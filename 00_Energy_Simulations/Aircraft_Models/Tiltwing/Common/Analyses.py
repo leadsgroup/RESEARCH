@@ -66,6 +66,7 @@ def base_analysis(vehicle,run_noise_analysis_flag,use_topology_flag,microphone_t
         #  Noise Analysis
         noise = MARC.Analyses.Noise.Fidelity_One()   
         noise.geometry = vehicle  
+        noise.settings.mean_sea_level_altitude           = False 
         noise.settings.ground_microphone_x_resolution    = microphone_terrain_data.ground_microphone_x_resolution           
         noise.settings.ground_microphone_y_resolution    = microphone_terrain_data.ground_microphone_y_resolution             
         noise.settings.ground_microphone_min_x           = microphone_terrain_data.ground_microphone_min_x                 

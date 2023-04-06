@@ -240,7 +240,7 @@ def repeated_flight_operation_setup(analyses,vehicle,simulated_days = 1,flights_
 
     # airport
     airport           = MARC.Attributes.Airports.Airport()
-    airport.altitude   = airport_geospacial_data.departure_location[2] 
+    airport.altitude   = 0 
     airport.delta_isa  = 0.0
     airport.atmosphere = MARC.Attributes.Atmospheres.Earth.US_Standard_1976() 
     mission.airport    = airport      
@@ -470,7 +470,7 @@ def repeated_flight_operation_setup(analyses,vehicle,simulated_days = 1,flights_
 # ------------------------------------------------------------------
 #   Cruise at 1000 ft 
 # ------------------------------------------------------------------
-def full_mission_setup_at_1000ft(analyses,vehicle,simulated_days = 1,flights_per_day = 1,control_points = 10,recharge_battery = True,microphone_terrain_data = None ,airport_geospacial_data = None): 
+def direct_mission_setup_at_1000ft(analyses,vehicle,simulated_days = 1,flights_per_day = 1,control_points = 10,recharge_battery = True,microphone_terrain_data = None ,airport_geospacial_data = None): 
      
  
     # ------------------------------------------------------------------
@@ -518,8 +518,8 @@ def full_mission_setup_at_1000ft(analyses,vehicle,simulated_days = 1,flights_per
     segment                                            = Segments.Hover.Climb(base_segment)
     segment.tag                                        = "Vertical_Climb"  
     segment.analyses.extend(analyses.vertical_flight) 
-    segment.altitude_start                             = 0.0  * Units.ft   + airport_geospacial_data.departure_location[2]  
-    segment.altitude_end                               = 200.  * Units.ft   + airport_geospacial_data.departure_location[2]  
+    segment.altitude_start                             = 0.0  * Units.ft     
+    segment.altitude_end                               = 200.  * Units.ft     
     segment.climb_rate                                 = 300. * Units['ft/min']  
     segment.battery_energy                             = vehicle.networks.battery_electric_rotor.battery.pack.max_energy   
     segment.battery_pack_temperature                   = atmo_data.temperature[0,0]   
@@ -533,7 +533,7 @@ def full_mission_setup_at_1000ft(analyses,vehicle,simulated_days = 1,flights_per
     segment                       = Segments.Cruise.Constant_Acceleration_Constant_Altitude(base_segment)
     segment.tag                   = "accelerating_transition_1" 
     segment.analyses.extend( analyses.low_speed_transition_flight) 
-    segment.altitude              = 200.  * Units.ft      + airport_geospacial_data.departure_location[2]  
+    segment.altitude              = 200.  * Units.ft        
     segment.air_speed_start       = 300. * Units['ft/min']     
     segment.air_speed_end         = Vstall* 0.4 
     segment.acceleration          = 9.81/5
@@ -550,7 +550,7 @@ def full_mission_setup_at_1000ft(analyses,vehicle,simulated_days = 1,flights_per
     segment                       = Segments.Cruise.Constant_Acceleration_Constant_Altitude(base_segment)
     segment.tag                   = "accelerating_transition_2" 
     segment.analyses.extend( analyses.high_speed_transition_flight) 
-    segment.altitude              = 200.  * Units.ft     + airport_geospacial_data.departure_location[2]  
+    segment.altitude              = 200.  * Units.ft       
     segment.air_speed_end         = Vstall*0.8
     segment.acceleration          = 9.81/5
     segment.pitch_initial         = -5. * Units.degrees 
@@ -567,8 +567,8 @@ def full_mission_setup_at_1000ft(analyses,vehicle,simulated_days = 1,flights_per
     segment.analyses.extend(analyses.high_speed_transition_flight) 
     segment.climb_rate               = 500. * Units['ft/min'] 
     segment.air_speed_end            = 105.   * Units['mph'] 
-    segment.altitude_start           = 200.0 * Units.ft       + airport_geospacial_data.departure_location[2]  
-    segment.altitude_end             = 500.0 * Units.ft      + airport_geospacial_data.departure_location[2]  
+    segment.altitude_start           = 200.0 * Units.ft         
+    segment.altitude_end             = 500.0 * Units.ft        
     segment.true_course_angle        = airport_geospacial_data.true_course_angle   
     segment = vehicle.networks.battery_electric_rotor.add_unknowns_and_residuals_to_segment(segment )       
     mission.append_segment(segment)    
@@ -581,8 +581,8 @@ def full_mission_setup_at_1000ft(analyses,vehicle,simulated_days = 1,flights_per
     segment.analyses.extend(analyses.forward_flight)  
     segment.air_speed_end             = 107.5   * Units['mph'] 
     segment.climb_rate                = 500.   * Units['ft/min']  
-    segment.altitude_start            = 500.0  * Units.ft + airport_geospacial_data.departure_location[2]                         
-    segment.altitude_end              = 750.0 * Units.ft  + np.maximum(airport_geospacial_data.departure_location[2],airport_geospacial_data.destination_location[2])        
+    segment.altitude_start            = 500.0  * Units.ft                          
+    segment.altitude_end              = 750.0 * Units.ft          
     segment.true_course_angle         = airport_geospacial_data.true_course_angle         
     segment = vehicle.networks.battery_electric_rotor.add_unknowns_and_residuals_to_segment(segment )     
     mission.append_segment(segment)     
@@ -596,8 +596,8 @@ def full_mission_setup_at_1000ft(analyses,vehicle,simulated_days = 1,flights_per
     segment.analyses.extend(analyses.forward_flight)  
     segment.air_speed_end             = 110.   * Units['mph'] 
     segment.climb_rate                = 500.   * Units['ft/min']  
-    segment.altitude_start            = 750.0  * Units.ft    + np.maximum(airport_geospacial_data.departure_location[2],airport_geospacial_data.destination_location[2])                     
-    segment.altitude_end              = 1000.0 * Units.ft   + np.maximum(airport_geospacial_data.departure_location[2],airport_geospacial_data.destination_location[2])       
+    segment.altitude_start            = 750.0  * Units.ft                         
+    segment.altitude_end              = 1000.0 * Units.ft          
     segment.true_course_angle         = airport_geospacial_data.true_course_angle         
     segment = vehicle.networks.battery_electric_rotor.add_unknowns_and_residuals_to_segment(segment )     
     mission.append_segment(segment)     
@@ -606,7 +606,7 @@ def full_mission_setup_at_1000ft(analyses,vehicle,simulated_days = 1,flights_per
     # ------------------------------------------------------------------
     #   Constant Altitude Cruises 
     # ------------------------------------------------------------------  
-    cruise_distance                                  = airport_geospacial_data.flight_range - airport_geospacial_data.adjusted_cruise_distance
+    cruise_distance                                  = airport_geospacial_data.flight_range - 12705.401970116902
     num_cruise_legs = int(np.ceil(cruise_distance/5000))
     for i in range(num_cruise_legs): 
         if i == num_cruise_legs-1:
@@ -616,7 +616,7 @@ def full_mission_setup_at_1000ft(analyses,vehicle,simulated_days = 1,flights_per
         segment                                          = Segments.Cruise.Constant_Speed_Constant_Altitude(base_segment)
         segment.tag                                      = "Cruise_" + str(i+1)
         segment.analyses.extend( analyses.forward_flight )                  
-        segment.altitude                                 = 1000. * Units.ft + np.maximum(airport_geospacial_data.departure_location[2],airport_geospacial_data.destination_location[2])    
+        segment.altitude                                 = 1000. * Units.ft     
         segment.air_speed                                = 110.  * Units['mph']  
         segment.distance                                 = distance
         segment.true_course_angle                        = airport_geospacial_data.true_course_angle   
@@ -632,8 +632,8 @@ def full_mission_setup_at_1000ft(analyses,vehicle,simulated_days = 1,flights_per
     segment.analyses.extend(analyses.forward_flight)
     segment.climb_rate               = -300. * Units['ft/min'] 
     segment.air_speed_end            = 107.5   * Units['mph'] 
-    segment.altitude_start           = 1000.0 * Units.ft  + np.maximum(airport_geospacial_data.departure_location[2],airport_geospacial_data.destination_location[2])   
-    segment.altitude_end             = 750.0 * Units.ft   + np.maximum(airport_geospacial_data.departure_location[2],airport_geospacial_data.destination_location[2])   
+    segment.altitude_start           = 1000.0 * Units.ft     
+    segment.altitude_end             = 750.0 * Units.ft      
     segment.true_course_angle        = airport_geospacial_data.true_course_angle 
     segment = vehicle.networks.battery_electric_rotor.add_unknowns_and_residuals_to_segment(segment ) 
     mission.append_segment(segment)     
@@ -647,8 +647,8 @@ def full_mission_setup_at_1000ft(analyses,vehicle,simulated_days = 1,flights_per
     segment.analyses.extend(analyses.forward_flight)
     segment.climb_rate               = -300. * Units['ft/min'] 
     segment.air_speed_end            = 105.   * Units['mph'] 
-    segment.altitude_start           = 750.0 * Units.ft   + np.maximum(airport_geospacial_data.departure_location[2],airport_geospacial_data.destination_location[2])   
-    segment.altitude_end             = 500.0 * Units.ft  + airport_geospacial_data.destination_location[2]       
+    segment.altitude_start           = 750.0 * Units.ft      
+    segment.altitude_end             = 500.0 * Units.ft         
     segment.true_course_angle        = airport_geospacial_data.true_course_angle 
     segment = vehicle.networks.battery_electric_rotor.add_unknowns_and_residuals_to_segment(segment ) 
     mission.append_segment(segment)       
@@ -660,7 +660,7 @@ def full_mission_setup_at_1000ft(analyses,vehicle,simulated_days = 1,flights_per
     segment                       = Segments.Cruise.Constant_Acceleration_Constant_Altitude(base_segment)
     segment.tag                   = "decelerating_transition_1" 
     segment.analyses.extend( analyses.high_speed_transition_flight) 
-    segment.altitude              = 500.0 * Units.ft + airport_geospacial_data.destination_location[2]  
+    segment.altitude              = 500.0 * Units.ft   
     segment.air_speed_end         = Vstall*0.5
     segment.acceleration          = -0.5
     segment.pitch_initial         = 0. * Units.degrees 
@@ -677,8 +677,8 @@ def full_mission_setup_at_1000ft(analyses,vehicle,simulated_days = 1,flights_per
     segment.analyses.extend( analyses.low_speed_transition_flight)  
     segment.climb_rate               = -300. * Units['ft/min'] 
     segment.air_speed_end            = Vstall* 0.4 
-    segment.altitude_start           = 500.0 * Units.ft   + airport_geospacial_data.destination_location[2]     
-    segment.altitude_end             = 200.0 * Units.ft  + airport_geospacial_data.destination_location[2]   
+    segment.altitude_start           = 500.0 * Units.ft        
+    segment.altitude_end             = 200.0 * Units.ft     
     segment.true_course_angle        = airport_geospacial_data.true_course_angle 
     segment = vehicle.networks.battery_electric_rotor.add_unknowns_and_residuals_to_segment(segment) 
     mission.append_segment(segment)      
@@ -689,7 +689,7 @@ def full_mission_setup_at_1000ft(analyses,vehicle,simulated_days = 1,flights_per
     segment                          = Segments.Cruise.Constant_Acceleration_Constant_Altitude(base_segment)  
     segment.tag                      = "decelerating_transition_3"  
     segment.analyses.extend( analyses.low_speed_transition_flight)   
-    segment.altitude                 = 200.  * Units.ft + airport_geospacial_data.destination_location[2]  
+    segment.altitude                 = 200.  * Units.ft   
     segment.air_speed_start          = Vstall* 0.4 
     segment.air_speed_end            = 300. * Units['ft/min'] 
     segment.acceleration             = -0.5 * Units['m/s/s']   
@@ -706,8 +706,8 @@ def full_mission_setup_at_1000ft(analyses,vehicle,simulated_days = 1,flights_per
     segment                          = Segments.Hover.Descent(base_segment)
     segment.tag                      = "Vertical_Descent" 
     segment.analyses.extend( analyses.vertical_flight) 
-    segment.altitude_start           = 200.0  * Units.ft + airport_geospacial_data.destination_location[2]   
-    segment.altitude_end             = 0.  * Units.ft  + airport_geospacial_data.destination_location[2]  
+    segment.altitude_start           = 200.0  * Units.ft    
+    segment.altitude_end             = 0.  * Units.ft    
     segment.descent_rate             = 300. * Units['ft/min']   
     segment.true_course_angle        = airport_geospacial_data.true_course_angle 
     segment = vehicle.networks.battery_electric_rotor.add_unknowns_and_residuals_to_segment(segment)  
@@ -721,7 +721,7 @@ def full_mission_setup_at_1000ft(analyses,vehicle,simulated_days = 1,flights_per
 # ------------------------------------------------------------------
 #   Cruise at 1500 ft 
 # ------------------------------------------------------------------
-def full_mission_setup_at_1500ft(analyses,vehicle,simulated_days = 1,flights_per_day = 1,control_points = 10,recharge_battery = True,microphone_terrain_data = None ,airport_geospacial_data = None): 
+def direct_mission_setup_at_1500ft(analyses,vehicle,simulated_days = 1,flights_per_day = 1,control_points = 10,recharge_battery = True,microphone_terrain_data = None ,airport_geospacial_data = None): 
      
    
     # ------------------------------------------------------------------
@@ -769,8 +769,8 @@ def full_mission_setup_at_1500ft(analyses,vehicle,simulated_days = 1,flights_per
     segment                                            = Segments.Hover.Climb(base_segment)
     segment.tag                                        = "Vertical_Climb"  
     segment.analyses.extend(analyses.vertical_flight) 
-    segment.altitude_start                             = 0.0  * Units.ft   + airport_geospacial_data.departure_location[2]  
-    segment.altitude_end                               = 200.  * Units.ft   + airport_geospacial_data.departure_location[2]  
+    segment.altitude_start                             = 0.0  * Units.ft     
+    segment.altitude_end                               = 200.  * Units.ft     
     segment.climb_rate                                 = 300. * Units['ft/min']  
     segment.battery_energy                             = vehicle.networks.battery_electric_rotor.battery.pack.max_energy   
     segment.battery_pack_temperature                   = atmo_data.temperature[0,0]   
@@ -784,7 +784,7 @@ def full_mission_setup_at_1500ft(analyses,vehicle,simulated_days = 1,flights_per
     segment                       = Segments.Cruise.Constant_Acceleration_Constant_Altitude(base_segment)
     segment.tag                   = "accelerating_transition_1" 
     segment.analyses.extend( analyses.low_speed_transition_flight) 
-    segment.altitude              = 200.  * Units.ft      + airport_geospacial_data.departure_location[2]  
+    segment.altitude              = 200.  * Units.ft        
     segment.air_speed_start       = 300. * Units['ft/min']     
     segment.air_speed_end         = Vstall* 0.4 
     segment.acceleration          = 9.81/5
@@ -801,7 +801,7 @@ def full_mission_setup_at_1500ft(analyses,vehicle,simulated_days = 1,flights_per
     segment                       = Segments.Cruise.Constant_Acceleration_Constant_Altitude(base_segment)
     segment.tag                   = "accelerating_transition_2" 
     segment.analyses.extend( analyses.high_speed_transition_flight) 
-    segment.altitude              = 200.  * Units.ft     + airport_geospacial_data.departure_location[2]  
+    segment.altitude              = 200.  * Units.ft       
     segment.air_speed_end         = Vstall*0.8
     segment.acceleration          = 9.81/5
     segment.pitch_initial         = -5. * Units.degrees 
@@ -818,8 +818,8 @@ def full_mission_setup_at_1500ft(analyses,vehicle,simulated_days = 1,flights_per
     segment.analyses.extend(analyses.high_speed_transition_flight) 
     segment.climb_rate               = 500. * Units['ft/min'] 
     segment.air_speed_end            = 105.   * Units['mph'] 
-    segment.altitude_start           = 200.0 * Units.ft       + airport_geospacial_data.departure_location[2]  
-    segment.altitude_end             = 500.0 * Units.ft      + airport_geospacial_data.departure_location[2]  
+    segment.altitude_start           = 200.0 * Units.ft         
+    segment.altitude_end             = 500.0 * Units.ft        
     segment.true_course_angle        = airport_geospacial_data.true_course_angle   
     segment = vehicle.networks.battery_electric_rotor.add_unknowns_and_residuals_to_segment(segment )       
     mission.append_segment(segment)    
@@ -832,8 +832,8 @@ def full_mission_setup_at_1500ft(analyses,vehicle,simulated_days = 1,flights_per
     segment.analyses.extend(analyses.forward_flight)  
     segment.air_speed_end             = 107.5   * Units['mph'] 
     segment.climb_rate                = 500.   * Units['ft/min']  
-    segment.altitude_start            = 500.0  * Units.ft + airport_geospacial_data.departure_location[2]                         
-    segment.altitude_end              = 1000.0 * Units.ft  + np.maximum(airport_geospacial_data.departure_location[2],airport_geospacial_data.destination_location[2])        
+    segment.altitude_start            = 500.0  * Units.ft                          
+    segment.altitude_end              = 1000.0 * Units.ft          
     segment.true_course_angle         = airport_geospacial_data.true_course_angle         
     segment = vehicle.networks.battery_electric_rotor.add_unknowns_and_residuals_to_segment(segment )     
     mission.append_segment(segment)     
@@ -847,8 +847,8 @@ def full_mission_setup_at_1500ft(analyses,vehicle,simulated_days = 1,flights_per
     segment.analyses.extend(analyses.forward_flight)  
     segment.air_speed_end             = 110.   * Units['mph'] 
     segment.climb_rate                = 500.   * Units['ft/min']  
-    segment.altitude_start            = 1000.0  * Units.ft    + np.maximum(airport_geospacial_data.departure_location[2],airport_geospacial_data.destination_location[2])                     
-    segment.altitude_end              = 1500.0 * Units.ft   + np.maximum(airport_geospacial_data.departure_location[2],airport_geospacial_data.destination_location[2])       
+    segment.altitude_start            = 1000.0  * Units.ft                         
+    segment.altitude_end              = 1500.0 * Units.ft          
     segment.true_course_angle         = airport_geospacial_data.true_course_angle         
     segment = vehicle.networks.battery_electric_rotor.add_unknowns_and_residuals_to_segment(segment )     
     mission.append_segment(segment)     
@@ -857,7 +857,7 @@ def full_mission_setup_at_1500ft(analyses,vehicle,simulated_days = 1,flights_per
     # ------------------------------------------------------------------
     #   Constant Altitude Cruises 
     # ------------------------------------------------------------------  
-    cruise_distance                                  = airport_geospacial_data.flight_range - airport_geospacial_data.adjusted_cruise_distance
+    cruise_distance                                  = airport_geospacial_data.flight_range - 20386.435287247485
     num_cruise_legs = int(np.ceil(cruise_distance/5000))
     for i in range(num_cruise_legs): 
         if i == num_cruise_legs-1:
@@ -867,7 +867,7 @@ def full_mission_setup_at_1500ft(analyses,vehicle,simulated_days = 1,flights_per
         segment                                          = Segments.Cruise.Constant_Speed_Constant_Altitude(base_segment)
         segment.tag                                      = "Cruise_" + str(i+1)
         segment.analyses.extend( analyses.forward_flight )                  
-        segment.altitude                                 = 1500. * Units.ft + np.maximum(airport_geospacial_data.departure_location[2],airport_geospacial_data.destination_location[2])    
+        segment.altitude                                 = 1500. * Units.ft     
         segment.air_speed                                = 110.  * Units['mph']  
         segment.distance                                 = distance
         segment.true_course_angle                        = airport_geospacial_data.true_course_angle   
@@ -883,8 +883,8 @@ def full_mission_setup_at_1500ft(analyses,vehicle,simulated_days = 1,flights_per
     segment.analyses.extend(analyses.forward_flight)
     segment.climb_rate               = -300. * Units['ft/min'] 
     segment.air_speed_end            = 107.5   * Units['mph'] 
-    segment.altitude_start           = 1500.0 * Units.ft  + np.maximum(airport_geospacial_data.departure_location[2],airport_geospacial_data.destination_location[2])   
-    segment.altitude_end             = 1000.0 * Units.ft   + np.maximum(airport_geospacial_data.departure_location[2],airport_geospacial_data.destination_location[2])   
+    segment.altitude_start           = 1500.0 * Units.ft     
+    segment.altitude_end             = 1000.0 * Units.ft      
     segment.true_course_angle        = airport_geospacial_data.true_course_angle 
     segment = vehicle.networks.battery_electric_rotor.add_unknowns_and_residuals_to_segment(segment ) 
     mission.append_segment(segment)     
@@ -898,8 +898,8 @@ def full_mission_setup_at_1500ft(analyses,vehicle,simulated_days = 1,flights_per
     segment.analyses.extend(analyses.forward_flight)
     segment.climb_rate               = -300. * Units['ft/min'] 
     segment.air_speed_end            = 105.   * Units['mph'] 
-    segment.altitude_start           = 1000.0 * Units.ft   + np.maximum(airport_geospacial_data.departure_location[2],airport_geospacial_data.destination_location[2])   
-    segment.altitude_end             = 500.0 * Units.ft  + airport_geospacial_data.destination_location[2]       
+    segment.altitude_start           = 1000.0 * Units.ft      
+    segment.altitude_end             = 500.0 * Units.ft         
     segment.true_course_angle        = airport_geospacial_data.true_course_angle 
     segment = vehicle.networks.battery_electric_rotor.add_unknowns_and_residuals_to_segment(segment ) 
     mission.append_segment(segment)       
@@ -911,7 +911,7 @@ def full_mission_setup_at_1500ft(analyses,vehicle,simulated_days = 1,flights_per
     segment                       = Segments.Cruise.Constant_Acceleration_Constant_Altitude(base_segment)
     segment.tag                   = "decelerating_transition_1" 
     segment.analyses.extend( analyses.high_speed_transition_flight) 
-    segment.altitude              = 500.0 * Units.ft + airport_geospacial_data.destination_location[2]  
+    segment.altitude              = 500.0 * Units.ft   
     segment.air_speed_end         = Vstall*0.5
     segment.acceleration          = -0.5
     segment.pitch_initial         = 0. * Units.degrees 
@@ -928,8 +928,8 @@ def full_mission_setup_at_1500ft(analyses,vehicle,simulated_days = 1,flights_per
     segment.analyses.extend( analyses.low_speed_transition_flight)  
     segment.climb_rate               = -300. * Units['ft/min'] 
     segment.air_speed_end            = Vstall* 0.4 
-    segment.altitude_start           = 500.0 * Units.ft  + airport_geospacial_data.destination_location[2]     
-    segment.altitude_end             = 200.0 * Units.ft  + airport_geospacial_data.destination_location[2]   
+    segment.altitude_start           = 500.0 * Units.ft       
+    segment.altitude_end             = 200.0 * Units.ft     
     segment.true_course_angle        = airport_geospacial_data.true_course_angle 
     segment = vehicle.networks.battery_electric_rotor.add_unknowns_and_residuals_to_segment(segment) 
     mission.append_segment(segment)      
@@ -940,7 +940,7 @@ def full_mission_setup_at_1500ft(analyses,vehicle,simulated_days = 1,flights_per
     segment                          = Segments.Cruise.Constant_Acceleration_Constant_Altitude(base_segment)  
     segment.tag                      = "decelerating_transition_3"  
     segment.analyses.extend( analyses.low_speed_transition_flight)   
-    segment.altitude                 = 200.  * Units.ft + airport_geospacial_data.destination_location[2]  
+    segment.altitude                 = 200.  * Units.ft   
     segment.air_speed_start          = Vstall* 0.4 
     segment.air_speed_end            = 300. * Units['ft/min'] 
     segment.acceleration             = -0.5 * Units['m/s/s']   
@@ -957,8 +957,8 @@ def full_mission_setup_at_1500ft(analyses,vehicle,simulated_days = 1,flights_per
     segment                          = Segments.Hover.Descent(base_segment)
     segment.tag                      = "Vertical_Descent" 
     segment.analyses.extend( analyses.vertical_flight) 
-    segment.altitude_start           = 200.0  * Units.ft + airport_geospacial_data.destination_location[2]   
-    segment.altitude_end             = 0.  * Units.ft  + airport_geospacial_data.destination_location[2]  
+    segment.altitude_start           = 200.0  * Units.ft    
+    segment.altitude_end             = 0.  * Units.ft    
     segment.descent_rate             = 300. * Units['ft/min']   
     segment.true_course_angle        = airport_geospacial_data.true_course_angle 
     segment = vehicle.networks.battery_electric_rotor.add_unknowns_and_residuals_to_segment(segment)  
@@ -972,7 +972,7 @@ def full_mission_setup_at_1500ft(analyses,vehicle,simulated_days = 1,flights_per
 # ------------------------------------------------------------------
 #   Cruise at 2000 ft 
 # ------------------------------------------------------------------
-def full_mission_setup_at_2000ft(analyses,vehicle,simulated_days = 1,flights_per_day = 1,control_points = 10,recharge_battery = True,microphone_terrain_data = None ,airport_geospacial_data = None): 
+def direct_mission_setup_at_2000ft(analyses,vehicle,simulated_days = 1,flights_per_day = 1,control_points = 10,recharge_battery = True,microphone_terrain_data = None ,airport_geospacial_data = None): 
      
   
     # ------------------------------------------------------------------
@@ -1020,8 +1020,8 @@ def full_mission_setup_at_2000ft(analyses,vehicle,simulated_days = 1,flights_per
     segment                                            = Segments.Hover.Climb(base_segment)
     segment.tag                                        = "Vertical_Climb"  
     segment.analyses.extend(analyses.vertical_flight) 
-    segment.altitude_start                             = 0.0  * Units.ft   + airport_geospacial_data.departure_location[2]  
-    segment.altitude_end                               = 200.  * Units.ft   + airport_geospacial_data.departure_location[2]  
+    segment.altitude_start                             = 0.0  * Units.ft     
+    segment.altitude_end                               = 200.  * Units.ft     
     segment.climb_rate                                 = 300. * Units['ft/min']  
     segment.battery_energy                             = vehicle.networks.battery_electric_rotor.battery.pack.max_energy   
     segment.battery_pack_temperature                   = atmo_data.temperature[0,0]   
@@ -1035,7 +1035,7 @@ def full_mission_setup_at_2000ft(analyses,vehicle,simulated_days = 1,flights_per
     segment                       = Segments.Cruise.Constant_Acceleration_Constant_Altitude(base_segment)
     segment.tag                   = "accelerating_transition_1" 
     segment.analyses.extend( analyses.low_speed_transition_flight) 
-    segment.altitude              = 200.  * Units.ft      + airport_geospacial_data.departure_location[2]  
+    segment.altitude              = 200.  * Units.ft        
     segment.air_speed_start       = 300. * Units['ft/min']     
     segment.air_speed_end         = Vstall* 0.4 
     segment.acceleration          = 9.81/5
@@ -1052,7 +1052,7 @@ def full_mission_setup_at_2000ft(analyses,vehicle,simulated_days = 1,flights_per
     segment                       = Segments.Cruise.Constant_Acceleration_Constant_Altitude(base_segment)
     segment.tag                   = "accelerating_transition_2" 
     segment.analyses.extend( analyses.high_speed_transition_flight) 
-    segment.altitude              = 200.  * Units.ft     + airport_geospacial_data.departure_location[2]  
+    segment.altitude              = 200.  * Units.ft       
     segment.air_speed_end         = Vstall*0.8
     segment.acceleration          = 9.81/5
     segment.pitch_initial         = -5. * Units.degrees 
@@ -1069,8 +1069,8 @@ def full_mission_setup_at_2000ft(analyses,vehicle,simulated_days = 1,flights_per
     segment.analyses.extend(analyses.high_speed_transition_flight) 
     segment.climb_rate               = 500. * Units['ft/min'] 
     segment.air_speed_end            = 105.   * Units['mph'] 
-    segment.altitude_start           = 200.0 * Units.ft       + airport_geospacial_data.departure_location[2]  
-    segment.altitude_end             = 500.0 * Units.ft      + airport_geospacial_data.departure_location[2]  
+    segment.altitude_start           = 200.0 * Units.ft         
+    segment.altitude_end             = 500.0 * Units.ft        
     segment.true_course_angle        = airport_geospacial_data.true_course_angle   
     segment = vehicle.networks.battery_electric_rotor.add_unknowns_and_residuals_to_segment(segment )       
     mission.append_segment(segment)    
@@ -1083,8 +1083,8 @@ def full_mission_setup_at_2000ft(analyses,vehicle,simulated_days = 1,flights_per
     segment.analyses.extend(analyses.forward_flight)  
     segment.air_speed_end             = 107.5  * Units['mph'] 
     segment.climb_rate                = 500.   * Units['ft/min']  
-    segment.altitude_start            = 500.0  * Units.ft + airport_geospacial_data.departure_location[2]                         
-    segment.altitude_end              = 1250.0 * Units.ft  + np.maximum(airport_geospacial_data.departure_location[2],airport_geospacial_data.destination_location[2])        
+    segment.altitude_start            = 500.0  * Units.ft                          
+    segment.altitude_end              = 1250.0 * Units.ft          
     segment.true_course_angle         = airport_geospacial_data.true_course_angle         
     segment = vehicle.networks.battery_electric_rotor.add_unknowns_and_residuals_to_segment(segment )     
     mission.append_segment(segment)     
@@ -1098,8 +1098,8 @@ def full_mission_setup_at_2000ft(analyses,vehicle,simulated_days = 1,flights_per
     segment.analyses.extend(analyses.forward_flight)  
     segment.air_speed_end             = 110.   * Units['mph'] 
     segment.climb_rate                = 500.   * Units['ft/min']  
-    segment.altitude_start            = 1250.0  * Units.ft    + np.maximum(airport_geospacial_data.departure_location[2],airport_geospacial_data.destination_location[2])                     
-    segment.altitude_end              = 2000.0 * Units.ft   + np.maximum(airport_geospacial_data.departure_location[2],airport_geospacial_data.destination_location[2])       
+    segment.altitude_start            = 1250.0  * Units.ft                         
+    segment.altitude_end              = 2000.0 * Units.ft          
     segment.true_course_angle         = airport_geospacial_data.true_course_angle         
     segment = vehicle.networks.battery_electric_rotor.add_unknowns_and_residuals_to_segment(segment )     
     mission.append_segment(segment)     
@@ -1108,7 +1108,7 @@ def full_mission_setup_at_2000ft(analyses,vehicle,simulated_days = 1,flights_per
     # ------------------------------------------------------------------
     #   Constant Altitude Cruises 
     # ------------------------------------------------------------------  
-    cruise_distance                                  = airport_geospacial_data.flight_range - airport_geospacial_data.adjusted_cruise_distance
+    cruise_distance                                  = airport_geospacial_data.flight_range - 23931.55680482532
     num_cruise_legs = int(np.ceil(cruise_distance/5000))
     for i in range(num_cruise_legs): 
         if i == num_cruise_legs-1:
@@ -1118,7 +1118,7 @@ def full_mission_setup_at_2000ft(analyses,vehicle,simulated_days = 1,flights_per
         segment                                          = Segments.Cruise.Constant_Speed_Constant_Altitude(base_segment)
         segment.tag                                      = "Cruise_" + str(i+1)
         segment.analyses.extend( analyses.forward_flight )                  
-        segment.altitude                                 = 2000. * Units.ft + np.maximum(airport_geospacial_data.departure_location[2],airport_geospacial_data.destination_location[2])    
+        segment.altitude                                 = 2000. * Units.ft     
         segment.air_speed                                = 110.  * Units['mph']  
         segment.distance                                 = distance
         segment.true_course_angle                        = airport_geospacial_data.true_course_angle   
@@ -1134,8 +1134,8 @@ def full_mission_setup_at_2000ft(analyses,vehicle,simulated_days = 1,flights_per
     segment.analyses.extend(analyses.forward_flight)
     segment.climb_rate               = -300. * Units['ft/min'] 
     segment.air_speed_end            = 107.5   * Units['mph'] 
-    segment.altitude_start           = 2000.0 * Units.ft  + np.maximum(airport_geospacial_data.departure_location[2],airport_geospacial_data.destination_location[2])   
-    segment.altitude_end             = 1250.0 * Units.ft   + np.maximum(airport_geospacial_data.departure_location[2],airport_geospacial_data.destination_location[2])   
+    segment.altitude_start           = 2000.0 * Units.ft     
+    segment.altitude_end             = 1250.0 * Units.ft      
     segment.true_course_angle        = airport_geospacial_data.true_course_angle 
     segment = vehicle.networks.battery_electric_rotor.add_unknowns_and_residuals_to_segment(segment ) 
     mission.append_segment(segment)     
@@ -1149,8 +1149,8 @@ def full_mission_setup_at_2000ft(analyses,vehicle,simulated_days = 1,flights_per
     segment.analyses.extend(analyses.forward_flight)
     segment.climb_rate               = -300. * Units['ft/min'] 
     segment.air_speed_end            = 105.   * Units['mph'] 
-    segment.altitude_start           = 1250.0 * Units.ft   + np.maximum(airport_geospacial_data.departure_location[2],airport_geospacial_data.destination_location[2])   
-    segment.altitude_end             = 500.0 * Units.ft  + airport_geospacial_data.destination_location[2]       
+    segment.altitude_start           = 1250.0 * Units.ft      
+    segment.altitude_end             = 500.0 * Units.ft         
     segment.true_course_angle        = airport_geospacial_data.true_course_angle 
     segment = vehicle.networks.battery_electric_rotor.add_unknowns_and_residuals_to_segment(segment ) 
     mission.append_segment(segment)       
@@ -1162,7 +1162,7 @@ def full_mission_setup_at_2000ft(analyses,vehicle,simulated_days = 1,flights_per
     segment                       = Segments.Cruise.Constant_Acceleration_Constant_Altitude(base_segment)
     segment.tag                   = "decelerating_transition_1" 
     segment.analyses.extend( analyses.high_speed_transition_flight) 
-    segment.altitude              = 500.0 * Units.ft + airport_geospacial_data.destination_location[2]  
+    segment.altitude              = 500.0 * Units.ft   
     segment.air_speed_end         = Vstall*0.5
     segment.acceleration          = -0.5
     segment.pitch_initial         = 0. * Units.degrees 
@@ -1179,8 +1179,8 @@ def full_mission_setup_at_2000ft(analyses,vehicle,simulated_days = 1,flights_per
     segment.analyses.extend( analyses.low_speed_transition_flight)  
     segment.climb_rate               = -300. * Units['ft/min'] 
     segment.air_speed_end            = Vstall* 0.4 
-    segment.altitude_start           = 500.0 * Units.ft  + airport_geospacial_data.destination_location[2]    
-    segment.altitude_end             = 200.0 * Units.ft  + airport_geospacial_data.destination_location[2]   
+    segment.altitude_start           = 500.0 * Units.ft      
+    segment.altitude_end             = 200.0 * Units.ft     
     segment.true_course_angle        = airport_geospacial_data.true_course_angle 
     segment = vehicle.networks.battery_electric_rotor.add_unknowns_and_residuals_to_segment(segment) 
     mission.append_segment(segment)      
@@ -1191,7 +1191,7 @@ def full_mission_setup_at_2000ft(analyses,vehicle,simulated_days = 1,flights_per
     segment                          = Segments.Cruise.Constant_Acceleration_Constant_Altitude(base_segment)  
     segment.tag                      = "decelerating_transition_3"  
     segment.analyses.extend( analyses.low_speed_transition_flight)   
-    segment.altitude                 = 200.  * Units.ft + airport_geospacial_data.destination_location[2]  
+    segment.altitude                 = 200.  * Units.ft   
     segment.air_speed_start          = Vstall* 0.4 
     segment.air_speed_end            = 300. * Units['ft/min'] 
     segment.acceleration             = -0.5 * Units['m/s/s']   
@@ -1208,8 +1208,8 @@ def full_mission_setup_at_2000ft(analyses,vehicle,simulated_days = 1,flights_per
     segment                          = Segments.Hover.Descent(base_segment)
     segment.tag                      = "Vertical_Descent" 
     segment.analyses.extend( analyses.vertical_flight) 
-    segment.altitude_start           = 200.0  * Units.ft + airport_geospacial_data.destination_location[2]   
-    segment.altitude_end             = 0.  * Units.ft  + airport_geospacial_data.destination_location[2]  
+    segment.altitude_start           = 200.0  * Units.ft    
+    segment.altitude_end             = 0.  * Units.ft    
     segment.descent_rate             = 300. * Units['ft/min']   
     segment.true_course_angle        = airport_geospacial_data.true_course_angle 
     segment = vehicle.networks.battery_electric_rotor.add_unknowns_and_residuals_to_segment(segment)  

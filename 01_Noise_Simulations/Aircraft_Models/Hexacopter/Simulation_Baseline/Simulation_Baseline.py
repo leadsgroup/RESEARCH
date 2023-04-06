@@ -86,7 +86,7 @@ def main():
         # -------------------------------------------------------------------------------------------    
         # SET UP MISSION PROFILE  
         # -------------------------------------------------------------------------------------------    
-        base_mission      = Missions.full_mission_setup_at_2000ft(configs_analyses,vehicle,simulated_days,flights_per_day,control_points,recharge_battery,meta_data)
+        base_mission      = Missions.direct_mission_setup_at_2000ft(configs_analyses,vehicle,simulated_days,flights_per_day,control_points,recharge_battery,meta_data)
         missions_analyses = Missions.missions_setup(base_mission) 
     
         # -------------------------------------------------------------------------------------------    
