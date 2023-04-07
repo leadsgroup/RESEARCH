@@ -86,8 +86,8 @@ def main():
     #motor_omega_function(motor,conditions)
     #motor_current_function(motor,conditions)
     
-    motor_omega_function(motor_2,conditions)
-    motor_current_function(motor_2,conditions)    
+    
+    motor_torque_function(motor_2,conditions) 
     
     return 
 
@@ -125,6 +125,7 @@ def motor_omega_function(motor_0,conditions):
     fig_1.tight_layout()
     return 
 
+
 #------------------------------------
 # Motor Current Function 
 #------------------------------------ 
@@ -156,8 +157,31 @@ def motor_current_function(motor_0,conditions):
     
     fig_2.tight_layout()
     return
+def motor_torque_function(motor_0,conditions):
 
+    # create copy of motor to test functions 
+    motor = motor_0    
+    
+    # Define function specific inputs  
+    motor.inputs.curent   = np.atleast_2d(np.linspace(0,500,100)).T 
+    
+    # Run Motor Omega Function 
+    torque  = motor.torque(conditions)    
+    
+    fig_1 = plt.figure('Omega_Function')
+    fig_1.set_size_inches(10,6)
+    axis_1_1 = fig_1.add_subplot(1,2,1)
+    axis_1_2 = fig_1.add_subplot(1,2,2) 
+     
 
+    axis_1_2.plot(motor.inputs.curent[:,0],torque[:,0]) 
+    axis_1_2.set_xlim([0,500])
+    axis_1_2.set_xlabel('Current')
+    axis_1_2.set_ylabel('Torque')
+    
+    fig_1.tight_layout()    
+    return 
+    
 # ----------------------------------------------------------------------        
 #   Call Main
 # ----------------------------------------------------------------------    
