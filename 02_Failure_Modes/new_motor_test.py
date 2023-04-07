@@ -10,9 +10,37 @@ from MARC.Core import Units
 from MARC.Core import Data, Container
 from MARC.Methods.Propulsion.electric_motor_sizing import size_from_mass , size_optimal_motor 
 import numpy as np 
-import pylab as plt 
+import pickle 
+import matplotlib.pyplot as plt  
+import matplotlib.cm as cm 
 
 def main(): 
+    '''
+    Plot Parameters
+    '''
+    
+
+    # Universal Plot Settings 
+    plt.rcParams['axes.linewidth'] = 2.
+    plt.rcParams["font.family"] = "Times New Roman"
+    parameters = {'axes.labelsize': 22,
+                  'xtick.labelsize': 18,
+                  'ytick.labelsize': 18,
+                  'axes.titlesize': 22}
+    plt.rcParams.update(parameters)
+    plot_parameters                  = Data()
+    plot_parameters.line_width       = 3 
+    plot_parameters.line_style       = '-' 
+    plot_parameters.figure_width     = 10 
+    plot_parameters.figure_height    = 7 
+    plot_parameters.marker_size      = 10 
+    plot_parameters.legend_font_size = 20 
+    plot_parameters.plot_grid        = True   
+    plot_parameters.markers          = ['o','v','s','^','p','^','D','X','*']
+    plot_parameters.colors           = cm.inferno(np.linspace(0,1,5))     
+    plot_parameters.lw               = 2                              # line_width                
+    plot_parameters.legend_font      = 20                             # legend_font_size       
+    
     '''
     Design Motor 
     ''' 
@@ -48,58 +76,65 @@ def main():
     conditions.freestream.dynamic_viscosity             = atmosphere_conditions.dynamic_viscosity
     conditions.freestream.velocity                      = np.array([[flight_velocity,0,0]])
     conditions.propulsion.throttle                      = np.array([[1.0]])
-    conditions.frames.body.transform_to_inertial        = np.array([np.eye(3)]) 
-    conditions.propulsion.propeller_power_coefficient   = np.array([[propeller_power_coefficient]]) 
+    conditions.frames.body.transform_to_inertial        = np.array([np.eye(3)])  
+    
+    motor_omega_function(motor,conditions)
     
     return 
 
 #------------------------------------
 # Motor Omega Function  
 #------------------------------------
-def motor_omega_function(motor,conditions):
+def motor_omega_function(motor_0,conditions):
     
     # create copy of motor to test functions 
-    motor_1 = motor    
+    motor = motor_0    
     
-    # Define function specific inputs 
-    voltage_1 =  400
-    motor_1.inputs.voltage  = np.array([[voltage_1]]) 
-    motor_1.inputs.rotor_CP = conditions.propulsion.propeller_power_coefficient
+    # Define function specific inputs  
+    motor.inputs.voltage  = np.atleast_2d(np.linspace(0,500,100)).T
+    motor.inputs.rotor_CP = np.ones_like(motor_0.inputs.voltage)*motor.angular_velocity
     
     # Run Motor Omega Function 
-    omega_1  = motor_1.omega(conditions)   
-    torque_1 = motor_1.outputs.torque[0][0]  
+    omega  = motor.omega(conditions)   
+    torque = motor.outputs.torque  
     
     fig_1 = plt.figure('Omega_Function')
+    fig_1.set_size_inches(10,6)
     axis_1_1 = fig_1.add_subplot(1,2,1)
     axis_1_2 = fig_1.add_subplot(1,2,2) 
-    axis_1_1.plot(omega_1,voltage_1)
-    axis_1_2.plot(torque_1,voltage_1) 
     
+    axis_1_1.plot(motor.inputs.voltage[:,0],omega[:,0],)
+    axis_1_1.set_xlabel('Voltage')
+    axis_1_1.set_ylabel('Angular Velocity')
+
+    axis_1_2.plot(motor.inputs.voltage[:,0],torque[:,0]) 
+    axis_1_2.set_xlabel('Voltage')
+    axis_1_2.set_ylabel('Torque')
+    
+    fig_1.tight_layout()
     return 
 
 #------------------------------------
 # Motor Current Function 
 #------------------------------------ 
-def motor_current_function(motor,conditions):   
+def motor_current_function(motor_0,conditions):   
     # create copy of motor to test functions 
-    motor_2 = motor    
+    motor = motor    
     
-    # Define function specific inputs  
-    voltage_1 =  400
-    motor_2.inputs.voltage = np.array([[voltage_1]])
-    motor_2.outputs.omega  = np.array([[motor.angular_velocity]])
+    # Define function specific inputs   
+    motor.inputs.voltage = np.atleast_2d(np.linspace(0,500,100)).T
+    motor.outputs.omega  = np.ones_like(motor_0.inputs.voltage)*motor.angular_velocity
     
     # Run Motor Current Function 
-    i, etam = motor_2.current(conditions) 
-    current_2 = i[0][0]
+    i, etam = motor.current(conditions) 
+    current = i[0][0]
     
 
     fig_2 = plt.figure('Current_Function')
     axis_2_1 = fig_2.add_subplot(1,2,1)
     axis_2_2 = fig_2.add_subplot(1,2,2) 
-    axis_2_1.plot(current_2,voltage_1)
-    axis_2_2.plot(etam,voltage_1) 
+    axis_2_1.plot(current,motor.inputs.voltag)
+    axis_2_2.plot(etam,motor.inputs.voltag) 
         
     return
     
@@ -108,56 +143,26 @@ def motor_current_function(motor,conditions):
 #------------------------------------
 # Motor Torque Function 
 #------------------------------------   
-def motor_torque_function(motor,conditions):    
+def motor_torque_function(motor_0,conditions):    
     # create copy of motor to test functions  
-    motor_3  = motor      
+    motor  = motor_0      
     
-    # Define function specific inputs  
-    voltage_1 =  400
-    motor_3.inputs.voltage = np.array([[voltage_1]]) 
-    motor_3.inputs.omega  = np.array([[motor.angular_velocity]])   
+    # Define function specific inputs   
+    motor.inputs.voltage = np.atleast_2d(np.linspace(0,500,100)).T
+    motor.inputs.omega   = np.ones_like(motor.inputs.voltage)*motor_0.angular_velocity
     
     # Run Motor Torque Function 
-    motor_3.torque(conditions)
-    torque_3 = motor_3.outputs.torque[0][0]  
+    motor.torque(conditions)
+    torque = motor.outputs.torque[0][0]  
 
 
     fig_3 = plt.figure('Torque_Function')
     axis_3_1 = fig_3.add_subplot(1,2,1)
     axis_3_2 = fig_3.add_subplot(1,2,2) 
-    axis_3_1.plot(torque_3,voltage_1)  
+    axis_3_1.plot(torque,motor.inputs.voltage)  
     return
     
-#------------------------------------
-# Motor Torque Function 
-#------------------------------------   
-def motor_torque_function(motor,conditions):  
-    # create copy of motor to test functions   
-    motor_4  = motor     
-    
-    # Define function specific inputs    
-    voltage_1 =  400
-    motor_4.inputs.voltage  = np.array([[voltage_1]]) 
-    motor_4.inputs.rotor_CP = conditions.propulsion.propeller_power_coefficient
-    
-    # Run Motor Omega Function   
-    torque_1 = motor_4.outputs.torque[0][0] 
-    motor_4.inputs.torque = np.array([[torque_1]])
-    
-    # Run Motor Voltage-Current Function 
-    motor_4.voltage_current(conditions) 
-    voltage_4 = motor_4.outputs.voltage[0][0]
-    current_4 = motor_4.outputs.current[0][0]  
-    
-
-    fig_4= plt.figure('CTorque_Function')
-    axis_4_1 = fig_4.add_subplot(1,2,1)
-    axis_4_2 = fig_4.add_subplot(1,2,2) 
-    axis_4_1.plot(current_4,voltage_1)
-    axis_4_2.plot(voltage_4,voltage_1) 
-        
-     
-    return
+ 
 
 # ----------------------------------------------------------------------        
 #   Call Main
