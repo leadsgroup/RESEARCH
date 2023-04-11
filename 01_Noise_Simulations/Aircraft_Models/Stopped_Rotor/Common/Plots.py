@@ -21,7 +21,10 @@ from MARC.Visualization.Geometry                                         import 
 # ----------------------------------------------------------------------  
 def plot_results(results,run_noise_model,save_figure_flag):  
     
+    # Plots fligh conditions 
     plot_flight_conditions(results) 
+    
+    # Plot arcraft trajectory
     plot_flight_trajectory(results)
     
     # Plot Aerodynamic Coefficients

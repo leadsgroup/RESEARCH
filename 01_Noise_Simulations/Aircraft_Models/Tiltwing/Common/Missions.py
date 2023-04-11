@@ -1467,37 +1467,143 @@ def approach_departure_mission_setup(analyses,vehicle,simulated_days = 1,flights
 
     mission     = MARC.Analyses.Mission.Sequential_Segments()
     mission.tag = 'approach_departure_mission'
+         
 
     # airport
-    airport           = MARC.Attributes.Airports.Airport()
-    airport.altitude   =  0.0  * Units.ft
-    airport.delta_isa  =  0.0
+    airport            = MARC.Attributes.Airports.Airport() 
+    airport.altitude   = 0 
     airport.atmosphere = MARC.Attributes.Atmospheres.Earth.US_Standard_1976() 
-    mission.airport    = airport      
-
+    mission.airport    = airport    
     atmosphere         = MARC.Analyses.Atmospheric.US_Standard_1976() 
-    atmo_data          = atmosphere.compute_values(altitude = airport.altitude,temperature_deviation= 1.)     
-
+    atmo_data          = atmosphere.compute_values(altitude = airport.altitude,temperature_deviation= 1.)    
+    
     # unpack Segments module
     Segments = MARC.Analyses.Mission.Segments
 
-    # base segment           
-    base_segment                                                              = Segments.Segment() 
-    base_segment.battery_discharge                                            = True  
-    base_segment.state.numerics.number_control_points                         = control_points
-    base_segment.state.numerics.discretization_method                         = linear_data
-    ones_row                                                                  = base_segment.state.ones_row
-    base_segment.process.initialize.initialize_battery                        = MARC.Methods.Missions.Segments.Common.Energy.initialize_battery
+    # base segment
+    base_segment                                             = Segments.Segment() 
+    base_segment.state.numerics.number_control_points        = control_points 
+    base_segment.state.numerics.discretization_method        = linear_data  
+    ones_row                                                 = base_segment.state.ones_row
+    base_segment.battery_discharge                           = True  
+    base_segment.process.iterate.conditions.stability        = MARC.Methods.skip
+    base_segment.process.finalize.post_process.stability     = MARC.Methods.skip    
+    base_segment.process.initialize.initialize_battery = MARC.Methods.Missions.Segments.Common.Energy.initialize_battery
     base_segment.process.finalize.post_process.update_battery_state_of_health = MARC.Methods.Missions.Segments.Common.Energy.update_battery_state_of_health  
-    base_segment.process.finalize.post_process.stability                      = MARC.Methods.skip
 
 
-    # VSTALL Calculation  
-    vehicle_mass   = vehicle.mass_properties.max_takeoff
-    reference_area = vehicle.reference_area
-    Vstall         = estimate_stall_speed(vehicle_mass,reference_area,altitude = 0.0,maximum_lift_coefficient = 1.2)       
+
+    # VSTALL Calculation
+    m      = vehicle.mass_properties.max_takeoff
+    g      = 9.81
+    S      = vehicle.reference_area
+    atmo   = MARC.Analyses.Atmospheric.US_Standard_1976()
+    rho    = atmo.compute_values(1000.*Units.feet,0.).density
+    CLmax  = 1.2 
+    Vstall = float(np.sqrt(2.*m*g/(rho*S*CLmax)))  
+
+  
+    # ------------------------------------------------------------------
+    #  Forth Transition Segment
+    # ------------------------------------------------------------------ 
+    segment                          = Segments.Climb.Linear_Speed_Constant_Rate(base_segment)
+    segment.tag                      = "decelerating_transition_2"  
+    segment.analyses.extend( analyses.low_speed_transition_flight)  
+    segment.climb_rate               = -300. * Units['ft/min']  
+    segment.air_speed_start          = Vstall*0.5
+    segment.air_speed_end            = Vstall* 0.4 
+    segment.battery_energy           = vehicle.networks.battery_electric_rotor.battery.pack.max_energy 
+    segment.altitude_start           = 500.0 * Units.ft        
+    segment.altitude_end             = 200.0 * Units.ft       
+    segment = vehicle.networks.battery_electric_rotor.add_unknowns_and_residuals_to_segment(segment) 
+    mission.append_segment(segment)      
     
- 
+    # ------------------------------------------------------------------
+    #  Forth Transition Segment
+    # ------------------------------------------------------------------ 
+    segment                          = Segments.Cruise.Constant_Acceleration_Constant_Altitude(base_segment)  
+    segment.tag                      = "decelerating_transition_3"  
+    segment.analyses.extend( analyses.low_speed_transition_flight)   
+    segment.altitude                 = 200.  * Units.ft    
+    segment.air_speed_start          = Vstall* 0.4 
+    segment.air_speed_end            = 300. * Units['ft/min'] 
+    segment.acceleration             = -0.5 * Units['m/s/s']   
+    segment.pitch_initial            = 1. * Units.degrees
+    segment.pitch_final              = 2. * Units.degrees               
+    segment.state.unknowns.throttle  = 0.6 * ones_row(1)  
+    segment = vehicle.networks.battery_electric_rotor.add_unknowns_and_residuals_to_segment(segment) 
+    mission.append_segment(segment)      
+
+    # ------------------------------------------------------------------
+    #   Descent Segment: Constant Speed, Constant Rate
+    # ------------------------------------------------------------------ 
+    segment                          = Segments.Hover.Descent(base_segment)
+    segment.tag                      = "Vertical_Descent" 
+    segment.analyses.extend( analyses.vertical_flight) 
+    segment.altitude_start           = 200.0  * Units.ft     
+    segment.altitude_end             = 0.  * Units.ft      
+    segment.descent_rate             = 300. * Units['ft/min']    
+    segment = vehicle.networks.battery_electric_rotor.add_unknowns_and_residuals_to_segment(segment)  
+    mission.append_segment(segment)      
+    # ------------------------------------------------------------------
+    #   First Climb Segment: Constant Speed, Constant Rate
+    # ------------------------------------------------------------------ 
+    segment                                            = Segments.Hover.Climb(base_segment)
+    segment.tag                                        = "Vertical_Climb"  
+    segment.analyses.extend(analyses.vertical_flight) 
+    segment.altitude_start                             = 0.0  * Units.ft    
+    segment.altitude_end                               = 200.  * Units.ft    
+    segment.climb_rate                                 = 300. * Units['ft/min']    
+    segment.battery_pack_temperature                   = atmo_data.temperature[0,0]   
+    segment.true_course_angle                          = airport_geospacial_data.true_course_angle     
+    segment = vehicle.networks.battery_electric_rotor.add_unknowns_and_residuals_to_segment(segment) 
+    mission.append_segment(segment)  
+     
+    # ------------------------------------------------------------------
+    #  First Transition Segment
+    # ------------------------------------------------------------------ 
+    segment                       = Segments.Cruise.Constant_Acceleration_Constant_Altitude(base_segment)
+    segment.tag                   = "accelerating_transition_1" 
+    segment.analyses.extend( analyses.low_speed_transition_flight) 
+    segment.altitude              = 200.  * Units.ft    
+    segment.air_speed_start       = 300. * Units['ft/min']     
+    segment.air_speed_end         = Vstall* 0.4 
+    segment.acceleration          = 9.81/5
+    segment.pitch_initial         = 0. * Units.degrees  
+    segment.pitch_final           = -5. * Units.degrees   
+    segment.true_course_angle     = airport_geospacial_data.true_course_angle     
+    segment = vehicle.networks.battery_electric_rotor.add_unknowns_and_residuals_to_segment(segment)
+    mission.append_segment(segment)
+    
+
+    # ------------------------------------------------------------------
+    #  First Transition Segment
+    # ------------------------------------------------------------------ 
+    segment                       = Segments.Cruise.Constant_Acceleration_Constant_Altitude(base_segment)
+    segment.tag                   = "accelerating_transition_2" 
+    segment.analyses.extend( analyses.high_speed_transition_flight) 
+    segment.altitude              = 200.  * Units.ft     
+    segment.air_speed_end         = Vstall*0.8
+    segment.acceleration          = 9.81/5
+    segment.pitch_initial         = -5. * Units.degrees 
+    segment.pitch_final           = 0. * Units.degrees 
+    segment.true_course_angle     = airport_geospacial_data.true_course_angle     
+    segment  = vehicle.networks.battery_electric_rotor.add_unknowns_and_residuals_to_segment(segment ) 
+    mission.append_segment(segment) 
+     
+    # ------------------------------------------------------------------
+    #   First Cruise Segment: Constant Acceleration, Constant Altitude
+    # ------------------------------------------------------------------ 
+    segment                          = Segments.Climb.Linear_Speed_Constant_Rate(base_segment)
+    segment.tag                      = "accelerating_transition_3"  
+    segment.analyses.extend(analyses.high_speed_transition_flight) 
+    segment.climb_rate               = 500. * Units['ft/min'] 
+    segment.air_speed_end            = Vstall* 1.0 
+    segment.altitude_start           = 200.0 * Units.ft    
+    segment.altitude_end             = 500.0 * Units.ft       
+    segment.true_course_angle        = airport_geospacial_data.true_course_angle   
+    segment = vehicle.networks.battery_electric_rotor.add_unknowns_and_residuals_to_segment(segment )       
+    mission.append_segment(segment)     
 
     return mission  
  

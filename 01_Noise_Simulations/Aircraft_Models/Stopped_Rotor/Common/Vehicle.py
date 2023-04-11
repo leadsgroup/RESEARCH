@@ -25,7 +25,6 @@ from MARC.Methods.Propulsion.electric_motor_sizing                          impo
 from MARC.Methods.Propulsion                                                import propeller_design ,lift_rotor_design 
 from MARC.Methods.Weights.Buildups.eVTOL.empty                              import empty
 from MARC.Methods.Center_of_Gravity.compute_component_centers_of_gravity    import compute_component_centers_of_gravity
-from MARC.Methods.Geometry.Two_Dimensional.Cross_Section.Airfoil.compute_airfoil_properties  import compute_airfoil_properties
 from MARC.Methods.Geometry.Two_Dimensional.Planform.wing_segmented_planform import wing_segmented_planform 
 from MARC.Methods.Weights.Buildups.eVTOL.converge_evtol_weight              import converge_evtol_weight  
  
@@ -82,11 +81,12 @@ def vehicle_setup(resize_aircraft,vehicle_name = 'Stopped_Rotor_CRM') :
         wing.winglet_fraction         = 0.0  
         wing.symmetric                = True
         wing.vertical                 = False
+
         ospath                        = os.path.abspath(__file__)
         separator                     = os.path.sep
-        rel_path                      = os.path.dirname(ospath) + separator  
+        rel_path                      = ospath.split( 'Stopped_Rotor' + separator + 'Common')[0]     
         airfoil                       = MARC.Components.Airfoils.Airfoil()
-        airfoil.coordinate_file       = '..' + separator + '..' + separator + 'Aircraft_Models' + separator+ 'Airfoils' + separator + 'NACA_63_412.txt'
+        airfoil.coordinate_file       = rel_path + 'Airfoils' + separator + 'NACA_63_412.txt'
         
         # Segment                                  
         segment                       = MARC.Components.Wings.Segment()
@@ -668,21 +668,16 @@ def vehicle_setup(resize_aircraft,vehicle_name = 'Stopped_Rotor_CRM') :
         propeller.cruise.design_thrust              = Drag*3/2 # (Drag*3)/number of rotors 
         propeller.rotation                          = 1
         propeller.variable_pitch                    = True  
-        airfoil                                = MARC.Components.Airfoils.Airfoil()
-        ospath    = os.path.abspath(__file__)
-        separator = os.path.sep
-        rel_path  = os.path.dirname(ospath) + separator     
-        airfoil.coordinate_file                     =   '..' + separator + '..' + separator + 'Aircraft_Models' + separator+  'Airfoils' + separator + 'NACA_4412.txt'
-        airfoil.polar_files                         = [ '..' + separator + '..' + separator + 'Aircraft_Models' + separator+  'Airfoils' + separator + 'Polars' + separator + 'NACA_4412_polar_Re_50000.txt' ,
-                                                        '..' + separator + '..' + separator + 'Aircraft_Models' + separator+  'Airfoils' + separator + 'Polars' + separator + 'NACA_4412_polar_Re_100000.txt' ,
-                                                        '..' + separator + '..' + separator + 'Aircraft_Models' + separator+  'Airfoils' + separator + 'Polars' + separator + 'NACA_4412_polar_Re_200000.txt' ,
-                                                        '..' + separator + '..' + separator + 'Aircraft_Models' + separator+  'Airfoils' + separator + 'Polars' + separator + 'NACA_4412_polar_Re_500000.txt' ,
-                                                        '..' + separator + '..' + separator + 'Aircraft_Models' + separator+  'Airfoils' + separator + 'Polars' + separator + 'NACA_4412_polar_Re_1000000.txt',
-                                                        '..' + separator + '..' + separator + 'Aircraft_Models' + separator+  'Airfoils' + separator + 'Polars' + separator + 'NACA_4412_polar_Re_3500000.txt',
-                                                        '..' + separator + '..' + separator + 'Aircraft_Models' + separator+  'Airfoils' + separator + 'Polars' + separator + 'NACA_4412_polar_Re_5000000.txt',
-                                                        '..' + separator + '..' + separator + 'Aircraft_Models' + separator+  'Airfoils' + separator + 'Polars' + separator + 'NACA_4412_polar_Re_7500000.txt' ]
-    
-        airfoil.polars                              = compute_airfoil_properties(airfoil.geometry,airfoil.polar_files)        
+        airfoil                                     = MARC.Components.Airfoils.Airfoil()
+        airfoil.coordinate_file                     = rel_path + 'Airfoils' + separator + 'NACA_4412.txt'
+        airfoil.polar_files                         = [rel_path + 'Airfoils' + separator + 'Polars' + separator + 'NACA_4412_polar_Re_50000.txt' ,
+                                                      rel_path + 'Airfoils' + separator + 'Polars' + separator + 'NACA_4412_polar_Re_100000.txt' ,
+                                                      rel_path + 'Airfoils' + separator + 'Polars' + separator + 'NACA_4412_polar_Re_200000.txt' ,
+                                                      rel_path + 'Airfoils' + separator + 'Polars' + separator + 'NACA_4412_polar_Re_500000.txt' ,
+                                                      rel_path + 'Airfoils' + separator + 'Polars' + separator + 'NACA_4412_polar_Re_1000000.txt',
+                                                      rel_path + 'Airfoils' + separator + 'Polars' + separator + 'NACA_4412_polar_Re_3500000.txt',
+                                                      rel_path + 'Airfoils' + separator + 'Polars' + separator + 'NACA_4412_polar_Re_5000000.txt',
+                                                      rel_path + 'Airfoils' + separator + 'Polars' + separator + 'NACA_4412_polar_Re_7500000.txt' ]
         propeller.append_airfoil(airfoil)          
         propeller.airfoil_polar_stations            = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0] 
         propeller                                   = propeller_design(propeller)
@@ -740,22 +735,17 @@ def vehicle_setup(resize_aircraft,vehicle_name = 'Stopped_Rotor_CRM') :
         rotor.hover.design_freestream_velocity  = np.sqrt(rotor.hover.design_thrust/(2*1.2*np.pi*(rotor.tip_radius**2)))  
         rotor.oei.design_altitude               = 40 * Units.feet  
         rotor.oei.design_thrust                 = Hover_Load/6  
-        rotor.oei.design_freestream_velocity    = np.sqrt(rotor.oei.design_thrust/(2*1.2*np.pi*(rotor.tip_radius**2)))
-        
-        ospath    = os.path.abspath(__file__)
-        separator = os.path.sep
-        rel_path  = os.path.dirname(ospath) + separator     
-        airfoil.coordinate_file                     =   '..' + separator + '..' + separator + 'Aircraft_Models' + separator+  'Airfoils' + separator + 'NACA_4412.txt'
-        airfoil.polar_files                         = [ '..' + separator + '..' + separator + 'Aircraft_Models' + separator+  'Airfoils' + separator + 'Polars' + separator + 'NACA_4412_polar_Re_50000.txt' ,
-                                                        '..' + separator + '..' + separator + 'Aircraft_Models' + separator+  'Airfoils' + separator + 'Polars' + separator + 'NACA_4412_polar_Re_100000.txt' ,
-                                                        '..' + separator + '..' + separator + 'Aircraft_Models' + separator+  'Airfoils' + separator + 'Polars' + separator + 'NACA_4412_polar_Re_200000.txt' ,
-                                                        '..' + separator + '..' + separator + 'Aircraft_Models' + separator+  'Airfoils' + separator + 'Polars' + separator + 'NACA_4412_polar_Re_500000.txt' ,
-                                                        '..' + separator + '..' + separator + 'Aircraft_Models' + separator+  'Airfoils' + separator + 'Polars' + separator + 'NACA_4412_polar_Re_1000000.txt',
-                                                        '..' + separator + '..' + separator + 'Aircraft_Models' + separator+  'Airfoils' + separator + 'Polars' + separator + 'NACA_4412_polar_Re_3500000.txt',
-                                                        '..' + separator + '..' + separator + 'Aircraft_Models' + separator+  'Airfoils' + separator + 'Polars' + separator + 'NACA_4412_polar_Re_5000000.txt',
-                                                        '..' + separator + '..' + separator + 'Aircraft_Models' + separator+  'Airfoils' + separator + 'Polars' + separator + 'NACA_4412_polar_Re_7500000.txt' ]
-    
-        airfoil.polars                              = compute_airfoil_properties(airfoil.geometry,airfoil.polar_files)      
+        rotor.oei.design_freestream_velocity    = np.sqrt(rotor.oei.design_thrust/(2*1.2*np.pi*(rotor.tip_radius**2)))  
+        airfoil                                 = MARC.Components.Airfoils.Airfoil()   
+        airfoil.coordinate_file                 = rel_path + 'Airfoils' + separator + 'NACA_4412.txt'
+        airfoil.polar_files                     =[rel_path + 'Airfoils' + separator + 'Polars' + separator + 'NACA_4412_polar_Re_50000.txt' ,
+                                                  rel_path + 'Airfoils' + separator + 'Polars' + separator + 'NACA_4412_polar_Re_100000.txt' ,
+                                                   rel_path + 'Airfoils' + separator + 'Polars' + separator + 'NACA_4412_polar_Re_200000.txt' ,
+                                                   rel_path + 'Airfoils' + separator + 'Polars' + separator + 'NACA_4412_polar_Re_500000.txt' ,
+                                                   rel_path + 'Airfoils' + separator + 'Polars' + separator + 'NACA_4412_polar_Re_1000000.txt',
+                                                   rel_path + 'Airfoils' + separator + 'Polars' + separator + 'NACA_4412_polar_Re_3500000.txt',
+                                                   rel_path + 'Airfoils' + separator + 'Polars' + separator + 'NACA_4412_polar_Re_5000000.txt',
+                                                   rel_path + 'Airfoils' + separator + 'Polars' + separator + 'NACA_4412_polar_Re_7500000.txt' ]
         rotor.append_airfoil(airfoil)          
         rotor.airfoil_polar_stations           = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
         rotor                                  = lift_rotor_design(rotor)   

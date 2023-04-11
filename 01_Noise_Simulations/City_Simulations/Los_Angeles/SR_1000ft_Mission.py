@@ -62,11 +62,11 @@ def main():
 
     ''' Provided below is the information for 9 direct routes between two airports'''
     # departure airport location  
-    departure_location         = ['LAX','SNA','BUR','LAX','BUR','LAX','DIS','LGB','LGB']  
+    departure_location         = ['LAX','LGB','BUR','LAX','BUR','LAX','DIS','SNA','SNA']  
     
     # coordinates for departure airport 
     departure_coord            = np.array([[33.9348,-118.39678], [33.81347,-118.15542], [34.1843,-118.36587], [33.9348,-118.39678],
-                                           [34.1843,-118.36587],  [33.9348,-118.39678],  [33.81151,-117.9179886], [33.68406,-117.78554], [33.68406,-117.78554]])
+                                           [34.1843,-118.36587],  [33.9348,-118.39678],  [33.81151,-117.9179886], [33.6719,-117.886], [33.6719,-117.886]])
     
     # destination airport location
     destination_location       = ['SBD','ONT','ONT','BUR','DIS','DIS','SBD','BUR','SBD']
@@ -151,7 +151,7 @@ def main():
         noise_results = load_results(filename) 
 
     if plot_mission: 
-            plot_elevation_contours(topography_file, use_lat_long_coordinates = False, airport_geospacial_data  = airport_geospacial_data,save_filename = filename) 
+            plot_elevation_contours(topography_file, use_lat_long_coordinates = False,save_filename = filename) 
             Plots.plot_results(noise_results,run_noise_model,save_figure_flag = True)    
 
     tf = time.time() 

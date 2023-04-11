@@ -149,7 +149,7 @@ def main():
         noise_results = load_results(filename) 
 
     if plot_mission: 
-            plot_elevation_contours(topography_file, use_lat_long_coordinates = False, airport_geospacial_data  = airport_geospacial_data,save_filename = filename) 
+            plot_elevation_contours(topography_file, use_lat_long_coordinates = False,save_filename = filename) 
             Plots.plot_results(noise_results,run_noise_model,save_figure_flag = True)    
 
     tf = time.time() 

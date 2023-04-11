@@ -1211,120 +1211,114 @@ def approach_departure_mission_setup(analyses,vehicle,simulated_days = 1,flights
 
     starting_elevation  = 0 * Units.ft
     mission = MARC.Analyses.Mission.Sequential_Segments()
-    mission.tag = 'mission'
-
+    mission.tag = 'approach_and_departure_mission'
+   
     # airport
     airport            = MARC.Attributes.Airports.Airport() 
     airport.delta_isa  =  0.0
     airport.atmosphere = MARC.Attributes.Atmospheres.Earth.US_Standard_1976() 
-    mission.airport    = airport     
-    
-    atmosphere         = MARC.Analyses.Atmospheric.US_Standard_1976() 
-    atmo_data          = atmosphere.compute_values(altitude = airport.altitude,temperature_deviation= 1.)       
+    mission.airport    = airport           
 
     # unpack Segments module
     Segments = MARC.Analyses.Mission.Segments
 
     # base segment 
     base_segment                                             = Segments.Segment() 
-    base_segment.battery_discharge                           = True   
-    base_segment.state.numerics.number_control_points        = control_points    
+    base_segment.state.numerics.number_control_points        = control_points 
+    base_segment.state.numerics.discretization_method        = linear_data  
     ones_row                                                 = base_segment.state.ones_row    
-    base_segment.process.initialize.initialize_battery       = MARC.Methods.Missions.Segments.Common.Energy.initialize_battery
+    base_segment.process.initialize.initialize_battery = MARC.Methods.Missions.Segments.Common.Energy.initialize_battery
     base_segment.process.finalize.post_process.update_battery_state_of_health = MARC.Methods.Missions.Segments.Common.Energy.update_battery_state_of_health   
+    
+
     # ------------------------------------------------------------------
-    #   First Descent Segment: Constant Acceleration, Constant Altitude
-    # ------------------------------------------------------------------ 
+    #  Decelerating Decent
+    # ------------------------------------------------------------------
     segment                                  = Segments.Climb.Linear_Speed_Constant_Rate(base_segment)
-    segment.tag                              = "Descent_1"  
-    segment.analyses.extend(analyses.forward_flight)
-    segment.climb_rate                       = -200. * Units['ft/min']
-    segment.battery_energy                   = vehicle.networks.battery_electric_rotor.battery.pack.max_energy  
-    segment.air_speed_start                  = 75. * Units['mph']      
-    segment.air_speed_end                    = 35. * Units['mph']      
-    segment.altitude_start                   = 500.0 * Units.ft 
-    segment.altitude_end                     = 200.0 * Units.ft   
-    segment.state.unknowns.throttle          = 0.6  * ones_row(1)  
+    segment.tag                              = "Decelerating_Descent"
+    segment.analyses.extend(analyses.descent_transition) 
+    segment.climb_rate                       = -300. * Units['ft/min'] 
+    segment.air_speed_start                  = 35. * Units['mph']     
+    segment.air_speed_end                    = 15.  * Units['mph']       
+    segment.altitude_start                   = 500.0 * Units.ft    
+    segment.battery_energy                   = vehicle.networks.battery_electric_rotor.battery.pack.max_energy 
+    segment.altitude_end                     = 200.0 * Units.ft    
     segment = vehicle.networks.battery_electric_rotor.add_unknowns_and_residuals_to_segment(segment)  
     mission.append_segment(segment)      
+     
     # ------------------------------------------------------------------
-    #  Third Transition Segment
+    #  Deceleration Segment
     # ------------------------------------------------------------------
 
     segment                           = Segments.Cruise.Constant_Acceleration_Constant_Altitude(base_segment)
-    segment.tag                       = "Decent_Transition"  
+    segment.tag                       = "Deceleration" 
     segment.analyses.extend( analyses.descent_transition) 
-    segment.altitude                  = 200.  * Units.ft 
-    segment.air_speed_start           = 35.  * Units['mph'] 
+    segment.altitude                  = 200.  * Units.ft     
     segment.air_speed_end             = 300. * Units['ft/min']
-    segment.acceleration              = -0.5307 
+    segment.acceleration              = -0.5 
     segment.pitch_initial             = 1. * Units.degrees
-    segment.pitch_final               = 2. * Units.degrees       
-    segment.state.unknowns.throttle   = 0.5  * ones_row(1)  
-    segment = vehicle.networks.battery_electric_rotor.add_unknowns_and_residuals_to_segment(segment) 
-    mission.append_segment(segment)
-
+    segment.pitch_final               = 2. * Units.degrees           
+    segment = vehicle.networks.battery_electric_rotor.add_unknowns_and_residuals_to_segment(segment)  
+    mission.append_segment(segment) 
     
     # ------------------------------------------------------------------
-    #   First Climb Segment: Constant Speed, Constant Rate
+    #   Vertical Descent
     # ------------------------------------------------------------------ 
     segment                           = Segments.Hover.Descent(base_segment)
     segment.tag                       = "Vertical_Descent"  
     segment.analyses.extend( analyses.vertical_flight) 
-    segment.altitude_start            = 200.0  * Units.ft  
-    segment.altitude_end              = 0.  * Units.ft 
-    segment.descent_rate              = 300. * Units['ft/min']  
-    segment.state.unknowns.throttle   = 0.5  * ones_row(1)  
-    segment = vehicle.networks.battery_electric_rotor.add_unknowns_and_residuals_to_segment(segment) 
-    mission.append_segment(segment)
-
+    segment.altitude_start            = 200.0  * Units.ft     
+    segment.altitude_end              = 0.  * Units.ft     
+    segment.descent_rate              = 300. * Units['ft/min']      
+    segment = vehicle.networks.battery_electric_rotor.add_unknowns_and_residuals_to_segment(segment)  
+    mission.append_segment(segment)    
     
+         
     # ------------------------------------------------------------------
-    #   First Climb Segment: Constant Speed, Constant Rate
+    # Vertical Climb
     # ------------------------------------------------------------------ 
 
     segment                                            = Segments.Hover.Climb(base_segment)
     segment.tag                                        = "Vertical_Climb" 
     segment.analyses.extend( analyses.vertical_flight) 
-    segment.altitude_start                             = 0.0  * Units.ft 
-    segment.altitude_end                               = 200.  * Units.ft 
-    segment.climb_rate                                 = 300. * Units['ft/min']  
-    segment.battery_pack_temperature                   = atmo_data.temperature[0,0]
-    segment.state.unknowns.throttle                    = 0.8  * ones_row(1)  
+    segment.altitude_start                             = 0.0  * Units.ft  
+    segment.altitude_end                               = 200.  * Units.ft  
+    segment.climb_rate                                 = 300. * Units['ft/min']     
+    segment.true_course_angle                          = airport_geospacial_data.true_course_angle     
     segment = vehicle.networks.battery_electric_rotor.add_unknowns_and_residuals_to_segment(segment)  
     mission.append_segment(segment)
     
     # ------------------------------------------------------------------
-    #  First Transition Segment
-    # ------------------------------------------------------------------
+    # Acceleration
+    # ------------------------------------------------------------------  
 
-    segment                           = Segments.Cruise.Constant_Acceleration_Constant_Altitude(base_segment)
-    segment.tag                       = "Decent_Transition"  
-    segment.analyses.extend( analyses.descent_transition) 
-    segment.altitude                  = 200.  * Units.ft 
-    segment.air_speed_start           = 35.  * Units['mph'] 
-    segment.air_speed_end             = 300. * Units['ft/min']
-    segment.acceleration              = -0.5307 
-    segment.pitch_initial             = 1. * Units.degrees
-    segment.pitch_final               = 2. * Units.degrees       
-    segment.state.unknowns.throttle   = 0.5  * ones_row(1)  
-    segment = vehicle.networks.battery_electric_rotor.add_unknowns_and_residuals_to_segment(segment) 
-    mission.append_segment(segment)
+    segment                                  = Segments.Cruise.Constant_Acceleration_Constant_Altitude(base_segment)
+    segment.tag                              = "Acceleration"  
+    segment.analyses.extend( analyses.vertical_transition) 
+    segment.altitude                         = 200.  * Units.ft        
+    segment.air_speed_start                  = 300. * Units['ft/min'] 
+    segment.air_speed_end                    = 35 * Units['mph']    
+    segment.acceleration                     = 0.5
+    segment.pitch_initial                    = 0. * Units.degrees
+    segment.pitch_final                      = 0. * Units.degrees 
+    segment.state.unknowns.throttle          = 0.8  * ones_row(1)  
+    segment.true_course_angle                = airport_geospacial_data.true_course_angle     
+    segment = vehicle.networks.battery_electric_rotor.add_unknowns_and_residuals_to_segment(segment)  
+    mission.append_segment(segment) 
 
-    
     # ------------------------------------------------------------------
-    #   First Cruise Segment: Constant Acceleration, Constant Altitude
+    #  Accelerating Climb
     # ------------------------------------------------------------------
     segment                                  = Segments.Climb.Linear_Speed_Constant_Rate(base_segment)
-    segment.tag                              = "Climb_1"  
+    segment.tag                              = "Accelerating_Climb"  
     segment.analyses.extend(analyses.climb) 
     segment.climb_rate                       = 600. * Units['ft/min']
     segment.air_speed_start                  = 35.   * Units['mph']
     segment.air_speed_end                    = 55.  * Units['mph']       
     segment.altitude_start                   = 200.0 * Units.ft    
-    segment.altitude_end                     = 500.0 * Units.ft   
-    segment.state.unknowns.throttle          = 0.8  * ones_row(1)  
-    segment = vehicle.networks.battery_electric_rotor.add_unknowns_and_residuals_to_segment(segment) 
+    segment.altitude_end                     = 500.0 * Units.ft          
+    segment.true_course_angle                = airport_geospacial_data.true_course_angle    
+    segment = vehicle.networks.battery_electric_rotor.add_unknowns_and_residuals_to_segment(segment)  
     mission.append_segment(segment)
         
 
@@ -1373,6 +1367,572 @@ def hover_mission_setup(analyses,vehicle,simulated_days = 1,flights_per_day = 1,
     mission.append_segment(segment)
 
     return mission
+
+
+
+
+
+# ------------------------------------------------------------------
+#   LAX_to_DIS_1000ft_over_road_mission_setup
+# ------------------------------------------------------------------
+def LAX_to_DIS_1000ft_over_road_mission_setup(analyses,vehicle,simulated_days = 1,flights_per_day = 1,control_points = 10,recharge_battery = True,microphone_terrain_data = None ,airport_geospacial_data = None):
+    # ------------------------------------------------------------------
+    #   Initialize the Mission
+    # ------------------------------------------------------------------ 
+    mission     = MARC.Analyses.Mission.Sequential_Segments()
+    mission.tag = 'LAX_to_DIS_1000ft_over_road_mission_setup'
+
+    # airport
+    airport            = MARC.Attributes.Airports.Airport() 
+    airport.delta_isa  =  0.0
+    airport.atmosphere = MARC.Attributes.Atmospheres.Earth.US_Standard_1976() 
+    mission.airport    = airport           
+
+    # unpack Segments module
+    Segments = MARC.Analyses.Mission.Segments
+
+    # base segment 
+    base_segment                                             = Segments.Segment() 
+    base_segment.state.numerics.number_control_points        = control_points 
+    base_segment.state.numerics.discretization_method        = linear_data  
+    ones_row                                                 = base_segment.state.ones_row    
+    base_segment.process.initialize.initialize_battery = MARC.Methods.Missions.Segments.Common.Energy.initialize_battery
+    base_segment.process.finalize.post_process.update_battery_state_of_health = MARC.Methods.Missions.Segments.Common.Energy.update_battery_state_of_health   
+    
+            
+    # ------------------------------------------------------------------
+    # Vertical Climb
+    # ------------------------------------------------------------------ 
+
+    segment                                            = Segments.Hover.Climb(base_segment)
+    segment.tag                                        = "Vertical_Climb" 
+    segment.analyses.extend( analyses.vertical_flight) 
+    segment.altitude_start                             = 0.0  * Units.ft  
+    segment.altitude_end                               = 200.  * Units.ft  
+    segment.climb_rate                                 = 300. * Units['ft/min']  
+    segment.battery_energy                             = vehicle.networks.battery_electric_rotor.battery.pack.max_energy    
+    segment.true_course_angle                          = 174.24041  * Units.degrees  
+    segment = vehicle.networks.battery_electric_rotor.add_unknowns_and_residuals_to_segment(segment)  
+    mission.append_segment(segment)
+    
+    # ------------------------------------------------------------------
+    # Acceleration
+    # ------------------------------------------------------------------  
+
+    segment                                  = Segments.Cruise.Constant_Acceleration_Constant_Altitude(base_segment)
+    segment.tag                              = "Acceleration"  
+    segment.analyses.extend( analyses.vertical_transition) 
+    segment.altitude                         = 200.  * Units.ft        
+    segment.air_speed_start                  = 300. * Units['ft/min'] 
+    segment.air_speed_end                    = 35 * Units['mph']    
+    segment.acceleration                     = 0.5
+    segment.pitch_initial                    = 0. * Units.degrees
+    segment.pitch_final                      = 0. * Units.degrees 
+    segment.state.unknowns.throttle          = 0.8  * ones_row(1)  
+    segment.true_course_angle                = 174.24041  * Units.degrees  
+    segment = vehicle.networks.battery_electric_rotor.add_unknowns_and_residuals_to_segment(segment)  
+    mission.append_segment(segment) 
+
+    # ------------------------------------------------------------------
+    #  Accelerating Climb
+    # ------------------------------------------------------------------
+    segment                                  = Segments.Climb.Linear_Speed_Constant_Rate(base_segment)
+    segment.tag                              = "Accelerating_Climb"  
+    segment.analyses.extend(analyses.climb) 
+    segment.climb_rate                       = 600. * Units['ft/min']
+    segment.air_speed_start                  = 35.   * Units['mph']
+    segment.air_speed_end                    = 55.  * Units['mph']       
+    segment.altitude_start                   = 200.0 * Units.ft    
+    segment.altitude_end                     = 500.0 * Units.ft          
+    segment.true_course_angle                = 174.24041  * Units.degrees  
+    segment = vehicle.networks.battery_electric_rotor.add_unknowns_and_residuals_to_segment(segment)  
+    mission.append_segment(segment)
+    
+    # ------------------------------------------------------------------
+    #   First Cruise Segment 
+    # ------------------------------------------------------------------
+    segment                                  = Segments.Climb.Linear_Speed_Constant_Rate(base_segment)
+    segment.tag                              = "Climb_1"  
+    segment.analyses.extend(analyses.climb) 
+    segment.climb_rate                       = 500. * Units['ft/min']
+    segment.air_speed_start                  = 55.   * Units['mph']
+    segment.air_speed_end                    = 65.  * Units['mph']       
+    segment.altitude_start                   = 500.0 * Units.ft        
+    segment.altitude_end                     = 750.0 * Units.ft        
+    segment.true_course_angle                = 174.24041  * Units.degrees  
+    segment = vehicle.networks.battery_electric_rotor.add_unknowns_and_residuals_to_segment(segment)  
+    mission.append_segment(segment)    
+    
+    # ------------------------------------------------------------------
+    #  Second Cruise Segment 
+    # ------------------------------------------------------------------
+    segment                                  = Segments.Climb.Linear_Speed_Constant_Rate(base_segment)
+    segment.tag                              = "Climb_2"  
+    segment.analyses.extend(analyses.climb) 
+    segment.climb_rate                       = 500. * Units['ft/min']
+    segment.air_speed_start                  = 65.  * Units['mph']
+    segment.air_speed_end                    = 75.  * Units['mph']       
+    segment.altitude_start                   = 750.0 * Units.ft   
+    segment.altitude_end                     = 1000.0 * Units.ft        
+    segment.true_course_angle                = 90.409* Units.degrees  
+    segment = vehicle.networks.battery_electric_rotor.add_unknowns_and_residuals_to_segment(segment)  
+    mission.append_segment(segment)      
+
+    # ------------------------------------------------------------------
+    #  Cruise
+    # ------------------------------------------------------------------  
+    cruise_distance                                  = 7.5592  *Units.nmi
+    num_cruise_legs = int(np.ceil(cruise_distance/5000))
+    for i in range(num_cruise_legs): 
+        if i == num_cruise_legs-1:
+            distance =  cruise_distance%5000
+        else:
+            distance = 5000
+        segment                                          = Segments.Cruise.Constant_Speed_Constant_Altitude(base_segment)
+        segment.tag                                      = "Cruise_0_" + str(i+1)
+        segment.analyses.extend( analyses.forward_flight )                  
+        segment.altitude                                 = 1000. * Units.ft     
+        segment.air_speed                                = 75.  * Units['mph']  
+        segment.distance                                 = distance
+        segment.true_course_angle                        = 90.4094*Units.degrees
+        segment = vehicle.networks.battery_electric_rotor.add_unknowns_and_residuals_to_segment(segment, initial_throttles = [0.8,0.0])  
+        mission.append_segment(segment)  
+
+
+    # ------------------------------------------------------------------
+    #  Cruise
+    # ------------------------------------------------------------------  
+    cruise_distance                                  = 2.452  *Units.nmi
+    num_cruise_legs = int(np.ceil(cruise_distance/5000))
+    for i in range(num_cruise_legs): 
+        if i == num_cruise_legs-1:
+            distance =  cruise_distance%5000
+        else:
+            distance = 5000
+        segment                                          = Segments.Cruise.Constant_Speed_Constant_Altitude(base_segment)
+        segment.tag                                      = "Cruise_1_" + str(i+1)
+        segment.analyses.extend( analyses.forward_flight )                  
+        segment.altitude                                 = 1000. * Units.ft     
+        segment.air_speed                                = 75.  * Units['mph']  
+        segment.distance                                 = distance
+        segment.true_course_angle                        = 113.48158*Units.degrees
+        segment = vehicle.networks.battery_electric_rotor.add_unknowns_and_residuals_to_segment(segment, initial_throttles = [0.8,0.0])  
+        mission.append_segment(segment)   
+
+    
+    # ------------------------------------------------------------------
+    #  Cruise
+    # ------------------------------------------------------------------  
+    cruise_distance                                  = 4.707036 *Units.nmi
+    num_cruise_legs = int(np.ceil(cruise_distance/5000))
+    for i in range(num_cruise_legs): 
+        if i == num_cruise_legs-1:
+            distance =  cruise_distance%5000
+        else:
+            distance = 5000
+        segment                                          = Segments.Cruise.Constant_Speed_Constant_Altitude(base_segment)
+        segment.tag                                      = "Cruise_2_" + str(i+1)
+        segment.analyses.extend( analyses.forward_flight )                  
+        segment.altitude                                 = 1000. * Units.ft     
+        segment.air_speed                                = 75.  * Units['mph']  
+        segment.distance                                 = distance
+        segment.true_course_angle                        = 90.73949*Units.degrees
+        segment = vehicle.networks.battery_electric_rotor.add_unknowns_and_residuals_to_segment(segment, initial_throttles = [0.8,0.0])  
+        mission.append_segment(segment)              
+
+    # ------------------------------------------------------------------
+    #  Cruise
+    # ------------------------------------------------------------------  
+    cruise_distance                                  = 7.644369 *Units.nmi
+    num_cruise_legs = int(np.ceil(cruise_distance/5000))
+    for i in range(num_cruise_legs): 
+        if i == num_cruise_legs-1:
+            distance =  cruise_distance%5000
+        else:
+            distance = 5000
+        segment                                          = Segments.Cruise.Constant_Speed_Constant_Altitude(base_segment)
+        segment.tag                                      = "Cruise_3_" + str(i+1)
+        segment.analyses.extend( analyses.forward_flight )                  
+        segment.altitude                                 = 1000. * Units.ft     
+        segment.air_speed                                = 75.  * Units['mph']  
+        segment.distance                                 = distance
+        segment.true_course_angle                        = 125.01709*Units.degrees
+        segment = vehicle.networks.battery_electric_rotor.add_unknowns_and_residuals_to_segment(segment, initial_throttles = [0.8,0.0])  
+        mission.append_segment(segment)              
+ 
+                
+    # ------------------------------------------------------------------
+    #   First Descent Segment 
+    # ------------------------------------------------------------------ 
+    segment                                  = Segments.Climb.Linear_Speed_Constant_Rate(base_segment)
+    segment.tag                              = "Descent_1"  
+    segment.analyses.extend(analyses.forward_flight)
+    segment.climb_rate                       = -200. * Units['ft/min']   
+    segment.air_speed_end                    = 55. * Units['mph']      
+    segment.altitude_start                   = 1000.0 * Units.ft     
+    segment.altitude_end                     = 750.0 * Units.ft      
+    segment.true_course_angle                = 125.01709*Units.degrees
+    segment = vehicle.networks.battery_electric_rotor.add_unknowns_and_residuals_to_segment(segment)    
+    mission.append_segment(segment) 
+    
+    # ------------------------------------------------------------------
+    # Second Descent Segment 
+    # ------------------------------------------------------------------ 
+    segment                                  = Segments.Climb.Linear_Speed_Constant_Rate(base_segment)
+    segment.tag                              = "Descent_2"  
+    segment.analyses.extend(analyses.forward_flight)
+    segment.climb_rate                       = -200. * Units['ft/min']  
+    segment.air_speed_end                    = 35. * Units['mph']      
+    segment.altitude_start                   = 750.0 * Units.ft     
+    segment.altitude_end                     = 500.0 * Units.ft      
+    segment.true_course_angle                = 180 * Units.degrees   
+    segment = vehicle.networks.battery_electric_rotor.add_unknowns_and_residuals_to_segment(segment)    
+    mission.append_segment(segment)    
+     
+
+    # ------------------------------------------------------------------
+    #  Decelerating Decent
+    # ------------------------------------------------------------------
+    segment                                  = Segments.Climb.Linear_Speed_Constant_Rate(base_segment)
+    segment.tag                              = "Decelerating_Descent"
+    segment.analyses.extend(analyses.descent_transition) 
+    segment.climb_rate                       = -300. * Units['ft/min'] 
+    segment.air_speed_end                    = 15.  * Units['mph']       
+    segment.altitude_start                   = 500.0 * Units.ft    
+    segment.altitude_end                     = 200.0 * Units.ft   
+    segment.true_course_angle                = 180 * Units.degrees    
+    segment = vehicle.networks.battery_electric_rotor.add_unknowns_and_residuals_to_segment(segment)  
+    mission.append_segment(segment)      
+     
+    # ------------------------------------------------------------------
+    #  Deceleration Segment
+    # ------------------------------------------------------------------
+
+    segment                           = Segments.Cruise.Constant_Acceleration_Constant_Altitude(base_segment)
+    segment.tag                       = "Deceleration" 
+    segment.analyses.extend( analyses.descent_transition) 
+    segment.altitude                  = 200.  * Units.ft     
+    segment.air_speed_end             = 300. * Units['ft/min']
+    segment.acceleration              = -0.5 
+    segment.pitch_initial             = 1. * Units.degrees
+    segment.pitch_final               = 2. * Units.degrees        
+    segment.true_course_angle         = 180 * Units.degrees 
+    segment = vehicle.networks.battery_electric_rotor.add_unknowns_and_residuals_to_segment(segment)  
+    mission.append_segment(segment) 
+    
+    # ------------------------------------------------------------------
+    #   Vertical Descent
+    # ------------------------------------------------------------------ 
+    segment                           = Segments.Hover.Descent(base_segment)
+    segment.tag                       = "Vertical_Descent"  
+    segment.analyses.extend( analyses.vertical_flight) 
+    segment.altitude_start            = 200.0  * Units.ft     
+    segment.altitude_end              = 0.  * Units.ft     
+    segment.descent_rate              = 300. * Units['ft/min']  
+    segment.true_course_angle         = 180 * Units.degrees  
+    segment = vehicle.networks.battery_electric_rotor.add_unknowns_and_residuals_to_segment(segment)  
+    mission.append_segment(segment)
+    
+     
+    return mission 
+
+
+# ------------------------------------------------------------------
+#   LAX_to_DIS_2000ft_over_road_mission_setup
+# ------------------------------------------------------------------
+def LAX_to_DIS_2000ft_over_road_mission_setup(analyses,vehicle,simulated_days = 1,flights_per_day = 1,control_points = 10,recharge_battery = True,microphone_terrain_data = None ,airport_geospacial_data = None):
+    # ------------------------------------------------------------------
+    #   Initialize the Mission
+    # ------------------------------------------------------------------ 
+    mission     = MARC.Analyses.Mission.Sequential_Segments()
+    mission.tag = 'LAX_to_DIS_2000ft_over_road_mission_setup'
+
+    # airport
+    airport            = MARC.Attributes.Airports.Airport() 
+    airport.delta_isa  =  0.0
+    airport.atmosphere = MARC.Attributes.Atmospheres.Earth.US_Standard_1976() 
+    mission.airport    = airport           
+
+    # unpack Segments module
+    Segments = MARC.Analyses.Mission.Segments
+
+    # base segment 
+    base_segment                                             = Segments.Segment() 
+    base_segment.state.numerics.number_control_points        = control_points 
+    base_segment.state.numerics.discretization_method        = linear_data  
+    ones_row                                                 = base_segment.state.ones_row    
+    base_segment.process.initialize.initialize_battery = MARC.Methods.Missions.Segments.Common.Energy.initialize_battery
+    base_segment.process.finalize.post_process.update_battery_state_of_health = MARC.Methods.Missions.Segments.Common.Energy.update_battery_state_of_health   
+    
+            
+    # ------------------------------------------------------------------
+    # Vertical Climb
+    # ------------------------------------------------------------------ 
+
+    segment                                            = Segments.Hover.Climb(base_segment)
+    segment.tag                                        = "Vertical_Climb" 
+    segment.analyses.extend( analyses.vertical_flight) 
+    segment.altitude_start                             = 0.0  * Units.ft  
+    segment.altitude_end                               = 200.  * Units.ft  
+    segment.climb_rate                                 = 300. * Units['ft/min']  
+    segment.battery_energy                             = vehicle.networks.battery_electric_rotor.battery.pack.max_energy    
+    segment.true_course_angle                          = 174.24041  * Units.degrees  
+    segment = vehicle.networks.battery_electric_rotor.add_unknowns_and_residuals_to_segment(segment)  
+    mission.append_segment(segment)
+    
+    # ------------------------------------------------------------------
+    # Acceleration
+    # ------------------------------------------------------------------  
+
+    segment                                  = Segments.Cruise.Constant_Acceleration_Constant_Altitude(base_segment)
+    segment.tag                              = "Acceleration"  
+    segment.analyses.extend( analyses.vertical_transition) 
+    segment.altitude                         = 200.  * Units.ft        
+    segment.air_speed_start                  = 300. * Units['ft/min'] 
+    segment.air_speed_end                    = 35 * Units['mph']    
+    segment.acceleration                     = 0.5
+    segment.pitch_initial                    = 0. * Units.degrees
+    segment.pitch_final                      = 0. * Units.degrees 
+    segment.state.unknowns.throttle          = 0.8  * ones_row(1)  
+    segment.true_course_angle                = 174.24041  * Units.degrees  
+    segment = vehicle.networks.battery_electric_rotor.add_unknowns_and_residuals_to_segment(segment)  
+    mission.append_segment(segment) 
+
+    # ------------------------------------------------------------------
+    #  Accelerating Climb
+    # ------------------------------------------------------------------
+    segment                                  = Segments.Climb.Linear_Speed_Constant_Rate(base_segment)
+    segment.tag                              = "Accelerating_Climb"  
+    segment.analyses.extend(analyses.climb) 
+    segment.climb_rate                       = 600. * Units['ft/min']
+    segment.air_speed_start                  = 35.   * Units['mph']
+    segment.air_speed_end                    = 55.  * Units['mph']       
+    segment.altitude_start                   = 200.0 * Units.ft    
+    segment.altitude_end                     = 500.0 * Units.ft          
+    segment.true_course_angle                = 174.24041  * Units.degrees  
+    segment = vehicle.networks.battery_electric_rotor.add_unknowns_and_residuals_to_segment(segment)  
+    mission.append_segment(segment)  
+
+    
+    # ------------------------------------------------------------------
+    #   First Cruise Segment 
+    # ------------------------------------------------------------------
+    segment                                  = Segments.Climb.Linear_Speed_Constant_Rate(base_segment)
+    segment.tag                              = "Climb_1"  
+    segment.analyses.extend(analyses.climb) 
+    segment.climb_rate                       = 500. * Units['ft/min']
+    segment.air_speed_start                  = 55.   * Units['mph']
+    segment.air_speed_end                    = 65.  * Units['mph']       
+    segment.altitude_start                   = 500.0 * Units.ft        
+    segment.altitude_end                     = 750.0 * Units.ft        
+    segment.true_course_angle                = 174.24041  * Units.degrees  
+    segment = vehicle.networks.battery_electric_rotor.add_unknowns_and_residuals_to_segment(segment)  
+    mission.append_segment(segment)    
+    
+    # ------------------------------------------------------------------
+    #  Second Cruise Segment 
+    # ------------------------------------------------------------------
+    segment                                  = Segments.Climb.Linear_Speed_Constant_Rate(base_segment)
+    segment.tag                              = "Climb_2"  
+    segment.analyses.extend(analyses.climb) 
+    segment.climb_rate                       = 500. * Units['ft/min']
+    segment.air_speed_start                  = 65.  * Units['mph']
+    segment.air_speed_end                    = 75.  * Units['mph']       
+    segment.altitude_start                   = 750.0 * Units.ft   
+    segment.altitude_end                     = 1000.0 * Units.ft        
+    segment.true_course_angle                = 90.409* Units.degrees  
+    segment = vehicle.networks.battery_electric_rotor.add_unknowns_and_residuals_to_segment(segment)  
+    mission.append_segment(segment)      
+
+    
+    # ------------------------------------------------------------------
+    #   First Cruise Segment 
+    # ------------------------------------------------------------------
+    segment                                  = Segments.Climb.Constant_Speed_Constant_Rate(base_segment)
+    segment.tag                              = "Climb_3"  
+    segment.analyses.extend(analyses.climb) 
+    segment.climb_rate                       = 500. * Units['ft/min']
+    segment.air_speed                        = 75.   * Units['mph']    
+    segment.altitude_start                   = 1000.0 * Units.ft  
+    segment.altitude_end                     = 2000.0 * Units.ft        
+    segment.true_course_angle                = 90.409* Units.degrees  
+    segment = vehicle.networks.battery_electric_rotor.add_unknowns_and_residuals_to_segment(segment)  
+    mission.append_segment(segment)     
+    
+    # ------------------------------------------------------------------
+    #  Cruise
+    # ------------------------------------------------------------------  
+    cruise_distance                                  = 5.39300356  *Units.nmi
+    num_cruise_legs = int(np.ceil(cruise_distance/5000))
+    for i in range(num_cruise_legs): 
+        if i == num_cruise_legs-1:
+            distance =  cruise_distance%5000
+        else:
+            distance = 5000
+        segment                                          = Segments.Cruise.Constant_Speed_Constant_Altitude(base_segment)
+        segment.tag                                      = "Cruise_0_" + str(i+1)
+        segment.analyses.extend( analyses.forward_flight )                  
+        segment.altitude                                 = 2000. * Units.ft     
+        segment.air_speed                                = 75.  * Units['mph']  
+        segment.distance                                 = distance
+        segment.true_course_angle                        = 90.4094*Units.degrees
+        segment = vehicle.networks.battery_electric_rotor.add_unknowns_and_residuals_to_segment(segment, initial_throttles = [0.8,0.0])  
+        mission.append_segment(segment)  
+
+
+    # ------------------------------------------------------------------
+    #  Cruise
+    # ------------------------------------------------------------------  
+    cruise_distance                                  = 2.452  *Units.nmi
+    num_cruise_legs = int(np.ceil(cruise_distance/5000))
+    for i in range(num_cruise_legs): 
+        if i == num_cruise_legs-1:
+            distance =  cruise_distance%5000
+        else:
+            distance = 5000
+        segment                                          = Segments.Cruise.Constant_Speed_Constant_Altitude(base_segment)
+        segment.tag                                      = "Cruise_1_" + str(i+1)
+        segment.analyses.extend( analyses.forward_flight )                  
+        segment.altitude                                 = 2000. * Units.ft     
+        segment.air_speed                                = 75.  * Units['mph']  
+        segment.distance                                 = distance
+        segment.true_course_angle                        = 113.48158*Units.degrees
+        segment = vehicle.networks.battery_electric_rotor.add_unknowns_and_residuals_to_segment(segment, initial_throttles = [0.8,0.0])  
+        mission.append_segment(segment)   
+    
+    
+    # ------------------------------------------------------------------
+    #  Cruise
+    # ------------------------------------------------------------------  
+    cruise_distance                                  = 4.707036 *Units.nmi
+    num_cruise_legs = int(np.ceil(cruise_distance/5000))
+    for i in range(num_cruise_legs): 
+        if i == num_cruise_legs-1:
+            distance =  cruise_distance%5000
+        else:
+            distance = 5000
+        segment                                          = Segments.Cruise.Constant_Speed_Constant_Altitude(base_segment)
+        segment.tag                                      = "Cruise_2_" + str(i+1)
+        segment.analyses.extend( analyses.forward_flight )                  
+        segment.altitude                                 = 2000. * Units.ft     
+        segment.air_speed                                = 75.  * Units['mph']  
+        segment.distance                                 = distance
+        segment.true_course_angle                        = 90.73949*Units.degrees
+        segment = vehicle.networks.battery_electric_rotor.add_unknowns_and_residuals_to_segment(segment, initial_throttles = [0.8,0.0])  
+        mission.append_segment(segment)              
+
+    # ------------------------------------------------------------------
+    #  Cruise
+    # ------------------------------------------------------------------  
+    cruise_distance                                  = 3.19876 *Units.nmi
+    num_cruise_legs = int(np.ceil(cruise_distance/5000))
+    for i in range(num_cruise_legs): 
+        if i == num_cruise_legs-1:
+            distance =  cruise_distance%5000
+        else:
+            distance = 5000
+        segment                                          = Segments.Cruise.Constant_Speed_Constant_Altitude(base_segment)
+        segment.tag                                      = "Cruise_3_" + str(i+1)
+        segment.analyses.extend( analyses.forward_flight )                  
+        segment.altitude                                 = 2000. * Units.ft     
+        segment.air_speed                                = 75.  * Units['mph']  
+        segment.distance                                 = distance
+        segment.true_course_angle                        = 125.01709*Units.degrees
+        segment = vehicle.networks.battery_electric_rotor.add_unknowns_and_residuals_to_segment(segment, initial_throttles = [0.8,0.0])  
+        mission.append_segment(segment)              
+  
+    
+    # ------------------------------------------------------------------
+    #   First Descent Segment 
+    # ------------------------------------------------------------------ 
+    segment                                  = Segments.Climb.Linear_Speed_Constant_Rate(base_segment)
+    segment.state.numerics.number_control_points   = control_points*2 
+    segment.tag                              = "Descent_1"  
+    segment.analyses.extend(analyses.forward_flight)
+    segment.climb_rate                       = -200. * Units['ft/min']   
+    segment.air_speed_end                    = 65. * Units['mph']      
+    segment.altitude_start                   = 2000.0 * Units.ft     
+    segment.altitude_end                     = 1000.0 * Units.ft      
+    segment.true_course_angle                = 125.01709*Units.degrees
+    segment = vehicle.networks.battery_electric_rotor.add_unknowns_and_residuals_to_segment(segment)    
+    mission.append_segment(segment) 
+     
+     
+    # ------------------------------------------------------------------
+    #   First Descent Segment 
+    # ------------------------------------------------------------------ 
+    segment                                  = Segments.Climb.Linear_Speed_Constant_Rate(base_segment)
+    segment.state.numerics.number_control_points   = control_points*2 
+    segment.tag                              = "Descent_2"  
+    segment.analyses.extend(analyses.forward_flight)
+    segment.climb_rate                       = -200. * Units['ft/min']   
+    segment.air_speed_end                    = 55. * Units['mph']      
+    segment.altitude_start                   = 1000.0 * Units.ft     
+    segment.altitude_end                     = 750.0 * Units.ft      
+    segment.true_course_angle                = 125.01709*Units.degrees
+    segment = vehicle.networks.battery_electric_rotor.add_unknowns_and_residuals_to_segment(segment)    
+    mission.append_segment(segment) 
+    
+    # ------------------------------------------------------------------
+    # Second Descent Segment 
+    # ------------------------------------------------------------------ 
+    segment                                  = Segments.Climb.Linear_Speed_Constant_Rate(base_segment)
+    segment.tag                              = "Descent_2"  
+    segment.analyses.extend(analyses.forward_flight)
+    segment.climb_rate                       = -200. * Units['ft/min']  
+    segment.air_speed_end                    = 35. * Units['mph']      
+    segment.altitude_start                   = 750.0 * Units.ft     
+    segment.altitude_end                     = 500.0 * Units.ft      
+    segment.true_course_angle                = 180 * Units.degrees   
+    segment = vehicle.networks.battery_electric_rotor.add_unknowns_and_residuals_to_segment(segment)    
+    mission.append_segment(segment)    
+     
+
+    # ------------------------------------------------------------------
+    #  Decelerating Decent
+    # ------------------------------------------------------------------
+    segment                                  = Segments.Climb.Linear_Speed_Constant_Rate(base_segment)
+    segment.tag                              = "Decelerating_Descent"
+    segment.analyses.extend(analyses.descent_transition) 
+    segment.climb_rate                       = -300. * Units['ft/min'] 
+    segment.air_speed_end                    = 15.  * Units['mph']       
+    segment.altitude_start                   = 500.0 * Units.ft    
+    segment.altitude_end                     = 200.0 * Units.ft   
+    segment.true_course_angle                = 180 * Units.degrees    
+    segment = vehicle.networks.battery_electric_rotor.add_unknowns_and_residuals_to_segment(segment)  
+    mission.append_segment(segment)      
+     
+    # ------------------------------------------------------------------
+    #  Deceleration Segment
+    # ------------------------------------------------------------------
+
+    segment                           = Segments.Cruise.Constant_Acceleration_Constant_Altitude(base_segment)
+    segment.tag                       = "Deceleration" 
+    segment.analyses.extend( analyses.descent_transition) 
+    segment.altitude                  = 200.  * Units.ft     
+    segment.air_speed_end             = 300. * Units['ft/min']
+    segment.acceleration              = -0.5 
+    segment.pitch_initial             = 1. * Units.degrees
+    segment.pitch_final               = 2. * Units.degrees        
+    segment.true_course_angle         = 180 * Units.degrees 
+    segment = vehicle.networks.battery_electric_rotor.add_unknowns_and_residuals_to_segment(segment)  
+    mission.append_segment(segment) 
+    
+    # ------------------------------------------------------------------
+    #   Vertical Descent
+    # ------------------------------------------------------------------ 
+    segment                           = Segments.Hover.Descent(base_segment)
+    segment.tag                       = "Vertical_Descent"  
+    segment.analyses.extend( analyses.vertical_flight) 
+    segment.altitude_start            = 200.0  * Units.ft     
+    segment.altitude_end              = 0.  * Units.ft     
+    segment.descent_rate              = 300. * Units['ft/min']  
+    segment.true_course_angle         = 180 * Units.degrees  
+    segment = vehicle.networks.battery_electric_rotor.add_unknowns_and_residuals_to_segment(segment)  
+    mission.append_segment(segment)
+    
+    return mission 
+
 
 
 # ------------------------------------------------------------------

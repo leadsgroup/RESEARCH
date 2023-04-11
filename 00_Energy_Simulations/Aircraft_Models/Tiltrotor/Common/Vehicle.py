@@ -86,12 +86,12 @@ def vehicle_setup(resize_aircraft,vehicle_name = 'Tiltrotor_CRM') :
         wing.aerodynamic_center                   = [ 1.8 ,0 , 1.0 ]    
         wing.winglet_fraction                     = 0.0  
         wing.symmetric                            = True
-        wing.vertical                             = False
-        airfoil                                   = MARC.Components.Airfoils.Airfoil() 
-        ospath    = os.path.abspath(__file__)
-        separator = os.path.sep
-        rel_path  = os.path.dirname(ospath) + separator             
-        airfoil.coordinate_file                   = rel_path + '../../Airfoils/NACA_63_412.txt'
+        wing.vertical                             = False 
+        ospath                                    = os.path.abspath(__file__)
+        separator                                 = os.path.sep
+        rel_path                                  = ospath.split( 'Tiltrotor' + separator + 'Common')[0]  
+        airfoil                                   = MARC.Components.Airfoils.Airfoil()  
+        airfoil.coordinate_file                   = rel_path + 'Airfoils' + separator + 'NACA_63_412.txt'
                                                   
         # Segment                                              
         segment                                   = MARC.Components.Wings.Segment()
@@ -397,15 +397,15 @@ def vehicle_setup(resize_aircraft,vehicle_name = 'Tiltrotor_CRM') :
         prop_rotor.cruise.design_freestream_velocity  = 130*Units.mph  
         
         airfoil                                     = MARC.Components.Airfoils.Airfoil()
-        airfoil.coordinate_file                     = rel_path + '../../Airfoils/NACA_4412.txt'
-        airfoil.polar_files                         = [rel_path+ '../../Airfoils/Polars/NACA_4412_polar_Re_50000.txt' ,
-                                                      rel_path + '../../Airfoils/Polars/NACA_4412_polar_Re_100000.txt' ,
-                                                      rel_path + '../../Airfoils/Polars/NACA_4412_polar_Re_200000.txt' ,
-                                                      rel_path + '../../Airfoils/Polars/NACA_4412_polar_Re_500000.txt' ,
-                                                      rel_path + '../../Airfoils/Polars/NACA_4412_polar_Re_1000000.txt',
-                                                      rel_path + '../../Airfoils/Polars/NACA_4412_polar_Re_3500000.txt',
-                                                      rel_path + '../../Airfoils/Polars/NACA_4412_polar_Re_5000000.txt',
-                                                      rel_path + '../../Airfoils/Polars/NACA_4412_polar_Re_7500000.txt' ]
+        airfoil.coordinate_file                     = rel_path + 'Airfoils' + separator + 'NACA_4412.txt'
+        airfoil.polar_files                         = [rel_path + 'Airfoils' + separator + 'Polars' + separator + 'NACA_4412_polar_Re_50000.txt' ,
+                                                      rel_path + 'Airfoils' + separator + 'Polars' + separator + 'NACA_4412_polar_Re_100000.txt' ,
+                                                      rel_path + 'Airfoils' + separator + 'Polars' + separator + 'NACA_4412_polar_Re_200000.txt' ,
+                                                      rel_path + 'Airfoils' + separator + 'Polars' + separator + 'NACA_4412_polar_Re_500000.txt' ,
+                                                      rel_path + 'Airfoils' + separator + 'Polars' + separator + 'NACA_4412_polar_Re_1000000.txt',
+                                                      rel_path + 'Airfoils' + separator + 'Polars' + separator + 'NACA_4412_polar_Re_3500000.txt',
+                                                      rel_path + 'Airfoils' + separator + 'Polars' + separator + 'NACA_4412_polar_Re_5000000.txt',
+                                                      rel_path + 'Airfoils' + separator + 'Polars' + separator + 'NACA_4412_polar_Re_7500000.txt' ]
         prop_rotor.append_airfoil(airfoil)          
         prop_rotor.airfoil_polar_stations            = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]    
         prop_rotor.variable_pitch                    = True    
