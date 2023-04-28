@@ -80,7 +80,7 @@ def setup():
         [ 'MainWingArea'                        ,   ['vehicle_configurations.*.wings.main_wing.areas.reference',
                                                   'vehicle_configurations.*.reference_area'                    ]],
         ['numCellParallel', 'vehicle_configurations.*.networks.battery_electric_rotor.battery.pack.electrical_configuration.parallel'],
-        ['numCellSeries','vehicle_configurations.*.networks.battery_electric_rotor.battery.pack.electrical_configuration.series'],
+        ['numCellSeries' ,'vehicle_configurations.*.networks.battery_electric_rotor.battery.pack.electrical_configuration.series'],
         [ 'SOC_end_of_flight'         , 'summary.SOC_EOF'],
         [ 'Nothing'                   , 'summary.Nothing'],               
     ]   
