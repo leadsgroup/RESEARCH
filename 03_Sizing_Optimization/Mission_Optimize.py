@@ -43,7 +43,7 @@ def setup():
 
     #   [ tag                   , initial,  (lb , ub)    , scaling , units ]  
     problem.inputs = np.array([
-                      ['climbRate', 100, 75, 125, 100., 1*Units.less],
+                      ['climbRate'  , 100, 75, 125, 100., 1*Units.less],
                       ['descentRate', 140, 100, 180, 100., 1*Units.less],
         ],dtype=object)    
 
@@ -73,8 +73,8 @@ def setup():
     # [ 'alias' , ['data.path1.name','data.path2.name'] ]
 
     problem.aliases = [
-        ['climbRate', 'missions.base.segments.climb.climb_rate'],
-        ['descentRate','missions.base.segments.descent.climb_rate'],
+        [ 'climbRate'                 , 'missions.base.segments.climb.climb_rate'],
+        [ 'descentRate'               , 'missions.base.segments.descent.climb_rate'],
         [ 'SOC_end_of_flight'         , 'summary.SOC_EOF'],
         [ 'Nothing'                   , 'summary.Nothing'],               
     ]   

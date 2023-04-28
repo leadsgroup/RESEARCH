@@ -547,7 +547,7 @@ def configs_setup(vehicle):
 
     oei_config = MARC.Components.Configs.Config(vehicle)
     oei_config.tag = 'oei'
-    net = oei_config.networks
+    net = oei_config.networks.battery_electric_rotor
     net.rotor_group_indexes = [0]
     net.motor_group_indexes = [0]  
     net.esc_group_indexes   = [0]    

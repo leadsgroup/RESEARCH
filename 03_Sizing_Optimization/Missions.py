@@ -58,7 +58,7 @@ def mission_setup(analyses):
     base_segment                                             = Segments.Segment() 
     ones_row                                                 = base_segment.state.ones_row 
     base_segment                                             = Segments.Segment()   
-    base_segment.state.numerics.number_control_points        = 8
+    base_segment.state.numerics.number_control_points        = 16
     base_segment.process.initialize.initialize_battery       = MARC.Methods.Missions.Segments.Common.Energy.initialize_battery
     base_segment.process.finalize.post_process.update_battery_state_of_health = MARC.Methods.Missions.Segments.Common.Energy.update_battery_state_of_health  
     base_segment.process.finalize.post_process.stability     = MARC.Methods.skip 
@@ -89,7 +89,7 @@ def mission_setup(analyses):
     # ------------------------------------------------------------------ 
     segment = Segments.Climb.Linear_Speed_Constant_Rate(base_segment) 
     segment.tag = 'Departure_End_of_Runway'       
-    segment.analyses.extend( analyses.oei )           
+    segment.analyses.extend(analyses.oei ) 
     segment.altitude_start                                   = 0.0 * Units.feet
     segment.altitude_end                                     = 50.0 * Units.feet
     segment.air_speed_start                                  = Vstall  
@@ -123,23 +123,22 @@ def mission_setup(analyses):
     segment.air_speed_start                                  = Vstall*1.2  
     segment.air_speed_end                                    = 175.* Units['mph']    
     segment.climb_rate                                       = 500* Units['ft/min']      
-    segment = vehicle.networks.battery_electric_rotor.add_unknowns_and_residuals_to_segment(segment)   
+    segment = vehicle.networks.battery_electric_rotor.add_unknowns_and_residuals_to_segment(segment,  initial_throttles = [0.85])   
     mission.append_segment(segment)  
     
-    vehicle        = analyses.base.aerodynamics.geometry 
+    
     # ------------------------------------------------------------------
     #   Cruise Segment Flight 1 
     # ------------------------------------------------------------------ 
     segment = Segments.Cruise.Constant_Speed_Constant_Altitude(base_segment) 
-    segment.tag = 'Cruise'  
-    segment.tag = 'cruise'  
+    segment.tag = 'Cruise'   
     segment.analyses.extend(analyses.base) 
     segment.air_speed                                        = 175.*Units['mph']   
     segment.altitude                                         = 2500 * Units.feet 
     segment.air_speed                                        = 175.*Units['mph']   
     segment.altitude                                         = 2500 * Units.feet 
     segment.distance                                         = 50*Units.nmi           
-    segment = vehicle.networks.battery_electric_rotor.add_unknowns_and_residuals_to_segment(segment) 
+    segment = vehicle.networks.battery_electric_rotor.add_unknowns_and_residuals_to_segment(segment,  initial_throttles = [0.85]) 
     mission.append_segment(segment)   
  
     
@@ -154,7 +153,7 @@ def mission_setup(analyses):
     segment.air_speed_start                                  = 175.* Units['mph']    
     segment.air_speed_end                                    = Vstall*1.3     
     segment.climb_rate                                       = -300 * Units['ft/min']    
-    segment = vehicle.networks.battery_electric_rotor.add_unknowns_and_residuals_to_segment(segment)  
+    segment = vehicle.networks.battery_electric_rotor.add_unknowns_and_residuals_to_segment(segment,  initial_throttles = [0.85])  
     mission.append_segment(segment)  
      
 

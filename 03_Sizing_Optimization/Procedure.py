@@ -62,7 +62,7 @@ def modify_vehicle_and_mission(nexus):
 
     # mass properties
     wing = vehicle_opt.wings.main_wing
-    wing.aspect_ratio                     = wing.spans.projected**2. / wing.areas.reference 
+    wing.aspect_ratio    = wing.spans.projected**2. / wing.areas.reference 
     
     # ------------------------------------------------------------------        
     #   Main Wing
@@ -99,7 +99,7 @@ def modify_vehicle_and_mission(nexus):
     # ---------------------------------------------------------------------- 
     # Re-set nattery charge each optimization
     nexus.missions.base.segments.takeoff.battery_energy =  vehicle_opt.networks.battery_electric_rotor.battery.pack.max_energy 
-
+    
     # diff the new data
     vehicle_opt.store_diff()
     

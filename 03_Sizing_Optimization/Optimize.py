@@ -76,11 +76,11 @@ def setup():
     # [ 'alias' , ['data.path1.name','data.path2.name'] ]
 
     problem.aliases = [
-        [ 'Span'              , 'vehicle_configurations.*.wings.main_wing.spans.projected'],
+        [ 'Span'                      , 'vehicle_configurations.*.wings.main_wing.spans.projected'],
         [ 'MainWingArea'                        ,   ['vehicle_configurations.*.wings.main_wing.areas.reference',
-                                                  'vehicle_configurations.*.reference_area'                    ]],
-        ['numCellParallel', 'vehicle_configurations.*.networks.battery_electric_rotor.battery.pack.electrical_configuration.parallel'],
-        ['numCellSeries' ,'vehicle_configurations.*.networks.battery_electric_rotor.battery.pack.electrical_configuration.series'],
+                                                     'vehicle_configurations.*.reference_area'                    ]],
+        ['numCellParallel'            , 'vehicle_configurations.*.networks.battery_electric_rotor.battery.pack.electrical_configuration.parallel'],
+        ['numCellSeries'              ,'vehicle_configurations.*.networks.battery_electric_rotor.battery.pack.electrical_configuration.series'],
         [ 'SOC_end_of_flight'         , 'summary.SOC_EOF'],
         [ 'Nothing'                   , 'summary.Nothing'],               
     ]   
