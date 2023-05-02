@@ -19,32 +19,32 @@ def main():
     ti                         = time.time()
     
     # topography data 
-    topography_file        = '../Maps_and_Scales/Los_Angeles/LA_Metropolitan_Area_5.txt'   
+    topography_file        = 'Maps_and_Scales\\San_Francisco\\SF_Metropolitan_Area_1.txt'   
     N_lat                  = 225  
     N_long                 = 390     
     
     long_dist,lat_dist,long_deg,lat_deg,elevation  = get_topography_data(topography_file,N_lat,N_long)
     
     # community noise data 
-    total_noise_file    = '../Maps_and_Scales/Los_Angeles/LA_Aircraft_Noise.png'
-    car_noise_file      = '../Maps_and_Scales/Los_Angeles/LA_Aircraft_Noise.png'
-    train_noise_file    = '../Maps_and_Scales/Los_Angeles/LA_Aircraft_Noise.png'
-    aircraft_noise_file = '../Maps_and_Scales/Los_Angeles/LA_Aircraft_Noise_Modified_2.png'
+    total_noise_file    = 'Maps_and_Scales\\San_Francisco\\SF_total_Noise.png'
+    car_noise_file      = 'Maps_and_Scales\\San_Francisco\\SF_car_noise.png'
+    train_noise_file    = 'Maps_and_Scales\\San_Francisco\\SF_train_noise.png'
+    aircraft_noise_file = 'Maps_and_Scales\\San_Francisco\\SF_aircraft_noise.png'
     jetliner_noise,_,_ = community_noise_map(total_noise_file,car_noise_file,train_noise_file,aircraft_noise_file,long_dist,lat_dist,long_deg,lat_deg,N_lat,N_long)  
     
     # tag for city 
-    city                        = 'Los_Angeles' 
-    city_acronym                = 'LA' 
-    aircraft_models             =  ['HC','SR','TR']
+    city                        = 'San_Francisco' 
+    city_acronym                = 'SF' 
+    aircraft_models             =  ['HC']
     
     # altitude 
-    altitudes                   = ['1000','2000']
+    altitudes                   = ['1000']
     
     # departure airport location  
-    dep_loc         = ['LAX','LGB','BUR','LAX','BUR','LAX','DIS','SNA','SNA','SBD','ONT','ONT','BUR','DIS','DIS','SBD','BUR','SBD'] 
+    dep_loc         = ['OAK','OAK','OAK','PAO','PAO','PAO','SFO','SFO','SFO','SJC','SJC','SJC'] 
     
     # destination airport location
-    des_loc       = ['SBD','ONT','ONT','BUR','DIS','DIS','SBD','BUR','SBD','LAX','LGB','BUR','LAX','BUR','LAX','DIS','SNA','SNA'] 
+    des_loc       = ['PAO','SFO','SJC','OAK','SFO','SJC','OAK','PAO','SJC','OAK','PAO','SFO'] 
     
     # 1hr min interval 
     flight_times = np.array(['06:00:00',
@@ -94,7 +94,7 @@ def main():
                              #'18:00:00','18:15:00','18:30:00','18:45:00',
                              #'19:00:00','19:15:00','19:30:00','19:45:00',]) 
     
-    ## 10 min minute interval
+    # 10 min minute interval
     #flight_times = np.array(['06:00:00','06:10:00','06:20:00','06:30:00','06:40:00','06:50:00',
                              #'07:00:00','07:10:00','07:20:00','07:30:00','07:40:00','07:50:00',
                              #'08:00:00','08:10:00','08:20:00','08:30:00','08:40:00','08:50:00',
@@ -150,7 +150,7 @@ def postprocess_direct_flight_noise(city,city_acronym,aircraft_models,altitudes,
             for flight_no in range(len(dep_loc)):  
                 
                 # create file name path
-                filename          = 'Raw_Data_' + aircraft + '/' + aircraft + '_' + altitude + 'ft_mission_' + city_acronym + '_' +  dep_loc[flight_no] + '_to_' + des_loc[flight_no] 
+                filename          = 'City_Simulations\\San_Francisco\\' + aircraft + '_' + altitude + 'ft_mission_' + city_acronym + '_' +  dep_loc[flight_no] + '_to_' + des_loc[flight_no] 
                 results           = load_results(filename)         
                  
                 # post process noise data  
@@ -228,7 +228,7 @@ def postprocess_direct_flight_noise(city,city_acronym,aircraft_models,altitudes,
             if frequency == '0':
                 frequency = '60' 
             
-            processed_results_filename        = 'Raw_Data_' + aircraft + '/'+ aircraft + '_' + altitude + 'ft_' + city_acronym + '_' + frequency +  'min_All' 
+            processed_results_filename        = aircraft + '_' + altitude + 'ft_' + city_acronym + '_' + frequency +  'min_All' 
             save_results(Results,processed_results_filename) 
     
     return  
@@ -276,15 +276,15 @@ def community_noise_map(total_noise_file,car_noise_file,train_noise_file, aircra
     aircraft_noise_raw_data       = imread(aircraft_noise_file )
     
     # import test samples of colors 
-    blue            = imread('../Maps_and_Scales/Color_Scales/Color_Blue.png' )    #  > 90
-    magenta         = imread('../Maps_and_Scales/Color_Scales/Color_Magenta.png' ) #  80 - 89.0
-    purple          = imread('../Maps_and_Scales/Color_Scales/Color_Purple.png' )  #  70 - 79.9
-    pink            = imread('../Maps_and_Scales/Color_Scales/Color_Pink.png' )    #  60 - 69.9 
-    red             = imread('../Maps_and_Scales/Color_Scales/Color_Red.png' )     #  55 - 59.9
-    orange          = imread('../Maps_and_Scales/Color_Scales/Color_Orange.png')   #  50 - 54.9
-    yellow_scale    = imread('../Maps_and_Scales/Color_Scales/Color_Yellow.png')   #  45 - 49.9
-    grey_background = imread('../Maps_and_Scales/Color_Scales/Color_Gray.png' )    # background
-    black_sea       = imread('../Maps_and_Scales/Color_Scales/Color_Black.png' )   # sea  
+    blue            = imread('Maps_and_Scales\\Color_Scales\\Color_Blue.png' )    #  > 90
+    magenta         = imread('Maps_and_Scales\\Color_Scales\\Color_Magenta.png' ) #  80 - 89.0
+    purple          = imread('Maps_and_Scales\\Color_Scales\\Color_Purple.png' )  #  70 - 79.9
+    pink            = imread('Maps_and_Scales\\Color_Scales\\Color_Pink.png' )    #  60 - 69.9 
+    red             = imread('Maps_and_Scales\\Color_Scales\\Color_Red.png' )     #  55 - 59.9
+    orange          = imread('Maps_and_Scales\\Color_Scales\\Color_Orange.png')   #  50 - 54.9
+    yellow_scale    = imread('Maps_and_Scales\\Color_Scales\\Color_Yellow.png')   #  45 - 49.9
+    grey_background = imread('Maps_and_Scales\\Color_Scales\\Color_Gray.png' )    # background
+    black_sea       = imread('Maps_and_Scales\\Color_Scales\\Color_Black.png' )   # sea  
     
     # associate color with scale 
     color_scales        = np.zeros((9,4))

@@ -82,8 +82,8 @@ def main():
     microphone_terrain_data =  generate_terrain_elevated_microphone_points(topography_file   = topography_file,
                                                            ground_microphone_x_resolution    = 225,  
                                                            ground_microphone_y_resolution    = 390, 
-                                                           ground_microphone_x_stencil       = 5,    
-                                                           ground_microphone_y_stencil       = 5)     
+                                                           ground_microphone_x_stencil       = 2,    
+                                                           ground_microphone_y_stencil       = 2)     
     
    
     airport_geospacial_data            =  compute_point_to_point_geospacial_data(topography_file  = topography_file,

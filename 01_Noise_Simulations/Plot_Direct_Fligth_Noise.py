@@ -35,10 +35,10 @@ def main():
     file_type                   = '.pdf'
      
     # tag for city  
-    city                        = 'LA' 
-    aircraft_models             = ['HC','SR','TR'] 
-    altitudes                   = ['1000','2000']
-    flight_frequency            = '15' 
+    city                        = 'SF' 
+    aircraft_models             = ['HC'] 
+    altitudes                   = ['1000']
+    flight_frequency            = '60' 
     
     plot_direct_flight_noise_LAmax(city,aircraft_models,altitudes,
                               flight_frequency, use_lat_long,save_figure,file_type,plot_parameters)  
@@ -64,7 +64,7 @@ def plot_direct_flight_noise_LAmax(city,aircraft_models,altitudes,
             altitude =  altitudes[alt_i]
             
             # load data  
-            processed_results_filename = 'Raw_Data_' + aircraft + '/'+ aircraft + '_' + altitude + 'ft_' + city + '_' + flight_frequency +  'min_All'   
+            processed_results_filename = aircraft + '_' + altitude + 'ft_' + city + '_' + flight_frequency +  'min_All'   
             Results = load_results(processed_results_filename) 
 
             elevation       = Results.elevation/Units.ft      
@@ -125,7 +125,7 @@ def plot_direct_flight_noise_LAeqT(city,aircraft_models,altitudes,
             altitude =  altitudes[alt_i]
             
             # load data  
-            processed_results_filename = 'Raw_Data_' + aircraft + '/'+ aircraft + '_' + altitude + 'ft_' + city + '_' + flight_frequency +  'min_All'   
+            processed_results_filename = aircraft + '_' + altitude + 'ft_' + city + '_' + flight_frequency +  'min_All'   
             Results = load_results(processed_results_filename)
 
             elevation       = Results.elevation/Units.ft      
