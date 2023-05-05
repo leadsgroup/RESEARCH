@@ -57,21 +57,21 @@ def main():
 
     # tag for city 
     city                       = 'SF'
-    topography_file            = # CHANGE TO FILE PATH OF MAP e.g '../../Maps_and_Scales/Los_Angeles/LA_Metropolitan_Area_5.txt'
+    topography_file            = '../../Maps_and_Scales/San_Francisco/SF_Metropolitan_Area_1.txt'
     
 
     ''' Provided below is the information for 9 direct routes between two airports'''
     # departure airport location  
-    departure_location         = # CREATE LIST OF CODES FOR DEPARTURE AIRPORTS. e.g. for Los Angeles  # ['LAX','SNA','BUR','LAX']  
+    departure_location         = ['SQL']  
     
     # coordinates for departure airport 
-    departure_coord            =  # CREATE LIST OF COORDIATES FOR DEPARTURE AIRPORTS. e.g. for Los Angeles   # np.array([[33.9348,-118.39678], [33.81347,-118.15542], [34.1843,-118.36587], [33.9348,-118.39678]])
+    departure_coord            = np.array([[37.51406,-122.251304]])
     
     # destination airport location
-    destination_location       = # CREATE LIST OF CODES FOR DESTINATION AIRPORTS. e.g. for Los Angeles   ['SBD','ONT','ONT','BUR']
+    destination_location       = ['OAK']
     
     # coordinates for destination airport 
-    destination_coord          =  # CREATE LIST OF COORDIATES FOR DESTINATION AIRPORTS. e.g. for Los Angeles   # np.array([[34.0758,-117.2512], [34.04920,-117.59908],  [34.04920,-117.59908], [34.1843,-118.36587]])
+    destination_coord          = np.array([[37.7125,-122.2197]])
     
     
     ''' Change the flight number i.e. "flight_no" below to simulate one of the 9 routes '''
@@ -80,8 +80,8 @@ def main():
     microphone_terrain_data =  generate_terrain_elevated_microphone_points(topography_file   = topography_file,
                                                            ground_microphone_x_resolution    = 225,  
                                                            ground_microphone_y_resolution    = 390, 
-                                                           ground_microphone_x_stencil       = 5,   
-                                                           ground_microphone_y_stencil       = 5)    
+                                                           ground_microphone_x_stencil       = 2,   
+                                                           ground_microphone_y_stencil       = 2)    
     
    
     airport_geospacial_data            =  compute_point_to_point_geospacial_data(topography_file  = topography_file,
