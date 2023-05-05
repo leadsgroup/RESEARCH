@@ -9,10 +9,10 @@ assert MARC.__version__=='1.0.0', 'These tutorials only work with the MARC 1.0.0
 from MARC.Core import Units, Data
 import numpy as np
 import matplotlib.pyplot as plt
-import Vehicles
-import Analyses
-import Missions
-import Procedure
+import Mission_Opt_Vehicle
+import Mission_Opt_Analyses
+import Mission_Opt_Missions
+import Mission_Opt_Procedure
 import Plot_Mission
 from MARC.Optimization import Nexus 
 import MARC.Optimization.Package_Setups.scipy_setup as scipy_setup 
@@ -82,22 +82,22 @@ def setup():
     # -------------------------------------------------------------------
     #  Vehicles
     # -------------------------------------------------------------------
-    nexus.vehicle_configurations = Vehicles.setup()
+    nexus.vehicle_configurations = Mission_Opt_Vehicle.setup()
     
     # -------------------------------------------------------------------
     #  Analyses
     # -------------------------------------------------------------------
-    nexus.analyses = Analyses.setup(nexus.vehicle_configurations)
+    nexus.analyses = Mission_Opt_Analyses.setup(nexus.vehicle_configurations)
     
     # -------------------------------------------------------------------
     #  Missions
     # -------------------------------------------------------------------
-    nexus.missions = Missions.setup(nexus.analyses)
+    nexus.missions = Mission_Opt_Missions.setup(nexus.analyses)
     
     # -------------------------------------------------------------------
     #  Procedure
     # -------------------------------------------------------------------    
-    nexus.procedure =  Procedure.setup()
+    nexus.procedure =  Mission_Opt_Procedure.setup()
     
     # -------------------------------------------------------------------
     #  Summary
