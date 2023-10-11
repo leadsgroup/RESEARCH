@@ -779,167 +779,167 @@ def mission_setup(analyses,vehicle):
     mission.append_segment(segment)  
     
      
-    ## ------------------------------------------------------------------
-    ##   Departure End of Runway Segment Flight 1 : 
-    ## ------------------------------------------------------------------ 
-    #segment = Segments.Climb.Linear_Speed_Constant_Rate(base_segment) 
-    #segment.tag = 'DER'       
-    #segment.analyses.extend( analyses.base ) 
-    #segment.battery_energy                                   = vehicle.networks.battery_electric_rotor.battery.pack.max_energy  
-    #segment.state.unknowns.throttle                          = 1.0 * ones_row(1) 
-    #segment.altitude_start                                   = 0.0 * Units.feet
-    #segment.altitude_end                                     = 50.0 * Units.feet
-    #segment.air_speed_start                                  = Vstall  
-    #segment.air_speed_end                                    = 45      
-    #segment = vehicle.networks.battery_electric_rotor.add_unknowns_and_residuals_to_segment(segment)   
-    #mission.append_segment(segment)
+    # ------------------------------------------------------------------
+    #   Departure End of Runway Segment Flight 1 : 
+    # ------------------------------------------------------------------ 
+    segment = Segments.Climb.Linear_Speed_Constant_Rate(base_segment) 
+    segment.tag = 'DER'       
+    segment.analyses.extend( analyses.base ) 
+    segment.battery_energy                                   = vehicle.networks.battery_electric_rotor.battery.pack.max_energy  
+    segment.state.unknowns.throttle                          = 1.0 * ones_row(1) 
+    segment.altitude_start                                   = 0.0 * Units.feet
+    segment.altitude_end                                     = 50.0 * Units.feet
+    segment.air_speed_start                                  = Vstall  
+    segment.air_speed_end                                    = 45      
+    segment = vehicle.networks.battery_electric_rotor.add_unknowns_and_residuals_to_segment(segment)   
+    mission.append_segment(segment)
     
-    ## ------------------------------------------------------------------
-    ##   Initial Climb Area Segment Flight 1  
-    ## ------------------------------------------------------------------ 
-    #segment = Segments.Climb.Linear_Speed_Constant_Rate(base_segment) 
-    #segment.tag = 'ICA' 
-    #segment.analyses.extend( analyses.base )  
-    #segment.state.unknowns.throttle                          = 0.85  * ones_row(1)  
-    #segment.altitude_start                                   = 50.0 * Units.feet
-    #segment.altitude_end                                     = 500.0 * Units.feet
-    #segment.air_speed_start                                  = 45  * Units['m/s']   
-    #segment.air_speed_end                                    = 50 * Units['m/s']   
-    #segment.climb_rate                                       = 600 * Units['ft/min']   
-    #segment = vehicle.networks.battery_electric_rotor.add_unknowns_and_residuals_to_segment(segment)   
-    #mission.append_segment(segment) 
+    # ------------------------------------------------------------------
+    #   Initial Climb Area Segment Flight 1  
+    # ------------------------------------------------------------------ 
+    segment = Segments.Climb.Linear_Speed_Constant_Rate(base_segment) 
+    segment.tag = 'ICA' 
+    segment.analyses.extend( analyses.base )  
+    segment.state.unknowns.throttle                          = 0.85  * ones_row(1)  
+    segment.altitude_start                                   = 50.0 * Units.feet
+    segment.altitude_end                                     = 500.0 * Units.feet
+    segment.air_speed_start                                  = 45  * Units['m/s']   
+    segment.air_speed_end                                    = 50 * Units['m/s']   
+    segment.climb_rate                                       = 600 * Units['ft/min']   
+    segment = vehicle.networks.battery_electric_rotor.add_unknowns_and_residuals_to_segment(segment)   
+    mission.append_segment(segment) 
              
-    ## ------------------------------------------------------------------
-    ##   Climb Segment Flight 1 
-    ## ------------------------------------------------------------------ 
-    #segment = Segments.Climb.Constant_Speed_Constant_Rate(base_segment) 
-    #segment.tag = 'Climb'        
-    #segment.analyses.extend( analyses.base )     
-    #segment.state.unknowns.throttle                          = 0.85 * ones_row(1)
-    #segment.state.unknowns.propeller_power_coefficient       = 0.3  * ones_row(1)   
-    #segment.altitude_start                                   = 500.0 * Units.feet
-    #segment.altitude_end                                     = 2500 * Units.feet
-    #segment.air_speed                                        = 120 * Units['mph']
-    #segment.climb_rate                                       = 500* Units['ft/min']  
-    #segment = vehicle.networks.battery_electric_rotor.add_unknowns_and_residuals_to_segment(segment)   
-    #mission.append_segment(segment)
+    # ------------------------------------------------------------------
+    #   Climb Segment Flight 1 
+    # ------------------------------------------------------------------ 
+    segment = Segments.Climb.Constant_Speed_Constant_Rate(base_segment) 
+    segment.tag = 'Climb'        
+    segment.analyses.extend( analyses.base )     
+    segment.state.unknowns.throttle                          = 0.85 * ones_row(1)
+    segment.state.unknowns.propeller_power_coefficient       = 0.3  * ones_row(1)   
+    segment.altitude_start                                   = 500.0 * Units.feet
+    segment.altitude_end                                     = 2500 * Units.feet
+    segment.air_speed                                        = 120 * Units['mph']
+    segment.climb_rate                                       = 500* Units['ft/min']  
+    segment = vehicle.networks.battery_electric_rotor.add_unknowns_and_residuals_to_segment(segment)   
+    mission.append_segment(segment)
     
-    ## ------------------------------------------------------------------
-    ##   Cruise Segment Flight 1 
-    ## ------------------------------------------------------------------ 
-    #segment = Segments.Cruise.Constant_Speed_Constant_Altitude(base_segment) 
-    #segment.tag = 'Cruise'  
-    #segment.analyses.extend(analyses.base) 
-    #segment.air_speed                                        = 145* Units['mph']
-    #segment.distance                                         = 60 * Units.miles
-    #segment.state.unknowns.throttle                          = 0.6 * ones_row(1)    
-    #segment = vehicle.networks.battery_electric_rotor.add_unknowns_and_residuals_to_segment(segment,initial_power_coefficient= 0.12)   
-    #mission.append_segment(segment)     
+    # ------------------------------------------------------------------
+    #   Cruise Segment Flight 1 
+    # ------------------------------------------------------------------ 
+    segment = Segments.Cruise.Constant_Speed_Constant_Altitude(base_segment) 
+    segment.tag = 'Cruise'  
+    segment.analyses.extend(analyses.base) 
+    segment.air_speed                                        = 145* Units['mph']
+    segment.distance                                         = 60 * Units.miles
+    segment.state.unknowns.throttle                          = 0.6 * ones_row(1)    
+    segment = vehicle.networks.battery_electric_rotor.add_unknowns_and_residuals_to_segment(segment,initial_power_coefficient= 0.12)   
+    mission.append_segment(segment)     
     
-    ## ------------------------------------------------------------------
-    ##   Descent Segment Flight 1   
-    ## ------------------------------------------------------------------ 
-    #segment = Segments.Descent.Constant_Speed_Constant_Rate(base_segment) 
-    #segment.tag = 'Descent'
-    #segment.analyses.extend( analyses.base )    
-    #segment.altitude_end                                     = 1000 * Units.feet 
-    #segment.air_speed                                        = 110 * Units['mph']
-    #segment.descent_rate                                     = 300 * Units['ft/min'] 
-    #segment.state.unknowns.throttle                          = 0.5  * ones_row(1)   
-    #segment = vehicle.networks.battery_electric_rotor.add_unknowns_and_residuals_to_segment(segment,initial_power_coefficient=0.3)  
-    #mission.append_segment(segment)  
+    # ------------------------------------------------------------------
+    #   Descent Segment Flight 1   
+    # ------------------------------------------------------------------ 
+    segment = Segments.Descent.Constant_Speed_Constant_Rate(base_segment) 
+    segment.tag = 'Descent'
+    segment.analyses.extend( analyses.base )    
+    segment.altitude_end                                     = 1000 * Units.feet 
+    segment.air_speed                                        = 110 * Units['mph']
+    segment.descent_rate                                     = 300 * Units['ft/min'] 
+    segment.state.unknowns.throttle                          = 0.5  * ones_row(1)   
+    segment = vehicle.networks.battery_electric_rotor.add_unknowns_and_residuals_to_segment(segment,initial_power_coefficient=0.3)  
+    mission.append_segment(segment)  
 
-    ## ------------------------------------------------------------------
-    ##  Downleg_Altitude Segment Flight 1 
-    ## ------------------------------------------------------------------ 
-    #segment = Segments.Cruise.Constant_Acceleration_Constant_Altitude(base_segment) 
-    #segment.tag = 'Downleg'
-    #segment.analyses.extend(analyses.base) 
-    #segment.air_speed_start                                  = 110 * Units['mph'] * Units['m/s']
-    #segment.air_speed_end                                    = 45.0 * Units['m/s']            
-    #segment.distance                                         = 6000 * Units.feet
-    #segment.acceleration                                     = -0.05307 * Units['m/s/s']  
-    #segment.air_speed                                        = 49.174
-    #segment.descent_rate                                     = 300 * Units['ft/min']
-    #segment.state.unknowns.throttle                          = 0.5   * ones_row(1)        
-    #segment = vehicle.networks.battery_electric_rotor.add_unknowns_and_residuals_to_segment(segment,initial_power_coefficient=0.3)      
-    #mission.append_segment(segment)     
+    # ------------------------------------------------------------------
+    #  Downleg_Altitude Segment Flight 1 
+    # ------------------------------------------------------------------ 
+    segment = Segments.Cruise.Constant_Acceleration_Constant_Altitude(base_segment) 
+    segment.tag = 'Downleg'
+    segment.analyses.extend(analyses.base) 
+    segment.air_speed_start                                  = 110 * Units['mph'] * Units['m/s']
+    segment.air_speed_end                                    = 45.0 * Units['m/s']            
+    segment.distance                                         = 6000 * Units.feet
+    segment.acceleration                                     = -0.05307 * Units['m/s/s']  
+    segment.air_speed                                        = 49.174
+    segment.descent_rate                                     = 300 * Units['ft/min']
+    segment.state.unknowns.throttle                          = 0.5   * ones_row(1)        
+    segment = vehicle.networks.battery_electric_rotor.add_unknowns_and_residuals_to_segment(segment,initial_power_coefficient=0.3)      
+    mission.append_segment(segment)     
     
-    ## ------------------------------------------------------------------
-    ##  Reserve Climb 
-    ## ------------------------------------------------------------------ 
-    #segment = Segments.Climb.Constant_Speed_Constant_Rate(base_segment) 
-    #segment.tag = 'Reserve_Climb'        
-    #segment.analyses.extend( analyses.base )     
-    #segment.state.unknowns.throttle                          = 0.85 * ones_row(1) 
-    #segment.altitude_end                                     = 1500 * Units.feet
-    #segment.air_speed                                        = 120 * Units['mph']
-    #segment.climb_rate                                       = 500* Units['ft/min']  
-    #segment = vehicle.networks.battery_electric_rotor.add_unknowns_and_residuals_to_segment(segment,initial_power_coefficient=0.3 )  
-    #mission.append_segment(segment)
+    # ------------------------------------------------------------------
+    #  Reserve Climb 
+    # ------------------------------------------------------------------ 
+    segment = Segments.Climb.Constant_Speed_Constant_Rate(base_segment) 
+    segment.tag = 'Reserve_Climb'        
+    segment.analyses.extend( analyses.base )     
+    segment.state.unknowns.throttle                          = 0.85 * ones_row(1) 
+    segment.altitude_end                                     = 1500 * Units.feet
+    segment.air_speed                                        = 120 * Units['mph']
+    segment.climb_rate                                       = 500* Units['ft/min']  
+    segment = vehicle.networks.battery_electric_rotor.add_unknowns_and_residuals_to_segment(segment,initial_power_coefficient=0.3 )  
+    mission.append_segment(segment)
     
-    ## ------------------------------------------------------------------
-    ##  Researve Cruise Segment 
-    ## ------------------------------------------------------------------ 
-    #segment = Segments.Cruise.Constant_Speed_Constant_Altitude(base_segment) 
-    #segment.tag = 'Reserve_Cruise'  
-    #segment.analyses.extend(analyses.base) 
-    #segment.air_speed                                        = 145* Units['mph']
-    #segment.distance                                         = 60 * Units.miles * 0.1
-    #segment.state.unknowns.throttle                          = 0.6 * ones_row(1)    
-    #segment.state.unknowns.propeller_power_coefficient       = 0.4 * ones_row(1)   
-    #segment = vehicle.networks.battery_electric_rotor.add_unknowns_and_residuals_to_segment(segment,initial_power_coefficient=0.4 ) 
-    #mission.append_segment(segment)     
+    # ------------------------------------------------------------------
+    #  Researve Cruise Segment 
+    # ------------------------------------------------------------------ 
+    segment = Segments.Cruise.Constant_Speed_Constant_Altitude(base_segment) 
+    segment.tag = 'Reserve_Cruise'  
+    segment.analyses.extend(analyses.base) 
+    segment.air_speed                                        = 145* Units['mph']
+    segment.distance                                         = 60 * Units.miles * 0.1
+    segment.state.unknowns.throttle                          = 0.6 * ones_row(1)    
+    segment.state.unknowns.propeller_power_coefficient       = 0.4 * ones_row(1)   
+    segment = vehicle.networks.battery_electric_rotor.add_unknowns_and_residuals_to_segment(segment,initial_power_coefficient=0.4 ) 
+    mission.append_segment(segment)     
     
-    ## ------------------------------------------------------------------
-    ##  Researve Descent
-    ## ------------------------------------------------------------------ 
-    #segment = Segments.Descent.Constant_Speed_Constant_Rate(base_segment) 
-    #segment.tag = 'Reserve_Descent'
-    #segment.analyses.extend( analyses.base )    
-    #segment.altitude_end                                     = 1000 * Units.feet 
-    #segment.air_speed                                        = 110 * Units['mph']
-    #segment.descent_rate                                     = 300 * Units['ft/min'] 
-    #segment.state.unknowns.throttle                          = 0.5  * ones_row(1)  
-    #segment.state.unknowns.propeller_power_coefficient       = 0.3     * ones_row(1)   
-    #segment = vehicle.networks.battery_electric_rotor.add_unknowns_and_residuals_to_segment(segment,initial_power_coefficient=0.3) 
-    #mission.append_segment(segment)  
+    # ------------------------------------------------------------------
+    #  Researve Descent
+    # ------------------------------------------------------------------ 
+    segment = Segments.Descent.Constant_Speed_Constant_Rate(base_segment) 
+    segment.tag = 'Reserve_Descent'
+    segment.analyses.extend( analyses.base )    
+    segment.altitude_end                                     = 1000 * Units.feet 
+    segment.air_speed                                        = 110 * Units['mph']
+    segment.descent_rate                                     = 300 * Units['ft/min'] 
+    segment.state.unknowns.throttle                          = 0.5  * ones_row(1)  
+    segment.state.unknowns.propeller_power_coefficient       = 0.3     * ones_row(1)   
+    segment = vehicle.networks.battery_electric_rotor.add_unknowns_and_residuals_to_segment(segment,initial_power_coefficient=0.3) 
+    mission.append_segment(segment)  
 
     
-    ## ------------------------------------------------------------------
-    ##  Baseleg Segment Flight 1  
-    ## ------------------------------------------------------------------ 
-    #segment = Segments.Climb.Linear_Speed_Constant_Rate(base_segment)
-    #segment.tag = 'Baseleg'
-    #segment.analyses.extend( analyses.base)  
-    #segment.state.unknowns.throttle                          = 0.8 * ones_row(1) 
-    #segment.altitude_start                                   = 1000 * Units.feet
-    #segment.altitude_end                                     = 500.0 * Units.feet
-    #segment.air_speed_start                                  = 45 
-    #segment.air_speed_end                                    = 40    
-    #segment.climb_rate                                       = -350 * Units['ft/min']
-    #segment = vehicle.networks.battery_electric_rotor.add_unknowns_and_residuals_to_segment(segment,initial_power_coefficient=0.3) 
-    #mission.append_segment(segment) 
+    # ------------------------------------------------------------------
+    #  Baseleg Segment Flight 1  
+    # ------------------------------------------------------------------ 
+    segment = Segments.Climb.Linear_Speed_Constant_Rate(base_segment)
+    segment.tag = 'Baseleg'
+    segment.analyses.extend( analyses.base)  
+    segment.state.unknowns.throttle                          = 0.8 * ones_row(1) 
+    segment.altitude_start                                   = 1000 * Units.feet
+    segment.altitude_end                                     = 500.0 * Units.feet
+    segment.air_speed_start                                  = 45 
+    segment.air_speed_end                                    = 40    
+    segment.climb_rate                                       = -350 * Units['ft/min']
+    segment = vehicle.networks.battery_electric_rotor.add_unknowns_and_residuals_to_segment(segment,initial_power_coefficient=0.3) 
+    mission.append_segment(segment) 
 
-    ## ------------------------------------------------------------------
-    ##  Final Approach Segment Flight 1  
-    ## ------------------------------------------------------------------ 
-    #segment = Segments.Climb.Linear_Speed_Constant_Rate(base_segment)
-    #segment_name = 'Final_Approach'
-    #segment.tag = segment_name          
-    #segment.analyses.extend( analyses.landing)     
-    #segment.state.unknowns.throttle                          = 0.8 * ones_row(1) 
-    #segment.altitude_start                                   = 500.0 * Units.feet
-    #segment.altitude_end                                     = 00.0 * Units.feet
-    #segment.air_speed_start                                  = 40 
-    #segment.air_speed_end                                    = 35   
-    #segment.climb_rate                                       = -300 * Units['ft/min']       
-    #segment = vehicle.networks.battery_electric_rotor.add_unknowns_and_residuals_to_segment(segment,initial_power_coefficient=0.3)  
-    #mission.append_segment(segment)  
+    # ------------------------------------------------------------------
+    #  Final Approach Segment Flight 1  
+    # ------------------------------------------------------------------ 
+    segment = Segments.Climb.Linear_Speed_Constant_Rate(base_segment)
+    segment_name = 'Final_Approach'
+    segment.tag = segment_name          
+    segment.analyses.extend( analyses.landing)     
+    segment.state.unknowns.throttle                          = 0.8 * ones_row(1) 
+    segment.altitude_start                                   = 500.0 * Units.feet
+    segment.altitude_end                                     = 00.0 * Units.feet
+    segment.air_speed_start                                  = 40 
+    segment.air_speed_end                                    = 35   
+    segment.climb_rate                                       = -300 * Units['ft/min']       
+    segment = vehicle.networks.battery_electric_rotor.add_unknowns_and_residuals_to_segment(segment,initial_power_coefficient=0.3)  
+    mission.append_segment(segment)  
  
-    ## ------------------------------------------------------------------
-    ##   Mission definition complete    
-    ## ------------------------------------------------------------------ 
+    # ------------------------------------------------------------------
+    #   Mission definition complete    
+    # ------------------------------------------------------------------ 
     
     return mission
 
