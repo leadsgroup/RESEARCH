@@ -13,9 +13,7 @@ from RCAIDE.Methods.Power.Battery.Sizing                                      im
 from RCAIDE.Methods.Geometry.Two_Dimensional.Planform                         import wing_segmented_planform
 from RCAIDE.Visualization                                                     import *     
 from RCAIDE.Methods.Weights.Buildups.eVTOL                                    import compute_weight 
-from RCAIDE.Methods.Weights.Buildups.eVTOL.converge_evtol_weight              import converge_evtol_weight 
-from RCAIDE.Methods.Stability.Center_of_Gravity  import  compute_vehicle_center_of_gravity
-from RCAIDE.Methods.Stability.Moment_of_Intertia import  compute_vehicle_moment_of_inertia
+from RCAIDE.Methods.Weights.Buildups.eVTOL.converge_evtol_weight              import converge_evtol_weight  
 
 # python imports 
 import numpy as np 
@@ -533,9 +531,9 @@ def vehicle_setup():
     bat.pack.electrical_configuration.series               = 140   
     bat.pack.electrical_configuration.parallel             = 100
     initialize_from_circuit_configuration(bat)  
-    bat.module.number_of_modules                    = 14  
+    bat.module.number_of_modules                           = 14  
     bat.module.geometrtic_configuration.total              = bat.pack.electrical_configuration.total
-    bat.module.voltage                              = bat.pack.maximum_voltage/bat.module.number_of_modules # assumes modules are connected in parallel, must be less than max_module_voltage (~50) /safety_factor (~ 1.5)  
+    bat.module.voltage                                     = bat.pack.maximum_voltage/bat.module.number_of_modules # assumes modules are connected in parallel, must be less than max_module_voltage (~50) /safety_factor (~ 1.5)  
     bat.module.geometrtic_configuration.normal_count       = 24
     bat.module.geometrtic_configuration.parallel_count     = 40
     bat.thermal_management_system                          = RCAIDE.Energy.Thermal_Management.Batteries.Atmospheric_Air_Convection_Heat_Exchanger()      
@@ -589,9 +587,7 @@ def vehicle_setup():
     settings = Data()
     converge_evtol_weight(vehicle,settings,contingency_factor = 1.0) 
     breakdown = compute_weight(vehicle,settings,contingency_factor = 1.0 )
-    print(breakdown) 
-    compute_vehicle_center_of_gravity(vehicle)
-    #compute_vehicle_moment_of_inertia(vehicle)
+    print(breakdown)  
         
     
     return vehicle
