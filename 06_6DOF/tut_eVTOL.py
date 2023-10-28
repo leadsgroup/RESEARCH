@@ -796,7 +796,9 @@ def vehicle_setup() :
                                                     rel_path + 'Airfoils' + separator + 'Polars' + separator + 'NACA_4412_polar_Re_7500000.txt' ]
     lift_rotor.append_airfoil(airfoil)               
     lift_rotor.airfoil_polar_stations           = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
-    #lift_rotor                                  = design_lift_rotor(lift_rotor)   
+    #lift_rotor                                  = design_lift_rotor(lift_rotor)  
+
+    lift_rotor.hover.design_power_coefficient   = 0.01 
     
     lift_rotor_origins                     = [[ -0.073, 1.950,  1.2] ,  [  -0.073, -1.950 ,  1.2],
                                               [ 4.440 , 1.950 ,  1.2] ,[ 4.440 , -1.950,  1.2],
@@ -832,7 +834,7 @@ def vehicle_setup() :
     lift_rotor_motor.wing_tag                = 'main_wing'
     lift_rotor_motor.rotor_radius            = lift_rotor.tip_radius
     lift_rotor_motor.design_torque           = 1000 # lift_rotor.hover.design_torque
-    lift_rotor_motor.angular_velocity        = 100 # lift_rotor.hover.design_angular_velocity/lift_rotor_motor.gear_ratio  
+    lift_rotor_motor.angular_velocity        = 100 # lift_rotor.hover.design_angular_velocity/lift_rotor_motor.gear_ratio   
     lift_rotor_motor                         = size_optimal_motor(lift_rotor_motor)
     lift_rotor_motor.mass_properties.mass    = nasa_motor(lift_rotor_motor.design_torque)    
     
