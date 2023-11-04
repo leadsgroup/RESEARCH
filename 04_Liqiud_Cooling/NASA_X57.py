@@ -6,16 +6,17 @@
 # RCAIDE imports 
 import RCAIDE
 from RCAIDE.Core import Units , Data 
-from RCAIDE.Energy.Networks.All_Electric                                      import All_Electric
-from RCAIDE.Methods.Propulsion                                                import design_propeller,  size_optimal_motor 
-from RCAIDE.Methods.Weights.Correlations.Propulsion                           import nasa_motor
-from RCAIDE.Methods.Power.Battery.Sizing                                      import initialize_from_circuit_configuration
-from RCAIDE.Methods.Geometry.Two_Dimensional.Planform                         import wing_segmented_planform
-from RCAIDE.Visualization                                                     import *     
-from RCAIDE.Methods.Thermal_Management.Batteries.Heat_Removal_Systems         import design_conjugate_cooling_heat_removal_system
-from RCAIDE.Methods.Weights.Buildups.eVTOL                                    import compute_weight 
-from RCAIDE.Methods.Weights.Buildups.eVTOL.converge_evtol_weight              import converge_evtol_weight 
+from RCAIDE.Energy.Networks.All_Electric                                         import All_Electric
+from RCAIDE.Methods.Propulsion                                                   import design_propeller,  size_optimal_motor 
+from RCAIDE.Methods.Weights.Correlation_Buildups.Propulsion                      import nasa_motor
+from RCAIDE.Methods.Weights.Physics_Based_Buildups.eVTOL                         import compute_weight 
+from RCAIDE.Methods.Weights.Physics_Based_Buildups.eVTOL.converge_evtol_weight   import converge_evtol_weight 
 
+from RCAIDE.Methods.Power.Battery.Sizing                                         import initialize_from_circuit_configuration
+from RCAIDE.Methods.Geometry.Two_Dimensional.Planform                            import wing_segmented_planform
+from RCAIDE.Visualization                                                        import *     
+from RCAIDE.Methods.Thermal_Management.Batteries.Design.Conjugate_Heat_Exchanger import design_atmospheric_air_heat_exchanger
+from RCAIDE.Methods.Thermal_Management.Batteries.Design.Conjugate_Heat_Removal   import design_wavy_channel_heat_removal_system 
 # python imports 
 import numpy as np 
 from copy import deepcopy
@@ -532,22 +533,27 @@ def vehicle_setup():
     bat.pack.electrical_configuration.series               = 140   
     bat.pack.electrical_configuration.parallel             = 100
     initialize_from_circuit_configuration(bat)  
-    bat.module.number_of_modules                    = 14  
+    bat.module.number_of_modules                           = 14  
     bat.module.geometrtic_configuration.total              = bat.pack.electrical_configuration.total
-    bat.module.voltage                              = bat.pack.maximum_voltage/bat.module.number_of_modules # assumes modules are connected in parallel, must be less than max_module_voltage (~50) /safety_factor (~ 1.5)  
+    bat.module.voltage                                     = bat.pack.maximum_voltage/bat.module.number_of_modules # assumes modules are connected in parallel, must be less than max_module_voltage (~50) /safety_factor (~ 1.5)  
     bat.module.geometrtic_configuration.normal_count       = 24
     bat.module.geometrtic_configuration.parallel_count     = 40
-    bus.voltage                                            = bat.pack.maximum_voltage  
-    
-    
-    
-    bus.batteries.append(bat)       
-
+    bus.voltage                                            = bat.pack.maximum_voltage   
     
     # Battery Heat Removal System 
-    bat_hrs                                                = RCAIDE.Energy.Thermal_Management.Batteries.Heat_Removal_Systems.Conjugate_HRS()
-    bat_hrs = design_conjugate_cooling_heat_removal_system(bat_hrs, bat)
-    bus.heat_removal_systems.append(bat_hrs)
+    HRS                                      = RCAIDE.Energy.Thermal_Management.Batteries.Heat_Removal_Systems.Conjugate_Heat_Removal() 
+    HRS.coolant_inlet_temperature            = 278 
+    HRS.design_battery_operating_temperature = 315
+    HRS.design_heat_generated                = 20000  
+    HRS                                      = design_wavy_channel_heat_removal_system(HRS,bat) 
+    bat.heat_removal_system                      = HRS
+    
+    # Battery Heat Exchanger 
+    HEX = RCAIDE.Energy.Thermal_Management.Batteries.Heat_Exchanger_Systems.Conjugate_Heat_Exchanger()
+    HEX = design_atmospheric_air_heat_exchanger(HEX,HRS,bat)
+    bat.heat_exchanger_system = HEX  
+    
+    bus.batteries.append(bat)        
     
     #------------------------------------------------------------------------------------------------------------------------------------           
     # Motors 
