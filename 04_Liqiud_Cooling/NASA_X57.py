@@ -542,14 +542,15 @@ def vehicle_setup():
     
     # Battery Heat Removal System 
     HRS                                      = RCAIDE.Energy.Thermal_Management.Batteries.Heat_Removal_Systems.Conjugate_Heat_Removal() 
-    HRS.coolant_inlet_temperature            = 278 
-    HRS.design_battery_operating_temperature = 315
-    HRS.design_heat_generated                = 20000  
+    HRS.inlet_temperature_of_coolant         = 284 
+    HRS.battery_operating_temperature        = 303
+    HRS.heat_removed                         = 50000  
     HRS                                      = design_wavy_channel_heat_removal_system(HRS,bat) 
-    bat.heat_removal_system                      = HRS
+    bat.heat_removal_system                  = HRS
     
     # Battery Heat Exchanger 
-    HEX = RCAIDE.Energy.Thermal_Management.Batteries.Heat_Exchanger_Systems.Conjugate_Heat_Exchanger()
+    HEX = RCAIDE.Energy.Thermal_Management.Batteries.Heat_Exchanger_Systems.Conjugate_Heat_Exchanger() 
+    HEX.design_altitude =  10000. * Units.feet 
     HEX = design_atmospheric_air_heat_exchanger(HEX,HRS,bat)
     bat.heat_exchanger_system = HEX  
     
@@ -647,7 +648,7 @@ def base_analysis(vehicle):
 
     # ------------------------------------------------------------------
     #  Aerodynamics Analysis
-    aerodynamics = RCAIDE.Analyses.Aerodynamics.Fidelity_Zero() 
+    aerodynamics = RCAIDE.Analyses.Aerodynamics.Subsonic_VLM() 
     aerodynamics.geometry = vehicle 
     analyses.append(aerodynamics)  
  

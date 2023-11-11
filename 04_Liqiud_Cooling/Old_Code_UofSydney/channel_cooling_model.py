@@ -83,7 +83,7 @@ def compute_net_generated_battery_heat_chan( battery, Q_heat_gen,numerics, btms)
         j_coolant = Nu / Re_coolant * np.power(Pr_coolant, -1 / 3)
     else:
         # Colburn factor
-        f_coolant = 1 / (4 * (1.8 * np.log10(Re_coolant / 7.7)) ** 2)
+        x = 1 / (4 * (1.8 * np.log10(Re_coolant / 7.7)) ** 2)
         # use Gnielinski equation to calculate Nu for 0.5 < Pr < 2000, 3000 < Re < 5e6
         Nu = (f_coolant / 2) * (Re_coolant - 1000) * Pr_coolant / (
                 1 + 12.7 * np.power((f_coolant / 2), 0.5) * (np.power(Pr_coolant, 2 / 3) - 1))
