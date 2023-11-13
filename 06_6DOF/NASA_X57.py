@@ -234,6 +234,18 @@ def vehicle_setup():
     wing.symmetric                        = True
     wing.high_lift                        = False 
     wing.dynamic_pressure_ratio           = 0.9 
+<<<<<<< HEAD
+=======
+
+    # control surfaces -------------------------------------------
+    elevator                       = RCAIDE.Components.Wings.Control_Surfaces.Elevator()
+    elevator.tag                   = 'elevator'
+    elevator.span_fraction_start   = 0.09
+    elevator.span_fraction_end     = 0.92
+    elevator.deflection            = 0.0  * Units.deg
+    elevator.chord_fraction        = 0.3
+    wing.append_control_surface(elevator) 
+>>>>>>> 122b0c596dddabd747d33faa1ee8a5205232e021
 
     # control surfaces -------------------------------------------
     elevator                       = RCAIDE.Components.Wings.Control_Surfaces.Elevator()
