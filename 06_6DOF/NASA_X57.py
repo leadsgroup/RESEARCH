@@ -8,12 +8,12 @@ import RCAIDE
 from RCAIDE.Core import Units , Data 
 from RCAIDE.Energy.Networks.All_Electric                                      import All_Electric
 from RCAIDE.Methods.Propulsion                                                import design_propeller,  size_optimal_motor 
-from RCAIDE.Methods.Weights.Correlations.Propulsion                           import nasa_motor
+from RCAIDE.Methods.Weights.Correlation_Buildups.Propulsion                           import nasa_motor
 from RCAIDE.Methods.Power.Battery.Sizing                                      import initialize_from_circuit_configuration
 from RCAIDE.Methods.Geometry.Two_Dimensional.Planform                         import wing_segmented_planform
 from RCAIDE.Visualization                                                     import *     
-from RCAIDE.Methods.Weights.Buildups.eVTOL                                    import compute_weight 
-from RCAIDE.Methods.Weights.Buildups.eVTOL.converge_evtol_weight              import converge_evtol_weight  
+from RCAIDE.Methods.Weights.Physics_Based_Buildups.eVTOL                                    import compute_weight 
+from RCAIDE.Methods.Weights.Physics_Based_Buildups.eVTOL.converge_evtol_weight              import converge_evtol_weight  
 
 # python imports 
 import numpy as np 
@@ -207,6 +207,9 @@ def vehicle_setup():
     vehicle.append_component(wing)
 
 
+<<<<<<< HEAD
+   
+=======
     #------------------------------------------------------------------------------------------------------------------------------------  
     #   Horizontal Tail
     #------------------------------------------------------------------------------------------------------------------------------------    
@@ -230,8 +233,18 @@ def vehicle_setup():
     wing.winglet_fraction                 = 0.0  
     wing.symmetric                        = True
     wing.high_lift                        = False 
-    wing.dynamic_pressure_ratio           = 0.9
+    wing.dynamic_pressure_ratio           = 0.9 
 
+    # control surfaces -------------------------------------------
+    elevator                       = RCAIDE.Components.Wings.Control_Surfaces.Elevator()
+    elevator.tag                   = 'elevator'
+    elevator.span_fraction_start   = 0.09
+    elevator.span_fraction_end     = 0.92
+    elevator.deflection            = 0.0  * Units.deg
+    elevator.chord_fraction        = 0.3
+    wing.append_control_surface(elevator) 
+
+>>>>>>> 122b0c596dddabd747d33faa1ee8a5205232e021
     # add to vehicle
     vehicle.append_component(wing)
 
@@ -641,10 +654,19 @@ def base_analysis(vehicle):
 
     # ------------------------------------------------------------------
     #  Aerodynamics Analysis
-    aerodynamics = RCAIDE.Analyses.Aerodynamics.Fidelity_Zero() 
+    aerodynamics = RCAIDE.Analyses.Aerodynamics.Subsonic_VLM() 
+    aerodynamics.process.compute.lift.inviscid_wings.settings.use_surrogate = False 
     aerodynamics.geometry = vehicle 
     analyses.append(aerodynamics)  
  
+
+    ## ------------------------------------------------------------------
+    ##  Stability Analysis
+    #stability = RCAIDE.Analyses.Stability.Fidelity_Zero()
+    #stability.settings.use_surrogate = False 
+    #stability.geometry = vehicle 
+    #analyses.append(stability)  
+    
     # ------------------------------------------------------------------
     #  Energy
     energy= RCAIDE.Analyses.Energy.Energy()
@@ -682,169 +704,169 @@ def mission_setup(analyses):
     Segments = RCAIDE.Analyses.Mission.Segments  
     base_segment = Segments.Segment() 
     
-    # ------------------------------------------------------------------
-    #   Departure End of Runway Segment Flight 1 : 
-    # ------------------------------------------------------------------ 
-    segment = Segments.Climb.Linear_Speed_Constant_Rate(base_segment) 
-    segment.tag = 'DER'       
-    segment.analyses.extend( analyses.base )
-    segment.initial_battery_state_of_charge                  = 0.89   
-    segment.altitude_start                                   = 0.0 * Units.feet
-    segment.altitude_end                                     = 50.0 * Units.feet
-    segment.air_speed_start                                  = 45  * Units['m/s'] 
-    segment.air_speed_end                                    = 45      
-    segment = analyses.base.energy.networks.all_electric.add_unknowns_and_residuals_to_segment(segment)   
-    mission.append_segment(segment)
+    ## ------------------------------------------------------------------
+    ##   Departure End of Runway Segment Flight 1 : 
+    ## ------------------------------------------------------------------ 
+    #segment = Segments.Climb.Linear_Speed_Constant_Rate(base_segment) 
+    #segment.tag = 'DER'       
+    #segment.analyses.extend( analyses.base )
+    #segment.initial_battery_state_of_charge                  = 0.89   
+    #segment.altitude_start                                   = 0.0 * Units.feet
+    #segment.altitude_end                                     = 50.0 * Units.feet
+    #segment.air_speed_start                                  = 45  * Units['m/s'] 
+    #segment.air_speed_end                                    = 45      
+    #segment = analyses.base.energy.networks.all_electric.add_unknowns_and_residuals_to_segment(segment)   
+    #mission.append_segment(segment)
     
-    # ------------------------------------------------------------------
-    #   Initial Climb Area Segment Flight 1  
-    # ------------------------------------------------------------------ 
-    segment = Segments.Climb.Linear_Speed_Constant_Rate(base_segment) 
-    segment.tag = 'ICA' 
-    segment.analyses.extend( analyses.base )   
-    segment.altitude_start                                   = 50.0 * Units.feet
-    segment.altitude_end                                     = 500.0 * Units.feet
-    segment.air_speed_start                                  = 45  * Units['m/s']   
-    segment.air_speed_end                                    = 50 * Units['m/s']   
-    segment.climb_rate                                       = 600 * Units['ft/min']   
-    segment = analyses.base.energy.networks.all_electric.add_unknowns_and_residuals_to_segment(segment)   
-    mission.append_segment(segment) 
+    ## ------------------------------------------------------------------
+    ##   Initial Climb Area Segment Flight 1  
+    ## ------------------------------------------------------------------ 
+    #segment = Segments.Climb.Linear_Speed_Constant_Rate(base_segment) 
+    #segment.tag = 'ICA' 
+    #segment.analyses.extend( analyses.base )   
+    #segment.altitude_start                                   = 50.0 * Units.feet
+    #segment.altitude_end                                     = 500.0 * Units.feet
+    #segment.air_speed_start                                  = 45  * Units['m/s']   
+    #segment.air_speed_end                                    = 50 * Units['m/s']   
+    #segment.climb_rate                                       = 600 * Units['ft/min']   
+    #segment = analyses.base.energy.networks.all_electric.add_unknowns_and_residuals_to_segment(segment)   
+    #mission.append_segment(segment) 
              
-    # ------------------------------------------------------------------
-    #   Climb Segment Flight 1 
-    # ------------------------------------------------------------------ 
-    segment = Segments.Climb.Constant_Speed_Constant_Rate(base_segment) 
-    segment.tag = 'Climb'        
-    segment.analyses.extend( analyses.base )      
-    segment.altitude_start                                   = 500.0 * Units.feet
-    segment.altitude_end                                     = 2500 * Units.feet
-    segment.air_speed                                        = 120 * Units['mph']
-    segment.climb_rate                                       = 500* Units['ft/min']  
-    segment = analyses.base.energy.networks.all_electric.add_unknowns_and_residuals_to_segment(segment)   
-    mission.append_segment(segment) 
+    ## ------------------------------------------------------------------
+    ##   Climb Segment Flight 1 
+    ## ------------------------------------------------------------------ 
+    #segment = Segments.Climb.Constant_Speed_Constant_Rate(base_segment) 
+    #segment.tag = 'Climb'        
+    #segment.analyses.extend( analyses.base )      
+    #segment.altitude_start                                   = 500.0 * Units.feet
+    #segment.altitude_end                                     = 2500 * Units.feet
+    #segment.air_speed                                        = 120 * Units['mph']
+    #segment.climb_rate                                       = 500* Units['ft/min']  
+    #segment = analyses.base.energy.networks.all_electric.add_unknowns_and_residuals_to_segment(segment)   
+    #mission.append_segment(segment) 
     
-    # ------------------------------------------------------------------
-    #   Climb 1 : constant Speed, constant rate segment 
-    # ------------------------------------------------------------------ 
-    segment = Segments.Climb.Constant_Speed_Constant_Rate(base_segment)
-    segment.tag = "Ascent"
-    segment.analyses.extend( analyses.base )
-    segment.initial_battery_state_of_charge  = 0.89 
-    segment.altitude_start                   = 2500.0  * Units.feet
-    segment.altitude_end                     = 8012    * Units.feet 
-    segment.air_speed                        = 96.4260 * Units['mph'] 
-    segment.climb_rate                       = 700.034 * Units['ft/min']     
-    segment = analyses.base.energy.networks.all_electric.add_unknowns_and_residuals_to_segment(segment)  
-    mission.append_segment(segment)
+    ## ------------------------------------------------------------------
+    ##   Climb 1 : constant Speed, constant rate segment 
+    ## ------------------------------------------------------------------ 
+    #segment = Segments.Climb.Constant_Speed_Constant_Rate(base_segment)
+    #segment.tag = "Ascent"
+    #segment.analyses.extend( analyses.base )
+    #segment.initial_battery_state_of_charge  = 0.89 
+    #segment.altitude_start                   = 2500.0  * Units.feet
+    #segment.altitude_end                     = 8012    * Units.feet 
+    #segment.air_speed                        = 96.4260 * Units['mph'] 
+    #segment.climb_rate                       = 700.034 * Units['ft/min']     
+    #segment = analyses.base.energy.networks.all_electric.add_unknowns_and_residuals_to_segment(segment)  
+    #mission.append_segment(segment)
 
-    # ------------------------------------------------------------------
-    #   Cruise Segment: constant Speed, constant altitude
-    # ------------------------------------------------------------------ 
-    segment = Segments.Cruise.Constant_Speed_Constant_Altitude(base_segment)
-    segment.tag = "Cruise" 
-    segment.analyses.extend(analyses.base) 
-    segment.altitude                  = 8012   * Units.feet
-    segment.air_speed                 = 120.91 * Units['mph'] 
-    segment.distance                  = 50.   * Units.nautical_mile   
-    segment = analyses.base.energy.networks.all_electric.add_unknowns_and_residuals_to_segment(segment)    
-    mission.append_segment(segment)    
+    ## ------------------------------------------------------------------
+    ##   Cruise Segment: constant Speed, constant altitude
+    ## ------------------------------------------------------------------ 
+    #segment = Segments.Cruise.Constant_Speed_Constant_Altitude(base_segment)
+    #segment.tag = "Cruise" 
+    #segment.analyses.extend(analyses.base) 
+    #segment.altitude                  = 8012   * Units.feet
+    #segment.air_speed                 = 120.91 * Units['mph'] 
+    #segment.distance                  = 50.   * Units.nautical_mile   
+    #segment = analyses.base.energy.networks.all_electric.add_unknowns_and_residuals_to_segment(segment)    
+    #mission.append_segment(segment)    
 
 
-    # ------------------------------------------------------------------
-    #   Descent Segment Flight 1   
-    # ------------------------------------------------------------------ 
-    segment = Segments.Climb.Linear_Speed_Constant_Rate(base_segment) 
-    segment.tag = "Decent"  
-    segment.analyses.extend( analyses.base )       
-    segment.altitude_start                                   = 8012 * Units.feet  
-    segment.altitude_end                                     = 1000.0 * Units.feet
-    segment.air_speed_start                                  = 130.* Units['mph']  
-    segment.air_speed_end                                    = 120 * Units['mph']   
-    segment.climb_rate                                       = -200 * Units['ft/min']   
-    segment = analyses.base.energy.networks.all_electric.add_unknowns_and_residuals_to_segment(segment)   
-    mission.append_segment(segment)   
+    ## ------------------------------------------------------------------
+    ##   Descent Segment Flight 1   
+    ## ------------------------------------------------------------------ 
+    #segment = Segments.Climb.Linear_Speed_Constant_Rate(base_segment) 
+    #segment.tag = "Decent"  
+    #segment.analyses.extend( analyses.base )       
+    #segment.altitude_start                                   = 8012 * Units.feet  
+    #segment.altitude_end                                     = 1000.0 * Units.feet
+    #segment.air_speed_start                                  = 130.* Units['mph']  
+    #segment.air_speed_end                                    = 120 * Units['mph']   
+    #segment.climb_rate                                       = -200 * Units['ft/min']   
+    #segment = analyses.base.energy.networks.all_electric.add_unknowns_and_residuals_to_segment(segment)   
+    #mission.append_segment(segment)   
 
-    # ------------------------------------------------------------------
-    #  Downleg_Altitude Segment Flight 1 
-    # ------------------------------------------------------------------ 
-    segment = Segments.Cruise.Constant_Speed_Constant_Altitude(base_segment) 
-    segment.tag = 'Downleg'
-    segment.analyses.extend(analyses.base) 
-    segment.air_speed                                        = 120 * Units['mph']           
-    segment.distance                                         = 6000 * Units.feet
-    segment.acceleration                                     = -0.025  * Units['m/s/s']   
-    segment.descent_rate                                     = 300 * Units['ft/min']      
-    segment = analyses.base.energy.networks.all_electric.add_unknowns_and_residuals_to_segment(segment)      
-    mission.append_segment(segment)     
+    ## ------------------------------------------------------------------
+    ##  Downleg_Altitude Segment Flight 1 
+    ## ------------------------------------------------------------------ 
+    #segment = Segments.Cruise.Constant_Speed_Constant_Altitude(base_segment) 
+    #segment.tag = 'Downleg'
+    #segment.analyses.extend(analyses.base) 
+    #segment.air_speed                                        = 120 * Units['mph']           
+    #segment.distance                                         = 6000 * Units.feet
+    #segment.acceleration                                     = -0.025  * Units['m/s/s']   
+    #segment.descent_rate                                     = 300 * Units['ft/min']      
+    #segment = analyses.base.energy.networks.all_electric.add_unknowns_and_residuals_to_segment(segment)      
+    #mission.append_segment(segment)     
     
-    # ------------------------------------------------------------------
-    #  Reserve Climb 
-    # ------------------------------------------------------------------ 
-    segment = Segments.Climb.Constant_Speed_Constant_Rate(base_segment) 
-    segment.tag = 'Reserve_Climb'        
-    segment.analyses.extend( analyses.base )      
-    segment.altitude_end                                     = 1500 * Units.feet
-    segment.air_speed                                        = 120 * Units['mph']
-    segment.climb_rate                                       = 500* Units['ft/min']  
-    segment = analyses.base.energy.networks.all_electric.add_unknowns_and_residuals_to_segment(segment )  
-    mission.append_segment(segment)
+    ## ------------------------------------------------------------------
+    ##  Reserve Climb 
+    ## ------------------------------------------------------------------ 
+    #segment = Segments.Climb.Constant_Speed_Constant_Rate(base_segment) 
+    #segment.tag = 'Reserve_Climb'        
+    #segment.analyses.extend( analyses.base )      
+    #segment.altitude_end                                     = 1500 * Units.feet
+    #segment.air_speed                                        = 120 * Units['mph']
+    #segment.climb_rate                                       = 500* Units['ft/min']  
+    #segment = analyses.base.energy.networks.all_electric.add_unknowns_and_residuals_to_segment(segment )  
+    #mission.append_segment(segment)
     
-    # ------------------------------------------------------------------
-    #  Researve Cruise Segment 
-    # ------------------------------------------------------------------ 
-    segment = Segments.Cruise.Constant_Speed_Constant_Altitude(base_segment) 
-    segment.tag = 'Reserve_Cruise'  
-    segment.analyses.extend(analyses.base) 
-    segment.air_speed                                        = 145* Units['mph']
-    segment.distance                                         = 60 * Units.miles * 0.1 
-    segment = analyses.base.energy.networks.all_electric.add_unknowns_and_residuals_to_segment(segment) 
-    mission.append_segment(segment)     
+    ## ------------------------------------------------------------------
+    ##  Researve Cruise Segment 
+    ## ------------------------------------------------------------------ 
+    #segment = Segments.Cruise.Constant_Speed_Constant_Altitude(base_segment) 
+    #segment.tag = 'Reserve_Cruise'  
+    #segment.analyses.extend(analyses.base) 
+    #segment.air_speed                                        = 145* Units['mph']
+    #segment.distance                                         = 60 * Units.miles * 0.1 
+    #segment = analyses.base.energy.networks.all_electric.add_unknowns_and_residuals_to_segment(segment) 
+    #mission.append_segment(segment)     
     
-    # ------------------------------------------------------------------
-    #  Researve Descent
-    # ------------------------------------------------------------------ 
-    segment = Segments.Descent.Constant_Speed_Constant_Rate(base_segment) 
-    segment.tag = 'Reserve_Descent'
-    segment.analyses.extend( analyses.base )    
-    segment.altitude_end                                     = 1000 * Units.feet 
-    segment.air_speed                                        = 110 * Units['mph']
-    segment.descent_rate                                     = 300 * Units['ft/min']  
-    segment = analyses.base.energy.networks.all_electric.add_unknowns_and_residuals_to_segment(segment) 
-    mission.append_segment(segment)  
+    ## ------------------------------------------------------------------
+    ##  Researve Descent
+    ## ------------------------------------------------------------------ 
+    #segment = Segments.Descent.Constant_Speed_Constant_Rate(base_segment) 
+    #segment.tag = 'Reserve_Descent'
+    #segment.analyses.extend( analyses.base )    
+    #segment.altitude_end                                     = 1000 * Units.feet 
+    #segment.air_speed                                        = 110 * Units['mph']
+    #segment.descent_rate                                     = 300 * Units['ft/min']  
+    #segment = analyses.base.energy.networks.all_electric.add_unknowns_and_residuals_to_segment(segment) 
+    #mission.append_segment(segment)  
 
     
-    # ------------------------------------------------------------------
-    #  Baseleg Segment Flight 1  
-    # ------------------------------------------------------------------ 
-    segment = Segments.Climb.Linear_Speed_Constant_Rate(base_segment)
-    segment.tag = 'Baseleg'
-    segment.analyses.extend( analyses.base)   
-    segment.altitude_start                                   = 1000 * Units.feet
-    segment.altitude_end                                     = 500.0 * Units.feet
-    segment.air_speed_start                                  = 45 
-    segment.air_speed_end                                    = 40    
-    segment.climb_rate                                       = -350 * Units['ft/min']
-    segment = analyses.base.energy.networks.all_electric.add_unknowns_and_residuals_to_segment(segment) 
-    mission.append_segment(segment) 
+    ## ------------------------------------------------------------------
+    ##  Baseleg Segment Flight 1  
+    ## ------------------------------------------------------------------ 
+    #segment = Segments.Climb.Linear_Speed_Constant_Rate(base_segment)
+    #segment.tag = 'Baseleg'
+    #segment.analyses.extend( analyses.base)   
+    #segment.altitude_start                                   = 1000 * Units.feet
+    #segment.altitude_end                                     = 500.0 * Units.feet
+    #segment.air_speed_start                                  = 45 
+    #segment.air_speed_end                                    = 40    
+    #segment.climb_rate                                       = -350 * Units['ft/min']
+    #segment = analyses.base.energy.networks.all_electric.add_unknowns_and_residuals_to_segment(segment) 
+    #mission.append_segment(segment) 
 
-    # ------------------------------------------------------------------
-    #  Final Approach Segment Flight 1  
-    # ------------------------------------------------------------------ 
-    segment = Segments.Climb.Linear_Speed_Constant_Rate(base_segment)
-    segment_name = 'Final_Approach'
-    segment.tag = segment_name          
-    segment.analyses.extend( analyses.base)      
-    segment.altitude_start                                   = 500.0 * Units.feet
-    segment.altitude_end                                     = 00.0 * Units.feet
-    segment.air_speed_start                                  = 40 
-    segment.air_speed_end                                    = 35   
-    segment.climb_rate                                       = -300 * Units['ft/min']       
-    segment = analyses.base.energy.networks.all_electric.add_unknowns_and_residuals_to_segment(segment)  
-    mission.append_segment(segment)  
+    ## ------------------------------------------------------------------
+    ##  Final Approach Segment Flight 1  
+    ## ------------------------------------------------------------------ 
+    #segment = Segments.Climb.Linear_Speed_Constant_Rate(base_segment)
+    #segment_name = 'Final_Approach'
+    #segment.tag = segment_name          
+    #segment.analyses.extend( analyses.base)      
+    #segment.altitude_start                                   = 500.0 * Units.feet
+    #segment.altitude_end                                     = 00.0 * Units.feet
+    #segment.air_speed_start                                  = 40 
+    #segment.air_speed_end                                    = 35   
+    #segment.climb_rate                                       = -300 * Units['ft/min']       
+    #segment = analyses.base.energy.networks.all_electric.add_unknowns_and_residuals_to_segment(segment)  
+    #mission.append_segment(segment)  
  
-    # ------------------------------------------------------------------
-    #   Mission definition complete    
-    # ------------------------------------------------------------------ 
+    ## ------------------------------------------------------------------
+    ##   Mission definition complete    
+    ## ------------------------------------------------------------------ 
     
     return mission 
  
