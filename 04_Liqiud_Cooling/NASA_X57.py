@@ -553,10 +553,10 @@ def vehicle_setup():
     bat.heat_removal_system                  = HAS
     
     # Battery Heat Exchanger 
-    HEX = RCAIDE.Energy.Thermal_Management.Batteries.Heat_Exchanger_Systems.Cross_Flow_Heat_Exchanger.Cross_Flow_Heat_Exchanger() 
-    HEX.design_altitude    = propeller.cruise.design_altitude 
-    HEX.inlet_temperature_of_cold_fluid = atmo_data.temperature[0,0]   
-    HEX                    = design_cross_flow_heat_exchanger(HEX,HAS,bat)
+    HEX                                      = RCAIDE.Energy.Thermal_Management.Batteries.Heat_Exchanger_Systems.Cross_Flow_Heat_Exchanger.Cross_Flow_Heat_Exchanger() 
+    HEX.design_altitude                      = propeller.cruise.design_altitude 
+    HEX.inlet_temperature_of_cold_fluid      = atmo_data.temperature[0,0]   
+    HEX                                      = design_cross_flow_heat_exchanger(HEX,HAS,bat)
     bat.heat_exchanger_system = HEX  
     
     bus.batteries.append(bat)        
