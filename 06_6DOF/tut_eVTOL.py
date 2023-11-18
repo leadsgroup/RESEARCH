@@ -14,12 +14,12 @@ from RCAIDE.Energy.Networks.All_Electric                                      im
 from RCAIDE.Methods.Performance.estimate_cruise_drag                          import estimate_cruise_drag
 from RCAIDE.Methods.Geometry.Two_Dimensional.Planform                         import segment_properties
 from RCAIDE.Methods.Power.Battery.Sizing                                      import initialize_from_circuit_configuration 
-from RCAIDE.Methods.Weights.Correlations.Propulsion                           import nasa_motor
+from RCAIDE.Methods.Weights.Correlation_Buildups.Propulsion                   import nasa_motor
 from RCAIDE.Methods.Propulsion                                                import size_optimal_motor
 from RCAIDE.Methods.Propulsion                                                import design_propeller ,design_lift_rotor 
-from RCAIDE.Methods.Weights.Buildups.eVTOL                                    import compute_weight 
+from RCAIDE.Methods.Weights.Physics_Based_Buildups.eVTOL                       import compute_weight 
 from RCAIDE.Methods.Geometry.Two_Dimensional.Planform                         import wing_segmented_planform 
-from RCAIDE.Methods.Weights.Buildups.eVTOL.converge_evtol_weight              import converge_evtol_weight  
+from RCAIDE.Methods.Weights.Physics_Based_Buildups.eVTOL.converge_evtol_weight import converge_evtol_weight   
 from RCAIDE.Methods.Performance.estimate_stall_speed                          import estimate_stall_speed 
 from RCAIDE.Visualization                                                     import *       
  
@@ -550,6 +550,8 @@ def vehicle_setup() :
                            [   0.219 ,   4.891 , 0.950] ,[   0.219 , -  4.891 ,0.950],
                            [  4.196 ,   4.891 ,0.950] ,[   4.196, -  4.891 ,0.950]]
     
+
+    
     for ii in range(8):
         rotor_nacelle          = deepcopy(nacelle)
         rotor_nacelle.tag      = 'rotor_nacelle_' + str(ii+1) 
@@ -654,8 +656,9 @@ def vehicle_setup() :
     #------------------------------------------------------------------------------------------------------------------------------------  
     bus                              = RCAIDE.Energy.Distributors.Bus_Power_Control_Unit()
     bus.fixed_voltage                = False 
-    bus.active_propulsor_groups      = ['forward_propulsor' ,'lift_propulsor']
-    
+    bus.active_propulsor_groups      = ['forward_propulsor' ,'lift_propulsor_group1', 'lift_propulsor_group2', 
+                             'lift_propulsor_group3', 'lift_propulsor_group4']    
+
     
     #------------------------------------------------------------------------------------------------------------------------------------  
     # Battery   
@@ -765,9 +768,21 @@ def vehicle_setup() :
     lift_rotor_esc                   = RCAIDE.Energy.Distributors.Electronic_Speed_Controller()
     lift_rotor_esc.propulsor_group   = 'lift_propulsor'
     lift_rotor_esc.efficiency        = 0.95
+    propulsor_group_names = ['lift_propulsor_group1', 'lift_propulsor_group2', 
+                             'lift_propulsor_group3', 'lift_propulsor_group4']    
     for i in range(8):
         lift_rotor_ESC          = deepcopy(lift_rotor_esc)
-        lift_rotor_ESC.tag      = 'lift_rotor_esc' + str(i + 1)  
+        lift_rotor_ESC.tag      = 'lift_rotor_esc' + str(i + 1) 
+        if i in [0,3]:
+            lift_rotor_ESC.propulsor_group = propulsor_group_names[0]
+        elif i in [1,2]:
+            lift_rotor_ESC.propulsor_group = propulsor_group_names[1]
+        elif i in [6,7]:
+            lift_rotor_ESC.propulsor_group = propulsor_group_names[2]
+        elif i in [4,5]:
+            lift_rotor_ESC.propulsor_group = propulsor_group_names[3]
+            
+            
         bus.electronic_speed_controllers.append(lift_rotor_ESC) 
     
     #------------------------------------------------------------------------------------------------------------------------------------  
@@ -807,7 +822,11 @@ def vehicle_setup() :
     
     # Appending rotors with different origins
     rotations = [-1,1,-1,1,-1,1,-1,1] 
-    angle_offsets        = np.random.rand(8)*(np.pi)    
+    angle_offsets        = np.random.rand(8)*(np.pi) 
+
+    propulsor_group_names = ['lift_propulsor_group1', 'lift_propulsor_group2', 
+                             'lift_propulsor_group3', 'lift_propulsor_group4']
+    
     for ii in range(8):
         lr                        = deepcopy(lift_rotor) 
         lr.propulsor_group        = 'lift_propulsor'  # needs to change based on group       
@@ -815,8 +834,19 @@ def vehicle_setup() :
         lr.rotation               = rotations[ii]
         lr.origin                 = [lift_rotor_origins[ii]]
         lr.phase_offset_angle     = angle_offsets[ii]
-        if ii == 2:
-            lr.active = False
+        #if ii == 2:
+            #lr.active = False
+            
+        # pairing propulsor groups based on lift rotor origins
+        if ii in [0, 3]:  # First and second rotors
+            lr.propulsor_group = propulsor_group_names[0]
+        elif ii in [1,2]:
+            lr.propulsor_group = propulsor_group_names[1]
+        elif ii in [6,7]:
+            lr.propulsor_group = propulsor_group_names[2]
+        elif ii in [4,5]:
+            lr.propulsor_group = propulsor_group_names[3]
+            
         bus.rotors.append(lr)    
         
         
@@ -844,6 +874,16 @@ def vehicle_setup() :
         lr_motor           = deepcopy(lift_rotor_motor)
         lr_motor.tag       = 'lift_rotor_motor_' + str(i+1)
         lift_rotor.origin  = [lift_rotor_origins[ii]]
+        
+        if i in [0, 3]:  # First and second rotors
+            lr_motor.propulsor_group = propulsor_group_names[0]
+        elif i in [1,2]:
+            lr_motor.propulsor_group = propulsor_group_names[1]
+        elif i in [6,7]:
+            lr_motor.propulsor_group = propulsor_group_names[2]
+        elif i in [4,5]:
+            lr_motor.propulsor_group = propulsor_group_names[3]
+                
         bus.motors.append(lr_motor) 
     
     # append bus   
@@ -894,7 +934,8 @@ def configs_setup(vehicle):
 
     base_config = RCAIDE.Components.Configs.Config(vehicle)
     base_config.tag = 'base' 
-    base_config.networks.all_electric.busses.bus.active_propulsor_groups = ['forward_propulsor' ,'lift_propulsor']    
+    base_config.networks.all_electric.busses.bus.active_propulsor_groups = ['forward_propulsor' ,'lift_propulsor_group1', 'lift_propulsor_group2', 
+                             'lift_propulsor_group3', 'lift_propulsor_group4']    
     configs.append(base_config)
 
 
@@ -906,13 +947,15 @@ def configs_setup(vehicle):
 
     transition_config = RCAIDE.Components.Configs.Config(vehicle)
     transition_config.tag = 'transition_flight' 
-    transition_config.networks.all_electric.busses.bus.active_propulsor_groups = ['forward_propulsor' ,'lift_propulsor']    
+    transition_config.networks.all_electric.busses.bus.active_propulsor_groups = ['forward_propulsor' ,'lift_propulsor_group1', 'lift_propulsor_group2', 
+                             'lift_propulsor_group3', 'lift_propulsor_group4']    
     configs.append(transition_config)
     
 
     vertical_config = RCAIDE.Components.Configs.Config(vehicle)
     vertical_config.tag = 'vertical_flight'  
-    vertical_config.networks.all_electric.busses.bus.active_propulsor_groups = ['lift_propulsor'] 
+    vertical_config.networks.all_electric.busses.bus.active_propulsor_groups = ['lift_propulsor_group1', 'lift_propulsor_group2', 
+                             'lift_propulsor_group3', 'lift_propulsor_group4'] 
     configs.append(vertical_config)  
 
 
@@ -1193,20 +1236,20 @@ def plot_results(results):
     plot_stability_coefficients(results) 
     
     # Plot Aircraft Electronics
-    plot_battery_pack_conditions(results) 
-    plot_battery_temperature(results)
-    plot_battery_cell_conditions(results) 
-    plot_battery_degradation(results) 
+    #plot_battery_pack_conditions(results) 
+    #plot_battery_temperature(results)
+    #plot_battery_cell_conditions(results) 
+    #plot_battery_degradation(results) 
     
     # Plot Propeller Conditions 
     plot_rotor_conditions(results) 
-    plot_disc_and_power_loading(results)
+    #plot_disc_and_power_loading(results)
     
     # Plot Electric Motor and Propeller Efficiencies 
-    plot_electric_motor_and_rotor_efficiencies(results) 
+    #plot_electric_motor_and_rotor_efficiencies(results) 
     
     # Plot Battery Degradation  
-    plot_battery_degradation(results)   
+    #plot_battery_degradation(results)   
      
     return
  

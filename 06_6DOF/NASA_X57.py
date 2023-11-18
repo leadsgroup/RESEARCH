@@ -207,6 +207,9 @@ def vehicle_setup():
     vehicle.append_component(wing)
 
 
+<<<<<<< HEAD
+   
+=======
     #------------------------------------------------------------------------------------------------------------------------------------  
     #   Horizontal Tail
     #------------------------------------------------------------------------------------------------------------------------------------    
@@ -231,6 +234,18 @@ def vehicle_setup():
     wing.symmetric                        = True
     wing.high_lift                        = False 
     wing.dynamic_pressure_ratio           = 0.9 
+<<<<<<< HEAD
+=======
+
+    # control surfaces -------------------------------------------
+    elevator                       = RCAIDE.Components.Wings.Control_Surfaces.Elevator()
+    elevator.tag                   = 'elevator'
+    elevator.span_fraction_start   = 0.09
+    elevator.span_fraction_end     = 0.92
+    elevator.deflection            = 0.0  * Units.deg
+    elevator.chord_fraction        = 0.3
+    wing.append_control_surface(elevator) 
+>>>>>>> 122b0c596dddabd747d33faa1ee8a5205232e021
 
     # control surfaces -------------------------------------------
     elevator                       = RCAIDE.Components.Wings.Control_Surfaces.Elevator()
@@ -241,6 +256,7 @@ def vehicle_setup():
     elevator.chord_fraction        = 0.3
     wing.append_control_surface(elevator) 
 
+>>>>>>> 122b0c596dddabd747d33faa1ee8a5205232e021
     # add to vehicle
     vehicle.append_component(wing)
 
@@ -699,19 +715,19 @@ def mission_setup(analyses):
     Segments = RCAIDE.Analyses.Mission.Segments  
     base_segment = Segments.Segment() 
     
-    # ------------------------------------------------------------------
-    #   Departure End of Runway Segment Flight 1 : 
-    # ------------------------------------------------------------------ 
-    segment = Segments.Climb.Linear_Speed_Constant_Rate(base_segment) 
-    segment.tag = 'DER'       
-    segment.analyses.extend( analyses.base )
-    segment.initial_battery_state_of_charge                  = 0.89   
-    segment.altitude_start                                   = 0.0 * Units.feet
-    segment.altitude_end                                     = 50.0 * Units.feet
-    segment.air_speed_start                                  = 45  * Units['m/s'] 
-    segment.air_speed_end                                    = 45      
-    segment = analyses.base.energy.networks.all_electric.add_unknowns_and_residuals_to_segment(segment)   
-    mission.append_segment(segment)
+    ## ------------------------------------------------------------------
+    ##   Departure End of Runway Segment Flight 1 : 
+    ## ------------------------------------------------------------------ 
+    #segment = Segments.Climb.Linear_Speed_Constant_Rate(base_segment) 
+    #segment.tag = 'DER'       
+    #segment.analyses.extend( analyses.base )
+    #segment.initial_battery_state_of_charge                  = 0.89   
+    #segment.altitude_start                                   = 0.0 * Units.feet
+    #segment.altitude_end                                     = 50.0 * Units.feet
+    #segment.air_speed_start                                  = 45  * Units['m/s'] 
+    #segment.air_speed_end                                    = 45      
+    #segment = analyses.base.energy.networks.all_electric.add_unknowns_and_residuals_to_segment(segment)   
+    #mission.append_segment(segment)
     
     ## ------------------------------------------------------------------
     ##   Initial Climb Area Segment Flight 1  
