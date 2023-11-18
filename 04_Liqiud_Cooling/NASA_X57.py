@@ -15,8 +15,8 @@ from RCAIDE.Methods.Weights.Physics_Based_Buildups.eVTOL.converge_evtol_weight  
 from RCAIDE.Methods.Power.Battery.Sizing                                         import initialize_from_circuit_configuration
 from RCAIDE.Methods.Geometry.Two_Dimensional.Planform                            import wing_segmented_planform
 from RCAIDE.Visualization                                                        import *     
-from RCAIDE.Methods.Thermal_Management.Batteries.Design.Conjugate_Heat_Exchanger import design_atmospheric_air_heat_exchanger
-from RCAIDE.Methods.Thermal_Management.Batteries.Design.Conjugate_Heat_Removal   import design_wavy_channel_heat_removal_system 
+from RCAIDE.Methods.Thermal_Management.Batteries.Design.Heat_Exchanger_Systems.Cross_Flow_Heat_Exchanger        import design_cross_flow_heat_exchanger
+from RCAIDE.Methods.Thermal_Management.Batteries.Design.Heat_Acquistion_Systems.Wavy_Channel_Heat_Acquisition   import design_wavy_channel 
 # python imports 
 import numpy as np 
 from copy import deepcopy
@@ -533,25 +533,30 @@ def vehicle_setup():
     bat.pack.electrical_configuration.series               = 140   
     bat.pack.electrical_configuration.parallel             = 100
     initialize_from_circuit_configuration(bat)  
-    bat.module.number_of_modules                           = 14  
+    bat.pack.number_of_modules                             = 14  
     bat.module.geometrtic_configuration.total              = bat.pack.electrical_configuration.total
-    bat.module.voltage                                     = bat.pack.maximum_voltage/bat.module.number_of_modules # assumes modules are connected in parallel, must be less than max_module_voltage (~50) /safety_factor (~ 1.5)  
+    bat.module.voltage                                     = bat.pack.maximum_voltage/bat.pack.number_of_modules # assumes modules are connected in parallel, must be less than max_module_voltage (~50) /safety_factor (~ 1.5)  
     bat.module.geometrtic_configuration.normal_count       = 24
     bat.module.geometrtic_configuration.parallel_count     = 40
+    bat.module.number_of_cells                             = bat.module.geometrtic_configuration.normal_count *bat.module.geometrtic_configuration.parallel_count 
     bus.voltage                                            = bat.pack.maximum_voltage   
     
     # Battery Heat Removal System 
-    HRS                                      = RCAIDE.Energy.Thermal_Management.Batteries.Heat_Removal_Systems.Conjugate_Heat_Removal() 
-    HRS.inlet_temperature_of_coolant         = 284 
-    HRS.battery_operating_temperature        = 303
-    HRS.heat_removed                         = 50000  
-    HRS                                      = design_wavy_channel_heat_removal_system(HRS,bat) 
-    bat.heat_removal_system                  = HRS
+    HAS                                      = RCAIDE.Energy.Thermal_Management.Batteries.Heat_Acquisition_Systems.Wavy_Channel_Heat_Acquistion.Wavy_Channel() 
+    HAS.design_altitude                      = propeller.cruise.design_altitude 
+    atmosphere                               = RCAIDE.Analyses.Atmospheric.US_Standard_1976() 
+    atmo_data                                = atmosphere.compute_values(altitude =HAS.design_altitude)     
+    HAS.coolant_inlet_temperature            = atmo_data.temperature[0,0]  
+    HAS.design_battery_operating_temperature = 303
+    HAS.design_heat_removed                  = 50000  
+    HAS                                      = design_wavy_channel(HAS,bat) 
+    bat.heat_removal_system                  = HAS
     
     # Battery Heat Exchanger 
-    HEX = RCAIDE.Energy.Thermal_Management.Batteries.Heat_Exchanger_Systems.Conjugate_Heat_Exchanger() 
-    HEX.design_altitude =  10000. * Units.feet 
-    HEX = design_atmospheric_air_heat_exchanger(HEX,HRS,bat)
+    HEX = RCAIDE.Energy.Thermal_Management.Batteries.Heat_Exchanger_Systems.Cross_Flow_Heat_Exchanger.Cross_Flow_Heat_Exchanger() 
+    HEX.design_altitude    = propeller.cruise.design_altitude 
+    HEX.inlet_temperature_of_cold_fluid = atmo_data.temperature[0,0]   
+    HEX                    = design_cross_flow_heat_exchanger(HEX,HAS,bat)
     bat.heat_exchanger_system = HEX  
     
     bus.batteries.append(bat)        
