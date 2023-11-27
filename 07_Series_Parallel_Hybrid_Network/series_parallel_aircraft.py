@@ -855,10 +855,10 @@ def configs_setup(vehicle,motor_work,shaft_power):
     config.wings['main_wing'].control_surfaces.slat.deflection = 25. * Units.deg  
     HPCU = config.networks.series_parallel_hybrid_turboelectric_engine.hybrid_power_control_units.hybrid_power_control_unit
     for turbofan in HPCU.turbofans:  
-        turbofan.generator_flag    = True 
-        shaft_power_offtake = RCAIDE.Energy.Converters.Shaft_Power_Off_Take()
-        shaft_power_offtake.power_draw = shaft_power    
-        turbofan.shaft_power_offtake = shaft_power_offtake
+        turbofan.generator_flag           = True 
+        shaft_power_offtake               = RCAIDE.Energy.Converters.Shaft_Power_Off_Take()
+        shaft_power_offtake.power_draw    = shaft_power    
+        turbofan.shaft_power_offtake      = shaft_power_offtake
     config.max_lift_coefficient_factor    = 1. 
     configs.append(config) 
 
@@ -869,10 +869,10 @@ def configs_setup(vehicle,motor_work,shaft_power):
     config.tag = 'climb' 
     HPCU = config.networks.series_parallel_hybrid_turboelectric_engine.hybrid_power_control_units.hybrid_power_control_unit
     for turbofan in HPCU.turbofans: 
-        turbofan.generator_flag    = True 
-        shaft_power_offtake = RCAIDE.Energy.Converters.Shaft_Power_Off_Take()
-        shaft_power_offtake.power_draw = shaft_power    
-        turbofan.shaft_power_offtake = shaft_power_offtake      
+        turbofan.generator_flag           = True 
+        shaft_power_offtake               = RCAIDE.Energy.Converters.Shaft_Power_Off_Take()
+        shaft_power_offtake.power_draw    = shaft_power    
+        turbofan.shaft_power_offtake      = shaft_power_offtake      
     config.max_lift_coefficient_factor    = 1. 
     configs.append(config)    
     
@@ -891,6 +891,21 @@ def configs_setup(vehicle,motor_work,shaft_power):
         turbofan.shaft_power_offtake = shaft_power_offtake
     config.max_lift_coefficient_factor    = 1. 
     configs.append(config)    
+    
+
+    # ------------------------------------------------------------------
+    #   Climb Configuration
+    # ------------------------------------------------------------------
+    config = RCAIDE.Components.Configs.Config(base_config)
+    config.tag = 'descent' 
+    HPCU = config.networks.series_parallel_hybrid_turboelectric_engine.hybrid_power_control_units.hybrid_power_control_unit
+    for turbofan in HPCU.turbofans: 
+        turbofan.generator_flag           = True 
+        shaft_power_offtake               = RCAIDE.Energy.Converters.Shaft_Power_Off_Take()
+        shaft_power_offtake.power_draw    = shaft_power    
+        turbofan.shaft_power_offtake      = shaft_power_offtake      
+    config.max_lift_coefficient_factor    = 1. 
+    configs.append(config)        
 
     # ------------------------------------------------------------------
     #   Landing Configuration
@@ -900,8 +915,7 @@ def configs_setup(vehicle,motor_work,shaft_power):
     config.tag = 'landing' 
     config.wings['main_wing'].control_surfaces.flap.deflection = 30. * Units.deg
     config.wings['main_wing'].control_surfaces.slat.deflection = 25. * Units.deg  
-    config.max_lift_coefficient_factor    = 1. 
-
+    config.max_lift_coefficient_factor    = 1.  
     configs.append(config)
 
     # ------------------------------------------------------------------
@@ -990,7 +1004,7 @@ def mission_setup(analyses):
     segment.analyses.extend( analyses.cruise ) 
     segment.altitude  = 10.668 * Units.km  
     segment.air_speed = 230.412 * Units['m/s']
-    segment.distance  = 1000 * Units.nmi 
+    segment.distance  = 2000 * Units.nmi 
     segment = analyses.base.energy.networks.series_parallel_hybrid_turboelectric_engine.add_unknowns_and_residuals_to_segment(segment)
     mission.append_segment(segment)
 
@@ -1001,7 +1015,7 @@ def mission_setup(analyses):
 
     segment = Segments.Descent.Constant_Speed_Constant_Rate(base_segment)
     segment.tag = "descent_1" 
-    segment.analyses.extend( analyses.cruise ) 
+    segment.analyses.extend( analyses.base ) 
     segment.altitude_start = 10.5 * Units.km 
     segment.altitude_end   = 8.0   * Units.km
     segment.air_speed      = 220.0 * Units['m/s']
@@ -1016,7 +1030,7 @@ def mission_setup(analyses):
 
     segment = Segments.Descent.Constant_Speed_Constant_Rate(base_segment)
     segment.tag = "descent_2" 
-    segment.analyses.extend( analyses.landing ) 
+    segment.analyses.extend( analyses.descent ) 
     segment.altitude_end = 6.0   * Units.km
     segment.air_speed    = 195.0 * Units['m/s']
     segment.descent_rate = 5.0   * Units['m/s'] 
@@ -1030,7 +1044,7 @@ def mission_setup(analyses):
 
     segment = Segments.Descent.Constant_Speed_Constant_Rate(base_segment)
     segment.tag = "descent_3"  
-    segment.analyses.extend( analyses.landing ) 
+    segment.analyses.extend( analyses.descent ) 
     segment.altitude_end = 4.0   * Units.km
     segment.air_speed    = 170.0 * Units['m/s']
     segment.descent_rate = 5.0   * Units['m/s'] 

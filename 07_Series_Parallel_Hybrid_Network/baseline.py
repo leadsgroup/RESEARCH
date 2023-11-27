@@ -22,6 +22,7 @@ import numpy as np
 from copy import deepcopy
 import matplotlib.pyplot as plt  
 import os   
+import pickle
 
 # ----------------------------------------------------------------------
 #   Main
@@ -907,7 +908,7 @@ def mission_setup(analyses):
     segment.analyses.extend( analyses.cruise ) 
     segment.altitude  = 10.668 * Units.km  
     segment.air_speed = 230.412 * Units['m/s']
-    segment.distance  = 1000 * Units.nmi 
+    segment.distance  = 2000 * Units.nmi 
     segment = analyses.base.energy.networks.turbofan_engine.add_unknowns_and_residuals_to_segment(segment)
     mission.append_segment(segment)
 
