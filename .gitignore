@@ -57,7 +57,6 @@ nosetests.xml
 # Mac
 .DS_Store
 
-*.bem
 *.pkl
 *.dat
 *.mp4
@@ -70,7 +69,6 @@ nosetests.xml
 # Geometry
 *.geo
 *.stl
-*.vsp3
 *.cfg
 *.su2
 *.key

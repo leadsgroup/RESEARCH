@@ -2,13 +2,13 @@
 # RCAIDE imports 
 import RCAIDE
 from RCAIDE.Core import Units    
-from RCAIDE.Methods.Propulsion            import design_turbofan 
-from RCAIDE.Visualization                 import *     
-from RCAIDE.Methods.Propulsion.turbofan_propulsor  import compute_propulsor_performance   , compute_unique_propulsor_groups
-from RCAIDE.Methods.Propulsion                              import design_propeller,  size_optimal_motor  
+from RCAIDE.Methods.Propulsion.Design           import design_turbofan ,design_propeller
+from RCAIDE.Visualization                       import *     
+from RCAIDE.Methods.Propulsion.Performance.turbofan_propulsor  import compute_propulsor_performance   , compute_unique_propulsor_groups 
 
 # python imports 
 import numpy as np  
+import pickle
 from copy import deepcopy
 import matplotlib.pyplot as plt  
 import os   
@@ -20,13 +20,85 @@ import matplotlib.cm as cm
 
 def main(): 
      
+    comparison_of_perfomrance()
+    #first_order_analysis()
 
-    first_order_analysis()
-
-    second_order_analysis()
+    #second_order_analysis()
     return 
 
+def comparison_of_perfomrance():
+    baseline_file    =  'baseline'
+    baseline_res     = load_results(baseline_file)
+    
+    hybrid_file   = 'series_parallel_hybrid_aircraft'
+    hybrid_res  = load_results(hybrid_file) 
+    
+    
+    # get plotting style 
+    ps      = plot_style()  
+    ps.axis_font_size = 14
 
+    parameters = {'axes.labelsize': ps.axis_font_size,
+                  'xtick.labelsize': ps.axis_font_size,
+                  'ytick.labelsize': ps.axis_font_size,
+                  'axes.titlesize': ps.title_font_size}
+    plt.rcParams.update(parameters)
+     
+    # get line colors for plots     
+     
+    fig   = plt.figure()
+    fig.set_size_inches(5,5) 
+    axes_1 = fig.add_subplot(3,1,1)
+    axes_2 = axes_1.twinx() 
+    axes_3 = fig.add_subplot(3,1,2)
+    axes_4 = fig.add_subplot(3,1,3)
+    for i in range(len(baseline_res.segments)): 
+        time     = baseline_res.segments[i].conditions.frames.inertial.time[:,0] / Units.min
+        airspeed = baseline_res.segments[i].conditions.freestream.velocity[:,0] /   Units['mph']  
+        altitude = baseline_res.segments[i].conditions.freestream.altitude[:,0]/Units.feet   
+            
+        Weight_baseline   = baseline_res.segments[i].conditions.weights.total_mass[:, 0] * 9.81   
+        mdot_baseline     = baseline_res.segments[i].conditions.weights.vehicle_mass_rate[:, 0]
+        thrust_baseline   = baseline_res.segments[i].conditions.frames.body.thrust_force_vector[:, 0]
+        sfc_baseline      = (mdot_baseline / Units.lb) / (thrust_baseline / Units.lbf) * Units.hr    
+
+        Weight_hybrid   = hybrid_res.segments[i].conditions.weights.total_mass[:, 0] * 9.81   
+        mdot_hybrid     = hybrid_res.segments[i].conditions.weights.vehicle_mass_rate[:, 0]
+        thrust_hybrid   = hybrid_res.segments[i].conditions.frames.body.thrust_force_vector[:, 0]
+        sfc_hybrid      = (mdot_hybrid / Units.lb) / (thrust_hybrid / Units.lbf) * Units.hr      
+        
+        axes_1.plot(time, altitude, color = 'firebrick', marker = ps.marker, linewidth = ps.line_width)
+        axes_1.set_ylabel(r'Altitude (ft)') 
+        axes_1.set_ylim([0, 40000]) 
+        set_axes(axes_1)     
+        axes_2.plot(time, airspeed, color = 'mediumblue', marker = ps.marker, linewidth = ps.line_width)   
+        axes_2.tick_params(axis="y", which="both", right=False, left=False, labelright=True,
+                        color='mediumblue', labelcolor='mediumblue')        
+        axes_2.set_ylabel(r"Airspeed (mph)" ,color='mediumblue')  
+        axes_2.set_ylim([100, 1000])      
+         
+        if i == 0:
+            axes_3.plot(time, Weight_baseline/1000 , color = 'black', marker = ps.marker, linewidth = ps.line_width, label = 'Baseline') 
+            axes_3.plot(time, Weight_hybrid/1000 , color = 'green', marker = ps.marker, linewidth = ps.line_width, label = 'Hybrid') 
+        else:
+            axes_3.plot(time, Weight_baseline/1000 , color = 'black', marker = ps.marker, linewidth = ps.line_width) 
+            axes_3.plot(time, Weight_hybrid/1000 , color = 'green', marker = ps.marker, linewidth = ps.line_width) 
+        axes_3.set_ylabel(r'Weight (kN)') 
+        set_axes(axes_3) 
+ 
+        axes_4.plot(time, sfc_baseline, color = 'black', marker = ps.marker, linewidth = ps.line_width)
+        axes_4.plot(time, sfc_hybrid, color = 'green', marker = ps.marker, linewidth = ps.line_width)
+        axes_4.set_xlabel('Time (mins)')
+        axes_4.set_ylabel(r'SFC (lb/lbf-hr)')
+        axes_4.set_ylim([0, 1]) 
+        set_axes(axes_4) 
+        axes_3.legend()   
+    
+    fig.tight_layout()
+    return
+    
+    
+    
 def test_propeller():
     
     
@@ -403,6 +475,23 @@ def JT9D_7_turbofan_engine(altitude,mach,motor_work = None, regenerator = None, 
         overall_efficiency[i] = eta 
 
     return thrust , overall_efficiency
+# ----------------------------------------------------------------------
+#   Save Results
+# ----------------------------------------------------------------------
+def save_results(results,filename): 
+    pickle_file  =  filename + '.pkl'
+    with open(pickle_file, 'wb') as file:
+        pickle.dump(results, file) 
+    return   
+
+# ------------------------------------------------------------------
+#   Load Results
+# ------------------------------------------------------------------   
+def load_results(filename):  
+    load_file = filename + '.pkl' 
+    with open(load_file, 'rb') as file:
+        results = pickle.load(file) 
+    return results  
 
 
 
