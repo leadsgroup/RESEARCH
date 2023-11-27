@@ -835,7 +835,7 @@ def vehicle_setup() :
         lr.origin                 = [lift_rotor_origins[ii]]
         lr.phase_offset_angle     = angle_offsets[ii]
         #if ii == 2:
-            #lr.active = False
+           #lr.active = False
             
         # pairing propulsor groups based on lift rotor origins
         if ii in [0, 3]:  # First and second rotors
@@ -1050,22 +1050,22 @@ def mission_setup(analyses,vehicle):
     reference_area = vehicle.reference_area 
     Vstall         = estimate_stall_speed(vehicle_mass,reference_area,altitude = 0.0,maximum_lift_coefficient = 1.2)      
      
-    # ------------------------------------------------------------------
-    #   First Climb Segment: Constant Speed, Constant Rate
-    # ------------------------------------------------------------------
+    ## ------------------------------------------------------------------
+    ##   First Climb Segment: Constant Speed, Constant Rate
+    ## ------------------------------------------------------------------
     segment     = Segments.Vertical_Flight.Climb(base_segment)
     segment.tag = "Vertical_Climb"   
     segment.analyses.extend( analyses.vertical_flight )  
     segment.altitude_start                          = 0.0  * Units.ft  
     segment.altitude_end                            = 200.  * Units.ft   
     segment.initial_battery_state_of_charge         = 1.0 
-    segment.climb_rate                              = 500. * Units['ft/min']  
+    segment.climb_rate                              = 300. * Units['ft/min']  
     segment = analyses.base.energy.networks.all_electric.add_unknowns_and_residuals_to_segment(segment) 
     mission.append_segment(segment)
     
-    ## ------------------------------------------------------------------
-    ##   First Cruise Segment: Transition
-    ## ------------------------------------------------------------------
+    ### ------------------------------------------------------------------
+    ###   First Cruise Segment: Transition
+    ### ------------------------------------------------------------------
  
     #segment                                         = Segments.Transition.Constant_Acceleration_Constant_Pitchrate_Constant_Altitude(base_segment)
     #segment.tag                                     = "Vertical_Transition"  
@@ -1095,9 +1095,9 @@ def mission_setup(analyses,vehicle):
     #segment = analyses.base.energy.networks.all_electric.add_unknowns_and_residuals_to_segment(segment)
     #mission.append_segment(segment) 
   
-    ## ------------------------------------------------------------------
-    ##   First Climb
-    ## ------------------------------------------------------------------ 
+    # ------------------------------------------------------------------
+    #   First Climb
+    # ------------------------------------------------------------------ 
     #segment                                          = Segments.Climb.Linear_Speed_Constant_Rate(base_segment)
     #segment.tag                                      = "Climb_1"   
     #segment.analyses.extend( analyses.forward_flight ) 
