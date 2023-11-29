@@ -37,7 +37,7 @@ except ImportError:
 def main():  
     # start simulation clock
     ti                         = time.time()
-    RUN_NEW_MODEL_FLAG         = False 
+    RUN_NEW_MODEL_FLAG         = True 
     
     # -------------------------------------------------------------------------------------------    
     # SET UP SIMULATION PARAMETERS   

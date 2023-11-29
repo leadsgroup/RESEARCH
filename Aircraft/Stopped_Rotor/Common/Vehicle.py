@@ -15,13 +15,12 @@ from RCAIDE.Energy.Networks.All_Electric                                      im
 from RCAIDE.Methods.Performance.estimate_cruise_drag                          import estimate_cruise_drag
 from RCAIDE.Methods.Geometry.Two_Dimensional.Planform                         import segment_properties
 from RCAIDE.Methods.Power.Battery.Sizing                                      import initialize_from_circuit_configuration 
-from RCAIDE.Methods.Weights.Correlations.Propulsion                           import nasa_motor
-from RCAIDE.Methods.Propulsion                                                import size_optimal_motor
-from RCAIDE.Methods.Propulsion                                                import design_propeller ,design_lift_rotor 
-from RCAIDE.Methods.Weights.Buildups.eVTOL                                    import compute_weight
-from RCAIDE.Methods.Center_of_Gravity.compute_component_centers_of_gravity    import compute_component_centers_of_gravity
+from RCAIDE.Methods.Weights.Correlation_Buildups.Propulsion                   import nasa_motor
+from RCAIDE.Methods.Propulsion.Design                                         import size_optimal_motor, design_propeller ,design_lift_rotor 
+from RCAIDE.Methods.Weights.Physics_Based_Buildups.eVTOL                      import compute_weight
+from RCAIDE.Methods.Stability.Center_of_Gravity                               import compute_component_centers_of_gravity
 from RCAIDE.Methods.Geometry.Two_Dimensional.Planform                         import wing_segmented_planform 
-from RCAIDE.Methods.Weights.Buildups.eVTOL.converge_evtol_weight              import converge_evtol_weight  
+from RCAIDE.Methods.Weights.Physics_Based_Buildups.eVTOL                      import converge_evtol_weight  
  
 import os
 import numpy as np 
