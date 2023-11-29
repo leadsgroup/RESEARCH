@@ -1,0 +1,66 @@
+{\rtf1\ansi\ansicpg1252\cocoartf2580
+\cocoatextscaling0\cocoaplatform0{\fonttbl\f0\fswiss\fcharset0 Helvetica;\f1\fmodern\fcharset0 Courier;}
+{\colortbl;\red255\green255\blue255;\red153\green168\blue186;\red32\green32\blue32;\red191\green100\blue38;
+\red254\green187\blue91;\red86\green132\blue173;\red109\green109\blue109;\red88\green118\blue71;\red95\green96\blue103;
+}
+{\*\expandedcolortbl;;\csgenericrgb\c60000\c65882\c72941;\csgenericrgb\c12549\c12549\c12549;\csgenericrgb\c74902\c39216\c14902;
+\csgenericrgb\c99608\c73333\c35686;\csgenericrgb\c33725\c51765\c67843;\csgenericrgb\c42745\c42745\c42745;\csgenericrgb\c34510\c46275\c27843;\csgenericrgb\c37255\c37647\c40392;
+}
+\margl1440\margr1440\vieww13440\viewh10200\viewkind0
+\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\partightenfactor0
+
+\f0\fs26 \cf2 \cb3 \
+
+\f1 \cf4 def \cf5 main\cf2 ():\
+    run_model                       = \cf4 True\
+    \cf2 structured_data_flag            = \cf4 False\
+    \cf2 num_lags                        = \cf6 10  \cf7 # lags past states of a node and are defined in the features matrix of a temporal GNN\
+    \cf2 GNN_training_ratio              = \cf6 0.8\
+    \cf2 hidden_size                     = \cf6 150\
+    \cf2 compute_optimal_hyperperameters = \cf4 False\
+    \cf2 num_epochs                      = \cf6 100\
+    \cf2 use_GPU                         = \cf4 False\
+    \cf2 GNN_sampling_ratio              = \cf6 0.04  \cf7 # above 0.5 is too much memory for GPU\
+\
+    # Read Sheets\
+    \cf2 degradation_mechanisms_relationships = \cf8 'Data_Files/Battery_Degredation_Mechanims_LFP_Cell.csv'\
+    \cf2 degradation_mechanisms_key           = \cf8 'Data_Files/Battery_Degredation_Mechanims_LFP_Cell_Key.csv'\
+    \cf2 graph\cf4 , \cf2 node_keys\cf4 , \cf2 degradation_relationships = generate_graph(degradation_mechanisms_relationships\cf4 ,\cf2 degradation_mechanisms_key)\
+\
+    \cf4 if \cf2 structured_data_flag:\
+        \cf7 # data_paths                   = ['../efs-readonly/raw/arbin/FastCharge_000015_CH12.csv',\
+        #                                    '../efs-readonly/raw/arbin/FastCharge_000001_CH16.csv',\
+        #                                    '../efs-readonly/raw/arbin/FastCharge_000015_CH28.csv',\
+        #                                    '../efs-readonly/raw/arbin/FastCharge_000064_CH39.csv',\
+        #                                    '../efs-readonly/raw/arbin/FastCharge_000068_CH38.csv']\
+        \cf2 data_paths = [\cf8 '../Rawfiles/FastCharge_000001_CH16_structure.json'\cf2 ]\
+    \cf4 else\cf2 :\
+        \cf9 data_paths                   \cf2 = [\cf8 '../Rawfiles/FastCharge_000015_CH12.csv'\cf4 ,\
+                                           \cf8 '../Rawfiles/FastCharge_000001_CH16.csv'\cf4 ,\
+                                           \cf8 '../Rawfiles/FastCharge_000015_CH28.csv'\cf4 ,\
+                                           \cf8 '../Rawfiles/FastCharge_000064_CH39.csv'\cf4 ,\
+                                           \cf8 '../Rawfiles/FastCharge_000068_CH38.csv'\cf4 ,\
+                                        \cf8 '../Rawfiles/FastCharge_000017_CH33.csv'\cf4 ,\
+                                        \cf8 '../Rawfiles/FastCharge_000050_CH40.csv'\cf4 ,\
+                                        \cf8 '../Rawfiles/FastCharge_000046_CH31.csv'\cf4 ,\
+                                        \cf8 '../Rawfiles/FastCharge_000036_CH48.csv'\cf4 ,\
+                                        \cf8 '../Rawfiles/FastCharge_000020_CH23.csv'\cf4 ,\
+                                        \cf8 '../Rawfiles/FastCharge_000017_CH17.csv'\cf4 ,\cf2 ]\
+\
+\
+        data_paths                   = [\cf8 '../Rawfiles/FastCharge_000015_CH12.csv'\cf2 ]\
+\
+    \cf4 if \cf2 use_GPU:\
+        \cf4 if \cf2 structured_data_flag:\
+            filename = \cf8 'PyGeoTemp_MPNNLSTM_GPU_Res_S'\
+        \cf4 else\cf2 :\
+            filename = \cf8 'PyGeoTemp_MPNNLSTM_GPU_Res_R1'\
+    \cf4 else\cf2 :\
+        \cf4 if \cf2 structured_data_flag:\
+            filename = \cf8 'PyGeoTemp_MPNNLSTM_CPU_Res_S'\
+        \cf4 else\cf2 :\
+            filename = \cf8 'PyGeoTemp_MPNNLSTM_CPU_Res_R1'\
+\
+    \cf4 if \cf2 run_model:\
+\
+}
