@@ -795,6 +795,9 @@ def vehicle_setup() :
     lift_rotor.hover.design_altitude             = 40 * Units.feet  
     lift_rotor.hover.design_thrust               = Hover_Load/8
     lift_rotor.propulsor_group                   = 'lift_propulsor'
+
+    lift_rotor.hover.design_tip_mach            = 0.75
+    lift_rotor.hover.design_angular_velocity    = lift_rotor.hover.design_tip_mach *speed_of_sound/lift_rotor.tip_radius    
     lift_rotor.hover.design_freestream_velocity  = np.sqrt(lift_rotor.hover.design_thrust/(2*1.2*np.pi*(lift_rotor.tip_radius**2)))  
     lift_rotor.oei.design_altitude               = 40 * Units.feet  
     lift_rotor.oei.design_thrust                 = Hover_Load/6  
@@ -812,8 +815,6 @@ def vehicle_setup() :
     lift_rotor.append_airfoil(airfoil)               
     lift_rotor.airfoil_polar_stations           = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
     lift_rotor                                  = design_lift_rotor(lift_rotor)  
-
-    lift_rotor.hover.design_power_coefficient   = 0.01 
     
     lift_rotor_origins                     = [[ -0.073, 1.950,  1.2] ,  [  -0.073, -1.950 ,  1.2],
                                               [ 4.440 , 1.950 ,  1.2] ,[ 4.440 , -1.950,  1.2],
@@ -834,6 +835,11 @@ def vehicle_setup() :
         lr.rotation               = rotations[ii]
         lr.origin                 = [lift_rotor_origins[ii]]
         lr.phase_offset_angle     = angle_offsets[ii]
+        if ii in[1,3,5,7]:
+            lr.orientation_euler_angles          = [10.0,0.,0.] #* Units.degrees   # vector of angles defining default orientation of rotor
+        else:
+            lr.orientation_euler_angles          = [-10.0,0.,0.] #* Units.degrees  # vector of angles defining default orientation of rotor
+         
         #if ii == 2:
            #lr.active = False
             
