@@ -24,7 +24,7 @@ def main():
     angle_of_contact_degrees = np.degrees(angle_of_contact_radians)
     
     # Plot Channel Width and Angle vs Mass Flow Rate
-    fig_name = 'Fig_1'
+    fig_name = 'Figure_1'
     fig = plt.figure(fig_name)    
     fig.set_size_inches(PP.figure_width,PP.figure_height)  
     ax1 = fig.add_subplot(1,1,1)   
@@ -42,7 +42,7 @@ def main():
     ax2.tick_params(axis='y', labelcolor='black', direction='in')  # Added direction parameter
     
     # Display the combined legend on the inside upper left
-    ax1.legend(loc='upper left')  # Adjusted location
+    ax1.legend(loc='upper center')  # Adjusted location
     ax1.grid(True, linestyle='--', alpha=0.7)  # Added grid lines
 
     plt.tight_layout()
@@ -57,7 +57,7 @@ def main():
     power = [0.013889811, 0.320564344, 0.568661325, 0.951951201, 1.645415373]
     
     # Plot Power and Mass vs Mass Flow Rate 
-    fig_name = 'Fig_2'
+    fig_name = 'Figure_2'
     fig = plt.figure(fig_name)    
     fig.set_size_inches(PP.figure_width,PP.figure_height)  
     ax1 = fig.add_subplot(1,1,1)    
@@ -75,7 +75,7 @@ def main():
     ax2.tick_params(axis='y', labelcolor='tab:orange', direction='in')  # Added direction parameter
     
     # Display the combined legend on the inside upper left
-    ax1.legend(loc='upper left')  # Adjusted location
+    ax1.legend(loc='upper center')  # Adjusted location
     ax1.grid(True, linestyle='--', alpha=0.7)  # Added grid lines
 
     plt.tight_layout()
@@ -91,7 +91,7 @@ def main():
     length_of_cold_side = [1.378999049, 0.490059006, 0.335372408, 0.298018125, 0.30980726, 0.394728004]
     
     # Create a figure and axis 
-    fig_name = 'Fig_3'
+    fig_name = 'Figure_3'
     fig = plt.figure(fig_name)    
     fig.set_size_inches(PP.figure_width,PP.figure_height)  
     ax1 = fig.add_subplot(1,1,1)     
@@ -128,7 +128,7 @@ def main():
     power_kw = [p / 1000 for p in power_watt]
     
     # Create a figure and axis
-    fig_name = 'Fig_4'
+    fig_name = 'Figure_4'
     fig = plt.figure(fig_name)    
     fig.set_size_inches(PP.figure_width,PP.figure_height)  
     ax1 = fig.add_subplot(1,1,1)    
@@ -146,7 +146,7 @@ def main():
     ax2.tick_params(axis='y', labelcolor='tab:orange', direction='in')  # Added direction parameter
     
     # Display the combined legend on the inside upper left
-    ax1.legend(loc='upper left')  # Adjusted location
+    ax1.legend(loc='upper center')  # Adjusted location
     ax1.grid(True, linestyle='--', alpha=0.7)  # Added grid lines
     
     plt.tight_layout()
