@@ -35,7 +35,21 @@ def main():
     vehicle  = vehicle_setup() 
     
     # Set up vehicle configs
-    configs  = configs_setup(vehicle)
+    configs  = configs_setup(vehicle) 
+
+    ## plot vehicle 
+    #plot_3d_vehicle(configs.base,
+                    #show_wing_control_points    = False,
+                    #show_rotor_wake_vortex_core = False,
+                    #min_x_axis_limit            = 0,
+                    #max_x_axis_limit            = 40,
+                    #min_y_axis_limit            = -20,
+                    #max_y_axis_limit            = 20,
+                    #min_z_axis_limit            = -20,
+                    #max_z_axis_limit            = 20,
+                    #camera_x                    = 2.5,
+                    #camera_y                    = 0,
+                    #camera_z                    = 0)        
 
     # create analyses
     analyses = analyses_setup(configs)
@@ -111,7 +125,7 @@ def vehicle_setup() :
     
     ospath                        = os.path.abspath(__file__)
     separator                     = os.path.sep
-    rel_path                      = ospath.split( 'tut_eVTOL.py')[0]  +  '..' + separator   
+    rel_path                      = ospath.split( 'stopped_rotor.py')[0]  +  '..' + separator   
     airfoil                       = RCAIDE.Components.Airfoils.Airfoil()
     airfoil.coordinate_file       = rel_path + 'Airfoils' + separator + 'NACA_63_412.txt'
     
@@ -544,10 +558,10 @@ def vehicle_setup() :
     nac_segment.width              = 0.2
     nacelle.append_segment(nac_segment)      
     
-    lift_rotor_nacelle_origins   = [[  -0.073,  1.950, 0.850] ,[ -0.073, -1.950, 0.850],
-                           [   4.413,   1.950 ,0.850] ,[   4.413, -1.950, 0.850],
-                           [   0.219 ,   4.891 , 0.950] ,[   0.219 , -  4.891 ,0.950],
-                           [  4.196 ,   4.891 ,0.950] ,[   4.196, -  4.891 ,0.950]]
+    lift_rotor_nacelle_origins   = [[-0.073 ,  1.950 , 1.2] ,[-0.073  , -1.950  , 1.2],
+                                    [ 4.440 ,  1.950 , 1.2] ,[ 4.440  , -1.950  , 1.2],
+                                    [ 0.219 ,  4.891 , 1.2] ,[ 0.219  , - 4.891 , 1.2],
+                                    [ 4.196 ,  4.891 , 1.2] ,[ 4.196  , - 4.891 , 1.2]]
     
     for ii in range(8):
         rotor_nacelle          = deepcopy(nacelle)
@@ -653,8 +667,7 @@ def vehicle_setup() :
     #------------------------------------------------------------------------------------------------------------------------------------  
     bus                              = RCAIDE.Energy.Distributors.Bus_Power_Control_Unit()
     bus.fixed_voltage                = False 
-    bus.active_propulsor_groups      = ['forward_propulsor' ,'lift_propulsor']
-    
+    bus.active_propulsor_groups      =['forward_propulsor' ,'lift_propulsor_group1', 'lift_propulsor_group2','lift_propulsor_group3', 'lift_propulsor_group4'] 
     
     #------------------------------------------------------------------------------------------------------------------------------------  
     # Battery   
@@ -762,11 +775,20 @@ def vehicle_setup() :
     # Lift Propulsor System - Electronic Speed Controller
     #------------------------------------------------------------------------------------------------------------------------------------    
     lift_rotor_esc                   = RCAIDE.Energy.Distributors.Electronic_Speed_Controller()
-    lift_rotor_esc.propulsor_group   = 'lift_propulsor'
-    lift_rotor_esc.efficiency        = 0.95
+    lift_rotor_esc.efficiency        = 0.95 
+    propulsor_group_names = ['lift_propulsor_group1', 'lift_propulsor_group2', 
+                             'lift_propulsor_group3', 'lift_propulsor_group4']       
     for i in range(8):
         lift_rotor_ESC          = deepcopy(lift_rotor_esc)
-        lift_rotor_ESC.tag      = 'lift_rotor_esc' + str(i + 1)  
+        lift_rotor_ESC.tag      = 'lift_rotor_esc' + str(i + 1) 
+        if i in [0, 3]:  # First and second rotors
+            lift_rotor_ESC.propulsor_group = propulsor_group_names[0]
+        elif i in [1,2]:
+            lift_rotor_ESC.propulsor_group = propulsor_group_names[1]
+        elif i in [6,7]:
+            lift_rotor_ESC.propulsor_group = propulsor_group_names[2]
+        elif i in [4,5]:
+            lift_rotor_ESC.propulsor_group = propulsor_group_names[3]  
         bus.electronic_speed_controllers.append(lift_rotor_ESC) 
     
     #------------------------------------------------------------------------------------------------------------------------------------  
@@ -778,7 +800,6 @@ def vehicle_setup() :
     lift_rotor.number_of_blades                  = 3     
     lift_rotor.hover.design_altitude             = 40 * Units.feet  
     lift_rotor.hover.design_thrust               = Hover_Load/8
-    lift_rotor.propulsor_group                   = 'lift_propulsor'
     lift_rotor.hover.design_freestream_velocity  = np.sqrt(lift_rotor.hover.design_thrust/(2*1.2*np.pi*(lift_rotor.tip_radius**2)))  
     lift_rotor.oei.design_altitude               = 40 * Units.feet  
     lift_rotor.oei.design_thrust                 = Hover_Load/6  
@@ -795,23 +816,34 @@ def vehicle_setup() :
                                                     rel_path + 'Airfoils' + separator + 'Polars' + separator + 'NACA_4412_polar_Re_7500000.txt' ]
     lift_rotor.append_airfoil(airfoil)               
     lift_rotor.airfoil_polar_stations           = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
-    lift_rotor                                  = design_lift_rotor(lift_rotor)   
-    
-    lift_rotor_origins                     = [[ -0.073, 1.950,  1.2] ,  [  -0.073, -1.950 ,  1.2],
-                                              [ 4.440 , 1.950 ,  1.2] ,[ 4.440 , -1.950,  1.2],
-                                              [ 0.219 ,  4.891 , 1.2]  ,[ 0.219 , - 4.891 , 1.2],
-                                              [ 4.196 ,  4.891 , 1.2] ,[4.196, - 4.891 , 1.2]]
+    lift_rotor                                  = design_lift_rotor(lift_rotor)    
+    lift_rotor_origins                          = [[-0.073 ,  1.950 , 1.2] ,[-0.073  , -1.950  , 1.2],
+                                                   [ 4.440 ,  1.950 , 1.2] ,[ 4.440  , -1.950  , 1.2],
+                                                   [ 0.219 ,  4.891 , 1.2] ,[ 0.219  , - 4.891 , 1.2],
+                                                   [ 4.196 ,  4.891 , 1.2] ,[ 4.196  , - 4.891 , 1.2]]
     
     # Appending rotors with different origins
-    rotations = [-1,1,-1,1,-1,1,-1,1] 
-    angle_offsets        = np.random.rand(8)*(np.pi)    
-    for ii in range(8):
+    rotations             = [-1,1,-1,1,-1,1,-1,1]  
+    for i in range(8):
         lift_rotor                        = deepcopy(lift_rotor)
-        lift_rotor.tag                    = 'lift_rotor_' + str(ii+1)
-        lift_rotor.rotation               = rotations[ii]
-        lift_rotor.origin                 = [lift_rotor_origins[ii]]
-        lift_rotor.phase_offset_angle     = angle_offsets[ii] 
-        lift_rotor.active = False
+        lift_rotor.tag                    = 'lift_rotor_' + str(i+1)
+        lift_rotor.rotation               = rotations[i]
+        lift_rotor.origin                 = [lift_rotor_origins[i]] 
+        lift_rotor.active                 = True
+        if i in[1,3,5,7]:
+            lift_rotor.orientation_euler_angles          = [-10.0* Units.degrees,np.pi/2.,0.]    # vector of angles defining default orientation of rotor
+        else:
+            lift_rotor.orientation_euler_angles          = [10.0*Units.degrees,np.pi/2.,0.]   # vector of angles defining default orientation of rotor
+           
+        # pairing propulsor groups based on lift rotor origins
+        if i in [0, 3]:  # First and second rotors
+            lift_rotor.propulsor_group = propulsor_group_names[0]
+        elif i in [1,2]:
+            lift_rotor.propulsor_group = propulsor_group_names[1]
+        elif i in [6,7]:
+            lift_rotor.propulsor_group = propulsor_group_names[2]
+        elif i in [4,5]:
+            lift_rotor.propulsor_group = propulsor_group_names[3] 
         bus.rotors.append(lift_rotor)    
         
         
@@ -824,7 +856,6 @@ def vehicle_setup() :
     lift_rotor_motor.nominal_voltage         = bat.pack.maximum_voltage*3/4  
     lift_rotor_motor.origin                  = lift_rotor.origin 
     lift_rotor_motor.propeller_radius        = lift_rotor.tip_radius
-    lift_rotor_motor.propulsor_group         = 'lift_propulsor'   
     lift_rotor_motor.no_load_current         = 0.01  
     lift_rotor_motor.wing_mounted            = True 
     lift_rotor_motor.wing_tag                = 'main_wing'
@@ -838,7 +869,17 @@ def vehicle_setup() :
     for i in range(8):
         lr_motor           = deepcopy(lift_rotor_motor)
         lr_motor.tag       = 'lift_rotor_motor_' + str(i+1)
-        lift_rotor.origin  = [lift_rotor_origins[ii]]
+        lift_rotor.origin  = [lift_rotor_origins[i]]
+        
+        if i in [0, 3]:  # First and second rotors
+            lr_motor.propulsor_group = propulsor_group_names[0]
+        elif i in [1,2]:
+            lr_motor.propulsor_group = propulsor_group_names[1]
+        elif i in [6,7]:
+            lr_motor.propulsor_group = propulsor_group_names[2]
+        elif i in [4,5]:
+            lr_motor.propulsor_group = propulsor_group_names[3]
+                
         bus.motors.append(lr_motor) 
     
     # append bus   
@@ -889,7 +930,7 @@ def configs_setup(vehicle):
 
     base_config = RCAIDE.Components.Configs.Config(vehicle)
     base_config.tag = 'base' 
-    base_config.networks.all_electric.busses.bus.active_propulsor_groups = ['forward_propulsor' ,'lift_propulsor']    
+    base_config.networks.all_electric.busses.bus.active_propulsor_groups = ['forward_propulsor' ,'lift_propulsor_group1', 'lift_propulsor_group2','lift_propulsor_group3', 'lift_propulsor_group4']   
     configs.append(base_config)
 
 
@@ -906,8 +947,8 @@ def configs_setup(vehicle):
     
 
     vertical_config = RCAIDE.Components.Configs.Config(vehicle)
-    vertical_config.tag = 'vertical_flight'  
-    vertical_config.networks.all_electric.busses.bus.active_propulsor_groups = ['lift_propulsor'] 
+    vertical_config.tag = 'vertical_flight'     
+    vertical_config.networks.all_electric.busses.bus.active_propulsor_groups = ['lift_propulsor_group1', 'lift_propulsor_group2','lift_propulsor_group3', 'lift_propulsor_group4']   
     configs.append(vertical_config)  
 
 
@@ -1012,150 +1053,150 @@ def mission_setup(analyses,vehicle):
     segment.altitude_end                            = 200.  * Units.ft   
     segment.initial_battery_state_of_charge         = 1.0 
     segment.climb_rate                              = 500. * Units['ft/min']  
-    segment = analyses.base.energy.networks.all_electric.add_unknowns_and_residuals_to_segment(segment) 
+    segment = analyses.vertical_flight.energy.networks.all_electric.add_unknowns_and_residuals_to_segment(segment) 
     mission.append_segment(segment)
     
-    # ------------------------------------------------------------------
-    #   First Cruise Segment: Transition
-    # ------------------------------------------------------------------
+    ## ------------------------------------------------------------------
+    ##   First Cruise Segment: Transition
+    ## ------------------------------------------------------------------
  
-    segment                                         = Segments.Transition.Constant_Acceleration_Constant_Pitchrate_Constant_Altitude(base_segment)
-    segment.tag                                     = "Vertical_Transition"  
-    segment.analyses.extend( analyses.transition_flight )   
-    segment.altitude                                = 200.  * Units.ft           
-    segment.air_speed_start                         = 500. * Units['ft/min']
-    segment.air_speed_end                           = 0.75 * Vstall
-    segment.acceleration                            = 1.5
-    segment.pitch_initial                           = 0.0 * Units.degrees
-    segment.pitch_final                             = 2.  * Units.degrees    
-    segment = analyses.base.energy.networks.all_electric.add_unknowns_and_residuals_to_segment(segment)  
-    mission.append_segment(segment)
+    #segment                                         = Segments.Transition.Constant_Acceleration_Constant_Pitchrate_Constant_Altitude(base_segment)
+    #segment.tag                                     = "Vertical_Transition"  
+    #segment.analyses.extend( analyses.transition_flight )   
+    #segment.altitude                                = 200.  * Units.ft           
+    #segment.air_speed_start                         = 500. * Units['ft/min']
+    #segment.air_speed_end                           = 0.75 * Vstall
+    #segment.acceleration                            = 1.5
+    #segment.pitch_initial                           = 0.0 * Units.degrees
+    #segment.pitch_final                             = 2.  * Units.degrees    
+    #segment = analyses.base.energy.networks.all_electric.add_unknowns_and_residuals_to_segment(segment)  
+    #mission.append_segment(segment)
     
-    # ------------------------------------------------------------------
-    #   Climb Transition 
-    # ------------------------------------------------------------------ 
-    segment                                         = Segments.Transition.Constant_Acceleration_Constant_Angle_Linear_Climb(base_segment)
-    segment.tag                                     = "Climb_Transition" 
-    segment.analyses.extend( analyses.transition_flight)    
-    segment.altitude_start                          = 200.0 * Units.ft   
-    segment.altitude_end                            = 500.0 * Units.ft   
-    segment.air_speed_start                         = 0.75   * Vstall
-    segment.climb_angle                             = 3     * Units.degrees   
-    segment.acceleration                            = 0.25  * Units['m/s/s'] 
-    segment.pitch_initial                           = 2.    * Units.degrees 
-    segment.pitch_final                             = 7.    * Units.degrees    
-    segment = analyses.base.energy.networks.all_electric.add_unknowns_and_residuals_to_segment(segment)
-    mission.append_segment(segment) 
+    ## ------------------------------------------------------------------
+    ##   Climb Transition 
+    ## ------------------------------------------------------------------ 
+    #segment                                         = Segments.Transition.Constant_Acceleration_Constant_Angle_Linear_Climb(base_segment)
+    #segment.tag                                     = "Climb_Transition" 
+    #segment.analyses.extend( analyses.transition_flight)    
+    #segment.altitude_start                          = 200.0 * Units.ft   
+    #segment.altitude_end                            = 500.0 * Units.ft   
+    #segment.air_speed_start                         = 0.75   * Vstall
+    #segment.climb_angle                             = 3     * Units.degrees   
+    #segment.acceleration                            = 0.25  * Units['m/s/s'] 
+    #segment.pitch_initial                           = 2.    * Units.degrees 
+    #segment.pitch_final                             = 7.    * Units.degrees    
+    #segment = analyses.base.energy.networks.all_electric.add_unknowns_and_residuals_to_segment(segment)
+    #mission.append_segment(segment) 
   
-    # ------------------------------------------------------------------
-    #   First Climb
-    # ------------------------------------------------------------------ 
-    segment                                          = Segments.Climb.Linear_Speed_Constant_Rate(base_segment)
-    segment.tag                                      = "Climb_1"   
-    segment.analyses.extend( analyses.forward_flight ) 
-    segment.altitude_start                           = 500.0 * Units.ft   
-    segment.altitude_end                             = 1000. * Units.ft   
-    segment.climb_rate                               = 500.  * Units['ft/min']
-    segment.air_speed_start                          = 104.1  * Units['mph']  
-    segment.air_speed_end                            = 105.  * Units['mph']        
-    segment = analyses.base.energy.networks.all_electric.add_unknowns_and_residuals_to_segment(segment)   
-    mission.append_segment(segment)  
+    ## ------------------------------------------------------------------
+    ##   First Climb
+    ## ------------------------------------------------------------------ 
+    #segment                                          = Segments.Climb.Linear_Speed_Constant_Rate(base_segment)
+    #segment.tag                                      = "Climb_1"   
+    #segment.analyses.extend( analyses.forward_flight ) 
+    #segment.altitude_start                           = 500.0 * Units.ft   
+    #segment.altitude_end                             = 1000. * Units.ft   
+    #segment.climb_rate                               = 500.  * Units['ft/min']
+    #segment.air_speed_start                          = 104.1  * Units['mph']  
+    #segment.air_speed_end                            = 105.  * Units['mph']        
+    #segment = analyses.base.energy.networks.all_electric.add_unknowns_and_residuals_to_segment(segment)   
+    #mission.append_segment(segment)  
 
-    # ------------------------------------------------------------------
-    #  Second Climb
-    # ------------------------------------------------------------------ 
-    segment                                          = Segments.Climb.Linear_Speed_Constant_Rate(base_segment)
-    segment.tag                                      = "Climb_2"  
-    segment.analyses.extend( analyses.forward_flight) 
-    segment.altitude_start                           = 1000.0 * Units.ft   
-    segment.altitude_end                             = 1500. * Units.ft   
-    segment.climb_rate                               = 300.  * Units['ft/min']
-    segment.air_speed_start                          = 105.  * Units['mph']  
-    segment.air_speed_end                            = 110.  * Units['mph']        
-    segment = analyses.base.energy.networks.all_electric.add_unknowns_and_residuals_to_segment(segment,estimated_propulsor_group_throttles = [[0.8,0]])     
-    mission.append_segment(segment)  
+    ## ------------------------------------------------------------------
+    ##  Second Climb
+    ## ------------------------------------------------------------------ 
+    #segment                                          = Segments.Climb.Linear_Speed_Constant_Rate(base_segment)
+    #segment.tag                                      = "Climb_2"  
+    #segment.analyses.extend( analyses.forward_flight) 
+    #segment.altitude_start                           = 1000.0 * Units.ft   
+    #segment.altitude_end                             = 1500. * Units.ft   
+    #segment.climb_rate                               = 300.  * Units['ft/min']
+    #segment.air_speed_start                          = 105.  * Units['mph']  
+    #segment.air_speed_end                            = 110.  * Units['mph']        
+    #segment = analyses.base.energy.networks.all_electric.add_unknowns_and_residuals_to_segment(segment,estimated_propulsor_group_throttles = [[0.8,0]])     
+    #mission.append_segment(segment)  
 
-    # ------------------------------------------------------------------
-    #   Third Cruise Segment: Constant Acceleration, Constant Altitude
-    # ------------------------------------------------------------------ 
-    segment                                          = Segments.Cruise.Constant_Speed_Constant_Altitude(base_segment)
-    segment.tag                                      = "Cruise"  
-    segment.analyses.extend( analyses.forward_flight )                  
-    segment.altitude                                 = 1500.0 * Units.ft  
-    segment.air_speed                                = 110.  * Units['mph']  
-    segment.distance                                 = 50 *Units.nmi 
-    segment = analyses.base.energy.networks.all_electric.add_unknowns_and_residuals_to_segment(segment,estimated_propulsor_group_throttles = [[0.8,0]])      
-    mission.append_segment(segment)   
+    ## ------------------------------------------------------------------
+    ##   Third Cruise Segment: Constant Acceleration, Constant Altitude
+    ## ------------------------------------------------------------------ 
+    #segment                                          = Segments.Cruise.Constant_Speed_Constant_Altitude(base_segment)
+    #segment.tag                                      = "Cruise"  
+    #segment.analyses.extend( analyses.forward_flight )                  
+    #segment.altitude                                 = 1500.0 * Units.ft  
+    #segment.air_speed                                = 110.  * Units['mph']  
+    #segment.distance                                 = 50 *Units.nmi 
+    #segment = analyses.base.energy.networks.all_electric.add_unknowns_and_residuals_to_segment(segment,estimated_propulsor_group_throttles = [[0.8,0]])      
+    #mission.append_segment(segment)   
     
-    # ------------------------------------------------------------------
-    #   First Descent Segment: Constant Acceleration, Constant Rate
-    # ------------------------------------------------------------------
+    ## ------------------------------------------------------------------
+    ##   First Descent Segment: Constant Acceleration, Constant Rate
+    ## ------------------------------------------------------------------
 
-    segment = Segments.Climb.Linear_Speed_Constant_Rate(base_segment)
-    segment.tag = "Descent"  
-    segment.analyses.extend(analyses.forward_flight)  
-    segment.altitude_start                           = 1500.0 * Units.ft  
-    segment.altitude_end                             = 1000. * Units.ft  
-    segment.climb_rate                               = -500.  * Units['ft/min']
-    segment.air_speed_start                          = 110.  * Units['mph']  
-    segment.air_speed_end                            = Vstall     
-    segment = analyses.base.energy.networks.all_electric.add_unknowns_and_residuals_to_segment(segment,estimated_propulsor_group_throttles = [[0.8,0]])      
-    mission.append_segment(segment)  
+    #segment = Segments.Climb.Linear_Speed_Constant_Rate(base_segment)
+    #segment.tag = "Descent"  
+    #segment.analyses.extend(analyses.forward_flight)  
+    #segment.altitude_start                           = 1500.0 * Units.ft  
+    #segment.altitude_end                             = 1000. * Units.ft  
+    #segment.climb_rate                               = -500.  * Units['ft/min']
+    #segment.air_speed_start                          = 110.  * Units['mph']  
+    #segment.air_speed_end                            = Vstall     
+    #segment = analyses.base.energy.networks.all_electric.add_unknowns_and_residuals_to_segment(segment,estimated_propulsor_group_throttles = [[0.8,0]])      
+    #mission.append_segment(segment)  
      
             
-    # ------------------------------------------------------------------
-    #   First Cruise Segment: Transition
-    # ------------------------------------------------------------------ 
-    segment                                          = Segments.Transition.Constant_Acceleration_Constant_Angle_Linear_Climb(base_segment)
-    segment.tag                                      = "Descent_Transition"  
-    segment.analyses.extend( analyses.transition_flight ) 
-    segment.altitude_start                           = 1000.0 * Units.ft   
-    segment.altitude_end                             = 300.0 * Units.ft   
-    segment.climb_angle                              = 3 * Units.degrees
-    segment.acceleration                             = -0.25 * Units['m/s/s']    
-    segment.pitch_initial                            = 4.3  * Units.degrees  
-    segment.pitch_final                              = 7. * Units.degrees            
-    segment = analyses.base.energy.networks.all_electric.add_unknowns_and_residuals_to_segment(segment) 
-    mission.append_segment(segment)  
+    ## ------------------------------------------------------------------
+    ##   First Cruise Segment: Transition
+    ## ------------------------------------------------------------------ 
+    #segment                                          = Segments.Transition.Constant_Acceleration_Constant_Angle_Linear_Climb(base_segment)
+    #segment.tag                                      = "Descent_Transition"  
+    #segment.analyses.extend( analyses.transition_flight ) 
+    #segment.altitude_start                           = 1000.0 * Units.ft   
+    #segment.altitude_end                             = 300.0 * Units.ft   
+    #segment.climb_angle                              = 3 * Units.degrees
+    #segment.acceleration                             = -0.25 * Units['m/s/s']    
+    #segment.pitch_initial                            = 4.3  * Units.degrees  
+    #segment.pitch_final                              = 7. * Units.degrees            
+    #segment = analyses.base.energy.networks.all_electric.add_unknowns_and_residuals_to_segment(segment) 
+    #mission.append_segment(segment)  
 
-    # ------------------------------------------------------------------
-    #   Fifth Cuise Segment: Transition
-    # ------------------------------------------------------------------ 
-    segment                                         = Segments.Transition.Constant_Acceleration_Constant_Pitchrate_Constant_Altitude(base_segment)
-    segment.tag                                     = "Decelerating_Transition"   
-    segment.analyses.extend( analyses.transition_flight ) 
-    segment.altitude                                = 300.  * Units.ft     
-    segment.air_speed_start                         = 36.5 * Units['mph'] 
-    segment.air_speed_end                           = 300. * Units['ft/min'] 
-    segment.acceleration                            = -0.25 * Units['m/s/s']    
-    segment.pitch_initial                           = 7.  * Units.degrees  
-    segment.pitch_final                             = 7. * Units.degrees      
-    segment = analyses.base.energy.networks.all_electric.add_unknowns_and_residuals_to_segment(segment)  
-    mission.append_segment(segment)       
+    ## ------------------------------------------------------------------
+    ##   Fifth Cuise Segment: Transition
+    ## ------------------------------------------------------------------ 
+    #segment                                         = Segments.Transition.Constant_Acceleration_Constant_Pitchrate_Constant_Altitude(base_segment)
+    #segment.tag                                     = "Decelerating_Transition"   
+    #segment.analyses.extend( analyses.transition_flight ) 
+    #segment.altitude                                = 300.  * Units.ft     
+    #segment.air_speed_start                         = 36.5 * Units['mph'] 
+    #segment.air_speed_end                           = 300. * Units['ft/min'] 
+    #segment.acceleration                            = -0.25 * Units['m/s/s']    
+    #segment.pitch_initial                           = 7.  * Units.degrees  
+    #segment.pitch_final                             = 7. * Units.degrees      
+    #segment = analyses.base.energy.networks.all_electric.add_unknowns_and_residuals_to_segment(segment)  
+    #mission.append_segment(segment)       
     
-    # ------------------------------------------------------------------
-    #   Third Descent Segment: Constant Speed, Constant Rate
-    # ------------------------------------------------------------------ 
-    segment                                         = Segments.Vertical_Flight.Descent(base_segment)
-    segment.tag                                     = "Vertical_Descent" 
-    segment.analyses.extend( analyses.vertical_flight)     
-    segment.altitude_start                          = 300.0 * Units.ft   
-    segment.altitude_end                            = 0.   * Units.ft  
-    segment.descent_rate                            = 300. * Units['ft/min']      
-    segment = analyses.base.energy.networks.all_electric.add_unknowns_and_residuals_to_segment(segment)  
-    mission.append_segment(segment)  
+    ## ------------------------------------------------------------------
+    ##   Third Descent Segment: Constant Speed, Constant Rate
+    ## ------------------------------------------------------------------ 
+    #segment                                         = Segments.Vertical_Flight.Descent(base_segment)
+    #segment.tag                                     = "Vertical_Descent" 
+    #segment.analyses.extend( analyses.vertical_flight)     
+    #segment.altitude_start                          = 300.0 * Units.ft   
+    #segment.altitude_end                            = 0.   * Units.ft  
+    #segment.descent_rate                            = 300. * Units['ft/min']      
+    #segment = analyses.base.energy.networks.all_electric.add_unknowns_and_residuals_to_segment(segment)  
+    #mission.append_segment(segment)  
   
 
-    # ------------------------------------------------------------------
-    #  Charge Segment: 
-    # ------------------------------------------------------------------  
-    # Charge Model 
-    segment                                         = Segments.Ground.Battery_Recharge(base_segment)     
-    segment.tag                                     = 'Recharge' 
-    segment.time                                    = 1 * Units.hr
-    segment.analyses.extend(analyses.base)              
-    segment = analyses.base.energy.networks.all_electric.add_unknowns_and_residuals_to_segment(segment)   
-    mission.append_segment(segment)    
+    ## ------------------------------------------------------------------
+    ##  Charge Segment: 
+    ## ------------------------------------------------------------------  
+    ## Charge Model 
+    #segment                                         = Segments.Ground.Battery_Recharge(base_segment)     
+    #segment.tag                                     = 'Recharge' 
+    #segment.time                                    = 1 * Units.hr
+    #segment.analyses.extend(analyses.base)              
+    #segment = analyses.base.energy.networks.all_electric.add_unknowns_and_residuals_to_segment(segment)   
+    #mission.append_segment(segment)    
     return mission 
 
 
