@@ -915,7 +915,7 @@ def vehicle_setup() :
     
     #vehicle.weight_breakdown  = breakdown
     #compute_component_centers_of_gravity(vehicle)
-    #vehicle.center_of_gravity() 
+    vehicle.center_of_gravity() 
     
     return vehicle
 
