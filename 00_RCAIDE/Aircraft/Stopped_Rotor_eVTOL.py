@@ -10,20 +10,19 @@
 # ---------------------------------------------------------------------
 import RCAIDE
 from RCAIDE.Core import Units, Data   
-from RCAIDE.Energy.Networks.All_Electric                                      import All_Electric 
-from RCAIDE.Methods.Performance.estimate_cruise_drag                          import estimate_cruise_drag
-from RCAIDE.Methods.Geometry.Two_Dimensional.Planform                         import segment_properties
-from RCAIDE.Methods.Power.Battery.Sizing                                      import initialize_from_circuit_configuration 
-from RCAIDE.Methods.Weights.Correlation_Buildups.Propulsion                   import nasa_motor
-from RCAIDE.Methods.Propulsion                                                import size_optimal_motor
-from RCAIDE.Methods.Propulsion                                                import design_propeller ,design_lift_rotor 
-from RCAIDE.Methods.Weights.Physics_Based_Buildups.eVTOL                       import compute_weight 
-from RCAIDE.Methods.Geometry.Two_Dimensional.Planform                         import wing_segmented_planform 
-from RCAIDE.Methods.Weights.Physics_Based_Buildups.eVTOL.converge_evtol_weight import converge_evtol_weight   
-from RCAIDE.Methods.Performance.estimate_stall_speed                          import estimate_stall_speed 
-from RCAIDE.Visualization                                                     import *       
+from RCAIDE.Energy.Networks.All_Electric                                       import All_Electric 
+from RCAIDE.Methods.Performance.estimate_cruise_drag                           import estimate_cruise_drag
+from RCAIDE.Methods.Geometry.Two_Dimensional.Planform                          import segment_properties
+from RCAIDE.Methods.Power.Battery.Sizing                                       import initialize_from_circuit_configuration 
+from RCAIDE.Methods.Weights.Correlation_Buildups.Propulsion                    import nasa_motor
+from RCAIDE.Methods.Propulsion.Design                                          import size_optimal_motor, design_propeller ,design_lift_rotor 
+from RCAIDE.Methods.Weights.Physics_Based_Buildups.Electric                    import compute_weight , converge_weight
+from RCAIDE.Methods.Geometry.Two_Dimensional.Planform                          import wing_segmented_planform  
+from RCAIDE.Methods.Performance.estimate_stall_speed                           import estimate_stall_speed 
+from RCAIDE.Visualization                                                      import *       
  
 import os
+import pickle
 import numpy as np 
 from copy import deepcopy  
 import matplotlib.pyplot as plt  
@@ -32,8 +31,14 @@ import matplotlib.pyplot as plt
 #  REGRESSION
 # ----------------------------------------------------------------------------------------------------------------------  
 def main():      
+    new_vehicle = False
     # vehicle data
-    vehicle  = vehicle_setup() 
+    
+    if new_vehicle:
+        vehicle  = vehicle_setup() 
+        save_results(vehicle, 'Lift_Cruise')
+    else: 
+        vehicle = load_results('Lift_Cruise')        
     
     # Set up vehicle configs
     configs  = configs_setup(vehicle)
@@ -52,27 +57,26 @@ def main():
     
     # plot the results
     plot_results(results) 
-           
-    ## mission analysis 
-    #results = missions.base_mission.evaluate()  
-
-    ## plot the results
-    #plot_mission(results) 
-
+    
     # plot vehicle 
     plot_3d_vehicle(configs.base,
                     show_wing_control_points    = False,
                     show_rotor_wake_vortex_core = False,
-                    min_x_axis_limit            = 0,
-                    max_x_axis_limit            = 20,
-                    min_y_axis_limit            = -10,
-                    max_y_axis_limit            = 10,
+                    min_x_axis_limit            = -5,
+                    max_x_axis_limit            = 14,
+                    min_y_axis_limit            = -12,
+                    max_y_axis_limit            = 12,
                     min_z_axis_limit            = -10,
                     max_z_axis_limit            = 10,
-                    camera_x                    = 0,
-                    camera_y                    = 0,
-                    camera_z                    = 1,)      
+                    camera_eye_x                = -1,
+                    camera_eye_y                = 0,
+                    camera_eye_z                = 0,
+                    camera_center_x             = 0.,
+                    camera_center_y             = 0.,
+                    camera_center_z             = 0.,)         
+           
         
+
     return  
 
 
@@ -131,7 +135,7 @@ def vehicle_setup() :
     
     ospath                        = os.path.abspath(__file__)
     separator                     = os.path.sep
-    rel_path                      = ospath.split( 'tut_eVTOL.py')[0]  +  '..' + separator   
+    rel_path                      = ospath.split( 'Stopped_Rotor_eVTOL.py')[0]  +  '..' + separator   
     airfoil                       = RCAIDE.Components.Airfoils.Airfoil()
     airfoil.coordinate_file       = rel_path + 'Airfoils' + separator + 'NACA_63_412.txt'
     
@@ -234,74 +238,6 @@ def vehicle_setup() :
     
     # add to vehicle 
     vehicle.append_component(wing)        
-     
-    #------------------------------------------------------------------------------------------------------------------------------------  
-    #   Vertical Stabilizer
-    #------------------------------------------------------------------------------------------------------------------------------------  
-    wing = RCAIDE.Components.Wings.Vertical_Tail()
-    wing.tag = 'vertical_stabilizer'
-    
-    
-    wing.aspect_ratio             = 1.87749
-    wing.sweeps.quarter_chord     = 40 * Units.degrees
-    wing.thickness_to_chord       = 0.12
-    wing.spans.projected          = 1.78701
-    wing.chords.root              = 1.79192
-    wing.total_length             = 1.79192
-    wing.chords.tip               = 0.44578
-    wing.taper                    = wing.chords.tip / wing.chords.root 
-    wing.chords.mean_aerodynamic  = 0.809  
-    wing.areas.reference          = 1.70089
-    wing.areas.wetted             = 1.70089 * 2
-    wing.areas.exposed            = 1.70089 * 2
-    wing.twists.root              = 0.0 * Units.degrees
-    wing.twists.tip               = 0.0 * Units.degrees
-    wing.origin                   = [[  4.613,0.0 , 0.596]]
-    wing.aerodynamic_center       = [0, 0.0, 0]  
-    
-    wing.vertical                = True
-    wing.symmetric               = False
-    wing.t_tail                  = False
-    
-    wing.dynamic_pressure_ratio  = 1.0
-    
-    
-    # Wing Segments
-    segment                               = RCAIDE.Components.Wings.Segment()
-    segment.tag                           = 'root'
-    segment.percent_span_location         = 0.0
-    segment.root_chord_percent            = 1.0
-    segment.twist                         = 0. * Units.deg 
-    segment.dihedral_outboard             = 0 * Units.degrees
-    segment.sweeps.quarter_chord          = 50.0  * Units.degrees  
-    segment.thickness_to_chord            = .12   
-    wing.append_segment(segment)
-    
-    segment                               = RCAIDE.Components.Wings.Segment()
-    segment.tag                           = 'segment_1'
-    segment.percent_span_location         = 0.41599/wing.spans.projected
-    segment.twist                         = 0. * Units.deg
-    segment.root_chord_percent            = 1.14447/wing.chords.root   
-    segment.dihedral_outboard             = 0. * Units.degrees
-    segment.sweeps.quarter_chord          = 40.0 * Units.degrees   
-    segment.thickness_to_chord            = .1
-    wing.append_segment(segment)
-    
-    segment                               = RCAIDE.Components.Wings.Segment()
-    segment.tag                           = 'segment_2'
-    segment.percent_span_location         = 1.0
-    segment.twist                         = 0. * Units.deg
-    segment.root_chord_percent            = 0.44578/wing.chords.root 
-    segment.dihedral_outboard             = 0.0 * Units.degrees
-    segment.sweeps.quarter_chord          = 0.0    
-    segment.thickness_to_chord            = .1  
-    wing.append_segment(segment)
-    
-    # Fill out more segment properties automatically
-    wing = segment_properties(wing)        
-    
-    # add to vehicle
-    vehicle.append_component(wing) 
       
     #------------------------------------------------------------------------------------------------------------------------------------
     # ##########################################################   Fuselage  ############################################################   
@@ -564,12 +500,10 @@ def vehicle_setup() :
     nac_segment.width              = 0.2
     nacelle.append_segment(nac_segment)      
     
-    lift_rotor_nacelle_origins   = [[  -0.073,  1.950, 0.850] ,[ -0.073, -1.950, 0.850],
-                           [   4.413,   1.950 ,0.850] ,[   4.413, -1.950, 0.850],
-                           [   0.219 ,   4.891 , 0.950] ,[   0.219 , -  4.891 ,0.950],
-                           [  4.196 ,   4.891 ,0.950] ,[   4.196, -  4.891 ,0.950]]
-    
-
+    lift_rotor_nacelle_origins   = [[  -0.073,   1.950,  1.0] ,[ -0.073, -1.950,   1.0],
+                                    [   4.413,   1.950  ,1.0] ,[   4.413, -1.950,  1.0],
+                                    [   0.219,   4.891  ,1.050] ,[   0.219 , -  4.891 ,1.050],
+                                    [  4.196 ,   4.891  ,1.050] ,[   4.196, -  4.891  ,1.050]]
     
     for ii in range(8):
         rotor_nacelle          = deepcopy(nacelle)
@@ -665,61 +599,186 @@ def vehicle_setup() :
     vehicle.append_component(sys)   
     
     
+    
+   
     #------------------------------------------------------------------------------------------------------------------------------------
     # ########################################################  Energy Network  ######################################################### 
     #------------------------------------------------------------------------------------------------------------------------------------ 
     net                              = All_Electric()   
     
     #------------------------------------------------------------------------------------------------------------------------------------  
-    # Bus
+    # Forward Bus
+    #------------------------------------------------------------------------------------------------------------------------------------    
+    forward_bus                                            = RCAIDE.Energy.Distribution.Bus_Power_Control_Unit() 
+    forward_bus.tag                                        = 'forward_bus'
+     
+    # Battery    
+    forward_battery                                                    = RCAIDE.Energy.Storages.Batteries.Lithium_Ion_NMC() 
+    forward_battery.tag                                                = 'forward_bus_battery'
+    forward_battery.pack.electrical_configuration.series               = 140   
+    forward_battery.pack.electrical_configuration.parallel             = 60
+    initialize_from_circuit_configuration(forward_battery)  
+    forward_battery.module.number_of_modules                           = 14 
+    forward_battery.module.geometrtic_configuration.total              = forward_battery.pack.electrical_configuration.total
+    forward_battery.module.voltage                                     = forward_battery.pack.maximum_voltage/forward_battery.module.number_of_modules 
+    forward_battery.module.geometrtic_configuration.normal_count       = 25
+    forward_battery.module.geometrtic_configuration.parallel_count     = 40 
+    forward_bus.voltage                                    =  forward_battery.pack.maximum_voltage  
+    forward_bus.batteries.append(forward_battery)     
+     
+    # Payload   
+    payload                        = RCAIDE.Energy.Peripherals.Avionics()
+    payload.power_draw             = 10. # Watts 
+    payload.mass_properties.mass   = 1.0 * Units.kg
+    forward_bus.payload            = payload 
+    
+    # Avionics   
+    avionics                       = RCAIDE.Energy.Peripherals.Avionics()
+    avionics.power_draw            = 10. # Watts  
+    avionics.mass_properties.mass  = 1.0 * Units.kg
+    forward_bus.avionics           = avionics   
+    
+    
+    P = design_aircraft_propeller(vehicle)
+    PM = design_aircraft_propeller_motor(forward_battery,P) 
+    forward_propulsor_origins                              = [[  6.583,propeller_nacelle_origins[0][1] ,propeller_nacelle_origins[1][2]] ,
+                                                              [  6.583,propeller_nacelle_origins[1][1] ,propeller_nacelle_origins[1][2]]]       
+        
+        
+    for propulsor_index in range(2): 
+        propulsor      = RCAIDE.Energy.Propulsors.Propulsor()
+        propulsor.tag  = 'foward_propulsor_' + str(propulsor_index)  
+    
+        #------------------------------------------------------------------------------------------------------------------------------------  
+        # Electronic Speed Controller    
+        #------------------------------------------------------------------------------------------------------------------------------------  
+        propeller_esc                          = RCAIDE.Energy.Propulsors.Modulators.Electronic_Speed_Controller() 
+        propeller_esc.efficiency               = 0.95  
+        propeller_esc.tag                      = 'propeller_esc_' + str(propulsor_index) 
+        propulsor.electronic_speed_controller  = propeller_esc     
+        
+        #------------------------------------------------------------------------------------------------------------------------------------  
+        # Propeller Design - only need to design it once 
+        #------------------------------------------------------------------------------------------------------------------------------------            
+        proppeller                            = deepcopy(P)
+        proppeller.tag                        = 'propeller_' + str(propulsor_index) 
+        proppeller.origin                     = [forward_propulsor_origins[propulsor_index]]          
+        propulsor.rotor = proppeller
+        
+        #------------------------------------------------------------------------------------------------------------------------------------  
+        # Propeller Motor Design - only need to design it once 
+        #------------------------------------------------------------------------------------------------------------------------------------   
+        propeller_motor                       = deepcopy(PM)
+        propeller_motor.tag                   = 'propeller_motor_' + str(propulsor_index)
+        propeller_motor.origin                = [forward_propulsor_origins[propulsor_index]]   
+        propulsor.motor                       = propeller_motor 
+        
+        # append propulsor onto bus 
+        forward_bus.propulsors.append(propulsor)
+        
+    # append forward bus
+    net.busses.append(forward_bus)   
+    
     #------------------------------------------------------------------------------------------------------------------------------------  
-    bus                              = RCAIDE.Energy.Distributors.Bus_Power_Control_Unit()
-    bus.fixed_voltage                = False 
-    bus.active_propulsor_groups      = ['forward_propulsor' ,'lift_propulsor_group1', 'lift_propulsor_group2', 
-                             'lift_propulsor_group3', 'lift_propulsor_group4']    
+    # Lift Bus
+    #------------------------------------------------------------------------------------------------------------------------------------  
+    # Bus 
+    lift_bus                                                        = RCAIDE.Energy.Distribution.Bus_Power_Control_Unit()
+    lift_bus.tag                                                    = 'lift_bus' 
 
+    # Battery    
+    lift_battery                                                    = RCAIDE.Energy.Storages.Batteries.Lithium_Ion_NMC() 
+    lift_battery.tag                                                = 'lift_bus_battery'
+    lift_battery.pack.electrical_configuration.series               = 140   
+    lift_battery.pack.electrical_configuration.parallel             = 20
+    initialize_from_circuit_configuration(lift_battery)  
+    lift_battery.module.number_of_modules                           = 14 
+    lift_battery.module.geometrtic_configuration.total              = lift_battery.pack.electrical_configuration.total
+    lift_battery.module.voltage                                     = lift_battery.pack.maximum_voltage/lift_battery.module.number_of_modules 
+    lift_battery.module.geometrtic_configuration.normal_count       = 25
+    lift_battery.module.geometrtic_configuration.parallel_count     = 40 
+    lift_bus.voltage                                                =  lift_battery.pack.maximum_voltage  
+    lift_bus.batteries.append(lift_battery)              
+                  
+    # Payload           
+    payload                                                         = RCAIDE.Energy.Peripherals.Avionics()
+    payload.power_draw                                              = 10. # Watts 
+    payload.mass_properties.mass                                    = 1.0 * Units.kg
+    lift_bus.payload                                                = payload 
+                                     
+    # Avionics                                    
+    avionics                                                        = RCAIDE.Energy.Peripherals.Avionics()
+    avionics.power_draw                                             = 10. # Watts  
+    avionics.mass_properties.mass                                   = 1.0 * Units.kg
+    lift_bus.avionics                                               = avionics   
     
-    #------------------------------------------------------------------------------------------------------------------------------------  
-    # Battery   
-    #------------------------------------------------------------------------------------------------------------------------------------  
-    bat                                                    = RCAIDE.Energy.Storages.Batteries.Lithium_Ion_NMC() 
-    bat.pack.electrical_configuration.series               = 140   
-    bat.pack.electrical_configuration.parallel             = 100
-    initialize_from_circuit_configuration(bat)  
-    bat.module.number_of_modules                           = 14 
-    bat.module.geometrtic_configuration.total              = bat.pack.electrical_configuration.total
-    bat.module.voltage                                     = bat.pack.maximum_voltage/bat.module.number_of_modules 
-    bat.module.geometrtic_configuration.normal_count       = 25
-    bat.module.geometrtic_configuration.parallel_count     = 40
-    bus.voltage                      =  bat.pack.maximum_voltage  
-    bus.batteries.append(bat)                                
+    LR  = design_aircraft_rotor(vehicle)
+    LRM = design_aircraft_lift_rotor_motor(lift_battery,LR) 
+    lift_propulsor_origins  = [[-0.073 ,  1.950 , 1.2] ,[-0.073  , -1.950  , 1.2],
+                              [ 4.440 ,  1.950 , 1.2] ,[ 4.440  , -1.950  , 1.2],
+                              [ 0.219 ,  4.891 , 1.2] ,[ 0.219  , - 4.891 , 1.2],
+                              [ 4.196 ,  4.891 , 1.2] ,[ 4.196  , - 4.891 , 1.2]]      
     
-    #------------------------------------------------------------------------------------------------------------------------------------  
-    # Forward Cruise Propulsor System - Electronic Speed Controller    
-    #------------------------------------------------------------------------------------------------------------------------------------  
-    propeller_esc                   = RCAIDE.Energy.Distributors.Electronic_Speed_Controller() 
-    propeller_esc.efficiency        = 0.95  
-    propeller_esc.tag               = 'propeller_esc'  
-    propeller_esc.propulsor_group   = 'forward_propulsor'  
-    bus.electronic_speed_controllers.append(propeller_esc)    
+    for propulsor_index in range(8):   
+
+        propulsor                      = RCAIDE.Energy.Propulsors.Propulsor()
+        propulsor.tag                  = 'lift_propulsor_' + str(propulsor_index)              
+        
+        # Lift Propulsor System - Electronic Speed Controller 
+        lift_rotor_esc                 = RCAIDE.Energy.Propulsors.Modulators.Electronic_Speed_Controller()
+        lift_rotor_esc.efficiency      = 0.95    
+        lift_rotor_esc.tag             = 'lift_rotor_esc_' + str(propulsor_index) 
+        lift_rotor_esc.origin          = [lift_propulsor_origins[propulsor_index]] 
+        propulsor.electronic_speed_controller = lift_rotor_esc 
+
+        #------------------------------------------------------------------------------------------------------------------------------------  
+        # Lift Rotor Design - only need to design it once 
+        #------------------------------------------------------------------------------------------------------------------------------------          
+        lift_rotor                               = deepcopy(LR)
+        if propulsor_index in[1,3,5,7]:
+            lift_rotor.orientation_euler_angles  = [-10.0* Units.degrees,np.pi/2.,0.]    # vector of angles defining default orientation of rotor
+        else:
+            lift_rotor.orientation_euler_angles  = [10.0*Units.degrees,np.pi/2.,0.]   # vector of angles defining default orientation of rotor
+        
+        lift_rotor.tag                           = 'propeller_' + str(propulsor_index) 
+        lift_rotor.origin                        = [lift_propulsor_origins[propulsor_index]]         
+        propulsor.rotor = lift_rotor      
+        
+        #------------------------------------------------------------------------------------------------------------------------------------               
+        # Lift Rotor Motor Design - only need to design it once 
+        #------------------------------------------------------------------------------------------------------------------------------------   
+        lift_rotor_motor                         = deepcopy(LRM)
+        lift_rotor_motor.tag                     = 'lift_rotor_motor_' + str(propulsor_index) 
+        lift_rotor_motor.origin                  = [lift_propulsor_origins[propulsor_index]]    
+        propulsor.motor                          = lift_rotor_motor 
+
+        # append propulsor onto bus 
+        lift_bus.propulsors.append(propulsor) 
+        
+    # append bus   
+    net.busses.append(lift_bus)  
     
-    propeller_esc_2                 = deepcopy(propeller_esc)
-    propeller_esc_2.tag             = 'propeller_esc_2'
-    propeller_esc_2.propulsor_group = 'forward_propulsor'  
-    bus.electronic_speed_controllers.append(propeller_esc_2)   
+    # append energy network 
+    vehicle.append_energy_network(net) 
     
-    #------------------------------------------------------------------------------------------------------------------------------------  
-    # Forward Cruise Propulsor System - Propeller    
-    #------------------------------------------------------------------------------------------------------------------------------------           
-    g                                           = 9.81                                   # gravitational acceleration 
+    #------------------------------------------------------------------------------------------------------------------------------------
+    # ##################################   Determine Vehicle Mass Properties Using Physic Based Methods  ################################ 
+    #------------------------------------------------------------------------------------------------------------------------------------   
+    converge_weight(vehicle) 
+    breakdown = compute_weight(vehicle)
+    print(breakdown) 
+     
+    return vehicle
+
+def design_aircraft_propeller(vehicle):
+
+    ospath                        = os.path.abspath(__file__)
+    separator                     = os.path.sep
+    rel_path                      = ospath.split( 'Stopped_Rotor_eVTOL.py')[0]  +  '..' + separator   
     speed_of_sound                              = 340                                    # speed of sound 
     Drag                                        = estimate_cruise_drag(vehicle,altitude = 1500. * Units.ft,speed= 130.* Units['mph'] ,lift_coefficient = 0.5 ,profile_drag = 0.06)
-    Hover_Load                                  = vehicle.mass_properties.takeoff*g      # hover load   
-    
-    propeller                                   = RCAIDE.Energy.Converters.Propeller()
-    propeller.number_of_blades                  = 3
-    propeller.tag                               = 'propeller_1'
-    propeller.propulsor_group                   = 'forward_propulsor'  
+    propeller                                   = RCAIDE.Energy.Propulsors.Converters.Propeller()
+    propeller.number_of_blades                  = 3 
     propeller.tip_radius                        = 1.15  
     propeller.hub_radius                        = 0.1 * propeller.tip_radius  
     propeller.cruise.design_freestream_velocity = 130.* Units['mph'] 
@@ -742,81 +801,28 @@ def vehicle_setup() :
                                                   rel_path + 'Airfoils' + separator + 'Polars' + separator + 'NACA_4412_polar_Re_7500000.txt' ]
     propeller.append_airfoil(airfoil)          
     propeller.airfoil_polar_stations            = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0] 
-    propeller                                   = design_propeller(propeller)
-                 
-    propeller_origins                           = [[  6.583,propeller_nacelle_origins[0][1] , propeller_nacelle_origins[1][2]] ,
-                                                   [  6.583,propeller_nacelle_origins[1][1] ,propeller_nacelle_origins[1][2]]]
-    propeller.origin                            = [propeller_origins[0]]
-    bus.rotors.append(propeller)  
+
+    propeller                  = design_propeller(propeller)  
     
-    propeller_2          = deepcopy(propeller)
-    propeller_2.tag      = 'propeller_2'
-    propeller_2.rotation = -1
-    propeller_2.origin   = [propeller_origins[1]]
-    bus.rotors.append(propeller_2)   
     
-    #------------------------------------------------------------------------------------------------------------------------------------  
-    # Forward Cruise Propulsor System - Propeller Motors 
-    #------------------------------------------------------------------------------------------------------------------------------------     
-    propeller_motor                          = RCAIDE.Energy.Converters.Motor()
-    propeller_motor.efficiency               = 0.95
-    propeller_motor.tag                      = 'propeller_motor_1'
-    propeller_motor.origin                   = propeller.origin
-    propeller_motor.nominal_voltage          = bat.pack.maximum_voltage 
-    propeller_motor.origin                   = propeller.origin
-    propeller_motor.propeller_radius         = propeller.tip_radius
-    propeller_motor.propulsor_group          = 'forward_propulsor'
-    propeller_motor.no_load_current          = 0.001
-    propeller_motor.wing_mounted             = True 
-    propeller_motor.wing_tag                 = 'horizontal_tail'
-    propeller_motor.rotor_radius             = propeller.tip_radius
-    propeller_motor.design_torque            = propeller.cruise.design_torque
-    propeller_motor.angular_velocity         = propeller.cruise.design_angular_velocity/propeller_motor.gear_ratio 
-    propeller_motor                          = size_optimal_motor(propeller_motor)
-    propeller_motor.mass_properties.mass     = nasa_motor(propeller_motor.design_torque) 
-    bus.motors.append(propeller_motor) 
+        
     
-    propeller_motor_2          = deepcopy(propeller_motor)
-    propeller_motor_2.tag      = 'propeller_motor_2' 
-    propeller_motor_2.origin   = propeller_2.origin
-    bus.motors.append(propeller_motor_2)
-    
-    #------------------------------------------------------------------------------------------------------------------------------------  
-    # Lift Propulsor System - Electronic Speed Controller
-    #------------------------------------------------------------------------------------------------------------------------------------    
-    lift_rotor_esc                   = RCAIDE.Energy.Distributors.Electronic_Speed_Controller()
-    lift_rotor_esc.propulsor_group   = 'lift_propulsor'
-    lift_rotor_esc.efficiency        = 0.95
-    propulsor_group_names = ['lift_propulsor_group1', 'lift_propulsor_group2', 
-                             'lift_propulsor_group3', 'lift_propulsor_group4']    
-    for i in range(8):
-        lift_rotor_ESC          = deepcopy(lift_rotor_esc)
-        lift_rotor_ESC.tag      = 'lift_rotor_esc' + str(i + 1) 
-        if i in [0,3]:
-            lift_rotor_ESC.propulsor_group = propulsor_group_names[0]
-        elif i in [1,2]:
-            lift_rotor_ESC.propulsor_group = propulsor_group_names[1]
-        elif i in [6,7]:
-            lift_rotor_ESC.propulsor_group = propulsor_group_names[2]
-        elif i in [4,5]:
-            lift_rotor_ESC.propulsor_group = propulsor_group_names[3]
-            
-            
-        bus.electronic_speed_controllers.append(lift_rotor_ESC) 
-    
-    #------------------------------------------------------------------------------------------------------------------------------------  
-    # Lift Propulsor System - Lift Rotors   
-    #------------------------------------------------------------------------------------------------------------------------------------        
-    lift_rotor                                   = RCAIDE.Energy.Converters.Lift_Rotor()  
+    return propeller 
+
+def design_aircraft_rotor(vehicle):
+
+    ospath                                       = os.path.abspath(__file__)
+    separator                                    = os.path.sep
+    rel_path                                     = ospath.split( 'Stopped_Rotor_eVTOL.py')[0]  +  '..' + separator    
+    g                                            = 9.81                                   # gravitational acceleration 
+    Hover_Load                                   = vehicle.mass_properties.takeoff*g      # hover load        
+    lift_rotor                                   = RCAIDE.Energy.Propulsors.Converters.Lift_Rotor()   
+    lift_rotor.active                            = True          
     lift_rotor.tip_radius                        = 2.8/2
     lift_rotor.hub_radius                        = 0.15 * lift_rotor.tip_radius   
     lift_rotor.number_of_blades                  = 3     
     lift_rotor.hover.design_altitude             = 40 * Units.feet  
     lift_rotor.hover.design_thrust               = Hover_Load/8
-    lift_rotor.propulsor_group                   = 'lift_propulsor'
-
-    lift_rotor.hover.design_tip_mach            = 0.75
-    lift_rotor.hover.design_angular_velocity    = lift_rotor.hover.design_tip_mach *speed_of_sound/lift_rotor.tip_radius    
     lift_rotor.hover.design_freestream_velocity  = np.sqrt(lift_rotor.hover.design_thrust/(2*1.2*np.pi*(lift_rotor.tip_radius**2)))  
     lift_rotor.oei.design_altitude               = 40 * Units.feet  
     lift_rotor.oei.design_thrust                 = Hover_Load/6  
@@ -832,122 +838,50 @@ def vehicle_setup() :
                                                     rel_path + 'Airfoils' + separator + 'Polars' + separator + 'NACA_4412_polar_Re_5000000.txt',
                                                     rel_path + 'Airfoils' + separator + 'Polars' + separator + 'NACA_4412_polar_Re_7500000.txt' ]
     lift_rotor.append_airfoil(airfoil)               
-    lift_rotor.airfoil_polar_stations           = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
-    lift_rotor                                  = design_lift_rotor(lift_rotor)  
+    lift_rotor.airfoil_polar_stations           = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]  
+    lift_rotor                                  = design_lift_rotor(lift_rotor)     
+        
     
-    lift_rotor_origins                     = [[ -0.073, 1.950,  1.2] ,  [  -0.073, -1.950 ,  1.2],
-                                              [ 4.440 , 1.950 ,  1.2] ,[ 4.440 , -1.950,  1.2],
-                                              [ 0.219 ,  4.891 , 1.2]  ,[ 0.219 , - 4.891 , 1.2],
-                                              [ 4.196 ,  4.891 , 1.2] ,[4.196, - 4.891 , 1.2]]
-    
-    # Appending rotors with different origins
-    rotations = [-1,1,-1,1,-1,1,-1,1] 
-    angle_offsets        = np.random.rand(8)*(np.pi) 
+    return lift_rotor
 
-    propulsor_group_names = ['lift_propulsor_group1', 'lift_propulsor_group2', 
-                             'lift_propulsor_group3', 'lift_propulsor_group4']
+def design_aircraft_propeller_motor(bat,propeller): 
+
+    propeller_motor                       = RCAIDE.Energy.Propulsors.Converters.Motor()
+    propeller_motor.efficiency            = 0.95 
+    propeller_motor.origin                = propeller.origin
+    propeller_motor.nominal_voltage       = bat.pack.maximum_voltage 
+    propeller_motor.origin                = propeller.origin
+    propeller_motor.propeller_radius      = propeller.tip_radius 
+    propeller_motor.no_load_current       = 0.001
+    propeller_motor.wing_mounted          = True 
+    propeller_motor.wing_tag              = 'horizontal_tail'
+    propeller_motor.rotor_radius          = propeller.tip_radius
+    propeller_motor.design_torque         = propeller.cruise.design_torque
+    propeller_motor.angular_velocity      = propeller.cruise.design_angular_velocity/propeller_motor.gear_ratio  
+    propeller_motor                       = size_optimal_motor(propeller_motor)  
+    propeller_motor.mass_properties.mass  = nasa_motor(propeller_motor.design_torque)     
+    return propeller_motor
+
+
+
+def design_aircraft_lift_rotor_motor(bat,lift_rotor):
     
-    for ii in range(8):
-        lr                        = deepcopy(lift_rotor) 
-        lr.propulsor_group        = 'lift_propulsor'  # needs to change based on group       
-        lr.tag                    = 'lift_rotor_' + str(ii+1)
-        lr.rotation               = rotations[ii]
-        lr.origin                 = [lift_rotor_origins[ii]]
-        lr.phase_offset_angle     = angle_offsets[ii]
-        if ii in[1,3,5,7]:
-            lr.orientation_euler_angles          = [10.0,0.,0.] #* Units.degrees   # vector of angles defining default orientation of rotor
-        else:
-            lr.orientation_euler_angles          = [-10.0,0.,0.] #* Units.degrees  # vector of angles defining default orientation of rotor
-         
-        #if ii == 2:
-           #lr.active = False
-            
-        # pairing propulsor groups based on lift rotor origins
-        if ii in [0, 3]:  # First and second rotors
-            lr.propulsor_group = propulsor_group_names[0]
-        elif ii in [1,2]:
-            lr.propulsor_group = propulsor_group_names[1]
-        elif ii in [6,7]:
-            lr.propulsor_group = propulsor_group_names[2]
-        elif ii in [4,5]:
-            lr.propulsor_group = propulsor_group_names[3]
-            
-        bus.rotors.append(lr)    
-        
-        
-    
-    #------------------------------------------------------------------------------------------------------------------------------------               
-    # Lift Propulsor System - Lift Rotor Motors 
-    #------------------------------------------------------------------------------------------------------------------------------------  
-    lift_rotor_motor                         = RCAIDE.Energy.Converters.Motor()
+    lift_rotor_motor                         = RCAIDE.Energy.Propulsors.Converters.Motor()
     lift_rotor_motor.efficiency              = 0.9
     lift_rotor_motor.nominal_voltage         = bat.pack.maximum_voltage*3/4  
     lift_rotor_motor.origin                  = lift_rotor.origin 
     lift_rotor_motor.propeller_radius        = lift_rotor.tip_radius
-    lift_rotor_motor.propulsor_group         = 'lift_propulsor'   
+    lift_rotor_motor.tag                     = 'lift_rotor_motor'  
     lift_rotor_motor.no_load_current         = 0.01  
     lift_rotor_motor.wing_mounted            = True 
     lift_rotor_motor.wing_tag                = 'main_wing'
     lift_rotor_motor.rotor_radius            = lift_rotor.tip_radius
-    lift_rotor_motor.design_torque           = 1000 # lift_rotor.hover.design_torque
-    lift_rotor_motor.angular_velocity        = 100 # lift_rotor.hover.design_angular_velocity/lift_rotor_motor.gear_ratio   
+    lift_rotor_motor.design_torque           = lift_rotor.hover.design_torque
+    lift_rotor_motor.angular_velocity        = lift_rotor.hover.design_angular_velocity/lift_rotor_motor.gear_ratio  
     lift_rotor_motor                         = size_optimal_motor(lift_rotor_motor)
     lift_rotor_motor.mass_properties.mass    = nasa_motor(lift_rotor_motor.design_torque)    
     
-    # Appending motors with different origins
-    for i in range(8):
-        lr_motor           = deepcopy(lift_rotor_motor)
-        lr_motor.tag       = 'lift_rotor_motor_' + str(i+1)
-        lift_rotor.origin  = [lift_rotor_origins[ii]]
-        
-        if i in [0, 3]:  # First and second rotors
-            lr_motor.propulsor_group = propulsor_group_names[0]
-        elif i in [1,2]:
-            lr_motor.propulsor_group = propulsor_group_names[1]
-        elif i in [6,7]:
-            lr_motor.propulsor_group = propulsor_group_names[2]
-        elif i in [4,5]:
-            lr_motor.propulsor_group = propulsor_group_names[3]
-                
-        bus.motors.append(lr_motor) 
-    
-    # append bus   
-    net.busses.append(bus)
-    
-    #------------------------------------------------------------------------------------------------------------------------------------           
-    # Payload 
-    #------------------------------------------------------------------------------------------------------------------------------------  
-    payload                        = RCAIDE.Energy.Peripherals.Avionics()
-    payload.power_draw             = 10. # Watts 
-    payload.mass_properties.mass   = 1.0 * Units.kg
-    net.payload                    = payload
-    
-    #------------------------------------------------------------------------------------------------------------------------------------  
-    # Avionics
-    #------------------------------------------------------------------------------------------------------------------------------------  
-    avionics                       = RCAIDE.Energy.Peripherals.Avionics()
-    avionics.power_draw            = 20. # Watts  
-    avionics.mass_properties.mass  = 1.0 * Units.kg
-    net.avionics                   = avionics  
-     
-    # append energy network 
-    vehicle.append_energy_network(net)
-    
-    
-    #------------------------------------------------------------------------------------------------------------------------------------
-    # ##################################   Determine Vehicle Mass Properties Using Physic Based Methods  ################################ 
-    #------------------------------------------------------------------------------------------------------------------------------------      
-    settings = Data()
-    converge_evtol_weight(vehicle,settings,contingency_factor = 1.0) 
-    breakdown = compute_weight(vehicle,settings,contingency_factor = 1.0 )
-    print(breakdown)
-    
-    #vehicle.weight_breakdown  = breakdown
-    #compute_component_centers_of_gravity(vehicle)
-    vehicle.center_of_gravity() 
-    
-    return vehicle
-
+    return lift_rotor_motor
 
 # ---------------------------------------------------------------------
 #   Define the Configurations
@@ -958,47 +892,24 @@ def configs_setup(vehicle):
     configs = RCAIDE.Components.Configs.Config.Container()
 
     base_config = RCAIDE.Components.Configs.Config(vehicle)
-    base_config.tag = 'base' 
-    base_config.networks.all_electric.busses.bus.active_propulsor_groups = ['forward_propulsor' ,'lift_propulsor_group1', 'lift_propulsor_group2', 
-                             'lift_propulsor_group3', 'lift_propulsor_group4']    
-    configs.append(base_config)
-
+    base_config.tag = 'base'     
+    configs.append(base_config) 
 
     forward_config = RCAIDE.Components.Configs.Config(vehicle)
-    forward_config.tag = 'forward_flight' 
-    forward_config.networks.all_electric.busses.bus.active_propulsor_groups = ['forward_propulsor'] 
-    configs.append(forward_config) 
-
+    forward_config.tag = 'forward_flight'  
+    forward_config.networks.all_electric.busses['lift_bus'].active = False  
+    configs.append(forward_config)  
 
     transition_config = RCAIDE.Components.Configs.Config(vehicle)
-    transition_config.tag = 'transition_flight' 
-    transition_config.networks.all_electric.busses.bus.active_propulsor_groups = ['forward_propulsor' ,'lift_propulsor_group1', 'lift_propulsor_group2', 
-                             'lift_propulsor_group3', 'lift_propulsor_group4']    
+    transition_config.tag = 'transition_flight'    
     configs.append(transition_config)
     
 
     vertical_config = RCAIDE.Components.Configs.Config(vehicle)
     vertical_config.tag = 'vertical_flight'  
-    vertical_config.networks.all_electric.busses.bus.active_propulsor_groups = ['lift_propulsor_group1', 'lift_propulsor_group2', 
-                             'lift_propulsor_group3', 'lift_propulsor_group4'] 
-    configs.append(vertical_config)  
-
-
-    descent_config = RCAIDE.Components.Configs.Config(vehicle)
-    descent_config.tag = 'descent' 
-    base_config.networks.all_electric.busses.bus.rotors.lift_rotor_1.pitch_command           =-5 * Units.degrees 
-    base_config.networks.all_electric.busses.bus.rotors.lift_rotor_2.pitch_command           =-5 * Units.degrees 
-    base_config.networks.all_electric.busses.bus.rotors.lift_rotor_3.pitch_command           =-5 * Units.degrees 
-    base_config.networks.all_electric.busses.bus.rotors.lift_rotor_4.pitch_command           =-5 * Units.degrees 
-    base_config.networks.all_electric.busses.bus.rotors.lift_rotor_5.pitch_command           =-5 * Units.degrees 
-    base_config.networks.all_electric.busses.bus.rotors.lift_rotor_6.pitch_command           =-5 * Units.degrees 
-    base_config.networks.all_electric.busses.bus.rotors.lift_rotor_7.pitch_command           =-5 * Units.degrees 
-    base_config.networks.all_electric.busses.bus.rotors.lift_rotor_8.pitch_command           =-5 * Units.degrees  
-    descent_config.networks.all_electric.busses.bus.active_propulsor_groups = ['forward_propulsor'] 
-    configs.append(descent_config)  
-    
-    
-    # done!
+    vertical_config.networks.all_electric.busses['forward_bus'].active = False  
+    configs.append(vertical_config)   
+     
     return configs
 
   
@@ -1025,14 +936,14 @@ def base_analysis(vehicle):
     weights         = RCAIDE.Analyses.Weights.Weights_eVTOL()
     weights.vehicle = vehicle
     analyses.append(weights)
- 
+
     # ------------------------------------------------------------------
     #  Aerodynamics Analysis
-    aerodynamics = RCAIDE.Analyses.Aerodynamics.Subsonic_VLM() 
-    aerodynamics.process.compute.lift.inviscid_wings.settings.use_surrogate = False 
-    aerodynamics.geometry = vehicle 
-    analyses.append(aerodynamics)  
-    
+    aerodynamics          = RCAIDE.Analyses.Aerodynamics.Subsonic_VLM() 
+    aerodynamics.geometry = vehicle
+    aerodynamics.settings.drag_coefficient_increment = 0.0000
+    analyses.append(aerodynamics)   
+
     # ------------------------------------------------------------------
     #  Energy
     energy          = RCAIDE.Analyses.Energy.Energy()
@@ -1075,160 +986,150 @@ def mission_setup(analyses,vehicle):
     reference_area = vehicle.reference_area 
     Vstall         = estimate_stall_speed(vehicle_mass,reference_area,altitude = 0.0,maximum_lift_coefficient = 1.2)      
      
-    ## ------------------------------------------------------------------
-    ##   First Climb Segment: Constant Speed, Constant Rate
-    ## ------------------------------------------------------------------
+    # ------------------------------------------------------------------
+    #   First Climb Segment: Constant Speed, Constant Rate
+    # ------------------------------------------------------------------
     segment     = Segments.Vertical_Flight.Climb(base_segment)
     segment.tag = "Vertical_Climb"   
     segment.analyses.extend( analyses.vertical_flight )  
     segment.altitude_start                          = 0.0  * Units.ft  
     segment.altitude_end                            = 200.  * Units.ft   
     segment.initial_battery_state_of_charge         = 1.0 
-    segment.climb_rate                              = 300. * Units['ft/min']  
-    segment = analyses.base.energy.networks.all_electric.add_unknowns_and_residuals_to_segment(segment) 
+    segment.climb_rate                              = 500. * Units['ft/min']   
     mission.append_segment(segment)
     
-    ### ------------------------------------------------------------------
-    ###   First Cruise Segment: Transition
-    ### ------------------------------------------------------------------
+    # ------------------------------------------------------------------
+    #   First Cruise Segment: Transition
+    # ------------------------------------------------------------------
  
-    #segment                                         = Segments.Transition.Constant_Acceleration_Constant_Pitchrate_Constant_Altitude(base_segment)
-    #segment.tag                                     = "Vertical_Transition"  
-    #segment.analyses.extend( analyses.transition_flight )   
-    #segment.altitude                                = 200.  * Units.ft           
-    #segment.air_speed_start                         = 500. * Units['ft/min']
-    #segment.air_speed_end                           = 0.75 * Vstall
-    #segment.acceleration                            = 1.5
-    #segment.pitch_initial                           = 0.0 * Units.degrees
-    #segment.pitch_final                             = 2.  * Units.degrees    
-    #segment = analyses.base.energy.networks.all_electric.add_unknowns_and_residuals_to_segment(segment)  
-    #mission.append_segment(segment)
+    segment                                         = Segments.Transition.Constant_Acceleration_Constant_Pitchrate_Constant_Altitude(base_segment)
+    segment.tag                                     = "Vertical_Transition"  
+    segment.analyses.extend( analyses.transition_flight )   
+    segment.altitude                                = 200.  * Units.ft           
+    segment.air_speed_start                         = 500. * Units['ft/min']
+    segment.air_speed_end                           = 0.75 * Vstall
+    segment.acceleration                            = 1.5
+    segment.pitch_initial                           = 0.0 * Units.degrees
+    segment.pitch_final                             = 2.  * Units.degrees     
+    mission.append_segment(segment)
     
-    ## ------------------------------------------------------------------
-    ##   Climb Transition 
-    ## ------------------------------------------------------------------ 
-    #segment                                         = Segments.Transition.Constant_Acceleration_Constant_Angle_Linear_Climb(base_segment)
-    #segment.tag                                     = "Climb_Transition" 
-    #segment.analyses.extend( analyses.transition_flight)    
-    #segment.altitude_start                          = 200.0 * Units.ft   
-    #segment.altitude_end                            = 500.0 * Units.ft   
-    #segment.air_speed_start                         = 0.75   * Vstall
-    #segment.climb_angle                             = 3     * Units.degrees   
-    #segment.acceleration                            = 0.25  * Units['m/s/s'] 
-    #segment.pitch_initial                           = 2.    * Units.degrees 
-    #segment.pitch_final                             = 7.    * Units.degrees    
-    #segment = analyses.base.energy.networks.all_electric.add_unknowns_and_residuals_to_segment(segment)
-    #mission.append_segment(segment) 
+    # ------------------------------------------------------------------
+    #   Climb Transition 
+    # ------------------------------------------------------------------ 
+    segment                                         = Segments.Transition.Constant_Acceleration_Constant_Angle_Linear_Climb(base_segment)
+    segment.tag                                     = "Climb_Transition" 
+    segment.analyses.extend( analyses.transition_flight)    
+    segment.altitude_start                          = 200.0 * Units.ft   
+    segment.altitude_end                            = 500.0 * Units.ft   
+    segment.air_speed_start                         = 0.75   * Vstall
+    segment.climb_angle                             = 3     * Units.degrees   
+    segment.acceleration                            = 0.25  * Units['m/s/s'] 
+    segment.pitch_initial                           = 2.    * Units.degrees 
+    segment.pitch_final                             = 7.    * Units.degrees     
+    mission.append_segment(segment) 
   
     # ------------------------------------------------------------------
     #   First Climb
     # ------------------------------------------------------------------ 
-    #segment                                          = Segments.Climb.Linear_Speed_Constant_Rate(base_segment)
-    #segment.tag                                      = "Climb_1"   
-    #segment.analyses.extend( analyses.forward_flight ) 
-    #segment.altitude_start                           = 500.0 * Units.ft   
-    #segment.altitude_end                             = 1000. * Units.ft   
-    #segment.climb_rate                               = 500.  * Units['ft/min']
-    #segment.air_speed_start                          = 104.1  * Units['mph']  
-    #segment.air_speed_end                            = 105.  * Units['mph']        
-    #segment = analyses.base.energy.networks.all_electric.add_unknowns_and_residuals_to_segment(segment)   
-    #mission.append_segment(segment)  
+    segment                                          = Segments.Climb.Linear_Speed_Constant_Rate(base_segment)
+    segment.tag                                      = "Climb_1"   
+    segment.analyses.extend( analyses.forward_flight ) 
+    segment.altitude_start                           = 500.0 * Units.ft   
+    segment.altitude_end                             = 1000. * Units.ft   
+    segment.climb_rate                               = 500.  * Units['ft/min']
+    segment.air_speed_start                          = 104.1  * Units['mph']  
+    segment.air_speed_end                            = 105.  * Units['mph']          
+    mission.append_segment(segment)  
 
-    ## ------------------------------------------------------------------
-    ##  Second Climb
-    ## ------------------------------------------------------------------ 
-    #segment                                          = Segments.Climb.Linear_Speed_Constant_Rate(base_segment)
-    #segment.tag                                      = "Climb_2"  
-    #segment.analyses.extend( analyses.forward_flight) 
-    #segment.altitude_start                           = 1000.0 * Units.ft   
-    #segment.altitude_end                             = 1500. * Units.ft   
-    #segment.climb_rate                               = 300.  * Units['ft/min']
-    #segment.air_speed_start                          = 105.  * Units['mph']  
-    #segment.air_speed_end                            = 110.  * Units['mph']        
-    #segment = analyses.base.energy.networks.all_electric.add_unknowns_and_residuals_to_segment(segment,estimated_propulsor_group_throttles = [[0.8,0]])     
-    #mission.append_segment(segment)  
+    # ------------------------------------------------------------------
+    #  Second Climb
+    # ------------------------------------------------------------------ 
+    segment                                          = Segments.Climb.Linear_Speed_Constant_Rate(base_segment)
+    segment.tag                                      = "Climb_2"  
+    segment.analyses.extend( analyses.forward_flight) 
+    segment.altitude_start                           = 1000.0 * Units.ft   
+    segment.altitude_end                             = 1500. * Units.ft   
+    segment.climb_rate                               = 300.  * Units['ft/min']
+    segment.air_speed_start                          = 105.  * Units['mph']  
+    segment.air_speed_end                            = 110.  * Units['mph']            
+    mission.append_segment(segment)  
 
-    ## ------------------------------------------------------------------
-    ##   Third Cruise Segment: Constant Acceleration, Constant Altitude
-    ## ------------------------------------------------------------------ 
-    #segment                                          = Segments.Cruise.Constant_Speed_Constant_Altitude(base_segment)
-    #segment.tag                                      = "Cruise"  
-    #segment.analyses.extend( analyses.forward_flight )                  
-    #segment.altitude                                 = 1500.0 * Units.ft  
-    #segment.air_speed                                = 110.  * Units['mph']  
-    #segment.distance                                 = 50 *Units.nmi 
-    #segment = analyses.base.energy.networks.all_electric.add_unknowns_and_residuals_to_segment(segment,estimated_propulsor_group_throttles = [[0.8,0]])      
-    #mission.append_segment(segment)   
+    # ------------------------------------------------------------------
+    #   Third Cruise Segment: Constant Acceleration, Constant Altitude
+    # ------------------------------------------------------------------ 
+    segment                                          = Segments.Cruise.Constant_Speed_Constant_Altitude(base_segment)
+    segment.tag                                      = "Cruise"  
+    segment.analyses.extend( analyses.forward_flight )                  
+    segment.altitude                                 = 1500.0 * Units.ft  
+    segment.air_speed                                = 110.  * Units['mph']  
+    segment.distance                                 = 50 *Units.nmi      
+    mission.append_segment(segment)   
     
-    ## ------------------------------------------------------------------
-    ##   First Descent Segment: Constant Acceleration, Constant Rate
-    ## ------------------------------------------------------------------
+    # ------------------------------------------------------------------
+    #   First Descent Segment: Constant Acceleration, Constant Rate
+    # ------------------------------------------------------------------
 
-    #segment = Segments.Climb.Linear_Speed_Constant_Rate(base_segment)
-    #segment.tag = "Descent"  
-    #segment.analyses.extend(analyses.forward_flight)  
-    #segment.altitude_start                           = 1500.0 * Units.ft  
-    #segment.altitude_end                             = 1000. * Units.ft  
-    #segment.climb_rate                               = -500.  * Units['ft/min']
-    #segment.air_speed_start                          = 110.  * Units['mph']  
-    #segment.air_speed_end                            = Vstall     
-    #segment = analyses.base.energy.networks.all_electric.add_unknowns_and_residuals_to_segment(segment,estimated_propulsor_group_throttles = [[0.8,0]])      
-    #mission.append_segment(segment)  
+    segment = Segments.Climb.Linear_Speed_Constant_Rate(base_segment)
+    segment.tag = "Descent"  
+    segment.analyses.extend(analyses.forward_flight)  
+    segment.altitude_start                           = 1500.0 * Units.ft  
+    segment.altitude_end                             = 1000. * Units.ft  
+    segment.climb_rate                               = -500.  * Units['ft/min']
+    segment.air_speed_start                          = 110.  * Units['mph']  
+    segment.air_speed_end                            = Vstall          
+    mission.append_segment(segment)  
      
             
-    ## ------------------------------------------------------------------
-    ##   First Cruise Segment: Transition
-    ## ------------------------------------------------------------------ 
-    #segment                                          = Segments.Transition.Constant_Acceleration_Constant_Angle_Linear_Climb(base_segment)
-    #segment.tag                                      = "Descent_Transition"  
-    #segment.analyses.extend( analyses.transition_flight ) 
-    #segment.altitude_start                           = 1000.0 * Units.ft   
-    #segment.altitude_end                             = 300.0 * Units.ft   
-    #segment.climb_angle                              = 3 * Units.degrees
-    #segment.acceleration                             = -0.25 * Units['m/s/s']    
-    #segment.pitch_initial                            = 4.3  * Units.degrees  
-    #segment.pitch_final                              = 7. * Units.degrees            
-    #segment = analyses.base.energy.networks.all_electric.add_unknowns_and_residuals_to_segment(segment) 
-    #mission.append_segment(segment)  
+    # ------------------------------------------------------------------
+    #   First Cruise Segment: Transition
+    # ------------------------------------------------------------------ 
+    segment                                          = Segments.Transition.Constant_Acceleration_Constant_Angle_Linear_Climb(base_segment)
+    segment.tag                                      = "Descent_Transition"  
+    segment.analyses.extend( analyses.transition_flight ) 
+    segment.altitude_start                           = 1000.0 * Units.ft   
+    segment.altitude_end                             = 300.0 * Units.ft   
+    segment.climb_angle                              = 3 * Units.degrees
+    segment.acceleration                             = -0.25 * Units['m/s/s']    
+    segment.pitch_initial                            = 4.3  * Units.degrees  
+    segment.pitch_final                              = 7. * Units.degrees              
+    mission.append_segment(segment)  
 
-    ## ------------------------------------------------------------------
-    ##   Fifth Cuise Segment: Transition
-    ## ------------------------------------------------------------------ 
-    #segment                                         = Segments.Transition.Constant_Acceleration_Constant_Pitchrate_Constant_Altitude(base_segment)
-    #segment.tag                                     = "Decelerating_Transition"   
-    #segment.analyses.extend( analyses.transition_flight ) 
-    #segment.altitude                                = 300.  * Units.ft     
-    #segment.air_speed_start                         = 36.5 * Units['mph'] 
-    #segment.air_speed_end                           = 300. * Units['ft/min'] 
-    #segment.acceleration                            = -0.25 * Units['m/s/s']    
-    #segment.pitch_initial                           = 7.  * Units.degrees  
-    #segment.pitch_final                             = 7. * Units.degrees      
-    #segment = analyses.base.energy.networks.all_electric.add_unknowns_and_residuals_to_segment(segment)  
-    #mission.append_segment(segment)       
+    # ------------------------------------------------------------------
+    #   Fifth Cuise Segment: Transition
+    # ------------------------------------------------------------------ 
+    segment                                         = Segments.Transition.Constant_Acceleration_Constant_Pitchrate_Constant_Altitude(base_segment)
+    segment.tag                                     = "Decelerating_Transition"   
+    segment.analyses.extend( analyses.transition_flight ) 
+    segment.altitude                                = 300.  * Units.ft     
+    segment.air_speed_start                         = 36.5 * Units['mph'] 
+    segment.air_speed_end                           = 300. * Units['ft/min'] 
+    segment.acceleration                            = -0.25 * Units['m/s/s']    
+    segment.pitch_initial                           = 7.  * Units.degrees  
+    segment.pitch_final                             = 7. * Units.degrees       
+    mission.append_segment(segment)       
     
-    ## ------------------------------------------------------------------
-    ##   Third Descent Segment: Constant Speed, Constant Rate
-    ## ------------------------------------------------------------------ 
-    #segment                                         = Segments.Vertical_Flight.Descent(base_segment)
-    #segment.tag                                     = "Vertical_Descent" 
-    #segment.analyses.extend( analyses.vertical_flight)     
-    #segment.altitude_start                          = 300.0 * Units.ft   
-    #segment.altitude_end                            = 0.   * Units.ft  
-    #segment.descent_rate                            = 300. * Units['ft/min']      
-    #segment = analyses.base.energy.networks.all_electric.add_unknowns_and_residuals_to_segment(segment)  
-    #mission.append_segment(segment)  
+    # ------------------------------------------------------------------
+    #   Third Descent Segment: Constant Speed, Constant Rate
+    # ------------------------------------------------------------------ 
+    segment                                         = Segments.Vertical_Flight.Descent(base_segment)
+    segment.tag                                     = "Vertical_Descent" 
+    segment.analyses.extend( analyses.vertical_flight)     
+    segment.altitude_start                          = 300.0 * Units.ft   
+    segment.altitude_end                            = 0.   * Units.ft  
+    segment.descent_rate                            = 300. * Units['ft/min']       
+    mission.append_segment(segment)  
   
 
-    ## ------------------------------------------------------------------
-    ##  Charge Segment: 
-    ## ------------------------------------------------------------------  
-    ## Charge Model 
-    #segment                                         = Segments.Ground.Battery_Recharge(base_segment)     
-    #segment.tag                                     = 'Recharge' 
-    #segment.time                                    = 1 * Units.hr
-    #segment.analyses.extend(analyses.base)              
-    #segment = analyses.base.energy.networks.all_electric.add_unknowns_and_residuals_to_segment(segment)   
-    #mission.append_segment(segment)    
+    # ------------------------------------------------------------------
+    #  Charge Segment: 
+    # ------------------------------------------------------------------  
+    # Charge Model 
+    segment                                         = Segments.Ground.Battery_Recharge(base_segment)     
+    segment.analyses.extend(analyses.base)              
+    segment.tag                                     = 'Recharge' 
+    segment.time                                    = 1 * Units.hr
+    segment.current                                 = 100 
+    mission.append_segment(segment)    
     return mission 
 
 
@@ -1249,34 +1150,53 @@ def missions_setup(mission):
 def plot_results(results):  
     
     # Plots fligh conditions 
-    plot_flight_conditions(results) 
+    plot_flight_conditions(results,save_figure=True,save_filename='eVTOL_Flight_Conditions') 
     
     # Plot arcraft trajectory
-    plot_flight_trajectory(results)
+    plot_flight_trajectory(results,save_figure=True,save_filename='eVTOL_Flight_Trajectory')
     
     # Plot Aerodynamic Coefficients
-    plot_aerodynamic_coefficients(results)  
-     
-    # Plot Aircraft Stability
-    plot_stability_coefficients(results) 
-    
+    plot_aerodynamic_coefficients(results,save_figure=True,save_filename='eVTOL_Aero_Coefficients')  
+      
     # Plot Aircraft Electronics
-    #plot_battery_pack_conditions(results) 
-    #plot_battery_temperature(results)
-    #plot_battery_cell_conditions(results) 
-    #plot_battery_degradation(results) 
+    plot_battery_pack_conditions(results,save_figure=True,save_filename='eVTOL_Bat_Energy') 
+    plot_battery_temperature(results,save_figure=True,save_filename='eVTOL_Bat_Temp')
+    plot_battery_cell_conditions(results) 
+    plot_battery_degradation(results) 
     
     # Plot Propeller Conditions 
-    plot_rotor_conditions(results) 
-    #plot_disc_and_power_loading(results)
+    plot_rotor_conditions(results,save_figure=True,save_filename='eVTOL_Rotors') 
+    plot_disc_and_power_loading(results)
     
     # Plot Electric Motor and Propeller Efficiencies 
-    #plot_electric_motor_and_rotor_efficiencies(results) 
-    
-    # Plot Battery Degradation  
-    #plot_battery_degradation(results)   
+    plot_electric_efficiencies(results,save_figure=True,save_filename='eVTOL_Efficiencies') 
+     
      
     return
+# ----------------------------------------------------------------------
+#   Save Results
+# ----------------------------------------------------------------------
+def save_results(results,filename): 
+    pickle_file  =  filename + '.pkl'
+    with open(pickle_file, 'wb') as file:
+        pickle.dump(results, file) 
+    return   
+
+# ------------------------------------------------------------------
+#   Load Results
+# ------------------------------------------------------------------   
+def load_results(filename):  
+    load_file = filename + '.pkl' 
+    with open(load_file, 'rb') as file:
+        results = pickle.load(file) 
+    return results  
+
+
+if __name__ == '__main__': 
+    main()    
+    plt.show()
+     
+
  
 if __name__ == '__main__': 
     main()    

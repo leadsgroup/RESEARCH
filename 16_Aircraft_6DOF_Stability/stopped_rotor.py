@@ -563,10 +563,10 @@ def vehicle_setup() :
                                     [ 0.219 ,  4.891 , 1.2] ,[ 0.219  , - 4.891 , 1.2],
                                     [ 4.196 ,  4.891 , 1.2] ,[ 4.196  , - 4.891 , 1.2]]
     
-    for ii in range(8):
+    for i in range(8):
         rotor_nacelle          = deepcopy(nacelle)
-        rotor_nacelle.tag      = 'rotor_nacelle_' + str(ii+1) 
-        rotor_nacelle.origin   = [lift_rotor_nacelle_origins[ii]]
+        rotor_nacelle.tag      = 'rotor_nacelle_' + str(i) 
+        rotor_nacelle.origin   = [lift_rotor_nacelle_origins[i]]
         vehicle.append_component(rotor_nacelle) 
     
     propeller_nacelle                = RCAIDE.Components.Nacelles.Nacelle()
@@ -643,10 +643,10 @@ def vehicle_setup() :
     
     propeller_nacelle_origins   = [[ 5.583,  1.300 ,    1.092] ,[5.583, - 1.300,     1.092]]
     
-    for ii in range(2):
+    for i in range(2):
         prop_nacelle          = deepcopy(propeller_nacelle)
-        prop_nacelle.tag      = 'propeller_nacelle_' + str(ii+1) 
-        prop_nacelle.origin   = [propeller_nacelle_origins[ii]]
+        prop_nacelle.tag      = 'propeller_nacelle_' + str(i) 
+        prop_nacelle.origin   = [propeller_nacelle_origins[i]]
         vehicle.append_component(prop_nacelle)    
         
     #------------------------------------------------------------------------------------------------------------------------------------
@@ -663,227 +663,215 @@ def vehicle_setup() :
     net                              = All_Electric()   
     
     #------------------------------------------------------------------------------------------------------------------------------------  
-    # Bus
-    #------------------------------------------------------------------------------------------------------------------------------------  
-    bus                              = RCAIDE.Energy.Distributors.Bus_Power_Control_Unit()
-    bus.fixed_voltage                = False 
-    bus.active_propulsor_groups      =['forward_propulsor' ,'lift_propulsor_group1', 'lift_propulsor_group2','lift_propulsor_group3', 'lift_propulsor_group4'] 
-    
-    #------------------------------------------------------------------------------------------------------------------------------------  
-    # Battery   
-    #------------------------------------------------------------------------------------------------------------------------------------  
+    # Forward Bus
+    #------------------------------------------------------------------------------------------------------------------------------------    
+    forward_bus                              = RCAIDE.Energy.Distributors.Bus_Power_Control_Unit()
+    forward_bus.fixed_voltage                = False 
+    forward_bus.tag                          = 'forward_bus'
+     
+    # Battery    
     bat                                                    = RCAIDE.Energy.Storages.Batteries.Lithium_Ion_NMC() 
     bat.pack.electrical_configuration.series               = 140   
-    bat.pack.electrical_configuration.parallel             = 100
+    bat.pack.electrical_configuration.parallel             = 20
     initialize_from_circuit_configuration(bat)  
     bat.module.number_of_modules                           = 14 
     bat.module.geometrtic_configuration.total              = bat.pack.electrical_configuration.total
     bat.module.voltage                                     = bat.pack.maximum_voltage/bat.module.number_of_modules 
     bat.module.geometrtic_configuration.normal_count       = 25
-    bat.module.geometrtic_configuration.parallel_count     = 40
-    bus.voltage                      =  bat.pack.maximum_voltage  
-    bus.batteries.append(bat)                                
+    bat.module.geometrtic_configuration.parallel_count     = 40 
+    forward_bus.voltage                                    =  bat.pack.maximum_voltage  
+    forward_bus.batteries.append(bat)     
+    
+    forward_propulsor_origins                   = [[  6.583,propeller_nacelle_origins[0][1] , propeller_nacelle_origins[1][2]] ,
+                                                   [  6.583,propeller_nacelle_origins[1][1] ,propeller_nacelle_origins[1][2]]]  
+    propulsor_index  = 1
+    for i in enumerate(2): 
+        propulsor      = RCAIDE.Energy.Propulsor()
+        propulsor.tag  = 'foward_propulsor_' + str(propulsor_index) 
+        #forward_bus.active_propulsor_groups.append(propulsor_group)
+    
+        #------------------------------------------------------------------------------------------------------------------------------------  
+        # Electronic Speed Controller    
+        #------------------------------------------------------------------------------------------------------------------------------------  
+        propeller_esc                   = RCAIDE.Energy.Distributors.Electronic_Speed_Controller() 
+        propeller_esc.efficiency        = 0.95  
+        propeller_esc.tag               = 'propeller_esc_' + str(propulsor_index)
+        propeller_esc.propulsor_group   = propulsor_group
+        propulsor.append(propeller_esc)  
+        #forward_bus.electronic_speed_controllers.append(propeller_esc)      
+        
+        #------------------------------------------------------------------------------------------------------------------------------------  
+        # FPropeller    
+        #------------------------------------------------------------------------------------------------------------------------------------           
+        g                                           = 9.81                                   # gravitational acceleration 
+        speed_of_sound                              = 340                                    # speed of sound 
+        Drag                                        = estimate_cruise_drag(vehicle,altitude = 1500. * Units.ft,speed= 130.* Units['mph'] ,lift_coefficient = 0.5 ,profile_drag = 0.06)
+        Hover_Load                                  = vehicle.mass_properties.takeoff*g      # hover load    
+        propeller                                   = RCAIDE.Energy.Converters.Propeller()
+        propeller.number_of_blades                  = 3
+        propeller.tag                               = 'propeller_' + str(propulsor_index) 
+        propeller.origin                            = [forward_propulsor_origins[i]]
+        propeller.propulsor_group                   = propulsor_group  
+        propeller.tip_radius                        = 1.15  
+        propeller.hub_radius                        = 0.1 * propeller.tip_radius  
+        propeller.cruise.design_freestream_velocity = 130.* Units['mph'] 
+        propeller.cruise.design_tip_mach            = 0.65
+        propeller.cruise.design_angular_velocity    = propeller.cruise.design_tip_mach *speed_of_sound/propeller.tip_radius
+        propeller.cruise.design_Cl                  = 0.7
+        propeller.cruise.design_altitude            = 1500 * Units.feet
+        propeller.cruise.design_thrust              = Drag*3/2  
+        propeller.rotation                          = 1
+        propeller.variable_pitch                    = True  
+        airfoil                                     = RCAIDE.Components.Airfoils.Airfoil()
+        airfoil.coordinate_file                     = rel_path + 'Airfoils' + separator + 'NACA_4412.txt'
+        airfoil.polar_files                         = [rel_path + 'Airfoils' + separator + 'Polars' + separator + 'NACA_4412_polar_Re_50000.txt' ,
+                                                      rel_path + 'Airfoils' + separator + 'Polars' + separator + 'NACA_4412_polar_Re_100000.txt' ,
+                                                      rel_path + 'Airfoils' + separator + 'Polars' + separator + 'NACA_4412_polar_Re_200000.txt' ,
+                                                      rel_path + 'Airfoils' + separator + 'Polars' + separator + 'NACA_4412_polar_Re_500000.txt' ,
+                                                      rel_path + 'Airfoils' + separator + 'Polars' + separator + 'NACA_4412_polar_Re_1000000.txt',
+                                                      rel_path + 'Airfoils' + separator + 'Polars' + separator + 'NACA_4412_polar_Re_3500000.txt',
+                                                      rel_path + 'Airfoils' + separator + 'Polars' + separator + 'NACA_4412_polar_Re_5000000.txt',
+                                                      rel_path + 'Airfoils' + separator + 'Polars' + separator + 'NACA_4412_polar_Re_7500000.txt' ]
+        propeller.append_airfoil(airfoil)          
+        propeller.airfoil_polar_stations            = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0] 
+        
+        # only desing the propeller once 
+        if i == 0: 
+            propeller                  = design_propeller(propeller)    
+        forward_bus.rotors.append(propeller)   
+        
+        #------------------------------------------------------------------------------------------------------------------------------------  
+        # Forward Cruise Propulsor System - Propeller Motors 
+        #------------------------------------------------------------------------------------------------------------------------------------     
+        propeller_motor                          = RCAIDE.Energy.Converters.Motor()
+        propeller_motor.efficiency               = 0.95
+        propeller_motor.tag                      = 'propeller_motor_' + str(propulsor_index)
+        propeller_motor.origin                   = propeller.origin
+        propeller_motor.nominal_voltage          = bat.pack.maximum_voltage 
+        propeller_motor.origin                   = propeller.origin
+        propeller_motor.propeller_radius         = propeller.tip_radius
+        propeller_motor.propulsor_group          = propulsor_group
+        propeller_motor.no_load_current          = 0.001
+        propeller_motor.wing_mounted             = True 
+        propeller_motor.wing_tag                 = 'horizontal_tail'
+        propeller_motor.rotor_radius             = propeller.tip_radius
+        propeller_motor.design_torque            = propeller.cruise.design_torque
+        propeller_motor.angular_velocity         = propeller.cruise.design_angular_velocity/propeller_motor.gear_ratio  
+        
+        #  only desing the propeller motor once 
+        if i == 0: 
+            propeller_motor                      = size_optimal_motor(propeller_motor)  
+            propeller_motor.mass_properties.mass  = nasa_motor(propeller_motor.design_torque) 
+        forward_bus.motors.append(propeller_motor)  
+        
+        propulsor_index += 1        
+        
+    # append forward bus
+    net.busses.append(forward_bus)   
     
     #------------------------------------------------------------------------------------------------------------------------------------  
-    # Forward Cruise Propulsor System - Electronic Speed Controller    
-    #------------------------------------------------------------------------------------------------------------------------------------  
-    propeller_esc                   = RCAIDE.Energy.Distributors.Electronic_Speed_Controller() 
-    propeller_esc.efficiency        = 0.95  
-    propeller_esc.tag               = 'propeller_esc'  
-    propeller_esc.propulsor_group   = 'forward_propulsor'  
-    bus.electronic_speed_controllers.append(propeller_esc)    
-    
-    propeller_esc_2                 = deepcopy(propeller_esc)
-    propeller_esc_2.tag             = 'propeller_esc_2'
-    propeller_esc_2.propulsor_group = 'forward_propulsor'  
-    bus.electronic_speed_controllers.append(propeller_esc_2)   
-    
-    #------------------------------------------------------------------------------------------------------------------------------------  
-    # Forward Cruise Propulsor System - Propeller    
-    #------------------------------------------------------------------------------------------------------------------------------------           
-    g                                           = 9.81                                   # gravitational acceleration 
-    speed_of_sound                              = 340                                    # speed of sound 
-    Drag                                        = estimate_cruise_drag(vehicle,altitude = 1500. * Units.ft,speed= 130.* Units['mph'] ,lift_coefficient = 0.5 ,profile_drag = 0.06)
-    Hover_Load                                  = vehicle.mass_properties.takeoff*g      # hover load   
-    
-    propeller                                   = RCAIDE.Energy.Converters.Propeller()
-    propeller.number_of_blades                  = 3
-    propeller.tag                               = 'propeller_1'
-    propeller.propulsor_group                   = 'forward_propulsor'  
-    propeller.tip_radius                        = 1.15  
-    propeller.hub_radius                        = 0.1 * propeller.tip_radius  
-    propeller.cruise.design_freestream_velocity = 130.* Units['mph'] 
-    propeller.cruise.design_tip_mach            = 0.65
-    propeller.cruise.design_angular_velocity    = propeller.cruise.design_tip_mach *speed_of_sound/propeller.tip_radius
-    propeller.cruise.design_Cl                  = 0.7
-    propeller.cruise.design_altitude            = 1500 * Units.feet
-    propeller.cruise.design_thrust              = Drag*3/2  
-    propeller.rotation                          = 1
-    propeller.variable_pitch                    = True  
-    airfoil                                     = RCAIDE.Components.Airfoils.Airfoil()
-    airfoil.coordinate_file                     = rel_path + 'Airfoils' + separator + 'NACA_4412.txt'
-    airfoil.polar_files                         = [rel_path + 'Airfoils' + separator + 'Polars' + separator + 'NACA_4412_polar_Re_50000.txt' ,
-                                                  rel_path + 'Airfoils' + separator + 'Polars' + separator + 'NACA_4412_polar_Re_100000.txt' ,
-                                                  rel_path + 'Airfoils' + separator + 'Polars' + separator + 'NACA_4412_polar_Re_200000.txt' ,
-                                                  rel_path + 'Airfoils' + separator + 'Polars' + separator + 'NACA_4412_polar_Re_500000.txt' ,
-                                                  rel_path + 'Airfoils' + separator + 'Polars' + separator + 'NACA_4412_polar_Re_1000000.txt',
-                                                  rel_path + 'Airfoils' + separator + 'Polars' + separator + 'NACA_4412_polar_Re_3500000.txt',
-                                                  rel_path + 'Airfoils' + separator + 'Polars' + separator + 'NACA_4412_polar_Re_5000000.txt',
-                                                  rel_path + 'Airfoils' + separator + 'Polars' + separator + 'NACA_4412_polar_Re_7500000.txt' ]
-    propeller.append_airfoil(airfoil)          
-    propeller.airfoil_polar_stations            = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0] 
-    propeller                                   = design_propeller(propeller)
-                 
-    propeller_origins                           = [[  6.583,propeller_nacelle_origins[0][1] , propeller_nacelle_origins[1][2]] ,
-                                                   [  6.583,propeller_nacelle_origins[1][1] ,propeller_nacelle_origins[1][2]]]
-    propeller.origin                            = [propeller_origins[0]]
-    bus.rotors.append(propeller)  
-    
-    propeller_2          = deepcopy(propeller)
-    propeller_2.tag      = 'propeller_2'
-    propeller_2.rotation = -1
-    propeller_2.origin   = [propeller_origins[1]]
-    bus.rotors.append(propeller_2)   
-    
-    #------------------------------------------------------------------------------------------------------------------------------------  
-    # Forward Cruise Propulsor System - Propeller Motors 
-    #------------------------------------------------------------------------------------------------------------------------------------     
-    propeller_motor                          = RCAIDE.Energy.Converters.Motor()
-    propeller_motor.efficiency               = 0.95
-    propeller_motor.tag                      = 'propeller_motor_1'
-    propeller_motor.origin                   = propeller.origin
-    propeller_motor.nominal_voltage          = bat.pack.maximum_voltage 
-    propeller_motor.origin                   = propeller.origin
-    propeller_motor.propeller_radius         = propeller.tip_radius
-    propeller_motor.propulsor_group          = 'forward_propulsor'
-    propeller_motor.no_load_current          = 0.001
-    propeller_motor.wing_mounted             = True 
-    propeller_motor.wing_tag                 = 'horizontal_tail'
-    propeller_motor.rotor_radius             = propeller.tip_radius
-    propeller_motor.design_torque            = propeller.cruise.design_torque
-    propeller_motor.angular_velocity         = propeller.cruise.design_angular_velocity/propeller_motor.gear_ratio 
-    propeller_motor                          = size_optimal_motor(propeller_motor)
-    propeller_motor.mass_properties.mass     = nasa_motor(propeller_motor.design_torque) 
-    bus.motors.append(propeller_motor) 
-    
-    propeller_motor_2          = deepcopy(propeller_motor)
-    propeller_motor_2.tag      = 'propeller_motor_2' 
-    propeller_motor_2.origin   = propeller_2.origin
-    bus.motors.append(propeller_motor_2)
-    
-    #------------------------------------------------------------------------------------------------------------------------------------  
-    # Lift Propulsor System - Electronic Speed Controller
+    # Lift Bus
     #------------------------------------------------------------------------------------------------------------------------------------    
-    lift_rotor_esc                   = RCAIDE.Energy.Distributors.Electronic_Speed_Controller()
-    lift_rotor_esc.efficiency        = 0.95 
-    propulsor_group_names = ['lift_propulsor_group1', 'lift_propulsor_group2', 
-                             'lift_propulsor_group3', 'lift_propulsor_group4']       
-    for i in range(8):
-        lift_rotor_ESC          = deepcopy(lift_rotor_esc)
-        lift_rotor_ESC.tag      = 'lift_rotor_esc' + str(i + 1) 
-        if i in [0, 3]:  # First and second rotors
-            lift_rotor_ESC.propulsor_group = propulsor_group_names[0]
-        elif i in [1,2]:
-            lift_rotor_ESC.propulsor_group = propulsor_group_names[1]
-        elif i in [6,7]:
-            lift_rotor_ESC.propulsor_group = propulsor_group_names[2]
-        elif i in [4,5]:
-            lift_rotor_ESC.propulsor_group = propulsor_group_names[3]  
-        bus.electronic_speed_controllers.append(lift_rotor_ESC) 
     
-    #------------------------------------------------------------------------------------------------------------------------------------  
-    # Lift Propulsor System - Lift Rotors   
-    #------------------------------------------------------------------------------------------------------------------------------------        
-    lift_rotor                                   = RCAIDE.Energy.Converters.Lift_Rotor()  
-    lift_rotor.tip_radius                        = 2.8/2
-    lift_rotor.hub_radius                        = 0.15 * lift_rotor.tip_radius   
-    lift_rotor.number_of_blades                  = 3     
-    lift_rotor.hover.design_altitude             = 40 * Units.feet  
-    lift_rotor.hover.design_thrust               = Hover_Load/8
-    lift_rotor.hover.design_freestream_velocity  = np.sqrt(lift_rotor.hover.design_thrust/(2*1.2*np.pi*(lift_rotor.tip_radius**2)))  
-    lift_rotor.oei.design_altitude               = 40 * Units.feet  
-    lift_rotor.oei.design_thrust                 = Hover_Load/6  
-    lift_rotor.oei.design_freestream_velocity    = np.sqrt(lift_rotor.oei.design_thrust/(2*1.2*np.pi*(lift_rotor.tip_radius**2)))  
-    airfoil                                      = RCAIDE.Components.Airfoils.Airfoil()   
-    airfoil.coordinate_file                      = rel_path + 'Airfoils' + separator + 'NACA_4412.txt'
-    airfoil.polar_files                          =[rel_path + 'Airfoils' + separator + 'Polars' + separator + 'NACA_4412_polar_Re_50000.txt' ,
-                                                   rel_path + 'Airfoils' + separator + 'Polars' + separator + 'NACA_4412_polar_Re_100000.txt' ,
-                                                    rel_path + 'Airfoils' + separator + 'Polars' + separator + 'NACA_4412_polar_Re_200000.txt' ,
-                                                    rel_path + 'Airfoils' + separator + 'Polars' + separator + 'NACA_4412_polar_Re_500000.txt' ,
-                                                    rel_path + 'Airfoils' + separator + 'Polars' + separator + 'NACA_4412_polar_Re_1000000.txt',
-                                                    rel_path + 'Airfoils' + separator + 'Polars' + separator + 'NACA_4412_polar_Re_3500000.txt',
-                                                    rel_path + 'Airfoils' + separator + 'Polars' + separator + 'NACA_4412_polar_Re_5000000.txt',
-                                                    rel_path + 'Airfoils' + separator + 'Polars' + separator + 'NACA_4412_polar_Re_7500000.txt' ]
-    lift_rotor.append_airfoil(airfoil)               
-    lift_rotor.airfoil_polar_stations           = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
-    lift_rotor                                  = design_lift_rotor(lift_rotor)    
-    lift_rotor_origins                          = [[-0.073 ,  1.950 , 1.2] ,[-0.073  , -1.950  , 1.2],
-                                                   [ 4.440 ,  1.950 , 1.2] ,[ 4.440  , -1.950  , 1.2],
-                                                   [ 0.219 ,  4.891 , 1.2] ,[ 0.219  , - 4.891 , 1.2],
-                                                   [ 4.196 ,  4.891 , 1.2] ,[ 4.196  , - 4.891 , 1.2]]
-    
-    # Appending rotors with different origins
-    rotations             = [-1,1,-1,1,-1,1,-1,1]  
-    for i in range(8):
-        lift_rotor                        = deepcopy(lift_rotor)
-        lift_rotor.tag                    = 'lift_rotor_' + str(i+1)
-        lift_rotor.rotation               = rotations[i]
-        lift_rotor.origin                 = [lift_rotor_origins[i]] 
-        lift_rotor.active                 = True
-        if i in[1,3,5,7]:
-            lift_rotor.orientation_euler_angles          = [-10.0* Units.degrees,np.pi/2.,0.]    # vector of angles defining default orientation of rotor
-        else:
-            lift_rotor.orientation_euler_angles          = [10.0*Units.degrees,np.pi/2.,0.]   # vector of angles defining default orientation of rotor
+    propulsor_index         = 1
+    bus_index               = 1 
+    lift_propulsor_origins  = [[-0.073 ,  1.950 , 1.2] ,[-0.073  , -1.950  , 1.2],
+                              [ 4.440 ,  1.950 , 1.2] ,[ 4.440  , -1.950  , 1.2],
+                              [ 0.219 ,  4.891 , 1.2] ,[ 0.219  , - 4.891 , 1.2],
+                              [ 4.196 ,  4.891 , 1.2] ,[ 4.196  , - 4.891 , 1.2]]  
+    rotor_index           = 0
+    for _ in range(4):   
+        # Bus 
+        lift_bus                              = RCAIDE.Energy.Distributors.Bus_Power_Control_Unit()
+        lift_bus.fixed_voltage                = False 
+        lift_bus.tag                          = 'lift_bus_' + str(bus_index)
+
+        # Battery    
+        bat                                                    = RCAIDE.Energy.Storages.Batteries.Lithium_Ion_NMC() 
+        bat.pack.electrical_configuration.series               = 140   
+        bat.pack.electrical_configuration.parallel             = 20
+        initialize_from_circuit_configuration(bat)  
+        bat.module.number_of_modules                           = 14 
+        bat.module.geometrtic_configuration.total              = bat.pack.electrical_configuration.total
+        bat.module.voltage                                     = bat.pack.maximum_voltage/bat.module.number_of_modules 
+        bat.module.geometrtic_configuration.normal_count       = 25
+        bat.module.geometrtic_configuration.parallel_count     = 40 
+        lift_bus.voltage                                       =  bat.pack.maximum_voltage  
+        lift_bus.batteries.append(bat)     
+        
+        for _ in range(2):  
+            propulsor_group                = 'lift_propulsor_' + str(propulsor_index),
+            #lift_bus.active_propulsor_groups.append(propulsor_group)  
+            
+            # Lift Propulsor System - Electronic Speed Controller 
+            lift_rotor_esc                 = RCAIDE.Energy.Distributors.Electronic_Speed_Controller()
+            lift_rotor_esc.efficiency      = 0.95    
+            lift_rotor_esc.tag             = 'lift_rotor_esc_' + str(rotor_index+1) 
+            lift_rotor_esc.origin          = [lift_propulsor_origins[i]]
+            lift_rotor_esc.propulsor_group = propulsor_group 
+            lift_bus.electronic_speed_controllers.append(lift_rotor_esc)  
+              
+            # Lift Rotors           
+            lift_rotor                                   = RCAIDE.Energy.Converters.Lift_Rotor()   
+            lift_rotor.tag                               = 'lift_rotor_' + str(rotor_index+1) 
+            lift_rotor.origin                            = [lift_propulsor_origins[rotor_index]] 
+            lift_rotor.active                            = True            
+            lift_rotor.tip_radius                        = 2.8/2
+            lift_rotor.hub_radius                        = 0.15 * lift_rotor.tip_radius   
+            lift_rotor.number_of_blades                  = 3     
+            lift_rotor.hover.design_altitude             = 40 * Units.feet  
+            lift_rotor.hover.design_thrust               = Hover_Load/8
+            lift_rotor.hover.design_freestream_velocity  = np.sqrt(lift_rotor.hover.design_thrust/(2*1.2*np.pi*(lift_rotor.tip_radius**2)))  
+            lift_rotor.oei.design_altitude               = 40 * Units.feet  
+            lift_rotor.oei.design_thrust                 = Hover_Load/6  
+            lift_rotor.oei.design_freestream_velocity    = np.sqrt(lift_rotor.oei.design_thrust/(2*1.2*np.pi*(lift_rotor.tip_radius**2)))  
+            airfoil                                      = RCAIDE.Components.Airfoils.Airfoil()   
+            airfoil.coordinate_file                      = rel_path + 'Airfoils' + separator + 'NACA_4412.txt'
+            airfoil.polar_files                          =[rel_path + 'Airfoils' + separator + 'Polars' + separator + 'NACA_4412_polar_Re_50000.txt' ,
+                                                           rel_path + 'Airfoils' + separator + 'Polars' + separator + 'NACA_4412_polar_Re_100000.txt' ,
+                                                            rel_path + 'Airfoils' + separator + 'Polars' + separator + 'NACA_4412_polar_Re_200000.txt' ,
+                                                            rel_path + 'Airfoils' + separator + 'Polars' + separator + 'NACA_4412_polar_Re_500000.txt' ,
+                                                            rel_path + 'Airfoils' + separator + 'Polars' + separator + 'NACA_4412_polar_Re_1000000.txt',
+                                                            rel_path + 'Airfoils' + separator + 'Polars' + separator + 'NACA_4412_polar_Re_3500000.txt',
+                                                            rel_path + 'Airfoils' + separator + 'Polars' + separator + 'NACA_4412_polar_Re_5000000.txt',
+                                                            rel_path + 'Airfoils' + separator + 'Polars' + separator + 'NACA_4412_polar_Re_7500000.txt' ]
+            lift_rotor.append_airfoil(airfoil)               
+            lift_rotor.airfoil_polar_stations           = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0] 
+             
+            if rotor_index in[1,3,5,7]:
+                lift_rotor.orientation_euler_angles          = [-10.0* Units.degrees,np.pi/2.,0.]    # vector of angles defining default orientation of rotor
+            else:
+                lift_rotor.orientation_euler_angles          = [10.0*Units.degrees,np.pi/2.,0.]   # vector of angles defining default orientation of rotor
            
-        # pairing propulsor groups based on lift rotor origins
-        if i in [0, 3]:  # First and second rotors
-            lift_rotor.propulsor_group = propulsor_group_names[0]
-        elif i in [1,2]:
-            lift_rotor.propulsor_group = propulsor_group_names[1]
-        elif i in [6,7]:
-            lift_rotor.propulsor_group = propulsor_group_names[2]
-        elif i in [4,5]:
-            lift_rotor.propulsor_group = propulsor_group_names[3] 
-        bus.rotors.append(lift_rotor)    
-        
-        
+            # only desing the rotor once 
+            if i == 0: 
+                lift_rotor                                  = design_lift_rotor(lift_rotor)    
+            lift_bus.rotors.append(lift_rotor)      
+            
+            #------------------------------------------------------------------------------------------------------------------------------------               
+            # Lift Propulsor System - Lift Rotor Motors 
+            #------------------------------------------------------------------------------------------------------------------------------------  
+            lift_rotor_motor                         = RCAIDE.Energy.Converters.Motor()
+            lift_rotor_motor.efficiency              = 0.9
+            lift_rotor_motor.nominal_voltage         = bat.pack.maximum_voltage*3/4  
+            lift_rotor_motor.origin                  = lift_rotor.origin 
+            lift_rotor_motor.propeller_radius        = lift_rotor.tip_radius
+            lift_rotor_motor.no_load_current         = 0.01  
+            lift_rotor_motor.wing_mounted            = True 
+            lift_rotor_motor.wing_tag                = 'main_wing'
+            lift_rotor_motor.rotor_radius            = lift_rotor.tip_radius
+            lift_rotor_motor.design_torque           = lift_rotor.hover.design_torque
+            lift_rotor_motor.angular_velocity        = lift_rotor.hover.design_angular_velocity/lift_rotor_motor.gear_ratio  
     
-    #------------------------------------------------------------------------------------------------------------------------------------               
-    # Lift Propulsor System - Lift Rotor Motors 
-    #------------------------------------------------------------------------------------------------------------------------------------  
-    lift_rotor_motor                         = RCAIDE.Energy.Converters.Motor()
-    lift_rotor_motor.efficiency              = 0.9
-    lift_rotor_motor.nominal_voltage         = bat.pack.maximum_voltage*3/4  
-    lift_rotor_motor.origin                  = lift_rotor.origin 
-    lift_rotor_motor.propeller_radius        = lift_rotor.tip_radius
-    lift_rotor_motor.no_load_current         = 0.01  
-    lift_rotor_motor.wing_mounted            = True 
-    lift_rotor_motor.wing_tag                = 'main_wing'
-    lift_rotor_motor.rotor_radius            = lift_rotor.tip_radius
-    lift_rotor_motor.design_torque           = lift_rotor.hover.design_torque
-    lift_rotor_motor.angular_velocity        = lift_rotor.hover.design_angular_velocity/lift_rotor_motor.gear_ratio  
-    lift_rotor_motor                         = size_optimal_motor(lift_rotor_motor)
-    lift_rotor_motor.mass_properties.mass    = nasa_motor(lift_rotor_motor.design_torque)    
-    
-    # Appending motors with different origins
-    for i in range(8):
-        lr_motor           = deepcopy(lift_rotor_motor)
-        lr_motor.tag       = 'lift_rotor_motor_' + str(i+1)
-        lift_rotor.origin  = [lift_rotor_origins[i]]
-        
-        if i in [0, 3]:  # First and second rotors
-            lr_motor.propulsor_group = propulsor_group_names[0]
-        elif i in [1,2]:
-            lr_motor.propulsor_group = propulsor_group_names[1]
-        elif i in [6,7]:
-            lr_motor.propulsor_group = propulsor_group_names[2]
-        elif i in [4,5]:
-            lr_motor.propulsor_group = propulsor_group_names[3]
-                
-        bus.motors.append(lr_motor) 
-    
-    # append bus   
-    net.busses.append(bus)
+            #  only desing the rotor motor once 
+            if i == 0: 
+                lift_rotor_motor                         = size_optimal_motor(lift_rotor_motor)
+                lift_rotor_motor.mass_properties.mass    = nasa_motor(lift_rotor_motor.design_torque)    
+            lift_bus.motors.append(propeller_motor)     
+                     
+            # append bus   
+            net.busses.append(lift_bus) 
+            propulsor_index += 1
     
     #------------------------------------------------------------------------------------------------------------------------------------           
     # Payload 
@@ -929,8 +917,7 @@ def configs_setup(vehicle):
     configs = RCAIDE.Components.Configs.Config.Container()
 
     base_config = RCAIDE.Components.Configs.Config(vehicle)
-    base_config.tag = 'base' 
-    base_config.networks.all_electric.busses.bus.active_propulsor_groups = ['forward_propulsor' ,'lift_propulsor_group1', 'lift_propulsor_group2','lift_propulsor_group3', 'lift_propulsor_group4']   
+    base_config.tag = 'base'  
     configs.append(base_config)
 
 
@@ -948,7 +935,7 @@ def configs_setup(vehicle):
 
     vertical_config = RCAIDE.Components.Configs.Config(vehicle)
     vertical_config.tag = 'vertical_flight'     
-    vertical_config.networks.all_electric.busses.bus.active_propulsor_groups = ['lift_propulsor_group1', 'lift_propulsor_group2','lift_propulsor_group3', 'lift_propulsor_group4']   
+    vertical_config.networks.all_electric.busses.foward_bus.active = False    
     configs.append(vertical_config)  
 
 
