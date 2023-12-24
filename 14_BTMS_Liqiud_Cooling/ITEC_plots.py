@@ -42,7 +42,7 @@ def main():
     ax2.tick_params(axis='y', labelcolor='black', direction='in')  # Added direction parameter
     
     # Display the combined legend on the inside upper left
-    ax1.legend(loc='upper center')  # Adjusted location
+    #ax1.legend(loc='upper center')  # Adjusted location
     ax1.grid(True, linestyle='--', alpha=0.7)  # Added grid lines
 
     plt.tight_layout()
@@ -75,7 +75,7 @@ def main():
     ax2.tick_params(axis='y', labelcolor='tab:orange', direction='in')  # Added direction parameter
     
     # Display the combined legend on the inside upper left
-    ax1.legend(loc='upper center')  # Adjusted location
+    #ax1.legend(loc='upper center')  # Adjusted location
     ax1.grid(True, linestyle='--', alpha=0.7)  # Added grid lines
 
     plt.tight_layout()
@@ -109,9 +109,9 @@ def main():
     ax2.plot(mass_flow_rate, length_of_cold_side, color='black', linestyle='-', marker='^', linewidth=2.5, label='Length of Cold Side')  # Added label, changed color
     ax2.tick_params(axis='y', labelcolor='black', direction='in')  # Added direction parameter
     
-    # Display the combined legend on the inside upper left
-    ax1.legend(loc='upper left')  # Adjusted location
-    ax1.grid(True, linestyle='--', alpha=0.7)  # Added grid lines 
+    # Display the combined legend on the inside upper left with decreased size
+    ax2.legend(loc='upper left', fontsize='x-small')  # Adjusted location and decreased size
+    ax1.grid(True, linestyle='--', alpha=0.7)  # Added grid lines
 
     plt.tight_layout()
 
@@ -146,7 +146,7 @@ def main():
     ax2.tick_params(axis='y', labelcolor='tab:orange', direction='in')  # Added direction parameter
     
     # Display the combined legend on the inside upper left
-    ax1.legend(loc='upper center')  # Adjusted location
+    #ax1.legend(loc='upper center')  # Adjusted location
     ax1.grid(True, linestyle='--', alpha=0.7)  # Added grid lines
     
     plt.tight_layout()
