@@ -4,6 +4,7 @@
 #   Imports
 # ----------------------------------------------------------------------
 # RCAIDE imports 
+import RCAIDE
 from RCAIDE.Core import Units  
 from RCAIDE.Energy.Networks.All_Electric                                    import All_Electric
 from RCAIDE.Methods.Energy.Propulsion.Converters.Motor                      import size_optimal_motor
