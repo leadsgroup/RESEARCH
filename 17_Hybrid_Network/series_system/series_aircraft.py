@@ -27,8 +27,7 @@ import os
 # ----------------------------------------------------------------------
 
 def main():
-    motor_work = 5E3
-    shaft_power_offtake = 4E4
+    
     
     # vehicle data
     vehicle = vehicle_setup()
@@ -554,21 +553,21 @@ def vehicle_setup():
     
     # ################################################# Energy Network #######################################################         
     #------------------------------------------------------------------------------------------------------------------------- 
-    #  Turbofan Network
+    #  Series Hybrid Network
     #-------------------------------------------------------------------------------------------------------------------------     
-    net                         = RCAIDE.Energy.Networks.Series_Parallel_Hybrid_Turboelectric_Engine()
+    net                         = RCAIDE.Energy.Networks.Series_Hybrid_Engine()
     
     #------------------------------------------------------------------------------------------------------------------------------------  
     # HPCU(Hybrid Power Control Unit)
     #------------------------------------------------------------------------------------------------------------------------------------
-    HPCU                        = RCAIDE.Energy.Distributors.Hybrid_Power_Control_Unit()
+    HPCU                        = RCAIDE.Energy.Networks.Distribution.Hybrid_Power_Control_Unit()
     HPCU.fixed_voltage          = True
     
     #------------------------------------------------------------------------------------------------------------------------- 
     #   Fuel
     #-------------------------------------------------------------------------------------------------------------------------
     # fuel tank
-    fuel_tank                   = RACIDE.Energy.Storages.Fuel_Tanks.Fuel_Tank()
+    fuel_tank                   = RCAIDE.Energy.Sources.Fuel_Tanks.Fuel_Tank()
     fuel_tank.origin            = wing.origin
     
     #fuel
@@ -580,7 +579,7 @@ def vehicle_setup():
     fuel_tank.fuel              = fuel
     HPCU.fuel_tanks.append(fuel_tank)
     
-    turbofan                    = RCAIDE.Energy.Converters.Turbofan()
+    turbofan                    = RCAIDE.Energy.Propulsion.Converters.Turbofan()
     turbofan.tag                = 'modified_pratt_whitney_jt9d'
     turbofan.origin             = [[13,72, 4.86, -1.1]]
     turbofan.engine_length      = 2.71
@@ -590,7 +589,7 @@ def vehicle_setup():
     turbofan.design_thrust      = 35000.0* Units.N
     
     # fan
-    fan                         = RCAIDE.Energy.Converters.Fan()
+    fan                         = RCAIDE.Energy.Propulsion.Converters.Fan()
     fan.tag                     = 'fan'
     fan.polytropic_efficiency   = 0.93
     fan.pressure_ratio          = 1.7
@@ -600,12 +599,12 @@ def vehicle_setup():
     
     # working fluid
     turbofan.working_fluid      = RCAIDE.Attributes.Gases.Air()
-    ram                         = RCAIDE.Energy.Converters.Ram()
+    ram                         = RCAIDE.Energy.Propulsion.Converters.Ram()
     ram.tag                     = 'ram'
     turbofan.ram                = ram
     
     # inlet nozzle
-    inlet_nozzle                = RCAIDE.Energy.Converters.Nozzle()
+    inlet_nozzle                = RCAIDE.Energy.Propulsion.Converters.Nozzle()
     inlet_nozzle.tag            = 'inlet nozzle'
     inlet_nozzle.polytropic_efficiency  = 0.98
     inlet_nozzle.pressure_ratio = 0.98
@@ -613,35 +612,35 @@ def vehicle_setup():
     
     
     # low pressure compressor
-    low_pressure_compressor     = RCAIDE.Energy.Converters.Compressor()
+    low_pressure_compressor     = RCAIDE.Energy.Propulsion.Converters.Compressor()
     low_pressure_compressor.tag = 'lpc'
     low_pressure_compressor.polytropic_efficiency   = 0.91
     low_pressure_compressor.pressure_ratio  = 1.9
     turbofan.low_pressure_compressor    = low_pressure_compressor
     
     # high pressure compressor
-    high_pressure_compressor    = RCAIDE.Energy.Converters.Compressor()
+    high_pressure_compressor    = RCAIDE.Energy.Propulsion.Converters.Compressor()
     high_pressure_compressor.tag    = 'hpc'
     high_pressure_compressor.polytropic_efficiency  = 0.91
     high_pressure_compressor.pressure_ratio = 10.0
     turbofan.high_pressure_compressor   = high_pressure_compressor
     
     # low pressure turbine
-    low_pressure_turbine        = RCAIDE.Energy.Converters.Turbine()
+    low_pressure_turbine        = RCAIDE.Energy.Propulsion.Converters.Turbine()
     low_pressure_turbine.tag    = 'lpt'
     low_pressure_turbine.mechanical_efficiency  = 0.99
     low_pressure_turbine.polytropic_efficiency  = 0.93
     turbofan.low_pressure_turbine   = low_pressure_turbine
     
     # high pressure turbine
-    high_pressure_turbine       = RCAIDE.Energy.Converters.Turbine()
+    high_pressure_turbine       = RCAIDE.Energy.Propulsion.Converters.Turbine()
     high_pressure_turbine.tag   = 'hpt'
     high_pressure_turbine.mechanical_efficiency = 0.99
     high_pressure_turbine.polytropic_efficiency = 0.93
     turbofan.high_pressure_turbine  = high_pressure_turbine
     
     # combustor
-    combustor                   = RCAIDE.Energy.Converters.Combustor()
+    combustor                   = RCAIDE.Energy.Propulsion.Converters.Combustor()
     combustor.tag               = 'Comb'
     combustor.efficiency        = 0.99
     combustor.alphc             = 1.0
@@ -651,14 +650,14 @@ def vehicle_setup():
     turbofan.combustor          = combustor
     
     # core nozzle
-    core_nozzle                 = RCAIDE.Energy.Converters.Expansion_Nozzle()
+    core_nozzle                 = RCAIDE.Energy.Propulsion.Converters.Expansion_Nozzle()
     core_nozzle.tag             = 'core nozzle'
     core_nozzle.polytropic_efficiency   = 0.95
     core_nozzle.pressure_ratio  = 0.99
     turbofan.core_nozzle        = core_nozzle
     
     # fan nozzle
-    fan_nozzle                  = RCAIDE.Energy.Converters.Expansion_Nozzle()
+    fan_nozzle                  = RCAIDE.Energy.Propulsion.Converters.Expansion_Nozzle()
     fan_nozzle.tag              = 'fan nozzle'
     fan_nozzle.polytropic_efficiency    = 0.95
     fan_nozzle.pressure_ratio   = 0.99
@@ -677,20 +676,20 @@ def vehicle_setup():
     #------------------------------------------------------------------------------------------------------------------------------------  
     # Electronic Speed Controller    
     #------------------------------------------------------------------------------------------------------------------------------------
-    esc_1           = RCAIDE.Energy.Distributors.Electronic_Speed_Controller()
+    esc_1           = RCAIDE.Energy.Networks.Distribution.Electronic_Speed_Controller()
     esc_1.tag       = 'esc_1'
     esc_1.efficiency    = 0.95
     HPCU.electronic_speed_controllers.append(esc_1)
     
-    esc_2           = RCAIDE.Energy.Distributors.Electronic_Speed_Controller()
+    esc_2           = RCAIDE.Energy.Networks.Distribution.Electronic_Speed_Controller()
     esc_2.tag       = 'esc_2'
     esc_2.efficiency    = 0.95
     HPCU.electronic_speed_controllers.append(esc_2)
     
     #------------------------------------------------------------------------------------------------------------------------------------  
-    # Electronic Speed Controller    
+    # Battery 
     #------------------------------------------------------------------------------------------------------------------------------------    
-    bat                                             = RCAIDE.Energy.Storages.Batteries.Lithium_Ion_NMC()
+    bat                                             = RCAIDE.Energy.Sources.Batteries.Lithium_Ion_NMC()
     bat.pack.electrical_configuration.series        = 140
     bat.pack.electrical_configuration.parallel      = 100
     initialize_from_circuit_configuration(bat)
@@ -703,10 +702,16 @@ def vehicle_setup():
     HPCU.voltage                                    = bat.pack.maximum_voltage
     HPCU.batteries.append(bat)
     
+    #------------------------------------------------------------------------------------------------------------------------------------  
+    # Bus
+    #------------------------------------------------------------------------------------------------------------------------------------  
+    bus                              = RCAIDE.Energy.Networks.Distribution.Electrical_Bus() 
+    bus.identical_propulsors        = False # only for regression 
+
     #------------------------------------------------------------------------------------------------------------------------------------           
     # Motors 
     #------------------------------------------------------------------------------------------------------------------------------------
-    motor                   = RCAIDE.Energy.Converters.Motor()
+    motor                   = RCAIDE.Energy.Propulsion.Converters.Motor()
     motor.efficiency        = 0.98
     motor.nominal_voltage   = bat.pack.maximum_voltage
     motor.no_load_current   = 1
