@@ -2,14 +2,14 @@
 # ----------------------------------------------------------------------        
 #   Imports
 # ----------------------------------------------------------------------     
-import MARC
-from MARC.Core import Units, Data
+import RCAIDE
+from RCAIDE.Core import Units, Data
 import numpy as np
-from MARC.Analyses.Process import Process  
-from MARC.Methods.Weights.Correlations.UAV        import empty 
-from MARC.Methods.Weights.Buildups.eVTOL.empty    import empty    
+from RCAIDE.Analyses.Process import Process  
+from RCAIDE.Methods.Weights.Correlations.UAV        import empty 
+from RCAIDE.Methods.Weights.Buildups.eVTOL.empty    import empty    
 
-from MARC.Analyses.Mission.Segments.Conditions.Aerodynamics import Aerodynamics
+from RCAIDE.Analyses.Mission.Segments.Conditions.Aerodynamics import Aerodynamics
 # Routines  
 import Missions 
 
@@ -109,7 +109,7 @@ def longitudinal_static_stability_and_drag_post_process(nexus):
     g                                                       = 9.81   
     L                                                       = g*vehicle.mass_properties.max_takeoff
     S                                                       = vehicle.reference_area
-    atmosphere                                              = MARC.Analyses.Atmospheric.US_Standard_1976()
+    atmosphere                                              = RCAIDE.Analyses.Atmospheric.US_Standard_1976()
     atmo_data                                               = atmosphere.compute_values(altitude = \
                                                                 nexus.missions['stick_fixed_cruise'].segments['cruise'].altitude )       
                                      
@@ -126,7 +126,7 @@ def longitudinal_static_stability_and_drag_post_process(nexus):
     run_conditions.aerodynamics.roll_rate_coefficient       = 0.0
     run_conditions.aerodynamics.pitch_rate_coefficient      = 0.0
     
-    stability_stick_fixed = MARC.Analyses.Stability.AVL() 
+    stability_stick_fixed = RCAIDE.Analyses.Stability.AVL() 
     stability_stick_fixed.settings.filenames.avl_bin_name   = '/Users/matthewclarke/Documents/AVL/avl3.35'   # change to path of AVL  
     #stability_stick_fixed.settings.print_output             = True 
     #stability_stick_fixed.settings.keep_files      = True 
@@ -195,7 +195,7 @@ def elevator_sizing_post_process(nexus):
     max_defl                                           = vehicle.maximum_elevator_deflection
     V_max                                              = nexus.missions['elevator_sizing'].segments['cruise'].air_speed
                                 
-    atmosphere                                         = MARC.Analyses.Atmospheric.US_Standard_1976()
+    atmosphere                                         = RCAIDE.Analyses.Atmospheric.US_Standard_1976()
     atmo_data                                          = atmosphere.compute_values(altitude = nexus.missions['elevator_sizing'].segments['cruise'].altitude )       
     run_conditions                                     = Aerodynamics()
     run_conditions.freestream.density                  = atmo_data.density[0,0] 
@@ -210,7 +210,7 @@ def elevator_sizing_post_process(nexus):
     CL_pull_man  = vehicle.maxiumum_load_factor*m*g/(S*q)  
     CL_push_man  = vehicle.minimum_load_factor*m*g/(S*q) 
                                       
-    stability_pull_maneuver                                   = MARC.Analyses.Stability.AVL() 
+    stability_pull_maneuver                                   = RCAIDE.Analyses.Stability.AVL() 
     stability_pull_maneuver.settings.filenames.avl_bin_name   = '/Users/matthewclarke/Documents/AVL/avl3.35'   # change to path of AVL  
     run_conditions.aerodynamics.lift_coefficient              =  CL_pull_man
     run_conditions.freestream.velocity                        = V_max 
@@ -221,7 +221,7 @@ def elevator_sizing_post_process(nexus):
     AoA_pull                                                  = results_pull_maneuver.aerodynamics.AoA[0,0]
     elevator_pull_deflection                                  = results_pull_maneuver.stability.static.control_surfaces_cases['case_0001_0001'].control_surfaces.elevator.deflection
 
-    stability_push_maneuver = MARC.Analyses.Stability.AVL() 
+    stability_push_maneuver = RCAIDE.Analyses.Stability.AVL() 
     stability_push_maneuver.settings.filenames.avl_bin_name   = '/Users/matthewclarke/Documents/AVL/avl3.35'  # change to path of AVL  
     run_conditions.aerodynamics.lift_coefficient              = CL_push_man 
     run_conditions.freestream.velocity                        = V_trim
@@ -269,7 +269,7 @@ def aileron_rudder_sizing_post_process(nexus):
     max_defl                                                  = vehicle.maximum_aileron_rudder_deflection
     V_crosswind                                               = vehicle.crosswind_velocity
                                        
-    atmosphere                                                = MARC.Analyses.Atmospheric.US_Standard_1976()
+    atmosphere                                                = RCAIDE.Analyses.Atmospheric.US_Standard_1976()
     atmo_data                                                 = atmosphere.compute_values(altitude = nexus.missions['aileron_sizing'].segments['cruise'].altitude )       
     run_conditions                                            = Aerodynamics()
     run_conditions.freestream.density                         = atmo_data.density[0,0] 
@@ -279,7 +279,7 @@ def aileron_rudder_sizing_post_process(nexus):
     run_conditions.aerodynamics.angle_of_attack               = np.array([0.0]) 
     
     
-    stability_roll_maneuver = MARC.Analyses.Stability.AVL() 
+    stability_roll_maneuver = RCAIDE.Analyses.Stability.AVL() 
     stability_roll_maneuver.settings.filenames.avl_bin_name   = '/Users/matthewclarke/Documents/AVL/avl3.35' # change to path of AVL    
     stability_roll_maneuver.settings.number_spanwise_vortices = 40
     run_conditions.aerodynamics.lift_coefficient              = CL_trim 
@@ -300,7 +300,7 @@ def aileron_rudder_sizing_post_process(nexus):
         rudder_roll_deflection = 0
         summary.rudder_roll_deflection_residual = 0       
         
-    stability_cross_wind_maneuver = MARC.Analyses.Stability.AVL() 
+    stability_cross_wind_maneuver = RCAIDE.Analyses.Stability.AVL() 
     stability_cross_wind_maneuver.settings.filenames.avl_bin_name = '/Users/matthewclarke/Documents/AVL/avl3.35'  # change to path of AVL   
     run_conditions.aerodynamics.lift_coefficient                  = CL_trim 
     stability_cross_wind_maneuver.geometry                        = vehicle
@@ -350,7 +350,7 @@ def flap_sizing_post_process(nexus):
     max_defl                                                 = vehicle.maximum_flap_deflection
     V_max                                                    = nexus.missions['flap_sizing'].segments['cruise'].air_speed
           
-    atmosphere                                               = MARC.Analyses.Atmospheric.US_Standard_1976()
+    atmosphere                                               = RCAIDE.Analyses.Atmospheric.US_Standard_1976()
     atmo_data                                                = atmosphere.compute_values(altitude = nexus.missions['flap_sizing'].segments['cruise'].altitude )       
     run_conditions                                           = Aerodynamics()
     run_conditions.freestream.density                        = atmo_data.density[0,0] 
@@ -364,7 +364,7 @@ def flap_sizing_post_process(nexus):
     run_conditions.aerodynamics.roll_rate_coefficient        = 0.0
     run_conditions.aerodynamics.pitch_rate_coefficient       = 0.0
     
-    stability_no_flap = MARC.Analyses.Stability.AVL() 
+    stability_no_flap = RCAIDE.Analyses.Stability.AVL() 
     stability_no_flap.settings.filenames.avl_bin_name        = '/Users/matthewclarke/Documents/AVL/avl3.35' # change to path of AVL    
     stability_no_flap.settings.number_spanwise_vortices      = 40
     vehicle.wings.main_wing.control_surfaces.flap.deflection = 0.0
@@ -373,7 +373,7 @@ def flap_sizing_post_process(nexus):
     CL_12_deg_no_flap                                        = results_no_flap.aerodynamics.lift_coefficient[0,0]  
       
     
-    stability_flap = MARC.Analyses.Stability.AVL() 
+    stability_flap = RCAIDE.Analyses.Stability.AVL() 
     stability_flap.settings.filenames.avl_bin_name           = '/Users/matthewclarke/Documents/AVL/avl3.35' # change to path of AVL   
     stability_flap.settings.number_spanwise_vortices         = 40
     vehicle.wings.main_wing.control_surfaces.flap.deflection = max_defl 

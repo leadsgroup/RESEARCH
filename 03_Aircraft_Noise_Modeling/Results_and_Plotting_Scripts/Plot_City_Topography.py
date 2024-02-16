@@ -1,13 +1,12 @@
 import numpy as np
-from MARC.Core import Units
+from RCAIDE.Core import Units
 import matplotlib.pyplot as plt
 from matplotlib.image import imread
 from scipy.interpolate import griddata  
-from MARC.Methods.Missions.compute_point_to_point_geospacial_data           import compute_point_to_point_geospacial_data
 import matplotlib.colors
 import matplotlib.colors as colors  
 from geopy.distance import geodesic as GD
-from MARC.Visualization.Topography                                          import * 
+from RCAIDE.Visualization.Topography                                          import * 
 import scipy.ndimage as ndimage
 import pickle
 

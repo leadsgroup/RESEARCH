@@ -1,12 +1,12 @@
 # Imports
-import MARC
-from MARC.Core import Units, Data   
+import RCAIDE
+from RCAIDE.Core import Units, Data   
 import numpy as np   
 
 # design propeller 
 
 def design_baseline_rotor():          
-    prop                            = MARC.Components.Energy.Converters.Lift_Rotor()
+    prop                            = RCAIDE.Components.Energy.Converters.Lift_Rotor()
     prop.inputs                     = Data() 
     prop.inputs.pitch_command       = 5*Units.degrees 
     prop.inputs.y_axis_rotation     = 20*Units.degrees 

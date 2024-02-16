@@ -8,26 +8,26 @@
 #----------------------------------------------------------------------
 #   Imports
 # ---------------------------------------------------------------------
-import MARC
-from MARC.Core import Units, Data   
+import RCAIDE
+from RCAIDE.Core import Units, Data   
 import pickle 
-from MARC.Visualization.Performance.Aerodynamics.Vehicle import *  
-from MARC.Visualization.Performance.Mission import *   
-from MARC.Visualization.Performance.Energy.Battery import *   
-from MARC.Visualization.Performance.Noise import *  
-from MARC.Visualization.Geometry import *
-from MARC.Components.Energy.Networks.Battery_Electric_Rotor                 import Battery_Electric_Rotor 
-from MARC.Methods.Performance.estimate_cruise_drag                          import estimate_cruise_drag
-from MARC.Methods.Geometry.Two_Dimensional.Planform                         import segment_properties
-from MARC.Methods.Power.Battery.Sizing                                      import initialize_from_circuit_configuration 
-from MARC.Methods.Weights.Correlations.Propulsion                           import nasa_motor
-from MARC.Methods.Propulsion.electric_motor_sizing                          import size_optimal_motor
-from MARC.Methods.Propulsion                                                import prop_rotor_design
-from MARC.Methods.Geometry.Two_Dimensional.Planform.wing_planform           import wing_planform 
-from MARC.Methods.Weights.Buildups.eVTOL.empty                              import empty
-from MARC.Methods.Center_of_Gravity.compute_component_centers_of_gravity    import compute_component_centers_of_gravity
-from MARC.Methods.Geometry.Two_Dimensional.Planform.wing_segmented_planform import wing_segmented_planform 
-from MARC.Methods.Weights.Buildups.eVTOL.converge_evtol_weight              import converge_evtol_weight  
+from RCAIDE.Visualization.Performance.Aerodynamics.Vehicle import *  
+from RCAIDE.Visualization.Performance.Mission import *   
+from RCAIDE.Visualization.Performance.Energy.Battery import *   
+from RCAIDE.Visualization.Performance.Noise import *  
+from RCAIDE.Visualization.Geometry import *
+from RCAIDE.Components.Energy.Networks.Battery_Electric_Rotor                 import Battery_Electric_Rotor 
+from RCAIDE.Methods.Performance.estimate_cruise_drag                          import estimate_cruise_drag
+from RCAIDE.Methods.Geometry.Two_Dimensional.Planform                         import segment_properties
+from RCAIDE.Methods.Power.Battery.Sizing                                      import initialize_from_circuit_configuration 
+from RCAIDE.Methods.Weights.Correlations.Propulsion                           import nasa_motor
+from RCAIDE.Methods.Propulsion.electric_motor_sizing                          import size_optimal_motor
+from RCAIDE.Methods.Propulsion                                                import prop_rotor_design
+from RCAIDE.Methods.Geometry.Two_Dimensional.Planform.wing_planform           import wing_planform 
+from RCAIDE.Methods.Weights.Buildups.eVTOL.empty                              import empty
+from RCAIDE.Methods.Center_of_Gravity.compute_component_centers_of_gravity    import compute_component_centers_of_gravity
+from RCAIDE.Methods.Geometry.Two_Dimensional.Planform.wing_segmented_planform import wing_segmented_planform 
+from RCAIDE.Methods.Weights.Buildups.eVTOL.converge_evtol_weight              import converge_evtol_weight  
  
 import os
 import numpy as np 
@@ -44,7 +44,7 @@ def vehicle_setup(resize_aircraft,vehicle_name = 'Tiltwing_CRM') :
     
     if resize_aircraft:
          
-        vehicle               = MARC.Vehicle()
+        vehicle               = RCAIDE.Vehicle()
         vehicle.tag           = vehicle_name
         vehicle.configuration = 'eVTOL'
          
@@ -59,7 +59,7 @@ def vehicle_setup(resize_aircraft,vehicle_name = 'Tiltwing_CRM') :
         # ------------------------------------------------------    
         # WINGS    
         # ------------------------------------------------------  
-        wing                                        = MARC.Components.Wings.Main_Wing()
+        wing                                        = RCAIDE.Components.Wings.Main_Wing()
         wing.tag                                    = 'canard_wing'  
         wing.aspect_ratio                           = 8.51507 
         wing.sweeps.quarter_chord                   = 0.0
@@ -82,7 +82,7 @@ def vehicle_setup(resize_aircraft,vehicle_name = 'Tiltwing_CRM') :
         wing.aerodynamic_center                     = [0., 0., 0.]     
         wing.winglet_fraction                       = 0.0  
         wing.symmetric                              = True    
-        airfoil                                   = MARC.Components.Airfoils.Airfoil() 
+        airfoil                                   = RCAIDE.Components.Airfoils.Airfoil() 
         ospath    = os.path.abspath(__file__)
         separator = os.path.sep
         rel_path  = os.path.dirname(ospath) + separator             
@@ -92,7 +92,7 @@ def vehicle_setup(resize_aircraft,vehicle_name = 'Tiltwing_CRM') :
         # add to vehicle   
         vehicle.append_component(wing)                            
                                                     
-        wing                                        = MARC.Components.Wings.Main_Wing()
+        wing                                        = RCAIDE.Components.Wings.Main_Wing()
         wing.tag                                    = 'main_wing'  
         wing.aspect_ratio                           = 8.51507 
         wing.sweeps.quarter_chord                   = 0.0
@@ -128,7 +128,7 @@ def vehicle_setup(resize_aircraft,vehicle_name = 'Tiltwing_CRM') :
         # FUSELAGE    
         # ------------------------------------------------------    
         # FUSELAGE PROPERTIES                       
-        fuselage                                    = MARC.Components.Fuselages.Fuselage()
+        fuselage                                    = RCAIDE.Components.Fuselages.Fuselage()
         fuselage.tag                                = 'fuselage' 
         fuselage.seats_abreast                      = 0.  
         fuselage.seat_pitch                         = 1.  
@@ -149,7 +149,7 @@ def vehicle_setup(resize_aircraft,vehicle_name = 'Tiltwing_CRM') :
         fuselage.differential_pressure              = 0.  
         
         # Segment  
-        segment                                     = MARC.Components.Lofted_Body_Segment.Segment() 
+        segment                                     = RCAIDE.Components.Lofted_Body_Segment.Segment() 
         segment.tag                                 = 'segment_0'   
         segment.percent_x_location                  = 0.  
         segment.percent_z_location                  = 0.  
@@ -160,7 +160,7 @@ def vehicle_setup(resize_aircraft,vehicle_name = 'Tiltwing_CRM') :
         fuselage.Segments.append(segment)             
         
         # Segment                                   
-        segment                                     = MARC.Components.Lofted_Body_Segment.Segment()
+        segment                                     = RCAIDE.Components.Lofted_Body_Segment.Segment()
         segment.tag                                 = 'segment_1'   
         segment.percent_x_location                  = 0.97675/6.1 
         segment.percent_z_location                  = 0.21977/6.1
@@ -170,7 +170,7 @@ def vehicle_setup(resize_aircraft,vehicle_name = 'Tiltwing_CRM') :
         
         
         # Segment                                   
-        segment                                     = MARC.Components.Lofted_Body_Segment.Segment()
+        segment                                     = RCAIDE.Components.Lofted_Body_Segment.Segment()
         segment.tag                                 = 'segment_2'    
         segment.percent_x_location                  = 1.93556/6.1 
         segment.percent_z_location                  = 0.39371/6.1
@@ -180,7 +180,7 @@ def vehicle_setup(resize_aircraft,vehicle_name = 'Tiltwing_CRM') :
         
         
         # Segment                                   
-        segment                                     = MARC.Components.Lofted_Body_Segment.Segment()
+        segment                                     = RCAIDE.Components.Lofted_Body_Segment.Segment()
         segment.tag                                 = 'segment_3'    
         segment.percent_x_location                  = 3.44137/6.1 
         segment.percent_z_location                  = 0.57143/6.1
@@ -189,7 +189,7 @@ def vehicle_setup(resize_aircraft,vehicle_name = 'Tiltwing_CRM') :
         fuselage.Segments.append(segment)             
         
         # Segment                                   
-        segment                                     = MARC.Components.Lofted_Body_Segment.Segment()
+        segment                                     = RCAIDE.Components.Lofted_Body_Segment.Segment()
         segment.tag                                 = 'segment_4'   
         segment.percent_x_location                  = 4.61031/6.1
         segment.percent_z_location                  = 0.81577/6.1
@@ -198,7 +198,7 @@ def vehicle_setup(resize_aircraft,vehicle_name = 'Tiltwing_CRM') :
         fuselage.Segments.append(segment)              
         
         # Segment                                   
-        segment                                     = MARC.Components.Lofted_Body_Segment.Segment()
+        segment                                     = RCAIDE.Components.Lofted_Body_Segment.Segment()
         segment.tag                                 = 'segment_5'   
         segment.percent_x_location                  = 0.9827
         segment.percent_z_location                  = 0.180
@@ -208,7 +208,7 @@ def vehicle_setup(resize_aircraft,vehicle_name = 'Tiltwing_CRM') :
         
         
         # Segment                                   
-        segment                                     = MARC.Components.Lofted_Body_Segment.Segment()
+        segment                                     = RCAIDE.Components.Lofted_Body_Segment.Segment()
         segment.tag                                 = 'segment_6'   
         segment.percent_x_location                  = 1. 
         segment.percent_z_location                  = 0.2058
@@ -221,21 +221,21 @@ def vehicle_setup(resize_aircraft,vehicle_name = 'Tiltwing_CRM') :
 
         
         # Nacelles 
-        nacelle                = MARC.Components.Nacelles.Nacelle()
+        nacelle                = RCAIDE.Components.Nacelles.Nacelle()
         nacelle.tag            = 'nacelle'
         nacelle.length         = 1.5
         nacelle.diameter       = 0.5
         nacelle.orientation_euler_angles  = [0.,0.,0.]    
         nacelle.flow_through   = False  
         
-        nac_segment                    = MARC.Components.Lofted_Body_Segment.Segment()
+        nac_segment                    = RCAIDE.Components.Lofted_Body_Segment.Segment()
         nac_segment.tag                = 'segment_1'
         nac_segment.percent_x_location = 0.0  
         nac_segment.height             = 0.0
         nac_segment.width              = 0.0
         nacelle.append_segment(nac_segment)    
     
-        nac_segment                    = MARC.Components.Lofted_Body_Segment.Segment()
+        nac_segment                    = RCAIDE.Components.Lofted_Body_Segment.Segment()
         nac_segment.tag                = 'segment_2'
         nac_segment.percent_x_location = 0.10  
         nac_segment.height             = 0.3
@@ -243,35 +243,35 @@ def vehicle_setup(resize_aircraft,vehicle_name = 'Tiltwing_CRM') :
         nacelle.append_segment(nac_segment)    
         
         
-        nac_segment                    = MARC.Components.Lofted_Body_Segment.Segment()
+        nac_segment                    = RCAIDE.Components.Lofted_Body_Segment.Segment()
         nac_segment.tag                = 'segment_3'
         nac_segment.percent_x_location = 0.25  
         nac_segment.height             = 0.45
         nac_segment.width              = 0.45
         nacelle.append_segment(nac_segment)    
         
-        nac_segment                    = MARC.Components.Lofted_Body_Segment.Segment()
+        nac_segment                    = RCAIDE.Components.Lofted_Body_Segment.Segment()
         nac_segment.tag                = 'segment_4'
         nac_segment.percent_x_location = 0.5 
         nac_segment.height             = 0.5
         nac_segment.width              = 0.5
         nacelle.append_segment(nac_segment)    
     
-        nac_segment                    = MARC.Components.Lofted_Body_Segment.Segment()
+        nac_segment                    = RCAIDE.Components.Lofted_Body_Segment.Segment()
         nac_segment.tag                = 'segment_5'
         nac_segment.percent_x_location = 0.75
         nac_segment.height             = 0.45
         nac_segment.width              = 0.45
         nacelle.append_segment(nac_segment)        
     
-        nac_segment                    = MARC.Components.Lofted_Body_Segment.Segment()
+        nac_segment                    = RCAIDE.Components.Lofted_Body_Segment.Segment()
         nac_segment.tag                = 'segment_5'
         nac_segment.percent_x_location = 0.9
         nac_segment.height             = 0.3
         nac_segment.width              = 0.3
         nacelle.append_segment(nac_segment)    
         
-        nac_segment                    = MARC.Components.Lofted_Body_Segment.Segment()
+        nac_segment                    = RCAIDE.Components.Lofted_Body_Segment.Segment()
         nac_segment.tag                = 'segment_7'
         nac_segment.percent_x_location = 1.0  
         nac_segment.height             = 0.0
@@ -299,7 +299,7 @@ def vehicle_setup(resize_aircraft,vehicle_name = 'Tiltwing_CRM') :
         
         
         # Battery         
-        bat                                                    = MARC.Components.Energy.Storages.Batteries.Constant_Mass.Lithium_Ion_LiNiMnCoO2_18650()  
+        bat                                                    = RCAIDE.Components.Energy.Storages.Batteries.Constant_Mass.Lithium_Ion_LiNiMnCoO2_18650()  
         bat.pack.electrical_configuration.series               = 140   
         bat.pack.electrical_configuration.parallel             = 100
         initialize_from_circuit_configuration(bat)  
@@ -312,7 +312,7 @@ def vehicle_setup(resize_aircraft,vehicle_name = 'Tiltwing_CRM') :
         net.voltage                                            = bat.pack.max_voltage 
      
         # 1. Electronic Speed Controller  
-        prop_rotor_esc              = MARC.Components.Energy.Distributors.Electronic_Speed_Controller()
+        prop_rotor_esc              = RCAIDE.Components.Energy.Distributors.Electronic_Speed_Controller()
         prop_rotor_esc.efficiency   = 0.95
         for i in range(8):
             prop_rotor_ESC          = deepcopy(prop_rotor_esc)
@@ -324,7 +324,7 @@ def vehicle_setup(resize_aircraft,vehicle_name = 'Tiltwing_CRM') :
         Drag            = estimate_cruise_drag(vehicle,altitude = 1500. * Units.ft,speed= 130.* Units['mph'] ,lift_coefficient = 0.5 ,profile_drag = 0.06)
         Hover_Load      = vehicle.mass_properties.takeoff*g      # hover load          
      
-        prop_rotor                                   = MARC.Components.Energy.Converters.Prop_Rotor() 
+        prop_rotor                                   = RCAIDE.Components.Energy.Converters.Prop_Rotor() 
         prop_rotor.tag                               = 'prop_rotor'     
         prop_rotor.tip_radius                        = 1.25
         prop_rotor.hub_radius                        = 0.15 * prop_rotor.tip_radius
@@ -346,7 +346,7 @@ def vehicle_setup(resize_aircraft,vehicle_name = 'Tiltwing_CRM') :
         ospath                                      = os.path.abspath(__file__)
         separator                                   = os.path.sep
         rel_path                                    = ospath.split( 'Tiltwing' + separator + 'Common')[0]
-        airfoil                                     = MARC.Components.Airfoils.Airfoil() 
+        airfoil                                     = RCAIDE.Components.Airfoils.Airfoil() 
         airfoil.coordinate_file                     = rel_path + 'Airfoils' + separator + 'NACA_4412.txt'
         airfoil.polar_files                         = [rel_path+ 'Airfoils' + separator + 'Polars' + separator + 'NACA_4412_polar_Re_50000.txt' ,
                                                       rel_path + 'Airfoils' + separator + 'Polars' + separator + 'NACA_4412_polar_Re_100000.txt' ,
@@ -372,7 +372,7 @@ def vehicle_setup(resize_aircraft,vehicle_name = 'Tiltwing_CRM') :
             net.rotors.append(pr)  
     
         # Component 7 the Motors  
-        prop_rotor_motor                         = MARC.Components.Energy.Converters.Motor()
+        prop_rotor_motor                         = RCAIDE.Components.Energy.Converters.Motor()
         prop_rotor_motor.efficiency              = 0.9
         prop_rotor_motor.nominal_voltage         = bat.pack.max_voltage*0.75 
         prop_rotor_motor.propeller_radius        = prop_rotor.tip_radius   
@@ -392,18 +392,18 @@ def vehicle_setup(resize_aircraft,vehicle_name = 'Tiltwing_CRM') :
                 
                 
         # Component 2: Payload
-        payload                        = MARC.Components.Energy.Peripherals.Payload()
+        payload                        = RCAIDE.Components.Energy.Peripherals.Payload()
         payload.power_draw             = 10. # Watts 
         payload.mass_properties.mass   = 1.0 * Units.kg
         net.payload                    = payload
         
         # Component 3: Avionics    
-        avionics                       = MARC.Components.Energy.Peripherals.Avionics()
+        avionics                       = RCAIDE.Components.Energy.Peripherals.Avionics()
         avionics.power_draw            = 20. # Watts  
         net.avionics                   = avionics   
         
         # Component 4: Miscellaneous Systems 
-        sys                            = MARC.Components.Systems.System()
+        sys                            = RCAIDE.Components.Systems.System()
         sys.mass_properties.mass       = 5 # kg       
     
         # append motor origin spanwise locations onto wing data structure
@@ -444,15 +444,15 @@ def configs_setup(vehicle):
     # ------------------------------------------------------------------
     #   Initialize Configurations
     # ------------------------------------------------------------------ 
-    configs                                     = MARC.Components.Configs.Config.Container() 
-    base_config                                 = MARC.Components.Configs.Config(vehicle)
+    configs                                     = RCAIDE.Components.Configs.Config.Container() 
+    base_config                                 = RCAIDE.Components.Configs.Config(vehicle)
     base_config.tag                             = 'base'
     configs.append(base_config)
  
     # ------------------------------------------------------------------
     #   Hover Configuration
     # ------------------------------------------------------------------
-    config                                            = MARC.Components.Configs.Config(base_config)
+    config                                            = RCAIDE.Components.Configs.Config(base_config)
     config.tag                                        = 'vertical_flight'
     vector_angle                                      = 90*Units.degrees
     for rotor in config.networks.battery_electric_rotor.rotors: 
@@ -466,7 +466,7 @@ def configs_setup(vehicle):
     # ------------------------------------------------------------------
     #  Vertical Transition 1 
     # ------------------------------------------------------------------  
-    config                                            = MARC.Components.Configs.Config(base_config)
+    config                                            = RCAIDE.Components.Configs.Config(base_config)
     vector_angle                                      = 60.0  * Units.degrees
     config.tag                                        = 'low_speed_transition_flight'
     for rotor in config.networks.battery_electric_rotor.rotors: 
@@ -482,7 +482,7 @@ def configs_setup(vehicle):
     # ------------------------------------------------------------------
     # Vertical Transition 2    
     # ------------------------------------------------------------------ 
-    config                                            = MARC.Components.Configs.Config(base_config)
+    config                                            = RCAIDE.Components.Configs.Config(base_config)
     vector_angle                                      = 30.0  * Units.degrees
     config.tag                                        = 'high_speed_transition_flight'
     for rotor in config.networks.battery_electric_rotor.rotors: 
@@ -498,7 +498,7 @@ def configs_setup(vehicle):
     # ------------------------------------------------------------------
     #   Forward Flight Transition 
     # ------------------------------------------------------------------
-    config                                            = MARC.Components.Configs.Config(base_config)
+    config                                            = RCAIDE.Components.Configs.Config(base_config)
     config.tag                                        = 'forward_flight'
     vector_angle                                      = 0.0 * Units.degrees 
     for rotor in config.networks.battery_electric_rotor.rotors: 

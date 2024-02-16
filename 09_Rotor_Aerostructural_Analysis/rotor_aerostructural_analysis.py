@@ -9,23 +9,23 @@
 #   Imports
 # ----------------------------------------------------------------------
 
-import MARC
-from MARC.Core import Units
-from MARC.Plots.Geometry import plot_rotor
+import RCAIDE
+from RCAIDE.Core import Units
+from RCAIDE.Plots.Geometry import plot_rotor
 import matplotlib.pyplot as plt  
-from MARC.Core import Data 
+from RCAIDE.Core import Data 
 
-from MARC.Methods.Geometry.Two_Dimensional.Cross_Section.Airfoil.compute_airfoil_properties \
+from RCAIDE.Methods.Geometry.Two_Dimensional.Cross_Section.Airfoil.compute_airfoil_properties \
      import compute_airfoil_properties
-from MARC.Methods.Geometry.Two_Dimensional.Cross_Section.Airfoil.compute_naca_4series \
+from RCAIDE.Methods.Geometry.Two_Dimensional.Cross_Section.Airfoil.compute_naca_4series \
      import compute_naca_4series
-from MARC.Methods.Geometry.Two_Dimensional.Cross_Section.Airfoil.import_airfoil_geometry\
+from RCAIDE.Methods.Geometry.Two_Dimensional.Cross_Section.Airfoil.import_airfoil_geometry\
      import import_airfoil_geometry
 
 import numpy as np
 import scipy as sp
 import copy 
-from MARC.Methods.Propulsion import propeller_design , lift_rotor_design , prop_rotor_design  
+from RCAIDE.Methods.Propulsion import propeller_design , lift_rotor_design , prop_rotor_design  
 
 def main():
 
@@ -269,7 +269,7 @@ def radius_of_curvature(x1,y1,x2,y2,x3,y3):
  
 def lift_rotor_run():     
 
-    rotor                              = MARC.Components.Energy.Converters.Lift_Rotor() 
+    rotor                              = RCAIDE.Components.Energy.Converters.Lift_Rotor() 
     rotor.tag                          = 'rotor'
     rotor.orientation_euler_angles     = [0, 90*Units.degrees,0]
     rotor.tip_radius                   = 1.15
@@ -284,7 +284,7 @@ def lift_rotor_run():
     
 
     # define first airfoil 
-    airfoil                         = MARC.Components.Airfoils.Airfoil()
+    airfoil                         = RCAIDE.Components.Airfoils.Airfoil()
     airfoil.tag                     = 'NACA_4412' 
     airfoil.coordinate_file         = 'Airfoils/NACA_4412.txt'   # absolute path   
     airfoil.polar_files             = ['Airfoils/Polars/NACA_4412_polar_Re_50000.txt',
@@ -302,9 +302,9 @@ def lift_rotor_run():
     rotor                              = lift_rotor_design(rotor)  # Reduced iteration for regression therefore optimal design is NOT reached!   
     
     # Find the operating conditions
-    atmosphere                                          = MARC.Analyses.Atmospheric.US_Standard_1976()
+    atmosphere                                          = RCAIDE.Analyses.Atmospheric.US_Standard_1976()
     atmosphere_conditions                               =  atmosphere.compute_values(rotor.design_altitude)  
-    conditions                                          = MARC.Analyses.Mission.Segments.Conditions.Aerodynamics()
+    conditions                                          = RCAIDE.Analyses.Mission.Segments.Conditions.Aerodynamics()
     conditions._size                                    = 1
     conditions.freestream                               = Data()
     conditions.propulsion                               = Data()

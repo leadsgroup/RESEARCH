@@ -1,8 +1,8 @@
 # Imports
-import MARC
-from MARC.Core import Units, Data  
-from MARC.Methods.Geometry.Two_Dimensional.Cross_Section.Airfoil.compute_airfoil_properties import compute_airfoil_properties
-from MARC.Methods.Geometry.Two_Dimensional.Cross_Section.Airfoil.import_airfoil_geometry    import import_airfoil_geometry    
+import RCAIDE
+from RCAIDE.Core import Units, Data  
+from RCAIDE.Methods.Geometry.Two_Dimensional.Cross_Section.Airfoil.compute_airfoil_properties import compute_airfoil_properties
+from RCAIDE.Methods.Geometry.Two_Dimensional.Cross_Section.Airfoil.import_airfoil_geometry    import import_airfoil_geometry    
 from scipy.interpolate import interp1d
 import os
 import numpy as np  
@@ -10,7 +10,7 @@ import numpy as np
 # design propeller 
                                         
 def design_F8745D4_prop():  
-    prop                            = MARC.Components.Energy.Converters.Propeller()
+    prop                            = RCAIDE.Components.Energy.Converters.Propeller()
     prop.inputs                     = Data()
     prop.inputs.pitch_command       = 0 
     prop.inputs.y_axis_rotation     = 0.
@@ -38,7 +38,7 @@ def design_F8745D4_prop():
     ospath    = os.path.abspath(__file__)
     separator = os.path.sep
     rel_path  = os.path.dirname(ospath) + separator  
-    airfoil                          = MARC.Components.Airfoils.Airfoil()   
+    airfoil                          = RCAIDE.Components.Airfoils.Airfoil()   
     airfoil.coordinate_file          = rel_path +'../Airfoils/Clark_y.txt'
     airfoil.polar_files              = [rel_path +'../Airfoils/Polars/Clark_y_polar_Re_50000.txt' ,
                                        rel_path +'../Airfoils/Polars/Clark_y_polar_Re_100000.txt',

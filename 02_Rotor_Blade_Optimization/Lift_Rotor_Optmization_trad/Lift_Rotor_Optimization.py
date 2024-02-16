@@ -1,9 +1,9 @@
 # Lift_Rotor_Optimization
 
-from MARC.Core import Units, Data, to_numpy
-from MARC.Optimization import Nexus
-from MARC.Optimization.Package_Setups.pyoptsparse_setup import Pyoptsparse_Solve 
-import MARC.Optimization.Package_Setups.scipy_setup      as scipy_setup
+from RCAIDE.Core import Units, Data, to_numpy
+from RCAIDE.Optimization import Nexus
+from RCAIDE.Optimization.Package_Setups.pyoptsparse_setup import Pyoptsparse_Solve 
+import RCAIDE.Optimization.Package_Setups.scipy_setup      as scipy_setup
  
 # ----------------------------------------------------------------------        
 #   Imports

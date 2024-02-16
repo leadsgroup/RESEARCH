@@ -5,14 +5,14 @@
 #----------------------------------------------------------------------
 #   Imports
 # ---------------------------------------------------------------------
-import MARC  
+import RCAIDE  
 
 # ----------------------------------------------------------------------
 #   Define the Vehicle Analyses
 # ---------------------------------------------------------------------- 
 def setup(configs):
 
-    analyses = MARC.Analyses.Analysis.Container()
+    analyses = RCAIDE.Analyses.Analysis.Container()
 
     # build a base analysis for each config
     for tag,config in configs.items():
@@ -29,23 +29,23 @@ def base_analysis(vehicle):
     # ------------------------------------------------------------------
     #   Initialize the Analyses
     # ------------------------------------------------------------------     
-    analyses = MARC.Analyses.Vehicle()
+    analyses = RCAIDE.Analyses.Vehicle()
 
     # ------------------------------------------------------------------
     #  Basic Geometry Relations
-    sizing = MARC.Analyses.Sizing.Sizing()
+    sizing = RCAIDE.Analyses.Sizing.Sizing()
     sizing.features.vehicle = vehicle
     analyses.append(sizing)
 
     # ------------------------------------------------------------------
     #  Weights
-    weights = MARC.Analyses.Weights.Weights_eVTOL()
+    weights = RCAIDE.Analyses.Weights.Weights_eVTOL()
     weights.vehicle = vehicle
     analyses.append(weights)
 
     # ------------------------------------------------------------------
     #  Aerodynamics Analysis
-    aerodynamics = MARC.Analyses.Aerodynamics.Fidelity_Zero()
+    aerodynamics = RCAIDE.Analyses.Aerodynamics.Fidelity_Zero()
     aerodynamics.geometry = vehicle  
     aerodynamics.settings.model_fuselage = True 
     aerodynamics.settings.number_spanwise_vortices           = 25
@@ -54,24 +54,24 @@ def base_analysis(vehicle):
      
     # ------------------------------------------------------------------
     #  Stability Analysis
-    stability = MARC.Analyses.Stability.Fidelity_Zero()
+    stability = RCAIDE.Analyses.Stability.Fidelity_Zero()
     stability.geometry = vehicle
     analyses.append(stability)       
                                                                               
     # ------------------------------------------------------------------
     #  Energy
-    energy= MARC.Analyses.Energy.Energy()
+    energy= RCAIDE.Analyses.Energy.Energy()
     energy.network = vehicle.networks
     analyses.append(energy)
 
     # ------------------------------------------------------------------
     #  Planet Analysis
-    planet = MARC.Analyses.Planets.Planet()
+    planet = RCAIDE.Analyses.Planets.Planet()
     analyses.append(planet)
 
     # ------------------------------------------------------------------
     #  Atmosphere Analysis
-    atmosphere = MARC.Analyses.Atmospheric.US_Standard_1976()
+    atmosphere = RCAIDE.Analyses.Atmospheric.US_Standard_1976()
     atmosphere.features.planet = planet.features
     analyses.append(atmosphere)   
 

@@ -7,14 +7,14 @@
 #  Imports
 # ----------------------------------------------------------------------
 
-import MARC
+import RCAIDE
 
 import numpy as np
 from scipy.optimize import fsolve
 
-from MARC.Core import Data
-from MARC.Components.Energy.Energy_Component import Energy_Component
-from MARC.Attributes.Coolants.Glycol_Water import Glycol_Water
+from RCAIDE.Core import Data
+from RCAIDE.Components.Energy.Energy_Component import Energy_Component
+from RCAIDE.Attributes.Coolants.Glycol_Water import Glycol_Water
 
 # ----------------------------------------------------------------------
 #  Cryogenic Heat Exchanger Component

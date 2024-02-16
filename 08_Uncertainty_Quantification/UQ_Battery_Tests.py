@@ -3,8 +3,8 @@
 #----------------------------------------------------------------------
 #   Imports
 # --------------------------------------------------------------------- 
-import MARC  
-from MARC.Core          import Units, Data    
+import RCAIDE  
+from RCAIDE.Core          import Units, Data    
 
 import uncertainpy       as un
 import chaospy           as cp                       # To create distributions

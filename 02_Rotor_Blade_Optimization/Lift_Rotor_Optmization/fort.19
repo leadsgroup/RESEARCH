@@ -108,7 +108,7 @@
  SNOPTC EXIT  40 -- terminated after numerical difficulties
  SNOPTC INFO  43 -- cannot satisfy the general constraints
 
- Problem name                 MARC
+ Problem name                 RCAIDE
  No. of iterations                 297   Objective            9.4406471915E-01
  No. of major iterations            62   Linear    obj. term  0.0000000000E+00
  Penalty parameter           0.000E+00   Nonlinear obj. term  9.4406471915E-01
@@ -241,7 +241,7 @@
  SNOPTC EXIT   0 -- finished successfully
  SNOPTC INFO   1 -- optimality conditions satisfied
 
- Problem name                 MARC
+ Problem name                 RCAIDE
  No. of iterations                 351   Objective            1.1459986270E+00
  No. of major iterations            69   Linear    obj. term  0.0000000000E+00
  Penalty parameter           2.345E+00   Nonlinear obj. term  1.1459986270E+00
@@ -366,7 +366,7 @@
  SNOPTC EXIT  40 -- terminated after numerical difficulties
  SNOPTC INFO  43 -- cannot satisfy the general constraints
 
- Problem name                 MARC
+ Problem name                 RCAIDE
  No. of iterations                 301   Objective            1.3257010198E+00
  No. of major iterations            59   Linear    obj. term  0.0000000000E+00
  Penalty parameter           0.000E+00   Nonlinear obj. term  1.3257010198E+00
@@ -535,7 +535,7 @@
  SNOPTC EXIT   0 -- finished successfully
  SNOPTC INFO   1 -- optimality conditions satisfied
 
- Problem name                 MARC
+ Problem name                 RCAIDE
  No. of iterations                 358   Objective            1.5292913020E+00
  No. of major iterations            98   Linear    obj. term  0.0000000000E+00
  Penalty parameter           6.185E-01   Nonlinear obj. term  1.5292913020E+00
@@ -652,7 +652,7 @@
  SNOPTC EXIT   0 -- finished successfully
  SNOPTC INFO   1 -- optimality conditions satisfied
 
- Problem name                 MARC
+ Problem name                 RCAIDE
  No. of iterations                 180   Objective            1.7302222905E+00
  No. of major iterations            54   Linear    obj. term  0.0000000000E+00
  Penalty parameter           5.604E+00   Nonlinear obj. term  1.7302222905E+00
@@ -768,7 +768,7 @@
  SNOPTC EXIT   0 -- finished successfully
  SNOPTC INFO   1 -- optimality conditions satisfied
 
- Problem name                 MARC
+ Problem name                 RCAIDE
  No. of iterations                 123   Objective            1.9308125839E+00
  No. of major iterations            53   Linear    obj. term  0.0000000000E+00
  Penalty parameter           3.653E+00   Nonlinear obj. term  1.9308125839E+00
@@ -852,7 +852,7 @@
  SNOPTC EXIT   0 -- finished successfully
  SNOPTC INFO   1 -- optimality conditions satisfied
 
- Problem name                 MARC
+ Problem name                 RCAIDE
  No. of iterations                 134   Objective            2.1539141567E+00
  No. of major iterations            27   Linear    obj. term  0.0000000000E+00
  Penalty parameter           3.900E+00   Nonlinear obj. term  2.1539141567E+00
@@ -959,7 +959,7 @@
  SNOPTC EXIT   0 -- finished successfully
  SNOPTC INFO   1 -- optimality conditions satisfied
 
- Problem name                 MARC
+ Problem name                 RCAIDE
  No. of iterations                 109   Objective            2.3537486412E+00
  No. of major iterations            46   Linear    obj. term  0.0000000000E+00
  Penalty parameter           2.850E-01   Nonlinear obj. term  2.3537486412E+00
@@ -1073,7 +1073,7 @@
  SNOPTC EXIT   0 -- finished successfully
  SNOPTC INFO   1 -- optimality conditions satisfied
 
- Problem name                 MARC
+ Problem name                 RCAIDE
  No. of iterations                 149   Objective            2.5296763966E+00
  No. of major iterations            51   Linear    obj. term  0.0000000000E+00
  Penalty parameter           2.370E+00   Nonlinear obj. term  2.5296763966E+00
@@ -1188,7 +1188,7 @@
  SNOPTC EXIT   0 -- finished successfully
  SNOPTC INFO   1 -- optimality conditions satisfied
 
- Problem name                 MARC
+ Problem name                 RCAIDE
  No. of iterations                 132   Objective            2.7503773435E+00
  No. of major iterations            52   Linear    obj. term  0.0000000000E+00
  Penalty parameter           3.657E+00   Nonlinear obj. term  2.7503773435E+00
@@ -1307,7 +1307,7 @@
  SNOPTC EXIT   0 -- finished successfully
  SNOPTC INFO   1 -- optimality conditions satisfied
 
- Problem name                 MARC
+ Problem name                 RCAIDE
  No. of iterations                 144   Objective            2.9250120247E+00
  No. of major iterations            56   Linear    obj. term  0.0000000000E+00
  Penalty parameter           6.455E-01   Nonlinear obj. term  2.9250120247E+00
@@ -1487,7 +1487,7 @@
  SNOPTC EXIT   0 -- finished successfully
  SNOPTC INFO   1 -- optimality conditions satisfied
 
- Problem name                 MARC
+ Problem name                 RCAIDE
  No. of iterations                 161   Objective            3.1207049556E+00
  No. of major iterations           107   Linear    obj. term  0.0000000000E+00
  Penalty parameter           4.377E+00   Nonlinear obj. term  3.1207049556E+00
@@ -1613,7 +1613,7 @@
  SNOPTC EXIT   0 -- finished successfully
  SNOPTC INFO   1 -- optimality conditions satisfied
 
- Problem name                 MARC
+ Problem name                 RCAIDE
  No. of iterations                 142   Objective            3.3144151752E+00
  No. of major iterations            61   Linear    obj. term  0.0000000000E+00
  Penalty parameter           2.017E+00   Nonlinear obj. term  3.3144151752E+00
@@ -1729,7 +1729,7 @@
  SNOPTC EXIT   0 -- finished successfully
  SNOPTC INFO   1 -- optimality conditions satisfied
 
- Problem name                 MARC
+ Problem name                 RCAIDE
  No. of iterations                 106   Objective            3.5052954296E+00
  No. of major iterations            53   Linear    obj. term  0.0000000000E+00
  Penalty parameter           2.207E+00   Nonlinear obj. term  3.5052954296E+00
@@ -1850,7 +1850,7 @@
  SNOPTC EXIT   0 -- finished successfully
  SNOPTC INFO   1 -- optimality conditions satisfied
 
- Problem name                 MARC
+ Problem name                 RCAIDE
  No. of iterations                 105   Objective            3.6920199739E+00
  No. of major iterations            58   Linear    obj. term  0.0000000000E+00
  Penalty parameter           8.195E-01   Nonlinear obj. term  3.6920199739E+00
@@ -1972,7 +1972,7 @@
  SNOPTC EXIT   0 -- finished successfully
  SNOPTC INFO   1 -- optimality conditions satisfied
 
- Problem name                 MARC
+ Problem name                 RCAIDE
  No. of iterations                 126   Objective            3.8725489287E+00
  No. of major iterations            59   Linear    obj. term  0.0000000000E+00
  Penalty parameter           1.892E-01   Nonlinear obj. term  3.8725489287E+00
@@ -2173,7 +2173,7 @@
  SNOPTC EXIT   0 -- finished successfully
  SNOPTC INFO   1 -- optimality conditions satisfied
 
- Problem name                 MARC
+ Problem name                 RCAIDE
  No. of iterations                 207   Objective            4.0439076801E+00
  No. of major iterations           124   Linear    obj. term  0.0000000000E+00
  Penalty parameter           2.273E+00   Nonlinear obj. term  4.0439076801E+00
@@ -2283,7 +2283,7 @@
  SNOPTC EXIT   0 -- finished successfully
  SNOPTC INFO   1 -- optimality conditions satisfied
 
- Problem name                 MARC
+ Problem name                 RCAIDE
  No. of iterations                  83   Objective            4.2021825795E+00
  No. of major iterations            49   Linear    obj. term  0.0000000000E+00
  Penalty parameter           4.786E-02   Nonlinear obj. term  4.2021825795E+00
@@ -2397,7 +2397,7 @@
  SNOPTC EXIT   0 -- finished successfully
  SNOPTC INFO   1 -- optimality conditions satisfied
 
- Problem name                 MARC
+ Problem name                 RCAIDE
  No. of iterations                  84   Objective            4.3078735339E+00
  No. of major iterations            51   Linear    obj. term  0.0000000000E+00
  Penalty parameter           5.768E-02   Nonlinear obj. term  4.3078735339E+00
@@ -2527,7 +2527,7 @@
  SNOPTC EXIT   0 -- finished successfully
  SNOPTC INFO   1 -- optimality conditions satisfied
 
- Problem name                 MARC
+ Problem name                 RCAIDE
  No. of iterations                 109   Objective            4.3616503261E+00
  No. of major iterations            65   Linear    obj. term  0.0000000000E+00
  Penalty parameter           1.935E-01   Nonlinear obj. term  4.3616503261E+00
@@ -2679,7 +2679,7 @@
  SNOPTC EXIT   0 -- finished successfully
  SNOPTC INFO   3 -- requested accuracy could not be achieved
 
- Problem name                 MARC
+ Problem name                 RCAIDE
  No. of iterations                 123   Objective            4.3481340746E+00
  No. of major iterations            83   Linear    obj. term  0.0000000000E+00
  Penalty parameter           6.045E-03   Nonlinear obj. term  4.3481340746E+00

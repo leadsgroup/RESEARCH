@@ -1,16 +1,9 @@
 import numpy as np
-from MARC.Core import Units , Data 
-import matplotlib.pyplot as plt
-from matplotlib.image import imread
-from scipy.interpolate import griddata 
-from MARC.Visualization.Performance.Common.post_process_noise_data import post_process_noise_data 
-from MARC.Methods.Noise.Fidelity_Zero.Noise_Tools.generate_microphone_points import generate_terrain_elevated_microphone_points
-from MARC.Methods.Missions.compute_point_to_point_geospacial_data           import compute_point_to_point_geospacial_data
+from RCAIDE.Core import Units , Data 
+import matplotlib.pyplot as plt 
 import matplotlib.colors
-import matplotlib.colors as colors  
-from geopy.distance import geodesic as GD
-from MARC.Visualization.Topography                                          import * 
-import scipy.ndimage as ndimage
+import matplotlib.colors as colors   
+from RCAIDE.Visualization.Topography                                          import *  
 import pickle
 
 

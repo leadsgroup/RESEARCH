@@ -1,13 +1,13 @@
-# MARC Imports 
-from  MARC.Core import Data, Units  
+# RCAIDE Imports 
+from  RCAIDE.Core import Data, Units  
 
 # Python Imports  
 import numpy as np   
 import pickle 
 import matplotlib.pyplot as plt  
 import matplotlib.cm as cm 
-from MARC.Visualization.Performance.Common.post_process_noise_data import post_process_noise_data
- 
+from MARC.Visualization.Noise.post_process_noise_data import post_process_noise_data
+
 # ----------------------------------------------------------------------
 #   Main
 # ---------------------------------------------------------------------- 

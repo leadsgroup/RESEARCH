@@ -5,20 +5,20 @@
 # ----------------------------------------------------------------------        
 #   Imports
 # ----------------------------------------------------------------------      
-import MARC
-from MARC.Analyses.Process import Process   
+import RCAIDE
+from RCAIDE.Analyses.Process import Process   
 import numpy as np 
-from MARC.Core                                                              import Data , Units 
-from MARC.Components.Energy.Networks.Battery_Electric_Rotor                 import Battery_Electric_Rotor
-from MARC.Methods.Propulsion                                                import propeller_design 
-from MARC.Methods.Power.Battery.Sizing                                      import initialize_from_circuit_configuration  
-from MARC.Methods.Propulsion.electric_motor_sizing                          import size_optimal_motor
-from MARC.Methods.Weights.Correlations.Propulsion                           import nasa_motor
-from MARC.Methods.Geometry.Two_Dimensional.Planform                         import segment_properties
-from MARC.Methods.Weights.Buildups.eVTOL.empty                              import empty  
-from MARC.Methods.Geometry.Two_Dimensional.Planform.wing_segmented_planform import wing_segmented_planform
-from MARC.Methods.Weights.Buildups.eVTOL.converge_evtol_weight              import converge_evtol_weight  
-from MARC.Methods.Center_of_Gravity.compute_component_centers_of_gravity    import compute_component_centers_of_gravity
+from RCAIDE.Core                                                              import Data , Units 
+from RCAIDE.Components.Energy.Networks.Battery_Electric_Rotor                 import Battery_Electric_Rotor
+from RCAIDE.Methods.Propulsion                                                import propeller_design 
+from RCAIDE.Methods.Power.Battery.Sizing                                      import initialize_from_circuit_configuration  
+from RCAIDE.Methods.Propulsion.electric_motor_sizing                          import size_optimal_motor
+from RCAIDE.Methods.Weights.Correlations.Propulsion                           import nasa_motor
+from RCAIDE.Methods.Geometry.Two_Dimensional.Planform                         import segment_properties
+from RCAIDE.Methods.Weights.Buildups.eVTOL.empty                              import empty  
+from RCAIDE.Methods.Geometry.Two_Dimensional.Planform.wing_segmented_planform import wing_segmented_planform
+from RCAIDE.Methods.Weights.Buildups.eVTOL.converge_evtol_weight              import converge_evtol_weight  
+from RCAIDE.Methods.Center_of_Gravity.compute_component_centers_of_gravity    import compute_component_centers_of_gravity
 
 # ----------------------------------------------------------------------        
 #   Setup
@@ -75,7 +75,7 @@ def modify_vehicle(nexus):
     net = vehicle_opt.networks.battery_electric_rotor
     
     # Component 3: Battery       
-    bat                                                    = MARC.Components.Energy.Storages.Batteries.Constant_Mass.Lithium_Ion_LiNiMnCoO2_18650() 
+    bat                                                    = RCAIDE.Components.Energy.Storages.Batteries.Constant_Mass.Lithium_Ion_LiNiMnCoO2_18650() 
     bat.pack.electrical_configuration.series               =  np.ceil(net.battery.pack.electrical_configuration.series)
     bat.pack.electrical_configuration.parallel             =  np.ceil(net.battery.pack.electrical_configuration.parallel)
     initialize_from_circuit_configuration(bat)  

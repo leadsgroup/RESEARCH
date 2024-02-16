@@ -1,5 +1,5 @@
 import numpy as np
-from MARC.Core import Units , Data 
+from RCAIDE.Core import Units , Data 
 import matplotlib.pyplot as plt
 from matplotlib.image import imread
 from scipy.interpolate import griddata  

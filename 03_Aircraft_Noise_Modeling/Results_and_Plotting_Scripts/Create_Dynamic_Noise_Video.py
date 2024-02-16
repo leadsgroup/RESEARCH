@@ -1,12 +1,12 @@
 # ----------------------------------------------------------------------
 #   Imports
 # ----------------------------------------------------------------------
-import MARC
-from MARC.Core import Units
+import RCAIDE
+from RCAIDE.Core import Units
 import pickle 
 import time 
 import numpy as np 
-from MARC.Core import Data  
+from RCAIDE.Core import Data  
 import matplotlib.cm as cm
 import matplotlib.pyplot as plt  
 import numpy as np 

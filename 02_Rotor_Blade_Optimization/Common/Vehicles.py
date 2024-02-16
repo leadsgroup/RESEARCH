@@ -7,18 +7,18 @@
 #   Imports
 # ----------------------------------------------------------------------    
 
-import MARC
-from MARC.Components.Energy.Networks import Battery_Electric_Rotor
-from MARC.Methods.Propulsion import propeller_design 
-from MARC.Methods.Geometry.Two_Dimensional.Cross_Section.Airfoil.compute_airfoil_properties \
+import RCAIDE
+from RCAIDE.Components.Energy.Networks import Battery_Electric_Rotor
+from RCAIDE.Methods.Propulsion import propeller_design 
+from RCAIDE.Methods.Geometry.Two_Dimensional.Cross_Section.Airfoil.compute_airfoil_properties \
      import compute_airfoil_properties
-from MARC.Methods.Geometry.Two_Dimensional.Cross_Section.Airfoil.import_airfoil_geometry \
+from RCAIDE.Methods.Geometry.Two_Dimensional.Cross_Section.Airfoil.import_airfoil_geometry \
      import import_airfoil_geometry     
-from MARC.Analyses.Propulsion.Rotor_Wake_Fidelity_Zero import Rotor_Wake_Fidelity_Zero
+from RCAIDE.Analyses.Propulsion.Rotor_Wake_Fidelity_Zero import Rotor_Wake_Fidelity_Zero
 import numpy as np
 
-from MARC.Methods.Geometry.Two_Dimensional.Cross_Section.Airfoil.import_airfoil_geometry  import import_airfoil_geometry
-from MARC.Methods.Geometry.Two_Dimensional.Cross_Section.Airfoil.compute_airfoil_properties import compute_airfoil_properties
+from RCAIDE.Methods.Geometry.Two_Dimensional.Cross_Section.Airfoil.import_airfoil_geometry  import import_airfoil_geometry
+from RCAIDE.Methods.Geometry.Two_Dimensional.Cross_Section.Airfoil.compute_airfoil_properties import compute_airfoil_properties
 
 
 # ----------------------------------------------------------------------
@@ -40,10 +40,10 @@ def base_setup(problem):
     
     rs      = problem.rotor_settings
     
-    vehicle = MARC.Vehicle()
+    vehicle = RCAIDE.Vehicle()
     net     = Battery_Electric_Rotor()
     
-    prop = MARC.Components.Energy.Converters.Propeller()
+    prop = RCAIDE.Components.Energy.Converters.Propeller()
     prop.tag                      = 'prop_rotor'
     prop.orientation_euler_angles = rs.orientation_euler_angles
     prop.number_of_blades         = rs.number_of_blades
@@ -108,20 +108,20 @@ def base_setup(problem):
 
 def configs_setup(base_vehicle):
     
-    configs                             = MARC.Components.Configs.Config.Container()
-    base_config                         = MARC.Components.Configs.Config(base_vehicle)
+    configs                             = RCAIDE.Components.Configs.Config.Container()
+    base_config                         = RCAIDE.Components.Configs.Config(base_vehicle)
     
-    config                              = MARC.Components.Configs.Config(base_config)
+    config                              = RCAIDE.Components.Configs.Config(base_config)
     config.tag                          = 'cruise'
     configs.append(config)
     
-    config                              = MARC.Components.Configs.Config(base_config)
+    config                              = RCAIDE.Components.Configs.Config(base_config)
     config.tag                          = 'hover' 
     config.networks.Battery_Electric_Rotor.rotors.prop_rotor.orientation_euler_angles = [0.,np.pi/2.,0.]
     configs.append(config)      
 
     
-    config                              = MARC.Components.Configs.Config(base_config)
+    config                              = RCAIDE.Components.Configs.Config(base_config)
     config.tag                          = 'OEI' 
     config.networks.Battery_Electric_Rotor.rotors.prop_rotor.orientation_euler_angles = [0.,np.pi/2.,0.]
     configs.append(config)          

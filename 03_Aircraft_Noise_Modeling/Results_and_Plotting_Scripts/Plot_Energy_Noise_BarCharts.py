@@ -1,6 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from MARC.Core import Units , Data 
+from RCAIDE.Core import Units , Data 
 import matplotlib.cm as cm 
 import pickle
 

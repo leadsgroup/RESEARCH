@@ -3,8 +3,8 @@ from MARC.Core import Units , Data
 import matplotlib.pyplot as plt
 from matplotlib.image import imread
 from scipy.interpolate import griddata 
-from MARC.Visualization.Performance.Common.post_process_noise_data import post_process_noise_data 
-from MARC.Methods.Noise.Fidelity_Zero.Noise_Tools.decibel_arithmetic         import SPL_arithmetic 
+from MARC.Visualization.Noise.post_process_noise_data import post_process_noise_data 
+from MARC.Methods.Noise.Common.decibel_arithmetic import SPL_arithmetic
 import matplotlib.colors
 import matplotlib.colors as colors  
 from geopy.distance import geodesic as GD
@@ -36,8 +36,8 @@ def main():
     
     # topography data 
     topography_file        = '../Maps_and_Scales/Los_Angeles/LA_Metropolitan_Area_5.txt'   
-    N_lat                  = 225  
-    N_long                 = 390     
+    N_lat                  = 10 # 225  
+    N_long                 = 20 # 390     
     
     long_dist,lat_dist,long_deg,lat_deg,elevation  = get_topography_data(topography_file,N_lat,N_long)
     
@@ -63,20 +63,20 @@ def main():
     des_loc       =   ['SBD','ONT','ONT','BUR','DIS','DIS','SBD','BUR','SBD','LAX','LGB','BUR','LAX','BUR','LAX','DIS','SNA','SNA'] 
 
     # 1hr min interval 
-    #flight_times = np.array(['06:00:00',
-                             #'07:00:00',
-                             #'08:00:00',
-                             #'09:00:00',
-                             #'10:00:00',
-                             #'11:00:00',
-                             #'12:00:00',
-                             #'13:00:00',
-                             #'14:00:00',
-                             #'15:00:00',
-                             #'16:00:00',
-                             #'17:00:00',
-                             #'18:00:00',
-                             #'19:00:00',]) 
+    flight_times = np.array(['06:00:00',
+                             '07:00:00',
+                             '08:00:00',
+                             '09:00:00',
+                             '10:00:00',
+                             '11:00:00',
+                             '12:00:00',
+                             '13:00:00',
+                             '14:00:00',
+                             '15:00:00',
+                             '16:00:00',
+                             '17:00:00',
+                             '18:00:00',
+                             '19:00:00',]) 
                              
     #30 min interval 
     #flight_times = np.array(['06:00:00','06:30:00',
@@ -392,10 +392,10 @@ def community_noise_map(total_noise_file,car_noise_file,train_noise_file, aircra
     
      
     airport_noise  = vectorize_image(aircraft_noise_raw_data ,color_scales,N_lat,N_long) 
-    car_noise      = vectorize_image(car_noise_raw_data ,color_scales,N_lat,N_long) 
-    train_noise    = vectorize_image(train_noise_raw_data ,color_scales,N_lat,N_long)  
+    #car_noise      = vectorize_image(car_noise_raw_data ,color_scales,N_lat,N_long) 
+    #train_noise    = vectorize_image(train_noise_raw_data ,color_scales,N_lat,N_long)  
     
-    return airport_noise, car_noise, train_noise
+    return airport_noise, 0 ,0  #, car_noise, train_noise
 
 def vectorize_image(raw_data,color_scales,N_lat,N_long): 
     

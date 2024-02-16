@@ -1,5 +1,5 @@
-import MARC 
-from MARC.Core import Units , Data, to_numpy
+import RCAIDE 
+from RCAIDE.Core import Units , Data, to_numpy
 # Package Imports 
 import matplotlib.cm as cm 
 import numpy as np 
@@ -10,17 +10,17 @@ import matplotlib.ticker as ticker
 import matplotlib.colors as colors  
 from matplotlib.cm import ScalarMappable
 from mpl_toolkits.mplot3d import Axes3D  
-from MARC.Analyses.Mission.Segments.Segment                           import Segment 
-from MARC.Methods.Noise.Fidelity_Zero.Propeller.propeller_mid_fidelity import propeller_mid_fidelity
-from MARC.Analyses.Mission.Segments.Conditions.Aerodynamics           import Aerodynamics 
-from MARC.Components.Energy.Networks.Battery_Electric_Rotor                import Battery_Electric_Rotor  
-from MARC.Components.Energy.Converters                                import Lift_Rotor , Prop_Rotor, Propeller
-from MARC.Methods.Geometry.Two_Dimensional.Cross_Section.Airfoil.generate_interpolated_airfoils import generate_interpolated_airfoils 
+from RCAIDE.Analyses.Mission.Segments.Segment                           import Segment 
+from RCAIDE.Methods.Noise.Fidelity_Zero.Propeller.propeller_mid_fidelity import propeller_mid_fidelity
+from RCAIDE.Analyses.Mission.Segments.Conditions.Aerodynamics           import Aerodynamics 
+from RCAIDE.Components.Energy.Networks.Battery_Electric_Rotor                import Battery_Electric_Rotor  
+from RCAIDE.Components.Energy.Converters                                import Lift_Rotor , Prop_Rotor, Propeller
+from RCAIDE.Methods.Geometry.Two_Dimensional.Cross_Section.Airfoil.generate_interpolated_airfoils import generate_interpolated_airfoils 
 
-from MARC.Components.Energy.Networks.Battery_Electric_Rotor                import Battery_Electric_Rotor 
+from RCAIDE.Components.Energy.Networks.Battery_Electric_Rotor                import Battery_Electric_Rotor 
 from mpl_toolkits.mplot3d.art3d import Poly3DCollection
-from MARC.Methods.Geometry.Two_Dimensional.Cross_Section.Airfoil.import_airfoil_geometry import import_airfoil_geometry
-from MARC.Methods.Geometry.Two_Dimensional.Cross_Section.Airfoil.compute_naca_4series    import compute_naca_4series
+from RCAIDE.Methods.Geometry.Two_Dimensional.Cross_Section.Airfoil.import_airfoil_geometry import import_airfoil_geometry
+from RCAIDE.Methods.Geometry.Two_Dimensional.Cross_Section.Airfoil.compute_naca_4series    import compute_naca_4series
 import os
 import pickle
 from scipy.interpolate import interp1d
@@ -62,7 +62,7 @@ def lift_rotor_plots():
     rotor.OEI.design_altitude             = 20 * Units.feet   
        
     
-    airfoil                          = MARC.Components.Airfoils.Airfoil()    
+    airfoil                          = RCAIDE.Components.Airfoils.Airfoil()    
     airfoil.coordinate_file          =  '..' + separator + 'Airfoils' + separator + 'NACA_4412.txt'
     airfoil.polar_files              = ['..' + separator + 'Airfoils' + separator + 'Polars' + separator +'NACA_4412_polar_Re_50000.txt',
                                          '..' + separator + 'Airfoils' + separator + 'Polars' + separator +'NACA_4412_polar_Re_100000.txt',
@@ -90,7 +90,7 @@ def prop_rotor_plots():
     
     # DEFINE ROTOR OPERATING CONDITIONS 
 
-    prop_rotor                                    = MARC.Components.Energy.Converters.Prop_Rotor() 
+    prop_rotor                                    = RCAIDE.Components.Energy.Converters.Prop_Rotor() 
     prop_rotor.tag                                = 'prop_rotor'     
     prop_rotor.tip_radius                         = 3/2
     prop_rotor.hub_radius                         = 0.15 * prop_rotor.tip_radius
@@ -115,7 +115,7 @@ def prop_rotor_plots():
     prop_rotor.cruise.design_freestream_velocity  = 175*Units.mph 
 
 
-    airfoil                                       = MARC.Components.Airfoils.Airfoil()    
+    airfoil                                       = RCAIDE.Components.Airfoils.Airfoil()    
     airfoil.coordinate_file                       =  '..' + separator + 'Airfoils' + separator + 'NACA_4412.txt'
     airfoil.polar_files                           = ['..' + separator + 'Airfoils' + separator + 'Polars' + separator +'NACA_4412_polar_Re_50000.txt',
                                                       '..' + separator + 'Airfoils' + separator + 'Polars' + separator +'NACA_4412_polar_Re_100000.txt',
@@ -185,7 +185,7 @@ def traditional_new_parameterization_3d_comparison():
         rotor       = load_blade_geometry(folder_names[i],rotor_file_name) 
         
     
-        airfoil                          = MARC.Components.Airfoils.Airfoil()    
+        airfoil                          = RCAIDE.Components.Airfoils.Airfoil()    
         airfoil.coordinate_file          =  'Airfoils/NACA_4412.txt'
         airfoil.polar_files              = ['Airfoils/Polars/NACA_4412_polar_Re_50000.txt',
                                              'Airfoils/Polars/NACA_4412_polar_Re_100000.txt',
@@ -207,7 +207,7 @@ def prop_rotor_traditional_new_parameterization_3d_comparison():
 
     # DEFINE ROTOR OPERATING CONDITIONS 
 
-    prop_rotor                                    = MARC.Components.Energy.Converters.Prop_Rotor() 
+    prop_rotor                                    = RCAIDE.Components.Energy.Converters.Prop_Rotor() 
     prop_rotor.tag                                = 'prop_rotor'     
     prop_rotor.tip_radius                         = 3/2
     prop_rotor.hub_radius                         = 0.15 * prop_rotor.tip_radius
@@ -232,7 +232,7 @@ def prop_rotor_traditional_new_parameterization_3d_comparison():
     prop_rotor.cruise.design_freestream_velocity  = 175*Units.mph 
 
 
-    airfoil                                       = MARC.Components.Airfoils.Airfoil()    
+    airfoil                                       = RCAIDE.Components.Airfoils.Airfoil()    
     airfoil.coordinate_file                       =  '..' + separator + 'Airfoils' + separator + 'NACA_4412.txt'
     airfoil.polar_files                           = ['..' + separator + 'Airfoils' + separator + 'Polars' + separator +'NACA_4412_polar_Re_50000.txt',
                                                       '..' + separator + 'Airfoils' + separator + 'Polars' + separator +'NACA_4412_polar_Re_100000.txt',
@@ -274,7 +274,7 @@ def prop_rotor_traditional_new_parameterization_3d_comparison():
         rotor_file_name  = 'PR_Alpha_' + alpha_opt_weight + '_Beta_' + beta_opt_weight          
         rotor              = load_blade_geometry(folder_name,rotor_file_name)  
     
-        airfoil                          = MARC.Components.Airfoils.Airfoil()    
+        airfoil                          = RCAIDE.Components.Airfoils.Airfoil()    
         airfoil.coordinate_file          =  'Airfoils/NACA_4412.txt'
         airfoil.polar_files              = ['Airfoils/Polars/NACA_4412_polar_Re_50000.txt',
                                              'Airfoils/Polars/NACA_4412_polar_Re_100000.txt',
@@ -312,7 +312,7 @@ def traditional_new_parameterization_comparison():
     rotor.OEI.design_altitude             = 20 * Units.feet   
        
     
-    airfoil                          = MARC.Components.Airfoils.Airfoil()    
+    airfoil                          = RCAIDE.Components.Airfoils.Airfoil()    
     ospath                           = os.path.abspath(__file__)
     separator                        = os.path.sep
     rel_path                         = os.path.dirname(ospath) + separator  
@@ -1152,7 +1152,7 @@ def add_rotor_stem(rotor,number_of_root_sections= 5):
         
     for i in range(number_of_root_sections-1):
         # import geometry  
-        airfoil                     = MARC.Components.Airfoils.Airfoil()
+        airfoil                     = RCAIDE.Components.Airfoils.Airfoil()
         airfoil.coordinate_file     = new_files[i]         
         airfoil.tag                 = 'Root_Section_' + str(i)
         airfoil.geometry            = import_airfoil_geometry(airfoil.coordinate_file )

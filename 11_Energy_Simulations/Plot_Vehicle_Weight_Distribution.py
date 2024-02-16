@@ -1,5 +1,5 @@
-# MARC Imports 
-from  MARC.Core import Data, Units  
+# RCAIDE Imports 
+from  RCAIDE.Core import Data, Units  
 
 # Python Imports  
 import numpy as np   

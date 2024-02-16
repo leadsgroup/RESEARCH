@@ -7,14 +7,14 @@
 #   Imports
 # ----------------------------------------------------------------------    
 
-from MARC.Core import Units, Data, to_numpy
+from RCAIDE.Core import Units, Data, to_numpy
 import numpy as np 
 import Vehicles
 import Procedure
-from MARC.Optimization import Nexus
-from MARC.Optimization.Package_Setups.pyoptsparse_setup import Pyoptsparse_Solve
-#from MARC.Input_Output.OpenVSP import write
-from MARC.Plots.Geometry import plot_propeller
+from RCAIDE.Optimization import Nexus
+from RCAIDE.Optimization.Package_Setups.pyoptsparse_setup import Pyoptsparse_Solve
+#from RCAIDE.Input_Output.OpenVSP import write
+from RCAIDE.Plots.Geometry import plot_propeller
 import matplotlib.pyplot as plt
 import jax
 

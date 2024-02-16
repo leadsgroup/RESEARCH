@@ -3,14 +3,14 @@
 # ----------------------------------------------------------------------        
 #   Imports
 # ----------------------------------------------------------------------  
-import MARC
-from MARC.Core import Units, Data 
+import RCAIDE
+from RCAIDE.Core import Units, Data 
 import numpy as np
 import Vehicles
 import Missions
 import Procedure
-import MARC.Optimization.Package_Setups.scipy_setup as scipy_setup
-from MARC.Optimization       import Nexus     
+import RCAIDE.Optimization.Package_Setups.scipy_setup as scipy_setup
+from RCAIDE.Optimization       import Nexus     
 import time 
 # ----------------------------------------------------------------------        
 #   Run the whole thing

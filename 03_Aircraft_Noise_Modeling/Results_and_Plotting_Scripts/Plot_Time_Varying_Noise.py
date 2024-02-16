@@ -1,5 +1,5 @@
 import numpy as np
-from MARC.Core import Units, Data 
+from RCAIDE.Core import Units, Data 
 import matplotlib.pyplot as plt 
 from scipy.interpolate import griddata  
 import matplotlib.colors

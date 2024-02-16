@@ -5,17 +5,17 @@
 #   Imports
 # ----------------------------------------------------------------------    
 
-import MARC
-assert MARC.__version__=='1.0.0', 'These tutorials only work with the MARC 1.0.0 release'
-from MARC.Core import Units, Data
+import RCAIDE
+assert RCAIDE.__version__=='1.0.0', 'These tutorials only work with the RCAIDE 1.0.0 release'
+from RCAIDE.Core import Units, Data
 import numpy as np
 import Vehicles
 import Analyses
 import Missions
 import Procedure
 import Plot_Mission 
-from MARC.Optimization import Nexus 
-import MARC.Optimization.Package_Setups.scipy_setup as scipy_setup 
+from RCAIDE.Optimization import Nexus 
+import RCAIDE.Optimization.Package_Setups.scipy_setup as scipy_setup 
 
 # ----------------------------------------------------------------------        
 #   Run the whole thing

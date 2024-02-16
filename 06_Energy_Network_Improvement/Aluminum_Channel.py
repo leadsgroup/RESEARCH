@@ -9,7 +9,7 @@
 #-------------------------------------------------------------------------------
 
 from .Solid import Solid
-from MARC.Core import Units
+from RCAIDE.Core import Units
 
 #-------------------------------------------------------------------------------
 # Aluminum for WavyChannel for battery cooling

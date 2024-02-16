@@ -1,5 +1,5 @@
 import numpy as np
-from MARC.Core import Units, Data 
+from RCAIDE.Core import Units, Data 
 import matplotlib.pyplot as plt 
 from scipy.interpolate import griddata  
 import matplotlib.colors
@@ -11,7 +11,9 @@ import pickle
 # ----------------------------------------------------------------------
 #   Main
 # ----------------------------------------------------------------------
-def main():
+def main(): 
+    a = np.asarray([ [1,2,3], [4,5,6], [7,8,9] ])
+    np.savetxt("foo.csv", a, delimiter=",")
     
     # Universal Plot Settings
     plt.rcParams['axes.linewidth'] = 1.

@@ -8,26 +8,26 @@
 # ----------------------------------------------------------------------
 #   Imports
 # ---------------------------------------------------------------------- 
-import MARC
-from MARC.Core import Units
+import RCAIDE
+from RCAIDE.Core import Units
 
 import numpy as np
 import pylab as plt
 import pickle
 import copy, time
 
-from MARC.Core import (
+from RCAIDE.Core import (
 Data, Container
 )
 #import vsp 
-from MARC.Input_Output.OpenVSP.vsp_write import write
-from MARC.Input_Output.OpenVSP.get_vsp_areas import get_vsp_areas 
-from MARC.Methods.Geometry.Two_Dimensional.Planform import wing_planform 
-from MARC.Plots.Mission_Plots import *
-from MARC.Methods.Propulsion.turbofan_sizing import turbofan_sizing
-from MARC.Methods.Geometry.Two_Dimensional.Cross_Section.Propulsion import compute_turbofan_geometry
-from MARC.Methods.Center_of_Gravity.compute_component_centers_of_gravity import compute_component_centers_of_gravity
-from MARC.Methods.Center_of_Gravity.compute_aircraft_center_of_gravity import compute_aircraft_center_of_gravity
+from RCAIDE.Input_Output.OpenVSP.vsp_write import write
+from RCAIDE.Input_Output.OpenVSP.get_vsp_areas import get_vsp_areas 
+from RCAIDE.Methods.Geometry.Two_Dimensional.Planform import wing_planform 
+from RCAIDE.Plots.Mission_Plots import *
+from RCAIDE.Methods.Propulsion.turbofan_sizing import turbofan_sizing
+from RCAIDE.Methods.Geometry.Two_Dimensional.Cross_Section.Propulsion import compute_turbofan_geometry
+from RCAIDE.Methods.Center_of_Gravity.compute_component_centers_of_gravity import compute_component_centers_of_gravity
+from RCAIDE.Methods.Center_of_Gravity.compute_aircraft_center_of_gravity import compute_aircraft_center_of_gravity
 
 # ----------------------------------------------------------------------
 #   Main
@@ -72,7 +72,7 @@ def full_setup():
     mission  = mission_setup(configs_analyses)
     missions_analyses = missions_setup(mission)
 
-    analyses = MARC.Analyses.Analysis.Container()
+    analyses = RCAIDE.Analyses.Analysis.Container()
     analyses.configs  = configs_analyses
     analyses.missions = missions_analyses
 
@@ -84,7 +84,7 @@ def full_setup():
 
 def analyses_setup(configs):
 
-    analyses = MARC.Analyses.Analysis.Container()
+    analyses = RCAIDE.Analyses.Analysis.Container()
 
     # build a base analysis for each config
     for tag,config in configs.items():
@@ -98,23 +98,23 @@ def base_analysis(vehicle):
     # ------------------------------------------------------------------
     #   Initialize the Analyses
     # ------------------------------------------------------------------     
-    analyses = MARC.Analyses.Vehicle()
+    analyses = RCAIDE.Analyses.Vehicle()
 
     # ------------------------------------------------------------------
     #  Basic Geometry Relations
-    sizing = MARC.Analyses.Sizing.Sizing()
+    sizing = RCAIDE.Analyses.Sizing.Sizing()
     sizing.features.vehicle = vehicle
     analyses.append(sizing)
 
     # ------------------------------------------------------------------
     #  Weights
-    weights = MARC.Analyses.Weights.Weights_Transport()
+    weights = RCAIDE.Analyses.Weights.Weights_Transport()
     weights.vehicle = vehicle
     analyses.append(weights)
 
     # ------------------------------------------------------------------
     #  Aerodynamics Analysis
-    aerodynamics = MARC.Analyses.Aerodynamics.Fidelity_Zero()
+    aerodynamics = RCAIDE.Analyses.Aerodynamics.Fidelity_Zero()
     #aerodynamics.process.compute.lift.inviscid.keep_files = True
     aerodynamics.geometry = vehicle
    
@@ -123,24 +123,24 @@ def base_analysis(vehicle):
 
     # ------------------------------------------------------------------
     #  Stability Analysis
-    stability = MARC.Analyses.Stability.Fidelity_Zero()
+    stability = RCAIDE.Analyses.Stability.Fidelity_Zero()
     stability.geometry = vehicle
     analyses.append(stability)
 
     # ------------------------------------------------------------------
     #  Energy
-    energy= MARC.Analyses.Energy.Energy()
+    energy= RCAIDE.Analyses.Energy.Energy()
     energy.network = vehicle.propulsors 
     analyses.append(energy)
 
     # ------------------------------------------------------------------
     #  Planet Analysis
-    planet = MARC.Analyses.Planets.Planet()
+    planet = RCAIDE.Analyses.Planets.Planet()
     analyses.append(planet)
 
     # ------------------------------------------------------------------
     #  Atmosphere Analysis
-    atmosphere = MARC.Analyses.Atmospheric.US_Standard_1976()
+    atmosphere = RCAIDE.Analyses.Atmospheric.US_Standard_1976()
     atmosphere.features.planet = planet.features
     analyses.append(atmosphere)   
 
@@ -157,7 +157,7 @@ def vehicle_setup():
     #   Initialize the Vehicle
     # ------------------------------------------------------------------
 
-    vehicle = MARC.Vehicle()
+    vehicle = RCAIDE.Vehicle()
     vehicle.tag = 'Embraer_E190AR'
 
     # ------------------------------------------------------------------
@@ -190,7 +190,7 @@ def vehicle_setup():
     #   Main Wing
     # ------------------------------------------------------------------
 
-    wing = MARC.Components.Wings.Main_Wing()
+    wing = RCAIDE.Components.Wings.Main_Wing()
     wing.tag = 'main_wing'
 
     wing.areas.reference         = 92.0
@@ -224,7 +224,7 @@ def vehicle_setup():
     #  Horizontal Stabilizer
     # ------------------------------------------------------------------
 
-    wing = MARC.Components.Wings.Wing()
+    wing = RCAIDE.Components.Wings.Wing()
     wing.tag = 'horizontal_stabilizer'
     
     wing.areas.reference         = 26.0
@@ -254,7 +254,7 @@ def vehicle_setup():
     #   Vertical Stabilizer
     # ------------------------------------------------------------------
 
-    wing = MARC.Components.Wings.Wing()
+    wing = RCAIDE.Components.Wings.Wing()
     wing.tag = 'vertical_stabilizer'
     
     wing.areas.reference         = 16.0
@@ -284,7 +284,7 @@ def vehicle_setup():
     #  Fuselage
     # ------------------------------------------------------------------
 
-    fuselage = MARC.Components.Fuselages.Fuselage()
+    fuselage = RCAIDE.Components.Fuselages.Fuselage()
     fuselage.tag    = 'fuselage'
     fuselage.origin = [[0,0,0]]
     fuselage.number_coach_seats    = vehicle.passengers
@@ -325,7 +325,7 @@ def vehicle_setup():
 
 
     #initialize the gas turbine network
-    gt_engine                   = MARC.Components.Energy.Networks.Turbofan()
+    gt_engine                   = RCAIDE.Components.Energy.Networks.Turbofan()
     gt_engine.tag               = 'turbofan'
 
     gt_engine.number_of_engines = 2.0
@@ -342,14 +342,14 @@ def vehicle_setup():
     gt_engine.areas.wetted  = Awet
     
     #set the working fluid for the network
-    working_fluid               = MARC.Attributes.Gases.Air()
+    working_fluid               = RCAIDE.Attributes.Gases.Air()
 
     #add working fluid to the network
     gt_engine.working_fluid = working_fluid
 
 
     #Component 1 : ram,  to convert freestream static to stagnation quantities
-    ram = MARC.Components.Energy.Converters.Ram()
+    ram = RCAIDE.Components.Energy.Converters.Ram()
     ram.tag = 'ram'
 
     #add ram to the network
@@ -357,7 +357,7 @@ def vehicle_setup():
 
 
     #Component 2 : inlet nozzle
-    inlet_nozzle = MARC.Components.Energy.Converters.Compression_Nozzle()
+    inlet_nozzle = RCAIDE.Components.Energy.Converters.Compression_Nozzle()
     inlet_nozzle.tag = 'inlet nozzle'
 
     inlet_nozzle.polytropic_efficiency = 0.98
@@ -368,7 +368,7 @@ def vehicle_setup():
 
 
     #Component 3 :low pressure compressor    
-    low_pressure_compressor = MARC.Components.Energy.Converters.Compressor()    
+    low_pressure_compressor = RCAIDE.Components.Energy.Converters.Compressor()    
     low_pressure_compressor.tag = 'lpc'
 
     low_pressure_compressor.polytropic_efficiency = 0.91
@@ -378,7 +378,7 @@ def vehicle_setup():
     gt_engine.low_pressure_compressor = low_pressure_compressor
 
     #Component 4 :high pressure compressor  
-    high_pressure_compressor = MARC.Components.Energy.Converters.Compressor()    
+    high_pressure_compressor = RCAIDE.Components.Energy.Converters.Compressor()    
     high_pressure_compressor.tag = 'hpc'
 
     high_pressure_compressor.polytropic_efficiency = 0.91
@@ -388,7 +388,7 @@ def vehicle_setup():
     gt_engine.high_pressure_compressor = high_pressure_compressor
 
     #Component 5 :low pressure turbine  
-    low_pressure_turbine = MARC.Components.Energy.Converters.Turbine()   
+    low_pressure_turbine = RCAIDE.Components.Energy.Converters.Turbine()   
     low_pressure_turbine.tag='lpt'
 
     low_pressure_turbine.mechanical_efficiency = 0.99
@@ -398,7 +398,7 @@ def vehicle_setup():
     gt_engine.low_pressure_turbine = low_pressure_turbine
 
     #Component 5 :high pressure turbine  
-    high_pressure_turbine = MARC.Components.Energy.Converters.Turbine()   
+    high_pressure_turbine = RCAIDE.Components.Energy.Converters.Turbine()   
     high_pressure_turbine.tag='hpt'
 
     high_pressure_turbine.mechanical_efficiency = 0.99
@@ -408,20 +408,20 @@ def vehicle_setup():
     gt_engine.high_pressure_turbine = high_pressure_turbine 
 
     #Component 6 :combustor  
-    combustor = MARC.Components.Energy.Converters.Combustor()   
+    combustor = RCAIDE.Components.Energy.Converters.Combustor()   
     combustor.tag = 'Comb'
 
     combustor.efficiency                = 0.99 
     combustor.alphac                    = 1.0     
     combustor.turbine_inlet_temperature = 1500
     combustor.pressure_ratio            = 0.95
-    combustor.fuel_data                 = MARC.Attributes.Propellants.Jet_A()    
+    combustor.fuel_data                 = RCAIDE.Attributes.Propellants.Jet_A()    
 
     #add the combustor to the network    
     gt_engine.combustor = combustor
 
     #Component 7 :core nozzle
-    core_nozzle = MARC.Components.Energy.Converters.Expansion_Nozzle()   
+    core_nozzle = RCAIDE.Components.Energy.Converters.Expansion_Nozzle()   
     core_nozzle.tag = 'core nozzle'
 
     core_nozzle.polytropic_efficiency = 0.95
@@ -431,7 +431,7 @@ def vehicle_setup():
     gt_engine.core_nozzle = core_nozzle
 
     #Component 8 :fan nozzle
-    fan_nozzle = MARC.Components.Energy.Converters.Expansion_Nozzle()   
+    fan_nozzle = RCAIDE.Components.Energy.Converters.Expansion_Nozzle()   
     fan_nozzle.tag = 'fan nozzle'
 
     fan_nozzle.polytropic_efficiency = 0.95
@@ -441,7 +441,7 @@ def vehicle_setup():
     gt_engine.fan_nozzle = fan_nozzle
 
     #Component 9 : fan   
-    fan = MARC.Components.Energy.Converters.Fan()   
+    fan = RCAIDE.Components.Energy.Converters.Fan()   
     fan.tag = 'fan'
 
     fan.polytropic_efficiency = 0.93
@@ -451,7 +451,7 @@ def vehicle_setup():
     gt_engine.fan = fan    
 
     #Component 10 : thrust (to compute the thrust)
-    thrust = MARC.Components.Energy.Processes.Thrust()       
+    thrust = RCAIDE.Components.Energy.Processes.Thrust()       
     thrust.tag ='compute_thrust'
 
     #total design thrust (includes all the engines)
@@ -471,7 +471,7 @@ def vehicle_setup():
     # add  gas turbine network gt_engine to the vehicle
     vehicle.append_component(gt_engine)      
     
-    fuel                    =MARC.Components.Physical_Component()
+    fuel                    =RCAIDE.Components.Physical_Component()
     vehicle.fuel            =fuel
     
     fuel.mass_properties.mass             =vehicle.mass_properties.max_takeoff-vehicle.mass_properties.max_fuel
@@ -493,9 +493,9 @@ def configs_setup(vehicle):
     #   Initialize Configurations
     # ------------------------------------------------------------------
 
-    configs = MARC.Components.Configs.Config.Container()
+    configs = RCAIDE.Components.Configs.Config.Container()
 
-    base_config = MARC.Components.Configs.Config(vehicle)
+    base_config = RCAIDE.Components.Configs.Config(vehicle)
     base_config.tag = 'base'
     configs.append(base_config)
 
@@ -503,7 +503,7 @@ def configs_setup(vehicle):
     #   Cruise Configuration
     # ------------------------------------------------------------------
 
-    config = MARC.Components.Configs.Config(base_config)
+    config = RCAIDE.Components.Configs.Config(base_config)
     config.tag = 'cruise'
 
     configs.append(config)
@@ -513,7 +513,7 @@ def configs_setup(vehicle):
     #   Takeoff Configuration
     # ------------------------------------------------------------------
 
-    config = MARC.Components.Configs.Config(base_config)
+    config = RCAIDE.Components.Configs.Config(base_config)
     config.tag = 'takeoff'
 
     config.wings['main_wing'].flaps.angle = 20. * Units.deg
@@ -526,7 +526,7 @@ def configs_setup(vehicle):
     #   Landing Configuration
     # ------------------------------------------------------------------
 
-    config = MARC.Components.Configs.Config(base_config)
+    config = RCAIDE.Components.Configs.Config(base_config)
     config.tag = 'landing'
 
     config.wings['main_wing'].flaps.angle = 30. * Units.deg
@@ -539,7 +539,7 @@ def configs_setup(vehicle):
     #   Short Field Takeoff Configuration
     # ------------------------------------------------------------------ 
 
-    config = MARC.Components.Configs.Config(base_config)
+    config = RCAIDE.Components.Configs.Config(base_config)
     config.tag = 'short_field_takeoff'
     
     config.wings['main_wing'].flaps.angle = 20. * Units.deg
@@ -565,24 +565,24 @@ def mission_setup(analyses):
     #   Initialize the Mission
     # ------------------------------------------------------------------
 
-    mission = MARC.Analyses.Mission.Sequential_Segments()
+    mission = RCAIDE.Analyses.Mission.Sequential_Segments()
     mission.tag = 'the_mission'
 
     #airport
-    airport = MARC.Attributes.Airports.Airport()
+    airport = RCAIDE.Attributes.Airports.Airport()
     airport.altitude   =  0.0  * Units.ft
     airport.delta_isa  =  0.0
-    airport.atmosphere = MARC.Analyses.Atmospheric.US_Standard_1976()
+    airport.atmosphere = RCAIDE.Analyses.Atmospheric.US_Standard_1976()
 
     mission.airport = airport    
 
     # unpack Segments module
-    Segments = MARC.Analyses.Mission.Segments
+    Segments = RCAIDE.Analyses.Mission.Segments
 
     # base segment
     base_segment = Segments.Segment()
-    atmosphere=MARC.Attributes.Atmospheres.Earth.US_Standard_1976()
-    planet = MARC.Attributes.Planets.Earth()
+    atmosphere=RCAIDE.Attributes.Atmospheres.Earth.US_Standard_1976()
+    planet = RCAIDE.Attributes.Planets.Earth()
     # ------------------------------------------------------------------
     #   First Climb Segment: Constant Speed, Constant Throttle
     # ------------------------------------------------------------------
@@ -873,7 +873,7 @@ def mission_setup(analyses):
 def missions_setup(base_mission):
 
     # the mission container
-    missions = MARC.Analyses.Mission.Mission.Container()
+    missions = RCAIDE.Analyses.Mission.Mission.Container()
 
     # ------------------------------------------------------------------
     #   Base Mission
@@ -885,7 +885,7 @@ def missions_setup(base_mission):
     # ------------------------------------------------------------------
     #   Mission for Constrained Fuel
     # ------------------------------------------------------------------    
-    fuel_mission = MARC.Analyses.Mission.Mission() #Fuel_Constrained()
+    fuel_mission = RCAIDE.Analyses.Mission.Mission() #Fuel_Constrained()
     fuel_mission.tag = 'fuel'
     fuel_mission.range   = 1277. * Units.nautical_mile
     fuel_mission.payload   = 19000.
@@ -895,14 +895,14 @@ def missions_setup(base_mission):
     # ------------------------------------------------------------------
     #   Mission for Constrained Short Field
     # ------------------------------------------------------------------    
-    short_field = MARC.Analyses.Mission.Mission(base_mission) #Short_Field_Constrained()
+    short_field = RCAIDE.Analyses.Mission.Mission(base_mission) #Short_Field_Constrained()
     short_field.tag = 'short_field'    
 
     #airport
-    airport = MARC.Attributes.Airports.Airport()
+    airport = RCAIDE.Attributes.Airports.Airport()
     airport.altitude   =  0.0  * Units.ft
     airport.delta_isa  =  0.0
-    airport.atmosphere = MARC.Attributes.Atmospheres.Earth.US_Standard_1976()
+    airport.atmosphere = RCAIDE.Attributes.Atmospheres.Earth.US_Standard_1976()
     airport.available_tofl = 1500.
     short_field.airport = airport    
     missions.append(short_field)
@@ -910,7 +910,7 @@ def missions_setup(base_mission):
     # ------------------------------------------------------------------
     #   Mission for Fixed Payload
     # ------------------------------------------------------------------    
-    payload = MARC.Analyses.Mission.Mission() #Payload_Constrained()
+    payload = RCAIDE.Analyses.Mission.Mission() #Payload_Constrained()
     payload.tag = 'payload'
     payload.range   = 2316. * Units.nautical_mile
     payload.payload   = 19000.

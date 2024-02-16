@@ -5,10 +5,10 @@
 # ----------------------------------------------------------------------        
 #   Imports
 # ----------------------------------------------------------------------  
-import MARC
-from MARC.Core import Units    
+import RCAIDE
+from RCAIDE.Core import Units    
 import numpy as np 
-from MARC.Methods.Performance.estimate_stall_speed   import estimate_stall_speed 
+from RCAIDE.Methods.Performance.estimate_stall_speed   import estimate_stall_speed 
  
 
 # ----------------------------------------------------------------------
@@ -18,7 +18,7 @@ from MARC.Methods.Performance.estimate_stall_speed   import estimate_stall_speed
 def setup(analyses):
     
     # the mission container
-    missions = MARC.Analyses.Mission.Mission.Container()
+    missions = RCAIDE.Analyses.Mission.Mission.Container()
 
     # ------------------------------------------------------------------
     #   Base Mission
@@ -38,26 +38,26 @@ def mission_setup(analyses):
     #   Initialize the Mission
     # ------------------------------------------------------------------
 
-    mission     = MARC.Analyses.Mission.Sequential_Segments()
+    mission     = RCAIDE.Analyses.Mission.Sequential_Segments()
     mission.tag = 'baseline_mission'
 
     # airport
-    airport            = MARC.Attributes.Airports.Airport()
+    airport            = RCAIDE.Attributes.Airports.Airport()
     airport.altitude   = 0.0  * Units.ft
     airport.delta_isa  = 0.0
-    airport.atmosphere = MARC.Attributes.Atmospheres.Earth.US_Standard_1976() 
+    airport.atmosphere = RCAIDE.Attributes.Atmospheres.Earth.US_Standard_1976() 
     mission.airport    = airport      
  
     # unpack Segments module
-    Segments = MARC.Analyses.Mission.Segments
+    Segments = RCAIDE.Analyses.Mission.Segments
 
     # base segment           
     base_segment                                             = Segments.Segment() 
     ones_row                                                 = base_segment.state.ones_row
     base_segment.battery_discharge                           = True   
-    base_segment.process.initialize.initialize_battery       = MARC.Methods.Missions.Segments.Common.Energy.initialize_battery
-    base_segment.process.finalize.post_process.update_battery_state_of_health = MARC.Methods.Missions.Segments.Common.Energy.update_battery_state_of_health  
-    base_segment.process.finalize.post_process.stability     = MARC.Methods.skip 
+    base_segment.process.initialize.initialize_battery       = RCAIDE.Methods.Missions.Segments.Common.Energy.initialize_battery
+    base_segment.process.finalize.post_process.update_battery_state_of_health = RCAIDE.Methods.Missions.Segments.Common.Energy.update_battery_state_of_health  
+    base_segment.process.finalize.post_process.stability     = RCAIDE.Methods.skip 
 
     # VSTALL Calculation  
     vehicle        = analyses.base.vehicle
