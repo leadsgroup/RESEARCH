@@ -522,26 +522,26 @@ def configs_setup(vehicle):
 #   Plot Mission
 # ----------------------------------------------------------------------
 
-def plot_mission(results,line_style='bo-'):
-    plot_flight_conditions(results, line_style) 
+def plot_mission(results):
+    plot_flight_conditions(results) 
         
     # Plot Flight Conditions 
-    plot_flight_conditions(results, line_style) 
+    plot_flight_conditions(results) 
     
     # Plot Aerodynamic Coefficients
-    plot_aerodynamic_coefficients(results, line_style)  
+    plot_aerodynamic_coefficients(results)  
     
     # Plot Aircraft Flight Speed
-    plot_aircraft_velocities(results, line_style) 
+    plot_aircraft_velocities(results) 
 
     # Plot Aircraft Stability
-    plot_stability_coefficients(results,line_style)  
+    plot_stability_coefficients(results)  
     
     # Plot Propeller Conditions 
-    plot_rotor_conditions(results, line_style) 
+    plot_rotor_conditions(results) 
      
     # Plot Throttle
-    plot_propulsor_throttles(results, line_style)   
+    plot_propulsor_throttles(results)   
       
     return
  
