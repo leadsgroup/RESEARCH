@@ -9,8 +9,8 @@
 # ---------------------------------------------------------------------------------------------------------------------- 
 import RCAIDE 
 from RCAIDE.Core import Units   
-from RCAIDE.Methods.Energy.Propulsion.Converters.Rotor import design_propeller 
-from Legacy.trunk.S.Methods.Flight_Dynamics.Static_Stability.Approximations.Supporting_Functions.convert_sweep import convert_sweep
+from RCAIDE.Methods.Energy.Propulsion.Converters.Rotor import design_propeller  
+from RCAIDE.Methods.Geometry.Two_Dimensional.Planform      import segment_properties
 from RCAIDE.Visualization       import *  
 
 # python imports 
@@ -79,7 +79,7 @@ def base_analysis(vehicle,use_avl_stability):
     #  Aerodynamics Analysis
     aerodynamics = RCAIDE.Analyses.Aerodynamics.Subsonic_VLM() 
     aerodynamics.geometry                            = vehicle
-    aerodynamics.number_spanwise_vortices            = 30
+    aerodynamics.settings.number_spanwise_vortices   = 30
     aerodynamics.settings.drag_coefficient_increment = 0.0000
     analyses.append(aerodynamics) 
     
@@ -167,34 +167,37 @@ def vehicle_setup():
     wing.winglet_fraction                 = 0.0  
     wing.dynamic_pressure_ratio           = 1.0   
     
-    #tip_airfoil                           = RCAIDE.Components.Airfoils.Airfoil()
-    #tip_airfoil.coordinate_file           = 'Airfoils/NACA_6410.txt' 
+    tip_airfoil                           = RCAIDE.Components.Airfoils.Airfoil()
+    tip_airfoil.coordinate_file           = 'Airfoils/NACA_6410.txt' 
  
-    #root_airfoil                          = RCAIDE.Components.Airfoils.Airfoil()
-    #root_airfoil.coordinate_file          = 'Airfoils/NACA_4415.txt' 
+    root_airfoil                          = RCAIDE.Components.Airfoils.Airfoil()
+    root_airfoil.coordinate_file          = 'Airfoils/NACA_4415.txt' 
     
-    ## Wing Segments
-    #segment                               = RCAIDE.Components.Wings.Segment()
-    #segment.tag                           = 'root'
-    #segment.percent_span_location         = 0.0
-    #segment.twist                         = 2 * Units.degrees   
-    #segment.root_chord_percent            = 1.0
-    #segment.dihedral_outboard             = 7.5 * Units.degrees  
-    #segment.sweeps.quarter_chord          = 0.165 * Units.degrees  
-    #segment.thickness_to_chord            = .15
-    #segment.append_airfoil(root_airfoil)
-    #wing.append_segment(segment)
-
-    #segment                               = RCAIDE.Components.Wings.Segment()
-    #segment.tag                           = 'tip'
-    #segment.percent_span_location         = 1.0
-    #segment.twist                         = -1.0 * Units.degrees
-    #segment.root_chord_percent            = 0.54  
-    #segment.dihedral_outboard             = 0 * Units.degrees
-    #segment.sweeps.quarter_chord          = 0 * Units.degrees  
-    #segment.thickness_to_chord            = .12
-    #segment.append_airfoil(tip_airfoil)
-    #wing.append_segment(segment)     
+    # Wing Segments 
+    segment                               = RCAIDE.Components.Wings.Segment()
+    segment.tag                           = 'root_segment'
+    segment.percent_span_location         = 0.0
+    segment.twist                         = 2 * Units.degrees  
+    segment.root_chord_percent            = 1.0
+    segment.dihedral_outboard             = 7.5 * Units.degrees  
+    segment.sweeps.quarter_chord          = 0.165 * Units.degrees  
+    segment.thickness_to_chord            = .15 
+    wing.append_segment(segment)  
+         
+    segment                               = RCAIDE.Components.Wings.Segment()
+    segment.tag                           = 'tip'
+    segment.percent_span_location         = 1.0
+    segment.twist                         = -1.0 * Units.degrees
+    segment.root_chord_percent            = 0.54  
+    segment.dihedral_outboard             = 0 * Units.degrees
+    segment.sweeps.quarter_chord          = 0 * Units.degrees  
+    segment.thickness_to_chord            = .12
+    segment.append_airfoil(tip_airfoil)
+    wing.append_segment(segment)     
+    
+    # Fill out more segment properties automatically
+    wing = segment_properties(wing)    
+    
                                           
     # control surfaces ------------------------------------------- 
     flap                          = RCAIDE.Components.Wings.Control_Surfaces.Flap()
