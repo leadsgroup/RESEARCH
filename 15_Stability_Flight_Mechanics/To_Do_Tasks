@@ -5,3 +5,8 @@ Intergrate moment of inertia calculations into code
 check to see if control surfaces are connected to the mission
 Figure out a way to mission witn n-dimensional surrogate i.e.  CL vs AoA, Mach, elevator deflection  
 Set up pertubation problems 
+
+Student's to do task:
+--------------------------
+Calculation of Stability Coefficient
+Computation of Stability Derivatives
