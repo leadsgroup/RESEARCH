@@ -5,3 +5,11 @@ Intergrate moment of inertia calculations into code
 check to see if control surfaces are connected to the mission
 Figure out a way to mission witn n-dimensional surrogate i.e.  CL vs AoA, Mach, elevator deflection  
 Set up pertubation problems 
+
+Matteo's to do tasks:
+--------------------------
+Analytical computation of latero-directional stability coefficients
+VLM code modification
+Modeling latero-directional stability derivatives
+Testing and validation
+Nice-to-have: dynamic latero-directional stability
