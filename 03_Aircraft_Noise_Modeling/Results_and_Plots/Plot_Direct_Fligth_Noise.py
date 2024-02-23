@@ -11,10 +11,7 @@ import pickle
 # ----------------------------------------------------------------------
 #   Main
 # ----------------------------------------------------------------------
-def main(): 
-    a = np.asarray([ [1,2,3], [4,5,6], [7,8,9] ])
-    np.savetxt("foo.csv", a, delimiter=",")
-    
+def main():  
     # Universal Plot Settings
     plt.rcParams['axes.linewidth'] = 1.
     plt.rcParams["font.family"]    = "Times New Roman"
@@ -36,17 +33,17 @@ def main():
     save_figure                 = True
     file_type                   = '.png'
      
-    ## tag for city  
-    #city                        = 'LA' 
-    #aircraft_models             = ['HC' ,'SR','TR'] 
-    #altitudes                   = ['1000']
-    #flight_intervals            = ['60','30','10'] 
+    # tag for city  
+    city                        = 'LA' 
+    aircraft_models             = ['HC' ,'SR','TR'] 
+    altitudes                   = ['1000']
+    flight_intervals            = ['60','30','10'] 
     
-    #plot_direct_flight_noise_LAmax(city,aircraft_models,altitudes,
-                              #flight_intervals, use_lat_long,save_figure,file_type,plot_parameters)  
+    plot_direct_flight_noise_LAmax(city,aircraft_models,altitudes,
+                              flight_intervals, use_lat_long,save_figure,file_type,plot_parameters)  
     
-    #plot_direct_flight_noise_LAeqT(city,aircraft_models,altitudes,
-                                  #flight_intervals, use_lat_long,save_figure,file_type,plot_parameters)    
+    plot_direct_flight_noise_LAeqT(city,aircraft_models,altitudes,
+                                  flight_intervals, use_lat_long,save_figure,file_type,plot_parameters)    
                           
 
     city                        = 'LA' 
@@ -244,9 +241,7 @@ def plot_total_flight_noise_LAeqT(city,aircraft_models,altitudes,
                     LAT  = Results.lat_dist/Units.nmi
                     LONG = Results.long_dist/Units.nmi 
                     axis.set_xlabel('x [nmi]')
-                    axis.set_ylabel('y [nmi]') 
-                
-                
+                    axis.set_ylabel('y [nmi]')  
                 
                 
                 CS_1  = axis.contourf(LONG,LAT,elevation,cmap =cut_terrain_map,norm=norm,levels = 20, alpha=0.5)  
