@@ -30,14 +30,14 @@ def solve_heads_BL_new(l,del_0,theta_0,del_star_0,cf_0,H_0_tur,Re_L,x_i,Ve_i,dVe
     # RK4 solver #########################################################################################################
     for i in range(1,n):
         # initialise the variable values at the current grid point using previous grid points (to define the error functions)
-        H_er = H[i-1]  
+        H_er  = H[i-1]  
         Cf_er = Cf[i-1] 
         H1_er = H[i-1]  
         Theta_er = Theta[i-1]
         
         # assign previous grid point values of H and Cf to start RK4
         H[i] = H[i-1]
-        Cf[i] = Cf[i-1]
+        Cf[i] = Cf[i-1] 
 
         #assume some error values
         erH = 0.2 
@@ -45,8 +45,7 @@ def solve_heads_BL_new(l,del_0,theta_0,del_star_0,cf_0,H_0_tur,Re_L,x_i,Ve_i,dVe
         erTheta = 0.2
         erCf = 0.2
         # iterate to get the variables at the grid point
-        while abs(erH)>0.00001 or abs(erH1)>0.00001 or abs(erTheta)>0.00001 or abs(erCf)>0.00001:
-            
+        while abs(erH)>0.00001 or abs(erH1)>0.00001 or abs(erTheta)>0.00001 or abs(erCf)>0.00001: 
 
             # define RK4 function for Theta
             def dTheta_by_dx(x, THETA):
@@ -63,13 +62,6 @@ def solve_heads_BL_new(l,del_0,theta_0,del_star_0,cf_0,H_0_tur,Re_L,x_i,Ve_i,dVe
 
             # get H1
             H1[i] = RK4(x[i-1], dx[i-1], H1[i-1], dH1_by_dx)
-
-            ## get theta
-            #Theta[i] = RK4(x[i-1], dx[i-1], Theta[i-1], dTheta_by_dx(x, Theta[i-1],args = (Cf, v, i, H, dv))) # ERROR IN LINE 
-            
-            ## define RK4 function for H1
-            ## get H1
-            #H1[i]   = RK4(x[i-1], dx[i-1], H1[i-1], dH1_by_dx(x, H1[i-1], args = (dv, v, H, Cf, Theta, i))) # ERROR IN LINE 
             
             # get H
             H[i]    = getH(H1[i])
@@ -99,19 +91,7 @@ def solve_heads_BL_new(l,del_0,theta_0,del_star_0,cf_0,H_0_tur,Re_L,x_i,Ve_i,dVe
     cf           =  Cf
     
     return H,delta_star,delta,cf,theta,Re_x,Re_theta  
-
-
-## define RK4 function for Theta
-#def dTheta_by_dx(x, THETA,Cf,v,i,H,dv):
-    #return 0.5*Cf[i] - (THETA/v[i])*(2+H[i])*(dv[i])
-
-#def dH1_by_dx(x, H1_var,dv,v,H,Cf,Theta,i):
-    #term1 = 0.0306*(H1_var-3)**(-0.6169)
-    #term2 = -Theta[i]*H1_var*dv[i]/v[i]
-    #term3 = -H1_var*Cf[i]/2
-    #term4 = (H1_var*Theta[i]/v[i])*(2+H[i])*dv[i]
-    #return (term1 + term2 + term3 +term4)*(1/Theta[i])
-
+ 
 def RK4(x0, dx, y0, SlopeFn):
     m1 = SlopeFn(x0, y0)
     m2 = SlopeFn(x0+(dx/2), y0+(m1*dx/2))
