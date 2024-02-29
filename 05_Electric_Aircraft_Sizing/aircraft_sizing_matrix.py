@@ -32,6 +32,40 @@ def main():
     return
 
 #def Weight_Estimation():
+
+#M_OE  = M_a + M_m + M_b + M_g
+
+# Need historical statistical regressions at subsystem level, for each component
+# or other applicable models, such as physics-based analytic ones
+# Models involve power output characteristics
+# all power and energy mission requirements must be considered in order to solve 
+# Eq. 1 simultaneously with the choice of an appropriate design point on the Sizing 
+# Matrix Plot (SMP, also known as performance matching plot). 
+# Design power loading W_mto/P_s and wing loading W_mto/S, being W_mto = M_mto*g 
+# the design gross weight, P_s the shaft brake-power and S the wing surface
+
+#M_b = largest between M_b_E = E_b*e_b and M_b_P = P_b*p_b
+
+#P_b = max power req in TO and initial climb
+
+#BP is sized to fulfil maximum mission power first (sizing to power), and then increased, if needed, to provide energy for the flight phases below the hybrid transition altitude (sizing to energy).
+
+#M_m = P_s*p_m and p_m from historical statistical regression
+
+#M_g = P_g*p_g, P_g selected by designer
+
+#M_f = E_f*e_f
+
+# M_a = M_OE - M_e (Mass of eng in conv. planes)
+
+# Power and energy requirements to be applied in the mass estimation are obtained through the analysis of the sizing mission profile
+
+#M_mto = M_p + M_OE + M_f
+
+
+# M_p represents payload mass, M_a non-propulsive 
+# airframe mass, M_m electric motor mass, M_b BP 
+# mass, M_g PGS mass, and M_f fuel mass.
     
 #   Based on historical regressions for W_E (Empty) and Fuel Fractions method for W_F (Fuel)
 #   W_TO = Take-Off weight
@@ -74,7 +108,7 @@ def Performance_Requirements():
 #                 - Point performance: Stall Speed, Max speed, Economic cruise speed, manoeuvring speed, max RoC
 #                 - Intergral performance: Range, Endurance, Time to climb
 #                 - Field performance: TO distance, LND distance, Balance field length (BFL)
-
+#
 #   Point Performance:
 #   - V_stall:
 #   V_S = np.sqrt(2*W/(rho_0*S*C_L_max)) = f(W/S) <= V_S*
@@ -105,57 +139,41 @@ def Performance_Requirements():
 #   - Instant turn: As in stall, V_s_n = np.sqrt(n)*V_stal -> f(W/S)
 #   - Sustained turn -> f(W/S, W/P and n)
     
-# Lift coefficient
+    # Lift coefficient
     cL_max = 1.7
     cL_max_TO = 4
     cL_max_LND = 6
-    cL = np.linspace(6.3, 6.3, 100)  # for the drag polar
+    cL = np.linspace(6.3, 6.3, 100)                    # for the drag polar
     
     # cD0 estimation: Roskam
-    W_MTO_h = [2200, 2500, 2028.25]  # only homebuilt
+    W_MTO_h = [2200, 2500, 2028.25]                    # only homebuilt
     W_MTO_s = [2500, 3000, 2500, 2350.13, 2450, 2548]  # only single engine
-    c, d = 1.0892, 0.5147  # single
-    c_h, d_h = 1.2362, 0.4319  # homebuilt
-    a, b = -2.2614, 1  # interpolation
-    
+    W_MTO = np.concatenate((W_MTO_s, W_MTO_h))
+    c, d = 1.0892, 0.5147                              # single
+    c_h, d_h = 1.2362, 0.4319                          # homebuilt
+    a, b = -2.2614, 1                                  # interpolation
     L_Swet_s = [c + d * np.log10(W) for W in W_MTO_s]
     L_Swet_h = [c_h + d_h * np.log10(W) for W in W_MTO_h]
-    
     L_Swet = np.concatenate((L_Swet_s, L_Swet_h))
-    W_MTO = np.concatenate((W_MTO_s, W_MTO_h))
-    
-    plt.figure(1)
-    plt.plot(L_Swet, np.log(W_MTO))
-    plt.grid(True)
-    plt.legend(['$S_{WET_s}$'], loc='best')
-    plt.ylabel('$S_{WET} [dB]$', fontsize=12)
-    plt.xlabel('$W_{TO} [dB]$', fontsize=12)
-    plt.title('Wet area wrt $W_{TO}$')
     
     # Parassite area and cD0
-    S_h = [167, 180, 134.2]  # homebuilt
-    S_s = [165.6, 231, 131, 131, 174, 170]  # single
+    S_h = [167, 180, 134.2]                            # homebuilt
+    S_s = [165.6, 231, 131, 131, 174, 170]             # single
     S = np.concatenate((S_s, S_h))
     
     L_f = a + b * L_Swet
     f = 10 ** L_f
     
-    cD_0 = 0.02  # Initially from MATLAB, subject to change based on calculations or data
+    cD_0 = 0.02                                        # Initial gues
     
-    # Oswald's coefficient
-    AR_m = 8.3
+    AR_m = 8.3                                         
     
     e_CLEAN = 1.78 * (1 - 0.045 * AR_m ** 0.68) - 0.64
-    e_TO = 0.78  # from Roskam
-    e_LND = 0.72  # from Roskam
+    e_TO = 0.78                                        # from Roskam
+    e_LND = 0.72                                       # from Roskam
     k_CLEAN = 1 / (np.pi * AR_m * e_CLEAN)
     k_TO = 1 / (np.pi * AR_m * e_TO)
     k_LND = 1 / (np.pi * AR_m * e_LND)
-    
-    # polar
-    cD_0_TO = cD_0 + 0.034  # from Roskam %0.017
-    cD_0_LND = cD_0 + 0.061  # from Roskam
-    cD_0_GEAR = cD_0 + 0.020  # from Roskam
     
     # After simulations and verifications
     cD_0_TO = 0.085
@@ -164,32 +182,10 @@ def Performance_Requirements():
     
     cD_CLEAN = cD_0 + k_CLEAN * cL ** 2
     cD_TO = cD_0_TO + k_TO * cL ** 2
-    cD_LND = cD_0_LND + k_LND * cL ** 2  # +0.020 is the contribution coming from the gear
-    
-    plt.figure(2)
-    plt.plot(cD_CLEAN, cL)
-    plt.grid(True)
-    plt.xlabel('$c_D$', fontsize=12)
-    plt.ylabel('$c_L$', fontsize=12)
-    plt.title('Polar curve') 
-    
-    plt.figure(3)
-    plt.plot(cD_TO, cL)
-    plt.grid(True)
-    plt.xlabel('$c_D$', fontsize=12)
-    plt.ylabel('$c_L$', fontsize=12)
-    plt.title('Polar curve TO')
-    
-    plt.figure(4)
-    plt.plot(cD_LND, cL)
-    plt.grid(True)
-    plt.xlabel('$c_D$', fontsize=12)
-    plt.ylabel('$c_L$', fontsize=12)
-    plt.title('Polar curve LND')
-    
-    # Density
+    cD_LND = cD_0_LND + k_LND * cL ** 2
+        
     # SI unit
-    theta_ref = 298.15  # by considering ISA + 18Â°
+    theta_ref = 298.15                                 # by considering ISA + 18 °C
     g = 9.81
     R = 287.05
     lamb = -6.5 * 1e-3
@@ -221,8 +217,21 @@ def Performance_Requirements():
     # sigma 5: 6000 ft for the second part of the climb
     h_5 = 6000 * 0.3048  # m
     sigma5 = (1 + lamb * h_5 / theta_ref0) ** (-(1 + g / (R * lamb)))
-    rho5 = sigma5 * rho0    
+    rho5 = sigma5 * rho0   
+
+    # -------------------------------------------------------------------------------------    
+    # user input variables 
+    # -------------------------------------------------------------------------------------
     
+    
+    
+    
+    
+    
+
+    # -------------------------------------------------------------------------------------
+    # Sizing calculations
+    # -------------------------------------------------------------------------------------    
     # Stall speed
     v_s = 28  # kcas
     vs = v_s / 1.94384  # m/s
@@ -231,11 +240,10 @@ def Performance_Requirements():
     S_TO = 300  # ft
     S_TOG = S_TO / 1.66
     mu = [0.025, 0.05]  # concrete and short grass
-    PDL = 3  # [hp/ft^2] Single Prop case from Roskam
+    PDL = 3             # [hp/ft^2] Single Prop case from Roskam
     K1 = 0.0376
     K2_1 = 5.75 * (sigma1 * PDL) ** (1 / 3)
     K2_2 = 5.75 * (sigma2 * PDL) ** (1 / 3)
-    g1 = 32.174  # ft/2s
     rho1_1 = rho1 * 0.00194  # slug/ft^3
     rho2_1 = rho2 * 0.00194  # slug/ft^3
     
@@ -244,44 +252,14 @@ def Performance_Requirements():
         return ((1 / (S_TO * rho1_1 * cL_max_TO * K2_1)) * (
                 K1 * 1.66 * x1 + S_TO * rho1_1 * cL_max_TO * mu + S_TO * rho1_1 * 0.72 * cD_0_TO)) ** (-1)
     
-    
     def y1_2(x1, mu):
         return ((1 / (S_TO * rho2_1 * cL_max_TO * K2_2)) * (
                 K1 * 1.66 * x1 + S_TO * rho2_1 * cL_max_TO * mu + S_TO * rho2_1 * 0.72 * cD_0_TO)) ** (-1)
     
-    
-    x1 = np.arange(0, 40, 0.1)
-    
-    # Plot TO phase at msl
-    plt.figure()
-    plt.plot(x1, y1_1(x1, mu[0]), label='$c_{Lmax_{\mu1}}$', linewidth=2)
-    plt.plot(x1, y1_1(x1, mu[1]), label='$c_{Lmax_{\mu2}}$', linewidth=2)
-    plt.grid(True, which='minor')
-    plt.xlabel('$(W/S)_{TO}$', fontsize=20, )
-    plt.ylabel('$(W/P)_{TO}$', fontsize=20, )
-    plt.title('$TO\:phase$ at msl', fontsize=20, )
-    plt.legend(loc='upper right', fontsize=14, )
-    
-    # Plot TO phase at 5000 ft
-    plt.figure()
-    plt.plot(x1, y1_2(x1, mu[0]), label='$c_{Lmax_{\mu1}}$', linewidth=2)
-    plt.plot(x1, y1_2(x1, mu[1]), label='$c_{Lmax_{\mu2}}$', linewidth=2)
-    plt.grid(True, which='minor')
-    plt.xlabel('$(W/S)_{TO}$', fontsize=20, )
-    plt.ylabel('$(W/P)_{TO}$', fontsize=20, )
-    plt.title('$TO\:phase$ at 5000 ft', fontsize=20, )
-    plt.legend(loc='upper right', fontsize=14, )    
+    x1 = np.arange(0, 40, 0.1)  
     
     # Stall phase calculation
     x2 = ((0.5 * (rho0) * (vs ** 2) * cL_max_LND) / 0.93) * 0.02087825  # 0.975
-    
-    # Plot stall phase
-    plt.figure()
-    plt.axvline(x=x2, color='r', linestyle='-', linewidth=2)
-    plt.grid(True, which='minor')
-    plt.xlabel('$(W/S)_{TO}$', fontsize=20, )
-    plt.ylabel('$(W/P)_{TO}$', fontsize=20, )
-    plt.title('$v_{stall}\:phase$', fontsize=20, )  
     
     # Constants
     RC = 1500 * 0.00508  # m/s
@@ -309,61 +287,12 @@ def Performance_Requirements():
     
     x3 = np.arange(0, 40 / 0.02087825, 0.1)
     
-    # Plotting
-    plt.figure()
-    plt.plot(x3 * 0.02087825, y3_1(x3), 'r', label='Climb at msl, AEO', linewidth=2)
-    plt.grid(True, which='minor')
-    plt.xlabel('$(W/S)_{TO}$', fontsize=20, )
-    plt.ylabel('$(W/P)_{TO}$', fontsize=20, )
-    plt.legend(loc='best', fontsize=20)
-    plt.title('$Climb\:phase$, AEO at msl', fontsize=20, )
-    
-    plt.figure()
-    plt.plot(x3 * 0.02087825, y3_1_2(x3), 'b', label='Climb AEO', linewidth=2)
-    plt.grid(True, which='minor')
-    plt.xlabel('$(W/S)_{TO}$', fontsize=20, )
-    plt.ylabel('$(W/P)_{TO}$', fontsize=20, )
-    plt.legend(loc='best', fontsize=20)
-    plt.title('$Climb\:phase$, AEO at 750 ft/min', fontsize=20, )
-    
-    plt.figure()
-    plt.plot(x3 * 0.02087825, y3_1_c(x3), 'g', label='Climb at 5000 ft, AEO', linewidth=2)
-    plt.grid(True, which='minor')
-    plt.xlabel('$(W/S)_{TO}$', fontsize=20, )
-    plt.ylabel('$(W/P)_{TO}$', fontsize=20, )
-    plt.legend(loc='best', fontsize=20)
-    plt.title('$Climb\:phase$, AEO at msl, climb gradient', fontsize=20, )
-    
-    plt.figure()
-    plt.plot(x3 * 0.02087825, y3_2_OEI(x3), 'm', label='Climb at 5000 ft, OEI', linewidth=2)
-    plt.grid(True, which='minor')
-    plt.xlabel('$(W/S)_{TO}$', fontsize=20, )
-    plt.ylabel('$(W/P)_{TO}$', fontsize=20, )
-    plt.legend(loc='best', fontsize=20)
-    plt.title('$Climb\:phase$, OEI at 5000 ft', fontsize=20, )
-    
-    plt.figure()
-    plt.plot(x3 * 0.02087825, y3_1_b(x3), 'y', label='Balked LND at msl', linewidth=2)
-    plt.grid(True, which='minor')
-    plt.xlabel('$(W/S)_{TO}$', fontsize=20, )
-    plt.ylabel('$(W/P)_{TO}$', fontsize=20, )
-    plt.legend(loc='best', fontsize=20)
-    plt.title('$Climb\:phase$, Balked LND at msl', fontsize=20, )
-    
     # Service ceiling
     RC_sc = 0.508  # m/s at the condition under examination
     
     y4 = lambda x4: 167.58 * (((((1 / eta_p) * (0.5 * rho4 * v_Y(x4, rho4) ** 3 * cD_0 / x4 +
                                                 2 * k_CLEAN * x4 / (rho4 * v_Y(x4, rho4)) + RC_sc))) ** (-1))) / 0.97
     x4 = np.arange(0, 40 / 0.02087825, 0.1)
-    
-    plt.figure()
-    plt.plot(x4 * 0.02087825, y4(x4), 'k', label='Service ceiling', linewidth=2)
-    plt.grid(True, which='minor')
-    plt.xlabel('$(W/S)_{TO}$', fontsize=20, )
-    plt.ylabel('$(W/P)_{TO}$', fontsize=20, )
-    plt.legend(loc='best', fontsize=20)
-    plt.title('Service ceiling', fontsize=20, )
     
     # Cruise phase
     v_cruise = 170 / 1.94384  # m/s
@@ -375,15 +304,6 @@ def Performance_Requirements():
                                       2 * k_CLEAN * x5 / (rho3 * v_min_cruise * (eta_p)))) ** (-1)) / 0.97))
     x5 = np.arange(0, 40/0.02087825 + 0.1, 0.1)
     
-    plt.figure()
-    plt.plot(x5 * 0.02087825, y5(x5), 'b', label='$v_{cr_{target}}$', linewidth=2)
-    plt.plot(x5 * 0.02087825, y5_min(x5), 'r', label='$v_{cr_{min}}$', linewidth=2)
-    plt.grid(True, which='minor')
-    plt.xlabel('$(W/S)_{TO}$', fontsize=20, )
-    plt.ylabel('$(W/P)_{TO}$', fontsize=20, )
-    plt.legend(loc='best', fontsize=20, )
-    plt.title('$Cruise\:phase$', fontsize=20, )
-    
     # Turn: constant velocity
     # 10000 ft
     n = 2  # 60° of turning
@@ -391,32 +311,8 @@ def Performance_Requirements():
     
     x6 = ((((0.5 * rho3 * v_A ** 2 * cL_max) / n)) / 0.97) * 0.02087825
     
-    plt.figure()
-    plt.axvline(x=x6, color='k', linestyle='--', linewidth=2)
-    plt.grid(True, which='minor')
-    plt.xlabel('$(W/S)_{TO}$', fontsize=20, )
-    plt.ylabel('$(W/P)_{TO}$', fontsize=20, )
-    plt.title('$Turn\:phase$', fontsize=20, )
-    
     # LND phase
-    x7_1 = ((0.5 * rho1 * ((1.3 * vs) ** 2)) * cL_max_LND / 0.93) * 0.02087825  # 0.975
     x7_2 = ((0.5 * rho2 * ((1.3 * vs) ** 2)) * cL_max_LND / 0.93) * 0.02087825  # 0.975
-    
-    plt.figure()
-    plt.axvline(x=x7_1, color='b', linestyle='--', linewidth=2, label='MSL')
-    plt.grid(True, which='minor')
-    plt.xlabel('$(W/S)_{TO}$', fontsize=20, )
-    plt.ylabel('$(W/P)_{TO}$', fontsize=20, )
-    plt.title('$LND\:phase$ at msl', fontsize=20, )
-    plt.legend(loc='best', fontsize=20)
-    
-    plt.figure()
-    plt.axvline(x=x7_2, color='r', linestyle='--', linewidth=2, label='5000 ft')
-    plt.grid(True, which='minor')
-    plt.xlabel('$(W/S)_{TO}$', fontsize=20, )
-    plt.ylabel('$(W/P)_{TO}$', fontsize=20, )
-    plt.title('$LND\:phase$ at 5000 ft', fontsize=20, )
-    plt.legend(loc='best', fontsize=20) 
     
     plt.figure()
     plt.plot(x1, y1_2(x1, mu[0]), color=[0.8500, 0.3250, 0.0980], linewidth=2.5)
@@ -434,18 +330,14 @@ def Performance_Requirements():
     plt.axvline(x7_2, color='c', linestyle='-', linewidth=2.5)
     plt.xlim(12, 29)
     plt.ylim(0, 40)
-    plt.scatter(16.8, 12.57, s=80, color='r', marker='o')  # with 5.9 in LND, 4 in TO and vs = 28 kts; n = 2; no SR 22
-    plt.scatter(13.1737, 8.4615, s=80, color='m', marker='o')  # CH-801
-    plt.scatter(15.0966, 9.6154, s=80, color='b', marker='o')  # MAULE
-    plt.scatter(13.8889, 9.6154, s=80, color='y', marker='o')  # B
-    plt.scatter(12.9870, 10.1695, s=80, color='c', marker='o')  # Helio
+    plt.scatter(16.8, 12.57, s=80, color='g', marker='o')  # with 5.9 in LND, 4 in TO and vs = 28 kts; n = 2; no SR 22
     A = [12, 12, 13.53, 17.13, 17.13]
     B = [0, 12.33, 13.66, 13.3, 0]
-    plt.fill(A, B, color='red', edgecolor='none', alpha=0.3)
+    plt.fill(A, B, color='green', edgecolor='none', alpha=0.3)
     plt.legend(['$TO_{\mu_1}$ 5000 ft', '$TO_{\mu_2}$ 5000 ft', 'Stall', 'Initial climb, AEO, msl',
                 'Climb gradient, AEO, msl', 'Climb, AEO', 'Climb, OEI, 5000 ft', 'Balked LND, msl',
                 'Service ceiling', 'Target cruise', 'Min cruise', 'Instantaneous turn',
-                'LND 5000 ft', 'Design point', 'CH-801', 'MAULE M-7-260', 'Bearhawk', 'Helio H-395'],
+                'LND 5000 ft', 'Design point'],
                loc='best', fontsize=12)
     plt.box(True)
     plt.title('Final SMP', fontsize=20)
