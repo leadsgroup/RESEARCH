@@ -1,5 +1,5 @@
   
-from MARC.Core import Data   
+from RCAIDE.Core import Data   
 import matplotlib.pyplot as plt
 import numpy as np  
 import matplotlib.cm as cm 

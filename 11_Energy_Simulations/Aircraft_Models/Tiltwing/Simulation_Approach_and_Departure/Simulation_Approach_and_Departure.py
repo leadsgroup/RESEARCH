@@ -9,16 +9,16 @@
 #----------------------------------------------------------------------
 #   Imports
 # ---------------------------------------------------------------------
-import MARC
-from MARC.Core import Units, Data   
+import RCAIDE
+from RCAIDE.Core import Units, Data   
 import pickle
-from MARC.Visualization.Performance.Aerodynamics.Vehicle                 import *  
-from MARC.Visualization.Performance.Mission                              import *  
-from MARC.Visualization.Performance.Aerodynamics.Rotor import *  
-from MARC.Visualization.Performance.Energy.Battery                       import *   
-from MARC.Visualization.Performance.Noise                                import *  
-from MARC.Visualization.Geometry.Three_Dimensional.plot_3d_vehicle       import plot_3d_vehicle 
-from MARC.Visualization.Geometry                                         import *
+from RCAIDE.Visualization.Performance.Aerodynamics.Vehicle                 import *  
+from RCAIDE.Visualization.Performance.Mission                              import *  
+from RCAIDE.Visualization.Performance.Aerodynamics.Rotor import *  
+from RCAIDE.Visualization.Performance.Energy.Battery                       import *   
+from RCAIDE.Visualization.Performance.Noise                                import *  
+from RCAIDE.Visualization.Geometry.Three_Dimensional.plot_3d_vehicle       import plot_3d_vehicle 
+from RCAIDE.Visualization.Geometry                                         import *
 
 import time  
 import numpy as np
@@ -32,9 +32,9 @@ import Missions
 import Plots  
 try:
     #import vsp 
-    from MARC.Input_Output.OpenVSP.vsp_write import write 
+    from RCAIDE.Input_Output.OpenVSP.vsp_write import write 
 except ImportError:
-    # This allows MARC to build without OpenVSP
+    # This allows RCAIDE to build without OpenVSP
     pass   
 
 # ----------------------------------------------------------------------
@@ -92,7 +92,7 @@ def main():
         # -------------------------------------------------------------------------------------------    
         # DEFINE ANALYSES 
         # -------------------------------------------------------------------------------------------
-        analyses          = MARC.Analyses.Analysis.Container()
+        analyses          = RCAIDE.Analyses.Analysis.Container()
         analyses.configs  = configs_analyses
         analyses.missions = missions_analyses 
         

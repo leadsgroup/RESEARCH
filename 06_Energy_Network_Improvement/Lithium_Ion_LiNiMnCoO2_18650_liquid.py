@@ -8,14 +8,14 @@
 # ----------------------------------------------------------------------
 #  Imports
 # ---------------------------------------------------------------------- 
-import MARC
-from MARC.Core   import Units , Data
-from MARC.Components.Energy.Storages.Batteries.Constant_Mass.Lithium_Ion import Lithium_Ion
-from MARC.Methods.Power.Battery.Cell_Cycle_Models.LiNiMnCoO2_cell_cycle_model import compute_NMC_cell_state_variables
-from MARC.Methods.Power.Battery.compute_net_generated_battery_heat            import compute_net_generated_battery_heat
+import RCAIDE
+from RCAIDE.Core   import Units , Data
+from RCAIDE.Components.Energy.Storages.Batteries.Constant_Mass.Lithium_Ion import Lithium_Ion
+from RCAIDE.Methods.Power.Battery.Cell_Cycle_Models.LiNiMnCoO2_cell_cycle_model import compute_NMC_cell_state_variables
+from RCAIDE.Methods.Power.Battery.compute_net_generated_battery_heat            import compute_net_generated_battery_heat
 
 # thermal management system by Chunrong Zhao
-from MARC.Methods.Power.Battery.compute_net_generated_battery_heat_liquid import compute_net_generated_battery_heat_liquid
+from RCAIDE.Methods.Power.Battery.compute_net_generated_battery_heat_liquid import compute_net_generated_battery_heat_liquid
 
 import numpy as np
 import os
@@ -638,4 +638,4 @@ def load_battery_results():
     ospath    = os.path.abspath(__file__)
     separator = os.path.sep
     rel_path  = os.path.dirname(ospath) + separator     
-    return MARC.Input_Output.MARC.load(rel_path+ 'NMC_Raw_Data.res')
+    return RCAIDE.Input_Output.RCAIDE.load(rel_path+ 'NMC_Raw_Data.res')

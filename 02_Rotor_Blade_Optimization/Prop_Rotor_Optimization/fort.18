@@ -268,7 +268,7 @@
  SNOPTC EXIT   0 -- finished successfully
  SNOPTC INFO   1 -- optimality conditions satisfied
 
- Problem name                 MARC
+ Problem name                 RCAIDE
  No. of iterations                 692   Objective            2.2911962464E+00
  No. of major iterations           118   Linear    obj. term  0.0000000000E+00
  Penalty parameter           1.776E+01   Nonlinear obj. term  2.2911962464E+00
@@ -280,7 +280,7 @@
  Nonlinear constraint violn    8.6E-07
 1
 
- Name           MARC                    Objective Value      2.2911962464E+00
+ Name           RCAIDE                    Objective Value      2.2911962464E+00
 
  Status         Optimal Soln             Iteration    692    Superbasics     5
 
@@ -524,7 +524,7 @@
  SNOPTC EXIT   0 -- finished successfully
  SNOPTC INFO   1 -- optimality conditions satisfied
 
- Problem name                 MARC
+ Problem name                 RCAIDE
  No. of iterations                  80   Objective            3.9035998972E+00
  No. of major iterations            50   Linear    obj. term  0.0000000000E+00
  Penalty parameter           3.064E-01   Nonlinear obj. term  3.9035998972E+00
@@ -536,7 +536,7 @@
  Nonlinear constraint violn    1.4E-07
 1
 
- Name           MARC                    Objective Value      3.9035998972E+00
+ Name           RCAIDE                    Objective Value      3.9035998972E+00
 
  Status         Optimal Soln             Iteration     80    Superbasics     5
 
@@ -933,7 +933,7 @@
  SNOPTC EXIT  60 -- undefined user-supplied functions
  SNOPTC INFO  63 -- unable to proceed into undefined region
 
- Problem name                 MARC
+ Problem name                 RCAIDE
  No. of iterations                 640   Objective            3.4558020665E+00
  No. of major iterations           187   Linear    obj. term  0.0000000000E+00
  Penalty parameter           4.083E+01   Nonlinear obj. term  3.4558020665E+00
@@ -945,7 +945,7 @@
  Nonlinear constraint violn    8.0E-03
 1
 
- Name           MARC                    Objective Value      3.4558020665E+00
+ Name           RCAIDE                    Objective Value      3.4558020665E+00
 
  Status         Optimal Soln             Iteration    640    Superbasics     9
 
@@ -1188,7 +1188,7 @@
  SNOPTC EXIT   0 -- finished successfully
  SNOPTC INFO   1 -- optimality conditions satisfied
 
- Problem name                 MARC
+ Problem name                 RCAIDE
  No. of iterations                  81   Objective            1.6785872144E+00
  No. of major iterations            49   Linear    obj. term  0.0000000000E+00
  Penalty parameter           1.031E-01   Nonlinear obj. term  1.6785872144E+00
@@ -1200,7 +1200,7 @@
  Nonlinear constraint violn    4.5E-09
 1
 
- Name           MARC                    Objective Value      1.6785872144E+00
+ Name           RCAIDE                    Objective Value      1.6785872144E+00
 
  Status         Optimal Soln             Iteration     81    Superbasics     5
 

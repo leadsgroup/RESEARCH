@@ -1,15 +1,15 @@
 # Imports
-import MARC
-from MARC.Core import Units, Data  
-from MARC.Methods.Geometry.Two_Dimensional.Cross_Section.Airfoil.compute_airfoil_properties import compute_airfoil_properties
-from MARC.Methods.Geometry.Two_Dimensional.Cross_Section.Airfoil.import_airfoil_geometry    import import_airfoil_geometry    
+import RCAIDE
+from RCAIDE.Core import Units, Data  
+from RCAIDE.Methods.Geometry.Two_Dimensional.Cross_Section.Airfoil.compute_airfoil_properties import compute_airfoil_properties
+from RCAIDE.Methods.Geometry.Two_Dimensional.Cross_Section.Airfoil.import_airfoil_geometry    import import_airfoil_geometry    
 import numpy as np  
 import os 
 
 # design propeller 
 
 def design_BO_105_prop():          
-    prop                            = MARC.Components.Energy.Converters.Rotor()
+    prop                            = RCAIDE.Components.Energy.Converters.Rotor()
     prop.inputs                     = Data() 
     prop.inputs.pitch_command       = 0 
     prop.inputs.y_axis_rotation     = 0.
@@ -32,7 +32,7 @@ def design_BO_105_prop():
     separator                       = os.path.sep
     rel_path                        = os.path.dirname(ospath) + separator   
      
-    airfoil_1                       = MARC.Components.Airfoils.Airfoil()   
+    airfoil_1                       = RCAIDE.Components.Airfoils.Airfoil()   
     airfoil_1.coordinate_file       =  rel_path +'../Airfoils/NACA_23012.txt'
     airfoil_1.polar_files           = [rel_path +'../Airfoils/Polars/NACA_23012_polar_Re_50000.txt',
                                         rel_path +'../Airfoils/Polars/NACA_23012_polar_Re_100000.txt',

@@ -7,19 +7,19 @@
 #   Imports
 # ----------------------------------------------------------------------    
 
-import MARC
-from MARC.Core import Units
-from MARC.Analyses.Process import Process
-from MARC.Optimization.write_optimization_outputs import write_optimization_outputs
-import MARC.Components.Energy.Converters.Propeller as prop_class
+import RCAIDE
+from RCAIDE.Core import Units
+from RCAIDE.Analyses.Process import Process
+from RCAIDE.Optimization.write_optimization_outputs import write_optimization_outputs
+import RCAIDE.Components.Energy.Converters.Propeller as prop_class
 
 import numpy as np
 from jax import jacfwd as jacobian
 import jax.numpy as jnp
 import jax.numpy.linalg as LA
 from jax import jit
-from MARC.Analyses.Mission.Segments.Segment   import Segment 
-from MARC.Methods.Noise.Fidelity_Zero.Propeller.propeller_mid_fidelity import propeller_mid_fidelity
+from RCAIDE.Analyses.Mission.Segments.Segment   import Segment 
+from RCAIDE.Methods.Noise.Fidelity_Zero.Propeller.propeller_mid_fidelity import propeller_mid_fidelity
 
 # ----------------------------------------------------------------------        
 #   Setup
@@ -176,11 +176,11 @@ def run_rotor_OEI(nexus):
     
 
     # Calculate the atmospheric properties
-    atmosphere            = MARC.Analyses.Atmospheric.US_Standard_1976()
+    atmosphere            = RCAIDE.Analyses.Atmospheric.US_Standard_1976()
     atmosphere_conditions = atmosphere.compute_values(altitude,temperature_deviation=TD)
 
     # Pack everything up
-    conditions                                          = MARC.Analyses.Mission.Segments.Conditions.Aerodynamics()
+    conditions                                          = RCAIDE.Analyses.Mission.Segments.Conditions.Aerodynamics()
     conditions.freestream.update(atmosphere_conditions)
     conditions.frames.inertial.velocity_vector          = jnp.array([[0.,0.,speed]])
     conditions.propulsion.throttle                      = jnp.array([[0.8]])
@@ -227,11 +227,11 @@ def run_rotor_hover(nexus):
     
 
     # Calculate the atmospheric properties
-    atmosphere            = MARC.Analyses.Atmospheric.US_Standard_1976()
+    atmosphere            = RCAIDE.Analyses.Atmospheric.US_Standard_1976()
     atmosphere_conditions = atmosphere.compute_values(altitude,temperature_deviation=TD)
 
     # Pack everything up
-    conditions                                          = MARC.Analyses.Mission.Segments.Conditions.Aerodynamics()
+    conditions                                          = RCAIDE.Analyses.Mission.Segments.Conditions.Aerodynamics()
     conditions.freestream.update(atmosphere_conditions)
     conditions.frames.inertial.velocity_vector          = jnp.array([[0.,0.,speed]])
     conditions.propulsion.throttle                      = jnp.array([[0.8]])
@@ -278,11 +278,11 @@ def run_rotor_forward(nexus):
     TM       = nexus.tip_mach_cruise
     
     # Calculate the atmospheric properties
-    atmosphere            = MARC.Analyses.Atmospheric.US_Standard_1976()
+    atmosphere            = RCAIDE.Analyses.Atmospheric.US_Standard_1976()
     atmosphere_conditions = atmosphere.compute_values(altitude,temperature_deviation=TD)
 
     # Pack everything up
-    conditions                                          = MARC.Analyses.Mission.Segments.Conditions.Aerodynamics()
+    conditions                                          = RCAIDE.Analyses.Mission.Segments.Conditions.Aerodynamics()
     conditions.freestream.update(atmosphere_conditions)
     conditions.frames.inertial.velocity_vector          = jnp.array([[0.,0.,speed]])
     conditions.propulsion.throttle                      = jnp.array([[0.8]])
@@ -336,7 +336,7 @@ def run_hover_noise(nexus):
     segment                                          = Segment() 
     segment.state.conditions                         = conditions
     #segment.state.conditions.expand_rows(ctrl_pts)  
-    noise                                            = MARC.Analyses.Noise.Fidelity_Zero() 
+    noise                                            = RCAIDE.Analyses.Noise.Fidelity_Zero() 
     settings                                         = noise.settings   
     num_mic                                          = len(conditions.noise.total_microphone_locations[0])  
     conditions.noise.number_of_microphones           = num_mic   
@@ -383,7 +383,7 @@ def run_forward_noise(nexus):
     segment                                          = Segment() 
     segment.state.conditions                         = conditions
     segment.state.conditions.expand_rows(ctrl_pts)  
-    noise                                            = MARC.Analyses.Noise.Fidelity_Zero() 
+    noise                                            = RCAIDE.Analyses.Noise.Fidelity_Zero() 
     settings                                         = noise.settings   
     num_mic                                          = len(conditions.noise.total_microphone_locations[0])  
     conditions.noise.number_of_microphones           = num_mic   

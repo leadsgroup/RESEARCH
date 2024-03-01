@@ -1,10 +1,10 @@
 import numpy as np
-from MARC.Core import Units , Data 
+from RCAIDE.Core import Units , Data 
 import matplotlib.pyplot as plt
 from matplotlib.image import imread
 from scipy.interpolate import griddata 
-from MARC.Visualization.Performance.Common.post_process_noise_data import post_process_noise_data 
-from MARC.Methods.Noise.Fidelity_One.Noise_Tools.decibel_arithmetic         import SPL_arithmetic 
+from RCAIDE.Visualization.Performance.Common.post_process_noise_data import post_process_noise_data 
+from RCAIDE.Methods.Noise.Fidelity_One.Noise_Tools.decibel_arithmetic         import SPL_arithmetic 
 import matplotlib.colors
 import matplotlib.colors as colors  
 from geopy.distance import geodesic as GD

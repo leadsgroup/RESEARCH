@@ -4,13 +4,13 @@
 #   Imports
 # --------------------------------------------------------------------- 
 import sys 
-import MARC  
-from MARC.Core import Units, Data 
-from MARC.Methods.Power.Battery.Sizing import initialize_from_mass  
-from MARC.Components.Energy.Storages.Batteries import Battery
-from MARC.Core import Units 
-from MARC.Methods.Power.Battery.Sizing import initialize_from_circuit_configuration
-from MARC.Core import Data 
+import RCAIDE  
+from RCAIDE.Core import Units, Data 
+from RCAIDE.Methods.Power.Battery.Sizing import initialize_from_mass  
+from RCAIDE.Components.Energy.Storages.Batteries import Battery
+from RCAIDE.Core import Units 
+from RCAIDE.Methods.Power.Battery.Sizing import initialize_from_circuit_configuration
+from RCAIDE.Core import Data 
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -30,7 +30,7 @@ def full_setup(c_rate,uncertainties,cycles,days):
     mission  = mission_setup(configs_analyses,vehicle,c_rate,cycles,days)
     missions_analyses = missions_setup(mission)
 
-    analyses = MARC.Analyses.Analysis.Container()
+    analyses = RCAIDE.Analyses.Analysis.Container()
     analyses.configs  = configs_analyses
     analyses.missions = missions_analyses
 
@@ -43,7 +43,7 @@ def full_setup(c_rate,uncertainties,cycles,days):
 # ----------------------------------------------------------------------
 def vehicle_setup(c_rate,uncertainties):
 
-    vehicle                       = MARC.Vehicle() 
+    vehicle                       = RCAIDE.Vehicle() 
     vehicle.tag                   = 'battery'   
     vehicle.reference_area        = 1
 
@@ -60,7 +60,7 @@ def vehicle_setup(c_rate,uncertainties):
     # ------------------------------------------------------------------        
     #   Main Wing
     # ------------------------------------------------------------------   
-    wing                         = MARC.Components.Wings.Wing()
+    wing                         = RCAIDE.Components.Wings.Wing()
     wing.tag                     = 'main_wing' 
     wing.areas.reference         = 1.
     wing.spans.projected         = 1.
@@ -79,12 +79,12 @@ def vehicle_setup(c_rate,uncertainties):
     vehicle.append_component(wing)
      
 
-    net                           = MARC.Components.Energy.Networks.Battery_Cell_Cycler()
+    net                           = RCAIDE.Components.Energy.Networks.Battery_Cell_Cycler()
     net.tag                       ='battery_cell'   
     net.dischage_model_fidelity   ='NMC'
 
     # Battery     
-    bat                                      = MARC.Components.Energy.Storages.Batteries.Constant_Mass.Lithium_Ion_LiNiMnCoO2_18650() 
+    bat                                      = RCAIDE.Components.Energy.Storages.Batteries.Constant_Mass.Lithium_Ion_LiNiMnCoO2_18650() 
          
     # define variable uncertainties  
     bat.uncertainties.internal_resistance    = uncertainties.R0 
@@ -103,7 +103,7 @@ def vehicle_setup(c_rate,uncertainties):
     # append battery mass to vehicle 
     vehicle.mass_properties.takeoff = bat.mass_properties.mass 
 
-    avionics                      = MARC.Components.Energy.Peripherals.Avionics()
+    avionics                      = RCAIDE.Components.Energy.Peripherals.Avionics()
     avionics.current              = operating_current
     net.avionics                  = avionics  
 
@@ -113,7 +113,7 @@ def vehicle_setup(c_rate,uncertainties):
 
 def analyses_setup(configs):
 
-    analyses = MARC.Analyses.Analysis.Container()
+    analyses = RCAIDE.Analyses.Analysis.Container()
 
     # build a base analysis for each config
     for tag,config in configs.items():
@@ -126,47 +126,47 @@ def base_analysis(vehicle):
     # ------------------------------------------------------------------
     #   Initialize the Analyses
     # ------------------------------------------------------------------     
-    analyses = MARC.Analyses.Vehicle()
+    analyses = RCAIDE.Analyses.Vehicle()
 
     # ------------------------------------------------------------------
     #  Basic Geometry Relations
-    sizing = MARC.Analyses.Sizing.Sizing()
+    sizing = RCAIDE.Analyses.Sizing.Sizing()
     sizing.features.vehicle = vehicle
     analyses.append(sizing)
 
     # ------------------------------------------------------------------
     #  Weights
-    weights = MARC.Analyses.Weights.Weights_eVTOL()
+    weights = RCAIDE.Analyses.Weights.Weights_eVTOL()
     weights.vehicle = vehicle
     analyses.append(weights)
 
     # ------------------------------------------------------------------
     #  Aerodynamics Analysis
-    aerodynamics = MARC.Analyses.Aerodynamics.Fidelity_Zero() 
+    aerodynamics = RCAIDE.Analyses.Aerodynamics.Fidelity_Zero() 
     aerodynamics.geometry = vehicle
     aerodynamics.settings.drag_coefficient_increment = 0.0000
     analyses.append(aerodynamics)  
 
     # ------------------------------------------------------------------	
     #  Stability Analysis	
-    stability = MARC.Analyses.Stability.Fidelity_Zero()    	
+    stability = RCAIDE.Analyses.Stability.Fidelity_Zero()    	
     stability.geometry = vehicle	
     analyses.append(stability) 
 
     # ------------------------------------------------------------------
     #  Energy
-    energy= MARC.Analyses.Energy.Energy()
+    energy= RCAIDE.Analyses.Energy.Energy()
     energy.network = vehicle.networks 
     analyses.append(energy)
 
     # ------------------------------------------------------------------
     #  Planet Analysis
-    planet = MARC.Analyses.Planets.Planet()
+    planet = RCAIDE.Analyses.Planets.Planet()
     analyses.append(planet)
 
     # ------------------------------------------------------------------
     #  Atmosphere Analysis
-    atmosphere = MARC.Analyses.Atmospheric.US_Standard_1976()
+    atmosphere = RCAIDE.Analyses.Atmospheric.US_Standard_1976()
     atmosphere.features.planet = planet.features
     analyses.append(atmosphere)   
 
@@ -176,8 +176,8 @@ def base_analysis(vehicle):
 
 
 def configs_setup(vehicle): 
-    configs         = MARC.Components.Configs.Config.Container()  
-    base_config     = MARC.Components.Configs.Config(vehicle)
+    configs         = RCAIDE.Components.Configs.Config.Container()  
+    base_config     = RCAIDE.Components.Configs.Config(vehicle)
     base_config.tag = 'base' 
     configs.append(base_config)   
     return configs
@@ -188,16 +188,16 @@ def mission_setup(analyses,vehicle,c_rate,cycles_per_day,days):
     #   Initialize the Mission
     # ------------------------------------------------------------------
 
-    mission     = MARC.Analyses.Mission.Sequential_Segments()
+    mission     = RCAIDE.Analyses.Mission.Sequential_Segments()
     mission.tag = 'the_mission'  
        
     # unpack Segments module
-    Segments     = MARC.Analyses.Mission.Segments
+    Segments     = RCAIDE.Analyses.Mission.Segments
 
     # base segment
     base_segment                                                              = Segments.Segment() 
-    base_segment.process.initialize.initialize_battery                        = MARC.Methods.Missions.Segments.Common.Energy.initialize_battery 
-    base_segment.process.finalize.post_process.update_battery_state_of_health = MARC.Methods.Missions.Segments.Common.Energy.update_battery_state_of_health    
+    base_segment.process.initialize.initialize_battery                        = RCAIDE.Methods.Missions.Segments.Common.Energy.initialize_battery 
+    base_segment.process.finalize.post_process.update_battery_state_of_health = RCAIDE.Methods.Missions.Segments.Common.Energy.update_battery_state_of_health    
     
     if days == 0 and cycles_per_day == 0: 
         bat                                                      = vehicle.networks.battery_cell.battery    
@@ -256,7 +256,7 @@ def mission_setup(analyses,vehicle,c_rate,cycles_per_day,days):
 def missions_setup(base_mission):
 
     # the mission container
-    missions = MARC.Analyses.Mission.Mission.Container()
+    missions = RCAIDE.Analyses.Mission.Mission.Container()
 
     # ------------------------------------------------------------------
     #   Base Mission

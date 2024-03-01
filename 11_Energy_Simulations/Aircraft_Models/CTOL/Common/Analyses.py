@@ -9,14 +9,14 @@
 #----------------------------------------------------------------------
 #   Imports
 # ---------------------------------------------------------------------
-import MARC  
+import RCAIDE  
 
 # ----------------------------------------------------------------------
 #   Define the Vehicle Analyses
 # ---------------------------------------------------------------------- 
 def analyses_setup(configs,run_noise_analysis_flag,use_topology_flag,microphone_terrain_data,airport_geospacial_data):
 
-    analyses = MARC.Analyses.Analysis.Container()
+    analyses = RCAIDE.Analyses.Analysis.Container()
 
     # build a base analysis for each config
     for tag,config in configs.items():
@@ -33,23 +33,23 @@ def base_analysis(vehicle,run_noise_analysis_flag,use_topology_flag,microphone_t
     # ------------------------------------------------------------------
     #   Initialize the Analyses
     # ------------------------------------------------------------------     
-    analyses = MARC.Analyses.Vehicle()
+    analyses = RCAIDE.Analyses.Vehicle()
 
     # ------------------------------------------------------------------
     #  Basic Geometry Relations
-    sizing = MARC.Analyses.Sizing.Sizing()
+    sizing = RCAIDE.Analyses.Sizing.Sizing()
     sizing.features.vehicle = vehicle
     analyses.append(sizing)
 
     # ------------------------------------------------------------------
     #  Weights
-    weights = MARC.Analyses.Weights.Weights_eVTOL()
+    weights = RCAIDE.Analyses.Weights.Weights_eVTOL()
     weights.vehicle = vehicle
     analyses.append(weights)
 
     # ------------------------------------------------------------------
     #  Aerodynamics Analysis
-    aerodynamics = MARC.Analyses.Aerodynamics.Fidelity_Zero()
+    aerodynamics = RCAIDE.Analyses.Aerodynamics.Fidelity_Zero()
     aerodynamics.geometry = vehicle  
     aerodynamics.settings.model_fuselage = True 
     aerodynamics.settings.number_spanwise_vortices           = 25
@@ -59,12 +59,12 @@ def base_analysis(vehicle,run_noise_analysis_flag,use_topology_flag,microphone_t
     if run_noise_analysis_flag:  
         # ------------------------------------------------------------------
         #  Noise Analysis
-        noise = MARC.Analyses.Noise.Fidelity_One()   
+        noise = RCAIDE.Analyses.Noise.Fidelity_One()   
         noise.geometry = vehicle
 
         # ------------------------------------------------------------------
         #  Noise Analysis
-        noise = MARC.Analyses.Noise.Fidelity_One()   
+        noise = RCAIDE.Analyses.Noise.Fidelity_One()   
         noise.geometry = vehicle  
         noise.settings.mean_sea_level_altitude           = False 
         noise.settings.ground_microphone_x_resolution    = microphone_terrain_data.ground_microphone_x_resolution           
@@ -86,18 +86,18 @@ def base_analysis(vehicle,run_noise_analysis_flag,use_topology_flag,microphone_t
                                                                               
     # ------------------------------------------------------------------
     #  Energy
-    energy= MARC.Analyses.Energy.Energy()
+    energy= RCAIDE.Analyses.Energy.Energy()
     energy.network = vehicle.networks
     analyses.append(energy)
 
     # ------------------------------------------------------------------
     #  Planet Analysis
-    planet = MARC.Analyses.Planets.Planet()
+    planet = RCAIDE.Analyses.Planets.Planet()
     analyses.append(planet)
 
     # ------------------------------------------------------------------
     #  Atmosphere Analysis
-    atmosphere = MARC.Analyses.Atmospheric.US_Standard_1976()
+    atmosphere = RCAIDE.Analyses.Atmospheric.US_Standard_1976()
     atmosphere.features.planet = planet.features
     analyses.append(atmosphere)   
 

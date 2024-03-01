@@ -501,14 +501,14 @@ def vehicle_setup():
     HAS.design_battery_operating_temperature               = 303
     HAS.design_heat_removed                                = 50000  
     HAS                                                    = design_wavy_channel(HAS,bat) 
-    bat.heat_removal_system                                = HAS
+    bat.thermal_management_system.heat_removal_system      = HAS
                   
     # Battery Heat Exchanger               
     HEX                                                    = RCAIDE.Energy.Thermal_Management.Batteries.Heat_Exchanger_Systems.Cross_Flow_Heat_Exchanger() 
     HEX.design_altitude                                    = 2500. * Units.feet 
     HEX.inlet_temperature_of_cold_fluid                    = atmo_data.temperature[0,0]   
     HEX                                                    = design_cross_flow_heat_exchanger(HEX,HAS,bat)
-    bat.heat_exchanger_system = HEX  
+    bat.thermal_management_system.heat_exchanger_system    = HEX  
     
     bus.batteries.append(bat)              
     

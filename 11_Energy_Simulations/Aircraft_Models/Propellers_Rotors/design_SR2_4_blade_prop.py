@@ -1,8 +1,8 @@
 # Imports
-import MARC
-from MARC.Core import Units, Data  
-from MARC.Methods.Geometry.Two_Dimensional.Cross_Section.Airfoil.compute_airfoil_properties import compute_airfoil_properties
-from MARC.Methods.Geometry.Two_Dimensional.Cross_Section.Airfoil.import_airfoil_geometry    import import_airfoil_geometry    
+import RCAIDE
+from RCAIDE.Core import Units, Data  
+from RCAIDE.Methods.Geometry.Two_Dimensional.Cross_Section.Airfoil.compute_airfoil_properties import compute_airfoil_properties
+from RCAIDE.Methods.Geometry.Two_Dimensional.Cross_Section.Airfoil.import_airfoil_geometry    import import_airfoil_geometry    
 from scipy.interpolate import interp1d
 import os
 import numpy as np 
@@ -10,7 +10,7 @@ import os
 
 # design propeller 
 def design_SR2_4_blade_prop():
-    prop                            = MARC.Components.Energy.Converters.Propeller()
+    prop                            = RCAIDE.Components.Energy.Converters.Propeller()
     prop.inputs                     = Data()
     prop.inputs.pitch_command       = 0
     prop.inputs.y_axis_rotation     = 0.
@@ -49,7 +49,7 @@ def design_SR2_4_blade_prop():
     separator                          = os.path.sep
     rel_path                           = os.path.dirname(ospath) + separator  
      
-    airfoil_1                          = MARC.Components.Airfoils.Airfoil()   
+    airfoil_1                          = RCAIDE.Components.Airfoils.Airfoil()   
     airfoil_1.coordinate_file          = rel_path +'../Airfoils/NACA_65_215.txt'
     airfoil_1.polar_files              = [rel_path +'../Airfoils/Polars/NACA_65_215_polar_Re_50000.txt'    ,rel_path +'../Airfoils/Polars/NACA_65_215_polar_Re_100000.txt',
                                         rel_path +'../Airfoils/Polars/NACA_65_215_polar_Re_200000.txt'   ,rel_path +'../Airfoils/Polars/NACA_65_215_polar_Re_500000.txt',
@@ -59,7 +59,7 @@ def design_SR2_4_blade_prop():
     prop.append_airfoil(airfoil_1) 
     
 
-    airfoil_2                          = MARC.Components.Airfoils.Airfoil()   
+    airfoil_2                          = RCAIDE.Components.Airfoils.Airfoil()   
     airfoil_2.coordinate_file          = rel_path +'../Airfoils/NACA_15.txt'
     airfoil_2.polar_files              = [rel_path +'../Airfoils/Polars/NACA_15_polar_Re_50000.txt',
                                         rel_path +'../Airfoils/Polars/NACA_15_polar_Re_100000.txt'       ,rel_path +'../Airfoils/Polars/NACA_15_polar_Re_200000.txt',

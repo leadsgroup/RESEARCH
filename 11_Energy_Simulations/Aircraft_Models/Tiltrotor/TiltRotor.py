@@ -6,28 +6,28 @@
 #----------------------------------------------------------------------
 #   Imports
 # ---------------------------------------------------------------------
-import MARC
-from MARC.Core import Units, Data 
+import RCAIDE
+from RCAIDE.Core import Units, Data 
 import os
 import pickle 
 
-from MARC.Visualization.Performance.Aerodynamics.Vehicle                 import *  
-from MARC.Visualization.Performance.Mission                              import *  
-from MARC.Visualization.Performance.Aerodynamics.Rotor import *  
-from MARC.Visualization.Performance.Energy.Battery                       import *   
-from MARC.Visualization.Performance.Noise                                import *  
-from MARC.Visualization.Geometry.Three_Dimensional.plot_3d_vehicle       import plot_3d_vehicle 
-from MARC.Visualization.Geometry                                         import *
-from MARC.Components.Energy.Networks.Battery_Electric_Rotor                         import Battery_Electric_Rotor 
-from MARC.Methods.Power.Battery.Sizing                                   import initialize_from_mass
-from MARC.Methods.Power.Battery.Sizing                                   import initialize_from_circuit_configuration  
-from MARC.Methods.Weights.Correlations.Propulsion                        import nasa_motor
-from MARC.Methods.Propulsion.electric_motor_sizing                       import size_from_mass , size_optimal_motor
-from MARC.Methods.Propulsion                                             import propeller_design   
-from MARC.Methods.Weights.Buildups.eVTOL.empty                           import empty
+from RCAIDE.Visualization.Performance.Aerodynamics.Vehicle                 import *  
+from RCAIDE.Visualization.Performance.Mission                              import *  
+from RCAIDE.Visualization.Performance.Aerodynamics.Rotor import *  
+from RCAIDE.Visualization.Performance.Energy.Battery                       import *   
+from RCAIDE.Visualization.Performance.Noise                                import *  
+from RCAIDE.Visualization.Geometry.Three_Dimensional.plot_3d_vehicle       import plot_3d_vehicle 
+from RCAIDE.Visualization.Geometry                                         import *
+from RCAIDE.Components.Energy.Networks.Battery_Electric_Rotor                         import Battery_Electric_Rotor 
+from RCAIDE.Methods.Power.Battery.Sizing                                   import initialize_from_mass
+from RCAIDE.Methods.Power.Battery.Sizing                                   import initialize_from_circuit_configuration  
+from RCAIDE.Methods.Weights.Correlations.Propulsion                        import nasa_motor
+from RCAIDE.Methods.Propulsion.electric_motor_sizing                       import size_from_mass , size_optimal_motor
+from RCAIDE.Methods.Propulsion                                             import propeller_design   
+from RCAIDE.Methods.Weights.Buildups.eVTOL.empty                           import empty
 
 ##import vsp 
-#from MARC.Input_Output.OpenVSP.vsp_write import write
+#from RCAIDE.Input_Output.OpenVSP.vsp_write import write
 
 import numpy as np
 import pylab as plt
@@ -82,7 +82,7 @@ def full_setup():
     mission  = mission_setup(configs_analyses,vehicle)
     missions_analyses = missions_setup(mission)
 
-    analyses = MARC.Analyses.Analysis.Container()
+    analyses = RCAIDE.Analyses.Analysis.Container()
     analyses.configs  = configs_analyses
     analyses.missions = missions_analyses
     
@@ -97,7 +97,7 @@ def vehicle_setup():
     # ------------------------------------------------------------------
     #   Initialize the Vehicle
     # ------------------------------------------------------------------    
-    vehicle                                   = MARC.Vehicle()
+    vehicle                                   = RCAIDE.Vehicle()
     vehicle.tag                               = 'Stopped_TiltRotor'
     vehicle.configuration                     = 'eVTOL'
 
@@ -118,7 +118,7 @@ def vehicle_setup():
     # WINGS                                    
     # ------------------------------------------------------------------    
     # WING PROPERTIES           
-    wing                                      = MARC.Components.Wings.Main_Wing()
+    wing                                      = RCAIDE.Components.Wings.Main_Wing()
     wing.tag                                  = 'main_wing'  
     wing.aspect_ratio                         = 10.32162
     wing.sweeps.quarter_chord                 = 1.3  * Units.degrees    
@@ -142,7 +142,7 @@ def vehicle_setup():
     wing.vertical                             = False
                                               
     # Segment                                              
-    segment                                   = MARC.Components.Wings.Segment()
+    segment                                   = RCAIDE.Components.Wings.Segment()
     segment.tag                               = 'Section_1'   
     segment.percent_span_location             = 0 
     segment.twist                             = 0.0 
@@ -153,7 +153,7 @@ def vehicle_setup():
     wing.Segments.append(segment)                           
                                               
     # Segment                                               
-    segment                                   = MARC.Components.Wings.Segment()
+    segment                                   = RCAIDE.Components.Wings.Segment()
     segment.tag                               = 'Section_2'    
     segment.percent_span_location             = 0.143
     segment.twist                             = 0.0
@@ -164,7 +164,7 @@ def vehicle_setup():
     wing.Segments.append(segment)                           
                                               
     # Segment                                               
-    segment                                   = MARC.Components.Wings.Segment()
+    segment                                   = RCAIDE.Components.Wings.Segment()
     segment.tag                               = 'Section_3'   
     segment.percent_span_location             = 0.908 
     segment.twist                             = 0.0 
@@ -175,7 +175,7 @@ def vehicle_setup():
     wing.Segments.append(segment)                           
                                               
     # Segment                                              
-    segment                                   = MARC.Components.Wings.Segment()
+    segment                                   = RCAIDE.Components.Wings.Segment()
     segment.tag                               = 'Section_4'   
     segment.percent_span_location             = 0.966 
     segment.twist                             = 0.0 
@@ -186,7 +186,7 @@ def vehicle_setup():
     wing.Segments.append(segment)                             
                                               
     # Segment                                              
-    segment                                   = MARC.Components.Wings.Segment()
+    segment                                   = RCAIDE.Components.Wings.Segment()
     segment.tag                               = 'Section_5'   
     segment.percent_span_location             =  1.0
     segment.twist                             = 0. 
@@ -200,7 +200,7 @@ def vehicle_setup():
     vehicle.append_component(wing)                   
                                               
     # WING PROPERTIES                         
-    wing                                      = MARC.Components.Wings.Wing()
+    wing                                      = RCAIDE.Components.Wings.Wing()
     wing.tag                                  = 'v_tail'  
     wing.aspect_ratio                         = 2.59706
     wing.sweeps.quarter_chord                 = 28.192 *Units.degrees    
@@ -229,7 +229,7 @@ def vehicle_setup():
     # FUSELAGE                
     # ---------------------------------------------------------------   
     # FUSELAGE PROPERTIES
-    fuselage                                    = MARC.Components.Fuselages.Fuselage()
+    fuselage                                    = RCAIDE.Components.Fuselages.Fuselage()
     fuselage.tag                                = 'fuselage' 
     fuselage.seats_abreast                      = 2.  
     fuselage.seat_pitch                         = 3.  
@@ -250,7 +250,7 @@ def vehicle_setup():
     fuselage.differential_pressure              = 0. 
     
     # Segment  
-    segment                                     = MARC.Components.Lofted_Body_Segment.Segment() 
+    segment                                     = RCAIDE.Components.Lofted_Body_Segment.Segment() 
     segment.tag                                 = 'segment_0'    
     segment.percent_x_location                  = 0.0 
     segment.percent_z_location                  = 0.     # change  
@@ -259,7 +259,7 @@ def vehicle_setup():
     fuselage.Segments.append(segment)                     
                                                 
     # Segment                                             
-    segment                                     = MARC.Components.Lofted_Body_Segment.Segment()
+    segment                                     = RCAIDE.Components.Lofted_Body_Segment.Segment()
     segment.tag                                 = 'segment_1'   
     segment.percent_x_location                  = 0.026  
     segment.percent_z_location                  = 0.00849
@@ -268,7 +268,7 @@ def vehicle_setup():
     fuselage.Segments.append(segment)           
                                                 
     # Segment                                             
-    segment                                     = MARC.Components.Lofted_Body_Segment.Segment()
+    segment                                     = RCAIDE.Components.Lofted_Body_Segment.Segment()
     segment.tag                                 = 'segment_2'   
     segment.percent_x_location                  = 0.074
     segment.percent_z_location                  = 0.02874
@@ -277,7 +277,7 @@ def vehicle_setup():
     fuselage.Segments.append(segment)                     
                                                 
     # Segment                                            
-    segment                                     = MARC.Components.Lofted_Body_Segment.Segment()
+    segment                                     = RCAIDE.Components.Lofted_Body_Segment.Segment()
     segment.tag                                 = 'segment_3'   
     segment.percent_x_location                  = 0.161  
     segment.percent_z_location                  = 0.04348   
@@ -286,7 +286,7 @@ def vehicle_setup():
     fuselage.Segments.append(segment)                     
                                                 
     # Segment                                             
-    segment                                     = MARC.Components.Lofted_Body_Segment.Segment()
+    segment                                     = RCAIDE.Components.Lofted_Body_Segment.Segment()
     segment.tag                                 = 'segment_4'   
     segment.percent_x_location                  = 0.284 
     segment.percent_z_location                  = 0.05435
@@ -295,7 +295,7 @@ def vehicle_setup():
     fuselage.Segments.append(segment)              
                                                 
     # Segment                                             
-    segment                                     = MARC.Components.Lofted_Body_Segment.Segment()
+    segment                                     = RCAIDE.Components.Lofted_Body_Segment.Segment()
     segment.tag                                 = 'segment_5'   
     segment.percent_x_location                  = 0.531 
     segment.percent_z_location                  = 0.05983
@@ -304,7 +304,7 @@ def vehicle_setup():
     fuselage.Segments.append(segment)                     
                                                 
     # Segment                                             
-    segment                                     = MARC.Components.Lofted_Body_Segment.Segment()
+    segment                                     = RCAIDE.Components.Lofted_Body_Segment.Segment()
     segment.tag                                 = 'segment_6'   
     segment.percent_x_location                  = 0.651
     segment.percent_z_location                  = 0.07079
@@ -313,7 +313,7 @@ def vehicle_setup():
     fuselage.Segments.append(segment)                  
                                                 
     # Segment                                             
-    segment                                     = MARC.Components.Lofted_Body_Segment.Segment()
+    segment                                     = RCAIDE.Components.Lofted_Body_Segment.Segment()
     segment.tag                                 = 'segment_7'   
     segment.percent_x_location                  = 0.773
     segment.percent_z_location                  = 0.08127
@@ -322,7 +322,7 @@ def vehicle_setup():
     fuselage.Segments.append(segment)                  
                                                 
     # Segment                                             
-    segment                                     = MARC.Components.Lofted_Body_Segment.Segment()
+    segment                                     = RCAIDE.Components.Lofted_Body_Segment.Segment()
     segment.tag                                 = 'segment_8'   
     segment.percent_x_location                  = 1.
     segment.percent_z_location                  = 0.10586
@@ -335,7 +335,7 @@ def vehicle_setup():
     #-------------------------------------------------------------------
     # INNER BOOMS   
     #-------------------------------------------------------------------   
-    boom                                        = MARC.Components.Fuselages.Fuselage()
+    boom                                        = RCAIDE.Components.Fuselages.Fuselage()
     boom.tag                                    = 'boom_1r'
     boom.configuration                          = 'boom'  
     boom.origin                                 = [[1.25,1.25 , 0.939 ]]  
@@ -364,7 +364,7 @@ def vehicle_setup():
     boom_z                                      = 0.939
                                                 
     # Segment  
-    segment                                     = MARC.Components.Lofted_Body_Segment.Segment() 
+    segment                                     = RCAIDE.Components.Lofted_Body_Segment.Segment() 
     segment.tag                                 = 'segment_1'   
     segment.percent_x_location                  = 0.
     segment.percent_z_location                  = 0.0 
@@ -373,7 +373,7 @@ def vehicle_setup():
     boom.Segments.append(segment)                     
                                                 
     # Segment                                             
-    segment                                     = MARC.Components.Lofted_Body_Segment.Segment()
+    segment                                     = RCAIDE.Components.Lofted_Body_Segment.Segment()
     segment.tag                                 = 'segment_2'   
     segment.percent_x_location                  = 0.2/2.75
     segment.percent_z_location                  = 0. 
@@ -382,7 +382,7 @@ def vehicle_setup():
     boom.Segments.append(segment)               
                                                 
     # Segment                                             
-    segment                                     = MARC.Components.Lofted_Body_Segment.Segment()
+    segment                                     = RCAIDE.Components.Lofted_Body_Segment.Segment()
     segment.tag                                 = 'segment_3'    
     segment.percent_x_location                  = 2.4/2.75
     segment.percent_z_location                  = 0. 
@@ -391,7 +391,7 @@ def vehicle_setup():
     boom.Segments.append(segment)                     
                                                 
     # Segment                                            
-    segment                                     = MARC.Components.Lofted_Body_Segment.Segment()
+    segment                                     = RCAIDE.Components.Lofted_Body_Segment.Segment()
     segment.tag                                 = 'segment_4'   
     segment.percent_x_location                  = 1.   
     segment.percent_z_location                  = 0.   
@@ -461,31 +461,31 @@ def vehicle_setup():
     ##net.areas.wetted                = np.pi*net.nacelle_diameter*net.engine_length + 0.5*np.pi*net.nacelle_diameter**2  
 
     ## Component 1: Electronic Speed Controller
-    #rotor_esc                       = MARC.Components.Energy.Distributors.Electronic_Speed_Controller()
+    #rotor_esc                       = RCAIDE.Components.Energy.Distributors.Electronic_Speed_Controller()
     #rotor_esc.efficiency            = 0.95
     #net.rotor_esc                   = rotor_esc 
                                     
-    #propeller_esc                   = MARC.Components.Energy.Distributors.Electronic_Speed_Controller()
+    #propeller_esc                   = RCAIDE.Components.Energy.Distributors.Electronic_Speed_Controller()
     #propeller_esc.efficiency        = 0.95
     #net.propeller_esc               = propeller_esc
  
     ## Component 2: Payload
-    #payload                         = MARC.Components.Energy.Peripherals.Payload()
+    #payload                         = RCAIDE.Components.Energy.Peripherals.Payload()
     #payload.power_draw              = 10. #Watts 
     #payload.mass_properties.mass    = 1.0 * Units.kg
     #net.payload                     = payload
                                     
     ## Component 3: Avionics      
-    #avionics                        = MARC.Components.Energy.Peripherals.Avionics()
+    #avionics                        = RCAIDE.Components.Energy.Peripherals.Avionics()
     #avionics.power_draw             = 20. #Watts  
     #net.avionics                    = avionics    
     
     ## Component 4: Miscellaneous Systems 
-    #sys                             = MARC.Components.Systems.System()
+    #sys                             = RCAIDE.Components.Systems.System()
     #sys.mass_properties.mass        = 5 # kg
   
     ## Component 5: Battery
-    #bat                            = MARC.Components.Energy.Storages.Batteries.Constant_Mass.Lithium_Ion_LiNiMnCoO2_18650()    
+    #bat                            = RCAIDE.Components.Energy.Storages.Batteries.Constant_Mass.Lithium_Ion_LiNiMnCoO2_18650()    
     #bat.pack.electrical_configuration.series         =  120  
     #bat.pack.electrical_configuration.parallel       =  120    
     #initialize_from_circuit_configuration(bat)       
@@ -507,7 +507,7 @@ def vehicle_setup():
     #Hover_Load     = vehicle.mass_properties.takeoff*g      # hover load  
 
     ## Thrust Propeller  
-    #prop_rotor                                   = MARC.Components.Energy.Converters.Prop_Rotor() 
+    #prop_rotor                                   = RCAIDE.Components.Energy.Converters.Prop_Rotor() 
     #prop_rotor.tag                               = 'prop_rotor'     
     #prop_rotor.tip_radius                        = 1.2/2 
     #prop_rotor.hub_radius                        = 0.15*prop_rotor.tip_radius
@@ -522,7 +522,7 @@ def vehicle_setup():
     #prop_rotor.cruise.design_thrust               = 4000/6
     #prop_rotor.cruise.design_freestream_velocity         = 175*Units.mph 
     
-    #airfoil                                       = MARC.Components.Airfoils.Airfoil()    
+    #airfoil                                       = RCAIDE.Components.Airfoils.Airfoil()    
     #ospath                                        = os.path.abspath(__file__)
     #separator                                     = os.path.sep
     #rel_path                                      = os.path.dirname(ospath) + separator    
@@ -554,7 +554,7 @@ def vehicle_setup():
         #net.rotors.append(pr)             
                                           
     ## Lift Rotors                                  
-    #lift_rotor                                   = MARC.Components.Energy.Converters.Lift_Rotor()  
+    #lift_rotor                                   = RCAIDE.Components.Energy.Converters.Lift_Rotor()  
     #lift_rotor.tip_radius                        = 1.2/2 
     #lift_rotor.hub_radius                        = 0.15 
     #lift_rotor.number_of_blades                  = 4 
@@ -585,7 +585,7 @@ def vehicle_setup():
     ## Design Motors
     ##------------------------------------------------------------------
     ## Propeller (Thrust) motor
-    #prop_rotor_motor                      = MARC.Components.Energy.Converters.Motor()
+    #prop_rotor_motor                      = RCAIDE.Components.Energy.Converters.Motor()
     #prop_rotor_motor.efficiency           = 0.95 
     #prop_rotor_motor.nominal_voltage      = bat.pack.max_voltage*3/4   
     #prop_rotor_motor.propeller_radius     = prop_rotor.tip_radius
@@ -604,7 +604,7 @@ def vehicle_setup():
     
         
     ## Rotor (Lift) Motor     
-    #lift_rotor_motor                         = MARC.Components.Energy.Converters.Motor()
+    #lift_rotor_motor                         = RCAIDE.Components.Energy.Converters.Motor()
     #lift_rotor_motor.efficiency              = 0.95 
     #lift_rotor_motor.nominal_voltage         = bat.pack.max_voltage*3/4    
     #lift_rotor_motor.propeller_radius        = lift_rotor.tip_radius   
@@ -664,7 +664,7 @@ def vehicle_setup():
 
 def analyses_setup(configs):
 
-    analyses = MARC.Analyses.Analysis.Container()
+    analyses = RCAIDE.Analyses.Analysis.Container()
 
     # build a base analysis for each config
     for tag,config in configs.items():
@@ -678,47 +678,47 @@ def base_analysis(vehicle):
     # ------------------------------------------------------------------
     #   Initialize the Analyses
     # ------------------------------------------------------------------     
-    analyses = MARC.Analyses.Vehicle()
+    analyses = RCAIDE.Analyses.Vehicle()
 
     # ------------------------------------------------------------------
     #  Basic Geometry Relations
-    sizing = MARC.Analyses.Sizing.Sizing()
+    sizing = RCAIDE.Analyses.Sizing.Sizing()
     sizing.features.vehicle = vehicle
     analyses.append(sizing)
 
     # ------------------------------------------------------------------
     #  Weights
-    weights = MARC.Analyses.Weights.Weights_eVTOL()
+    weights = RCAIDE.Analyses.Weights.Weights_eVTOL()
     weights.vehicle = vehicle
     analyses.append(weights)
 
     # ------------------------------------------------------------------
     #  Aerodynamics Analysis
-    aerodynamics = MARC.Analyses.Aerodynamics.Fidelity_Zero()
+    aerodynamics = RCAIDE.Analyses.Aerodynamics.Fidelity_Zero()
     aerodynamics.geometry = vehicle
     aerodynamics.settings.drag_coefficient_increment = 0.0
     analyses.append(aerodynamics)
 
     ## ------------------------------------------------------------------
     ##  Noise Analysis
-    #noise = MARC.Analyses.Noise.Fidelity_One()   
+    #noise = RCAIDE.Analyses.Noise.Fidelity_One()   
     #noise.geometry = vehicle
     #analyses.append(noise)
     
     # ------------------------------------------------------------------
     #  Energy
-    energy= MARC.Analyses.Energy.Energy()
+    energy= RCAIDE.Analyses.Energy.Energy()
     energy.network = vehicle.propulsors 
     analyses.append(energy)
 
     # ------------------------------------------------------------------
     #  Planet Analysis
-    planet = MARC.Analyses.Planets.Planet()
+    planet = RCAIDE.Analyses.Planets.Planet()
     analyses.append(planet)
 
     # ------------------------------------------------------------------
     #  Atmosphere Analysis
-    atmosphere = MARC.Analyses.Atmospheric.US_Standard_1976()
+    atmosphere = RCAIDE.Analyses.Atmospheric.US_Standard_1976()
     atmosphere.features.planet = planet.features
     analyses.append(atmosphere)   
 
@@ -731,24 +731,24 @@ def mission_setup(analyses,vehicle):
     #   Initialize the Mission
     # ------------------------------------------------------------------
 
-    mission = MARC.Analyses.Mission.Sequential_Segments()
+    mission = RCAIDE.Analyses.Mission.Sequential_Segments()
     mission.tag = 'baseline_mission'
 
     # airport
-    airport = MARC.Attributes.Airports.Airport()
+    airport = RCAIDE.Attributes.Airports.Airport()
     airport.altitude   =  0.0  * Units.ft
     airport.delta_isa  =  0.0
-    airport.atmosphere = MARC.Attributes.Atmospheres.Earth.US_Standard_1976()
+    airport.atmosphere = RCAIDE.Attributes.Atmospheres.Earth.US_Standard_1976()
 
     mission.airport = airport    
 
     # unpack Segments module
-    Segments = MARC.Analyses.Mission.Segments
+    Segments = RCAIDE.Analyses.Mission.Segments
 
     # base segment                                   
     base_segment                                             = Segments.Segment()
     ones_row                                                 = base_segment.state.ones_row 
-    base_segment.process.initialize.initialize_battery       = MARC.Methods.Missions.Segments.Common.Energy.initialize_battery 
+    base_segment.process.initialize.initialize_battery       = RCAIDE.Methods.Missions.Segments.Common.Energy.initialize_battery 
     base_segment.process.iterate.unknowns.network            = vehicle.propulsors.battery_electric_rotor.unpack_unknowns_transition
     base_segment.process.iterate.residuals.network           = vehicle.propulsors.battery_electric_rotor.residuals_transition
     base_segment.state.unknowns.battery_voltage_under_load   = vehicle.propulsors.battery_electric_rotor.battery.max_voltage * ones_row(1)  
@@ -759,7 +759,7 @@ def mission_setup(analyses,vehicle):
     m      = vehicle.mass_properties.max_takeoff
     g      = 9.81
     S      = vehicle.reference_area
-    atmo   = MARC.Analyses.Atmospheric.US_Standard_1976()
+    atmo   = RCAIDE.Analyses.Atmospheric.US_Standard_1976()
     rho    = atmo.compute_values(1000.*Units.feet,0.).density
     CLmax  = 1.2 
     Vstall = float(np.sqrt(2.*m*g/(rho*S*CLmax)))
@@ -797,9 +797,9 @@ def mission_setup(analyses,vehicle):
 
     segment.process.iterate.unknowns.network                 = vehicle.propulsors.battery_electric_rotor.unpack_unknowns_transition
     segment.process.iterate.residuals.network                = vehicle.propulsors.battery_electric_rotor.residuals_transition    
-    segment.process.iterate.unknowns.mission                 = MARC.Methods.skip
-    segment.process.iterate.conditions.stability             = MARC.Methods.skip
-    segment.process.finalize.post_process.stability          = MARC.Methods.skip 
+    segment.process.iterate.unknowns.mission                 = RCAIDE.Methods.skip
+    segment.process.iterate.conditions.stability             = RCAIDE.Methods.skip
+    segment.process.finalize.post_process.stability          = RCAIDE.Methods.skip 
 
     # add to misison
     mission.append_segment(segment)
@@ -827,9 +827,9 @@ def mission_setup(analyses,vehicle):
 
     #segment.process.iterate.unknowns.network                = vehicle.propulsors.battery_electric_rotor.unpack_unknowns_transition
     #segment.process.iterate.residuals.network               = vehicle.propulsors.battery_electric_rotor.residuals_transition    
-    #segment.process.iterate.unknowns.mission                = MARC.Methods.skip
-    #segment.process.iterate.conditions.stability            = MARC.Methods.skip
-    #segment.process.finalize.post_process.stability         = MARC.Methods.skip 
+    #segment.process.iterate.unknowns.mission                = RCAIDE.Methods.skip
+    #segment.process.iterate.conditions.stability            = RCAIDE.Methods.skip
+    #segment.process.finalize.post_process.stability         = RCAIDE.Methods.skip 
     
     ## add to misison
     #mission.append_segment(segment)
@@ -857,9 +857,9 @@ def mission_setup(analyses,vehicle):
 
     #segment.process.iterate.unknowns.network                = vehicle.propulsors.battery_electric_rotor.unpack_unknowns_transition
     #segment.process.iterate.residuals.network               = vehicle.propulsors.battery_electric_rotor.residuals_transition    
-    #segment.process.iterate.unknowns.mission                = MARC.Methods.skip
-    #segment.process.iterate.conditions.stability            = MARC.Methods.skip
-    #segment.process.finalize.post_process.stability         = MARC.Methods.skip
+    #segment.process.iterate.unknowns.mission                = RCAIDE.Methods.skip
+    #segment.process.iterate.conditions.stability            = RCAIDE.Methods.skip
+    #segment.process.finalize.post_process.stability         = RCAIDE.Methods.skip
 
     ## add to misison
     #mission.append_segment(segment)
@@ -1118,9 +1118,9 @@ def mission_setup(analyses,vehicle):
      
     #segment.process.iterate.unknowns.network                = vehicle.propulsors.battery_electric_rotor.unpack_unknowns_transition
     #segment.process.iterate.residuals.network               = vehicle.propulsors.battery_electric_rotor.residuals_transition    
-    #segment.process.iterate.unknowns.mission                = MARC.Methods.skip
-    #segment.process.iterate.conditions.stability            = MARC.Methods.skip
-    #segment.process.finalize.post_process.stability         = MARC.Methods.skip
+    #segment.process.iterate.unknowns.mission                = RCAIDE.Methods.skip
+    #segment.process.iterate.conditions.stability            = RCAIDE.Methods.skip
+    #segment.process.finalize.post_process.stability         = RCAIDE.Methods.skip
 
     ## add to misison
     #mission.append_segment(segment)
@@ -1149,7 +1149,7 @@ def mission_setup(analyses,vehicle):
     
     #segment.process.iterate.unknowns.network  = vehicle.propulsors.battery_electric_rotor.unpack_unknowns_transition
     #segment.process.iterate.residuals.network = vehicle.propulsors.battery_electric_rotor.residuals_transition    
-    #segment.process.iterate.unknowns.mission  = MARC.Methods.skip 
+    #segment.process.iterate.unknowns.mission  = RCAIDE.Methods.skip 
     ## add to misison
     #mission.append_segment(segment)  
  
@@ -1177,9 +1177,9 @@ def mission_setup(analyses,vehicle):
 
     #segment.process.iterate.unknowns.network                 = vehicle.propulsors.battery_electric_rotor.unpack_unknowns_transition
     #segment.process.iterate.residuals.network                = vehicle.propulsors.battery_electric_rotor.residuals_transition    
-    #segment.process.iterate.unknowns.mission                 = MARC.Methods.skip
-    #segment.process.iterate.conditions.stability             = MARC.Methods.skip
-    #segment.process.finalize.post_process.stability          = MARC.Methods.skip 
+    #segment.process.iterate.unknowns.mission                 = RCAIDE.Methods.skip
+    #segment.process.iterate.conditions.stability             = RCAIDE.Methods.skip
+    #segment.process.finalize.post_process.stability          = RCAIDE.Methods.skip 
 
     ## add to misison
     #mission.append_segment(segment)
@@ -1202,15 +1202,15 @@ def configs_setup(vehicle):
     # ------------------------------------------------------------------
     #   Initialize Configurations
     # ------------------------------------------------------------------ 
-    configs                                     = MARC.Components.Configs.Config.Container() 
-    base_config                                 = MARC.Components.Configs.Config(vehicle)
+    configs                                     = RCAIDE.Components.Configs.Config.Container() 
+    base_config                                 = RCAIDE.Components.Configs.Config(vehicle)
     base_config.tag                             = 'base'
     configs.append(base_config)
 
     # ------------------------------------------------------------------
     #   Hover Configuration
     # ------------------------------------------------------------------
-    config                                                 = MARC.Components.Configs.Config(base_config)
+    config                                                 = RCAIDE.Components.Configs.Config(base_config)
     config.tag                                             = 'hover' 
     vector_angle                                           = 90.0 * Units.degrees
     config.propulsors.battery_electric_rotor.propeller_thrust_angle   = vector_angle 
@@ -1220,7 +1220,7 @@ def configs_setup(vehicle):
     # ------------------------------------------------------------------
     #   Hover Climb Configuration
     # ------------------------------------------------------------------
-    config                                                 = MARC.Components.Configs.Config(base_config)
+    config                                                 = RCAIDE.Components.Configs.Config(base_config)
     config.tag                                             = 'hover_climb'
     vector_angle                                           = 90.0 * Units.degrees
     config.propulsors.battery_electric_rotor.propeller_thrust_angle   = vector_angle 
@@ -1230,7 +1230,7 @@ def configs_setup(vehicle):
     # ------------------------------------------------------------------
     #   Hover-to-Cruise Configuration
     # ------------------------------------------------------------------
-    config                                                 = MARC.Components.Configs.Config(base_config)
+    config                                                 = RCAIDE.Components.Configs.Config(base_config)
     config.tag                                             = 'transition_slow'
     vector_angle                                           = 85.0 * Units.degrees
     config.propulsors.battery_electric_rotor.propeller_thrust_angle   = vector_angle 
@@ -1240,7 +1240,7 @@ def configs_setup(vehicle):
     # ------------------------------------------------------------------
     #   Hover-to-Cruise Configuration
     # ------------------------------------------------------------------
-    config                                                 = MARC.Components.Configs.Config(base_config)
+    config                                                 = RCAIDE.Components.Configs.Config(base_config)
     config.tag                                             = 'transition_fast' 
     vector_angle                                           = 65.0 * Units.degrees
     config.propulsors.battery_electric_rotor.propeller_thrust_angle   = vector_angle 
@@ -1250,7 +1250,7 @@ def configs_setup(vehicle):
     # ------------------------------------------------------------------
     #   Cruise Configuration
     # ------------------------------------------------------------------
-    config                                                 = MARC.Components.Configs.Config(base_config)
+    config                                                 = RCAIDE.Components.Configs.Config(base_config)
     config.tag                                             = 'cruise'   
     vector_angle                                           = 0.0 * Units.degrees
     config.propulsors.battery_electric_rotor.propeller_thrust_angle   = vector_angle 
@@ -1264,7 +1264,7 @@ def configs_setup(vehicle):
 def missions_setup(base_mission):
 
     # the mission container
-    missions = MARC.Analyses.Mission.Mission.Container()
+    missions = RCAIDE.Analyses.Mission.Mission.Container()
 
     # ------------------------------------------------------------------
     #   Base Mission

@@ -5,10 +5,10 @@
 #   Imports
 # ----------------------------------------------------------------------
 
-import MARC
-from MARC.Core import Units
-from MARC.Core import Data, Container
-from MARC.Methods.Propulsion.electric_motor_sizing import size_from_mass , size_optimal_motor 
+import RCAIDE
+from RCAIDE.Core import Units
+from RCAIDE.Core import Data, Container
+from RCAIDE.Methods.Propulsion.electric_motor_sizing import size_from_mass , size_optimal_motor 
 import numpy as np 
 import pickle 
 import matplotlib.pyplot as plt  
@@ -44,7 +44,7 @@ def main():
     '''
     Design Old Motor 
     ''' 
-    motor                              = MARC.Components.Energy.Converters.Motor()
+    motor                              = RCAIDE.Components.Energy.Converters.Motor()
     motor.mass_properties.mass         = 9. * Units.kg 
     motor.efficiency                   = 0.935
     motor.gear_ratio                   = 1. 
@@ -59,7 +59,7 @@ def main():
     '''
     Design New Motor 
     ''' 
-    motor_2                             = MARC.Components.Energy.Converters.Motor_2()
+    motor_2                             = RCAIDE.Components.Energy.Converters.Motor_2()
     
     '''
     Operating conditions
@@ -69,7 +69,7 @@ def main():
     flight_velocity = 100  # m/s   
     propeller_power_coefficient = 0.02
     
-    atmosphere                                          = MARC.Analyses.Atmospheric.US_Standard_1976()
+    atmosphere                                          = RCAIDE.Analyses.Atmospheric.US_Standard_1976()
     atmosphere_conditions                               = atmosphere.compute_values(design_altitude)  
     conditions                                          = Data()
     conditions.freestream                               = Data()

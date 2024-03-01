@@ -10,12 +10,12 @@
 #----------------------------------------------------------------------
 #   Imports
 # ---------------------------------------------------------------------
-import MARC
-from MARC.Core import Units    
+import RCAIDE
+from RCAIDE.Core import Units    
 import numpy as np 
-from MARC.Methods.Performance.estimate_stall_speed   import estimate_stall_speed 
-from MARC.Methods.Utilities.Chebyshev  import chebyshev_data
-from MARC.Methods.Utilities.Chebyshev  import linear_data
+from RCAIDE.Methods.Performance.estimate_stall_speed   import estimate_stall_speed 
+from RCAIDE.Methods.Utilities.Chebyshev  import chebyshev_data
+from RCAIDE.Methods.Utilities.Chebyshev  import linear_data
 
 # ------------------------------------------------------------------
 #   Baseline Mission Setup
@@ -26,26 +26,26 @@ def baseline_mission_setup(analyses,vehicle,simulated_days = 1,flights_per_day =
     #   Initialize the Mission
     # ------------------------------------------------------------------
 
-    mission     = MARC.Analyses.Mission.Sequential_Segments()
+    mission     = RCAIDE.Analyses.Mission.Sequential_Segments()
     mission.tag = 'baseline_mission'
 
     # airport
-    airport            = MARC.Attributes.Airports.Airport()
+    airport            = RCAIDE.Attributes.Airports.Airport()
     airport.altitude   = 0.0  * Units.ft
     airport.delta_isa  = 0.0
-    airport.atmosphere = MARC.Attributes.Atmospheres.Earth.US_Standard_1976() 
+    airport.atmosphere = RCAIDE.Attributes.Atmospheres.Earth.US_Standard_1976() 
     mission.airport    = airport       
     
     # unpack Segments module
-    Segments = MARC.Analyses.Mission.Segments
+    Segments = RCAIDE.Analyses.Mission.Segments
 
     # base segment           
     base_segment                                                              = Segments.Segment()  
     base_segment.state.numerics.number_control_points                         = control_points 
     base_segment.state.numerics.discretization_method                         = linear_data
-    base_segment.process.initialize.initialize_battery                        = MARC.Methods.Missions.Segments.Common.Energy.initialize_battery
-    base_segment.process.finalize.post_process.update_battery_state_of_health = MARC.Methods.Missions.Segments.Common.Energy.update_battery_state_of_health  
-    base_segment.process.finalize.post_process.stability                      = MARC.Methods.skip 
+    base_segment.process.initialize.initialize_battery                        = RCAIDE.Methods.Missions.Segments.Common.Energy.initialize_battery
+    base_segment.process.finalize.post_process.update_battery_state_of_health = RCAIDE.Methods.Missions.Segments.Common.Energy.update_battery_state_of_health  
+    base_segment.process.finalize.post_process.stability                      = RCAIDE.Methods.skip 
 
     # VSTALL Calculation  
     vehicle_mass   = vehicle.mass_properties.max_takeoff
@@ -63,9 +63,9 @@ def baseline_mission_setup(analyses,vehicle,simulated_days = 1,flights_per_day =
     segment.climb_rate                              = 500. * Units['ft/min'] 
     segment.true_course_angle                       = airport_geospacial_data.true_course_angle    
     segment.battery_energy                          = vehicle.networks.battery_electric_rotor.battery.pack.max_energy    
-    segment.process.iterate.unknowns.mission        = MARC.Methods.skip
-    segment.process.iterate.conditions.stability    = MARC.Methods.skip
-    segment.process.finalize.post_process.stability = MARC.Methods.skip
+    segment.process.iterate.unknowns.mission        = RCAIDE.Methods.skip
+    segment.process.iterate.conditions.stability    = RCAIDE.Methods.skip
+    segment.process.finalize.post_process.stability = RCAIDE.Methods.skip
     segment = vehicle.networks.battery_electric_rotor.add_unknowns_and_residuals_to_segment(segment) 
     mission.append_segment(segment)
     
@@ -83,9 +83,9 @@ def baseline_mission_setup(analyses,vehicle,simulated_days = 1,flights_per_day =
     segment.pitch_initial                           = 0.0 * Units.degrees
     segment.pitch_final                             = 2.  * Units.degrees   
     segment.true_course_angle                       = airport_geospacial_data.true_course_angle   
-    segment.process.iterate.unknowns.mission        = MARC.Methods.skip
-    segment.process.iterate.conditions.stability    = MARC.Methods.skip
-    segment.process.finalize.post_process.stability = MARC.Methods.skip
+    segment.process.iterate.unknowns.mission        = RCAIDE.Methods.skip
+    segment.process.iterate.conditions.stability    = RCAIDE.Methods.skip
+    segment.process.finalize.post_process.stability = RCAIDE.Methods.skip
     segment = vehicle.networks.battery_electric_rotor.add_unknowns_and_residuals_to_segment(segment)  
     mission.append_segment(segment)
     
@@ -103,9 +103,9 @@ def baseline_mission_setup(analyses,vehicle,simulated_days = 1,flights_per_day =
     segment.pitch_initial                           = 2.    * Units.degrees 
     segment.pitch_final                             = 7.    * Units.degrees  
     segment.true_course_angle                       = airport_geospacial_data.true_course_angle   
-    segment.process.iterate.unknowns.mission        = MARC.Methods.skip
-    segment.process.iterate.conditions.stability    = MARC.Methods.skip
-    segment.process.finalize.post_process.stability = MARC.Methods.skip 
+    segment.process.iterate.unknowns.mission        = RCAIDE.Methods.skip
+    segment.process.iterate.conditions.stability    = RCAIDE.Methods.skip
+    segment.process.finalize.post_process.stability = RCAIDE.Methods.skip 
     segment = vehicle.networks.battery_electric_rotor.add_unknowns_and_residuals_to_segment(segment)
     mission.append_segment(segment) 
   
@@ -180,9 +180,9 @@ def baseline_mission_setup(analyses,vehicle,simulated_days = 1,flights_per_day =
     segment.acceleration                             = -0.25 * Units['m/s/s']    
     segment.pitch_initial                            = 4.3  * Units.degrees  
     segment.pitch_final                              = 7. * Units.degrees   
-    segment.process.iterate.unknowns.mission         = MARC.Methods.skip
-    segment.process.iterate.conditions.stability     = MARC.Methods.skip
-    segment.process.finalize.post_process.stability  = MARC.Methods.skip  
+    segment.process.iterate.unknowns.mission         = RCAIDE.Methods.skip
+    segment.process.iterate.conditions.stability     = RCAIDE.Methods.skip
+    segment.process.finalize.post_process.stability  = RCAIDE.Methods.skip  
     segment.true_course_angle                        = airport_geospacial_data.true_course_angle          
     segment = vehicle.networks.battery_electric_rotor.add_unknowns_and_residuals_to_segment(segment) 
     mission.append_segment(segment)  
@@ -199,9 +199,9 @@ def baseline_mission_setup(analyses,vehicle,simulated_days = 1,flights_per_day =
     segment.acceleration                            = -0.25 * Units['m/s/s']    
     segment.pitch_initial                           = 7.  * Units.degrees  
     segment.pitch_final                             = 7. * Units.degrees    
-    segment.process.iterate.unknowns.mission        = MARC.Methods.skip
-    segment.process.iterate.conditions.stability    = MARC.Methods.skip
-    segment.process.finalize.post_process.stability = MARC.Methods.skip   
+    segment.process.iterate.unknowns.mission        = RCAIDE.Methods.skip
+    segment.process.iterate.conditions.stability    = RCAIDE.Methods.skip
+    segment.process.finalize.post_process.stability = RCAIDE.Methods.skip   
     segment.true_course_angle                       = airport_geospacial_data.true_course_angle  
     segment = vehicle.networks.battery_electric_rotor.add_unknowns_and_residuals_to_segment(segment)  
     mission.append_segment(segment)       
@@ -216,9 +216,9 @@ def baseline_mission_setup(analyses,vehicle,simulated_days = 1,flights_per_day =
     segment.altitude_end                            = 0.   * Units.ft  
     segment.descent_rate                            = 300. * Units['ft/min']   
     segment.true_course_angle                       = airport_geospacial_data.true_course_angle   
-    segment.process.iterate.unknowns.mission        = MARC.Methods.skip
-    segment.process.iterate.conditions.stability    = MARC.Methods.skip
-    segment.process.finalize.post_process.stability = MARC.Methods.skip 
+    segment.process.iterate.unknowns.mission        = RCAIDE.Methods.skip
+    segment.process.iterate.conditions.stability    = RCAIDE.Methods.skip
+    segment.process.finalize.post_process.stability = RCAIDE.Methods.skip 
     segment = vehicle.networks.battery_electric_rotor.add_unknowns_and_residuals_to_segment(segment)  
     mission.append_segment(segment)  
   
@@ -235,30 +235,30 @@ def repeated_flight_operation_setup(analyses,vehicle,simulated_days = 1,flights_
     #   Initialize the Mission
     # ------------------------------------------------------------------
 
-    mission     = MARC.Analyses.Mission.Sequential_Segments()
+    mission     = RCAIDE.Analyses.Mission.Sequential_Segments()
     mission.tag = 'repeated_flight_operation_mission'
 
     # airport
-    airport            = MARC.Attributes.Airports.Airport()
+    airport            = RCAIDE.Attributes.Airports.Airport()
     airport.altitude   = 0.0  * Units.ft
     airport.delta_isa  = 0.0
-    airport.atmosphere = MARC.Attributes.Atmospheres.Earth.US_Standard_1976() 
+    airport.atmosphere = RCAIDE.Attributes.Atmospheres.Earth.US_Standard_1976() 
     mission.airport    = airport      
 
-    atmosphere         = MARC.Analyses.Atmospheric.US_Standard_1976() 
+    atmosphere         = RCAIDE.Analyses.Atmospheric.US_Standard_1976() 
     atmo_data          = atmosphere.compute_values(altitude = airport.altitude,temperature_deviation= 1.)     
 
     # unpack Segments module
-    Segments = MARC.Analyses.Mission.Segments
+    Segments = RCAIDE.Analyses.Mission.Segments
 
     # base segment           
     base_segment                                             = Segments.Segment() 
     base_segment.battery_discharge                           = True  
     base_segment.state.numerics.number_control_points        = control_points  
     base_segment.state.numerics.discretization_method        = linear_data    
-    base_segment.process.initialize.initialize_battery       = MARC.Methods.Missions.Segments.Common.Energy.initialize_battery
-    base_segment.process.finalize.post_process.update_battery_state_of_health = MARC.Methods.Missions.Segments.Common.Energy.update_battery_state_of_health  
-    base_segment.process.finalize.post_process.stability     = MARC.Methods.skip 
+    base_segment.process.initialize.initialize_battery       = RCAIDE.Methods.Missions.Segments.Common.Energy.initialize_battery
+    base_segment.process.finalize.post_process.update_battery_state_of_health = RCAIDE.Methods.Missions.Segments.Common.Energy.update_battery_state_of_health  
+    base_segment.process.finalize.post_process.stability     = RCAIDE.Methods.skip 
 
     # VSTALL Calculation  
     vehicle_mass   = vehicle.mass_properties.max_takeoff
@@ -292,9 +292,9 @@ def repeated_flight_operation_setup(analyses,vehicle,simulated_days = 1,flights_
             if day == 0:        
                 segment.battery_energy                      = vehicle.networks.battery_electric_rotor.battery.pack.max_energy   
             segment.battery_pack_temperature                = atmo_data.temperature[0,0]             
-            segment.process.iterate.unknowns.mission        = MARC.Methods.skip
-            segment.process.iterate.conditions.stability    = MARC.Methods.skip
-            segment.process.finalize.post_process.stability = MARC.Methods.skip
+            segment.process.iterate.unknowns.mission        = RCAIDE.Methods.skip
+            segment.process.iterate.conditions.stability    = RCAIDE.Methods.skip
+            segment.process.finalize.post_process.stability = RCAIDE.Methods.skip
             segment = vehicle.networks.battery_electric_rotor.add_unknowns_and_residuals_to_segment(segment) # ,initial_rotor_power_coefficients = [0.02,0.05],initial_throttles =  [0.7,0.9] )
             mission.append_segment(segment)
             
@@ -312,9 +312,9 @@ def repeated_flight_operation_setup(analyses,vehicle,simulated_days = 1,flights_
             segment.pitch_initial                           = 0.0 * Units.degrees
             segment.pitch_final                             = 2.  * Units.degrees   
             segment.true_course_angle                       = airport_geospacial_data.true_course_angle   
-            segment.process.iterate.unknowns.mission        = MARC.Methods.skip
-            segment.process.iterate.conditions.stability    = MARC.Methods.skip
-            segment.process.finalize.post_process.stability = MARC.Methods.skip
+            segment.process.iterate.unknowns.mission        = RCAIDE.Methods.skip
+            segment.process.iterate.conditions.stability    = RCAIDE.Methods.skip
+            segment.process.finalize.post_process.stability = RCAIDE.Methods.skip
             segment = vehicle.networks.battery_electric_rotor.add_unknowns_and_residuals_to_segment(segment) #, initial_rotor_power_coefficients = [0.2,0.05],initial_throttles =  [0.9,0.9]  ) 
             mission.append_segment(segment)
             
@@ -332,9 +332,9 @@ def repeated_flight_operation_setup(analyses,vehicle,simulated_days = 1,flights_
             segment.pitch_initial                           = 7.    * Units.degrees  
             segment.pitch_final                             = 5.    * Units.degrees    
             segment.true_course_angle                       = airport_geospacial_data.true_course_angle   
-            segment.process.iterate.unknowns.mission        = MARC.Methods.skip
-            segment.process.iterate.conditions.stability    = MARC.Methods.skip
-            segment.process.finalize.post_process.stability = MARC.Methods.skip 
+            segment.process.iterate.unknowns.mission        = RCAIDE.Methods.skip
+            segment.process.iterate.conditions.stability    = RCAIDE.Methods.skip
+            segment.process.finalize.post_process.stability = RCAIDE.Methods.skip 
             segment = vehicle.networks.battery_electric_rotor.add_unknowns_and_residuals_to_segment(segment) #,initial_rotor_power_coefficients = [0.1,0.05],initial_throttles =  [0.9,0.9]  ) 
             mission.append_segment(segment) 
           
@@ -412,9 +412,9 @@ def repeated_flight_operation_setup(analyses,vehicle,simulated_days = 1,flights_
             segment.acceleration                             = -0.25 * Units['m/s/s']    
             segment.pitch_initial                            = 2.3 * Units.degrees     
             segment.pitch_final                              = 7. * Units.degrees 
-            segment.process.iterate.unknowns.mission         = MARC.Methods.skip
-            segment.process.iterate.conditions.stability     = MARC.Methods.skip
-            segment.process.finalize.post_process.stability  = MARC.Methods.skip  
+            segment.process.iterate.unknowns.mission         = RCAIDE.Methods.skip
+            segment.process.iterate.conditions.stability     = RCAIDE.Methods.skip
+            segment.process.finalize.post_process.stability  = RCAIDE.Methods.skip  
             segment.true_course_angle                        = airport_geospacial_data.true_course_angle          
             segment = vehicle.networks.battery_electric_rotor.add_unknowns_and_residuals_to_segment(segment) 
             mission.append_segment(segment)  
@@ -431,9 +431,9 @@ def repeated_flight_operation_setup(analyses,vehicle,simulated_days = 1,flights_
             segment.acceleration                            = -0.25 * Units['m/s/s']    
             segment.pitch_initial                           = 7.  * Units.degrees  
             segment.pitch_final                             = 7. * Units.degrees    
-            segment.process.iterate.unknowns.mission        = MARC.Methods.skip
-            segment.process.iterate.conditions.stability    = MARC.Methods.skip
-            segment.process.finalize.post_process.stability = MARC.Methods.skip 
+            segment.process.iterate.unknowns.mission        = RCAIDE.Methods.skip
+            segment.process.iterate.conditions.stability    = RCAIDE.Methods.skip
+            segment.process.finalize.post_process.stability = RCAIDE.Methods.skip 
             segment.true_course_angle                       = airport_geospacial_data.true_course_angle    
             segment = vehicle.networks.battery_electric_rotor.add_unknowns_and_residuals_to_segment(segment) #,initial_rotor_power_coefficients = [0.2,0.05],initial_throttles =  [0.3,0.9])            
             mission.append_segment(segment)       
@@ -448,9 +448,9 @@ def repeated_flight_operation_setup(analyses,vehicle,simulated_days = 1,flights_
             segment.altitude_end                            = 0.   * Units.ft  
             segment.descent_rate                            = 300. * Units['ft/min']   
             segment.true_course_angle                       = airport_geospacial_data.true_course_angle   
-            segment.process.iterate.unknowns.mission        = MARC.Methods.skip
-            segment.process.iterate.conditions.stability    = MARC.Methods.skip
-            segment.process.finalize.post_process.stability = MARC.Methods.skip 
+            segment.process.iterate.unknowns.mission        = RCAIDE.Methods.skip
+            segment.process.iterate.conditions.stability    = RCAIDE.Methods.skip
+            segment.process.finalize.post_process.stability = RCAIDE.Methods.skip 
             segment = vehicle.networks.battery_electric_rotor.add_unknowns_and_residuals_to_segment(segment) #, initial_rotor_power_coefficients = [0.0,0.02], initial_throttles = [0.0,0.7])
             mission.append_segment(segment)  
            
@@ -477,26 +477,26 @@ def direct_mission_setup_at_1000ft(analyses,vehicle,simulated_days = 1,flights_p
     #   Initialize the Mission
     # ------------------------------------------------------------------
 
-    mission     = MARC.Analyses.Mission.Sequential_Segments()
+    mission     = RCAIDE.Analyses.Mission.Sequential_Segments()
     mission.tag = 'direct_mission_setup_at_1000ft'
 
     # airport
-    airport            = MARC.Attributes.Airports.Airport()
+    airport            = RCAIDE.Attributes.Airports.Airport()
     airport.altitude   = 0 
     airport.delta_isa  = 0.0
-    airport.atmosphere = MARC.Attributes.Atmospheres.Earth.US_Standard_1976() 
+    airport.atmosphere = RCAIDE.Attributes.Atmospheres.Earth.US_Standard_1976() 
     mission.airport    = airport       
     
     # unpack Segments module
-    Segments = MARC.Analyses.Mission.Segments
+    Segments = RCAIDE.Analyses.Mission.Segments
 
     # base segment           
     base_segment                                                              = Segments.Segment()  
     base_segment.state.numerics.number_control_points                         = control_points 
     base_segment.state.numerics.discretization_method                         = linear_data
-    base_segment.process.initialize.initialize_battery                        = MARC.Methods.Missions.Segments.Common.Energy.initialize_battery
-    base_segment.process.finalize.post_process.update_battery_state_of_health = MARC.Methods.Missions.Segments.Common.Energy.update_battery_state_of_health  
-    base_segment.process.finalize.post_process.stability                      = MARC.Methods.skip 
+    base_segment.process.initialize.initialize_battery                        = RCAIDE.Methods.Missions.Segments.Common.Energy.initialize_battery
+    base_segment.process.finalize.post_process.update_battery_state_of_health = RCAIDE.Methods.Missions.Segments.Common.Energy.update_battery_state_of_health  
+    base_segment.process.finalize.post_process.stability                      = RCAIDE.Methods.skip 
 
     # VSTALL Calculation  
     vehicle_mass   = vehicle.mass_properties.max_takeoff
@@ -514,9 +514,9 @@ def direct_mission_setup_at_1000ft(analyses,vehicle,simulated_days = 1,flights_p
     segment.climb_rate                                          = 500. * Units['ft/min'] 
     segment.true_course_angle                                   = airport_geospacial_data.true_course_angle  
     segment.battery_energy                                      = vehicle.networks.battery_electric_rotor.battery.pack.max_energy    
-    segment.process.iterate.unknowns.mission                    = MARC.Methods.skip
-    segment.process.iterate.conditions.stability                = MARC.Methods.skip
-    segment.process.finalize.post_process.stability             = MARC.Methods.skip
+    segment.process.iterate.unknowns.mission                    = RCAIDE.Methods.skip
+    segment.process.iterate.conditions.stability                = RCAIDE.Methods.skip
+    segment.process.finalize.post_process.stability             = RCAIDE.Methods.skip
     segment = vehicle.networks.battery_electric_rotor.add_unknowns_and_residuals_to_segment(segment) 
     mission.append_segment(segment)
     
@@ -534,9 +534,9 @@ def direct_mission_setup_at_1000ft(analyses,vehicle,simulated_days = 1,flights_p
     segment.pitch_initial                                       = 0.0 * Units.degrees
     segment.pitch_final                                         = 2.  * Units.degrees   
     segment.true_course_angle                                   = airport_geospacial_data.true_course_angle   
-    segment.process.iterate.unknowns.mission                    = MARC.Methods.skip
-    segment.process.iterate.conditions.stability                = MARC.Methods.skip
-    segment.process.finalize.post_process.stability             = MARC.Methods.skip
+    segment.process.iterate.unknowns.mission                    = RCAIDE.Methods.skip
+    segment.process.iterate.conditions.stability                = RCAIDE.Methods.skip
+    segment.process.finalize.post_process.stability             = RCAIDE.Methods.skip
     segment = vehicle.networks.battery_electric_rotor.add_unknowns_and_residuals_to_segment(segment)  
     mission.append_segment(segment)
     
@@ -554,9 +554,9 @@ def direct_mission_setup_at_1000ft(analyses,vehicle,simulated_days = 1,flights_p
     segment.pitch_initial                                       = 2.    * Units.degrees 
     segment.pitch_final                                         = 7.    * Units.degrees  
     segment.true_course_angle                                   = airport_geospacial_data.true_course_angle      
-    segment.process.iterate.unknowns.mission                    = MARC.Methods.skip
-    segment.process.iterate.conditions.stability                = MARC.Methods.skip
-    segment.process.finalize.post_process.stability             = MARC.Methods.skip 
+    segment.process.iterate.unknowns.mission                    = RCAIDE.Methods.skip
+    segment.process.iterate.conditions.stability                = RCAIDE.Methods.skip
+    segment.process.finalize.post_process.stability             = RCAIDE.Methods.skip 
     segment = vehicle.networks.battery_electric_rotor.add_unknowns_and_residuals_to_segment(segment)
     mission.append_segment(segment) 
    
@@ -653,9 +653,9 @@ def direct_mission_setup_at_1000ft(analyses,vehicle,simulated_days = 1,flights_p
     segment.acceleration                                        = -0.5 * Units['m/s/s']    
     segment.pitch_initial                                       = 4.3  * Units.degrees  
     segment.pitch_final                                         = 7. * Units.degrees   
-    segment.process.iterate.unknowns.mission                    = MARC.Methods.skip
-    segment.process.iterate.conditions.stability                = MARC.Methods.skip
-    segment.process.finalize.post_process.stability             = MARC.Methods.skip  
+    segment.process.iterate.unknowns.mission                    = RCAIDE.Methods.skip
+    segment.process.iterate.conditions.stability                = RCAIDE.Methods.skip
+    segment.process.finalize.post_process.stability             = RCAIDE.Methods.skip  
     segment.true_course_angle                                   = airport_geospacial_data.true_course_angle          
     segment = vehicle.networks.battery_electric_rotor.add_unknowns_and_residuals_to_segment(segment) 
     mission.append_segment(segment)  
@@ -672,9 +672,9 @@ def direct_mission_setup_at_1000ft(analyses,vehicle,simulated_days = 1,flights_p
     segment.acceleration                                        = -0.5 * Units['m/s/s']    
     segment.pitch_initial                                       = 7.  * Units.degrees  
     segment.pitch_final                                         = 7. * Units.degrees    
-    segment.process.iterate.unknowns.mission                    = MARC.Methods.skip
-    segment.process.iterate.conditions.stability                = MARC.Methods.skip
-    segment.process.finalize.post_process.stability             = MARC.Methods.skip   
+    segment.process.iterate.unknowns.mission                    = RCAIDE.Methods.skip
+    segment.process.iterate.conditions.stability                = RCAIDE.Methods.skip
+    segment.process.finalize.post_process.stability             = RCAIDE.Methods.skip   
     segment.true_course_angle                                   = airport_geospacial_data.true_course_angle  
     segment = vehicle.networks.battery_electric_rotor.add_unknowns_and_residuals_to_segment(segment)  
     mission.append_segment(segment)       
@@ -689,9 +689,9 @@ def direct_mission_setup_at_1000ft(analyses,vehicle,simulated_days = 1,flights_p
     segment.altitude_end                                        = 0.   * Units.ft    
     segment.descent_rate                                        = 300. * Units['ft/min']   
     segment.true_course_angle                                   = airport_geospacial_data.true_course_angle    
-    segment.process.iterate.unknowns.mission                    = MARC.Methods.skip
-    segment.process.iterate.conditions.stability                = MARC.Methods.skip
-    segment.process.finalize.post_process.stability             = MARC.Methods.skip 
+    segment.process.iterate.unknowns.mission                    = RCAIDE.Methods.skip
+    segment.process.iterate.conditions.stability                = RCAIDE.Methods.skip
+    segment.process.finalize.post_process.stability             = RCAIDE.Methods.skip 
     segment = vehicle.networks.battery_electric_rotor.add_unknowns_and_residuals_to_segment(segment)  
     mission.append_segment(segment)  
      
@@ -707,26 +707,26 @@ def direct_mission_setup_at_1500ft(analyses,vehicle,simulated_days = 1,flights_p
     #   Initialize the Mission
     # ------------------------------------------------------------------
 
-    mission     = MARC.Analyses.Mission.Sequential_Segments()
+    mission     = RCAIDE.Analyses.Mission.Sequential_Segments()
     mission.tag = 'direct_mission_setup_at_1500ft'
 
     # airport
-    airport            = MARC.Attributes.Airports.Airport()
+    airport            = RCAIDE.Attributes.Airports.Airport()
     airport.altitude   = 0 
     airport.delta_isa  = 0.0
-    airport.atmosphere = MARC.Attributes.Atmospheres.Earth.US_Standard_1976() 
+    airport.atmosphere = RCAIDE.Attributes.Atmospheres.Earth.US_Standard_1976() 
     mission.airport    = airport       
     
     # unpack Segments module
-    Segments = MARC.Analyses.Mission.Segments
+    Segments = RCAIDE.Analyses.Mission.Segments
 
     # base segment           
     base_segment                                                              = Segments.Segment()  
     base_segment.state.numerics.number_control_points                         = control_points 
     base_segment.state.numerics.discretization_method                         = linear_data
-    base_segment.process.initialize.initialize_battery                        = MARC.Methods.Missions.Segments.Common.Energy.initialize_battery
-    base_segment.process.finalize.post_process.update_battery_state_of_health = MARC.Methods.Missions.Segments.Common.Energy.update_battery_state_of_health  
-    base_segment.process.finalize.post_process.stability                      = MARC.Methods.skip 
+    base_segment.process.initialize.initialize_battery                        = RCAIDE.Methods.Missions.Segments.Common.Energy.initialize_battery
+    base_segment.process.finalize.post_process.update_battery_state_of_health = RCAIDE.Methods.Missions.Segments.Common.Energy.update_battery_state_of_health  
+    base_segment.process.finalize.post_process.stability                      = RCAIDE.Methods.skip 
 
     # VSTALL Calculation  
     vehicle_mass   = vehicle.mass_properties.max_takeoff
@@ -744,9 +744,9 @@ def direct_mission_setup_at_1500ft(analyses,vehicle,simulated_days = 1,flights_p
     segment.climb_rate                              = 500. * Units['ft/min'] 
     segment.true_course_angle                       = airport_geospacial_data.true_course_angle    
     segment.battery_energy                          = vehicle.networks.battery_electric_rotor.battery.pack.max_energy    
-    segment.process.iterate.unknowns.mission        = MARC.Methods.skip
-    segment.process.iterate.conditions.stability    = MARC.Methods.skip
-    segment.process.finalize.post_process.stability = MARC.Methods.skip
+    segment.process.iterate.unknowns.mission        = RCAIDE.Methods.skip
+    segment.process.iterate.conditions.stability    = RCAIDE.Methods.skip
+    segment.process.finalize.post_process.stability = RCAIDE.Methods.skip
     segment = vehicle.networks.battery_electric_rotor.add_unknowns_and_residuals_to_segment(segment) 
     mission.append_segment(segment)
     
@@ -764,9 +764,9 @@ def direct_mission_setup_at_1500ft(analyses,vehicle,simulated_days = 1,flights_p
     segment.pitch_initial                           = 0.0 * Units.degrees
     segment.pitch_final                             = 2.  * Units.degrees   
     segment.true_course_angle                       = airport_geospacial_data.true_course_angle   
-    segment.process.iterate.unknowns.mission        = MARC.Methods.skip
-    segment.process.iterate.conditions.stability    = MARC.Methods.skip
-    segment.process.finalize.post_process.stability = MARC.Methods.skip
+    segment.process.iterate.unknowns.mission        = RCAIDE.Methods.skip
+    segment.process.iterate.conditions.stability    = RCAIDE.Methods.skip
+    segment.process.finalize.post_process.stability = RCAIDE.Methods.skip
     segment = vehicle.networks.battery_electric_rotor.add_unknowns_and_residuals_to_segment(segment)  
     mission.append_segment(segment)
     
@@ -784,9 +784,9 @@ def direct_mission_setup_at_1500ft(analyses,vehicle,simulated_days = 1,flights_p
     segment.pitch_initial                           = 2.    * Units.degrees 
     segment.pitch_final                             = 7.    * Units.degrees  
     segment.true_course_angle                       = airport_geospacial_data.true_course_angle   
-    segment.process.iterate.unknowns.mission        = MARC.Methods.skip
-    segment.process.iterate.conditions.stability    = MARC.Methods.skip
-    segment.process.finalize.post_process.stability = MARC.Methods.skip 
+    segment.process.iterate.unknowns.mission        = RCAIDE.Methods.skip
+    segment.process.iterate.conditions.stability    = RCAIDE.Methods.skip
+    segment.process.finalize.post_process.stability = RCAIDE.Methods.skip 
     segment = vehicle.networks.battery_electric_rotor.add_unknowns_and_residuals_to_segment(segment)
     mission.append_segment(segment) 
     
@@ -884,9 +884,9 @@ def direct_mission_setup_at_1500ft(analyses,vehicle,simulated_days = 1,flights_p
     segment.acceleration                             = -0.5 * Units['m/s/s']    
     segment.pitch_initial                            = 4.3  * Units.degrees  
     segment.pitch_final                              = 7. * Units.degrees   
-    segment.process.iterate.unknowns.mission         = MARC.Methods.skip
-    segment.process.iterate.conditions.stability     = MARC.Methods.skip
-    segment.process.finalize.post_process.stability  = MARC.Methods.skip  
+    segment.process.iterate.unknowns.mission         = RCAIDE.Methods.skip
+    segment.process.iterate.conditions.stability     = RCAIDE.Methods.skip
+    segment.process.finalize.post_process.stability  = RCAIDE.Methods.skip  
     segment.true_course_angle                        = airport_geospacial_data.true_course_angle          
     segment = vehicle.networks.battery_electric_rotor.add_unknowns_and_residuals_to_segment(segment) 
     mission.append_segment(segment)  
@@ -903,9 +903,9 @@ def direct_mission_setup_at_1500ft(analyses,vehicle,simulated_days = 1,flights_p
     segment.acceleration                            = -0.5 * Units['m/s/s']    
     segment.pitch_initial                           = 7.  * Units.degrees  
     segment.pitch_final                             = 7. * Units.degrees    
-    segment.process.iterate.unknowns.mission        = MARC.Methods.skip
-    segment.process.iterate.conditions.stability    = MARC.Methods.skip
-    segment.process.finalize.post_process.stability = MARC.Methods.skip   
+    segment.process.iterate.unknowns.mission        = RCAIDE.Methods.skip
+    segment.process.iterate.conditions.stability    = RCAIDE.Methods.skip
+    segment.process.finalize.post_process.stability = RCAIDE.Methods.skip   
     segment.true_course_angle                       = airport_geospacial_data.true_course_angle  
     segment = vehicle.networks.battery_electric_rotor.add_unknowns_and_residuals_to_segment(segment)  
     mission.append_segment(segment)       
@@ -920,9 +920,9 @@ def direct_mission_setup_at_1500ft(analyses,vehicle,simulated_days = 1,flights_p
     segment.altitude_end                            = 0.   * Units.ft    
     segment.descent_rate                            = 300. * Units['ft/min']   
     segment.true_course_angle                       = airport_geospacial_data.true_course_angle   
-    segment.process.iterate.unknowns.mission        = MARC.Methods.skip
-    segment.process.iterate.conditions.stability    = MARC.Methods.skip
-    segment.process.finalize.post_process.stability = MARC.Methods.skip 
+    segment.process.iterate.unknowns.mission        = RCAIDE.Methods.skip
+    segment.process.iterate.conditions.stability    = RCAIDE.Methods.skip
+    segment.process.finalize.post_process.stability = RCAIDE.Methods.skip 
     segment = vehicle.networks.battery_electric_rotor.add_unknowns_and_residuals_to_segment(segment)  
     mission.append_segment(segment)
 
@@ -939,26 +939,26 @@ def direct_mission_setup_at_2000ft(analyses,vehicle,simulated_days = 1,flights_p
     #   Initialize the Mission
     # ------------------------------------------------------------------
 
-    mission     = MARC.Analyses.Mission.Sequential_Segments()
+    mission     = RCAIDE.Analyses.Mission.Sequential_Segments()
     mission.tag = 'direct_mission_setup_at_2000ft'
 
     # airport
-    airport            = MARC.Attributes.Airports.Airport()
+    airport            = RCAIDE.Attributes.Airports.Airport()
     airport.altitude   = 0 
     airport.delta_isa  = 0.0
-    airport.atmosphere = MARC.Attributes.Atmospheres.Earth.US_Standard_1976() 
+    airport.atmosphere = RCAIDE.Attributes.Atmospheres.Earth.US_Standard_1976() 
     mission.airport    = airport       
     
     # unpack Segments module
-    Segments = MARC.Analyses.Mission.Segments
+    Segments = RCAIDE.Analyses.Mission.Segments
 
     # base segment           
     base_segment                                                              = Segments.Segment()  
     base_segment.state.numerics.number_control_points                         = control_points 
     base_segment.state.numerics.discretization_method                         = linear_data
-    base_segment.process.initialize.initialize_battery                        = MARC.Methods.Missions.Segments.Common.Energy.initialize_battery
-    base_segment.process.finalize.post_process.update_battery_state_of_health = MARC.Methods.Missions.Segments.Common.Energy.update_battery_state_of_health  
-    base_segment.process.finalize.post_process.stability                      = MARC.Methods.skip 
+    base_segment.process.initialize.initialize_battery                        = RCAIDE.Methods.Missions.Segments.Common.Energy.initialize_battery
+    base_segment.process.finalize.post_process.update_battery_state_of_health = RCAIDE.Methods.Missions.Segments.Common.Energy.update_battery_state_of_health  
+    base_segment.process.finalize.post_process.stability                      = RCAIDE.Methods.skip 
 
     # VSTALL Calculation  
     vehicle_mass   = vehicle.mass_properties.max_takeoff
@@ -976,9 +976,9 @@ def direct_mission_setup_at_2000ft(analyses,vehicle,simulated_days = 1,flights_p
     segment.climb_rate                              = 500. * Units['ft/min'] 
     segment.true_course_angle                       = airport_geospacial_data.true_course_angle    
     segment.battery_energy                          = vehicle.networks.battery_electric_rotor.battery.pack.max_energy    
-    segment.process.iterate.unknowns.mission        = MARC.Methods.skip
-    segment.process.iterate.conditions.stability    = MARC.Methods.skip
-    segment.process.finalize.post_process.stability = MARC.Methods.skip
+    segment.process.iterate.unknowns.mission        = RCAIDE.Methods.skip
+    segment.process.iterate.conditions.stability    = RCAIDE.Methods.skip
+    segment.process.finalize.post_process.stability = RCAIDE.Methods.skip
     segment = vehicle.networks.battery_electric_rotor.add_unknowns_and_residuals_to_segment(segment) 
     mission.append_segment(segment)
     
@@ -996,9 +996,9 @@ def direct_mission_setup_at_2000ft(analyses,vehicle,simulated_days = 1,flights_p
     segment.pitch_initial                           = 0.0 * Units.degrees
     segment.pitch_final                             = 2.  * Units.degrees   
     segment.true_course_angle                       = airport_geospacial_data.true_course_angle   
-    segment.process.iterate.unknowns.mission        = MARC.Methods.skip
-    segment.process.iterate.conditions.stability    = MARC.Methods.skip
-    segment.process.finalize.post_process.stability = MARC.Methods.skip
+    segment.process.iterate.unknowns.mission        = RCAIDE.Methods.skip
+    segment.process.iterate.conditions.stability    = RCAIDE.Methods.skip
+    segment.process.finalize.post_process.stability = RCAIDE.Methods.skip
     segment = vehicle.networks.battery_electric_rotor.add_unknowns_and_residuals_to_segment(segment)  
     mission.append_segment(segment)
     
@@ -1016,9 +1016,9 @@ def direct_mission_setup_at_2000ft(analyses,vehicle,simulated_days = 1,flights_p
     segment.pitch_initial                           = 2.    * Units.degrees 
     segment.pitch_final                             = 7.    * Units.degrees  
     segment.true_course_angle                       = airport_geospacial_data.true_course_angle   
-    segment.process.iterate.unknowns.mission        = MARC.Methods.skip
-    segment.process.iterate.conditions.stability    = MARC.Methods.skip
-    segment.process.finalize.post_process.stability = MARC.Methods.skip 
+    segment.process.iterate.unknowns.mission        = RCAIDE.Methods.skip
+    segment.process.iterate.conditions.stability    = RCAIDE.Methods.skip
+    segment.process.finalize.post_process.stability = RCAIDE.Methods.skip 
     segment = vehicle.networks.battery_electric_rotor.add_unknowns_and_residuals_to_segment(segment)
     mission.append_segment(segment)  
 
@@ -1114,9 +1114,9 @@ def direct_mission_setup_at_2000ft(analyses,vehicle,simulated_days = 1,flights_p
     segment.acceleration                             = -0.5 * Units['m/s/s']    
     segment.pitch_initial                            = 4.3  * Units.degrees  
     segment.pitch_final                              = 7. * Units.degrees   
-    segment.process.iterate.unknowns.mission         = MARC.Methods.skip
-    segment.process.iterate.conditions.stability     = MARC.Methods.skip
-    segment.process.finalize.post_process.stability  = MARC.Methods.skip  
+    segment.process.iterate.unknowns.mission         = RCAIDE.Methods.skip
+    segment.process.iterate.conditions.stability     = RCAIDE.Methods.skip
+    segment.process.finalize.post_process.stability  = RCAIDE.Methods.skip  
     segment.true_course_angle                        = airport_geospacial_data.true_course_angle          
     segment = vehicle.networks.battery_electric_rotor.add_unknowns_and_residuals_to_segment(segment) 
     mission.append_segment(segment)  
@@ -1133,9 +1133,9 @@ def direct_mission_setup_at_2000ft(analyses,vehicle,simulated_days = 1,flights_p
     segment.acceleration                            = -0.5 * Units['m/s/s']    
     segment.pitch_initial                           = 7.  * Units.degrees  
     segment.pitch_final                             = 7. * Units.degrees    
-    segment.process.iterate.unknowns.mission        = MARC.Methods.skip
-    segment.process.iterate.conditions.stability    = MARC.Methods.skip
-    segment.process.finalize.post_process.stability = MARC.Methods.skip   
+    segment.process.iterate.unknowns.mission        = RCAIDE.Methods.skip
+    segment.process.iterate.conditions.stability    = RCAIDE.Methods.skip
+    segment.process.finalize.post_process.stability = RCAIDE.Methods.skip   
     segment.true_course_angle                       = airport_geospacial_data.true_course_angle  
     segment = vehicle.networks.battery_electric_rotor.add_unknowns_and_residuals_to_segment(segment)  
     mission.append_segment(segment)       
@@ -1150,9 +1150,9 @@ def direct_mission_setup_at_2000ft(analyses,vehicle,simulated_days = 1,flights_p
     segment.altitude_end                            = 0.   * Units.ft    
     segment.descent_rate                            = 300. * Units['ft/min']   
     segment.true_course_angle                       = airport_geospacial_data.true_course_angle   
-    segment.process.iterate.unknowns.mission        = MARC.Methods.skip
-    segment.process.iterate.conditions.stability    = MARC.Methods.skip
-    segment.process.finalize.post_process.stability = MARC.Methods.skip 
+    segment.process.iterate.unknowns.mission        = RCAIDE.Methods.skip
+    segment.process.iterate.conditions.stability    = RCAIDE.Methods.skip
+    segment.process.finalize.post_process.stability = RCAIDE.Methods.skip 
     segment = vehicle.networks.battery_electric_rotor.add_unknowns_and_residuals_to_segment(segment)  
     mission.append_segment(segment)
 
@@ -1167,26 +1167,26 @@ def flyover_at_200ft_mission_setup(analyses,vehicle,simulated_days = 1,flights_p
     #   Initialize the Mission
     # ------------------------------------------------------------------
 
-    mission     = MARC.Analyses.Mission.Sequential_Segments()
+    mission     = RCAIDE.Analyses.Mission.Sequential_Segments()
     mission.tag = 'flyover_at_200ft'
 
     # airport
-    airport            = MARC.Attributes.Airports.Airport()
+    airport            = RCAIDE.Attributes.Airports.Airport()
     airport.altitude   = 0.0  * Units.ft
     airport.delta_isa  = 0.0
-    airport.atmosphere = MARC.Attributes.Atmospheres.Earth.US_Standard_1976() 
+    airport.atmosphere = RCAIDE.Attributes.Atmospheres.Earth.US_Standard_1976() 
     mission.airport    = airport       
     
     # unpack Segments module
-    Segments = MARC.Analyses.Mission.Segments
+    Segments = RCAIDE.Analyses.Mission.Segments
 
     # base segment           
     base_segment                                                              = Segments.Segment()  
     base_segment.state.numerics.number_control_points                         = control_points 
     base_segment.state.numerics.discretization_method                         = linear_data
-    base_segment.process.initialize.initialize_battery                        = MARC.Methods.Missions.Segments.Common.Energy.initialize_battery
-    base_segment.process.finalize.post_process.update_battery_state_of_health = MARC.Methods.Missions.Segments.Common.Energy.update_battery_state_of_health  
-    base_segment.process.finalize.post_process.stability                      = MARC.Methods.skip 
+    base_segment.process.initialize.initialize_battery                        = RCAIDE.Methods.Missions.Segments.Common.Energy.initialize_battery
+    base_segment.process.finalize.post_process.update_battery_state_of_health = RCAIDE.Methods.Missions.Segments.Common.Energy.update_battery_state_of_health  
+    base_segment.process.finalize.post_process.stability                      = RCAIDE.Methods.skip 
  
     # ------------------------------------------------------------------
     #   Constant Altitude Cruises 
@@ -1212,26 +1212,26 @@ def flyover_at_500ft_mission_setup(analyses,vehicle,simulated_days = 1,flights_p
     #   Initialize the Mission
     # ------------------------------------------------------------------
 
-    mission     = MARC.Analyses.Mission.Sequential_Segments()
+    mission     = RCAIDE.Analyses.Mission.Sequential_Segments()
     mission.tag = 'flyover_at_500ft'
 
     # airport
-    airport            = MARC.Attributes.Airports.Airport()
+    airport            = RCAIDE.Attributes.Airports.Airport()
     airport.altitude   = 0.0  * Units.ft
     airport.delta_isa  = 0.0
-    airport.atmosphere = MARC.Attributes.Atmospheres.Earth.US_Standard_1976() 
+    airport.atmosphere = RCAIDE.Attributes.Atmospheres.Earth.US_Standard_1976() 
     mission.airport    = airport       
     
     # unpack Segments module
-    Segments = MARC.Analyses.Mission.Segments
+    Segments = RCAIDE.Analyses.Mission.Segments
 
     # base segment           
     base_segment                                                              = Segments.Segment()  
     base_segment.state.numerics.number_control_points                         = control_points 
     base_segment.state.numerics.discretization_method                         = linear_data
-    base_segment.process.initialize.initialize_battery                        = MARC.Methods.Missions.Segments.Common.Energy.initialize_battery
-    base_segment.process.finalize.post_process.update_battery_state_of_health = MARC.Methods.Missions.Segments.Common.Energy.update_battery_state_of_health  
-    base_segment.process.finalize.post_process.stability                      = MARC.Methods.skip 
+    base_segment.process.initialize.initialize_battery                        = RCAIDE.Methods.Missions.Segments.Common.Energy.initialize_battery
+    base_segment.process.finalize.post_process.update_battery_state_of_health = RCAIDE.Methods.Missions.Segments.Common.Energy.update_battery_state_of_health  
+    base_segment.process.finalize.post_process.stability                      = RCAIDE.Methods.skip 
  
     # ------------------------------------------------------------------
     #   Constant Altitude Cruises 
@@ -1258,26 +1258,26 @@ def flyover_at_1000ft_mission_setup(analyses,vehicle,simulated_days = 1,flights_
     #   Initialize the Mission
     # ------------------------------------------------------------------
 
-    mission     = MARC.Analyses.Mission.Sequential_Segments()
+    mission     = RCAIDE.Analyses.Mission.Sequential_Segments()
     mission.tag = 'flyover_at_1000ft'
 
     # airport
-    airport            = MARC.Attributes.Airports.Airport()
+    airport            = RCAIDE.Attributes.Airports.Airport()
     airport.altitude   = 0.0  * Units.ft
     airport.delta_isa  = 0.0
-    airport.atmosphere = MARC.Attributes.Atmospheres.Earth.US_Standard_1976() 
+    airport.atmosphere = RCAIDE.Attributes.Atmospheres.Earth.US_Standard_1976() 
     mission.airport    = airport       
     
     # unpack Segments module
-    Segments = MARC.Analyses.Mission.Segments
+    Segments = RCAIDE.Analyses.Mission.Segments
 
     # base segment           
     base_segment                                                              = Segments.Segment()  
     base_segment.state.numerics.number_control_points                         = control_points 
     base_segment.state.numerics.discretization_method                         = linear_data
-    base_segment.process.initialize.initialize_battery                        = MARC.Methods.Missions.Segments.Common.Energy.initialize_battery
-    base_segment.process.finalize.post_process.update_battery_state_of_health = MARC.Methods.Missions.Segments.Common.Energy.update_battery_state_of_health  
-    base_segment.process.finalize.post_process.stability                      = MARC.Methods.skip 
+    base_segment.process.initialize.initialize_battery                        = RCAIDE.Methods.Missions.Segments.Common.Energy.initialize_battery
+    base_segment.process.finalize.post_process.update_battery_state_of_health = RCAIDE.Methods.Missions.Segments.Common.Energy.update_battery_state_of_health  
+    base_segment.process.finalize.post_process.stability                      = RCAIDE.Methods.skip 
  
     # ------------------------------------------------------------------
     #   Constant Altitude Cruises 
@@ -1304,26 +1304,26 @@ def flyover_at_1500ft_mission_setup(analyses,vehicle,simulated_days = 1,flights_
     #   Initialize the Mission
     # ------------------------------------------------------------------
 
-    mission     = MARC.Analyses.Mission.Sequential_Segments()
+    mission     = RCAIDE.Analyses.Mission.Sequential_Segments()
     mission.tag = 'flyover_at_1500ft'
 
     # airport
-    airport            = MARC.Attributes.Airports.Airport()
+    airport            = RCAIDE.Attributes.Airports.Airport()
     airport.altitude   = 0.0  * Units.ft
     airport.delta_isa  = 0.0
-    airport.atmosphere = MARC.Attributes.Atmospheres.Earth.US_Standard_1976() 
+    airport.atmosphere = RCAIDE.Attributes.Atmospheres.Earth.US_Standard_1976() 
     mission.airport    = airport       
     
     # unpack Segments module
-    Segments = MARC.Analyses.Mission.Segments
+    Segments = RCAIDE.Analyses.Mission.Segments
 
     # base segment           
     base_segment                                                              = Segments.Segment()  
     base_segment.state.numerics.number_control_points                         = control_points 
     base_segment.state.numerics.discretization_method                         = linear_data
-    base_segment.process.initialize.initialize_battery                        = MARC.Methods.Missions.Segments.Common.Energy.initialize_battery
-    base_segment.process.finalize.post_process.update_battery_state_of_health = MARC.Methods.Missions.Segments.Common.Energy.update_battery_state_of_health  
-    base_segment.process.finalize.post_process.stability                      = MARC.Methods.skip 
+    base_segment.process.initialize.initialize_battery                        = RCAIDE.Methods.Missions.Segments.Common.Energy.initialize_battery
+    base_segment.process.finalize.post_process.update_battery_state_of_health = RCAIDE.Methods.Missions.Segments.Common.Energy.update_battery_state_of_health  
+    base_segment.process.finalize.post_process.stability                      = RCAIDE.Methods.skip 
  
     # ------------------------------------------------------------------
     #   Constant Altitude Cruises 
@@ -1350,26 +1350,26 @@ def flyover_at_2000ft_mission_setup(analyses,vehicle,simulated_days = 1,flights_
     #   Initialize the Mission
     # ------------------------------------------------------------------
 
-    mission     = MARC.Analyses.Mission.Sequential_Segments()
+    mission     = RCAIDE.Analyses.Mission.Sequential_Segments()
     mission.tag = 'flyover_at_2000ft'
 
     # airport
-    airport            = MARC.Attributes.Airports.Airport()
+    airport            = RCAIDE.Attributes.Airports.Airport()
     airport.altitude   = 0.0  * Units.ft
     airport.delta_isa  = 0.0
-    airport.atmosphere = MARC.Attributes.Atmospheres.Earth.US_Standard_1976() 
+    airport.atmosphere = RCAIDE.Attributes.Atmospheres.Earth.US_Standard_1976() 
     mission.airport    = airport       
     
     # unpack Segments module
-    Segments = MARC.Analyses.Mission.Segments
+    Segments = RCAIDE.Analyses.Mission.Segments
 
     # base segment           
     base_segment                                                              = Segments.Segment()  
     base_segment.state.numerics.number_control_points                         = control_points 
     base_segment.state.numerics.discretization_method                         = linear_data
-    base_segment.process.initialize.initialize_battery                        = MARC.Methods.Missions.Segments.Common.Energy.initialize_battery
-    base_segment.process.finalize.post_process.update_battery_state_of_health = MARC.Methods.Missions.Segments.Common.Energy.update_battery_state_of_health  
-    base_segment.process.finalize.post_process.stability                      = MARC.Methods.skip 
+    base_segment.process.initialize.initialize_battery                        = RCAIDE.Methods.Missions.Segments.Common.Energy.initialize_battery
+    base_segment.process.finalize.post_process.update_battery_state_of_health = RCAIDE.Methods.Missions.Segments.Common.Energy.update_battery_state_of_health  
+    base_segment.process.finalize.post_process.stability                      = RCAIDE.Methods.skip 
  
     # ------------------------------------------------------------------
     #   Constant Altitude Cruises 
@@ -1396,26 +1396,26 @@ def approach_departure_mission_setup(analyses,vehicle,simulated_days = 1,flights
     #   Initialize the Mission
     # ------------------------------------------------------------------
 
-    mission     = MARC.Analyses.Mission.Sequential_Segments()
+    mission     = RCAIDE.Analyses.Mission.Sequential_Segments()
     mission.tag = 'approach_departure_mission' 
 
     # airport
-    airport            = MARC.Attributes.Airports.Airport()
+    airport            = RCAIDE.Attributes.Airports.Airport()
     airport.altitude   = 0 
     airport.delta_isa  = 0.0
-    airport.atmosphere = MARC.Attributes.Atmospheres.Earth.US_Standard_1976() 
+    airport.atmosphere = RCAIDE.Attributes.Atmospheres.Earth.US_Standard_1976() 
     mission.airport    = airport       
     
     # unpack Segments module
-    Segments = MARC.Analyses.Mission.Segments
+    Segments = RCAIDE.Analyses.Mission.Segments
 
     # base segment           
     base_segment                                                              = Segments.Segment()  
     base_segment.state.numerics.number_control_points                         = control_points 
     base_segment.state.numerics.discretization_method                         = linear_data
-    base_segment.process.initialize.initialize_battery                        = MARC.Methods.Missions.Segments.Common.Energy.initialize_battery
-    base_segment.process.finalize.post_process.update_battery_state_of_health = MARC.Methods.Missions.Segments.Common.Energy.update_battery_state_of_health  
-    base_segment.process.finalize.post_process.stability                      = MARC.Methods.skip 
+    base_segment.process.initialize.initialize_battery                        = RCAIDE.Methods.Missions.Segments.Common.Energy.initialize_battery
+    base_segment.process.finalize.post_process.update_battery_state_of_health = RCAIDE.Methods.Missions.Segments.Common.Energy.update_battery_state_of_health  
+    base_segment.process.finalize.post_process.stability                      = RCAIDE.Methods.skip 
 
     # VSTALL Calculation  
     vehicle_mass   = vehicle.mass_properties.max_takeoff
@@ -1436,9 +1436,9 @@ def approach_departure_mission_setup(analyses,vehicle,simulated_days = 1,flights
     segment.acceleration                                        = -0.5 * Units['m/s/s']    
     segment.pitch_initial                                       = 4.3  * Units.degrees  
     segment.pitch_final                                         = 7. * Units.degrees   
-    segment.process.iterate.unknowns.mission                    = MARC.Methods.skip
-    segment.process.iterate.conditions.stability                = MARC.Methods.skip
-    segment.process.finalize.post_process.stability             = MARC.Methods.skip          
+    segment.process.iterate.unknowns.mission                    = RCAIDE.Methods.skip
+    segment.process.iterate.conditions.stability                = RCAIDE.Methods.skip
+    segment.process.finalize.post_process.stability             = RCAIDE.Methods.skip          
     segment = vehicle.networks.battery_electric_rotor.add_unknowns_and_residuals_to_segment(segment) 
     mission.append_segment(segment)  
 
@@ -1454,9 +1454,9 @@ def approach_departure_mission_setup(analyses,vehicle,simulated_days = 1,flights
     segment.acceleration                                        = -0.5 * Units['m/s/s']    
     segment.pitch_initial                                       = 7.  * Units.degrees  
     segment.pitch_final                                         = 7. * Units.degrees    
-    segment.process.iterate.unknowns.mission                    = MARC.Methods.skip
-    segment.process.iterate.conditions.stability                = MARC.Methods.skip
-    segment.process.finalize.post_process.stability             = MARC.Methods.skip    
+    segment.process.iterate.unknowns.mission                    = RCAIDE.Methods.skip
+    segment.process.iterate.conditions.stability                = RCAIDE.Methods.skip
+    segment.process.finalize.post_process.stability             = RCAIDE.Methods.skip    
     segment = vehicle.networks.battery_electric_rotor.add_unknowns_and_residuals_to_segment(segment)  
     mission.append_segment(segment)       
     
@@ -1469,9 +1469,9 @@ def approach_departure_mission_setup(analyses,vehicle,simulated_days = 1,flights
     segment.altitude_start                                      = 300.0 * Units.ft      
     segment.altitude_end                                        = 0.   * Units.ft    
     segment.descent_rate                                        = 300. * Units['ft/min']      
-    segment.process.iterate.unknowns.mission                    = MARC.Methods.skip
-    segment.process.iterate.conditions.stability                = MARC.Methods.skip
-    segment.process.finalize.post_process.stability             = MARC.Methods.skip 
+    segment.process.iterate.unknowns.mission                    = RCAIDE.Methods.skip
+    segment.process.iterate.conditions.stability                = RCAIDE.Methods.skip
+    segment.process.finalize.post_process.stability             = RCAIDE.Methods.skip 
     segment = vehicle.networks.battery_electric_rotor.add_unknowns_and_residuals_to_segment(segment)  
     mission.append_segment(segment)  
     
@@ -1486,9 +1486,9 @@ def approach_departure_mission_setup(analyses,vehicle,simulated_days = 1,flights
     segment.altitude_end                                        = 200.  * Units.ft     
     segment.climb_rate                                          = 500. * Units['ft/min'] 
     segment.true_course_angle                                   = airport_geospacial_data.true_course_angle    
-    segment.process.iterate.unknowns.mission                    = MARC.Methods.skip
-    segment.process.iterate.conditions.stability                = MARC.Methods.skip
-    segment.process.finalize.post_process.stability             = MARC.Methods.skip
+    segment.process.iterate.unknowns.mission                    = RCAIDE.Methods.skip
+    segment.process.iterate.conditions.stability                = RCAIDE.Methods.skip
+    segment.process.finalize.post_process.stability             = RCAIDE.Methods.skip
     segment = vehicle.networks.battery_electric_rotor.add_unknowns_and_residuals_to_segment(segment) 
     mission.append_segment(segment)
     
@@ -1506,9 +1506,9 @@ def approach_departure_mission_setup(analyses,vehicle,simulated_days = 1,flights
     segment.pitch_initial                                       = 0.0 * Units.degrees
     segment.pitch_final                                         = 2.  * Units.degrees   
     segment.true_course_angle                                   = airport_geospacial_data.true_course_angle   
-    segment.process.iterate.unknowns.mission                    = MARC.Methods.skip
-    segment.process.iterate.conditions.stability                = MARC.Methods.skip
-    segment.process.finalize.post_process.stability             = MARC.Methods.skip
+    segment.process.iterate.unknowns.mission                    = RCAIDE.Methods.skip
+    segment.process.iterate.conditions.stability                = RCAIDE.Methods.skip
+    segment.process.finalize.post_process.stability             = RCAIDE.Methods.skip
     segment = vehicle.networks.battery_electric_rotor.add_unknowns_and_residuals_to_segment(segment)  
     mission.append_segment(segment)
     
@@ -1526,9 +1526,9 @@ def approach_departure_mission_setup(analyses,vehicle,simulated_days = 1,flights
     segment.pitch_initial                                       = 2.    * Units.degrees 
     segment.pitch_final                                         = 7.    * Units.degrees  
     segment.true_course_angle                                   = airport_geospacial_data.true_course_angle      
-    segment.process.iterate.unknowns.mission                    = MARC.Methods.skip
-    segment.process.iterate.conditions.stability                = MARC.Methods.skip
-    segment.process.finalize.post_process.stability             = MARC.Methods.skip 
+    segment.process.iterate.unknowns.mission                    = RCAIDE.Methods.skip
+    segment.process.iterate.conditions.stability                = RCAIDE.Methods.skip
+    segment.process.finalize.post_process.stability             = RCAIDE.Methods.skip 
     segment = vehicle.networks.battery_electric_rotor.add_unknowns_and_residuals_to_segment(segment)
     mission.append_segment(segment) 
    
@@ -1541,20 +1541,20 @@ def hover_mission_setup(analyses,vehicle,simulated_days = 1,flights_per_day = 1,
     #   Initialize the Mission
     # ------------------------------------------------------------------
 
-    mission = MARC.Analyses.Mission.Sequential_Segments()
+    mission = RCAIDE.Analyses.Mission.Sequential_Segments()
     mission.tag = 'uber_mission'
     
     # unpack Segments module
-    Segments = MARC.Analyses.Mission.Segments
+    Segments = RCAIDE.Analyses.Mission.Segments
 
     # base segment
     base_segment = Segments.Segment()
     base_segment.state.numerics.number_control_points    = 4
     base_segment.state.numerics.discretization_method    = linear_data
-    base_segment.process.initialize.initialize_battery   = MARC.Methods.Missions.Segments.Common.Energy.initialize_battery
+    base_segment.process.initialize.initialize_battery   = RCAIDE.Methods.Missions.Segments.Common.Energy.initialize_battery
     
-    base_segment.process.iterate.conditions.stability    = MARC.Methods.skip
-    base_segment.process.finalize.post_process.stability = MARC.Methods.skip    
+    base_segment.process.iterate.conditions.stability    = RCAIDE.Methods.skip
+    base_segment.process.finalize.post_process.stability = RCAIDE.Methods.skip    
 
     # ------------------------------------------------------------------
     #   First Climb Segment: Constant Speed, Constant Rate
@@ -1569,9 +1569,9 @@ def hover_mission_setup(analyses,vehicle,simulated_days = 1,flights_per_day = 1,
     segment.altitude_end    = 40.  * Units.ft
     segment.climb_rate      = 200. * Units['ft/min']
     segment.battery_energy  = hover.networks.battery_electric_rotor.battery.max_energy  
-    segment.process.iterate.unknowns.mission                 = MARC.Methods.skip
-    segment.process.iterate.conditions.stability             = MARC.Methods.skip
-    segment.process.finalize.post_process.stability          = MARC.Methods.skip      
+    segment.process.iterate.unknowns.mission                 = RCAIDE.Methods.skip
+    segment.process.iterate.conditions.stability             = RCAIDE.Methods.skip
+    segment.process.finalize.post_process.stability          = RCAIDE.Methods.skip      
     
     segment = hover.networks.battery_electric_rotor.add_lift_unknowns_and_residuals_to_segment(segment)
     
@@ -1590,27 +1590,27 @@ def uber_mission_setup(analyse,vehicle,simulated_days = 1,flights_per_day = 1,co
     #   Initialize the Mission
     # ------------------------------------------------------------------
 
-    mission = MARC.Analyses.Mission.Sequential_Segments()
+    mission = RCAIDE.Analyses.Mission.Sequential_Segments()
     mission.tag = 'uber_mission'
     
     # unpack Segments module
-    Segments = MARC.Analyses.Mission.Segments
+    Segments = RCAIDE.Analyses.Mission.Segments
 
     # base segment
     base_segment = Segments.Segment()
     base_segment.state.numerics.number_control_points    = 4
     base_segment.state.numerics.discretization_method    = linear_data
-    base_segment.process.initialize.initialize_battery   = MARC.Methods.Missions.Segments.Common.Energy.initialize_battery
+    base_segment.process.initialize.initialize_battery   = RCAIDE.Methods.Missions.Segments.Common.Energy.initialize_battery
     
-    base_segment.process.iterate.conditions.stability    = MARC.Methods.skip
-    base_segment.process.finalize.post_process.stability = MARC.Methods.skip    
+    base_segment.process.iterate.conditions.stability    = RCAIDE.Methods.skip
+    base_segment.process.finalize.post_process.stability = RCAIDE.Methods.skip    
     
     
     # VSTALL Calculation
     m      = base.mass_properties.max_takeoff
     g      = 9.81
     S      = base.reference_area
-    atmo   = MARC.Analyses.Atmospheric.US_Standard_1976()
+    atmo   = RCAIDE.Analyses.Atmospheric.US_Standard_1976()
     rho    = atmo.compute_values(1000.*Units.feet,0.).density
     CLmax  = 1.2
         
@@ -1630,9 +1630,9 @@ def uber_mission_setup(analyse,vehicle,simulated_days = 1,flights_per_day = 1,co
     segment.altitude_end    = 40.  * Units.ft
     segment.climb_rate      = 200. * Units['ft/min']
     segment.battery_energy  = base.networks.battery_electric_rotor.battery.max_energy  
-    segment.process.iterate.unknowns.mission                 = MARC.Methods.skip
-    segment.process.iterate.conditions.stability             = MARC.Methods.skip
-    segment.process.finalize.post_process.stability          = MARC.Methods.skip      
+    segment.process.iterate.unknowns.mission                 = RCAIDE.Methods.skip
+    segment.process.iterate.conditions.stability             = RCAIDE.Methods.skip
+    segment.process.finalize.post_process.stability          = RCAIDE.Methods.skip      
     
     segment = base.networks.battery_electric_rotor.add_lift_unknowns_and_residuals_to_segment(segment)
     
@@ -1713,7 +1713,7 @@ def uber_mission_setup(analyse,vehicle,simulated_days = 1,flights_per_day = 1,co
     segment = base.networks.battery_electric_rotor.add_cruise_unknowns_and_residuals_to_segment(segment)    
     
     # post-process aerodynamic derivatives in cruise
-    #segment.process.finalize.post_process.aero_derivatives = MARC.Methods.Flight_Dynamics.Static_Stability.compute_aero_derivatives    
+    #segment.process.finalize.post_process.aero_derivatives = RCAIDE.Methods.Flight_Dynamics.Static_Stability.compute_aero_derivatives    
         
     # add to misison
     mission.append_segment(segment)      
@@ -1789,9 +1789,9 @@ def uber_mission_setup(analyse,vehicle,simulated_days = 1,flights_per_day = 1,co
     segment.altitude_start  = 40.0  * Units.ft
     segment.altitude_end    = 40.   * Units.ft
     segment.descent_rate    = 300. * Units['ft/min']
-    segment.process.iterate.unknowns.mission                 = MARC.Methods.skip
-    segment.process.iterate.conditions.stability             = MARC.Methods.skip
-    segment.process.finalize.post_process.stability          = MARC.Methods.skip  
+    segment.process.iterate.unknowns.mission                 = RCAIDE.Methods.skip
+    segment.process.iterate.conditions.stability             = RCAIDE.Methods.skip
+    segment.process.finalize.post_process.stability          = RCAIDE.Methods.skip  
     
     segment = base.networks.battery_electric_rotor.add_lift_unknowns_and_residuals_to_segment(segment)    
 
@@ -1816,9 +1816,9 @@ def uber_mission_setup(analyse,vehicle,simulated_days = 1,flights_per_day = 1,co
     segment.altitude_start  = 0.0  * Units.ft
     segment.altitude_end    = 40.  * Units.ft
     segment.climb_rate      = 500. * Units['ft/min']
-    segment.process.iterate.unknowns.mission                 = MARC.Methods.skip
-    segment.process.iterate.conditions.stability             = MARC.Methods.skip
-    segment.process.finalize.post_process.stability          = MARC.Methods.skip  
+    segment.process.iterate.unknowns.mission                 = RCAIDE.Methods.skip
+    segment.process.iterate.conditions.stability             = RCAIDE.Methods.skip
+    segment.process.finalize.post_process.stability          = RCAIDE.Methods.skip  
     
     segment = base.networks.battery_electric_rotor.add_lift_unknowns_and_residuals_to_segment(segment)    
 
@@ -1839,8 +1839,8 @@ def uber_mission_setup(analyse,vehicle,simulated_days = 1,flights_per_day = 1,co
     segment.altitude_end    = 200.  * Units.ft
     segment.climb_rate      = 500. * Units['ft/min']
 
-    segment.process.iterate.conditions.stability    = MARC.Methods.skip
-    segment.process.finalize.post_process.stability = MARC.Methods.skip    
+    segment.process.iterate.conditions.stability    = RCAIDE.Methods.skip
+    segment.process.finalize.post_process.stability = RCAIDE.Methods.skip    
 
     segment = base.networks.battery_electric_rotor.add_cruise_unknowns_and_residuals_to_segment(segment)    
 
@@ -1862,8 +1862,8 @@ def uber_mission_setup(analyse,vehicle,simulated_days = 1,flights_per_day = 1,co
     segment.air_speed_start = np.sqrt((500 * Units['ft/min'])**2 + (1.2*Vstall)**2)
     segment.air_speed_end   = 110.  * Units['mph']                                            
 
-    segment.process.iterate.conditions.stability    = MARC.Methods.skip
-    segment.process.finalize.post_process.stability = MARC.Methods.skip      
+    segment.process.iterate.conditions.stability    = RCAIDE.Methods.skip
+    segment.process.finalize.post_process.stability = RCAIDE.Methods.skip      
     
     segment = base.networks.battery_electric_rotor.add_cruise_unknowns_and_residuals_to_segment(segment)    
     
@@ -1884,8 +1884,8 @@ def uber_mission_setup(analyse,vehicle,simulated_days = 1,flights_per_day = 1,co
     segment.air_speed = 110.   * Units['mph']
     segment.distance  = 6.    * Units.miles                       
 
-    segment.process.iterate.conditions.stability    = MARC.Methods.skip
-    segment.process.finalize.post_process.stability = MARC.Methods.skip      
+    segment.process.iterate.conditions.stability    = RCAIDE.Methods.skip
+    segment.process.finalize.post_process.stability = RCAIDE.Methods.skip      
     
     segment = base.networks.battery_electric_rotor.add_cruise_unknowns_and_residuals_to_segment(segment)    
     
@@ -1906,8 +1906,8 @@ def uber_mission_setup(analyse,vehicle,simulated_days = 1,flights_per_day = 1,co
     segment.air_speed_start = 110.  * Units['mph']
     segment.air_speed_end   = 1.2*Vstall
 
-    segment.process.iterate.conditions.stability    = MARC.Methods.skip
-    segment.process.finalize.post_process.stability = MARC.Methods.skip 
+    segment.process.iterate.conditions.stability    = RCAIDE.Methods.skip
+    segment.process.finalize.post_process.stability = RCAIDE.Methods.skip 
     
     segment = base.networks.battery_electric_rotor.add_cruise_unknowns_and_residuals_to_segment(segment)    
     
@@ -1929,8 +1929,8 @@ def uber_mission_setup(analyse,vehicle,simulated_days = 1,flights_per_day = 1,co
     segment.air_speed_start = np.sqrt((400 * Units['ft/min'])**2 + (1.2*Vstall)**2)
     segment.air_speed_end   = 1.2*Vstall                           
 
-    segment.process.iterate.conditions.stability    = MARC.Methods.skip
-    segment.process.finalize.post_process.stability = MARC.Methods.skip  
+    segment.process.iterate.conditions.stability    = RCAIDE.Methods.skip
+    segment.process.finalize.post_process.stability = RCAIDE.Methods.skip  
     
     segment = base.networks.battery_electric_rotor.add_cruise_unknowns_and_residuals_to_segment(segment)    
     
@@ -1950,9 +1950,9 @@ def uber_mission_setup(analyse,vehicle,simulated_days = 1,flights_per_day = 1,co
     segment.altitude_start  = 40.0  * Units.ft
     segment.altitude_end    = 40.   * Units.ft
     segment.descent_rate    = 300. * Units['ft/min']
-    segment.process.iterate.unknowns.mission                 = MARC.Methods.skip
-    segment.process.iterate.conditions.stability             = MARC.Methods.skip
-    segment.process.finalize.post_process.stability          = MARC.Methods.skip      
+    segment.process.iterate.unknowns.mission                 = RCAIDE.Methods.skip
+    segment.process.iterate.conditions.stability             = RCAIDE.Methods.skip
+    segment.process.finalize.post_process.stability          = RCAIDE.Methods.skip      
 
     segment = base.networks.battery_electric_rotor.add_lift_unknowns_and_residuals_to_segment(segment)    
 
@@ -1970,7 +1970,7 @@ def uber_mission_setup(analyse,vehicle,simulated_days = 1,flights_per_day = 1,co
 def missions_setup(base_mission):
 
     # the mission container
-    missions = MARC.Analyses.Mission.Mission.Container()
+    missions = RCAIDE.Analyses.Mission.Mission.Container()
 
     # ------------------------------------------------------------------
     #   Base Mission
