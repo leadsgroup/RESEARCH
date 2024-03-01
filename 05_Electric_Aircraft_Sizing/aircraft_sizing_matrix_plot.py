@@ -182,7 +182,7 @@ def Performance_Requirements():
                 'Transitional climb OEI','Established climb OEI',
                 'Cruise climb OEI','Aborted landing AEO',
                 'Aborted landing OEI', 'Max cruise speed',
-                'Coordinated turn'],loc='best', fontsize=12)
+                'Coordinated turn'],loc='upper right', fontsize=12)
     plt.box(True)
     plt.title('SMP', fontsize=20)
     plt.xlabel('$(W/S)_{TO}$ [psf]', fontsize=20)
