@@ -174,29 +174,53 @@ def post_process(nexus):
     summary                           = nexus.summary
     nexus.total_number_of_iterations +=1
     
-    #throttle in design mission
+    # ----------------------------------------------------------------------       
+    # BASE MISSION POST PROCESSING 
+    # ----------------------------------------------------------------------   
+    # power and throttle in base mission
+    MTOW         = vehicle.mass_properties.max_takeoff
+    S_ref        = vehicle.reference_area
     max_throttle = 0 
+    max_power    = 0
     for i in range(len(results.base.segments)):  
         for network in results.base.segments[i].analyses.energy.networks: 
-            busses      = network.busses 
-            for bus in busses:
-                for propulsor in bus.propulsors:  
-                    max_segment_throttle = np.max(results.base.segments[i].conditions.energy[bus.tag][propulsor.tag].throttle[:,0])
+            fuel_lines      = network.fuel_lines 
+            for fuel_line in fuel_lines:
+                for propulsor in fuel_line.propulsors:  
+                    max_segment_throttle = np.max(results.base.segments[i].conditions.energy[fuel_line.tag][propulsor.tag].throttle[:,0])
+                    max_segment_power    = np.max(results.base.segments[i].conditions.energy.power[:,0])     
                     if max_segment_throttle > max_throttle:
-                        max_throttle = max_segment_throttle     
+                        max_throttle = max_segment_throttle   
+                    if max_segment_power > max_power:
+                        max_power = max_segment_power  
             
     summary.max_throttle = max_throttle
     
     # Fuel margin and base fuel calculations
-    design_landing_weight    = results.base.segments[-1].conditions.weights.total_mass[-1]
-    design_takeoff_weight    = vehicle.mass_properties.takeoff
-    zero_fuel_weight         = vehicle.mass_properties.breakdown.zero_fuel_weight
+    zero_fuel_weight         = vehicle.mass_properties.breakdown.zero_fuel_weight[0]
+    design_landing_weight    = results.base.segments[-1].conditions.weights.total_mass[-1,0]
+    max_zero_fuel_margin     = (design_landing_weight- zero_fuel_weight)/zero_fuel_weight
+    base_mission_fuelburn    = vehicle.mass_properties.takeoff - results.base.segments['descent_3'].conditions.weights.total_mass[-1,0]
+    summary.max_zero_fuel_margin  = max_zero_fuel_margin
+    summary.base_mission_fuelburn = base_mission_fuelburn
     
-    summary.max_zero_fuel_margin  = (design_landing_weight - zero_fuel_weight)/zero_fuel_weight
-    summary.base_mission_fuelburn = design_takeoff_weight - results.base.segments['descent_3'].conditions.weights.total_mass[-1]
+    # wing loading and power loading 
+    wing_loading          = MTOW*9.81/S_ref
+    power_loading         = MTOW*9.81/max_power
+    summary.wing_loading  = wing_loading
+    summary.power_loading = power_loading
     
 
-
+    # ----------------------------------------------------------------------       
+    # PRINT OPTIMIZATION RESULTS
+    # ----------------------------------------------------------------------   
+    print('\n\nMTOW (kg)              : ',MTOW)
+    print('Wing Area  (m^2)       : ',S_ref)
+    print('Max zero-fuel margin   : ',max_zero_fuel_margin)
+    print('fuel burn (kg)         : ',base_mission_fuelburn)
+    print('Wing Loading  (kg/m^2) : ',wing_loading)
+    print('Power Loading (kg/W)   : ',power_loading)
+    
     # when you run want to output results to a file 
     #filename = 'results.txt' 
     #write_optimization_outputs(nexus, filename)    
