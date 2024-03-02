@@ -6,14 +6,12 @@
 # RCAIDE imports 
 import RCAIDE
 from RCAIDE.Core import Units , Data 
-from RCAIDE.Energy.Networks.All_Electric                                         import All_Electric
-from RCAIDE.Methods.Energy.Propulsion.Converters.Rotor                           import design_propeller
-from RCAIDE.Methods.Energy.Propulsion.Converters.Motor                           import size_optimal_motor 
-from RCAIDE.Methods.Weights.Correlation_Buildups.Propulsion                      import nasa_motor
-from RCAIDE.Methods.Weights.Physics_Based_Buildups.Electric                      import compute_weight , converge_weight 
-
-from RCAIDE.Methods.Energy.Sources.Battery.Sizing                                import initialize_from_circuit_configuration
-from RCAIDE.Methods.Geometry.Two_Dimensional.Planform                            import wing_segmented_planform
+from RCAIDE.Energy.Networks.All_Electric_Network            import All_Electric_Network
+from RCAIDE.Methods.Energy.Propulsors.Converters.Rotor      import design_propeller 
+from RCAIDE.Methods.Energy.Propulsors.Converters.DC_Motor   import design_motor 
+from RCAIDE.Methods.Weights.Correlation_Buildups.Propulsion import nasa_motor
+from RCAIDE.Methods.Energy.Sources.Battery.Common           import initialize_from_circuit_configuration
+from RCAIDE.Methods.Geometry.Two_Dimensional.Planform       import wing_segmented_planform   
 from RCAIDE.Visualization                                                        import *     
 from RCAIDE.Methods.Energy.Thermal_Management.Batteries.Heat_Exchanger_Systems.Cross_Flow_Heat_Exchanger        import design_cross_flow_heat_exchanger
 from RCAIDE.Methods.Energy.Thermal_Management.Batteries.Heat_Acquisition_Systems.Wavy_Channel_Heat_Acquisition   import design_wavy_channel 
@@ -463,23 +461,21 @@ def vehicle_setup():
     nacelle_2.tag      = 'nacelle_2'
     nacelle_2.origin   = [[2.5,-2.5,1.0]]
     vehicle.append_component(nacelle_2)    
- 
+    
+    
 
+ 
     # ########################################################  Energy Network  #########################################################  
-    net                              = All_Electric()   
+    net                              = All_Electric_Network()   
 
     #------------------------------------------------------------------------------------------------------------------------------------  
     # Bus
     #------------------------------------------------------------------------------------------------------------------------------------  
-    bus                              = RCAIDE.Energy.Networks.Distribution.Electrical_Bus() 
-    bus.identical_propulsors        = False # only for regression 
-
-
- 
+    bus                              = RCAIDE.Energy.Networks.Distribution.Electrical_Bus()  
 
     #------------------------------------------------------------------------------------------------------------------------------------           
     # Battery
-    #------------------------------------------------------------------------------------------------------------------------------------  
+    #------------------------------------------------------------------------------------------------------------------------------------   
     bat                                                    = RCAIDE.Energy.Sources.Batteries.Lithium_Ion_NMC() 
     bat.pack.electrical_configuration.series               = 140   
     bat.pack.electrical_configuration.parallel             = 100
@@ -492,40 +488,41 @@ def vehicle_setup():
     bat.module.number_of_cells                             = bat.module.geometrtic_configuration.normal_count *bat.module.geometrtic_configuration.parallel_count 
     bus.voltage                                            = bat.pack.maximum_voltage   
     
-    # Battery Heat Removal System 
-    HAS                                                    = RCAIDE.Energy.Thermal_Management.Batteries.Heat_Acquisition_Systems.Wavy_Channel() 
-    HAS.design_altitude                                    = 2500. * Units.feet  
-    atmosphere                                             = RCAIDE.Analyses.Atmospheric.US_Standard_1976() 
-    atmo_data                                              = atmosphere.compute_values(altitude =HAS.design_altitude)     
-    HAS.coolant_inlet_temperature                          = atmo_data.temperature[0,0]  
-    HAS.design_battery_operating_temperature               = 303
-    HAS.design_heat_removed                                = 50000  
-    HAS                                                    = design_wavy_channel(HAS,bat) 
-    bat.thermal_management_system.heat_removal_system      = HAS
+    ## Battery Heat Removal System 
+    #HAS                                                    = RCAIDE.Energy.Thermal_Management.Batteries.Heat_Acquisition_Systems.Wavy_Channel() 
+    #HAS.design_altitude                                    = 2500. * Units.feet  
+    #atmosphere                                             = RCAIDE.Analyses.Atmospheric.US_Standard_1976() 
+    #atmo_data                                              = atmosphere.compute_values(altitude =HAS.design_altitude)     
+    #HAS.coolant_inlet_temperature                          = atmo_data.temperature[0,0]  
+    #HAS.design_battery_operating_temperature               = 303
+    #HAS.design_heat_removed                                = 50000  
+    #HAS                                                    = design_wavy_channel(HAS,bat) 
+    #bat.thermal_management_system.heat_removal_system      = HAS
                   
-    # Battery Heat Exchanger               
-    HEX                                                    = RCAIDE.Energy.Thermal_Management.Batteries.Heat_Exchanger_Systems.Cross_Flow_Heat_Exchanger() 
-    HEX.design_altitude                                    = 2500. * Units.feet 
-    HEX.inlet_temperature_of_cold_fluid                    = atmo_data.temperature[0,0]   
-    HEX                                                    = design_cross_flow_heat_exchanger(HEX,HAS,bat)
-    bat.thermal_management_system.heat_exchanger_system    = HEX  
+    ## Battery Heat Exchanger               
+    #HEX                                                    = RCAIDE.Energy.Thermal_Management.Batteries.Heat_Exchanger_Systems.Cross_Flow_Heat_Exchanger() 
+    #HEX.design_altitude                                    = 2500. * Units.feet 
+    #HEX.inlet_temperature_of_cold_fluid                    = atmo_data.temperature[0,0]   
+    #HEX                                                    = design_cross_flow_heat_exchanger(HEX,HAS,bat)
+    #bat.thermal_management_system.heat_exchanger_system    = HEX  
     
     bus.batteries.append(bat)              
-    
 
     #------------------------------------------------------------------------------------------------------------------------------------  
     #  Starboard Propulsor
     #------------------------------------------------------------------------------------------------------------------------------------   
-    starboard_propulsor  = RCAIDE.Energy.Propulsion.Propulsor()  
- 
-    # Electronic Speed Controller      
-    esc            = RCAIDE.Energy.Propulsion.Modulators.Electronic_Speed_Controller()
-    esc.tag        = 'esc_1'
-    esc.efficiency = 0.95 
-    starboard_propulsor.electronic_speed_controller = esc   
+    starboard_propulsor                              = RCAIDE.Energy.Propulsors.Electric_Rotor()  
+    starboard_propulsor.tag                          = 'starboard_propulsor'
+    starboard_propulsor.active_batteries             = ['li_ion_battery']   
+  
+    # Electronic Speed Controller       
+    esc                                              = RCAIDE.Energy.Propulsors.Modulators.Electronic_Speed_Controller()
+    esc.tag                                          = 'esc_1'
+    esc.efficiency                                   = 0.95 
+    starboard_propulsor.electronic_speed_controller  = esc   
      
     # Propeller              
-    propeller                                        = RCAIDE.Energy.Propulsion.Converters.Propeller() 
+    propeller                                        = RCAIDE.Energy.Propulsors.Converters.Propeller() 
     propeller.tag                                    = 'propeller_1'  
     propeller.tip_radius                             = 1.72/2   
     propeller.number_of_blades                       = 3
@@ -537,21 +534,22 @@ def vehicle_setup():
     propeller.cruise.design_thrust                   = 2000   
     propeller.clockwise_rotation                     = False
     propeller.variable_pitch                         = True  
-    propeller.origin                                 = [[2.,2.5,0.95]] 
-    airfoil                                          = RCAIDE.Components.Airfoils.Airfoil()    
-    airfoil.coordinate_file                          = '../Airfoils/NACA_4412.txt'
-    airfoil.polar_files                              = ['../Airfoils/Polars/NACA_4412_polar_Re_50000.txt' ,
-                                                     '../Airfoils/Polars/NACA_4412_polar_Re_100000.txt' ,
-                                                     '../Airfoils/Polars/NACA_4412_polar_Re_200000.txt' ,
-                                                     '../Airfoils/Polars/NACA_4412_polar_Re_500000.txt' ,
-                                                     '../Airfoils/Polars/NACA_4412_polar_Re_1000000.txt' ] 
-    propeller.append_airfoil(airfoil)              
+    propeller.origin                                 = [[2.,2.5,0.95]]   
+    airfoil                                          = RCAIDE.Components.Airfoils.Airfoil()
+    airfoil.tag                                      = 'NACA_4412' 
+    airfoil.coordinate_file                          =  rel_path + 'Airfoils' + separator + 'NACA_4412.txt'   # absolute path   
+    airfoil.polar_files                              =[ rel_path + 'Airfoils' + separator + 'Polars' + separator + 'NACA_4412_polar_Re_50000.txt',
+                                                        rel_path + 'Airfoils' + separator + 'Polars' + separator + 'NACA_4412_polar_Re_100000.txt',
+                                                        rel_path + 'Airfoils' + separator + 'Polars' + separator + 'NACA_4412_polar_Re_200000.txt',
+                                                        rel_path + 'Airfoils' + separator + 'Polars' + separator + 'NACA_4412_polar_Re_500000.txt',
+                                                        rel_path + 'Airfoils' + separator + 'Polars' + separator + 'NACA_4412_polar_Re_1000000.txt']   
+    propeller.append_airfoil(airfoil)                       
     propeller.airfoil_polar_stations                 = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0] 
     propeller                                        = design_propeller(propeller)    
     starboard_propulsor.rotor                        = propeller   
               
-    # Motor       
-    motor                                            = RCAIDE.Energy.Propulsion.Converters.Motor()
+    # DC_Motor       
+    motor                                            = RCAIDE.Energy.Propulsors.Converters.DC_Motor()
     motor.efficiency                                 = 0.98
     motor.origin                                     = [[2.,  2.5, 0.95]]
     motor.nominal_voltage                            = bat.pack.maximum_voltage*0.5
@@ -559,7 +557,7 @@ def vehicle_setup():
     motor.rotor_radius                               = propeller.tip_radius
     motor.design_torque                              = propeller.cruise.design_torque
     motor.angular_velocity                           = propeller.cruise.design_angular_velocity 
-    motor                                            = size_optimal_motor(motor)  
+    motor                                            = design_motor(motor)  
     motor.mass_properties.mass                       = nasa_motor(motor.design_torque) 
     starboard_propulsor.motor                        = motor 
  
@@ -569,7 +567,9 @@ def vehicle_setup():
     #------------------------------------------------------------------------------------------------------------------------------------  
     # Port Propulsor
     #------------------------------------------------------------------------------------------------------------------------------------   
-    port_propulsor                             = RCAIDE.Energy.Propulsion.Propulsor() 
+    port_propulsor                             = RCAIDE.Energy.Propulsors.Electric_Rotor() 
+    port_propulsor.tag                         = "port_propulsor"
+    port_propulsor.active_batteries            = ['li_ion_battery']   
             
     esc_2                                      = deepcopy(esc)
     esc_2.origin                               = [[2., -2.5, 0.95]]      
@@ -611,7 +611,7 @@ def vehicle_setup():
 
     # ------------------------------------------------------------------
     #   Vehicle Definition Complete
-    # ------------------------------------------------------------------
+    # ------------------------------------------------------------------ 
     
     return vehicle
 # ---------------------------------------------------------------------
@@ -714,7 +714,17 @@ def mission_setup(analyses):
     segment.altitude_start                                   = 0.0 * Units.feet
     segment.altitude_end                                     = 50.0 * Units.feet
     segment.air_speed_start                                  = 45  * Units['m/s'] 
-    segment.air_speed_end                                    = 45        
+    segment.air_speed_end                                    = 45   
+    
+    # define flight dynamics to model 
+    segment.flight_dynamics.force_x                      = True  
+    segment.flight_dynamics.force_z                      = True     
+    
+    # define flight controls 
+    segment.flight_controls.throttle.active               = True           
+    segment.flight_controls.throttle.assigned_propulsors  = [['starboard_propulsor','port_propulsor']] 
+    segment.flight_controls.body_angle.active             = True                
+            
     mission.append_segment(segment)
     
     # ------------------------------------------------------------------
@@ -727,7 +737,17 @@ def mission_setup(analyses):
     segment.altitude_end                                     = 500.0 * Units.feet
     segment.air_speed_start                                  = 45  * Units['m/s']   
     segment.air_speed_end                                    = 50 * Units['m/s']   
-    segment.climb_rate                                       = 600 * Units['ft/min']    
+    segment.climb_rate                                       = 600 * Units['ft/min'] 
+    
+    # define flight dynamics to model 
+    segment.flight_dynamics.force_x                      = True  
+    segment.flight_dynamics.force_z                      = True     
+    
+    # define flight controls 
+    segment.flight_controls.throttle.active               = True           
+    segment.flight_controls.throttle.assigned_propulsors  = [['starboard_propulsor','port_propulsor']] 
+    segment.flight_controls.body_angle.active             = True                
+          
     mission.append_segment(segment) 
              
     # ------------------------------------------------------------------
@@ -739,7 +759,17 @@ def mission_setup(analyses):
     segment.altitude_start                                   = 500.0 * Units.feet
     segment.altitude_end                                     = 2500 * Units.feet
     segment.air_speed                                        = 120 * Units['mph']
-    segment.climb_rate                                       = 500* Units['ft/min']   
+    segment.climb_rate                                       = 500* Units['ft/min']  
+    
+    # define flight dynamics to model 
+    segment.flight_dynamics.force_x                      = True  
+    segment.flight_dynamics.force_z                      = True     
+    
+    # define flight controls 
+    segment.flight_controls.throttle.active               = True           
+    segment.flight_controls.throttle.assigned_propulsors  = [['starboard_propulsor','port_propulsor']] 
+    segment.flight_controls.body_angle.active             = True                
+        
     mission.append_segment(segment) 
     
     # ------------------------------------------------------------------
@@ -752,7 +782,17 @@ def mission_setup(analyses):
     segment.altitude_start                   = 2500.0  * Units.feet
     segment.altitude_end                     = 8012    * Units.feet 
     segment.air_speed                        = 96.4260 * Units['mph'] 
-    segment.climb_rate                       = 700.034 * Units['ft/min']      
+    segment.climb_rate                       = 700.034 * Units['ft/min']    
+    
+    # define flight dynamics to model 
+    segment.flight_dynamics.force_x                      = True  
+    segment.flight_dynamics.force_z                      = True     
+    
+    # define flight controls 
+    segment.flight_controls.throttle.active               = True           
+    segment.flight_controls.throttle.assigned_propulsors  = [['starboard_propulsor','port_propulsor']] 
+    segment.flight_controls.body_angle.active             = True                
+         
     mission.append_segment(segment)
 
     # ------------------------------------------------------------------
@@ -763,7 +803,17 @@ def mission_setup(analyses):
     segment.analyses.extend(analyses.base) 
     segment.altitude                  = 8012   * Units.feet
     segment.air_speed                 = 120.91 * Units['mph'] 
-    segment.distance                  = 50.   * Units.nautical_mile        
+    segment.distance                  = 50.   * Units.nautical_mile      
+    
+    # define flight dynamics to model 
+    segment.flight_dynamics.force_x                      = True  
+    segment.flight_dynamics.force_z                      = True     
+    
+    # define flight controls 
+    segment.flight_controls.throttle.active               = True           
+    segment.flight_controls.throttle.assigned_propulsors  = [['starboard_propulsor','port_propulsor']] 
+    segment.flight_controls.body_angle.active             = True                
+         
     mission.append_segment(segment)    
 
 
@@ -777,7 +827,17 @@ def mission_setup(analyses):
     segment.altitude_end                                     = 1000.0 * Units.feet
     segment.air_speed_start                                  = 130.* Units['mph']  
     segment.air_speed_end                                    = 120 * Units['mph']   
-    segment.climb_rate                                       = -200 * Units['ft/min']     
+    segment.climb_rate                                       = -200 * Units['ft/min']   
+    
+    # define flight dynamics to model 
+    segment.flight_dynamics.force_x                      = True  
+    segment.flight_dynamics.force_z                      = True     
+    
+    # define flight controls 
+    segment.flight_controls.throttle.active               = True           
+    segment.flight_controls.throttle.assigned_propulsors  = [['starboard_propulsor','port_propulsor']] 
+    segment.flight_controls.body_angle.active             = True                
+         
     mission.append_segment(segment)   
 
     # ------------------------------------------------------------------
@@ -789,7 +849,17 @@ def mission_setup(analyses):
     segment.air_speed                                        = 120 * Units['mph']           
     segment.distance                                         = 6000 * Units.feet
     segment.acceleration                                     = -0.025  * Units['m/s/s']   
-    segment.descent_rate                                     = 300 * Units['ft/min']           
+    segment.descent_rate                                     = 300 * Units['ft/min']   
+    
+    # define flight dynamics to model 
+    segment.flight_dynamics.force_x                      = True  
+    segment.flight_dynamics.force_z                      = True     
+    
+    # define flight controls 
+    segment.flight_controls.throttle.active               = True           
+    segment.flight_controls.throttle.assigned_propulsors  = [['starboard_propulsor','port_propulsor']] 
+    segment.flight_controls.body_angle.active             = True                
+               
     mission.append_segment(segment)     
     
     # ------------------------------------------------------------------
@@ -801,6 +871,16 @@ def mission_setup(analyses):
     segment.altitude_end                                     = 1500 * Units.feet
     segment.air_speed                                        = 120 * Units['mph']
     segment.climb_rate                                       = 500* Units['ft/min']   
+    
+    # define flight dynamics to model 
+    segment.flight_dynamics.force_x                      = True  
+    segment.flight_dynamics.force_z                      = True     
+    
+    # define flight controls 
+    segment.flight_controls.throttle.active               = True           
+    segment.flight_controls.throttle.assigned_propulsors  = [['starboard_propulsor','port_propulsor']] 
+    segment.flight_controls.body_angle.active             = True                
+       
     mission.append_segment(segment)
     
     # ------------------------------------------------------------------
@@ -811,6 +891,16 @@ def mission_setup(analyses):
     segment.analyses.extend(analyses.base) 
     segment.air_speed                                        = 145* Units['mph']
     segment.distance                                         = 60 * Units.miles * 0.1  
+    
+    # define flight dynamics to model 
+    segment.flight_dynamics.force_x                      = True  
+    segment.flight_dynamics.force_z                      = True     
+    
+    # define flight controls 
+    segment.flight_controls.throttle.active               = True           
+    segment.flight_controls.throttle.assigned_propulsors  = [['starboard_propulsor','port_propulsor']] 
+    segment.flight_controls.body_angle.active             = True                
+       
     mission.append_segment(segment)     
     
     # ------------------------------------------------------------------
@@ -822,6 +912,16 @@ def mission_setup(analyses):
     segment.altitude_end                                     = 1000 * Units.feet 
     segment.air_speed                                        = 110 * Units['mph']
     segment.descent_rate                                     = 300 * Units['ft/min']   
+    
+    # define flight dynamics to model 
+    segment.flight_dynamics.force_x                      = True  
+    segment.flight_dynamics.force_z                      = True     
+    
+    # define flight controls 
+    segment.flight_controls.throttle.active               = True           
+    segment.flight_controls.throttle.assigned_propulsors  = [['starboard_propulsor','port_propulsor']] 
+    segment.flight_controls.body_angle.active             = True                
+       
     mission.append_segment(segment)  
 
     
@@ -837,6 +937,16 @@ def mission_setup(analyses):
     segment.air_speed_end                                    = 40    
     segment.climb_rate                                       = -350 * Units['ft/min'] 
     mission.append_segment(segment) 
+    
+    # define flight dynamics to model 
+    segment.flight_dynamics.force_x                      = True  
+    segment.flight_dynamics.force_z                      = True     
+    
+    # define flight controls 
+    segment.flight_controls.throttle.active               = True           
+    segment.flight_controls.throttle.assigned_propulsors  = [['starboard_propulsor','port_propulsor']] 
+    segment.flight_controls.body_angle.active             = True                
+       
 
     # ------------------------------------------------------------------
     #  Final Approach Segment Flight 1  
@@ -849,7 +959,17 @@ def mission_setup(analyses):
     segment.altitude_end                                     = 00.0 * Units.feet
     segment.air_speed_start                                  = 40 
     segment.air_speed_end                                    = 35   
-    segment.climb_rate                                       = -300 * Units['ft/min']        
+    segment.climb_rate                                       = -300 * Units['ft/min'] 
+    
+    # define flight dynamics to model 
+    segment.flight_dynamics.force_x                      = True  
+    segment.flight_dynamics.force_z                      = True     
+    
+    # define flight controls 
+    segment.flight_controls.throttle.active               = True           
+    segment.flight_controls.throttle.assigned_propulsors  = [['starboard_propulsor','port_propulsor']] 
+    segment.flight_controls.body_angle.active             = True                
+              
     mission.append_segment(segment)  
  
     # ------------------------------------------------------------------
@@ -886,7 +1006,11 @@ def plot_mission(results):
 
     plot_rotor_conditions(results) 
 
-    plot_electric_efficiencies(results)
+    plot_electric_propulsor_efficiencies(results)
+    
+    plot_heat_acquisition_system_conditions(results)
+    
+    plot_heat_exchanger_system_conditions(results)
      
     return
  

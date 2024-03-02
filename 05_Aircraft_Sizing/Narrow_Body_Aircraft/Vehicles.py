@@ -726,7 +726,16 @@ def configs_setup(vehicle):
 
     config = RCAIDE.Components.Configs.Config(base_config)
     config.tag = 'cruise'
-    configs.append(config)
+    configs.append(config) 
+
+    # ------------------------------------------------------------------
+    #   Cruise with Spoilers Configuration
+    # ------------------------------------------------------------------
+
+    config = RCAIDE.Components.Configs.Config(base_config)
+    config.tag = 'cruise_spoilers' 
+    config.maximum_lift_coefficient = 1.2  
+    configs.append(config)   
 
 
     # ------------------------------------------------------------------
