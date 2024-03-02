@@ -9,7 +9,7 @@ import numpy as np
 import RCAIDE
 from RCAIDE.Core import Units, Data
 from RCAIDE.Analyses.Process import Process 
-from RCAIDE.Methods.Energy.Propulsors.Turbofan_Propulsor   import design_turbofan,compute_turbofan_geometry  
+from RCAIDE.Methods.Energy.Propulsors.Turbofan_Propulsor   import design_turbofan,compute_nacelle_geometry
 from RCAIDE.Optimization.Common             import write_optimization_outputs
 
 # ----------------------------------------------------------------------        
@@ -127,11 +127,11 @@ def resize_aircraft(nexus):
         
         for network in config.networks:
             for fuel_line in network.fuel_lines:
-                for turbofan in fuel_line.turbofans: 
+                for turbofan in fuel_line.propulsors: 
                     turbofan.design_mach_number = mach_number
                     turbofan.design_altitude    = altitude
                     design_turbofan(turbofan)
-                    compute_turbofan_geometry(turbofan,turbofan.nacelle)
+                    compute_nacelle_geometry(turbofan,turbofan.nacelle)
 
     return nexus
 
@@ -143,12 +143,12 @@ def weight(nexus):
     vehicle=nexus.vehicle_configurations.base
 
     # weight analysis
-    weights = nexus.analyses.base.weights.evaluate(method="RCAIDE")
-    weights = nexus.analyses.cruise.weights.evaluate(method="RCAIDE")
+    weights = nexus.analyses.base.weights.evaluate(method="New SUAVE")
+    weights = nexus.analyses.cruise.weights.evaluate(method="New SUAVE")
     vehicle.mass_properties.breakdown = weights
-    weights = nexus.analyses.landing.weights.evaluate(method="RCAIDE")
-    weights = nexus.analyses.takeoff.weights.evaluate(method="RCAIDE")
-    weights = nexus.analyses.short_field_takeoff.weights.evaluate(method="RCAIDE")
+    weights = nexus.analyses.landing.weights.evaluate(method="New SUAVE")
+    weights = nexus.analyses.takeoff.weights.evaluate(method="New SUAVE")
+    weights = nexus.analyses.short_field_takeoff.weights.evaluate(method="New SUAVE")
 
     return nexus
 
@@ -175,11 +175,15 @@ def post_process(nexus):
     nexus.total_number_of_iterations +=1
     
     #throttle in design mission
-    max_throttle = 0
-    for segment in results.base.segments.values():
-        max_segment_throttle = np.max(segment.conditions.propulsion.throttle[:,0])
-        if max_segment_throttle > max_throttle:
-            max_throttle = max_segment_throttle
+    max_throttle = 0 
+    for i in range(len(results.base.segments)):  
+        for network in results.base.segments[i].analyses.energy.networks: 
+            busses      = network.busses 
+            for bus in busses:
+                for propulsor in bus.propulsors:  
+                    max_segment_throttle = np.max(results.base.segments[i].conditions.energy[bus.tag][propulsor.tag].throttle[:,0])
+                    if max_segment_throttle > max_throttle:
+                        max_throttle = max_segment_throttle     
             
     summary.max_throttle = max_throttle
     
@@ -191,8 +195,9 @@ def post_process(nexus):
     summary.max_zero_fuel_margin  = (design_landing_weight - zero_fuel_weight)/zero_fuel_weight
     summary.base_mission_fuelburn = design_takeoff_weight - results.base.segments['descent_3'].conditions.weights.total_mass[-1]
     
-    #when you run want to output results to a file
-    filename = 'results.txt'
-    write_optimization_outputs(nexus, filename)
-   
+
+
+    # when you run want to output results to a file 
+    #filename = 'results.txt' 
+    #write_optimization_outputs(nexus, filename)    
     return nexus    

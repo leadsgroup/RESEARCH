@@ -8,7 +8,8 @@
 import RCAIDE
 from RCAIDE.Core import Units   
 from RCAIDE.Methods.Geometry.Two_Dimensional.Planform      import segment_properties   
-from RCAIDE.Methods.Energy.Propulsors.Turbofan_Propulsor   import design_turbofan
+from RCAIDE.Methods.Energy.Propulsors.Turbofan_Propulsor   import design_turbofan , compute_nacelle_geometry
+from RCAIDE.Methods.Stability.Center_of_Gravity            import compute_component_centers_of_gravity
 from RCAIDE.Methods.Geometry.Two_Dimensional.Planform      import segment_properties
 from RCAIDE.Visualization                 import *     
 
@@ -29,6 +30,8 @@ def setup():
     return configs 
 
 def vehicle_setup():   
+    
+
     # ------------------------------------------------------------------
     #   Initialize the Vehicle
     # ------------------------------------------------------------------    
@@ -96,7 +99,7 @@ def vehicle_setup():
     root_airfoil                          = RCAIDE.Components.Airfoils.Airfoil()
     ospath                                = os.path.abspath(__file__)
     separator                             = os.path.sep
-    rel_path                              = os.path.dirname(ospath) + separator + '..' + separator  
+    rel_path                              = os.path.dirname(ospath) + separator   
     root_airfoil.coordinate_file          = rel_path  + 'Airfoils' + separator + 'B737a.txt'
     segment                               = RCAIDE.Components.Wings.Segment()
     segment.tag                           = 'Root'
@@ -486,66 +489,7 @@ def vehicle_setup():
     
     # add to vehicle
     vehicle.append_component(fuselage)
-    
-
-    # ################################################# Nacelles ##################################################################        
-
-    # -----------------------------------------------------------------
-    # Design the Nacelle
-    # ----------------------------------------------------------------- 
-    nacelle                               = RCAIDE.Components.Nacelles.Nacelle()
-    nacelle.diameter                      = 2.05
-    nacelle.length                        = 2.71
-    nacelle.tag                           = 'nacelle_1'
-    nacelle.inlet_diameter                = 2.0
-    nacelle.origin                        = [[13.5,4.38,-1.5]]
-    Awet                                  = 1.1*np.pi*nacelle.diameter*nacelle.length # 1.1 is simple coefficient
-    nacelle.areas.wetted                  = Awet   
-    nacelle.Airfoil.NACA_4_series_flag    = True 
-    nacelle.Airfoil.coordinate_file       = '2410' 
-    
-  
-    nac_segment                           = RCAIDE.Components.Lofted_Body_Segment.Segment()
-    nac_segment.tag                       = 'segment_1'
-    nac_segment.percent_x_location        = 0.0  
-    nac_segment.height                    = 2.05
-    nac_segment.width                     = 2.05
-    nacelle.append_segment(nac_segment)   
-    
-    nac_segment                           = RCAIDE.Components.Lofted_Body_Segment.Segment()
-    nac_segment.tag                       = 'segment_2'
-    nac_segment.percent_x_location        = 0.3
-    nac_segment.height                    = 2.1  
-    nac_segment.width                     = 2.1 
-    nacelle.append_segment(nac_segment)   
-    
-    nac_segment                           = RCAIDE.Components.Lofted_Body_Segment.Segment()
-    nac_segment.tag                       = 'segment_3'
-    nac_segment.percent_x_location        = 0.4  
-    nac_segment.height                    = 2.05
-    nac_segment.width                     = 2.05 
-    nacelle.append_segment(nac_segment)  
      
-    nac_segment                           = RCAIDE.Components.Lofted_Body_Segment.Segment()
-    nac_segment.tag                       = 'segment_4'
-    nac_segment.percent_x_location        = 0.75  
-    nac_segment.height                    = 1.9
-    nac_segment.width                     = 1.9
-    nacelle.append_segment(nac_segment)  
-    
-    nac_segment                          = RCAIDE.Components.Lofted_Body_Segment.Segment()
-    nac_segment.tag                      = 'segment_5'
-    nac_segment.percent_x_location       = 1.0
-    nac_segment.height                   = 1.7 
-    nac_segment.width                    = 1.7
-    nacelle.append_segment(nac_segment)    
-        
-    nacelle_2                             = deepcopy(nacelle)
-    nacelle_2.tag                         = 'nacelle_2'
-    nacelle_2.origin                      = [[13.5,-4.38,-1.5]]
-    
-    vehicle.append_component(nacelle)   
-    vehicle.append_component(nacelle_2)   
 
     # ################################################# Energy Network #######################################################         
     # Step 1: Define network
@@ -556,10 +500,10 @@ def vehicle_setup():
     #------------------------------------------------------------------------------------------------------------------------- 
     #  Turbofan Network
     #-------------------------------------------------------------------------------------------------------------------------   
-    network                                         = RCAIDE.Energy.Networks.Turbofan_Engine_Network() 
+    net                                         = RCAIDE.Energy.Networks.Turbofan_Engine_Network() 
 
     # Append energy network to aircraft 
-    vehicle.append_energy_network(network)   
+    vehicle.append_energy_network(net)   
     
     #------------------------------------------------------------------------------------------------------------------------- 
     # Fuel Distrubition Line 
@@ -653,6 +597,59 @@ def vehicle_setup():
     
     # design turbofan
     design_turbofan(turbofan)  
+    
+
+ 
+    # Nacelle 
+    nacelle                                     = RCAIDE.Components.Nacelles.Nacelle()
+    nacelle.diameter                            = 2.05
+    nacelle.length                              = 2.71
+    nacelle.tag                                 = 'nacelle_1'
+    nacelle.inlet_diameter                      = 2.0
+    nacelle.origin                              = [[13.5,4.38,-1.5]] 
+    nacelle.areas.wetted                        = 1.1*np.pi*nacelle.diameter*nacelle.length
+    nacelle.Airfoil.NACA_4_series_flag          = True 
+    nacelle.Airfoil.coordinate_file             = '2410' 
+           
+         
+    nac_segment                                 = RCAIDE.Components.Lofted_Body_Segment.Segment()
+    nac_segment.tag                             = 'segment_1'
+    nac_segment.percent_x_location              = 0.0  
+    nac_segment.height                          = 2.05
+    nac_segment.width                           = 2.05
+    nacelle.append_segment(nac_segment)         
+           
+    nac_segment                                 = RCAIDE.Components.Lofted_Body_Segment.Segment()
+    nac_segment.tag                             = 'segment_2'
+    nac_segment.percent_x_location              = 0.3
+    nac_segment.height                          = 2.1  
+    nac_segment.width                           = 2.1 
+    nacelle.append_segment(nac_segment)         
+           
+    nac_segment                                 = RCAIDE.Components.Lofted_Body_Segment.Segment()
+    nac_segment.tag                             = 'segment_3'
+    nac_segment.percent_x_location              = 0.4  
+    nac_segment.height                          = 2.05
+    nac_segment.width                           = 2.05 
+    nacelle.append_segment(nac_segment)         
+            
+    nac_segment                                 = RCAIDE.Components.Lofted_Body_Segment.Segment()
+    nac_segment.tag                             = 'segment_4'
+    nac_segment.percent_x_location              = 0.75  
+    nac_segment.height                          = 1.9
+    nac_segment.width                           = 1.9
+    nacelle.append_segment(nac_segment)         
+    
+    nac_segment                                 = RCAIDE.Components.Lofted_Body_Segment.Segment()
+    nac_segment.tag                             = 'segment_5'
+    nac_segment.percent_x_location              = 1.0
+    nac_segment.height                          = 1.7 
+    nac_segment.width                           = 1.7
+    nacelle.append_segment(nac_segment)           
+    compute_nacelle_geometry(turbofan, nacelle)
+    turbofan.nacelle                            = nacelle
+    
+    
     # append propulsor to distribution line 
     fuel_line.propulsors.append(turbofan)  
 
@@ -660,10 +657,11 @@ def vehicle_setup():
     # Propulsor: Port Propulsor
     #------------------------------------------------------------------------------------------------------------------------------------      
     # copy turbofan
-    turbofan_2                             = deepcopy(turbofan)
-    turbofan_2.active_fuel_tanks           = ['fuel_tank'] 
-    turbofan_2.tag                         = 'port_propulsor' 
-    turbofan_2.origin                      = [[13.72,-4.38,-1.1]]  # change origin
+    turbofan_2                                  = deepcopy(turbofan)
+    turbofan_2.active_fuel_tanks                = ['fuel_tank'] 
+    turbofan_2.tag                              = 'port_propulsor' 
+    turbofan_2.origin                           = [[13.72,-4.38,-1.1]]  # change origin 
+    turbofan_2.nacelle.origin                   = [[13.5,-4.38,-1.5]]
          
     # append propulsor to distribution line 
     fuel_line.propulsors.append(turbofan_2)
@@ -687,18 +685,20 @@ def vehicle_setup():
     fuel_line.fuel_tanks.append(fuel_tank) 
 
     # Append fuel line to Network      
-    network.fuel_lines.append(fuel_line)  
+    net.fuel_lines.append(fuel_line)  
     
     #------------------------------------------------------------------------------------------------------------------------- 
     # Compute Center of Gravity of aircraft (Optional)
     #------------------------------------------------------------------------------------------------------------------------- 
    
-    vehicle.center_of_gravity()     
+    vehicle.center_of_gravity()    
+    compute_component_centers_of_gravity(vehicle)
     
     #------------------------------------------------------------------------------------------------------------------------- 
     # Done ! 
     #------------------------------------------------------------------------------------------------------------------------- 
-          
+    
+        
     return vehicle
  
 

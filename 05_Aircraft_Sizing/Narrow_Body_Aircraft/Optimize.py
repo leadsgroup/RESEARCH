@@ -32,7 +32,7 @@ def main():
     #variable_sweep(problem)
     
     # Uncomment for the first optimization
-    output = scipy_setup.SciPy_Solve(problem,solver='SLSQP')
+    output = scipy_setup.SciPy_Solve(problem,solver='SLSQP', sense_step =  1e-4, tolerance = 1e-3)
     print (output)    
 
     print('fuel burn = ', problem.summary.base_mission_fuelburn)
@@ -57,8 +57,8 @@ def setup():
 
     #   [ tag                   , initial,     lb , ub        , scaling , units ]
     problem.inputs = np.array([
-        [ 'wing_area'           ,  92    ,    50. ,   130.    ,   100.  , 1*Units.meter**2],
-        [ 'cruise_altitude'     ,   8    ,     6. ,    12.    ,   10.   , 1*Units.km],
+        [ 'wing_area'           , 124.862  ,  100   ,   140.    ,   1000.  , 1*Units.meter**2],
+        [ 'cruise_altitude'     ,   8      ,     6. ,    12.    ,   10.   , 1*Units.km],
     ],dtype=object)
 
     # -------------------------------------------------------------------
