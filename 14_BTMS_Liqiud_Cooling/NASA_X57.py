@@ -32,14 +32,12 @@ def main():
     # create analyses
     analyses = analyses_setup(configs)
 
-    # mission analyses 
-    mission = mission_setup(analyses)
-
     # create mission instances (for multiple types of missions)
-    missions = missions_setup(mission) 
+    missions = missions_setup(analyses) 
 
     # mission analysis 
     results = missions.base_mission.evaluate()  
+    #results = missions.loiter.evaluate()  
 
     # plot the results
     plot_mission(results) 
@@ -477,34 +475,34 @@ def vehicle_setup():
     # Battery
     #------------------------------------------------------------------------------------------------------------------------------------   
     bat                                                    = RCAIDE.Energy.Sources.Batteries.Lithium_Ion_NMC() 
-    bat.pack.electrical_configuration.series               = 140   
-    bat.pack.electrical_configuration.parallel             = 100
+    bat.pack.electrical_configuration.series               = 128   
+    bat.pack.electrical_configuration.parallel             = 40
     initialize_from_circuit_configuration(bat)  
-    bat.pack.number_of_modules                             = 14  
+    bat.pack.number_of_modules                             = 16  
     bat.module.geometrtic_configuration.total              = bat.pack.electrical_configuration.total
     bat.module.voltage                                     = bat.pack.maximum_voltage/bat.pack.number_of_modules # assumes modules are connected in parallel, must be less than max_module_voltage (~50) /safety_factor (~ 1.5)  
-    bat.module.geometrtic_configuration.normal_count       = 24
-    bat.module.geometrtic_configuration.parallel_count     = 40
+    bat.module.geometrtic_configuration.normal_count       = 16
+    bat.module.geometrtic_configuration.parallel_count     = 20
     bat.module.number_of_cells                             = bat.module.geometrtic_configuration.normal_count *bat.module.geometrtic_configuration.parallel_count 
     bus.voltage                                            = bat.pack.maximum_voltage   
     
-    # Battery Heat Removal System 
-    HAS                                                    = RCAIDE.Energy.Thermal_Management.Batteries.Heat_Acquisition_Systems.Wavy_Channel() 
-    HAS.design_altitude                                    = 2500. * Units.feet  
-    atmosphere                                             = RCAIDE.Analyses.Atmospheric.US_Standard_1976() 
-    atmo_data                                              = atmosphere.compute_values(altitude =HAS.design_altitude)     
-    HAS.coolant_inlet_temperature                          = atmo_data.temperature[0,0]  
-    HAS.design_battery_operating_temperature               = 303
-    HAS.design_heat_removed                                = 50000  
-    HAS                                                    = design_wavy_channel(HAS,bat) 
-    bat.thermal_management_system.heat_removal_system      = HAS
+    ## Battery Heat Removal System 
+    #HAS                                                    = RCAIDE.Energy.Thermal_Management.Batteries.Heat_Acquisition_Systems.Wavy_Channel() 
+    #HAS.design_altitude                                    = 2500. * Units.feet  
+    #atmosphere                                             = RCAIDE.Analyses.Atmospheric.US_Standard_1976() 
+    #atmo_data                                              = atmosphere.compute_values(altitude =HAS.design_altitude)     
+    #HAS.coolant_inlet_temperature                          = atmo_data.temperature[0,0]  
+    #HAS.design_battery_operating_temperature               = 303
+    #HAS.design_heat_removed                                = 50000  
+    #HAS                                                    = design_wavy_channel(HAS,bat) 
+    #bat.thermal_management_system.heat_removal_system      = HAS
                   
-    # Battery Heat Exchanger               
-    HEX                                                    = RCAIDE.Energy.Thermal_Management.Batteries.Heat_Exchanger_Systems.Cross_Flow_Heat_Exchanger() 
-    HEX.design_altitude                                    = 2500. * Units.feet 
-    HEX.inlet_temperature_of_cold_fluid                    = atmo_data.temperature[0,0]   
-    HEX                                                    = design_cross_flow_heat_exchanger(HEX,HAS,bat)
-    bat.thermal_management_system.heat_exchanger_system    = HEX  
+    ## Battery Heat Exchanger               
+    #HEX                                                    = RCAIDE.Energy.Thermal_Management.Batteries.Heat_Exchanger_Systems.Cross_Flow_Heat_Exchanger() 
+    #HEX.design_altitude                                    = 2500. * Units.feet 
+    #HEX.inlet_temperature_of_cold_fluid                    = atmo_data.temperature[0,0]   
+    #HEX                                                    = design_cross_flow_heat_exchanger(HEX,HAS,bat)
+    #bat.thermal_management_system.heat_exchanger_system    = HEX  
     
     bus.batteries.append(bat)              
 
@@ -710,7 +708,7 @@ def mission_setup(analyses):
     segment = Segments.Climb.Linear_Speed_Constant_Rate(base_segment) 
     segment.tag = 'DER'       
     segment.analyses.extend( analyses.base )
-    segment.initial_battery_state_of_charge                  = 0.89   
+    segment.initial_battery_state_of_charge                  = 1.0  
     segment.altitude_start                                   = 0.0 * Units.feet
     segment.altitude_end                                     = 50.0 * Units.feet
     segment.air_speed_start                                  = 45  * Units['m/s'] 
@@ -801,13 +799,13 @@ def mission_setup(analyses):
     segment = Segments.Cruise.Constant_Speed_Constant_Altitude(base_segment)
     segment.tag = "Cruise" 
     segment.analyses.extend(analyses.base) 
-    segment.altitude                  = 8012   * Units.feet
-    segment.air_speed                 = 120.91 * Units['mph'] 
-    segment.distance                  = 50.   * Units.nautical_mile      
+    segment.altitude                                      = 8012   * Units.feet
+    segment.air_speed                                     = 120.91 * Units['mph'] 
+    segment.distance                                      = 50.   * Units.nautical_mile      
     
     # define flight dynamics to model 
-    segment.flight_dynamics.force_x                      = True  
-    segment.flight_dynamics.force_z                      = True     
+    segment.flight_dynamics.force_x                       = True  
+    segment.flight_dynamics.force_z                       = True     
     
     # define flight controls 
     segment.flight_controls.throttle.active               = True           
@@ -978,14 +976,60 @@ def mission_setup(analyses):
     
     return mission 
  
+# ----------------------------------------------------------------------
+#   Define the Mission
+# ---------------------------------------------------------------------- 
 
-def missions_setup(mission): 
+def loiter_mission_setup(analyses):   
+    
+    # ------------------------------------------------------------------
+    #   Initialize the Mission
+    # ------------------------------------------------------------------
+    mission = RCAIDE.Analyses.Mission.Sequential_Segments()
+    mission.tag = 'mission' 
+
+    # unpack Segments module
+    Segments = RCAIDE.Analyses.Mission.Segments  
+    base_segment = Segments.Segment()  
+
+    # ------------------------------------------------------------------
+    #   Cruise Segment: constant Speed, constant altitude
+    # ------------------------------------------------------------------ 
+    segment = Segments.Cruise.Constant_Speed_Constant_Altitude_Loiter(base_segment)
+    segment.tag = "Cruise" 
+    segment.analyses.extend(analyses.base) 
+    segment.initial_battery_state_of_charge               = 1.0  
+    segment.altitude                                      = 8012   * Units.feet
+    segment.air_speed                                     = 120.91 * Units['mph']  
+    segment.time                                          = 0.5*Units.hrs
+    
+    # define flight dynamics to model 
+    segment.flight_dynamics.force_x                       = True  
+    segment.flight_dynamics.force_z                       = True     
+    
+    # define flight controls 
+    segment.flight_controls.throttle.active               = True           
+    segment.flight_controls.throttle.assigned_propulsors  = [['starboard_propulsor','port_propulsor']] 
+    segment.flight_controls.body_angle.active             = True                
+         
+    mission.append_segment(segment)    
+ 
+    
+    return mission 
+
+
+def missions_setup(analyses): 
  
     missions         = RCAIDE.Analyses.Mission.Missions()
     
     # base mission 
-    mission.tag  = 'base_mission'
-    missions.append(mission)
+    base_mission = mission_setup(analyses) 
+    base_mission.tag  = 'base_mission' 
+    missions.append(base_mission) 
+
+    loiter       = loiter_mission_setup(analyses) 
+    loiter.tag  = 'loiter'
+    missions.append(loiter)    
  
     return missions 
 
@@ -999,6 +1043,8 @@ def plot_mission(results):
     plot_aircraft_velocities(results)
     
     plot_battery_pack_conditions(results)
+    
+    plot_propulsor_throttles(results)
     
     plot_battery_cell_conditions(results)
     
