@@ -81,6 +81,20 @@ def design_mission(nexus):
     return nexus
 
 # ----------------------------------------------------------------------        
+#   Design Mission
+# ----------------------------------------------------------------------    
+def design_mission(nexus):
+    mission              = nexus.missions.base
+
+    results      = nexus.results
+    
+    # run mission 
+    results.base = mission.evaluate()
+    
+    return nexus
+
+
+# ----------------------------------------------------------------------        
 #   Sizing
 # ----------------------------------------------------------------------    
 
