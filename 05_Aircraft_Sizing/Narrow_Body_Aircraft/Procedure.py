@@ -30,8 +30,17 @@ def setup():
     procedure.weights = weight
     
     # performance studies
-    procedure.missions                   = Process()
-    procedure.missions.design_mission    = design_mission
+    procedure.missions                                       = Process()
+    procedure.missions.design_mission                        = design_mission
+    procedure.missions.OEI_111c_1_mission                    = OEI_111c_1_mission 
+    procedure.missions.OEI_111c_2_mission                    = OEI_111c_2_mission 
+    procedure.missions.OEI_121_1_mission                     = OEI_121_1_mission 
+    procedure.missions.OEI_121_2_mission                     = OEI_121_2_mission 
+    procedure.missions.Aborted_landing_AEO_119_1_mission     = Aborted_landing_AEO_119_1_mission 
+    procedure.missions.Aborted_landing_AEO_119_2_mission     = Aborted_landing_AEO_119_2_mission
+    procedure.missions.Aborted_landing_OEI_121d_1_mission    = Aborted_landing_OEI_121d_1_mission 
+    procedure.missions.Aborted_landing_OEI_121d_2_mission    = Aborted_landing_OEI_121d_2_mission 
+
 
     # post process the results
     procedure.post_process = post_process
@@ -43,21 +52,12 @@ def setup():
 # ----------------------------------------------------------------------     
 
 # ----------------------------------------------------------------------        
-#   Design Mission
+#  Missions
 # ----------------------------------------------------------------------    
 def design_mission(nexus):
     
     mission              = nexus.missions.base
-    
-    #nexus.missions.OEI_111c_1
-    #nexus.missions.OEI_111c_2
-    #nexus.missions.OEI_121_1
-    #nexus.missions.OEI_121_2
-    #nexus.missions.Aborted_landing_AEO_119_1
-    #nexus.missions.Aborted_landing_AEO_119_2
-    #nexus.missions.Aborted_landing_OEI_121d_1 
-    #nexus.missions.Aborted_landing_OEI_121d_2   
-
+      
     mission.design_range = 1500.*Units.nautical_miles        
     # Given a total target range, compute the cruise distance
     
@@ -85,50 +85,81 @@ def design_mission(nexus):
     results      = nexus.results
     
     # run mission 
-    results.base = mission.evaluate()
-    
-    #nexus.missions.OEI_111c_1
-    #nexus.missions.OEI_111c_2
-    #nexus.missions.OEI_121_1
-    #nexus.missions.OEI_121_2
-    #nexus.missions.Aborted_landing_AEO_119_1
-    #nexus.missions.Aborted_landing_AEO_119_2
-    #nexus.missions.Aborted_landing_OEI_121d_1 
-    #nexus.missions.Aborted_landing_OEI_121d_2      
+    results.base = mission.evaluate()     
     
     return nexus
 
-# ----------------------------------------------------------------------        
-#   Design Mission
-# ----------------------------------------------------------------------    
-def design_mission(nexus):
-    mission              = nexus.missions.base
-    
-    #nexus.missions.OEI_111c_1
-    #nexus.missions.OEI_111c_2
-    #nexus.missions.OEI_121_1
-    #nexus.missions.OEI_121_2
-    #nexus.missions.Aborted_landing_AEO_119_1
-    #nexus.missions.Aborted_landing_AEO_119_2
-    #nexus.missions.Aborted_landing_OEI_121d_1 
-    #nexus.missions.Aborted_landing_OEI_121d_2      
+def OEI_111c_1_mission(nexus):   
+    mission      = nexus.missions.base    
+    results      = nexus.results 
+    results.base = mission.evaluate() 
+           
+    return nexus      
 
-    results      = nexus.results
-    
-    # run mission 
-    results.base = mission.evaluate()
-    
-    #nexus.missions.OEI_111c_1
-    #nexus.missions.OEI_111c_2
-    #nexus.missions.OEI_121_1
-    #nexus.missions.OEI_121_2
-    #nexus.missions.Aborted_landing_AEO_119_1
-    #nexus.missions.Aborted_landing_AEO_119_2
-    #nexus.missions.Aborted_landing_OEI_121d_1 
-    #nexus.missions.Aborted_landing_OEI_121d_2      
-    
+
+def OEI_111c_2_mission(nexus):  
+
+    mission      = nexus.missions.base    
+    results      = nexus.results 
+    results.base = mission.evaluate() 
+        
+    return  nexus     
+
+
+def OEI_121_1_mission(nexus): 
+
+    mission      = nexus.missions.base    
+    results      = nexus.results 
+    results.base = mission.evaluate() 
+        
+    return nexus     
+
+
+def OEI_121_2_mission(nexus): 
+
+    mission      = nexus.missions.base    
+    results      = nexus.results 
+    results.base = mission.evaluate() 
+        
+    return nexus  
+
+
+def Aborted_landing_AEO_119_1_mission(nexus): 
+
+    mission      = nexus.missions.base    
+    results      = nexus.results 
+    results.base = mission.evaluate() 
+        
     return nexus
 
+
+def Aborted_landing_AEO_119_2_mission(nexus): 
+
+    mission      = nexus.missions.base    
+    results      = nexus.results 
+    results.base = mission.evaluate() 
+        
+    return nexus
+
+
+def Aborted_landing_OEI_121d_1_mission(nexus):
+
+    mission      = nexus.missions.base    
+    results      = nexus.results 
+    results.base = mission.evaluate() 
+    
+        
+    return nexus
+
+     
+def Aborted_landing_OEI_121d_2_mission(nexus):
+
+    mission      = nexus.missions.base    
+    results      = nexus.results 
+    results.base = mission.evaluate() 
+    
+    return nexus
+ 
 
 # ----------------------------------------------------------------------        
 #   Sizing
@@ -137,17 +168,8 @@ def design_mission(nexus):
 def resize_aircraft(nexus):
     #by this point, the aircraft paramters are updated 
     
-    configs=nexus.vehicle_configurations
-    base=configs.base
-    
-    #nexus.missions.OEI_111c_1
-    #nexus.missions.OEI_111c_2
-    #nexus.missions.OEI_121_1
-    #nexus.missions.OEI_121_2
-    #nexus.missions.Aborted_landing_AEO_119_1
-    #nexus.missions.Aborted_landing_AEO_119_2
-    #nexus.missions.Aborted_landing_OEI_121d_1 
-    #nexus.missions.Aborted_landing_OEI_121d_2      
+    configs = nexus.vehicle_configurations
+    base    = configs.base   
     
     # find conditions
     air_speed   = nexus.missions.base.segments['cruise'].air_speed 
@@ -191,15 +213,31 @@ def resize_aircraft(nexus):
                     turbofan.design_altitude    = altitude
                     design_turbofan(turbofan)
                     compute_nacelle_geometry(turbofan,turbofan.nacelle)
-
+ 
+                     
     return nexus
 
 # ----------------------------------------------------------------------        
 #   Weights
 # ----------------------------------------------------------------------    
 
-def weight(nexus):
-    vehicle=nexus.vehicle_configurations.base
+def weight(nexus): 
+    
+    # weight analysis
+    weights_base   = nexus.analyses.base.weights.evaluate(method="New SUAVE")
+    nexus.vehicle_configurations.base.mass_properties.breakdown = weights_base
+    
+    
+    weights_cruise = nexus.analyses.cruise.weights.evaluate(method="New SUAVE")
+    
+    weights = nexus.analyses.landing.weights.evaluate(method="New SUAVE")
+    
+    weights = nexus.analyses.takeoff.weights.evaluate(method="New SUAVE")
+    
+    
+    weights = nexus.analyses.short_field_takeoff.weights.evaluate(method="New SUAVE") 
+    
+     
     
     #nexus.missions.OEI_111c_1
     #nexus.missions.OEI_111c_2
@@ -210,26 +248,8 @@ def weight(nexus):
     #nexus.missions.Aborted_landing_OEI_121d_1 
     #nexus.missions.Aborted_landing_OEI_121d_2      
 
-    # weight analysis
-    weights = nexus.analyses.base.weights.evaluate(method="New SUAVE")
-    weights = nexus.analyses.cruise.weights.evaluate(method="New SUAVE")
-    vehicle.mass_properties.breakdown = weights
-    weights = nexus.analyses.landing.weights.evaluate(method="New SUAVE")
-    weights = nexus.analyses.takeoff.weights.evaluate(method="New SUAVE")
-    weights = nexus.analyses.short_field_takeoff.weights.evaluate(method="New SUAVE")
-
     return nexus
-
-# ----------------------------------------------------------------------
-#   Finalizing Function
-# ----------------------------------------------------------------------    
-
-def finalize(nexus):
-    
-    nexus.analyses.finalize()   
-    
-    return nexus         
-
+ 
 # ----------------------------------------------------------------------
 #   Post Process Results to give back to the optimizer
 # ----------------------------------------------------------------------   
