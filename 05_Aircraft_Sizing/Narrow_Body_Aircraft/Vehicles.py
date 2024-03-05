@@ -737,9 +737,8 @@ def configs_setup(vehicle):
     config.maximum_lift_coefficient = 1.2  
     configs.append(config)   
 
-
     # ------------------------------------------------------------------
-    #   Takeoff Configuration
+    #   Takeoff Configuration 
     # ------------------------------------------------------------------
 
     config = RCAIDE.Components.Configs.Config(base_config)
@@ -751,8 +750,49 @@ def configs_setup(vehicle):
     config.landing_gear.gear_condition                          = 'up'       
     config.V2_VS_ratio = 1.21
     configs.append(config)
-
     
+    # ------------------------------------------------------------------
+    #   Takeoff Configuration + gear up
+    # ------------------------------------------------------------------
+
+    config = RCAIDE.Components.Configs.Config(base_config)
+    config.tag = 'takeoff_gear_up'
+    config.wings['main_wing'].control_surfaces.flap.deflection  = 15. * Units.deg
+    config.wings['main_wing'].control_surfaces.slat.deflection  = 25. * Units.deg 
+    config.networks.turbofan_engine.fuel_lines['fuel_line'].propulsors['starboard_propulsor'].fan.angular_velocity =  3470. * Units.rpm
+    config.networks.turbofan_engine.fuel_lines['fuel_line'].propulsors['port_propulsor'].fan.angular_velocity      =  3470. * Units.rpm
+    config.landing_gear.gear_condition                          = 'up'       
+    config.V2_VS_ratio = 1.21
+    configs.append(config) 
+    
+    # ------------------------------------------------------------------
+    #   Takeoff Configuration + gear down
+    # ------------------------------------------------------------------
+
+    config = RCAIDE.Components.Configs.Config(base_config)
+    config.tag = 'takeoff_gear_down'
+    config.wings['main_wing'].control_surfaces.flap.deflection  = 15. * Units.deg
+    config.wings['main_wing'].control_surfaces.slat.deflection  = 25. * Units.deg 
+    config.networks.turbofan_engine.fuel_lines['fuel_line'].propulsors['starboard_propulsor'].fan.angular_velocity =  3470. * Units.rpm
+    config.networks.turbofan_engine.fuel_lines['fuel_line'].propulsors['port_propulsor'].fan.angular_velocity      =  3470. * Units.rpm
+    config.landing_gear.gear_condition                          = 'down'       
+    config.V2_VS_ratio = 1.21
+    configs.append(config)  
+    
+    # ------------------------------------------------------------------
+    #   Takeoff Configuration + no flaps
+    # ------------------------------------------------------------------
+
+    config = RCAIDE.Components.Configs.Config(base_config)
+    config.tag = 'takeoff_no_flaps'
+    config.wings['main_wing'].control_surfaces.flap.deflection  = 0. * Units.deg
+    config.wings['main_wing'].control_surfaces.slat.deflection  = 25. * Units.deg 
+    config.networks.turbofan_engine.fuel_lines['fuel_line'].propulsors['starboard_propulsor'].fan.angular_velocity =  3470. * Units.rpm
+    config.networks.turbofan_engine.fuel_lines['fuel_line'].propulsors['port_propulsor'].fan.angular_velocity      =  3470. * Units.rpm
+    config.landing_gear.gear_condition                          = 'down'       
+    config.V2_VS_ratio = 1.21
+    configs.append(config)      
+
     # ------------------------------------------------------------------
     #   Cutback Configuration
     # ------------------------------------------------------------------
@@ -764,9 +804,7 @@ def configs_setup(vehicle):
     config.networks.turbofan_engine.fuel_lines['fuel_line'].propulsors['starboard_propulsor'].fan.angular_velocity =  2780. * Units.rpm
     config.networks.turbofan_engine.fuel_lines['fuel_line'].propulsors['port_propulsor'].fan.angular_velocity      =  2780. * Units.rpm
     config.landing_gear.gear_condition                          = 'up'       
-    configs.append(config)   
-    
-        
+    configs.append(config)           
     
     # ------------------------------------------------------------------
     #   Landing Configuration
@@ -780,7 +818,39 @@ def configs_setup(vehicle):
     config.networks.turbofan_engine.fuel_lines['fuel_line'].propulsors['port_propulsor'].fan.angular_velocity      =  2030. * Units.rpm
     config.landing_gear.gear_condition                          = 'down'   
     config.Vref_VS_ratio = 1.23
-    configs.append(config)   
+    configs.append(config) 
+    
+    # ------------------------------------------------------------------
+    #   Landing AEO Configuration
+    # ------------------------------------------------------------------
+
+    config = RCAIDE.Components.Configs.Config(base_config)
+    config.tag = 'landing_AEO'
+    config.mass_properties.max_takeoff                          = 0.85*79015.8 * Units.kilogram  
+    config.mass_properties.takeoff                              = 0.85*79015.8 * Units.kilogram     
+    config.wings['main_wing'].control_surfaces.flap.deflection  = 30. * Units.deg
+    config.wings['main_wing'].control_surfaces.slat.deflection  = 25. * Units.deg
+    config.networks.turbofan_engine.fuel_lines['fuel_line'].propulsors['starboard_propulsor'].fan.angular_velocity =  2030. * Units.rpm
+    config.networks.turbofan_engine.fuel_lines['fuel_line'].propulsors['port_propulsor'].fan.angular_velocity      =  2030. * Units.rpm
+    config.landing_gear.gear_condition                          = 'down'   
+    config.Vref_VS_ratio = 1.23
+    configs.append(config)    
+    
+    # ------------------------------------------------------------------
+    #   Approach Configuration LND OEI
+    # ------------------------------------------------------------------
+
+    config = RCAIDE.Components.Configs.Config(base_config)
+    config.tag = 'approach'
+    config.mass_properties.max_takeoff                          = 0.8*79015.8 * Units.kilogram  
+    config.mass_properties.takeoff                              = 0.8*79015.8 * Units.kilogram     
+    config.wings['main_wing'].control_surfaces.flap.deflection  = 25. * Units.deg
+    config.wings['main_wing'].control_surfaces.slat.deflection  = 25. * Units.deg
+    config.networks.turbofan_engine.fuel_lines['fuel_line'].propulsors['starboard_propulsor'].fan.angular_velocity =  2030. * Units.rpm
+    config.networks.turbofan_engine.fuel_lines['fuel_line'].propulsors['port_propulsor'].fan.angular_velocity      =  2030. * Units.rpm
+    config.landing_gear.gear_condition                          = 'up'   
+    config.Vref_VS_ratio = 1.23
+    configs.append(config)       
      
     # ------------------------------------------------------------------
     #   Short Field Takeoff Configuration
