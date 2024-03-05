@@ -3142,7 +3142,7 @@ def Aborted_landing_OEI_mission_setup_121d_1(analyses, vehicle):
     
     return mission 
 
-def Aborted_landing_OEI_mission_setup_121d_1(analyses, vehicle):
+def Aborted_landing_OEI_mission_setup_121d_2(analyses, vehicle):
     
     # ------------------------------------------------------------------
     #   Initialize the Mission
