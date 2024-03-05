@@ -48,6 +48,15 @@ def setup():
 def design_mission(nexus):
     
     mission              = nexus.missions.base
+    
+    #nexus.missions.OEI_111c_1
+    #nexus.missions.OEI_111c_2
+    #nexus.missions.OEI_121_1
+    #nexus.missions.OEI_121_2
+    #nexus.missions.Aborted_landing_AEO_119_1
+    #nexus.missions.Aborted_landing_AEO_119_2
+    #nexus.missions.Aborted_landing_OEI_121d_1 
+    #nexus.missions.Aborted_landing_OEI_121d_2   
 
     mission.design_range = 1500.*Units.nautical_miles        
     # Given a total target range, compute the cruise distance
@@ -78,6 +87,15 @@ def design_mission(nexus):
     # run mission 
     results.base = mission.evaluate()
     
+    #nexus.missions.OEI_111c_1
+    #nexus.missions.OEI_111c_2
+    #nexus.missions.OEI_121_1
+    #nexus.missions.OEI_121_2
+    #nexus.missions.Aborted_landing_AEO_119_1
+    #nexus.missions.Aborted_landing_AEO_119_2
+    #nexus.missions.Aborted_landing_OEI_121d_1 
+    #nexus.missions.Aborted_landing_OEI_121d_2      
+    
     return nexus
 
 # ----------------------------------------------------------------------        
@@ -85,11 +103,29 @@ def design_mission(nexus):
 # ----------------------------------------------------------------------    
 def design_mission(nexus):
     mission              = nexus.missions.base
+    
+    #nexus.missions.OEI_111c_1
+    #nexus.missions.OEI_111c_2
+    #nexus.missions.OEI_121_1
+    #nexus.missions.OEI_121_2
+    #nexus.missions.Aborted_landing_AEO_119_1
+    #nexus.missions.Aborted_landing_AEO_119_2
+    #nexus.missions.Aborted_landing_OEI_121d_1 
+    #nexus.missions.Aborted_landing_OEI_121d_2      
 
     results      = nexus.results
     
     # run mission 
     results.base = mission.evaluate()
+    
+    #nexus.missions.OEI_111c_1
+    #nexus.missions.OEI_111c_2
+    #nexus.missions.OEI_121_1
+    #nexus.missions.OEI_121_2
+    #nexus.missions.Aborted_landing_AEO_119_1
+    #nexus.missions.Aborted_landing_AEO_119_2
+    #nexus.missions.Aborted_landing_OEI_121d_1 
+    #nexus.missions.Aborted_landing_OEI_121d_2      
     
     return nexus
 
@@ -103,6 +139,15 @@ def resize_aircraft(nexus):
     
     configs=nexus.vehicle_configurations
     base=configs.base
+    
+    #nexus.missions.OEI_111c_1
+    #nexus.missions.OEI_111c_2
+    #nexus.missions.OEI_121_1
+    #nexus.missions.OEI_121_2
+    #nexus.missions.Aborted_landing_AEO_119_1
+    #nexus.missions.Aborted_landing_AEO_119_2
+    #nexus.missions.Aborted_landing_OEI_121d_1 
+    #nexus.missions.Aborted_landing_OEI_121d_2      
     
     # find conditions
     air_speed   = nexus.missions.base.segments['cruise'].air_speed 
@@ -155,6 +200,15 @@ def resize_aircraft(nexus):
 
 def weight(nexus):
     vehicle=nexus.vehicle_configurations.base
+    
+    #nexus.missions.OEI_111c_1
+    #nexus.missions.OEI_111c_2
+    #nexus.missions.OEI_121_1
+    #nexus.missions.OEI_121_2
+    #nexus.missions.Aborted_landing_AEO_119_1
+    #nexus.missions.Aborted_landing_AEO_119_2
+    #nexus.missions.Aborted_landing_OEI_121d_1 
+    #nexus.missions.Aborted_landing_OEI_121d_2      
 
     # weight analysis
     weights = nexus.analyses.base.weights.evaluate(method="New SUAVE")
