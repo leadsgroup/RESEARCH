@@ -5,12 +5,13 @@ from  solve_thwaites_BL import solve_thwaites_BL
 from  solve_heads_BL_prev_index    import solve_heads_BL_prev_index
 from  michel_criterion  import michel_criterion
 from solve_heads_BL_curr_index  import solve_heads_BL_curr_index
+from solve_heads_BL   import solve_heads_BL 
 
 def main():
      
     l          = 1             # characteristic length of 1
     Re_L       = 10**(7)
-    n_points   = 45           # Discretizing domain 
+    n_points   = 300          # Discretizing domain 
     x          = np.linspace(0,l,n_points)
     eps        = 10**(-12)     # First node location
     x[0]       = eps  
@@ -43,7 +44,7 @@ def main():
         # ode is using odeint function
         H_turb_old,delta_star_turb_old,delta_turb_old,cf_turb_old,theta_turb_old,Re_x_turb_old,Re_theta_turb_old = solve_heads_BL_prev_index(nu, l,delta_0_tur,theta_0_tur,delta_star_0_tur,cf_0_tur,H_0_tur,Re_L_tur,x_tur,Ve_tur,dVe_tur)
         H_turb_new,delta_star_turb_new,delta_turb_new,cf_turb_new,theta_turb_new,Re_x_turb_new,Re_theta_turb_new = solve_heads_BL_curr_index(nu, l,delta_0_tur,theta_0_tur,delta_star_0_tur,cf_0_tur,H_0_tur,Re_L_tur,x_tur,Ve_tur,dVe_tur)
-        # H_turb_ode,delta_star_turb_ode,delta_turb_ode,cf_turb_ode,theta_turb_ode,Re_x_turb_ode,Re_theta_turb_ode = 
+        H_turb_ode,delta_star_turb_ode,delta_turb_ode,cf_turb_ode,theta_turb_ode,Re_x_turb_ode,Re_theta_turb_ode = solve_heads_BL(nu, l,delta_0_tur,theta_0_tur,delta_star_0_tur,Re_L_tur,x_tur,Ve_tur,dVe_tur)
         
         # Concatenate vectors 
         delta_star_old  = np.hstack((delta_star_lam[:transition_index],delta_star_turb_old))  
@@ -53,8 +54,7 @@ def main():
         Re_x_old        = np.hstack((Re_x_lam[:transition_index],Re_x_turb_old))
         Re_theta_old    = np.hstack((Re_theta_lam[:transition_index],Re_theta_turb_old) )  
         H_old           = np.hstack((H_lam[:transition_index],H_turb_old))
-        
-        
+         
 
         delta_star_new  = np.hstack((delta_star_lam[:transition_index],delta_star_turb_new))  
         delta_new       = np.hstack((delta_lam[:transition_index],delta_turb_new))
@@ -64,13 +64,13 @@ def main():
         Re_theta_new    = np.hstack((Re_theta_lam[:transition_index],Re_theta_turb_new) )  
         H_new           = np.hstack((H_lam[:transition_index],H_turb_new))
     
-        # delta_star_ode  = np.hstack((delta_star_lam[:transition_index],delta_star_turb_ode))  
-        # delta_ode       = np.hstack((delta_lam[:transition_index],delta_turb_ode))
-        # cf_ode          = np.hstack((cf_lam[:transition_index],cf_turb_ode))
-        # theta_ode       = np.hstack((theta_lam[:transition_index],theta_turb_ode))
-        # Re_x_ode        = np.hstack((Re_x_lam[:transition_index],Re_x_turb_ode))
-        # Re_theta_ode    = np.hstack((Re_theta_lam[:transition_index],Re_theta_turb_ode) )  
-        # H_ode           = np.hstack((H_lam[:transition_index],H_turb_ode))
+        delta_star_ode  = np.hstack((delta_star_lam[:transition_index],delta_star_turb_ode))  
+        delta_ode       = np.hstack((delta_lam[:transition_index],delta_turb_ode))
+        cf_ode          = np.hstack((cf_lam[:transition_index],cf_turb_ode))
+        theta_ode       = np.hstack((theta_lam[:transition_index],theta_turb_ode))
+        Re_x_ode        = np.hstack((Re_x_lam[:transition_index],Re_x_turb_ode))
+        Re_theta_ode    = np.hstack((Re_theta_lam[:transition_index],Re_theta_turb_ode) )  
+        H_ode           = np.hstack((H_lam[:transition_index],H_turb_ode))
         
         
     else:
@@ -120,12 +120,12 @@ def main():
     axis5.plot(x,Re_x_new, 'r-')  
     axis6.plot(x,H_new, 'r-') 
     
-    # axis1.plot(x,delta_ode, 'g-')  
-    # axis2.plot(x,delta_star_ode, 'g-')  
-    # axis3.plot(x,theta_ode, 'g-')  
-    # axis4.plot(x,cf_ode, 'g-')  
-    # axis5.plot(x,Re_x_ode, 'g-')  
-    # axis6.plot(x,H_ode, 'g-') 
+    axis1.plot(x,delta_ode, 'g-')  
+    axis2.plot(x,delta_star_ode, 'g-')  
+    axis3.plot(x,theta_ode, 'g-')  
+    axis4.plot(x,cf_ode, 'g-')  
+    axis5.plot(x,Re_x_ode, 'g-')  
+    axis6.plot(x,H_ode, 'g-') 
     
     set_axes(axis1)
     set_axes(axis2)

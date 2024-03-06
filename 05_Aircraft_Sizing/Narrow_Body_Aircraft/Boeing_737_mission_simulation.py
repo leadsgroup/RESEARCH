@@ -23,12 +23,16 @@ import numpy as np
 from copy import deepcopy
 import matplotlib.pyplot as plt  
 import os   
+import time 
 
 # ----------------------------------------------------------------------
 #   Main
 # ----------------------------------------------------------------------
 
 def main(): 
+
+    time0 = time.time()
+            
     # vehicle data
     vehicle  = vehicle_setup() 
     
@@ -40,11 +44,17 @@ def main():
     missions = missions_setup(analyses,noise_analyses) 
      
     # mission analysis 
-    results       = missions.base_mission.evaluate()  
-    plot_mission(results) 
+    #results       = missions.base_mission.evaluate()  
+    #plot_mission(results) 
     
-    #noise_results = missions.noise_mission.evaluate()   
-    #plot_noise_mission(noise_results)     
+    noise_results = missions.noise_mission.evaluate()   
+    plot_noise_mission(noise_results)  
+    
+
+    
+    time1 = time.time()
+    
+    print('The total elapsed time to run '+ str( round((time1-time0)/60, 1)) + '  Mins')    
         
     return
  
@@ -142,14 +152,14 @@ def noise_analysis(vehicle):
     # ------------------------------------------------------------------
     #  Noise Analysis 
     noise = RCAIDE.Analyses.Noise.Correlation_Buildup()    
-    noise.settings.ground_microphone_x_resolution   = 3
-    noise.settings.ground_microphone_y_resolution   = 3     
-    noise.settings.ground_microphone_x_stencil      = 1         # number of points in x-direction of noise stencil
-    noise.settings.ground_microphone_y_stencil      = 1         # number of points in y-direction of noise stencil
+    noise.settings.ground_microphone_x_resolution   = 101
+    noise.settings.ground_microphone_y_resolution   = 21     
+    noise.settings.ground_microphone_x_stencil      = 3         # number of points in x-direction of noise stencil
+    noise.settings.ground_microphone_y_stencil      = 10         # number of points in y-direction of noise stencil
     noise.settings.ground_microphone_min_x          = 0
-    noise.settings.ground_microphone_max_x          = 1000 #7500
-    noise.settings.ground_microphone_min_y          = -1000
-    noise.settings.ground_microphone_max_y          = 1000
+    noise.settings.ground_microphone_max_x          = 7000
+    noise.settings.ground_microphone_min_y          = -1000 
+    noise.settings.ground_microphone_max_y          = 1000 + 1E-6 
     noise.geometry = vehicle          
     analyses.append(noise) 
  
@@ -1171,94 +1181,19 @@ def takeoff_landing_noise_mission_setup(analyses):
     mission.tag  = 'base_mission' 
     Segments     = RCAIDE.Analyses.Mission.Segments 
     base_segment = Segments.Segment() 
-    base_segment.state.numerics.number_of_control_points  = 3
+    base_segment.state.numerics.discretization_method     = RCAIDE.Methods.Utilities.Chebyshev.linear_data
+    base_segment.state.numerics.number_of_control_points  = 32 
 
-    ## -------------------   -----------------------------------------------
-    ##   Mission for Landing Noise
-    ## ------------------------------------------------------------------     
-    #segment                                               = Segments.Descent.Constant_Speed_Constant_Angle(base_segment)
-    #segment.tag                                           = "descent"
-    #segment.analyses.extend(analyses.base )   
-    #segment.altitude_start                                = 120.5
-    #segment.altitude_end                                  = 0.
-    #segment.air_speed                                     = 67. * Units['m/s']
-    #segment.descent_angle                                 = 3.0   * Units.degrees   
-    
-    ## define flight dynamics to model 
-    #segment.flight_dynamics.force_x                       = True  
-    #segment.flight_dynamics.force_z                       = True     
-    
-    ## define flight controls 
-    #segment.flight_controls.throttle.active               = True           
-    #segment.flight_controls.throttle.assigned_propulsors  = [['starboard_propulsor','port_propulsor']] 
-    #segment.flight_controls.body_angle.active             = True                
-    
-    #mission.append_segment(segment) 
-    
-
-    ## ------------------------------------------------------------------------------------------------------------------------------------ 
-    ##   Landing Roll
-    ## ------------------------------------------------------------------------------------------------------------------------------------ 
-
-    #segment = Segments.Ground.Landing(base_segment)
-    #segment.tag = "Landing"
-
-    #segment.analyses.extend( analyses.landing ) 
-    #segment.velocity_end                                        = 20. * Units.knots 
-    #segment.friction_coefficient                                = 0.4
-    #segment.altitude                                            = 0.0   
-    #segment.flight_controls.elapsed_time.active                 = True  
-    #segment.flight_controls.elapsed_time.initial_guess_values   = [[30.]]  
-    #mission.append_segment(segment)      
-
-    ## ------------------------------------------------------------------------------------------------------------------------------------ 
-    ##   Takeoff Roll
-    ## ------------------------------------------------------------------------------------------------------------------------------------ 
-
-    #segment = Segments.Ground.Takeoff(base_segment)
-    #segment.tag = "Takeoff_Ground_Roll" 
-    #segment.analyses.extend( analyses.takeoff )
-    #segment.velocity_start                               = 20.* Units.knots
-    #segment.velocity_end                                 = 150 * Units.knots
-    #segment.friction_coefficient                         = 0.04
-    #segment.altitude                                     = 0.0   
-    #mission.append_segment(segment) 
-
-    ## ------------------------------------------------------------------
-    ##   First Climb Segment: Constant Speed Constant Rate  
-    ## ------------------------------------------------------------------
-
-    #segment = Segments.Climb.Constant_Speed_Constant_Rate(base_segment)
-    #segment.tag = "climb_1" 
-    #segment.analyses.extend( analyses.takeoff ) 
-    #segment.altitude_start                               = 0.0   * Units.km
-    #segment.altitude_end                                 = 500 * Units.feet
-    #segment.air_speed                                    = 125.0 * Units['m/s']
-    #segment.climb_rate                                   = 6.0   * Units['m/s']  
-     
-    ## define flight dynamics to model 
-    #segment.flight_dynamics.force_x                      = True  
-    #segment.flight_dynamics.force_z                      = True     
-    
-    ## define flight controls 
-    #segment.flight_controls.throttle.active               = True           
-    #segment.flight_controls.throttle.assigned_propulsors  = [['starboard_propulsor','port_propulsor']] 
-    #segment.flight_controls.body_angle.active             = True                 
-    
-    #mission.append_segment(segment)
-    
-    
-
-    # ------------------------------------------------------------------    
-    #   Cruise Segment: Constant Speed Constant Altitude
-    # ------------------------------------------------------------------    
-
-    segment = Segments.Cruise.Constant_Speed_Constant_Altitude(base_segment)
-    segment.tag = "cruise" 
-    segment.analyses.extend( analyses.cruise ) 
-    segment.altitude                                      = 100 
-    segment.air_speed                                     = 100 
-    segment.distance                                      = 1000 
+    # -------------------   -----------------------------------------------
+    #   Mission for Landing Noise
+    # ------------------------------------------------------------------     
+    segment                                               = Segments.Descent.Constant_Speed_Constant_Angle(base_segment)
+    segment.tag                                           = "descent"
+    segment.analyses.extend(analyses.base )   
+    segment.altitude_start                                = 120.5
+    segment.altitude_end                                  = 0.0001    
+    segment.air_speed                                     = 67. * Units['m/s']
+    segment.descent_angle                                 = 3.0   * Units.degrees   
     
     # define flight dynamics to model 
     segment.flight_dynamics.force_x                       = True  
@@ -1269,7 +1204,59 @@ def takeoff_landing_noise_mission_setup(analyses):
     segment.flight_controls.throttle.assigned_propulsors  = [['starboard_propulsor','port_propulsor']] 
     segment.flight_controls.body_angle.active             = True                
     
-    mission.append_segment(segment)    
+    mission.append_segment(segment) 
+    
+
+    # ------------------------------------------------------------------------------------------------------------------------------------ 
+    #   Landing Roll
+    # ------------------------------------------------------------------------------------------------------------------------------------ 
+
+    segment = Segments.Ground.Landing(base_segment)
+    segment.tag = "Landing"
+
+    segment.analyses.extend( analyses.landing ) 
+    segment.velocity_end                                        = 20. * Units.knots 
+    segment.friction_coefficient                                = 0.4
+    segment.altitude                                            = 0.0001    
+    segment.flight_controls.elapsed_time.active                 = True  
+    segment.flight_controls.elapsed_time.initial_guess_values   = [[30.]]  
+    mission.append_segment(segment)      
+
+    # ------------------------------------------------------------------------------------------------------------------------------------ 
+    #   Takeoff Roll
+    # ------------------------------------------------------------------------------------------------------------------------------------ 
+
+    segment = Segments.Ground.Takeoff(base_segment)
+    segment.tag = "Takeoff_Ground_Roll" 
+    segment.analyses.extend( analyses.takeoff )
+    segment.velocity_start                               = 20.* Units.knots
+    segment.velocity_end                                 = 150 * Units.knots
+    segment.friction_coefficient                         = 0.04
+    segment.altitude                                     = 0.0001    
+    mission.append_segment(segment) 
+
+    # ------------------------------------------------------------------
+    #   First Climb Segment: Constant Speed Constant Rate  
+    # ------------------------------------------------------------------
+
+    segment = Segments.Climb.Constant_Speed_Constant_Rate(base_segment)
+    segment.tag = "climb_1" 
+    segment.analyses.extend( analyses.takeoff ) 
+    segment.altitude_start                               = 0.0001    
+    segment.altitude_end                                 = 500 * Units.feet
+    segment.air_speed                                    = 125.0 * Units['m/s']
+    segment.climb_rate                                   = 6.0   * Units['m/s']  
+     
+    # define flight dynamics to model 
+    segment.flight_dynamics.force_x                      = True  
+    segment.flight_dynamics.force_z                      = True     
+    
+    # define flight controls 
+    segment.flight_controls.throttle.active               = True           
+    segment.flight_controls.throttle.assigned_propulsors  = [['starboard_propulsor','port_propulsor']] 
+    segment.flight_controls.body_angle.active             = True                 
+    
+    mission.append_segment(segment)  
 
 
     return mission 
@@ -1315,8 +1302,7 @@ def plot_mission(results):
     plot_drag_components(results)
     
     # Plot Altitude, sfc, vehicle weight 
-    plot_altitude_sfc_weight(results)
-    
+    plot_altitude_sfc_weight(results) 
     
     # Plot Emissions 
     plot_CO2e_emissions(results)
@@ -1330,7 +1316,24 @@ def plot_noise_mission(noise_results):
  
     
     # Plot noise level
-    flight_times = np.array(['06:00:00','07:00:00','08:00:00','09:00:00','10:00:00','11:00:00','12:00:00','13:00:00','14:00:00','15:00:00'])  
+    flight_times = np.array(['06:00:00','06:10:00','06:20:00','06:30:00','06:40:00','06:50:00',
+                             '07:00:00','07:10:00','07:20:00','07:30:00','07:40:00','07:50:00',
+                             '08:00:00','08:10:00','08:20:00','08:30:00','08:40:00','08:50:00',
+                             '09:00:00','09:10:00','09:20:00','09:30:00','09:40:00','09:50:00',
+                             '10:00:00','10:10:00','10:20:00','10:30:00','10:40:00','10:50:00',
+                             '11:00:00','11:10:00','11:20:00','11:30:00','11:40:00','11:50:00',
+                             '12:00:00','12:10:00','12:20:00','12:30:00','12:40:00','12:50:00',
+                             '13:00:00','13:10:00','13:20:00','13:30:00','13:40:00','13:50:00',
+                             '14:00:00','14:10:00','14:20:00','14:30:00','14:40:00','14:50:00',
+                             '15:00:00','15:10:00','15:20:00','15:30:00','15:40:00','15:50:00',
+                             '16:00:00','16:10:00','16:20:00','16:30:00','16:40:00','16:50:00',
+                             '17:00:00','17:10:00','17:20:00','17:30:00','17:40:00','17:50:00',
+                             '18:00:00','18:10:00','18:20:00','18:30:00','18:40:00','18:50:00',
+                             '19:00:00','19:10:00','19:20:00','19:30:00','19:40:00','19:50:00',
+                             '20:00:00','20:10:00','20:20:00','20:30:00','20:40:00','20:50:00',
+                             '21:00:00','21:10:00','21:20:00','21:30:00','21:40:00','21:50:00',
+                             '22:00:00','22:10:00','22:20:00','22:30:00','22:40:00','22:50:00',
+                             ])  
 
     # Plot Flight Conditions 
     plot_flight_conditions(noise_results)    
@@ -1344,8 +1347,8 @@ def plot_noise_mission(noise_results):
     # Day Night Average Noise Level 
     plot_2D_noise_contour(noise_data,
                         noise_level      = noise_data.DNL,
-                        min_noise_level  = 30,  
-                        max_noise_level  = 90, 
+                        min_noise_level  = 35,  
+                        max_noise_level  = 100, 
                         noise_scale_label= 'DNL',
                         save_filename    = "DNL_Noise_2D_Contour") 
     
@@ -1353,8 +1356,8 @@ def plot_noise_mission(noise_results):
     # Maximum Sound Pressure Level   
     plot_2D_noise_contour(noise_data,
                         noise_level      = np.max(noise_data.SPL_dBA,axis=0), 
-                        min_noise_level  = 30,  
-                        max_noise_level  = 90, 
+                        min_noise_level  = 35,
+                        max_noise_level  = 100, 
                         noise_scale_label= 'SPL [dBA]',
                         save_filename    = "SPL_max_Noise_2D_Contour", 
                         use_lat_long_coordinates= False)   
