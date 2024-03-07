@@ -8,7 +8,7 @@ import RCAIDE
 from   RCAIDE.Core                                        import Units
 from   RCAIDE.Methods.Performance.estimate_stall_speed    import estimate_stall_speed
 import numpy                                              as np
-
+import Vehicles
 # ----------------------------------------------------------------------
 #   Define the Mission
 # ----------------------------------------------------------------------
@@ -22,9 +22,9 @@ def setup(analyses):
     missions.append(base_mission)
     
     # FAA Rule FAR 25.111c_3 
-    OEI_mission_111c_1 = OEI_mission_setup_111c_1(analyses) # standard atm, 15 degree C 
+    OEI_mission_111c_1 = OEI_mission_setup_111c_1(analyses, vehicle) # standard atm, 15 degree C 
     missions.append(OEI_mission_111c_1)    
-    OEI_mission_111c_2 = OEI_mission_setup_111c_2(analyses) # 25 degree C 
+    OEI_mission_111c_2 = OEI_mission_setup_111c_2(analyses, vehicle) # 25 degree C 
     missions.append(OEI_mission_111c_2)
      
     # FAA Rule FAR 25.121a_b_c     
