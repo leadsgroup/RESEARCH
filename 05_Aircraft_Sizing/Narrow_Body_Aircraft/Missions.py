@@ -21,31 +21,33 @@ def setup(analyses):
     base_mission = base_mission_setup(analyses)
     missions.append(base_mission)
     
-    # FAA Rule 25.111 c 
+    # FAA Rule FAR 25.111c_3 
     OEI_mission_111c_1 = OEI_mission_setup_111c_1(analyses) # standard atm, 15 degree C 
     missions.append(OEI_mission_111c_1)    
     OEI_mission_111c_2 = OEI_mission_setup_111c_2(analyses) # 25 degree C 
     missions.append(OEI_mission_111c_2)
      
-    # FAA Rule 25.121     
+    # FAA Rule FAR 25.121a_b_c     
     OEI_mission_121_1 = OEI_mission_setup_121_1(analyses) # standard atm, 15 degree C   
     missions.append(OEI_mission_121_1)  
     OEI_mission_121_2 = OEI_mission_setup_121_2(analyses)# 25 degree C
     missions.append(OEI_mission_121_2)   
-    
 
-    # FAA Rule 25.119    
+    # FAA Rule FAR 25.119    
     Aborted_landing_AEO_mission_119_1 = Aborted_landing_AEO_mission_setup_119_1(analyses) # standard atm, 15 degree C 
     missions.append(Aborted_landing_AEO_mission_119_1) 
     Aborted_landing_AEO_mission_119_2 = Aborted_landing_AEO_mission_setup_119_2(analyses) # 25 degree C 
     missions.append(Aborted_landing_AEO_mission_119_2)
     
-
-    # FAA Rule 25.121d     
+    # FAA Rule FAR 25.121d     
     Aborted_landing_OEI_mission_121d_1 = Aborted_landing_OEI_mission_setup_121d_1(analyses) # standard atm, 15 degree C
     missions.append(Aborted_landing_OEI_mission_121d_1)
     Aborted_landing_OEI_mission_121d_2 = Aborted_landing_OEI_mission_setup_121d_2(analyses) # 25 degree C 
     missions.append(Aborted_landing_OEI_mission_121d_2)
+    
+    # Takeoff distance requirement
+    TO_mission_setup_flap15_h0_mission = TO_mission_setup_flap15_h0(analyses)
+    missions.append(TO_mission_setup_flap15_h0_mission) 
 
     return missions 
     
@@ -405,7 +407,7 @@ def base_mission_setup(analyses):
     
     return mission 
 
-def OEI_mission_setup_111c_1(analyses):
+def OEI_mission_setup_111c_1(analyses, vehicle):
     
     # ------------------------------------------------------------------
     #   Initialize the Mission
@@ -465,7 +467,7 @@ def OEI_mission_setup_111c_1(analyses):
     
     return mission 
 
-def OEI_mission_setup_111c_2(analyses):
+def OEI_mission_setup_111c_2(analyses, vehicle):
     
     # ------------------------------------------------------------------
     #   Initialize the Mission
@@ -545,7 +547,7 @@ def OEI_mission_setup_111c_2(analyses):
     mission.append_segment(segment)    
     return mission
 
-def OEI_mission_setup_121_1(analyses):
+def OEI_mission_setup_121_1(analyses,vehicle):
     
     # ------------------------------------------------------------------
     #   Initialize the Mission
@@ -649,7 +651,7 @@ def OEI_mission_setup_121_1(analyses):
     
     return mission
 
-def OEI_mission_setup_121_2(analyses):
+def OEI_mission_setup_121_2(analyses, vehicle):
     
     # ------------------------------------------------------------------
     #   Initialize the Mission
@@ -753,7 +755,7 @@ def OEI_mission_setup_121_2(analyses):
     
     return mission
 
-def Aborted_landing_AEO_mission_setup_119_1(analyses):
+def Aborted_landing_AEO_mission_setup_119_1(analyses, vehicle):
     
     # ------------------------------------------------------------------
     #   Initialize the Mission
@@ -817,7 +819,7 @@ def Aborted_landing_AEO_mission_setup_119_1(analyses):
    
     return mission 
 
-def Aborted_landing_AEO_mission_setup_119_2(analyses):
+def Aborted_landing_AEO_mission_setup_119_2(analyses, vehicle):
     
     # ------------------------------------------------------------------
     #   Initialize the Mission
@@ -864,7 +866,7 @@ def Aborted_landing_AEO_mission_setup_119_2(analyses):
     mission.append_segment(segment) 
     return mission 
 
-def Aborted_landing_OEI_mission_setup_121d_1(analyses):
+def Aborted_landing_OEI_mission_setup_121d_1(analyses, vehicle):
     
     # ------------------------------------------------------------------
     #   Initialize the Mission
@@ -879,14 +881,12 @@ def Aborted_landing_OEI_mission_setup_121d_1(analyses):
     atmosphere         = RCAIDE.Analyses.Atmospheric.US_Standard_1976()
     atmo_data          = atmosphere.compute_values(altitude = 0,temperature_deviation= 0.0)
     base_segment.temperature_deviation = atmo_data.temperature[0][0]  
-    
 
     # VSTALL Calculation
     vehicle_mass   = vehicle.mass_properties.max_takeoff*0.85
     reference_area = vehicle.reference_area
     Vstall         = estimate_stall_speed(vehicle_mass,reference_area,altitude = 0.0,maximum_lift_coefficient = 1.2)        
  
-        
     # ------------------------------------------------------------------
     #  A First Climb Segment: Constant Speed, Constant Angle
     # ------------------------------------------------------------------
@@ -912,7 +912,7 @@ def Aborted_landing_OEI_mission_setup_121d_1(analyses):
    
     return mission 
 
-def Aborted_landing_OEI_mission_setup_121d_2(analyses):
+def Aborted_landing_OEI_mission_setup_121d_2(analyses, vehicle):
     
     # ------------------------------------------------------------------
     #   Initialize the Mission
@@ -928,8 +928,11 @@ def Aborted_landing_OEI_mission_setup_121d_2(analyses):
     atmo_data          = atmosphere.compute_values(altitude = 0,temperature_deviation= 10.0)
     base_segment.temperature_deviation = atmo_data.temperature[0][0]      
 
-
-        
+    # VSTALL Calculation
+    vehicle_mass   = vehicle.mass_properties.max_takeoff*0.85
+    reference_area = vehicle.reference_area
+    Vstall         = estimate_stall_speed(vehicle_mass,reference_area,altitude = 0.0,maximum_lift_coefficient = 1.2)    
+  
     # ------------------------------------------------------------------
     #  A First Climb Segment: Constant Speed, Constant Angle
     # ------------------------------------------------------------------
@@ -953,5 +956,43 @@ def Aborted_landing_OEI_mission_setup_121d_2(analyses):
     
     mission.append_segment(segment)  
 
-
     return mission 
+
+def TO_mission_setup_flap15_h0(analyses, vehicle):
+    
+    # ------------------------------------------------------------------
+    #   Initialize the Mission
+    # ------------------------------------------------------------------
+
+    mission = RCAIDE.Analyses.Mission.Sequential_Segments()
+    mission.tag = 'TO_mission_flap15_h0'
+  
+    Segments = RCAIDE.Analyses.Mission.Segments 
+    base_segment = Segments.Segment() 
+
+    # -------------------------------------------------------------------
+    #   Takeoff Roll
+    # -------------------------------------------------------------------
+
+    segment = Segments.Ground.Takeoff(base_segment)
+    segment.tag = "TO_mission_flap15_h0" 
+    segment.analyses.extend( analyses.TO_mission_flap15_h0 )
+    segment.velocity_start           = 0.* Units.knots
+    S_TO_lim                         = 5699.38 * Units.feet
+    vehicle.mass_properties.max_takeoff = 114224.9491 * Units.pounds
+    W                                = vehicle.mass_properties.max_takeoff
+    T                                = 2*vehicle.turbofan.design_thrust
+    segment.friction_coefficient     = 0.04
+    C_D_TO                           = 0.02
+    C_L_TO                           = 2.2
+    rho                              = 0.002
+    g                                = 32.17405
+    segment.velocity_end             = np.sqrt(((2*g*S_TO_lim*T/W) - 
+                                                (segment.friction_coefficient*2*g*S_TO_lim))/
+                                               (1 + (S_TO_lim*g*rho*vehicle.wing.areas.reference*C_D_TO/(2*W) - 
+                                                     g*S_TO_lim*segment.friction_coefficient*rho*
+                                                     vehicle.wing.areas.reference*C_L_TO/(2*W)))) * Units.knots
+    segment.altitude                 = 0.0   
+    mission.append_segment(segment)
+    
+    return mission

@@ -39,8 +39,8 @@ def setup():
     procedure.missions.Aborted_landing_AEO_119_1_mission     = Aborted_landing_AEO_119_1_mission 
     procedure.missions.Aborted_landing_AEO_119_2_mission     = Aborted_landing_AEO_119_2_mission
     procedure.missions.Aborted_landing_OEI_121d_1_mission    = Aborted_landing_OEI_121d_1_mission 
-    procedure.missions.Aborted_landing_OEI_121d_2_mission    = Aborted_landing_OEI_121d_2_mission 
-
+    procedure.missions.Aborted_landing_OEI_121d_2_mission    = Aborted_landing_OEI_121d_2_mission
+    procedure.missions.TO_mission_flap15_h0_mission          = TO_mission_flap15_h0_mission 
 
     # post process the results
     procedure.post_process = post_process
@@ -89,7 +89,8 @@ def design_mission(nexus):
     
     return nexus
 
-def OEI_111c_1_mission(nexus):   
+def OEI_111c_1_mission(nexus):  
+    
     mission      = nexus.missions.base    
     results      = nexus.results 
     results.base = mission.evaluate() 
@@ -147,12 +148,19 @@ def Aborted_landing_OEI_121d_1_mission(nexus):
     mission      = nexus.missions.base    
     results      = nexus.results 
     results.base = mission.evaluate() 
-    
         
     return nexus
 
      
 def Aborted_landing_OEI_121d_2_mission(nexus):
+
+    mission      = nexus.missions.base    
+    results      = nexus.results 
+    results.base = mission.evaluate() 
+    
+    return nexus
+
+def TO_mission_flap15_h0_mission(nexus):
 
     mission      = nexus.missions.base    
     results      = nexus.results 
@@ -227,26 +235,38 @@ def weight(nexus):
     weights_base   = nexus.analyses.base.weights.evaluate(method="New SUAVE")
     nexus.vehicle_configurations.base.mass_properties.breakdown = weights_base
     
-    
     weights_cruise = nexus.analyses.cruise.weights.evaluate(method="New SUAVE")
+    nexus.vehicle_configurations.cruise.mass_properties.breakdown = weights_cruise
     
-    weights = nexus.analyses.landing.weights.evaluate(method="New SUAVE")
+    weights_cruise_spoilers = nexus.analyses.cruise_spoilers.weights.evaluate(method="New SUAVE")
+    nexus.vehicle_configurations.cruise_spoilers.mass_properties.breakdown = weights_cruise_spoilers
     
-    weights = nexus.analyses.takeoff.weights.evaluate(method="New SUAVE")
+    weights_takeoff = nexus.analyses.takeoff.weights.evaluate(method="New SUAVE")
+    nexus.vehicle_configurations.takeoff.mass_properties.breakdown = weights_takeoff
     
+    weights_takeoff_gear_up = nexus.analyses.takeoff_gear_up.weights.evaluate(method="New SUAVE")
+    nexus.vehicle_configurations.takeoff_gear_up.mass_properties.breakdown = weights_takeoff_gear_up
     
-    weights = nexus.analyses.short_field_takeoff.weights.evaluate(method="New SUAVE") 
+    weights_takeoff_gear_down = nexus.analyses.takeoff_gear_down.weights.evaluate(method="New SUAVE")
+    nexus.vehicle_configurations.takeoff_gear_down.mass_properties.breakdown = weights_takeoff_gear_down
     
-     
+    weights_takeoff_no_flaps = nexus.analyses.takeoff_no_flaps.weights.evaluate(method="New SUAVE")
+    nexus.vehicle_configurations.takeoff_no_flaps.mass_properties.breakdown = weights_takeoff_no_flaps
     
-    #nexus.missions.OEI_111c_1
-    #nexus.missions.OEI_111c_2
-    #nexus.missions.OEI_121_1
-    #nexus.missions.OEI_121_2
-    #nexus.missions.Aborted_landing_AEO_119_1
-    #nexus.missions.Aborted_landing_AEO_119_2
-    #nexus.missions.Aborted_landing_OEI_121d_1 
-    #nexus.missions.Aborted_landing_OEI_121d_2      
+    weights_cutback = nexus.analyses.cutback.weights.evaluate(method="New SUAVE")
+    nexus.vehicle_configurations.cutback.mass_properties.breakdown = weights_cutback
+    
+    weights_landing = nexus.analyses.landing.weights.evaluate(method="New SUAVE")
+    nexus.vehicle_configurations.landing.mass_properties.breakdown = weights_landing  
+    
+    weights_landing_AEO = nexus.analyses.landing_AEO.weights.evaluate(method="New SUAVE")
+    nexus.vehicle_configurations.landing_AEO.mass_properties.breakdown = weights_landing_AEO   
+    
+    weights_landing_OEI = nexus.analyses.landing_OEI.weights.evaluate(method="New SUAVE")
+    nexus.vehicle_configurations.landing_OEI.mass_properties.breakdown = weights_landing_OEI
+    
+    weights_short_field_takeoff = nexus.analyses.short_field_takeoff.weights.evaluate(method="New SUAVE")
+    nexus.vehicle_configurations.short_field_takeoff.mass_properties.breakdown = weights_short_field_takeoff 
 
     return nexus
  
