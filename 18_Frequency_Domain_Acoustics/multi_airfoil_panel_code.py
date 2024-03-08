@@ -28,10 +28,12 @@ def main():
     # operating conditions 
     RPM         = 2400
     Omega       = RPM*Units.rpm
-    Radius      = 1  
-    
-    AoA                = np.atleast_2d(np.linspace(-5,10,16))*Units.degrees    # change This is a 
-    Re_vals            = np.ones_like(AoA)* 1E5  # chage this  
+    Radius      = 1
+    n_sections = 11
+    Radial_sections = np.linspace(0, Radius, n_sections)
+    AoA                = np.atleast_2d(np.linspace(-5,10,16))*Units.degrees
+    # set of Re for a blade given the Re at the tip
+    Re_vals            = Radial_sections*1e5
     
     
     # airfoil geometry  

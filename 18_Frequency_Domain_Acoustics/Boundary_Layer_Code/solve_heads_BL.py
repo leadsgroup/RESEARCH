@@ -1,14 +1,14 @@
- 
+
 import numpy as np
 from scipy.interpolate import interp1d
 from scipy.integrate import odeint  
 # ----------------------------------------------------------------------
 # heads_method.py 
 # ----------------------------------------------------------------------    
-def solve_heads_BL(l,del_0,theta_0,del_star_0,Re_L,x_i,Ve_i,dVe_i):    
+def solve_heads_BL(nu,l,del_0,theta_0,del_star_0,Re_L,x_i,Ve_i,dVe_i):    
     ''' Solved intergral boundary layer equations for turbulent flow  
     '''
-    nu           = l/Re_L       
+    #nu           = l/Re_L       
     H_0          = del_star_0 / theta_0                        # page 126 
     H1_0         = getH1(np.atleast_1d(H_0))[0]                # page 127 
     y0           = [theta_0, Ve_i[0]*theta_0*H1_0]   # page 128   

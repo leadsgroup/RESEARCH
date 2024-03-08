@@ -83,17 +83,17 @@ def base_analysis(vehicle,use_avl_stability):
     aerodynamics.settings.drag_coefficient_increment = 0.0000
     analyses.append(aerodynamics) 
     
-    ## ------------------------------------------------------------------
-    ##  Stability Analysis
-    #if use_avl_stability:
-        #stability                                   = RCAIDE.Analyses.Stability.AVL()     
-        #stability.settings.filenames.avl_bin_name   = '/Users/matthewclarke/Documents/AVL/avl3.35'    
-        #stability.settings.trim_aircraft            = False 
-        #stability.settings.print_output             = False 
-    #else:
-        #stability                                   = RCAIDE.Analyses.Stability.Fidelity_Zero() 
-    #stability.geometry = vehicle
-    #analyses.append(stability)
+    # ------------------------------------------------------------------
+    #  Stability Analysis
+    if use_avl_stability:
+        stability                                   = RCAIDE.Analyses.Stability.AVL()     
+        stability.settings.filenames.avl_bin_name   = '/Users/matthewclarke/Documents/AVL/avl3.35'    
+        stability.settings.trim_aircraft            = False 
+        stability.settings.print_output             = False 
+    else:
+        stability                                   = RCAIDE.Analyses.Stability.Analytical_Approximation() 
+    stability.geometry = vehicle
+    analyses.append(stability)
 
 
     # ------------------------------------------------------------------
