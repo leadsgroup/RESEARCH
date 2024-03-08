@@ -43,7 +43,7 @@ timestep = 2         # Number of time steps to consider for gradient calculation
 cooling_system = CoolingSystem(max_flow_rate, min_flow_rate, max_gradient, timestep)
 
 # Simulated temperature data over time
-temperature_data = [30, 32, 35, 38, 80, 42, 41, 39, 37, 35]
+temperature_data = [30, 32, 35, 38, 80, 42, 41, 39, 37, -20]
 
 for temperature in temperature_data:
     cooling_system.update_temperature_history(temperature)

@@ -14,7 +14,9 @@ from RCAIDE.Methods.Energy.Sources.Battery.Common           import initialize_fr
 from RCAIDE.Methods.Geometry.Two_Dimensional.Planform       import wing_segmented_planform   
 from RCAIDE.Visualization                                                        import *     
 from RCAIDE.Methods.Energy.Thermal_Management.Batteries.Heat_Exchanger_Systems.Cross_Flow_Heat_Exchanger        import design_cross_flow_heat_exchanger
-from RCAIDE.Methods.Energy.Thermal_Management.Batteries.Heat_Acquisition_Systems.Wavy_Channel_Heat_Acquisition   import design_wavy_channel 
+from RCAIDE.Methods.Energy.Thermal_Management.Batteries.Heat_Acquisition_Systems.Wavy_Channel_Heat_Acquisition  import design_wavy_channel 
+from RCAIDE.Methods.Energy.Thermal_Management.Batteries.Heat_Addition_System.Coil_Heat_Addition                 import design_coil_heating 
+
 # python imports 
 import numpy as np 
 from copy import deepcopy
@@ -486,23 +488,35 @@ def vehicle_setup():
     bat.module.number_of_cells                             = bat.module.geometrtic_configuration.normal_count *bat.module.geometrtic_configuration.parallel_count 
     bus.voltage                                            = bat.pack.maximum_voltage   
     
-    ## Battery Heat Removal System 
-    #HAS                                                    = RCAIDE.Energy.Thermal_Management.Batteries.Heat_Acquisition_Systems.Wavy_Channel() 
-    #HAS.design_altitude                                    = 2500. * Units.feet  
-    #atmosphere                                             = RCAIDE.Analyses.Atmospheric.US_Standard_1976() 
-    #atmo_data                                              = atmosphere.compute_values(altitude =HAS.design_altitude)     
-    #HAS.coolant_inlet_temperature                          = atmo_data.temperature[0,0]  
-    #HAS.design_battery_operating_temperature               = 303
-    #HAS.design_heat_removed                                = 50000  
-    #HAS                                                    = design_wavy_channel(HAS,bat) 
-    #bat.thermal_management_system.heat_removal_system      = HAS
+    # Reservoir for Battery TMS
+    RES                                                    = RCAIDE.Energy.Thermal_Management.Batteries.Reservoirs.Reservoir()
+    bat.thermal_management_system.reservoir                = RES
+    # Battery Heat Removal System 
+    HAS                                                    = RCAIDE.Energy.Thermal_Management.Batteries.Heat_Acquisition_Systems.Wavy_Channel() 
+    HAS.design_altitude                                    = 2500. * Units.feet  
+    atmosphere                                             = RCAIDE.Analyses.Atmospheric.US_Standard_1976() 
+    atmo_data                                              = atmosphere.compute_values(altitude =HAS.design_altitude)     
+    HAS.coolant_inlet_temperature                          = atmo_data.temperature[0,0]  
+    HAS.design_battery_operating_temperature               = 303
+    HAS.design_heat_removed                                = 50000  
+    HAS                                                    = design_wavy_channel(HAS,bat) 
+    bat.thermal_management_system.heat_removal_system      = HAS
                   
-    ## Battery Heat Exchanger               
-    #HEX                                                    = RCAIDE.Energy.Thermal_Management.Batteries.Heat_Exchanger_Systems.Cross_Flow_Heat_Exchanger() 
-    #HEX.design_altitude                                    = 2500. * Units.feet 
-    #HEX.inlet_temperature_of_cold_fluid                    = atmo_data.temperature[0,0]   
-    #HEX                                                    = design_cross_flow_heat_exchanger(HEX,HAS,bat)
-    #bat.thermal_management_system.heat_exchanger_system    = HEX  
+    # Battery Heat Exchanger               
+    HEX                                                    = RCAIDE.Energy.Thermal_Management.Batteries.Heat_Exchanger_Systems.Cross_Flow_Heat_Exchanger() 
+    HEX.design_altitude                                    = 2500. * Units.feet 
+    HEX.inlet_temperature_of_cold_fluid                    = atmo_data.temperature[0,0]   
+    HEX                                                    = design_cross_flow_heat_exchanger(HEX,HAS,bat)
+    bat.thermal_management_system.heat_exchanger_system    = HEX  
+    
+    # Battery Heat Addition System 
+    HAA                                                    = RCAIDE.Energy.Thermal_Management.Batteries.Heat_Addition_Systems.Coil_Heat_Addition()
+    HAA.design_heat_to_add                                 = 15000 #W
+    HAA                                                    = design_coil_heating(HAA,RES,bat)
+    bat.thermal_management_system.heat_addition_system     = HAA
+    
+    
+    
     
     bus.batteries.append(bat)              
 
