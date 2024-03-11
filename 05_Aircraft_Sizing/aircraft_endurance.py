@@ -11,10 +11,10 @@ def main():
     n               = np.linspace(semi_points,0,semi_points)    
     thetan          = n*(np.pi/2)/(semi_points+1)               
     x_points_half   = (span/2)*np.cos(thetan)                   
-    x_points       = np.zeros(n_pts+1)
-    x_points[0]    = 0 
-    x_points[-1]   = span  
-    x_points[1:-1] = np.concatenate((x_points_half[:-1], (span - x_points_half[::-1])))
+    x_points        = np.zeros(n_pts+1)
+    x_points[0]     = 0 
+    x_points[-1]    = span  
+    x_points[1:-1]  = np.concatenate((x_points_half[:-1], (span - x_points_half[::-1])))
     
     
 
