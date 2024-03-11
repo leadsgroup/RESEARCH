@@ -713,8 +713,12 @@ def mission_setup(analyses):
     mission.tag = 'mission' 
 
     # unpack Segments module
-    Segments = RCAIDE.Analyses.Mission.Segments  
+    Segments     = RCAIDE.Analyses.Mission.Segments  
     base_segment = Segments.Segment() 
+    atmosphere                          = RCAIDE.Analyses.Atmospheric.US_Standard_1976() 
+    atmo_data                           = atmosphere.compute_values(altitude = 0,temperature_deviation= -10.)  
+    base_segment.temperature_deviation  = atmo_data.temperature[0][0] 
+    
     
     # ------------------------------------------------------------------
     #   Departure End of Runway Segment Flight 1 : 
@@ -726,11 +730,14 @@ def mission_setup(analyses):
     segment.altitude_start                                   = 0.0 * Units.feet
     segment.altitude_end                                     = 50.0 * Units.feet
     segment.air_speed_start                                  = 45  * Units['m/s'] 
-    segment.air_speed_end                                    = 45   
+    segment.air_speed_end                                    = 45    
+    segment.percent_operation                                = 1.0
+     
+    segment.battery_cell_temperature                      = atmo_data.temperature[0,0]   
     
     # define flight dynamics to model 
-    segment.flight_dynamics.force_x                      = True  
-    segment.flight_dynamics.force_z                      = True     
+    segment.flight_dynamics.force_x                       = True  
+    segment.flight_dynamics.force_z                       = True     
     
     # define flight controls 
     segment.flight_controls.throttle.active               = True           
@@ -750,6 +757,7 @@ def mission_setup(analyses):
     segment.air_speed_start                                  = 45  * Units['m/s']   
     segment.air_speed_end                                    = 50 * Units['m/s']   
     segment.climb_rate                                       = 600 * Units['ft/min'] 
+    segment.percent_operation                              = 1.0
     
     # define flight dynamics to model 
     segment.flight_dynamics.force_x                      = True  
@@ -772,6 +780,7 @@ def mission_setup(analyses):
     segment.altitude_end                                     = 2500 * Units.feet
     segment.air_speed                                        = 120 * Units['mph']
     segment.climb_rate                                       = 500* Units['ft/min']  
+    segment.percent_operation                                  = 0.75
     
     # define flight dynamics to model 
     segment.flight_dynamics.force_x                      = True  
@@ -795,6 +804,7 @@ def mission_setup(analyses):
     segment.altitude_end                     = 8012    * Units.feet 
     segment.air_speed                        = 96.4260 * Units['mph'] 
     segment.climb_rate                       = 700.034 * Units['ft/min']    
+    segment.percent_operation                 = 0.5
     
     # define flight dynamics to model 
     segment.flight_dynamics.force_x                      = True  
@@ -816,6 +826,7 @@ def mission_setup(analyses):
     segment.altitude                                      = 8012   * Units.feet
     segment.air_speed                                     = 120.91 * Units['mph'] 
     segment.distance                                      = 50.   * Units.nautical_mile      
+    segment.percent_operation                               = 0.5
     
     # define flight dynamics to model 
     segment.flight_dynamics.force_x                       = True  
@@ -840,6 +851,7 @@ def mission_setup(analyses):
     segment.air_speed_start                                  = 130.* Units['mph']  
     segment.air_speed_end                                    = 120 * Units['mph']   
     segment.climb_rate                                       = -200 * Units['ft/min']   
+    segment.percent_operation                                  = 0.25
     
     # define flight dynamics to model 
     segment.flight_dynamics.force_x                      = True  
@@ -862,6 +874,7 @@ def mission_setup(analyses):
     segment.distance                                         = 6000 * Units.feet
     segment.acceleration                                     = -0.025  * Units['m/s/s']   
     segment.descent_rate                                     = 300 * Units['ft/min']   
+    segment.percent_operation                                  = 1.0
     
     # define flight dynamics to model 
     segment.flight_dynamics.force_x                      = True  
@@ -883,6 +896,7 @@ def mission_setup(analyses):
     segment.altitude_end                                     = 1500 * Units.feet
     segment.air_speed                                        = 120 * Units['mph']
     segment.climb_rate                                       = 500* Units['ft/min']   
+    segment.percent_operation                                  = 1.0
     
     # define flight dynamics to model 
     segment.flight_dynamics.force_x                      = True  
@@ -903,6 +917,7 @@ def mission_setup(analyses):
     segment.analyses.extend(analyses.base) 
     segment.air_speed                                        = 145* Units['mph']
     segment.distance                                         = 60 * Units.miles * 0.1  
+    segment.percent_operation                                  = 1.0
     
     # define flight dynamics to model 
     segment.flight_dynamics.force_x                      = True  
@@ -924,6 +939,7 @@ def mission_setup(analyses):
     segment.altitude_end                                     = 1000 * Units.feet 
     segment.air_speed                                        = 110 * Units['mph']
     segment.descent_rate                                     = 300 * Units['ft/min']   
+    segment.percent_operation                                  = 1.0
     
     # define flight dynamics to model 
     segment.flight_dynamics.force_x                      = True  
@@ -948,7 +964,7 @@ def mission_setup(analyses):
     segment.air_speed_start                                  = 45 
     segment.air_speed_end                                    = 40    
     segment.climb_rate                                       = -350 * Units['ft/min'] 
-    mission.append_segment(segment) 
+    segment.percent_operation                                  = 1.0
     
     # define flight dynamics to model 
     segment.flight_dynamics.force_x                      = True  
@@ -958,7 +974,8 @@ def mission_setup(analyses):
     segment.flight_controls.throttle.active               = True           
     segment.flight_controls.throttle.assigned_propulsors  = [['starboard_propulsor','port_propulsor']] 
     segment.flight_controls.body_angle.active             = True                
-       
+
+    mission.append_segment(segment)        
 
     # ------------------------------------------------------------------
     #  Final Approach Segment Flight 1  
@@ -972,6 +989,7 @@ def mission_setup(analyses):
     segment.air_speed_start                                  = 40 
     segment.air_speed_end                                    = 35   
     segment.climb_rate                                       = -300 * Units['ft/min'] 
+    segment.percent_operation                                  = 1.0
     
     # define flight dynamics to model 
     segment.flight_dynamics.force_x                      = True  
