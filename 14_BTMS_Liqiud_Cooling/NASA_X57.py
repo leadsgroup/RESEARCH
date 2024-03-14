@@ -1,4 +1,4 @@
- 
+
 
 # ----------------------------------------------------------------------
 #   Imports
@@ -22,9 +22,9 @@ import numpy as np
 from copy import deepcopy
 import os 
 import matplotlib.pyplot        as plt 
- 
+
 def main():     
-      
+
     # vehicle data
     vehicle  = vehicle_setup() 
 
@@ -54,7 +54,7 @@ def main():
                     #max_y_axis_limit            = 20,
                     #min_z_axis_limit            = -20,
                     #max_z_axis_limit            = 20)         
-           
+
     return
 
 
@@ -66,7 +66,7 @@ def full_setup():
 
     # vehicle data
     vehicle  = vehicle_setup() 
-   
+
     # Set up configs
     configs  = configs_setup(vehicle)
 
@@ -96,7 +96,7 @@ def vehicle_setup():
     vehicle = RCAIDE.Vehicle()
     vehicle.tag = 'X57_Maxwell_Mod2'
 
- 
+
     # ################################################# Vehicle-level Properties ########################################################  
 
     # mass properties
@@ -109,7 +109,7 @@ def vehicle_setup():
     vehicle.passengers                    = 4
     vehicle.systems.control               = "fully powered"
     vehicle.systems.accessories           = "commuter"    
-    
+
     cruise_speed                          = 135.*Units['mph']    
     altitude                              = 2500. * Units.ft
     atmo                                  = RCAIDE.Analyses.Atmospheric.US_Standard_1976()
@@ -119,7 +119,7 @@ def vehicle_setup():
     vehicle.design_dynamic_pressure       = ( .5 *freestream0.density*(cruise_speed*cruise_speed))[0][0]
     vehicle.design_mach_number            =  mach_number
 
-         
+
     # ##########################################################  Wings ################################################################    
     #------------------------------------------------------------------------------------------------------------------------------------  
     #  Main Wing
@@ -149,7 +149,7 @@ def vehicle_setup():
     rel_path                                   = ospath.split( 'NASA_X57.py')[0]  +  '..' + separator   
     airfoil                                    = RCAIDE.Components.Airfoils.Airfoil() 
     airfoil.coordinate_file                    = rel_path + 'Airfoils' + separator + 'NACA_63_412.txt'   # absolute path         
-    
+
     cg_x = wing.origin[0][0] + 0.25*wing.chords.mean_aerodynamic
     cg_z = wing.origin[0][2] - 0.2*wing.chords.mean_aerodynamic
     vehicle.mass_properties.center_of_gravity = [[cg_x,   0.  ,  cg_z ]]  # SOURCE: Design and aerodynamic analysis of a twin-engine commuter aircraft
@@ -176,7 +176,7 @@ def vehicle_setup():
     segment.thickness_to_chord            = 0.12 
     segment.append_airfoil(airfoil)
     wing.append_segment(segment)
-    
+
     # Wing Segments
     segment                               = RCAIDE.Components.Wings.Segment()
     segment.tag                           = 'winglet'
@@ -199,10 +199,10 @@ def vehicle_setup():
     segment.thickness_to_chord            = 0.12
     segment.append_airfoil(airfoil)
     wing.append_segment(segment)    
-    
+
     # Fill out more segment properties automatically
     wing = wing_segmented_planform(wing)           
-    
+
     # add to vehicle
     vehicle.append_component(wing)
 
@@ -263,7 +263,7 @@ def vehicle_setup():
     # add to vehicle
     vehicle.append_component(wing)
 
- 
+
     # ##########################################################   Fuselage  ############################################################    
     fuselage = RCAIDE.Components.Fuselages.Fuselage()
     fuselage.tag                                = 'fuselage'
@@ -396,7 +396,7 @@ def vehicle_setup():
 
     # add to vehicle
     vehicle.append_component(fuselage)
- 
+
     # ##########################################################   Nacelles  ############################################################    
     nacelle                    = RCAIDE.Components.Nacelles.Nacelle()
     nacelle.tag                = 'nacelle_1'
@@ -405,66 +405,66 @@ def vehicle_setup():
     nacelle.areas.wetted       = 0.01*(2*np.pi*0.01/2)
     nacelle.origin             = [[2.5,2.5,1.0]]
     nacelle.flow_through       = False  
-    
+
     nac_segment                    = RCAIDE.Components.Lofted_Body_Segment.Segment()
     nac_segment.tag                = 'segment_1'
     nac_segment.percent_x_location = 0.0  
     nac_segment.height             = 0.0
     nac_segment.width              = 0.0
     nacelle.append_segment(nac_segment)   
-    
+
     nac_segment                    = RCAIDE.Components.Lofted_Body_Segment.Segment()
     nac_segment.tag                = 'segment_2'
     nac_segment.percent_x_location = 0.1  
     nac_segment.height             = 0.5
     nac_segment.width              = 0.65
     nacelle.append_segment(nac_segment)   
-    
+
     nac_segment                    = RCAIDE.Components.Lofted_Body_Segment.Segment()
     nac_segment.tag                = 'segment_3'
     nac_segment.percent_x_location = 0.3  
     nac_segment.height             = 0.52
     nac_segment.width              = 0.7
     nacelle.append_segment(nac_segment)  
-     
+
     nac_segment                    = RCAIDE.Components.Lofted_Body_Segment.Segment()
     nac_segment.tag                = 'segment_4'
     nac_segment.percent_x_location = 0.5  
     nac_segment.height             = 0.5
     nac_segment.width              = 0.65
     nacelle.append_segment(nac_segment)  
-    
+
     nac_segment                    = RCAIDE.Components.Lofted_Body_Segment.Segment()
     nac_segment.tag                = 'segment_5'
     nac_segment.percent_x_location = 0.7 
     nac_segment.height             = 0.4
     nac_segment.width              = 0.6
     nacelle.append_segment(nac_segment)   
-    
+
     nac_segment                    = RCAIDE.Components.Lofted_Body_Segment.Segment()
     nac_segment.tag                = 'segment_6'
     nac_segment.percent_x_location = 0.9 
     nac_segment.height             = 0.3
     nac_segment.width              = 0.5
     nacelle.append_segment(nac_segment)  
-    
+
     nac_segment                    = RCAIDE.Components.Lofted_Body_Segment.Segment()
     nac_segment.tag                = 'segment_7'
     nac_segment.percent_x_location = 1.0  
     nac_segment.height             = 0.0
     nac_segment.width              = 0.0
     nacelle.append_segment(nac_segment)    
-    
+
     vehicle.append_component(nacelle)  
 
     nacelle_2          = deepcopy(nacelle)
     nacelle_2.tag      = 'nacelle_2'
     nacelle_2.origin   = [[2.5,-2.5,1.0]]
     vehicle.append_component(nacelle_2)    
-    
-    
 
- 
+
+
+
     # ########################################################  Energy Network  #########################################################  
     net                              = All_Electric_Network()   
 
@@ -487,11 +487,10 @@ def vehicle_setup():
     bat.module.geometrtic_configuration.parallel_count     = 20
     bat.module.number_of_cells                             = bat.module.geometrtic_configuration.normal_count *bat.module.geometrtic_configuration.parallel_count 
     bus.voltage                                            = bat.pack.maximum_voltage   
-    
+
     # Reservoir for Battery TMS
     RES                                                    = RCAIDE.Energy.Thermal_Management.Batteries.Reservoirs.Reservoir()
     bat.thermal_management_system.reservoir                = RES
-    
     # Battery Heat Removal System 
     HAS                                                    = RCAIDE.Energy.Thermal_Management.Batteries.Heat_Acquisition_Systems.Wavy_Channel() 
     HAS.design_altitude                                    = 2500. * Units.feet  
@@ -502,23 +501,23 @@ def vehicle_setup():
     HAS.design_heat_removed                                = 50000  
     HAS                                                    = design_wavy_channel(HAS,bat) 
     bat.thermal_management_system.heat_removal_system      = HAS
-                  
+
     # Battery Heat Exchanger               
     HEX                                                    = RCAIDE.Energy.Thermal_Management.Batteries.Heat_Exchanger_Systems.Cross_Flow_Heat_Exchanger() 
     HEX.design_altitude                                    = 2500. * Units.feet 
     HEX.inlet_temperature_of_cold_fluid                    = atmo_data.temperature[0,0]   
     HEX                                                    = design_cross_flow_heat_exchanger(HEX,HAS,bat)
     bat.thermal_management_system.heat_exchanger_system    = HEX  
-    
+
     ## Battery Heat Addition System 
     #HAA                                                    = RCAIDE.Energy.Thermal_Management.Batteries.Heat_Addition_Systems.Coil_Heat_Addition()
     #HAA.design_heat_to_add                                 = 15000 #W
     #HAA                                                    = design_coil_heating(HAA,RES,bat)
     #bat.thermal_management_system.heat_addition_system     = HAA
-    
-    
-    
-    
+
+
+
+
     bus.batteries.append(bat)              
 
     #------------------------------------------------------------------------------------------------------------------------------------  
@@ -527,13 +526,13 @@ def vehicle_setup():
     starboard_propulsor                              = RCAIDE.Energy.Propulsors.Electric_Rotor()  
     starboard_propulsor.tag                          = 'starboard_propulsor'
     starboard_propulsor.active_batteries             = ['li_ion_battery']   
-  
+
     # Electronic Speed Controller       
     esc                                              = RCAIDE.Energy.Propulsors.Modulators.Electronic_Speed_Controller()
     esc.tag                                          = 'esc_1'
     esc.efficiency                                   = 0.95 
     starboard_propulsor.electronic_speed_controller  = esc   
-     
+
     # Propeller              
     propeller                                        = RCAIDE.Energy.Propulsors.Converters.Propeller() 
     propeller.tag                                    = 'propeller_1'  
@@ -560,7 +559,7 @@ def vehicle_setup():
     propeller.airfoil_polar_stations                 = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0] 
     propeller                                        = design_propeller(propeller)    
     starboard_propulsor.rotor                        = propeller   
-              
+
     # DC_Motor       
     motor                                            = RCAIDE.Energy.Propulsors.Converters.DC_Motor()
     motor.efficiency                                 = 0.98
@@ -573,7 +572,7 @@ def vehicle_setup():
     motor                                            = design_motor(motor)  
     motor.mass_properties.mass                       = nasa_motor(motor.design_torque) 
     starboard_propulsor.motor                        = motor 
- 
+
     # append propulsor to distribution line 
     bus.propulsors.append(starboard_propulsor) 
 
@@ -583,7 +582,7 @@ def vehicle_setup():
     port_propulsor                             = RCAIDE.Energy.Propulsors.Electric_Rotor() 
     port_propulsor.tag                         = "port_propulsor"
     port_propulsor.active_batteries            = ['li_ion_battery']   
-            
+
     esc_2                                      = deepcopy(esc)
     esc_2.origin                               = [[2., -2.5, 0.95]]      
     port_propulsor.electronic_speed_controller = esc_2  
@@ -593,11 +592,11 @@ def vehicle_setup():
     propeller_2.origin                         = [[2.,-2.5,0.95]]
     propeller_2.clockwise_rotation             = False        
     port_propulsor.rotor                       = propeller_2  
-              
+
     motor_2                                    = deepcopy(motor)
     motor_2.origin                             = [[2., -2.5, 0.95]]      
     port_propulsor.motor                       = motor_2  
-    
+
     # append propulsor to distribution line 
     bus.propulsors.append(port_propulsor) 
 
@@ -619,13 +618,13 @@ def vehicle_setup():
 
     # append bus   
     net.busses.append(bus)
-    
+
     vehicle.append_energy_network(net)
 
     # ------------------------------------------------------------------
     #   Vehicle Definition Complete
     # ------------------------------------------------------------------ 
-    
+
     return vehicle
 # ---------------------------------------------------------------------
 #   Define the Configurations
@@ -644,8 +643,8 @@ def configs_setup(vehicle):
 
     # done!
     return configs
- 
- 
+
+
 # ----------------------------------------------------------------------
 #   Define the Vehicle Analyses
 # ----------------------------------------------------------------------
@@ -667,7 +666,7 @@ def base_analysis(vehicle):
     #   Initialize the Analyses
     # ------------------------------------------------------------------     
     analyses = RCAIDE.Analyses.Vehicle()
- 
+
     # ------------------------------------------------------------------
     #  Weights
     weights = RCAIDE.Analyses.Weights.Weights_eVTOL()
@@ -679,7 +678,7 @@ def base_analysis(vehicle):
     aerodynamics = RCAIDE.Analyses.Aerodynamics.Subsonic_VLM() 
     aerodynamics.geometry = vehicle 
     analyses.append(aerodynamics)  
- 
+
     # ------------------------------------------------------------------
     #  Energy
     energy= RCAIDE.Analyses.Energy.Energy()
@@ -696,7 +695,7 @@ def base_analysis(vehicle):
     atmosphere = RCAIDE.Analyses.Atmospheric.US_Standard_1976()
     atmosphere.features.planet = planet.features
     analyses.append(atmosphere)   
-    
+
 
     # done!
     return analyses    
@@ -706,7 +705,7 @@ def base_analysis(vehicle):
 # ---------------------------------------------------------------------- 
 
 def mission_setup(analyses):   
-    
+
     # ------------------------------------------------------------------
     #   Initialize the Mission
     # ------------------------------------------------------------------
@@ -714,11 +713,10 @@ def mission_setup(analyses):
     mission.tag = 'mission' 
 
     # unpack Segments module
-    Segments     = RCAIDE.Analyses.Mission.Segments  
+    Segments = RCAIDE.Analyses.Mission.Segments  
     base_segment = Segments.Segment() 
     base_segment.temperature_deviation  = 0
-    
-    
+
     # ------------------------------------------------------------------
     #   Departure End of Runway Segment Flight 1 : 
     # ------------------------------------------------------------------ 
@@ -729,22 +727,20 @@ def mission_setup(analyses):
     segment.altitude_start                                   = 0.0 * Units.feet
     segment.altitude_end                                     = 50.0 * Units.feet
     segment.air_speed_start                                  = 45  * Units['m/s'] 
-    segment.air_speed_end                                    = 45    
+    segment.air_speed_end                                    = 45   
     segment.percent_operation                                = 1.0
-     
-  #  segment.battery_cell_temperature                      = atmo_data.temperature[0,0]   
-    
+
     # define flight dynamics to model 
-    segment.flight_dynamics.force_x                       = True  
-    segment.flight_dynamics.force_z                       = True     
-    
+    segment.flight_dynamics.force_x                      = True  
+    segment.flight_dynamics.force_z                      = True     
+
     # define flight controls 
     segment.flight_controls.throttle.active               = True           
     segment.flight_controls.throttle.assigned_propulsors  = [['starboard_propulsor','port_propulsor']] 
     segment.flight_controls.body_angle.active             = True                
-            
+
     mission.append_segment(segment)
-    
+
     # ------------------------------------------------------------------
     #   Initial Climb Area Segment Flight 1  
     # ------------------------------------------------------------------ 
@@ -756,19 +752,19 @@ def mission_setup(analyses):
     segment.air_speed_start                                  = 45  * Units['m/s']   
     segment.air_speed_end                                    = 50 * Units['m/s']   
     segment.climb_rate                                       = 600 * Units['ft/min'] 
-    segment.percent_operation                              = 1.0
-    
+    segment.percent_operation                                = 1.0
+
     # define flight dynamics to model 
     segment.flight_dynamics.force_x                      = True  
     segment.flight_dynamics.force_z                      = True     
-    
+
     # define flight controls 
     segment.flight_controls.throttle.active               = True           
     segment.flight_controls.throttle.assigned_propulsors  = [['starboard_propulsor','port_propulsor']] 
     segment.flight_controls.body_angle.active             = True                
-          
+
     mission.append_segment(segment) 
-             
+
     # ------------------------------------------------------------------
     #   Climb Segment Flight 1 
     # ------------------------------------------------------------------ 
@@ -780,18 +776,18 @@ def mission_setup(analyses):
     segment.air_speed                                        = 120 * Units['mph']
     segment.climb_rate                                       = 500* Units['ft/min']  
     segment.percent_operation                                = 0.75
-    
+
     # define flight dynamics to model 
     segment.flight_dynamics.force_x                      = True  
     segment.flight_dynamics.force_z                      = True     
-    
+
     # define flight controls 
     segment.flight_controls.throttle.active               = True           
     segment.flight_controls.throttle.assigned_propulsors  = [['starboard_propulsor','port_propulsor']] 
     segment.flight_controls.body_angle.active             = True                
-        
+
     mission.append_segment(segment) 
-    
+
     # ------------------------------------------------------------------
     #   Climb 1 : constant Speed, constant rate segment 
     # ------------------------------------------------------------------ 
@@ -804,16 +800,16 @@ def mission_setup(analyses):
     segment.air_speed                        = 96.4260 * Units['mph'] 
     segment.climb_rate                       = 700.034 * Units['ft/min']    
     segment.percent_operation                = 0.5
-    
+
     # define flight dynamics to model 
     segment.flight_dynamics.force_x                      = True  
     segment.flight_dynamics.force_z                      = True     
-    
+
     # define flight controls 
     segment.flight_controls.throttle.active               = True           
     segment.flight_controls.throttle.assigned_propulsors  = [['starboard_propulsor','port_propulsor']] 
     segment.flight_controls.body_angle.active             = True                
-         
+
     mission.append_segment(segment)
 
     # ------------------------------------------------------------------
@@ -825,17 +821,17 @@ def mission_setup(analyses):
     segment.altitude                                      = 8012   * Units.feet
     segment.air_speed                                     = 120.91 * Units['mph'] 
     segment.distance                                      = 50.   * Units.nautical_mile      
-    segment.percent_operation                             = 0.05
-    
+    segment.percent_operation                             = 0.07
+
     # define flight dynamics to model 
     segment.flight_dynamics.force_x                       = True  
     segment.flight_dynamics.force_z                       = True     
-    
+
     # define flight controls 
     segment.flight_controls.throttle.active               = True           
     segment.flight_controls.throttle.assigned_propulsors  = [['starboard_propulsor','port_propulsor']] 
     segment.flight_controls.body_angle.active             = True                
-         
+
     mission.append_segment(segment)    
 
 
@@ -850,17 +846,17 @@ def mission_setup(analyses):
     segment.air_speed_start                                  = 130.* Units['mph']  
     segment.air_speed_end                                    = 120 * Units['mph']   
     segment.climb_rate                                       = -200 * Units['ft/min']   
-    segment.percent_operation                                = 0.1
-    
+    segment.percent_operation                                = 0.15
+
     # define flight dynamics to model 
     segment.flight_dynamics.force_x                      = True  
     segment.flight_dynamics.force_z                      = True     
-    
+
     # define flight controls 
     segment.flight_controls.throttle.active               = True           
     segment.flight_controls.throttle.assigned_propulsors  = [['starboard_propulsor','port_propulsor']] 
     segment.flight_controls.body_angle.active             = True                
-         
+
     mission.append_segment(segment)   
 
     # ------------------------------------------------------------------
@@ -873,19 +869,19 @@ def mission_setup(analyses):
     segment.distance                                         = 6000 * Units.feet
     segment.acceleration                                     = -0.025  * Units['m/s/s']   
     segment.descent_rate                                     = 300 * Units['ft/min']   
-    segment.percent_operation                                = 0.75
-    
+    segment.percent_operation                                = 1.0
+
     # define flight dynamics to model 
     segment.flight_dynamics.force_x                      = True  
     segment.flight_dynamics.force_z                      = True     
-    
+
     # define flight controls 
     segment.flight_controls.throttle.active               = True           
     segment.flight_controls.throttle.assigned_propulsors  = [['starboard_propulsor','port_propulsor']] 
     segment.flight_controls.body_angle.active             = True                
-               
+
     mission.append_segment(segment)     
-    
+
     # ------------------------------------------------------------------
     #  Reserve Climb 
     # ------------------------------------------------------------------ 
@@ -895,19 +891,19 @@ def mission_setup(analyses):
     segment.altitude_end                                     = 1500 * Units.feet
     segment.air_speed                                        = 120 * Units['mph']
     segment.climb_rate                                       = 500* Units['ft/min']   
-    segment.percent_operation                                = 0.75
-    
+    segment.percent_operation                                = 1.0
+
     # define flight dynamics to model 
     segment.flight_dynamics.force_x                      = True  
     segment.flight_dynamics.force_z                      = True     
-    
+
     # define flight controls 
     segment.flight_controls.throttle.active               = True           
     segment.flight_controls.throttle.assigned_propulsors  = [['starboard_propulsor','port_propulsor']] 
     segment.flight_controls.body_angle.active             = True                
-       
+
     mission.append_segment(segment)
-    
+
     # ------------------------------------------------------------------
     #  Researve Cruise Segment 
     # ------------------------------------------------------------------ 
@@ -916,19 +912,19 @@ def mission_setup(analyses):
     segment.analyses.extend(analyses.base) 
     segment.air_speed                                        = 145* Units['mph']
     segment.distance                                         = 60 * Units.miles * 0.1  
-    segment.percent_operation                                = 0.01
-    
+    segment.percent_operation                                = 1.0
+
     # define flight dynamics to model 
     segment.flight_dynamics.force_x                      = True  
     segment.flight_dynamics.force_z                      = True     
-    
+
     # define flight controls 
     segment.flight_controls.throttle.active               = True           
     segment.flight_controls.throttle.assigned_propulsors  = [['starboard_propulsor','port_propulsor']] 
     segment.flight_controls.body_angle.active             = True                
-       
+
     mission.append_segment(segment)     
-    
+
     # ------------------------------------------------------------------
     #  Researve Descent
     # ------------------------------------------------------------------ 
@@ -938,20 +934,20 @@ def mission_setup(analyses):
     segment.altitude_end                                     = 1000 * Units.feet 
     segment.air_speed                                        = 110 * Units['mph']
     segment.descent_rate                                     = 300 * Units['ft/min']   
-    segment.percent_operation                                = 0.75
-    
+    segment.percent_operation                                  = 1.0
+
     # define flight dynamics to model 
     segment.flight_dynamics.force_x                      = True  
     segment.flight_dynamics.force_z                      = True     
-    
+
     # define flight controls 
     segment.flight_controls.throttle.active               = True           
     segment.flight_controls.throttle.assigned_propulsors  = [['starboard_propulsor','port_propulsor']] 
     segment.flight_controls.body_angle.active             = True                
-       
+
     mission.append_segment(segment)  
 
-    
+
     # ------------------------------------------------------------------
     #  Baseleg Segment Flight 1  
     # ------------------------------------------------------------------ 
@@ -963,12 +959,12 @@ def mission_setup(analyses):
     segment.air_speed_start                                  = 45 
     segment.air_speed_end                                    = 40    
     segment.climb_rate                                       = -350 * Units['ft/min'] 
-    segment.percent_operation                                = 1.0
-    
+    segment.percent_operation                                  = 1.0
+
     # define flight dynamics to model 
     segment.flight_dynamics.force_x                      = True  
     segment.flight_dynamics.force_z                      = True     
-    
+
     # define flight controls 
     segment.flight_controls.throttle.active               = True           
     segment.flight_controls.throttle.assigned_propulsors  = [['starboard_propulsor','port_propulsor']] 
@@ -988,31 +984,31 @@ def mission_setup(analyses):
     segment.air_speed_start                                  = 40 
     segment.air_speed_end                                    = 35   
     segment.climb_rate                                       = -300 * Units['ft/min'] 
-    segment.percent_operation                                = 1.0
-    
+    segment.percent_operation                                  = 1.0
+
     # define flight dynamics to model 
     segment.flight_dynamics.force_x                      = True  
     segment.flight_dynamics.force_z                      = True     
-    
+
     # define flight controls 
     segment.flight_controls.throttle.active               = True           
     segment.flight_controls.throttle.assigned_propulsors  = [['starboard_propulsor','port_propulsor']] 
     segment.flight_controls.body_angle.active             = True                
-              
+
     mission.append_segment(segment)  
- 
+
     # ------------------------------------------------------------------
     #   Mission definition complete    
     # ------------------------------------------------------------------ 
-    
+
     return mission 
- 
+
 # ----------------------------------------------------------------------
 #   Define the Mission
 # ---------------------------------------------------------------------- 
 
 def loiter_mission_setup(analyses):   
-    
+
     # ------------------------------------------------------------------
     #   Initialize the Mission
     # ------------------------------------------------------------------
@@ -1033,26 +1029,26 @@ def loiter_mission_setup(analyses):
     segment.altitude                                      = 8012   * Units.feet
     segment.air_speed                                     = 120.91 * Units['mph']  
     segment.time                                          = 0.5*Units.hrs
-    
+
     # define flight dynamics to model 
     segment.flight_dynamics.force_x                       = True  
     segment.flight_dynamics.force_z                       = True     
-    
+
     # define flight controls 
     segment.flight_controls.throttle.active               = True           
     segment.flight_controls.throttle.assigned_propulsors  = [['starboard_propulsor','port_propulsor']] 
     segment.flight_controls.body_angle.active             = True                
-         
+
     mission.append_segment(segment)    
- 
-    
+
+
     return mission 
 
 
 def missions_setup(analyses): 
- 
+
     missions         = RCAIDE.Analyses.Mission.Missions()
-    
+
     # base mission 
     base_mission = mission_setup(analyses) 
     base_mission.tag  = 'base_mission' 
@@ -1061,38 +1057,38 @@ def missions_setup(analyses):
     loiter       = loiter_mission_setup(analyses) 
     loiter.tag  = 'loiter'
     missions.append(loiter)    
- 
+
     return missions 
 
 
 def plot_mission(results):  
-    
+
     plot_flight_conditions(results) 
 
     plot_aerodynamic_coefficients(results)  
-    
+
     plot_aircraft_velocities(results)
-    
+
     plot_battery_pack_conditions(results)
-    
+
     plot_propulsor_throttles(results)
-    
+
     plot_battery_cell_conditions(results)
-    
+
     plot_battery_degradation(results)
 
     plot_rotor_conditions(results) 
 
     plot_electric_propulsor_efficiencies(results)
-    
+
     plot_heat_acquisition_system_conditions(results)
-    
+
     plot_heat_exchanger_system_conditions(results)
-    
+
     plot_reservoir_conditions(results)
-     
+
     return
- 
+
 if __name__ == '__main__': 
     main()    
     plt.show()
