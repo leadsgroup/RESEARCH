@@ -22,7 +22,7 @@ import pylab as plt
 
 def main():
     
-    use_avl_stability = False 
+    use_avl_stability = False
     # vehicle data
     vehicle  = vehicle_setup() 
 
@@ -56,13 +56,13 @@ def analyses_setup(configs,use_avl_stability):
 
     # build a base analysis for each config
     for tag,config in configs.items():
-        analysis = base_analysis(config,use_avl_stability)
+        analysis = base_analysis(config, use_avl_stability, configs)
         analyses[tag] = analysis
 
     return analyses
 
 
-def base_analysis(vehicle,use_avl_stability):
+def base_analysis(vehicle,use_avl_stability, configs):
 
     # ------------------------------------------------------------------
     #   Initialize the Analyses
@@ -87,11 +87,13 @@ def base_analysis(vehicle,use_avl_stability):
     #  Stability Analysis
     if use_avl_stability:
         stability                                   = RCAIDE.Analyses.Stability.AVL()     
-        stability.settings.filenames.avl_bin_name   = '/Users/matthewclarke/Documents/AVL/avl3.35'    
+        stability.settings.filenames.avl_bin_name   = 'C:\\Users\\Matteo\\Documents\\UIUC\\avl.exe' #/Users/matthewclarke/Documents/AVL/avl3.35'    
         stability.settings.trim_aircraft            = False 
         stability.settings.print_output             = False 
     else:
         stability                                   = RCAIDE.Analyses.Stability.Analytical_Approximation() 
+
+    stability.configuration                         = configs
     stability.geometry = vehicle
     analyses.append(stability)
 
