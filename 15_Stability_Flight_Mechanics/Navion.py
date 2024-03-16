@@ -91,10 +91,11 @@ def base_analysis(vehicle,use_avl_stability, configs):
         stability.settings.trim_aircraft            = False 
         stability.settings.print_output             = False 
     else:
-        stability                                   = RCAIDE.Analyses.Stability.Analytical_Approximation() 
+        stability                                   = RCAIDE.Analyses.Stability.Analytical_Approximation()
+        
 
     stability.configuration                         = configs
-    stability.geometry = vehicle
+    stability.geometry                              = vehicle
     analyses.append(stability)
 
 
