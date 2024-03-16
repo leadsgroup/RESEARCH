@@ -6,12 +6,13 @@
 # RCAIDE imports 
 import RCAIDE
 from RCAIDE.Core import Units , Data 
-from RCAIDE.Energy.Networks.All_Electric_Network            import All_Electric_Network
-from RCAIDE.Methods.Energy.Propulsors.Converters.Rotor      import design_propeller 
-from RCAIDE.Methods.Energy.Propulsors.Converters.DC_Motor   import design_motor 
-from RCAIDE.Methods.Weights.Correlation_Buildups.Propulsion import nasa_motor
-from RCAIDE.Methods.Energy.Sources.Battery.Common           import initialize_from_circuit_configuration
-from RCAIDE.Methods.Geometry.Two_Dimensional.Planform       import wing_segmented_planform   
+from RCAIDE.Energy.Networks.All_Electric_Network                                 import All_Electric_Network
+from RCAIDE.Methods.Energy.Propulsors.Converters.Rotor                           import design_propeller 
+from RCAIDE.Methods.Energy.Propulsors.Converters.DC_Motor                        import design_motor 
+from RCAIDE.Methods.Weights.Correlation_Buildups.Propulsion                      import nasa_motor
+from RCAIDE.Methods.Energy.Sources.Battery.Common                                import initialize_from_circuit_configuration
+from RCAIDE.Methods.Geometry.Two_Dimensional.Planform                            import wing_segmented_planform   
+from RCAIDE.Methods.Weights.Physics_Based_Buildups.Electric                      import compute_weight , converge_weight
 from RCAIDE.Visualization                                                        import *     
 from RCAIDE.Methods.Energy.Thermal_Management.Batteries.Heat_Exchanger_Systems.Cross_Flow_Heat_Exchanger        import design_cross_flow_heat_exchanger
 from RCAIDE.Methods.Energy.Thermal_Management.Batteries.Heat_Acquisition_Systems.Wavy_Channel_Heat_Acquisition  import design_wavy_channel 
@@ -124,26 +125,26 @@ def vehicle_setup():
     #------------------------------------------------------------------------------------------------------------------------------------  
     #  Main Wing
     #------------------------------------------------------------------------------------------------------------------------------------
-    wing                                  = RCAIDE.Components.Wings.Main_Wing()
-    wing.tag                              = 'main_wing' 
-    wing.sweeps.quarter_chord             = 0.0 * Units.deg
-    wing.thickness_to_chord               = 0.12
-    wing.areas.reference                  = 14.76
-    wing.spans.projected                  = 11.4 
-    wing.chords.root                      = 1.46
-    wing.chords.tip                       = 0.92
-    wing.chords.mean_aerodynamic          = 1.19
-    wing.taper                            = wing.chords.root/wing.chords.tip 
-    wing.aspect_ratio                     = wing.spans.projected**2. / wing.areas.reference 
-    wing.twists.root                      = 3.0 * Units.degrees
-    wing.twists.tip                       = 0.0 * Units.degrees 
-    wing.origin                           = [[2.93, 0., 1.01]]
-    wing.aerodynamic_center               = [3., 0., 1.01] 
-    wing.vertical                         = False
-    wing.symmetric                        = True
-    wing.high_lift                        = True 
-    wing.winglet_fraction                 = 0.0  
-    wing.dynamic_pressure_ratio           = 1.0   
+    wing                                       = RCAIDE.Components.Wings.Main_Wing()
+    wing.tag                                   = 'main_wing' 
+    wing.sweeps.quarter_chord                  = 0.0 * Units.deg
+    wing.thickness_to_chord                    = 0.12
+    wing.areas.reference                       = 14.76
+    wing.spans.projected                       = 11.4 
+    wing.chords.root                           = 1.46
+    wing.chords.tip                            = 0.92
+    wing.chords.mean_aerodynamic               = 1.19
+    wing.taper                                 = wing.chords.root/wing.chords.tip 
+    wing.aspect_ratio                          = wing.spans.projected**2. / wing.areas.reference 
+    wing.twists.root                           = 3.0 * Units.degrees
+    wing.twists.tip                            = 0.0 * Units.degrees 
+    wing.origin                                = [[2.93, 0., 1.01]]
+    wing.aerodynamic_center                    = [3., 0., 1.01] 
+    wing.vertical                              = False
+    wing.symmetric                             = True
+    wing.high_lift                             = True 
+    wing.winglet_fraction                      = 0.0  
+    wing.dynamic_pressure_ratio                = 1.0   
     ospath                                     = os.path.abspath(__file__)
     separator                                  = os.path.sep
     rel_path                                   = ospath.split( 'NASA_X57.py')[0]  +  '..' + separator   
@@ -478,12 +479,12 @@ def vehicle_setup():
     #------------------------------------------------------------------------------------------------------------------------------------   
     bat                                                    = RCAIDE.Energy.Sources.Batteries.Lithium_Ion_NMC() 
     bat.pack.electrical_configuration.series               = 128   
-    bat.pack.electrical_configuration.parallel             = 40
+    bat.pack.electrical_configuration.parallel             = 100  
     initialize_from_circuit_configuration(bat)  
     bat.pack.number_of_modules                             = 16  
     bat.module.geometrtic_configuration.total              = bat.pack.electrical_configuration.total
     bat.module.voltage                                     = bat.pack.maximum_voltage/bat.pack.number_of_modules # assumes modules are connected in parallel, must be less than max_module_voltage (~50) /safety_factor (~ 1.5)  
-    bat.module.geometrtic_configuration.normal_count       = 16
+    bat.module.geometrtic_configuration.normal_count       = 40  
     bat.module.geometrtic_configuration.parallel_count     = 20
     bat.module.number_of_cells                             = bat.module.geometrtic_configuration.normal_count *bat.module.geometrtic_configuration.parallel_count 
     bus.voltage                                            = bat.pack.maximum_voltage   
@@ -492,6 +493,7 @@ def vehicle_setup():
     RES                                                    = RCAIDE.Energy.Thermal_Management.Batteries.Reservoirs.Reservoir()
     bat.thermal_management_system.reservoir                = RES
     # Battery Heat Removal System 
+    
     HAS                                                    = RCAIDE.Energy.Thermal_Management.Batteries.Heat_Acquisition_Systems.Wavy_Channel() 
     HAS.design_altitude                                    = 2500. * Units.feet  
     atmosphere                                             = RCAIDE.Analyses.Atmospheric.US_Standard_1976() 
@@ -509,14 +511,11 @@ def vehicle_setup():
     HEX                                                    = design_cross_flow_heat_exchanger(HEX,HAS,bat)
     bat.thermal_management_system.heat_exchanger_system    = HEX  
 
-    ## Battery Heat Addition System 
-    #HAA                                                    = RCAIDE.Energy.Thermal_Management.Batteries.Heat_Addition_Systems.Coil_Heat_Addition()
-    #HAA.design_heat_to_add                                 = 15000 #W
-    #HAA                                                    = design_coil_heating(HAA,RES,bat)
-    #bat.thermal_management_system.heat_addition_system     = HAA
-
-
-
+    # Battery Heat Addition System 
+    HAA                                                    = RCAIDE.Energy.Thermal_Management.Batteries.Heat_Addition_Systems.Coil_Heat_Addition()
+    HAA.design_heat_to_add                                 = 15000 #W
+    HAA                                                    = design_coil_heating(HAA,RES,bat)
+    bat.thermal_management_system.heat_addition_system     = HAA 
 
     bus.batteries.append(bat)              
 
@@ -619,11 +618,14 @@ def vehicle_setup():
     # append bus   
     net.busses.append(bus)
 
-    vehicle.append_energy_network(net)
-
-    # ------------------------------------------------------------------
-    #   Vehicle Definition Complete
-    # ------------------------------------------------------------------ 
+    vehicle.append_energy_network(net) 
+    
+    #------------------------------------------------------------------------------------------------------------------------------------
+    # ##################################   Determine Vehicle Mass Properties Using Physic Based Methods  ################################ 
+    #------------------------------------------------------------------------------------------------------------------------------------   
+    converge_weight(vehicle) 
+    breakdown = compute_weight(vehicle)
+    print(breakdown) 
 
     return vehicle
 # ---------------------------------------------------------------------
@@ -907,11 +909,11 @@ def mission_setup(analyses):
     # ------------------------------------------------------------------
     #  Researve Cruise Segment 
     # ------------------------------------------------------------------ 
-    segment = Segments.Cruise.Constant_Speed_Constant_Altitude(base_segment) 
-    segment.tag = 'Reserve_Cruise'  
+    segment = Segments.Cruise.Constant_Speed_Constant_Altitude_Loiter(base_segment) 
+    segment.tag = 'Reserve_Cruise_Loiter'  
     segment.analyses.extend(analyses.base) 
     segment.air_speed                                        = 145* Units['mph']
-    segment.distance                                         = 60 * Units.miles * 0.1  
+    segment.time                                             = 0.5*Units.hr
     segment.percent_operation                                = 1.0
 
     # define flight dynamics to model 
@@ -1066,6 +1068,8 @@ def plot_mission(results):
     plot_flight_conditions(results) 
 
     plot_aerodynamic_coefficients(results)  
+    
+    plot_aerodynamic_forces(results)
 
     plot_aircraft_velocities(results)
 
