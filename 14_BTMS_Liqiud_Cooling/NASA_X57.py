@@ -1070,6 +1070,8 @@ def plot_mission(results):
     plot_aerodynamic_coefficients(results)  
     
     plot_aerodynamic_forces(results)
+    
+    plot_drag_components(results)
 
     plot_aircraft_velocities(results)
 
