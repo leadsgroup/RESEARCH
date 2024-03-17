@@ -20,42 +20,35 @@ from RCAIDE.Methods.Energy.Thermal_Management.Batteries.Heat_Addition_System.Coi
 
 # python imports 
 import numpy as np 
+import pickle 
 from copy import deepcopy
 import os 
 import matplotlib.pyplot        as plt 
 
 def main():     
 
-    # vehicle data
-    vehicle  = vehicle_setup() 
+    # vehicle data 
+    BTMS_flag = False   
+    file_name = 'X_57_w_no_HEX'    
 
+    vehicle   = vehicle_setup(BTMS_flag) 
+ 
     # Set up vehicle configs
     configs  = configs_setup(vehicle)
-
+ 
     # create analyses
     analyses = analyses_setup(configs)
-
+ 
     # create mission instances (for multiple types of missions)
     missions = missions_setup(analyses) 
-
+ 
     # mission analysis 
-    results = missions.base_mission.evaluate()  
-    #results = missions.loiter.evaluate()  
-
+    results = missions.base_mission.evaluate()   
+ 
     # plot the results
     plot_mission(results) 
-
-    # plot vehicle 
-    #plot_3d_vehicle(configs.base,
-                    #show_wing_control_points    = False,
-                    #show_rotor_wake_vortex_core = False,
-                    #min_x_axis_limit            = 0,
-                    #max_x_axis_limit            = 40,
-                    #min_y_axis_limit            = -20,
-                    #max_y_axis_limit            = 20,
-                    #min_z_axis_limit            = -20,
-                    #max_z_axis_limit            = 20)         
-
+    
+    save_results(results,file_name)  
     return
 
 
@@ -88,7 +81,7 @@ def full_setup():
 # ----------------------------------------------------------------------------------------------------------------------
 #   Build the Vehicle
 # ----------------------------------------------------------------------------------------------------------------------
-def vehicle_setup():
+def vehicle_setup(BTMS_flag):
 
     #------------------------------------------------------------------------------------------------------------------------------------
     #   Initialize the Vehicle
@@ -478,44 +471,45 @@ def vehicle_setup():
     # Battery
     #------------------------------------------------------------------------------------------------------------------------------------   
     bat                                                    = RCAIDE.Energy.Sources.Batteries.Lithium_Ion_NMC() 
-    bat.pack.electrical_configuration.series               = 128   
+    bat.pack.electrical_configuration.series               = 80  # 128   
     bat.pack.electrical_configuration.parallel             = 100  
     initialize_from_circuit_configuration(bat)  
     bat.pack.number_of_modules                             = 16  
     bat.module.geometrtic_configuration.total              = bat.pack.electrical_configuration.total
     bat.module.voltage                                     = bat.pack.maximum_voltage/bat.pack.number_of_modules # assumes modules are connected in parallel, must be less than max_module_voltage (~50) /safety_factor (~ 1.5)  
-    bat.module.geometrtic_configuration.normal_count       = 40  
+    bat.module.geometrtic_configuration.normal_count       = 25 
     bat.module.geometrtic_configuration.parallel_count     = 20
     bat.module.number_of_cells                             = bat.module.geometrtic_configuration.normal_count *bat.module.geometrtic_configuration.parallel_count 
     bus.voltage                                            = bat.pack.maximum_voltage   
-
-    # Reservoir for Battery TMS
-    RES                                                    = RCAIDE.Energy.Thermal_Management.Batteries.Reservoirs.Reservoir()
-    bat.thermal_management_system.reservoir                = RES
-    # Battery Heat Removal System 
     
-    HAS                                                    = RCAIDE.Energy.Thermal_Management.Batteries.Heat_Acquisition_Systems.Wavy_Channel() 
-    HAS.design_altitude                                    = 2500. * Units.feet  
-    atmosphere                                             = RCAIDE.Analyses.Atmospheric.US_Standard_1976() 
-    atmo_data                                              = atmosphere.compute_values(altitude =HAS.design_altitude)     
-    HAS.coolant_inlet_temperature                          = atmo_data.temperature[0,0]  
-    HAS.design_battery_operating_temperature               = 303
-    HAS.design_heat_removed                                = 50000  
-    HAS                                                    = design_wavy_channel(HAS,bat) 
-    bat.thermal_management_system.heat_removal_system      = HAS
-
-    # Battery Heat Exchanger               
-    HEX                                                    = RCAIDE.Energy.Thermal_Management.Batteries.Heat_Exchanger_Systems.Cross_Flow_Heat_Exchanger() 
-    HEX.design_altitude                                    = 2500. * Units.feet 
-    HEX.inlet_temperature_of_cold_fluid                    = atmo_data.temperature[0,0]   
-    HEX                                                    = design_cross_flow_heat_exchanger(HEX,HAS,bat)
-    bat.thermal_management_system.heat_exchanger_system    = HEX  
-
-    # Battery Heat Addition System 
-    HAA                                                    = RCAIDE.Energy.Thermal_Management.Batteries.Heat_Addition_Systems.Coil_Heat_Addition()
-    HAA.design_heat_to_add                                 = 15000 #W
-    HAA                                                    = design_coil_heating(HAA,RES,bat)
-    bat.thermal_management_system.heat_addition_system     = HAA 
+    if BTMS_flag:
+        # Reservoir for Battery TMS
+        RES                                                    = RCAIDE.Energy.Thermal_Management.Batteries.Reservoirs.Reservoir()
+        bat.thermal_management_system.reservoir                = RES
+        # Battery Heat Removal System 
+        
+        HAS                                                    = RCAIDE.Energy.Thermal_Management.Batteries.Heat_Acquisition_Systems.Wavy_Channel() 
+        HAS.design_altitude                                    = 2500. * Units.feet  
+        atmosphere                                             = RCAIDE.Analyses.Atmospheric.US_Standard_1976() 
+        atmo_data                                              = atmosphere.compute_values(altitude =HAS.design_altitude)     
+        HAS.coolant_inlet_temperature                          = atmo_data.temperature[0,0]  
+        HAS.design_battery_operating_temperature               = 303
+        HAS.design_heat_removed                                = 50000  
+        HAS                                                    = design_wavy_channel(HAS,bat) 
+        bat.thermal_management_system.heat_removal_system      = HAS
+    
+        # Battery Heat Exchanger               
+        HEX                                                    = RCAIDE.Energy.Thermal_Management.Batteries.Heat_Exchanger_Systems.Cross_Flow_Heat_Exchanger() 
+        HEX.design_altitude                                    = 2500. * Units.feet 
+        HEX.inlet_temperature_of_cold_fluid                    = atmo_data.temperature[0,0]   
+        HEX                                                    = design_cross_flow_heat_exchanger(HEX,HAS,bat)
+        bat.thermal_management_system.heat_exchanger_system    = HEX  
+    
+        # Battery Heat Addition System 
+        HAA                                                    = RCAIDE.Energy.Thermal_Management.Batteries.Heat_Addition_Systems.Coil_Heat_Addition()
+        HAA.design_heat_to_add                                 = 15000 #W
+        HAA                                                    = design_coil_heating(HAA,RES,bat)
+        bat.thermal_management_system.heat_addition_system     = HAA 
 
     bus.batteries.append(bat)              
 
@@ -1094,6 +1088,26 @@ def plot_mission(results):
     plot_reservoir_conditions(results)
 
     return
+
+
+# ----------------------------------------------------------------------
+#   Save Results
+# ----------------------------------------------------------------------
+def save_results(results,filename): 
+    pickle_file  =  filename + '.pkl'
+    with open(pickle_file, 'wb') as file:
+        pickle.dump(results, file) 
+    return   
+
+# ------------------------------------------------------------------
+#   Load Results
+# ------------------------------------------------------------------   
+def load_results(filename):  
+    load_file = filename + '.pkl' 
+    with open(load_file, 'rb') as file:
+        results = pickle.load(file) 
+    return results  
+
 
 if __name__ == '__main__': 
     main()    
