@@ -28,8 +28,8 @@ import matplotlib.pyplot        as plt
 def main():     
 
     # vehicle data 
-    BTMS_flag = False   
-    file_name = 'X_57_w_no_HEX'    
+    BTMS_flag = True   
+    file_name = 'X_57_HEX'    
 
     vehicle   = vehicle_setup(BTMS_flag) 
  
@@ -57,7 +57,7 @@ def main():
 # ---------------------------------------------------------------------- 
 
 def full_setup():
-
+    #axis_5.plot(time, cdc, color = line_colors[i], marker = ps.markers[0], linewidth = ps.line_width)
     # vehicle data
     vehicle  = vehicle_setup() 
 
@@ -471,14 +471,14 @@ def vehicle_setup(BTMS_flag):
     # Battery
     #------------------------------------------------------------------------------------------------------------------------------------   
     bat                                                    = RCAIDE.Energy.Sources.Batteries.Lithium_Ion_NMC() 
-    bat.pack.electrical_configuration.series               = 80  # 128   
-    bat.pack.electrical_configuration.parallel             = 100  
+    bat.pack.electrical_configuration.series               = 70  # 128   
+    bat.pack.electrical_configuration.parallel             = 120 # 100 
     initialize_from_circuit_configuration(bat)  
-    bat.pack.number_of_modules                             = 16  
+    bat.pack.number_of_modules                             = 15  # 16 
     bat.module.geometrtic_configuration.total              = bat.pack.electrical_configuration.total
     bat.module.voltage                                     = bat.pack.maximum_voltage/bat.pack.number_of_modules # assumes modules are connected in parallel, must be less than max_module_voltage (~50) /safety_factor (~ 1.5)  
-    bat.module.geometrtic_configuration.normal_count       = 25 
-    bat.module.geometrtic_configuration.parallel_count     = 20
+    bat.module.geometrtic_configuration.normal_count       = 20 
+    bat.module.geometrtic_configuration.parallel_count     = 28
     bat.module.number_of_cells                             = bat.module.geometrtic_configuration.normal_count *bat.module.geometrtic_configuration.parallel_count 
     bus.voltage                                            = bat.pack.maximum_voltage   
     
@@ -493,7 +493,7 @@ def vehicle_setup(BTMS_flag):
         atmosphere                                             = RCAIDE.Analyses.Atmospheric.US_Standard_1976() 
         atmo_data                                              = atmosphere.compute_values(altitude =HAS.design_altitude)     
         HAS.coolant_inlet_temperature                          = atmo_data.temperature[0,0]  
-        HAS.design_battery_operating_temperature               = 303
+        HAS.design_battery_operating_temperature               = 313
         HAS.design_heat_removed                                = 50000  
         HAS                                                    = design_wavy_channel(HAS,bat) 
         bat.thermal_management_system.heat_removal_system      = HAS
@@ -506,10 +506,10 @@ def vehicle_setup(BTMS_flag):
         bat.thermal_management_system.heat_exchanger_system    = HEX  
     
         # Battery Heat Addition System 
-        HAA                                                    = RCAIDE.Energy.Thermal_Management.Batteries.Heat_Addition_Systems.Coil_Heat_Addition()
-        HAA.design_heat_to_add                                 = 15000 #W
-        HAA                                                    = design_coil_heating(HAA,RES,bat)
-        bat.thermal_management_system.heat_addition_system     = HAA 
+        #HAA                                                    = RCAIDE.Energy.Thermal_Management.Batteries.Heat_Addition_Systems.Coil_Heat_Addition()
+        #HAA.design_heat_to_add                                 = 15000 #W
+        #HAA                                                    = design_coil_heating(HAA,RES,bat)
+        #bat.thermal_management_system.heat_addition_system     = HAA 
 
     bus.batteries.append(bat)              
 
@@ -711,7 +711,7 @@ def mission_setup(analyses):
     # unpack Segments module
     Segments = RCAIDE.Analyses.Mission.Segments  
     base_segment = Segments.Segment() 
-    base_segment.temperature_deviation  = 0
+    base_segment.temperature_deviation  = 15
 
     # ------------------------------------------------------------------
     #   Departure End of Runway Segment Flight 1 : 
@@ -842,7 +842,7 @@ def mission_setup(analyses):
     segment.air_speed_start                                  = 130.* Units['mph']  
     segment.air_speed_end                                    = 120 * Units['mph']   
     segment.climb_rate                                       = -200 * Units['ft/min']   
-    segment.percent_operation                                = 0.15
+    segment.percent_operation                                = 0.1
 
     # define flight dynamics to model 
     segment.flight_dynamics.force_x                      = True  
