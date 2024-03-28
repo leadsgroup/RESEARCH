@@ -9,11 +9,12 @@
 # ---------------------------------------------------------------------------------------------------------------------- 
 import RCAIDE 
 from RCAIDE.Core import Units   
-from RCAIDE.Methods.Energy.Propulsion.Converters.Rotor import design_propeller  
-from RCAIDE.Methods.Geometry.Two_Dimensional.Planform      import segment_properties
+from RCAIDE.Methods.Energy.Propulsors.Converters.Rotor import design_propeller
+from RCAIDE.Methods.Geometry.Two_Dimensional.Planform  import segment_properties
 from RCAIDE.Visualization       import *  
 
 # python imports 
+import os 
 import numpy as np
 import pylab as plt
 # ----------------------------------------------------------------------
@@ -23,6 +24,7 @@ import pylab as plt
 def main():
     
     use_avl_stability = False
+    
     # vehicle data
     vehicle  = vehicle_setup() 
 
@@ -397,8 +399,11 @@ def vehicle_setup():
     fuel.mass_properties.mass                   = 319 *Units.lbs
     vehicle.fuel                                = fuel
 
+
+
+
     # ########################################################  Energy Network  #########################################################  
-    net                                         = RCAIDE.Energy.Networks.Internal_Combustion_Engine()   
+    net                                         = RCAIDE.Energy.Networks.Internal_Combustion_Engine_Network()   
 
     # add the network to the vehicle
     vehicle.append_energy_network(net) 
@@ -424,39 +429,44 @@ def vehicle_setup():
     #------------------------------------------------------------------------------------------------------------------------------------  
     # Propulsor
     #------------------------------------------------------------------------------------------------------------------------------------   
-    ice_prop                                   = RCAIDE.Energy.Propulsion.ICE_Propeller()
-    ice_prop.tag                               = 'ice_propeller'
+    ice_prop    = RCAIDE.Energy.Propulsors.ICE_Propeller()     
     ice_prop.active_fuel_tanks                 = ['fuel_tank']   
                                                      
     # Engine                     
-    engine                                     = RCAIDE.Energy.Propulsion.Converters.Engine()
+    engine                                     = RCAIDE.Energy.Propulsors.Converters.Engine()
+
     engine.sea_level_power                     = 185. * Units.horsepower 
-    engine.rated_speed                         = 2300. * Units.rpm
+    engine.rated_speed                         = 2300. * Units.rpm 
     engine.power_specific_fuel_consumption     = 0.01
     ice_prop.engine                            = engine 
      
     # Propeller 
-    prop = RCAIDE.Energy.Propulsion.Converters.Propeller()
-    prop.tag                                   = 'propeller'
-    prop.number_of_blades                      = 2.0
-    prop.tip_radius                            = 76./2. * Units.inches
-    prop.hub_radius                            = 8.     * Units.inches
-    prop.cruise.design_freestream_velocity     = 120.91 * Units['mph']  
-    prop.cruise.design_angular_velocity        = 2300.  * Units.rpm
-    prop.cruise.design_Cl                      = 0.8
-    prop.cruise.design_altitude                = 1000. * Units.feet
-    prop.cruise.design_power                   = 185. * Units.horsepower  
-    airfoil                                    = RCAIDE.Components.Airfoils.Airfoil()   
-    airfoil.coordinate_file                    = 'Airfoils/NACA_4412.txt'
-    airfoil.polar_files                        = ['Airfoils/Polars/NACA_4412_polar_Re_50000.txt' ,
-                                               'Airfoils/Polars/NACA_4412_polar_Re_100000.txt' ,
-                                               'Airfoils/Polars/NACA_4412_polar_Re_200000.txt' ,
-                                               'Airfoils/Polars/NACA_4412_polar_Re_500000.txt' ,
-                                               'Airfoils/Polars/NACA_4412_polar_Re_1000000.txt' ] 
-    prop.append_airfoil(airfoil)               
-    prop.airfoil_polar_stations                = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0] 
-    prop                                       = design_propeller(prop)    
-    ice_prop.propeller                         = prop 
+    prop = RCAIDE.Energy.Propulsors.Converters.Propeller()
+    prop.tag                                = 'propeller'
+    prop.number_of_blades                   = 2.0
+    prop.tip_radius                         = 76./2. * Units.inches
+    prop.hub_radius                         = 8.     * Units.inches
+    prop.cruise.design_freestream_velocity  = 119.   * Units.knots
+    prop.cruise.design_angular_velocity     = 2650.  * Units.rpm
+    prop.cruise.design_Cl                   = 0.8
+    prop.cruise.design_altitude             = 12000. * Units.feet
+    prop.cruise.design_power                = .64 * 180. * Units.horsepower
+    prop.variable_pitch                     = True  
+    ospath                                  = os.path.abspath(__file__)
+    separator                               = os.path.sep
+    rel_path                                = os.path.dirname(ospath) + separator 
+    airfoil                                 = RCAIDE.Components.Airfoils.Airfoil()
+    airfoil.tag                             = 'NACA_4412'   
+    airfoil.coordinate_file                 =  rel_path + 'Airfoils' + separator + 'NACA_4412.txt'   # absolute path   
+    airfoil.polar_files                     =[ rel_path + 'Airfoils' + separator + 'Polars' + separator + 'NACA_4412_polar_Re_50000.txt',
+                                               rel_path + 'Airfoils' + separator + 'Polars' + separator + 'NACA_4412_polar_Re_100000.txt',
+                                               rel_path + 'Airfoils' + separator + 'Polars' + separator + 'NACA_4412_polar_Re_200000.txt',
+                                               rel_path + 'Airfoils' + separator + 'Polars' + separator + 'NACA_4412_polar_Re_500000.txt',
+                                               rel_path + 'Airfoils' + separator + 'Polars' + separator + 'NACA_4412_polar_Re_1000000.txt']  
+    prop.append_airfoil(airfoil)           
+    prop.airfoil_polar_stations             = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]  
+    prop                                    = design_propeller(prop)    
+    ice_prop.propeller                      = prop 
     
     fuel_line.propulsors.append(ice_prop)
 
@@ -471,8 +481,7 @@ def vehicle_setup():
     #------------------------------------------------------------------------------------------------------------------------------------ 
     #   Vehicle Definition Complete
     #------------------------------------------------------------------------------------------------------------------------------------ 
-
-
+     
     return vehicle
 
 
@@ -583,19 +592,16 @@ def mission_setup(analyses):
     # define flight dynamics to model 
     segment.flight_dynamics.force_x                       = True  
     segment.flight_dynamics.force_z                       = True     
+    # segment.flight_dynamics.moment_y = True 
     
-    # define flight controls 
+    # define flight controls  
     segment.flight_controls.RPM.active                    = True           
     segment.flight_controls.RPM.assigned_propulsors       = [['ice_propeller']]
-    segment.flight_controls.RPM.initial_values            = [[2500]] 
+    segment.flight_controls.RPM.initial_guess             = True 
+    segment.flight_controls.RPM.initial_guess_values      = [[2500]] 
     segment.flight_controls.throttle.active               = True           
-    segment.flight_controls.throttle.assigned_propulsors  = [['ice_propeller']]
-    segment.flight_controls.throttle.initial_values       = [[0.5]] 
-    segment.flight_controls.body_angle                   
-    segment.flight_controls.body_angle.active             = True               
-    segment.flight_controls.body_angle.initial_values     = [[3*Units.degrees]]    
-    
-    
+    segment.flight_controls.throttle.assigned_propulsors  = [['ice_propeller']]  
+    segment.flight_controls.body_angle.active             = True   
     mission.append_segment(segment)
 
 
