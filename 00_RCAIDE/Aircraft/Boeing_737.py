@@ -662,8 +662,7 @@ def vehicle_setup():
     nac_segment.percent_x_location              = 1.0
     nac_segment.height                          = 1.7 
     nac_segment.width                           = 1.7
-    nacelle.append_segment(nac_segment)           
-    estimate_nacelle_dimensions(turbofan, nacelle)
+    nacelle.append_segment(nac_segment)            
     turbofan.nacelle                            = nacelle
              
     # fan                

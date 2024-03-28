@@ -1,6 +1,6 @@
 import numpy as np
-from RCAIDE.Core import Units, Data 
 import matplotlib.pyplot as plt  
+import pandas as pd
 import pickle
 
 
@@ -29,15 +29,39 @@ def main():
                 
                 
                 # create excel files of data below 
-                elevation      = (Results.elevation).flatten  # this is in 2D 
-                LAT            = Results.lat_deg
-                LONG           = Results.long_deg    
-                L_Amax         = Results.L_Amax 
-                L_AeqT         = Results.L_AeqT  
-                L_AeqT_24hr    = Results.L_AeqT_24hr
-                SEL            = Results.SEL
-                L_dn           = Results.L_dn
-                L_Aeq_jetliner = Results.L_AeqT_24hr_total  
+                elevation      = (Results.elevation).flatten() # this is in 2D 
+                LAT            = (Results.lat_deg).flatten()
+                LONG           = (Results.long_deg).flatten()    
+                L_Amax         = (Results.L_Amax).flatten() 
+                L_AeqT         = (Results.L_AeqT).flatten()  
+                L_AeqT_24hr    = (Results.L_AeqT_24hr).flatten()
+                SEL            = (Results.SEL).flatten()
+                L_dn           = (Results.L_dn).flatten()
+                L_Aeq_jetliner = (Results.L_AeqT_24hr_total).flatten()   
+                
+                M                   = {}
+                M['elevation']      = elevation   
+                M['Latitude']       = LAT           
+                M['Longitude']      = LONG          
+                M['L_Amax']         = L_Amax        
+                M['L_AeqT']         = L_AeqT        
+                M['L_AeqT_24hr']    = L_AeqT_24hr   
+                M['SEL']            = SEL           
+                M['L_dn']           = L_dn          
+                M['L_Aeq_jetliner'] = L_Aeq_jetliner 
+                
+                Mat =  pd.DataFrame(M)
+                
+                csv_filename = aircraft + '_' + altitude + 'ft_' + city + '_' + frequency +  'min_All.csv' 
+                Mat.to_csv(csv_filename)
+                
+
+                    
+                    
+                    
+                    
+                    
+                    
                 # save data in excel file 
                 
                 
