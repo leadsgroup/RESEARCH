@@ -28,8 +28,8 @@ import matplotlib.pyplot        as plt
 def main():     
 
     # vehicle data 
-    BTMS_flag = True   
-    file_name = 'X_57_HEX'    
+    BTMS_flag = False   
+    file_name = 'X_57_w_no_HEX'    
 
     vehicle   = vehicle_setup(BTMS_flag) 
  
@@ -712,6 +712,8 @@ def mission_setup(analyses):
     Segments = RCAIDE.Analyses.Mission.Segments  
     base_segment = Segments.Segment() 
     base_segment.temperature_deviation  = 15
+    base_segment.state.numerics.number_of_control_points    = 10
+    
 
     # ------------------------------------------------------------------
     #   Departure End of Runway Segment Flight 1 : 
@@ -793,7 +795,7 @@ def mission_setup(analyses):
     segment.initial_battery_state_of_charge  = 0.89 
     segment.altitude_start                   = 2500.0  * Units.feet
     segment.altitude_end                     = 8012    * Units.feet 
-    segment.air_speed                        = 96.4260 * Units['mph'] 
+    segment.air_speed                        = 130     * Units['mph'] 
     segment.climb_rate                       = 700.034 * Units['ft/min']    
     segment.percent_operation                = 0.5
 
@@ -815,7 +817,7 @@ def mission_setup(analyses):
     segment.tag = "Cruise" 
     segment.analyses.extend(analyses.base) 
     segment.altitude                                      = 8012   * Units.feet
-    segment.air_speed                                     = 120.91 * Units['mph'] 
+    segment.air_speed                                     = 145* Units['mph'] 
     segment.distance                                      = 50.   * Units.nautical_mile      
     segment.percent_operation                             = 0.07
 
@@ -884,8 +886,8 @@ def mission_setup(analyses):
     segment = Segments.Climb.Constant_Speed_Constant_Rate(base_segment) 
     segment.tag = 'Reserve_Climb'        
     segment.analyses.extend( analyses.base )      
-    segment.altitude_end                                     = 1500 * Units.feet
-    segment.air_speed                                        = 120 * Units['mph']
+    segment.altitude_end                                     = 2500 * Units.feet
+    segment.air_speed                                        = 130 * Units['mph']
     segment.climb_rate                                       = 500* Units['ft/min']   
     segment.percent_operation                                = 1.0
 
@@ -904,7 +906,7 @@ def mission_setup(analyses):
     #  Researve Cruise Segment 
     # ------------------------------------------------------------------ 
     segment = Segments.Cruise.Constant_Speed_Constant_Altitude_Loiter(base_segment) 
-    segment.tag = 'Reserve_Cruise_Loiter'  
+    segment.tag = 'Reserve_Loiter'  
     segment.analyses.extend(analyses.base) 
     segment.air_speed                                        = 145* Units['mph']
     segment.time                                             = 0.5*Units.hr
