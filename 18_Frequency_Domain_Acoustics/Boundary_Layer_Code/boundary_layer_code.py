@@ -2,23 +2,26 @@
 import numpy as np    
 import matplotlib.pyplot as plt 
 from  solve_thwaites_BL import solve_thwaites_BL
-from  solve_heads_BL_prev_index    import solve_heads_BL_prev_index
+from  solve_heads_BL_prev_index    import solve_heads_BL_prev_index # This is theoretically wrong (Actually just a general piece of shit)
 from  michel_criterion  import michel_criterion
 from solve_heads_BL_curr_index  import solve_heads_BL_curr_index
-from solve_heads_BL   import solve_heads_BL 
+from solve_heads_BL_prev_index_str_coup import solve_heads_BL_prev_index_str_coup # This is a nice guy :)
+from solve_heads_BL_prev_index_str_coup_diff import solve_heads_BL_prev_index_str_coup_diff # This is meh -_-
 
 def main():
      
-    l          = 1             # characteristic length of 1
+    l          = 5             # characteristic length of 1
     Re_L       = 10**(7)
-    n_points   = 300          # Discretizing domain 
+    n_points   = 1000        # Discretizing domain 
     x          = np.linspace(0,l,n_points)
     eps        = 10**(-12)     # First node location
     x[0]       = eps  
-    theta_0    = 1E-12 # initial momentum thickness 
-    Ve      = np.ones(n_points)       
-    dVe     = np.gradient(Ve,x)
-    nu = Ve[0]*l/Re_L
+    theta_0    = 1E-12 # initial momentum thickness
+    nu         = 1.5*10**(-5)
+    Ve         = (Re_L*nu/l)*np.ones(n_points)
+    # Ve         = np.ones(n_points)
+    # nu         = Ve[0]*l/Re_L
+    dVe        = np.gradient(Ve,x)
     
     # Thwaites method for laminar flow 
     H_lam,delta_star_lam,delta_lam,cf_lam,theta_lam,Re_x_lam,Re_theta_lam = solve_thwaites_BL(l,Re_L,x,Ve,dVe,theta_0) 
@@ -42,9 +45,9 @@ def main():
         # old is using previous index
         # new is using current index
         # ode is using odeint function
-        H_turb_old,delta_star_turb_old,delta_turb_old,cf_turb_old,theta_turb_old,Re_x_turb_old,Re_theta_turb_old = solve_heads_BL_prev_index(nu, l,delta_0_tur,theta_0_tur,delta_star_0_tur,cf_0_tur,H_0_tur,Re_L_tur,x_tur,Ve_tur,dVe_tur)
-        H_turb_new,delta_star_turb_new,delta_turb_new,cf_turb_new,theta_turb_new,Re_x_turb_new,Re_theta_turb_new = solve_heads_BL_curr_index(nu, l,delta_0_tur,theta_0_tur,delta_star_0_tur,cf_0_tur,H_0_tur,Re_L_tur,x_tur,Ve_tur,dVe_tur)
-        H_turb_ode,delta_star_turb_ode,delta_turb_ode,cf_turb_ode,theta_turb_ode,Re_x_turb_ode,Re_theta_turb_ode = solve_heads_BL(nu, l,delta_0_tur,theta_0_tur,delta_star_0_tur,Re_L_tur,x_tur,Ve_tur,dVe_tur)
+        H_turb_old,delta_star_turb_old,delta_turb_old,cf_turb_old,theta_turb_old,Re_x_turb_old,Re_theta_turb_old = solve_heads_BL_prev_index_str_coup(nu, l,delta_0_tur,theta_0_tur,delta_star_0_tur,cf_0_tur,H_0_tur,Re_L_tur,x_tur,Ve_tur,dVe_tur)
+        # H_turb_new,delta_star_turb_new,delta_turb_new,cf_turb_new,theta_turb_new,Re_x_turb_new,Re_theta_turb_new = solve_heads_BL_curr_index(nu, l,delta_0_tur,theta_0_tur,delta_star_0_tur,cf_0_tur,H_0_tur,Re_L_tur,x_tur,Ve_tur,dVe_tur)
+        # H_turb_ode,delta_star_turb_ode,delta_turb_ode,cf_turb_ode,theta_turb_ode,Re_x_turb_ode,Re_theta_turb_ode = 
         
         # Concatenate vectors 
         delta_star_old  = np.hstack((delta_star_lam[:transition_index],delta_star_turb_old))  
@@ -54,33 +57,34 @@ def main():
         Re_x_old        = np.hstack((Re_x_lam[:transition_index],Re_x_turb_old))
         Re_theta_old    = np.hstack((Re_theta_lam[:transition_index],Re_theta_turb_old) )  
         H_old           = np.hstack((H_lam[:transition_index],H_turb_old))
-         
+        
+        
 
-        delta_star_new  = np.hstack((delta_star_lam[:transition_index],delta_star_turb_new))  
-        delta_new       = np.hstack((delta_lam[:transition_index],delta_turb_new))
-        cf_new          = np.hstack((cf_lam[:transition_index],cf_turb_new))
-        theta_new       = np.hstack((theta_lam[:transition_index],theta_turb_new))
-        Re_x_new        = np.hstack((Re_x_lam[:transition_index],Re_x_turb_new))
-        Re_theta_new    = np.hstack((Re_theta_lam[:transition_index],Re_theta_turb_new) )  
-        H_new           = np.hstack((H_lam[:transition_index],H_turb_new))
+        # delta_star_new  = np.hstack((delta_star_lam[:transition_index],delta_star_turb_new))  
+        # delta_new       = np.hstack((delta_lam[:transition_index],delta_turb_new))
+        # cf_new          = np.hstack((cf_lam[:transition_index],cf_turb_new))
+        # theta_new       = np.hstack((theta_lam[:transition_index],theta_turb_new))
+        # Re_x_new        = np.hstack((Re_x_lam[:transition_index],Re_x_turb_new))
+        # Re_theta_new    = np.hstack((Re_theta_lam[:transition_index],Re_theta_turb_new) )  
+        # H_new           = np.hstack((H_lam[:transition_index],H_turb_new))
     
-        delta_star_ode  = np.hstack((delta_star_lam[:transition_index],delta_star_turb_ode))  
-        delta_ode       = np.hstack((delta_lam[:transition_index],delta_turb_ode))
-        cf_ode          = np.hstack((cf_lam[:transition_index],cf_turb_ode))
-        theta_ode       = np.hstack((theta_lam[:transition_index],theta_turb_ode))
-        Re_x_ode        = np.hstack((Re_x_lam[:transition_index],Re_x_turb_ode))
-        Re_theta_ode    = np.hstack((Re_theta_lam[:transition_index],Re_theta_turb_ode) )  
-        H_ode           = np.hstack((H_lam[:transition_index],H_turb_ode))
+        # delta_star_ode  = np.hstack((delta_star_lam[:transition_index],delta_star_turb_ode))  
+        # delta_ode       = np.hstack((delta_lam[:transition_index],delta_turb_ode))
+        # cf_ode          = np.hstack((cf_lam[:transition_index],cf_turb_ode))
+        # theta_ode       = np.hstack((theta_lam[:transition_index],theta_turb_ode))
+        # Re_x_ode        = np.hstack((Re_x_lam[:transition_index],Re_x_turb_ode))
+        # Re_theta_ode    = np.hstack((Re_theta_lam[:transition_index],Re_theta_turb_ode) )  
+        # H_ode           = np.hstack((H_lam[:transition_index],H_turb_ode))
         
         
     else:
-        delta_star = delta_star_lam
-        delta      = delta_lam
-        cf         = cf_lam
-        theta      = theta_lam 
-        Re_x       = Re_x_lam 
-        Re_theta   = Re_theta_lam  
-        H          = H_lam
+        delta_star_old = delta_star_lam
+        delta_old      = delta_lam
+        cf_old         = cf_lam
+        theta_old      = theta_lam 
+        Re_x_old       = Re_x_lam 
+        Re_theta_old   = Re_theta_lam  
+        H_old          = H_lam
         
     
     #print('Transition Point: ', x[transition_index])
@@ -113,19 +117,19 @@ def main():
     axis5.plot(x,Re_x_old, 'b-')  
     axis6.plot(x,H_old, 'b-') 
 
-    axis1.plot(x,delta_new, 'r-')  
-    axis2.plot(x,delta_star_new, 'r-')  
-    axis3.plot(x,theta_new, 'r-')  
-    axis4.plot(x,cf_new, 'r-')  
-    axis5.plot(x,Re_x_new, 'r-')  
-    axis6.plot(x,H_new, 'r-') 
+    # axis1.plot(x,delta_new, 'r-')  
+    # axis2.plot(x,delta_star_new, 'r-')  
+    # axis3.plot(x,theta_new, 'r-')  
+    # axis4.plot(x,cf_new, 'r-')  
+    # axis5.plot(x,Re_x_new, 'r-')  
+    # axis6.plot(x,H_new, 'r-') 
     
-    axis1.plot(x,delta_ode, 'g-')  
-    axis2.plot(x,delta_star_ode, 'g-')  
-    axis3.plot(x,theta_ode, 'g-')  
-    axis4.plot(x,cf_ode, 'g-')  
-    axis5.plot(x,Re_x_ode, 'g-')  
-    axis6.plot(x,H_ode, 'g-') 
+    # axis1.plot(x,delta_ode, 'g-')  
+    # axis2.plot(x,delta_star_ode, 'g-')  
+    # axis3.plot(x,theta_ode, 'g-')  
+    # axis4.plot(x,cf_ode, 'g-')  
+    # axis5.plot(x,Re_x_ode, 'g-')  
+    # axis6.plot(x,H_ode, 'g-') 
     
     set_axes(axis1)
     set_axes(axis2)

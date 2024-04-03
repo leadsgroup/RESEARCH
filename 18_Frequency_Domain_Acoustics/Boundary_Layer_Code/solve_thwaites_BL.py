@@ -5,7 +5,7 @@ from scipy.integrate import odeint
 def solve_thwaites_BL(l,Re_L,x_i,Ve_i,dVe_i, theta_0):  
     ''' Solved intergral boundary layer equations for laminar flow  
     '''    
-    nu          = l/Re_L     
+    nu          = Ve_i[0]*l/Re_L     
     y0          = theta_0**2 * getVe(0,x_i,Ve_i)**6   
     theta2_Ve6  = odeint(odefcn, y0,x_i , args=(nu, x_i, Ve_i))  # eqn 25 , Solving Intergral Boundary Layer Lecture 
     
