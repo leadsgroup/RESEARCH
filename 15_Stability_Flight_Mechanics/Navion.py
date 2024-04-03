@@ -22,8 +22,8 @@ import pylab as plt
 # ----------------------------------------------------------------------
 
 def main():
-    
-    use_avl_stability = False
+    run_stability     = True 
+    stability_method  = 'vlm' # either "avl" , "vlm" or "analytical"
     
     # vehicle data
     vehicle  = vehicle_setup() 
@@ -32,7 +32,7 @@ def main():
     configs  = configs_setup(vehicle)
 
     # create analyses
-    analyses = analyses_setup(configs,use_avl_stability)
+    analyses = analyses_setup(configs,stability_method,run_stability)
 
     # mission analyses
     mission  = mission_setup(analyses) 
@@ -44,7 +44,7 @@ def main():
     results = missions.base_mission.evaluate()   
 
     # plt results
-    plot_mission(results)
+    plot_mission(results,run_stability)
 
 
     return  
@@ -52,19 +52,19 @@ def main():
 #   Define the Vehicle Analyses
 # ----------------------------------------------------------------------
 
-def analyses_setup(configs,use_avl_stability):
+def analyses_setup(configs,stability_method,run_stability):
 
     analyses = RCAIDE.Analyses.Analysis.Container()
 
     # build a base analysis for each config
     for tag,config in configs.items():
-        analysis = base_analysis(config, use_avl_stability, configs)
+        analysis = base_analysis(config, stability_method,run_stability, configs)
         analyses[tag] = analysis
 
     return analyses
 
 
-def base_analysis(vehicle,use_avl_stability, configs):
+def base_analysis(vehicle,stability_method, run_stability,configs):
 
     # ------------------------------------------------------------------
     #   Initialize the Analyses
@@ -85,19 +85,24 @@ def base_analysis(vehicle,use_avl_stability, configs):
     aerodynamics.settings.drag_coefficient_increment = 0.0000
     analyses.append(aerodynamics) 
     
-    # ------------------------------------------------------------------
-    #  Stability Analysis
-    if use_avl_stability:
-        stability                                   = RCAIDE.Analyses.Stability.AVL()     
-        stability.settings.filenames.avl_bin_name   = 'C:\\Users\\Matteo\\Documents\\UIUC\\avl.exe' #/Users/matthewclarke/Documents/AVL/avl3.35'    
-        stability.settings.trim_aircraft            = False 
-        stability.settings.print_output             = False 
-    else:
-        stability                                   = RCAIDE.Analyses.Stability.Analytical_Approximation()
-
-    stability.configuration                         = configs
-    stability.geometry                              = vehicle
-    analyses.append(stability)
+    if run_stability:
+        # ------------------------------------------------------------------
+        #  Stability Analysis
+        if stability_method == "avl":
+            stability                                   = RCAIDE.Analyses.Stability.AVL()     
+            stability.settings.filenames.avl_bin_name   = 'C:\\Users\\Matteo\\Documents\\UIUC\\avl.exe' #/Users/matthewclarke/Documents/AVL/avl3.35'    
+            stability.settings.trim_aircraft            = False 
+            stability.settings.print_output             = False 
+        elif stability_method == "vlm":
+            stability                                   = RCAIDE.Analyses.Stability.VLM_Perturbation_Method()
+            stability.settings.trim_aircraft            = False 
+        elif stability_method == "analytical":
+            stability                                   = RCAIDE.Analyses.Stability.Analytical_Approximation()
+            stability.settings.trim_aircraft            = False 
+    
+        stability.configuration                         = configs
+        stability.geometry                              = vehicle
+        analyses.append(stability)
 
     # ------------------------------------------------------------------
     #  Energy
@@ -535,7 +540,7 @@ def configs_setup(vehicle):
 #   Plot Mission
 # ----------------------------------------------------------------------
 
-def plot_mission(results):
+def plot_mission(results,run_stability):
     plot_flight_conditions(results) 
         
     # Plot Flight Conditions 
@@ -548,7 +553,8 @@ def plot_mission(results):
     plot_aircraft_velocities(results) 
 
     # Plot Aircraft Stability
-    plot_stability_coefficients(results)  
+    if run_stability:
+        plot_stability_coefficients(results)  
     
     # Plot Propeller Conditions 
     plot_rotor_conditions(results) 
