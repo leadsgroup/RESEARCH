@@ -23,7 +23,7 @@ import pylab as plt
 
 def main():
     run_stability     = True 
-    stability_method  = 'vlm' # either "avl" , "vlm" or "analytical"
+    stability_method  = 'analytical' # either "avl" , "vlm" or "analytical"
     
     # vehicle data
     vehicle  = vehicle_setup() 
