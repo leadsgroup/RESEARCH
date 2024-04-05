@@ -23,7 +23,7 @@ import pylab as plt
 
 def main():
     run_stability     = True 
-    stability_method  = 'analytical' # either "avl" , "vlm" or "analytical"
+    stability_method  = 'vlm' # either "avl" , "vlm" or "analytical"
     
     # vehicle data
     vehicle  = vehicle_setup() 
@@ -91,14 +91,14 @@ def base_analysis(vehicle,stability_method, run_stability,configs):
         if stability_method == "avl":
             stability                                   = RCAIDE.Analyses.Stability.AVL()     
             stability.settings.filenames.avl_bin_name   = 'C:\\Users\\Matteo\\Documents\\UIUC\\avl.exe' #/Users/matthewclarke/Documents/AVL/avl3.35'    
-            stability.settings.trim_aircraft            = False 
+            #stability.settings.trim_aircraft            = False 
             stability.settings.print_output             = False 
         elif stability_method == "vlm":
             stability                                   = RCAIDE.Analyses.Stability.VLM_Perturbation_Method()
-            stability.settings.trim_aircraft            = False 
+            #stability.settings.trim_aircraft            = False 
         elif stability_method == "analytical":
             stability                                   = RCAIDE.Analyses.Stability.Analytical_Approximation()
-            stability.settings.trim_aircraft            = False 
+            #stability.settings.trim_aircraft            = False 
     
         stability.configuration                         = configs
         stability.geometry                              = vehicle
