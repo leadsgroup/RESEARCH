@@ -16,7 +16,7 @@ from RCAIDE.Methods.Weights.Physics_Based_Buildups.Electric                     
 from RCAIDE.Visualization                                                        import *     
 from RCAIDE.Methods.Energy.Thermal_Management.Batteries.Heat_Exchanger_Systems.Cross_Flow_Heat_Exchanger        import design_cross_flow_heat_exchanger
 from RCAIDE.Methods.Energy.Thermal_Management.Batteries.Heat_Acquisition_Systems.Wavy_Channel_Heat_Acquisition  import design_wavy_channel 
-from RCAIDE.Methods.Energy.Thermal_Management.Batteries.Heat_Addition_System.Coil_Heat_Addition                 import design_coil_heating 
+from RCAIDE.Methods.Energy.Thermal_Management.Batteries.Heat_Addition_System.Heating_Coil                       import design_heating_coil
 
 # python imports 
 import numpy as np 
@@ -28,7 +28,7 @@ import matplotlib.pyplot        as plt
 def main():     
 
     # vehicle data 
-    BTMS_flag = False   
+    BTMS_flag = True 
     file_name = 'X_57_w_no_HEX'    
 
     vehicle   = vehicle_setup(BTMS_flag) 
@@ -508,7 +508,7 @@ def vehicle_setup(BTMS_flag):
         # Battery Heat Addition System 
         #HAA                                                    = RCAIDE.Energy.Thermal_Management.Batteries.Heat_Addition_Systems.Coil_Heat_Addition()
         #HAA.design_heat_to_add                                 = 15000 #W
-        #HAA                                                    = design_coil_heating(HAA,RES,bat)
+        #HAA                                                    = design_heating_coil(HAA,RES,bat)
         #bat.thermal_management_system.heat_addition_system     = HAA 
 
     bus.batteries.append(bat)              
@@ -636,8 +636,35 @@ def configs_setup(vehicle):
     base_config = RCAIDE.Components.Configs.Config(vehicle)
     base_config.tag = 'base'  
     configs.append(base_config) 
+    
 
-    # done!
+    config = RCAIDE.Components.Configs.Config(vehicle)
+    config.tag = 'max_hex_operation'  
+    config.networks.all_electric.busses.bus.batteries.lithium_ion_nmc.thermal_management_system.heat_exchanger_system.percent_operation = 1
+    configs.append(config) 
+     
+    config = RCAIDE.Components.Configs.Config(vehicle)
+    config.tag = 'hex_low_alt_climb_operation'  
+    config.networks.all_electric.busses.bus.batteries.lithium_ion_nmc.thermal_management_system.heat_exchanger_system.percent_operation = 0.07
+    configs.append(config)     
+
+    config = RCAIDE.Components.Configs.Config(vehicle)
+    config.tag = 'hex_high_alt_climb_operation'  
+    config.networks.all_electric.busses.bus.batteries.lithium_ion_nmc.thermal_management_system.heat_exchanger_system.percent_operation = 0.3
+    configs.append(config)        
+
+    config = RCAIDE.Components.Configs.Config(vehicle)
+    config.tag = 'hex_cruise_operation'  
+    config.networks.all_electric.busses.bus.batteries.lithium_ion_nmc.thermal_management_system.heat_exchanger_system.percent_operation = 0.25
+    configs.append(config)         
+    
+
+    config = RCAIDE.Components.Configs.Config(vehicle)
+    config.tag = 'hex_descent_operation'  
+    config.networks.all_electric.busses.bus.batteries.lithium_ion_nmc.thermal_management_system.heat_exchanger_system.percent_operation = 0.5
+    configs.append(config)                   
+ 
+ 
     return configs
 
 
@@ -712,21 +739,20 @@ def mission_setup(analyses):
     Segments = RCAIDE.Analyses.Mission.Segments  
     base_segment = Segments.Segment() 
     base_segment.temperature_deviation  = 15
-    base_segment.state.numerics.number_of_control_points    = 10
+    #base_segment.state.numerics.number_of_control_points    = 10
     
 
     # ------------------------------------------------------------------
     #   Departure End of Runway Segment Flight 1 : 
     # ------------------------------------------------------------------ 
     segment = Segments.Climb.Linear_Speed_Constant_Rate(base_segment) 
-    segment.tag = 'DER'       
-    segment.analyses.extend( analyses.base )
+    segment.tag = 'definition'   
+    segment.analyses.extend( analyses.max_hex_operation)
     segment.initial_battery_state_of_charge                  = 1.0  
     segment.altitude_start                                   = 0.0 * Units.feet
     segment.altitude_end                                     = 50.0 * Units.feet
     segment.air_speed_start                                  = 45  * Units['m/s'] 
     segment.air_speed_end                                    = 45   
-    segment.percent_operation                                = 1.0
 
     # define flight dynamics to model 
     segment.flight_dynamics.force_x                      = True  
@@ -743,14 +769,13 @@ def mission_setup(analyses):
     #   Initial Climb Area Segment Flight 1  
     # ------------------------------------------------------------------ 
     segment = Segments.Climb.Linear_Speed_Constant_Rate(base_segment) 
-    segment.tag = 'ICA' 
-    segment.analyses.extend( analyses.base )   
+    segment.tag = 'inital_climb_area'   
+    segment.analyses.extend( analyses.max_hex_operation)   
     segment.altitude_start                                   = 50.0 * Units.feet
     segment.altitude_end                                     = 500.0 * Units.feet
     segment.air_speed_start                                  = 45  * Units['m/s']   
     segment.air_speed_end                                    = 50 * Units['m/s']   
     segment.climb_rate                                       = 600 * Units['ft/min'] 
-    segment.percent_operation                                = 1.0
 
     # define flight dynamics to model 
     segment.flight_dynamics.force_x                      = True  
@@ -767,13 +792,12 @@ def mission_setup(analyses):
     #   Climb Segment Flight 1 
     # ------------------------------------------------------------------ 
     segment = Segments.Climb.Constant_Speed_Constant_Rate(base_segment) 
-    segment.tag = 'Climb'        
-    segment.analyses.extend( analyses.base )      
+    segment.tag = 'Low_Altitude_Climb'        
+    segment.analyses.extend( analyses.hex_low_alt_climb_operation )      
     segment.altitude_start                                   = 500.0 * Units.feet
     segment.altitude_end                                     = 2500 * Units.feet
     segment.air_speed                                        = 120 * Units['mph']
-    segment.climb_rate                                       = 500* Units['ft/min']  
-    segment.percent_operation                                = 0.75
+    segment.climb_rate                                       = 500* Units['ft/min'] 
 
     # define flight dynamics to model 
     segment.flight_dynamics.force_x                      = True  
@@ -790,15 +814,13 @@ def mission_setup(analyses):
     #   Climb 1 : constant Speed, constant rate segment 
     # ------------------------------------------------------------------ 
     segment = Segments.Climb.Constant_Speed_Constant_Rate(base_segment)
-    segment.tag = "Ascent"
-    segment.analyses.extend( analyses.base )
+    segment.tag = "High_Altitude_Climb"
+    segment.analyses.extend( analyses.hex_high_alt_climb_operation )
     segment.initial_battery_state_of_charge  = 0.89 
     segment.altitude_start                   = 2500.0  * Units.feet
     segment.altitude_end                     = 8012    * Units.feet 
     segment.air_speed                        = 130     * Units['mph'] 
-    segment.climb_rate                       = 700.034 * Units['ft/min']    
-    segment.percent_operation                = 0.5
-
+    segment.climb_rate                       = 700.034 * Units['ft/min']   
     # define flight dynamics to model 
     segment.flight_dynamics.force_x                      = True  
     segment.flight_dynamics.force_z                      = True     
@@ -815,11 +837,10 @@ def mission_setup(analyses):
     # ------------------------------------------------------------------ 
     segment = Segments.Cruise.Constant_Speed_Constant_Altitude(base_segment)
     segment.tag = "Cruise" 
-    segment.analyses.extend(analyses.base) 
+    segment.analyses.extend(analyses.hex_cruise_operation) 
     segment.altitude                                      = 8012   * Units.feet
     segment.air_speed                                     = 145* Units['mph'] 
     segment.distance                                      = 50.   * Units.nautical_mile      
-    segment.percent_operation                             = 0.07
 
     # define flight dynamics to model 
     segment.flight_dynamics.force_x                       = True  
@@ -838,13 +859,12 @@ def mission_setup(analyses):
     # ------------------------------------------------------------------ 
     segment = Segments.Climb.Linear_Speed_Constant_Rate(base_segment) 
     segment.tag = "Decent"  
-    segment.analyses.extend( analyses.base )       
+    segment.analyses.extend( analyses.hex_descent_operation)       
     segment.altitude_start                                   = 8012 * Units.feet  
     segment.altitude_end                                     = 1000.0 * Units.feet
     segment.air_speed_start                                  = 130.* Units['mph']  
     segment.air_speed_end                                    = 120 * Units['mph']   
-    segment.climb_rate                                       = -200 * Units['ft/min']   
-    segment.percent_operation                                = 0.1
+    segment.climb_rate                                       = -200 * Units['ft/min']    
 
     # define flight dynamics to model 
     segment.flight_dynamics.force_x                      = True  
@@ -862,12 +882,11 @@ def mission_setup(analyses):
     # ------------------------------------------------------------------ 
     segment = Segments.Cruise.Constant_Speed_Constant_Altitude(base_segment) 
     segment.tag = 'Downleg'
-    segment.analyses.extend(analyses.base) 
+    segment.analyses.extend(analyses.hex_descent_operation) 
     segment.air_speed                                        = 120 * Units['mph']           
     segment.distance                                         = 6000 * Units.feet
     segment.acceleration                                     = -0.025  * Units['m/s/s']   
-    segment.descent_rate                                     = 300 * Units['ft/min']   
-    segment.percent_operation                                = 1.0
+    segment.descent_rate                                     = 300 * Units['ft/min']    
 
     # define flight dynamics to model 
     segment.flight_dynamics.force_x                      = True  
@@ -885,11 +904,10 @@ def mission_setup(analyses):
     # ------------------------------------------------------------------ 
     segment = Segments.Climb.Constant_Speed_Constant_Rate(base_segment) 
     segment.tag = 'Reserve_Climb'        
-    segment.analyses.extend( analyses.base )      
+    segment.analyses.extend( analyses.hex_descent_operation)      
     segment.altitude_end                                     = 2500 * Units.feet
     segment.air_speed                                        = 130 * Units['mph']
     segment.climb_rate                                       = 500* Units['ft/min']   
-    segment.percent_operation                                = 1.0
 
     # define flight dynamics to model 
     segment.flight_dynamics.force_x                      = True  
@@ -907,10 +925,9 @@ def mission_setup(analyses):
     # ------------------------------------------------------------------ 
     segment = Segments.Cruise.Constant_Speed_Constant_Altitude_Loiter(base_segment) 
     segment.tag = 'Reserve_Loiter'  
-    segment.analyses.extend(analyses.base) 
+    segment.analyses.extend(analyses.hex_cruise_operation) 
     segment.air_speed                                        = 145* Units['mph']
-    segment.time                                             = 0.5*Units.hr
-    segment.percent_operation                                = 1.0
+    segment.time                                             = 0.5*Units.hr 
 
     # define flight dynamics to model 
     segment.flight_dynamics.force_x                      = True  
@@ -928,11 +945,10 @@ def mission_setup(analyses):
     # ------------------------------------------------------------------ 
     segment = Segments.Descent.Constant_Speed_Constant_Rate(base_segment) 
     segment.tag = 'Reserve_Descent'
-    segment.analyses.extend( analyses.base )    
+    segment.analyses.extend( analyses.hex_descent_operation)    
     segment.altitude_end                                     = 1000 * Units.feet 
     segment.air_speed                                        = 110 * Units['mph']
-    segment.descent_rate                                     = 300 * Units['ft/min']   
-    segment.percent_operation                                  = 1.0
+    segment.descent_rate                                     = 300 * Units['ft/min']    
 
     # define flight dynamics to model 
     segment.flight_dynamics.force_x                      = True  
@@ -951,13 +967,12 @@ def mission_setup(analyses):
     # ------------------------------------------------------------------ 
     segment = Segments.Climb.Linear_Speed_Constant_Rate(base_segment)
     segment.tag = 'Baseleg'
-    segment.analyses.extend( analyses.base)   
+    segment.analyses.extend( analyses.max_hex_operation)   
     segment.altitude_start                                   = 1000 * Units.feet
     segment.altitude_end                                     = 500.0 * Units.feet
     segment.air_speed_start                                  = 45 
     segment.air_speed_end                                    = 40    
-    segment.climb_rate                                       = -350 * Units['ft/min'] 
-    segment.percent_operation                                  = 1.0
+    segment.climb_rate                                       = -350 * Units['ft/min']  
 
     # define flight dynamics to model 
     segment.flight_dynamics.force_x                      = True  
@@ -976,13 +991,12 @@ def mission_setup(analyses):
     segment = Segments.Climb.Linear_Speed_Constant_Rate(base_segment)
     segment_name = 'Final_Approach'
     segment.tag = segment_name          
-    segment.analyses.extend( analyses.base)      
+    segment.analyses.extend( analyses.max_hex_operation)      
     segment.altitude_start                                   = 500.0 * Units.feet
     segment.altitude_end                                     = 00.0 * Units.feet
     segment.air_speed_start                                  = 40 
     segment.air_speed_end                                    = 35   
-    segment.climb_rate                                       = -300 * Units['ft/min'] 
-    segment.percent_operation                                  = 1.0
+    segment.climb_rate                                       = -300 * Units['ft/min']  
 
     # define flight dynamics to model 
     segment.flight_dynamics.force_x                      = True  
@@ -995,9 +1009,9 @@ def mission_setup(analyses):
 
     mission.append_segment(segment)  
 
-    # ------------------------------------------------------------------
-    #   Mission definition complete    
-    # ------------------------------------------------------------------ 
+    ## ------------------------------------------------------------------
+    ##   Mission definition complete    
+    ## ------------------------------------------------------------------ 
 
     return mission 
 
