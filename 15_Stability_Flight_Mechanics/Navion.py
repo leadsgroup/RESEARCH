@@ -598,7 +598,7 @@ def mission_setup(analyses):
     # define flight dynamics to model 
     segment.flight_dynamics.force_x                       = True  
     segment.flight_dynamics.force_z                       = True     
-    # segment.flight_dynamics.moment_y = True 
+    segment.flight_dynamics.moment_y                      = True 
     
     # define flight controls  
     segment.flight_controls.RPM.active                    = True           
