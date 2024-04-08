@@ -634,7 +634,7 @@ def vehicle_setup():
     right_gas_turbine.mass_properties.mass          = 0.3
     right_gas_turbine.design_altitude               = 60000.0*Units.ft
     right_gas_turbine.design_mach_number            = 2.02
-    right_gas_turbine.design_thrust                 = 40000. * Units.lbf  
+    right_gas_turbine.design_thrust                 = 40000. * Units.lbf 
     right_gas_turbine.origin                        = [[37.,6.,-1.3]] 
     right_gas_turbine.working_fluid                 = RCAIDE.Attributes.Gases.Air()    
     
@@ -671,11 +671,6 @@ def vehicle_setup():
     lp_turbine.mechanical_efficiency         = 0.99
     lp_turbine.polytropic_efficiency         = 0.89
     right_gas_turbine.append(lp_turbine)
-    
-    # Shaft Power Offtake
-    shaft_power_offtake                   = RCAIDE.Energy.Propulsors.Converters.Shaft_Power_Offtake()
-    shaft_power_offtake.power_draw = 0.1
-    right_gas_turbine.append(shaft_power_offtake)
                  
     # High Pressure Turbine         
     hp_turbine                               = RCAIDE.Energy.Propulsors.Converters.Turbine()   
@@ -693,16 +688,6 @@ def vehicle_setup():
     combustor.pressure_ratio              = 0.92
     combustor.fuel_data                   = RCAIDE.Attributes.Propellants.Jet_A()     
     right_gas_turbine.append(combustor)
-     
-    #  Afterburner  
-    afterburner                           = RCAIDE.Energy.Propulsors.Converters.Combustor()   
-    afterburner.tag                       = 'afterburner' 
-    afterburner.efficiency                = 0.9
-    afterburner.alphac                    = 1.0     
-    afterburner.turbine_inlet_temperature = 1500
-    afterburner.pressure_ratio            = 1.0
-    afterburner.fuel_data                 = RCAIDE.Attributes.Propellants.Jet_A()     
-    right_gas_turbine.append(afterburner)    
  
     # Core Nozzle 
     nozzle                                = RCAIDE.Energy.Propulsors.Converters.Supersonic_Nozzle()   
@@ -719,13 +704,14 @@ def vehicle_setup():
     generator.tag                              = 'right_generator'
     generator.origin                           = [[2., 2.5, 0.95]]
     generator.connected_engine                 = ['right_turbine'] 
+    
     # what about shaft radius? we talked about this over a month ago. how do you plan to get current? 
-    generator.inputs.power                     = shaft_power_offtake.power_draw
-    generator.nominal_voltage                  = bat.pack.maximum_voltage # assume no transformer needed - need to change in the future 
     generator.efficiency                       = 0.98
-    generator.angular_velocity                 = shaft_power_offtake.angular_velocity
-    generator.torque                           = shaft_power_offtake.torque
-    generator.mass_properties.mass             = 100 
+    
+    generator.angular_velocity                 = 3000 * Units.rpm
+    generator.mass_properties.mass             = 100
+    generator.design_power                     = right_gas_turbine.design_power     
+    
     generator                                  = design_generator(generator)    
     right_turboelectric_generator.generators.append(generator)
     
