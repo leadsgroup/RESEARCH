@@ -442,7 +442,7 @@ def vehicle_setup():
 
     engine.sea_level_power                     = 185. * Units.horsepower 
     engine.rated_speed                         = 2300. * Units.rpm 
-    engine.power_specific_fuel_consumption     = 0.01
+    engine.power_specific_fuel_consumption     = 0.01  * Units['lb/hp/hr']
     ice_prop.engine                            = engine 
      
     # Propeller 
@@ -554,7 +554,9 @@ def plot_mission(results,run_stability):
 
     # Plot Aircraft Stability
     if run_stability:
-        plot_stability_coefficients(results)  
+        plot_longitudinal_stability(results)  
+        
+        plot_lateral_stability(results) 
     
     # Plot Propeller Conditions 
     plot_rotor_conditions(results) 
@@ -591,23 +593,26 @@ def mission_setup(analyses):
     segment     = Segments.Cruise.Constant_Speed_Constant_Altitude(base_segment)
     segment.tag = "cruise" 
     segment.analyses.extend( analyses.base )   
-    segment.altitude                                      = 12000. * Units.feet
-    segment.air_speed                                     = 119.   * Units.knots
-    segment.distance                                      = 10 * Units.nautical_mile
-    
-    # define flight dynamics to model 
-    segment.flight_dynamics.force_x                       = True  
-    segment.flight_dynamics.force_z                       = True     
-    segment.flight_dynamics.moment_y                      = True 
-    
-    # define flight controls  
-    segment.flight_controls.RPM.active                    = True           
-    segment.flight_controls.RPM.assigned_propulsors       = [['ice_propeller']]
-    segment.flight_controls.RPM.initial_guess             = True 
-    segment.flight_controls.RPM.initial_guess_values      = [[2500]] 
-    segment.flight_controls.throttle.active               = True           
-    segment.flight_controls.throttle.assigned_propulsors  = [['ice_propeller']]  
-    segment.flight_controls.body_angle.active             = True   
+    segment.altitude                                                 = 12000. * Units.feet
+    segment.air_speed                                                = 119.   * Units.knots
+    segment.distance                                                 = 10 * Units.nautical_mile
+                
+    # define flight dynamics to model             
+    segment.flight_dynamics.force_x                                  = True  
+    segment.flight_dynamics.force_z                                  = True     
+    segment.flight_dynamics.moment_y                                 = True 
+                
+    # define flight controls              
+    segment.flight_controls.RPM.active                               = True           
+    segment.flight_controls.RPM.assigned_propulsors                  = [['ice_propeller']]
+    segment.flight_controls.RPM.initial_guess                        = True 
+    segment.flight_controls.RPM.initial_guess_values                 = [[2500]] 
+    segment.flight_controls.throttle.active                          = True           
+    segment.flight_controls.throttle.assigned_propulsors             = [['ice_propeller']]   
+    segment.flight_controls.elevator_deflection.active               = True    
+    segment.flight_controls.elevator_deflection.assigned_surfaces    = [['elevator']]
+    segment.flight_controls.elevator_deflection.initial_guess_values = [[0]] 
+    segment.flight_controls.body_angle.active                        = True   
     mission.append_segment(segment)
 
 
