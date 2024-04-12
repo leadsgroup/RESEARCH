@@ -511,8 +511,7 @@ def vehicle_setup():
     fuselage.seats_abreast         = 6
     fuselage.seat_pitch            = 31. * Units.inches
     fuselage.fineness.nose         = 1.6
-    fuselage.fineness.tail         = 2.
-
+    fuselage.fineness.tail         = 2. 
     fuselage.lengths.nose          = 6.4
     fuselage.lengths.tail          = 8.0
     fuselage.lengths.cabin         = 28.85  
@@ -2877,10 +2876,4 @@ def save_results(results):
  
 if __name__ == '__main__': 
     main()    
-    plt.show()
-
-
-
-
->>>>>>> 122b0c596dddabd747d33faa1ee8a5205232e021
-    
+    plt.show() 
