@@ -557,6 +557,8 @@ def plot_mission(results,run_stability):
         plot_longitudinal_stability(results)  
         
         plot_lateral_stability(results) 
+        
+        plot_flight_forces_and_moments(results)
     
     # Plot Propeller Conditions 
     plot_rotor_conditions(results) 
@@ -595,7 +597,8 @@ def mission_setup(analyses):
     segment.analyses.extend( analyses.base )   
     segment.altitude                                                 = 12000. * Units.feet
     segment.air_speed                                                = 119.   * Units.knots
-    segment.distance                                                 = 10 * Units.nautical_mile
+    segment.distance                                                 = 10 * Units.nautical_mile 
+    segment.sideslip_angle                                           = 10 * Units.degrees 
                 
     # define flight dynamics to model             
     segment.flight_dynamics.force_x                                  = True  
