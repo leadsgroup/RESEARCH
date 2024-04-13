@@ -32,7 +32,7 @@ def main():
     Omega           = RPM*Units.rpm
     Radius          = 1
     n_sections      = 11
-    Radial_sections = np.linspace(0, Radius, n_sections)
+    Radial_sections = np.linspace(0, Radius, n_sections)[1:]
     AoA             = np.atleast_2d(np.linspace(-5,10,16))*Units.degrees
     # set of Re for a blade given the Re at the tip
     Re_vals         = np.atleast_1d(Radial_sections*1e7)
@@ -44,7 +44,7 @@ def main():
     # compute geometry points of two airfoils 
     airfoil_file_1       = '2412'
 
-    airfoil_geometry_1   = compute_naca_4series(airfoil_file_1,npoints = 200) 
+    airfoil_geometry_1   = compute_naca_4series(airfoil_file_1,npoints = 201) # number of points must always be (a*10^b) + 1
     
     airfoil_properties_1 = airfoil_analysis(airfoil_geometry_1,AoA,Re_vals)  
     plot_airfoil_surface_forces(airfoil_properties_1 )   
