@@ -1,0 +1,13 @@
+Only Examining 10 Largest Airlines in the US
+
+Delta	17.8%
+American	17.2%
+Southwest	17.2%
+United	16.0%
+Alaska	6.3%
+JetBlue	5.2%
+Spirit	5.1%
+Frontier	3.6%
+SkyWest	2.3%
+Hawaiian	1.7%
+Other	7.6%

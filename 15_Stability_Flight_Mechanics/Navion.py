@@ -235,7 +235,7 @@ def vehicle_setup():
     wing                                  = RCAIDE.Components.Wings.Wing()
     wing.tag                              = 'horizontal_stabilizer'  
     wing.sweeps.leading_edge              = 6 * Units.degrees 
-    wing.thickness_to_chord               = 12
+    wing.thickness_to_chord               = 0.12
     wing.areas.reference                  = 4   
     wing.spans.projected                  = 4 
     wing.chords.root                      = 1.2394
@@ -272,7 +272,7 @@ def vehicle_setup():
     wing                                  = RCAIDE.Components.Wings.Wing()
     wing.tag                              = 'vertical_stabilizer'   
     wing.sweeps.leading_edge              = 20 * Units.degrees 
-    wing.thickness_to_chord               = 12.5
+    wing.thickness_to_chord               = 0.125
     wing.areas.reference                  = 1.163 
     wing.spans.projected                  = 1.4816
     wing.chords.root                      = 1.2176
@@ -602,8 +602,7 @@ def mission_setup(analyses):
                 
     # define flight dynamics to model             
     segment.flight_dynamics.force_x                                  = True  
-    segment.flight_dynamics.force_z                                  = True     
-    segment.flight_dynamics.moment_y                                 = True 
+    segment.flight_dynamics.force_z                                  = True    
                 
     # define flight controls              
     segment.flight_controls.RPM.active                               = True           
@@ -611,11 +610,15 @@ def mission_setup(analyses):
     segment.flight_controls.RPM.initial_guess                        = True 
     segment.flight_controls.RPM.initial_guess_values                 = [[2500]] 
     segment.flight_controls.throttle.active                          = True           
-    segment.flight_controls.throttle.assigned_propulsors             = [['ice_propeller']]   
-    segment.flight_controls.elevator_deflection.active               = True    
-    segment.flight_controls.elevator_deflection.assigned_surfaces    = [['elevator']]
-    segment.flight_controls.elevator_deflection.initial_guess_values = [[0]] 
+    segment.flight_controls.throttle.assigned_propulsors             = [['ice_propeller']]    
     segment.flight_controls.body_angle.active                        = True   
+    
+
+    #segment.flight_dynamics.moment_y                                 = True 
+    #segment.flight_controls.elevator_deflection.active               = True    
+    #segment.flight_controls.elevator_deflection.assigned_surfaces    = [['elevator']]
+    #segment.flight_controls.elevator_deflection.initial_guess_values = [[0]] 
+    
     mission.append_segment(segment)
 
 
