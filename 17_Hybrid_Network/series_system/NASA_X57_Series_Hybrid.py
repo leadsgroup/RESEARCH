@@ -628,16 +628,18 @@ def vehicle_setup():
     right_gas_turbine                               = RCAIDE.Energy.Propulsors.Converters.Turbine() 
     right_gas_turbine.tag                           = 'right_turbine'
     right_gas_turbine.engine_length                 = 4.039
+    right_gas_turbine.mechanical_efficiency         = 0.99
     right_gas_turbine.nacelle_diameter              = 1.3
     right_gas_turbine.inlet_diameter                = 1.212 
     right_gas_turbine.areas.wetted                  = 30
     right_gas_turbine.mass_properties.mass          = 0.3
     right_gas_turbine.design_altitude               = 60000.0*Units.ft
     right_gas_turbine.design_mach_number            = 2.02
-    right_gas_turbine.design_thrust                 = 40000. * Units.lbf 
+    #right_gas_turbine.design_thrust                 = 40000. * Units.lbf 
     right_gas_turbine.origin                        = [[37.,6.,-1.3]] 
-    right_gas_turbine.working_fluid                 = RCAIDE.Attributes.Gases.Air()    
-    right_gas_turbine.design_power                  = right_gas_turbine.design_thrust
+    right_gas_turbine.working_fluid                 = RCAIDE.Attributes.Gases.Air() 
+    right_gas_turbine.shaft_angular_velocity              = 2700. * Units.rpm
+    
     
     # Ram  
     ram     = RCAIDE.Energy.Propulsors.Converters.Ram()
@@ -697,31 +699,34 @@ def vehicle_setup():
     nozzle.pressure_ratio                 = 1.    
     right_gas_turbine.append(nozzle) 
     
-    
+
     # design turboelectric 
     right_gas_turbine = design_turboelectric_turbine(right_gas_turbine)   
     right_turboelectric_generator.turbines.append(right_gas_turbine)
     
-    # DC_Motor       
-    motor.design_torque                              = propeller.cruise.design_torque
-    motor.angular_velocity                           = propeller.cruise.design_angular_velocity 
-    motor                                            = design_motor(motor)  
-    motor.mass_properties.mass                       = nasa_motor(motor.design_torque) 
-    starboard_propulsor.motor                        = motor     
-    
+    right_gas_turbine.shaft_torque              = right_gas_turbine.design_power[0][0] * 0.737 / right_gas_turbine.shaft_angular_velocity
     generator                                  = RCAIDE.Energy.Propulsors.Converters.Generator()
     generator.tag                              = 'right_generator'
-    generator.origin                           = motor.origin
-    generator.connected_engine                 = ['right_turbine']     
-    # what about shaft radius? we talked about this over a month ago. how do you plan to get current? 
-    # Need when calculating force, or dynamic analysis
-    generator.efficiency                       = 0.98    
-    generator.angular_velocity                 = 3000 * Units.rpm
-    generator.nominal_voltage                  = bat.pack.maximum_voltage
-    generator.no_load_current                  = 1
+    generator.origin                           = [[35.,6.,-1.3]] 
+    generator.connected_engine                 = ['right_turbine'] 
     generator.mass_properties.mass             = motor.mass_properties.mass
-    generator.design_power                     = right_gas_turbine.design_power
-    generator.current                          = generator.design_power/generator.nominal_voltage    
+     
+    
+    generator.no_load_torque                   = 20
+    generator.efficiency                       = 0.98    
+    generator.nominal_voltage                  = bat.pack.maximum_voltage
+    
+    generator.shaft_radius = 0.1
+    right_gas_turbine.shaft_radius = 0.08
+    
+    generator.shaft_input_power                = right_gas_turbine.low_pressure_turbine.inputs.shaft_power_off_take * right_gas_turbine.mechanical_efficiency
+    generator.design_torque = right_gas_turbine.shaft_torque * generator.shaft_radius / right_gas_turbine.shaft_radius
+    
+    generator.design_power = bat.
+    #generator.design_power                     = generator.shaft_input_power * generator.efficiency
+    generator.current = generator.design_power / generator.nominal_voltage
+    #generator.design_omega = generator.design_power/generator.design_torque
+      
     generator                                  = design_generator(generator)
     
     right_turboelectric_generator.generators.append(generator)
