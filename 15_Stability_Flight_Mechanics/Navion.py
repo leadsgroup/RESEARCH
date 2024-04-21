@@ -541,8 +541,7 @@ def configs_setup(vehicle):
 # ----------------------------------------------------------------------
 
 def plot_mission(results,run_stability):
-    plot_flight_conditions(results) 
-        
+    
     # Plot Flight Conditions 
     plot_flight_conditions(results) 
     
@@ -588,6 +587,39 @@ def mission_setup(analyses):
     # base segment
     base_segment = Segments.Segment() 
 
+    # ------------------------------------------------------------------
+    #   Climb Segment : Constant Speed Constant Rate
+    # ------------------------------------------------------------------ 
+    segment = Segments.Climb.Constant_Speed_Constant_Rate(base_segment) 
+    segment.tag = "climb"        
+    segment.analyses.extend( analyses.base )      
+    segment.altitude_start                                = 0.0 * Units.feet
+    segment.altitude_end                                  = 12000 * Units.feet
+    segment.air_speed                                     = 120 * Units['mph']
+    segment.climb_rate                                    = 1000* Units['ft/min']  
+    
+    # define flight dynamics to model 
+    segment.flight_dynamics.force_x                       = True  
+    segment.flight_dynamics.force_z                       = True     
+    
+    # define flight controls 
+    segment.flight_controls.RPM.active                               = True           
+    segment.flight_controls.RPM.assigned_propulsors                  = [['ice_propeller']]
+    segment.flight_controls.RPM.initial_guess                        = True 
+    segment.flight_controls.RPM.initial_guess_values                 = [[2500]]     
+    
+    segment.flight_controls.throttle.active               = True           
+    segment.flight_controls.throttle.assigned_propulsors  = [['ice_propeller']] 
+    segment.flight_controls.body_angle.active             = True 
+    
+    segment.flight_dynamics.moment_y                                 = True 
+    segment.flight_controls.elevator_deflection.active               = True    
+    segment.flight_controls.elevator_deflection.assigned_surfaces    = [['elevator']]
+    segment.flight_controls.elevator_deflection.initial_guess_values = [[0]] 
+        
+           
+    mission.append_segment(segment)
+    
     # ------------------------------------------------------------------    
     #   Cruise Segment: Constant Speed Constant Altitude
     # ------------------------------------------------------------------    
@@ -596,7 +628,7 @@ def mission_setup(analyses):
     segment.tag = "cruise" 
     segment.analyses.extend( analyses.base )   
     segment.altitude                                                 = 12000. * Units.feet
-    segment.air_speed                                                = 119.   * Units.knots
+    segment.air_speed                                                = 120 * Units['mph']
     segment.distance                                                 = 10 * Units.nautical_mile 
     segment.sideslip_angle                                           = 10 * Units.degrees 
                 
@@ -614,12 +646,45 @@ def mission_setup(analyses):
     segment.flight_controls.body_angle.active                        = True   
     
 
-    #segment.flight_dynamics.moment_y                                 = True 
-    #segment.flight_controls.elevator_deflection.active               = True    
-    #segment.flight_controls.elevator_deflection.assigned_surfaces    = [['elevator']]
-    #segment.flight_controls.elevator_deflection.initial_guess_values = [[0]] 
+    segment.flight_dynamics.moment_y                                 = True 
+    segment.flight_controls.elevator_deflection.active               = True    
+    segment.flight_controls.elevator_deflection.assigned_surfaces    = [['elevator']]
+    segment.flight_controls.elevator_deflection.initial_guess_values = [[0]] 
     
     mission.append_segment(segment)
+    
+    # ------------------------------------------------------------------
+    #   Descent Segment : Linear Speed Constatnt Rate
+    # ------------------------------------------------------------------ 
+    segment = Segments.Climb.Linear_Speed_Constant_Rate(base_segment) 
+    segment.tag = "descent"        
+    segment.analyses.extend( analyses.base )      
+    segment.altitude_start                                = 12000 * Units.feet
+    segment.altitude_end                                  = 0 * Units.feet
+    segment.air_speed                                     = 120 * Units['mph']
+    segment.climb_rate                                    = -1000* Units['ft/min']  
+    
+    # define flight dynamics to model 
+    segment.flight_dynamics.force_x                       = True  
+    segment.flight_dynamics.force_z                       = True     
+    
+    # define flight controls 
+    segment.flight_controls.RPM.active                    = True           
+    segment.flight_controls.RPM.assigned_propulsors       = [['ice_propeller']]
+    segment.flight_controls.RPM.initial_guess             = True 
+    segment.flight_controls.RPM.initial_guess_values      = [[2500]]     
+    
+    segment.flight_controls.throttle.active               = True           
+    segment.flight_controls.throttle.assigned_propulsors  = [['ice_propeller']] 
+    segment.flight_controls.body_angle.active             = True                 
+    
+    segment.flight_dynamics.moment_y                                 = True 
+    segment.flight_controls.elevator_deflection.active               = True    
+    segment.flight_controls.elevator_deflection.assigned_surfaces    = [['elevator']]
+    segment.flight_controls.elevator_deflection.initial_guess_values = [[0]] 
+        
+           
+    mission.append_segment(segment)    
 
 
     return mission 
