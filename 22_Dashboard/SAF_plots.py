@@ -15,28 +15,28 @@ import os
 def main():
    
     separator                       = os.path.sep
-    SAF_filename                    = 'Data' + separator + 'Technology_Data.xlsx'
-    routes_filename                 = 'Data' + separator + 'American_Airlines_Monthly_Temp.xlsx'
-    corn_feedstock_filename         = 'Data' + separator + 'corn_2022_production.csv'
-    soybean_feedstock_filename      = 'Data' + separator + 'soybean_2022_production.csv'  
+    SAF_filename                    = 'Data' + separator + 'Technology' + separator +  'Technology_Data.xlsx'
+    routes_filename                 = 'Data' + separator +  'Air_Travel' + separator + 'American_Airlines_Flight_Ops_and_Climate.xlsx'
+    crops_filename                  = 'Data' + separator +  'Crops' + 'All_Crops_2017.csv' 
     
     SAT_data                       = pd.read_excel(SAF_filename,sheet_name=['Commercial_SAF','SAF_Research']) 
     Commercial_SAF                 = SAT_data['Commercial_SAF'] 
     SAF_Research                   = SAT_data['SAF_Research']  
     a                              = Commercial_SAF['Brand']  
-    b                              = Commercial_SAF['Process']
-    c                              = Commercial_SAF['Feedstock']
-    d                              = a + ': ' + b + '-' + c 
-    Commercial_SAF["Battery Name"] = d      
-    Routes                         = pd.read_csv(routes_filename,sheet_name=['Sheet1']) 
-    corn_feedstock                 = pd.read_csv(corn_feedstock_filename,sheet_name=['corn_2022_production']) 
-    soybean_feedstock              = pd.read_excel(soybean_feedstock_filename,sheet_name=['soybean_2022_production'])  
+    b                              = Commercial_SAF['Fuel Type']
+    c                              = Commercial_SAF['Process']
+    d                              = Commercial_SAF['Source']
+    e                              = Commercial_SAF['Feedstock']
+    Commercial_SAF["SAF Name"]     = a + ' ' + b + 'from' + c  + 'using ' + d + ' ' + e 
+    Flight_Ops                     = pd.read_excel(routes_filename,sheet_name=['Sheet1']) 
+    Flight_Ops                     = Flight_Ops['Sheet1']     
+    feedstocks                     = pd.read_csv(crops_filename,sheet_name=['Corn','Soyabean','Barley','Canola'])  
   
 
     selected_process   = 'All'
     selected_feedstock = 'All'
-    selected_x_axis    = list(Commercial_SAF.columns.values)[4:18][7]
-    selected_y_axis    = list(Commercial_SAF.columns.values)[4:18][9]
+    selected_x_axis    = list(Commercial_SAF.columns.values)[4:18][7] # NEED TO CORRECT 
+    selected_y_axis    = list(Commercial_SAF.columns.values)[4:18][9] # NEED TO CORRECT 
     switch_off         = False     
     fig_1 = generate_saf_scatter_plot(Commercial_SAF,selected_process,selected_feedstock,selected_x_axis,selected_y_axis,switch_off)
     
@@ -51,10 +51,10 @@ def main():
     fig_3 = generate_saf_dev_map(SAF_Research,selected_sector,selected_type,switch_off)
     
     
-    selected_fuels                  = ["Neste Jet-A","Neste SAF HEFA form Corn","World Energy SAF HEFA form Barley"]
+    selected_fuels                  = [saf_1,saf_2,saf_3]
     blend_ratios                    = [100,50,25]
     percent_fuel_use                = [75,95] 
-    flight_range                    = [40000]
+    flight_range                    = [40000] # given in miles 
     SAF_production_states_1         = ["California"]  
     SAF_production_states_2         = ["Illinois"]  
     aircraft                        = ["Boeing 787-8"]
@@ -63,9 +63,9 @@ def main():
     month_no                        = 1
     switch_off                      = False 
     
-    fig_4 = generate_feedstock_usage_plots(Routes,Commercial_SAF,corn_feedstock,soybean_feedstock,selected_fuels,blend_ratios,percent_fuel_use,SAF_production_states_1,SAF_production_states_2,aircraft,flight_range,selected_airpots,percent_adoption,selected_feedstock,month_no,switch_off)
+    fig_4 = generate_feedstock_usage_plots(Flight_Ops,Commercial_SAF,feedstocks,selected_fuels,blend_ratios,percent_fuel_use,SAF_production_states_1,SAF_production_states_2,aircraft,flight_range,selected_airpots,percent_adoption,selected_feedstock,month_no,switch_off)
       
-    fig_5 = generate_saf_flight_operations_plots(Routes,Commercial_SAF,corn_feedstock,soybean_feedstock,selected_fuels,blend_ratios,percent_fuel_use,SAF_production_states_1,SAF_production_states_2,aircraft,flight_range,selected_airpots,percent_adoption,selected_feedstock,month_no,switch_off)
+    fig_5 = generate_saf_flight_operations_plots(Flight_Ops,Commercial_SAF,feedstocks,selected_fuels,blend_ratios,percent_fuel_use,SAF_production_states_1,SAF_production_states_2,aircraft,flight_range,selected_airpots,percent_adoption,selected_feedstock,month_no,switch_off)
     
     return 
      
@@ -259,7 +259,7 @@ def generate_saf_spider_plot(Commercial_SAF,saf_1,saf_2,saf_3,switch_off):
     return fig 
 
 
-def generate_feedstock_usage_plots(SAF_Development,selected_sector,selected_type,switch_off): 
+def generate_saf_dev_map(SAF_Development,selected_sector,selected_type,switch_off): 
     template            = pio.templates["minty"] if switch_off else pio.templates["minty_dark"]    
     map_style           = None if switch_off else 'dark'
     map_style           = None if switch_off else 'dark'  
@@ -328,7 +328,7 @@ def generate_feedstock_usage_plots(SAF_Development,selected_sector,selected_type
 
 
  
-def generate_saf_flight_operations_plots(Routes,Commercial_SAF,corn_feedstock,soybean_feedstock,selected_fuels,blend_ratios,percent_fuel_use,SAF_production_states_1,SAF_production_states_2,aircraft,flight_range,selected_airpots,percent_adoption,selected_feedstock,month_no,switch_off):  
+def generate_saf_flight_operations_plots(Flight_Ops,Commercial_SAF,corn_feedstock,soybean_feedstock,selected_fuels,blend_ratios,percent_fuel_use,SAF_production_states_1,SAF_production_states_2,aircraft,flight_range,selected_airpots,percent_adoption,selected_feedstock,month_no,switch_off):  
     template             = pio.templates["minty"] if switch_off else pio.templates["minty_dark"]    
     font_size            = 16  
     with urlopen('https://raw.githubusercontent.com/plotly/datasets/master/geojson-counties-fips.json') as response:
@@ -350,55 +350,86 @@ def generate_saf_flight_operations_plots(Routes,Commercial_SAF,corn_feedstock,so
     cumulative_fuel_use[0]  = 1 - np.sum(cumulative_fuel_use[1:])
     
     # Step 3: Based on aircraft's fuel consumption, determine the total volume of fuel used oer flight 
-    if aircraft == "Boeing 787-8": 
-        C_T             = 0.000017678 
-        max_fuel_volume = 126206  # liters 
-        fuel_consumtion = 2.68 # L/100km per Pax 
-        passengers      = 238
-        W_0             = 227900   
-        CL_cruise       = 0.055 
-        CD_cruise       = 0.035
-        S_ref           = 377
-    if aircraft == "Boeing 737 MAX-8":
-        C_T             = 0.000017678  
-        max_fuel_volume = 26024 # liters 
-        fuel_consumtion = 2.04 # L/100km per Pax 
-        passengers      = 162
-        W_0             = 79015.8  
-        CL_cruise       = 0.055 
+    if aircraft == 'ATR 72-600': 
+        P_max           = 1568083 
+        W_0             = 23000   
+        thrust_coef     = 0.000017678 # incorrect  
+        fuel_volume     = 6410.2
+        fuel_economy    = 3.27 
+        passengers      = 72 
+        CL_cruise       = 0.55   # incorrect  
+        CD_cruise       = 0.035  # incorrect  
+        S_ref           = 61.0   
+        L_div_D         = CL_cruise/CD_cruise 
+        
+    #elif aircraft == 'Embraer 190': 
+        #P_max           =  
+        #W_0             = 52290 
+        #thrust_coef     = 0.000017678 # incorrect    
+        #fuel_volume     = 16629 
+        #fuel_economy    = 3.54 
+        #passengers      = 100 
+        #CL_cruise       = 0.55   # incorrect 
+        #CD_cruise       = 0.035  # incorrect 
+        #S_ref           = 92.53 
+        #L_div_D         = CL_cruise/CD_cruise  
+    elif aircraft == "Boeing 737 MAX-8":
+        P_max           = 15000000 
+        W_0             = 79015.8   
+        thrust_coef     = 0.000017678  
+        fuel_volume     = 26024 
+        fuel_economy    = 2.04 
+        passengers      = 162  
+        CL_cruise       = 0.55 
         CD_cruise       = 0.035
         S_ref           = 127 
-    elif aircraft == 'Airbus A350-1000': 
-        C_T             = 0.000017678   
-        max_fuel_volume = 166488 
-        fuel_consumtion = 2.85 # L/100km per Pax 
-        passengers      = 327  
-        W_0             = 322050  
-        CL_cruise       = 0.055 
-        CD_cruise       = 0.035
-        S_ref           = 464.3
+        L_div_D         = CL_cruise/CD_cruise
+        
     elif aircraft == 'Airbus A320 neo': 
-        C_T             = 0.000017678  
-        max_fuel_volume = 27200  # liters 
-        fuel_consumtion = 1.94   # L/100km per Pax 
-        passengers      = 180
-        W_0             = 79015
-        CL_cruise       = 0.055 
-        CD_cruise       = 0.035 
-        S_ref           = 122.6   
+        P_max           = 15000000 
+        W_0             = 78000
+        thrust_coef     = 0.000017678  
+        fuel_volume     = 26024  
+        fuel_economy    = 2.04  
+        passengers      = 162
+        W_0             = 79015.8  
+        CL_cruise       = 0.55 
+        CD_cruise       = 0.035
+        S_ref           = 127   
+        L_div_D         = CL_cruise/CD_cruise
+        
+    #elif aircraft == "Boeing 787-8": 
+        #P_max           =  
+        #thrust_coef     = 0.000017678 
+        #fuel_volume     = 126206  
+        #fuel_economy    = 2.68    
+        #passengers      = 238
+        #W_0             = 227900   
+        #CL_cruise       = 0.055 
+        #CD_cruise       = 0.035
+        #S_ref           = 377
+        #L_div_D         = CL_cruise/CD_cruise
+        
+    #elif aircraft == 'Airbus A350-1000':
+        #P_max          =  
+        #thrust_coef    = 0.000017678   
+        #fuel_volume    = 166488        # liters 
+        #fuel_economy   = 2.85          # L/100km per Pax 
+        #passengers     = 327  
+        #W_0            = 322050  
+        #CL_cruise      = 0.055 
+        #CD_cruise      = 0.035
+        #S_ref          = 464.3
+        #L_div_D        = CL_cruise/CD_cruise      
         
     # Step 4: filter list of routes by range 
-    Routes       =  Routes[Routes['Range'] < flight_range[0]] 
+    Flight_Ops   =  Flight_Ops[Flight_Ops['Distance (miles)'] < flight_range[0]] 
     miles_to_km  = 1.60934 
-    flight_range = Routes['Range']*miles_to_km 
-    passengers   = Routes['Passengers']
-    
-    # Step 5: Compute fuel volume used for each flight 
-    fuel_volumes = fuel_consumtion*(flight_range/100)*passengers 
-    Routes['Fuel_Volume'] = fuel_volumes
+    flight_range = Flight_Ops['Distance (miles)']*miles_to_km 
+    passengers   = Flight_Ops['Passengers'] 
         
     # Step 6: Filter flight data based on option selected: i.e. top 10, top 20, top 50, all airpots 
-    Airport_Routes     = Routes[['Passengers','Origin Airport','Destination City']]
+    Airport_Routes     = Flight_Ops[['Passengers','Origin Airport','Destination City']]
     Cumulative_Flights = Airport_Routes.groupby(['Origin Airport']).sum()    
     if  selected_airpots == "Top 10 Airports":
         Busiest_Airports   = Cumulative_Flights.sort_values(by=['Passengers'], ascending = False).head(10) 
@@ -411,24 +442,24 @@ def generate_saf_flight_operations_plots(Routes,Commercial_SAF,corn_feedstock,so
     Airport_List = Busiest_Airports['Origin Airport']
     
     # Step 7: Filter airports that will support SAF and those that wont support SAF 
-    mask                  = Routes['Origin Airport'].isin(Airport_List)
-    SAF_Possible_Airports = Routes[mask]
-    Non_SAF_Airports      = Routes[~mask]  
+    mask_1                = Flight_Ops['Origin Airport'].isin(Airport_List)
+    SAF_Possible_Airports = Flight_Ops[mask_1]
+    Non_SAF_Airports      = Flight_Ops[~mask_1]  
     
     # Step 8: Out of SAF supporting airports, use the percent adoption to detemrine how many flights at that airport will use SAF
-    mask             = np.len(0,len(SAF_Possible_Airports), int(len(SAF_Possible_Airports) *percent_adoption ))
-    SAF_Flights      = SAF_Possible_Airports[mask]  # flights on SAF 
-    SAF_Flights_N    = SAF_Possible_Airports[~mask] 
-    Non_SAF_Flights  = pd.concat([Non_SAF_Airports, SAF_Flights_N] )   # add list of flights from non supporting airports to non-SAF flights  
+    mask_2                      = np.len(0,len(SAF_Possible_Airports), int(len(SAF_Possible_Airports)*percent_adoption ))
+    SAF_Airports_Using_SAF      = SAF_Possible_Airports[mask_2]  # flights on SAF 
+    SAF_Airports_Using_Jet_A    = SAF_Possible_Airports[~mask_2] 
+    Non_SAF_Flights             = pd.concat([Non_SAF_Airports, SAF_Airports_Using_Jet_A] )   # add list of flights from non supporting airports to non-SAF flights  
      
-    # Step 9: Get total volume of eacb SAF required at the airports 
-    total_fuel_volume_required = np.sum(np.float(SAF_Flights['Fuel_Volume'][1:]))
-    unique_fuel_volumes        = cumulative_fuel_use*total_fuel_volume_required  
+    # Step 9: Get total volume of each SAF required at the airports 
+    total_fuel_volume_required = np.sum(np.float(SAF_Airports_Using_SAF['Total Fuel Per Route (Gal)'][1:]))
+    fuel_volumes               = cumulative_fuel_use*total_fuel_volume_required  
     
     # Step 10: Sort SAF's by feedstock and sum all fuel volumes based on fuel (FUTURE WORK: determine how much corn is needed for EACH type of process)
     mask                       = Commercial_SAF['Feedstock'].isin(selected_fuels)
     fuels_used                 = Commercial_SAF[mask]    
-    fuels_used['Fuels Used']   = unique_fuel_volumes 
+    fuels_used['Fuels Used']   = fuel_volumes 
     relative_crop_volume       = fuels_used['Fuels Used']*fuels_used['Fuel-to-Crop-factor']
     fuels_used['Crop-Volume']  = relative_crop_volume
     df2                        = fuels_used.groupby(['Feedstock']).sum()  
@@ -484,7 +515,7 @@ def generate_saf_flight_operations_plots(Routes,Commercial_SAF,corn_feedstock,so
      
     return fig_4
 
-def generate_saf_flight_ops_map(Routes,Commercial_SAF,corn_feedstock,soybean_feedstock,selected_fuels,blend_ratios,percent_fuel_use,SAF_production_states_1,SAF_production_states_2,aircraft,selected_airpots,percent_adoption,selected_feedstock,month_no,switch_off):  
+def generate_saf_flight_ops_map(Flight_Ops,Commercial_SAF,corn_feedstock,soybean_feedstock,selected_fuels,blend_ratios,percent_fuel_use,SAF_production_states_1,SAF_production_states_2,aircraft,selected_airpots,percent_adoption,selected_feedstock,month_no,switch_off):  
     template             = pio.templates["minty"] if switch_off else pio.templates["minty_dark"]  
     mapbox_access_token  = "pk.eyJ1IjoibWFjbGFya2UiLCJhIjoiY2xyanpiNHN6MDhsYTJqb3h6YmJjY2w5MyJ9.pQed7pZ9CnJL-mtqm1X8DQ"
     map_style            = None if switch_off else 'dark'   
@@ -499,7 +530,7 @@ def generate_saf_flight_ops_map(Routes,Commercial_SAF,corn_feedstock,soybean_fee
     if aircraft == "Boeing 787-8": 
         C_T             = 0.000017678 
         max_fuel_volume = 126206  # liters 
-        fuel_consumtion = 2.68 # L/100km per Pax 
+        fuel_economy = 2.68 # L/100km per Pax 
         passengers      = 238
         W_0             = 227900   
         CL_cruise       = 0.055 
@@ -508,7 +539,7 @@ def generate_saf_flight_ops_map(Routes,Commercial_SAF,corn_feedstock,soybean_fee
     if aircraft == "Boeing 737 MAX-8":
         C_T             = 0.000017678  
         max_fuel_volume = 26024 # liters 
-        fuel_consumtion = 2.04 # L/100km per Pax 
+        fuel_economy = 2.04 # L/100km per Pax 
         passengers      = 162
         W_0             = 79015.8  
         CL_cruise       = 0.055 
@@ -517,7 +548,7 @@ def generate_saf_flight_ops_map(Routes,Commercial_SAF,corn_feedstock,soybean_fee
     elif aircraft == 'Airbus A350-1000': 
         C_T             = 0.000017678   
         max_fuel_volume = 166488 
-        fuel_consumtion = 2.85 # L/100km per Pax 
+        fuel_economy = 2.85 # L/100km per Pax 
         passengers      = 327  
         W_0             = 322050  
         CL_cruise       = 0.055 
@@ -526,7 +557,7 @@ def generate_saf_flight_ops_map(Routes,Commercial_SAF,corn_feedstock,soybean_fee
     elif aircraft == 'Airbus A320 neo': 
         C_T             = 0.000017678  
         max_fuel_volume = 27200  # liters 
-        fuel_consumtion = 1.94   # L/100km per Pax 
+        fuel_economy = 1.94   # L/100km per Pax 
         passengers      = 180
         W_0             = 79015
         CL_cruise       = 0.055 
@@ -536,7 +567,7 @@ def generate_saf_flight_ops_map(Routes,Commercial_SAF,corn_feedstock,soybean_fee
     # ----------------------------------------------------------------------------------------------------------------------------------------------
     # Compute distance between departure and destimation points
     # ----------------------------------------------------------------------------------------------------------------------------------------------
-    Routes_Mo                    = Routes[Routes['Month'] == month_no+1 ]  
+    Routes_Mo                    = Flight_Ops[Flight_Ops['Month'] == month_no+1 ]  
     des_lon                      = np.array(Routes_Mo['Destination Longitude (Deg.)'])
     des_lat                      = np.array(Routes_Mo['Destination Latitude (Deg.)'])
     org_lon                      = np.array(Routes_Mo['Origin Longitude (Deg.)'])
@@ -553,7 +584,7 @@ def generate_saf_flight_ops_map(Routes,Commercial_SAF,corn_feedstock,soybean_fee
 
     
     reserve_distance    = reserve_speed*fuel_reserve
-    fuel_volume_L       = fuel_consumtion*passengers*(distances+ reserve_distance)/(1000*100)
+    fuel_volume_L       = fuel_economy*passengers*(distances+ reserve_distance)/(1000*100)
     fuel_volume_m_3     = fuel_volume_L*0.001  
     W_f                 = Jet_A_density*fuel_volume_m_3
     W_1                 = W_0*percent_fuel_use - W_f
@@ -562,9 +593,9 @@ def generate_saf_flight_ops_map(Routes,Commercial_SAF,corn_feedstock,soybean_fee
     Feasible_Routes     = Routes_Mo[Routes_Mo['Range'] < Range ]  
     
     #================================================================================================================================================  
-    # Plot Routes 
+    # Plot Flight_Ops 
     #================================================================================================================================================     
-    # Routes   
+    # Flight_Ops   
     fig_5                = go.Figure()
     airport_marker_size  = 5
     airport_marker_color = "white"
@@ -604,18 +635,18 @@ def generate_saf_flight_ops_map(Routes,Commercial_SAF,corn_feedstock,soybean_fee
   
     # Airports  
     fig_5.add_trace(go.Scattergeo( 
-        lon = Routes['Destination Longitude (Deg.)'],
-        lat = Routes['Destination Latitude (Deg.)'], 
-        text = Routes['Destination City'],
+        lon = Flight_Ops['Destination Longitude (Deg.)'],
+        lat = Flight_Ops['Destination Latitude (Deg.)'], 
+        text = Flight_Ops['Destination City'],
         mode = 'markers',
         marker = dict(
             size = airport_marker_size,
             color = airport_marker_color, ))) 
 
     fig_5.add_trace(go.Scattergeo( 
-        lon = Routes['Origin Longitude (Deg.)'],
-        lat = Routes['Origin Latitude (Deg.)'], 
-        text = Routes['Origin City'],
+        lon = Flight_Ops['Origin Longitude (Deg.)'],
+        lat = Flight_Ops['Origin Latitude (Deg.)'], 
+        text = Flight_Ops['Origin City'],
         mode = 'markers',
         marker = dict(
             size = airport_marker_size,

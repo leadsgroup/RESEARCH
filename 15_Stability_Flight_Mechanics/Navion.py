@@ -656,13 +656,13 @@ def mission_setup(analyses):
     # ------------------------------------------------------------------
     #   Descent Segment : Linear Speed Constatnt Rate
     # ------------------------------------------------------------------ 
-    segment = Segments.Climb.Linear_Speed_Constant_Rate(base_segment) 
+    segment = Segments.Descent.Constant_Speed_Constant_Rate(base_segment) 
     segment.tag = "descent"        
     segment.analyses.extend( analyses.base )      
     segment.altitude_start                                = 12000 * Units.feet
     segment.altitude_end                                  = 0 * Units.feet
-    segment.air_speed                                     = 120 * Units['mph']
-    segment.climb_rate                                    = -1000* Units['ft/min']  
+    segment.air_speed                                     = 120 * Units['mph']  
+    segment.climb_rate                                    = 200 * Units['ft/min']  
     
     # define flight dynamics to model 
     segment.flight_dynamics.force_x                       = True  

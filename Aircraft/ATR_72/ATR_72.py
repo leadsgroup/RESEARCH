@@ -26,8 +26,8 @@ def main():
     # Define internal combustion engine from Cessna Regression Aircraft 
     vehicle    = vehicle_setup()   
 
-    # plot vehicle 
-    plot_3d_vehicle(vehicle,
+    # plot vehic (vehicle,
+    # plot vehic (vehicle,
                     show_wing_control_points    = False,
                     show_rotor_wake_vortex_core = False,
                     min_x_axis_limit            = 0,
@@ -603,7 +603,7 @@ def vehicle_setup():
     # append propulsor to distribution line 
     fuel_line.propulsors.append(port_propulsor) 
 
-    net.fuel_lines.append(fuel_line)        
+    #net.fuel_lines.append(fuel_line)        
 
     #------------------------------------------------------------------------------------------------------------------------------------ 
     # Avionics
