@@ -608,15 +608,14 @@ def mission_setup(analyses):
     segment.flight_controls.RPM.initial_guess                        = True 
     segment.flight_controls.RPM.initial_guess_values                 = [[2500]]     
     
-    segment.flight_controls.throttle.active               = True           
-    segment.flight_controls.throttle.assigned_propulsors  = [['ice_propeller']] 
-    segment.flight_controls.body_angle.active             = True 
+    segment.flight_controls.throttle.active                          = True           
+    segment.flight_controls.throttle.assigned_propulsors             = [['ice_propeller']] 
+    segment.flight_controls.body_angle.active                        = True 
     
     segment.flight_dynamics.moment_y                                 = True 
     segment.flight_controls.elevator_deflection.active               = True    
     segment.flight_controls.elevator_deflection.assigned_surfaces    = [['elevator']]
-    segment.flight_controls.elevator_deflection.initial_guess_values = [[0]] 
-        
+    segment.flight_controls.elevator_deflection.initial_guess_values = [[0]]  
            
     mission.append_segment(segment)
     
