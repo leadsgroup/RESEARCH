@@ -65,34 +65,34 @@ def vehicle_setup():
     # ------------------------------------------------------------------
 
     vehicle = RCAIDE.Vehicle()
-    vehicle.tag = 'ATR_72'
+    vehicle.tag = 'MD_88'
 
     # ------------------------------------------------------------------
     #   Vehicle-level Properties
     # ------------------------------------------------------------------
 
-    # mass properties
-    vehicle.mass_properties.max_takeoff               = 23000 
-    vehicle.mass_properties.takeoff                   = 23000  
-    vehicle.mass_properties.operating_empty           = 13600  
-    vehicle.mass_properties.max_zero_fuel             = 21000 
-    vehicle.mass_properties.cargo                     = 7400
-    vehicle.mass_properties.center_of_gravity         = [[0,0,0]] # Unknown 
-    vehicle.mass_properties.moments_of_inertia.tensor = [[0,0,0]] # Unknown 
-    vehicle.mass_properties.max_fuel                  = 5000
-    vehicle.design_mach_number                        = 0.41 
-    vehicle.design_range                              = 1528000  
-    vehicle.design_cruise_alt                         = 25000 *Units.feet
+    ## mass properties
+    #vehicle.mass_properties.max_takeoff               = 23000 
+    #vehicle.mass_properties.takeoff                   = 23000  
+    #vehicle.mass_properties.operating_empty           = 13600  
+    #vehicle.mass_properties.max_zero_fuel             = 21000 
+    #vehicle.mass_properties.cargo                     = 7400
+    #vehicle.mass_properties.center_of_gravity         = [[0,0,0]] # Unknown 
+    #vehicle.mass_properties.moments_of_inertia.tensor = [[0,0,0]] # Unknown 
+    #vehicle.mass_properties.max_fuel                  = 5000
+    #vehicle.design_mach_number                        = 0.41 
+    #vehicle.design_range                              = 1528000  
+    #vehicle.design_cruise_alt                         = 25000 *Units.feet
 
-    # envelope properties
-    vehicle.envelope.ultimate_load        = 3.75
-    vehicle.envelope.limit_load           = 1.5
+    ## envelope properties
+    #vehicle.envelope.ultimate_load        = 3.75
+    #vehicle.envelope.limit_load           = 1.5
        
-    # basic parameters       
-    vehicle.reference_area                = 61.0  
-    vehicle.passengers                    = 72
-    vehicle.systems.control               = "fully powered"
-    vehicle.systems.accessories           = "short range"  
+    ## basic parameters       
+    #vehicle.reference_area                = 61.0  
+    #vehicle.passengers                    = 72
+    #vehicle.systems.control               = "fully powered"
+    #vehicle.systems.accessories           = "short range"
 
  
     # ------------------------------------------------------------------
@@ -283,23 +283,24 @@ def vehicle_setup():
     #  Fuselage
     # ------------------------------------------------------------------
 
+  
     fuselage = RCAIDE.Components.Fuselages.Fuselage()
     fuselage.tag = 'fuselage' 
-    fuselage.seats_abreast                      = 4 
-    fuselage.seat_pitch                         = 18  
-    fuselage.fineness.nose                      = 1.6
-    fuselage.fineness.tail                      = 2. 
-    fuselage.lengths.total                      = 27.12   
-    fuselage.lengths.nose                       = 3.375147531 
-    fuselage.lengths.tail                       = 9.2 
+    fuselage.seats_abreast                      = 5 
+    fuselage.seat_pitch                         = 31   
+    fuselage.fineness.nose                      = 0.54
+    fuselage.fineness.tail                      = 1.18 
+    fuselage.lengths.total                      = 45.0596 * Units.meters   
+    fuselage.lengths.nose                       = 3.62 * Units.meters 
+    fuselage.lengths.tail                       = 7.5 * Units.meters 
     fuselage.lengths.cabin                      = fuselage.lengths.total- (fuselage.lengths.nose + fuselage.lengths.tail  )
-    fuselage.width                              = 2.985093814  
-    fuselage.heights.maximum                    = 2.755708426  
+    fuselage.width                              = 3.18  
+    fuselage.heights.maximum                    = 3.565  
     fuselage.areas.side_projected               = 1.0 # incorrect 
     fuselage.areas.wetted                       = 1.0 # incorrect 
     fuselage.areas.front_projected              = 1.0 # incorrect 
-    fuselage.effective_diameter                 = 2.985093814  
-    fuselage.differential_pressure              = 1.0
+    fuselage.effective_diameter                 = 3.5  
+    fuselage.differential_pressure              = 8.5 * Units.psi    
     
      # Segment  
     segment                                     = RCAIDE.Components.Lofted_Body_Segment.Segment() 
