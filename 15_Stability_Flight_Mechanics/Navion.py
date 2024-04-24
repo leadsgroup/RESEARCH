@@ -716,7 +716,7 @@ def mission_setup(analyses):
     segment.flight_controls.rudder_deflection.initial_guess_values = [[0]]
     segment.flight_controls.flap_deflection.active               = True    
     segment.flight_controls.flap_deflection.assigned_surfaces    = [['flap']]
-    segment.flight_controls.flap_deflection.initial_guess_values = [[0]]   
+    segment.flight_controls.flap_deflection.initial_guess_values = [[0]]  
         
            
     mission.append_segment(segment)    
