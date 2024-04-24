@@ -624,7 +624,11 @@ def mission_setup(analyses):
     segment.flight_controls.aileron_deflection.initial_guess_values = [[0]] 
     segment.flight_controls.rudder_deflection.active               = True    
     segment.flight_controls.rudder_deflection.assigned_surfaces    = [['rudder']]
-    segment.flight_controls.rudder_deflection.initial_guess_values = [[0]]     
+    segment.flight_controls.rudder_deflection.initial_guess_values = [[0]]
+    segment.flight_controls.flap_deflection.active               = True    
+    segment.flight_controls.flap_deflection.assigned_surfaces    = [['flap']]
+    segment.flight_controls.flap_deflection.initial_guess_values = [[0]]     
+         
            
     mission.append_segment(segment)
     
@@ -654,7 +658,6 @@ def mission_setup(analyses):
     segment.flight_controls.throttle.assigned_propulsors             = [['ice_propeller']]    
     segment.flight_controls.body_angle.active                        = True   
     
-
     segment.flight_dynamics.moment_x                                 = True
     segment.flight_dynamics.moment_y                                 = True 
     segment.flight_dynamics.moment_z                                 = True 
@@ -666,7 +669,10 @@ def mission_setup(analyses):
     segment.flight_controls.aileron_deflection.initial_guess_values = [[0]] 
     segment.flight_controls.rudder_deflection.active               = True    
     segment.flight_controls.rudder_deflection.assigned_surfaces    = [['rudder']]
-    segment.flight_controls.rudder_deflection.initial_guess_values = [[0]] 
+    segment.flight_controls.rudder_deflection.initial_guess_values = [[0]]
+    segment.flight_controls.flap_deflection.active               = True    
+    segment.flight_controls.flap_deflection.assigned_surfaces    = [['flap']]
+    segment.flight_controls.flap_deflection.initial_guess_values = [[0]]     
     
     mission.append_segment(segment)
     
@@ -707,7 +713,10 @@ def mission_setup(analyses):
     segment.flight_controls.aileron_deflection.initial_guess_values = [[0]] 
     segment.flight_controls.rudder_deflection.active               = True    
     segment.flight_controls.rudder_deflection.assigned_surfaces    = [['rudder']]
-    segment.flight_controls.rudder_deflection.initial_guess_values = [[0]]  
+    segment.flight_controls.rudder_deflection.initial_guess_values = [[0]]
+    segment.flight_controls.flap_deflection.active               = True    
+    segment.flight_controls.flap_deflection.assigned_surfaces    = [['flap']]
+    segment.flight_controls.flap_deflection.initial_guess_values = [[0]]   
         
            
     mission.append_segment(segment)    
