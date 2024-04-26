@@ -720,15 +720,16 @@ def vehicle_setup():
     right_gas_turbine.shaft_radius = 0.08
     
     generator.shaft_input_power                = right_gas_turbine.low_pressure_turbine.inputs.shaft_power_off_take * right_gas_turbine.mechanical_efficiency
+    generator.design_power = 20000 #net.generator_power  # generator.design_power = generator.shaft_input_power * generator.efficiency
     
-    generator.design_torque = 2700.   #right_gas_turbine.shaft_torque * generator.shaft_radius / right_gas_turbine.shaft_radius
+    generator.no_load_current = 1
+    generator.current = generator.design_power / generator.nominal_voltage
     
-    generator.design_power = 20000 #net.generator_power 
+    generator.design_torque = 4000    #right_gas_turbine.shaft_torque * generator.shaft_radius / right_gas_turbine.shaft_radius
     generator.design_omega = generator.design_power/generator.design_torque
-    #generator.design_power                     = generator.shaft_input_power * generator.efficiency
-    #generator.current = generator.design_power / generator.nominal_voltage
-    #generator.design_omega = generator.design_power/generator.design_torque
-      
+    
+    #generator.current = generator.design_power / generator.nominal_voltag
+    
     generator                                  = design_generator(generator)
     
     right_turboelectric_generator.generators.append(generator)
