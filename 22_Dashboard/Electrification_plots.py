@@ -31,7 +31,7 @@ def main():
     route_temp_filename  = 'Data' + separator +  'Air_Travel' + separator + 'American_Airlines_Flight_Ops_and_Climate.xlsx'
     Routes_and_Temp      = pd.read_excel(route_temp_filename,sheet_name=['Sheet1']) 
     Routes_and_Temp      = Routes_and_Temp['Sheet1']     
-    filename             =  'Data' + separator  +  'US_Climate' + separator +  'Monthly_US_County_Temperature_2019.xlsx'
+    filename             = 'Data' + separator  +  'US_Climate' + separator +  'Monthly_US_County_Temperature_2019.xlsx'
     Temeperature_data    = pd.read_excel(filename,sheet_name=['US_County_Temperature_F'])  
     US_Temperature_F     = Temeperature_data['US_County_Temperature_F'] 
     
@@ -47,12 +47,14 @@ def main():
     #bat_1           = Commercial_Batteries['Battery Name'][5] 
     #bat_2           = Commercial_Batteries['Battery Name'][13] 
     #bat_3           = Commercial_Batteries['Battery Name'][6] 
+    #switch_off         = False      
     #fig_2           =  generate_battery_spider_plot(Commercial_Batteries,bat_1,bat_2,bat_3,switch_off) 
     #fig_2.show()
     
 
     #selected_sector = 'All'
     #selected_type   = 'All'
+    #switch_off         = False  
     #fig_3 = generate_battery_dev_map(Battery_Development,selected_sector,selected_type,switch_off)  
     #fig_3.show()
 
@@ -62,26 +64,26 @@ def main():
     #fig_4.show()
     
   
-    #aircraft              = 'Boeing 737 MAX-8'
-    #battery_choice        = Commercial_Batteries['Battery Name'][13] 
-    #weight_fraction       = 35
-    #system_voltage        = 400 
-    #propulsive_efficiency = 90
-    #percent_adoption      = 100 
-    #month_no              = 1 
-    #switch_off            = False 
-    #cost_of_electricity   = 140 # per Kw 
-    #fig_5, fig_6, fig_7, fig_8,fig_9,fig_10 = generate_electric_flight_operations_plots(Routes_and_Temp,Commercial_Batteries,aircraft,battery_choice,weight_fraction,system_voltage,propulsive_efficiency,percent_adoption,month_no,cost_of_electricity,switch_off)
+    aircraft              = 'Boeing 737 MAX-8'
+    battery_choice        = Commercial_Batteries['Battery Name'][13] 
+    weight_fraction       = 35
+    system_voltage        = 400 
+    propulsive_efficiency = 90
+    percent_adoption      = 100 
+    month_no              = 1 
+    switch_off            = False 
+    cost_of_electricity   = 140 # per Kw 
+    fig_5, fig_6, fig_7, fig_8,fig_9,fig_10 = generate_electric_flight_operations_plots(Routes_and_Temp,Commercial_Batteries,aircraft,battery_choice,weight_fraction,system_voltage,propulsive_efficiency,percent_adoption,month_no,cost_of_electricity,switch_off)
                 
-    #fig_5.show()
-    #fig_6.show()
-    #fig_7.show()
-    #fig_8.show()
-    #fig_9.show()
-    #fig_10.show()
+    fig_5.show()
+    fig_6.show()
+    fig_7.show()
+    fig_8.show()
+    fig_9.show()
+    fig_10.show()
  
-    selected_x_axis    = list(Electric_Motor_Development.columns.values)[4:18][7]
-    selected_y_axis    = list(Electric_Motor_Development.columns.values)[4:18][9]
+    selected_x_axis    = list(Electric_Motor_Development.columns.values)[4:14][1]
+    selected_y_axis    = list(Electric_Motor_Development.columns.values)[4:14][2]
     switch_off         = False      
     fig_11             = generate_motor_scatter_plot(Electric_Motor_Development,selected_x_axis,selected_y_axis,switch_off)   
     fig_11.show()      
@@ -351,8 +353,6 @@ def generate_US_bat_temperature_map(US_Temperature_F,month_no,switch_off):
     with urlopen('https://raw.githubusercontent.com/plotly/datasets/master/geojson-counties-fips.json') as response:
         counties = json.load(response) 
     month = list(US_Temperature_F.columns.values)[6:18][month_no]  
-    #fips  = list(US_Temperature_F['FIPS'])  
-    #US_Temperature_F['FIPS'] = ["%05d" % i for i in fips] 
     US_Temperature_F['FIPS'] = US_Temperature_F['FIPS'].apply('{:0>5}'.format)
     us_temperature_map= px.choropleth(US_Temperature_F, geojson=counties, locations='FIPS', color = month,
                            color_continuous_scale="RdYlBu_r", 
@@ -485,9 +485,25 @@ def generate_electric_flight_operations_plots(Routes_and_Temp,Commercial_Batteri
     Range_mi = Range * 0.000621371 
     
     # Compute distances between departure and destimation points 
-    Routes_and_Temp_Mo   = Routes_and_Temp[Routes_and_Temp['Month'] == month_no+1 ]     
-    Infeasible_Routes_1  = Routes_and_Temp_Mo[Routes_and_Temp_Mo['Distance (miles)'] > Range_mi ]  
-    Feasible_Routes_1    = Routes_and_Temp_Mo[Routes_and_Temp_Mo['Distance (miles)'] < Range_mi ] 
+    Routes_and_Temp_Mo                    = Routes_and_Temp[Routes_and_Temp['Month'] == month_no+1 ]     
+
+    Jet_A_density                        = 800.0 #  kg/m3
+    fuel_volume_L                        = Routes_and_Temp_Mo['Fuel Consumed Per Flight (Liters)']  
+    fuel_volume_m_3                      = fuel_volume_L*0.001  
+    W_f                                  = Jet_A_density*fuel_volume_m_3
+    W_residual                           = W_bat-W_f  
+    weight_per_pass                      = 158.757 # in kg  (250 lb for person, 100 lb for luggage) 
+    passenger_reductions                 = np.ceil(np.array(W_residual)/weight_per_pass)   
+    passenger_reductions[passenger_reductions < 0] = 0
+    original_Pax_volume                  = np.array(Routes_and_Temp_Mo['Passengers'])
+    remaining_Pax                        = original_Pax_volume - passenger_reductions*np.array(Routes_and_Temp_Mo['No of Flights Per Month'])
+    remaining_Pax[remaining_Pax<0]       = 0
+    Routes_and_Temp_Mo['E_Passengers']   = remaining_Pax   
+
+    Feasible_Routes_0    = Routes_and_Temp_Mo[Routes_and_Temp_Mo['E_Passengers'] > 0 ] 
+    Infeasible_Routes_0  = Routes_and_Temp_Mo[Routes_and_Temp_Mo['E_Passengers'] < 0 ]   
+    Feasible_Routes_1    = Feasible_Routes_0[Feasible_Routes_0['Distance (miles)'] < Range_mi ] 
+    Infeasible_Routes_1  = Feasible_Routes_0[Feasible_Routes_0['Distance (miles)'] > Range_mi ]  
     Feasible_Routes_2    = Feasible_Routes_1[Feasible_Routes_1['Origin ' + month] > Min_Temp] 
     Infeasible_Routes_2  = Feasible_Routes_1[Feasible_Routes_1['Origin ' + month] < Min_Temp] 
     Feasible_Routes_3    = Feasible_Routes_2[Feasible_Routes_2['Origin ' + month] < Max_Temp] 
@@ -496,10 +512,9 @@ def generate_electric_flight_operations_plots(Routes_and_Temp,Commercial_Batteri
     Infeasible_Routes_4  = Feasible_Routes_3[Feasible_Routes_3['Destination ' + month] < Min_Temp] 
     Feasible_Routes_5    = Feasible_Routes_4[Feasible_Routes_4['Destination ' + month] < Max_Temp] 
     Infeasible_Routes_5  = Feasible_Routes_4[Feasible_Routes_4['Destination ' + month] > Max_Temp] 
-    Infeasible_Routes_6  = Feasible_Routes_5.tail(int(len(Feasible_Routes_5)*(100 - percent_adoption)/100 ))
     Feasible_Routes      = Feasible_Routes_5.head(int(len(Feasible_Routes_5)*percent_adoption/100 )) 
-    Infeasible_Routes    = pd.concat([Infeasible_Routes_1,Infeasible_Routes_2,Infeasible_Routes_3,Infeasible_Routes_4,Infeasible_Routes_5,Infeasible_Routes_6])     
-    
+    Infeasible_Routes_6  = Feasible_Routes_5.tail(int(len(Feasible_Routes_5)*(100 - percent_adoption)/100 ))
+    Infeasible_Routes    = pd.concat([Infeasible_Routes_0,Infeasible_Routes_1,Infeasible_Routes_2,Infeasible_Routes_3,Infeasible_Routes_4,Infeasible_Routes_5,Infeasible_Routes_6])    
     
     #================================================================================================================================================  
     # Plot Routes 
@@ -576,7 +591,7 @@ def generate_electric_flight_operations_plots(Routes_and_Temp,Commercial_Batteri
     sector_colors       = px.colors.qualitative.Pastel 
     fig_5.add_trace(go.Histogram(histfunc="sum",
                                x= Feasible_Routes['Distance (miles)'],
-                               y = Feasible_Routes['Passengers'],
+                               y = Feasible_Routes['E_Passengers'],
                                name='All Electric', 
                                xbins=dict(start=0, end=4000, size=500),
                                marker_color=sector_colors[0],))
@@ -602,12 +617,12 @@ def generate_electric_flight_operations_plots(Routes_and_Temp,Commercial_Batteri
     #================================================================================================================================================    
     fig_6 = go.Figure()
     sector_colors      = px.colors.qualitative.Pastel 
-    Airport_Routes     = Feasible_Routes[['Passengers','Origin Airport','Destination City']]
+    Airport_Routes     = Feasible_Routes[['E_Passengers','Origin Airport','Destination City']]
     Cumulative_Flights = Airport_Routes.groupby(['Origin Airport']).sum()
-    Busiest_Airports   = Cumulative_Flights.sort_values(by=['Passengers'], ascending = False).head(10) 
+    Busiest_Airports   = Cumulative_Flights.sort_values(by=['E_Passengers'], ascending = False).head(10) 
     Alphabetical_List  = Busiest_Airports.sort_values(by=['Origin Airport'])  
-    fig_6.add_trace(go.Bar( x=list(Alphabetical_List['Passengers'].index),
-                       y=np.array(Alphabetical_List['Passengers']),
+    fig_6.add_trace(go.Bar( x=list(Alphabetical_List['E_Passengers'].index),
+                       y=np.array(Alphabetical_List['E_Passengers']),
                        marker_color=sector_colors[0])) 
     fig_6.update_layout(xaxis_title_text='Airport', 
                       yaxis_title_text='Passengers', 
@@ -623,7 +638,7 @@ def generate_electric_flight_operations_plots(Routes_and_Temp,Commercial_Batteri
     fig_7                       = go.Figure()
     colors                      = px.colors.qualitative.Pastel 
     sector_colors               = [colors[0],colors[2]]
-    Feasible_Passenger_Miles    = np.sum(np.array(Feasible_Routes['Passengers'])* np.array(Feasible_Routes['Distance (miles)']))
+    Feasible_Passenger_Miles    = np.sum(np.array(Feasible_Routes['E_Passengers'])* np.array(Feasible_Routes['Distance (miles)']))
     Infeasible_Passenger_Miles  = np.sum(np.array(Infeasible_Routes[['Passengers']])* np.array(Infeasible_Routes[['Distance (miles)']]))
     Total_Passenger_Miles       = np.sum(np.array(Routes_and_Temp[['Passengers']])* np.array(Routes_and_Temp[['Distance (miles)']]))  
     labels                      = ["All Electric", "Fossil Fuel"] 
@@ -645,52 +660,59 @@ def generate_electric_flight_operations_plots(Routes_and_Temp,Commercial_Batteri
     CASM_electric = np.zeros(12) 
 
     for m_i in range(12): 
-        Routes_and_Temp_Mo           = Routes_and_Temp.loc[Routes_and_Temp['Month'] == m_i+1 ]   
-         
-        # Filer List By Distance and Temperature    
-        Infeasible_Routes_1  = Routes_and_Temp_Mo[Routes_and_Temp_Mo['Distance (miles)'] > Range_mi ]  
-        Feasible_Routes_1    = Routes_and_Temp_Mo[Routes_and_Temp_Mo['Distance (miles)'] < Range_mi ] 
-        Feasible_Routes_2    = Feasible_Routes_1[Feasible_Routes_1['Origin ' + months[m_i]] > Min_Temp] 
-        Infeasible_Routes_2  = Feasible_Routes_1[Feasible_Routes_1['Origin ' + months[m_i]] < Min_Temp] 
-        Feasible_Routes_3    = Feasible_Routes_2[Feasible_Routes_2['Origin ' + months[m_i]] < Max_Temp] 
-        Infeasible_Routes_3  = Feasible_Routes_2[Feasible_Routes_2['Origin ' + months[m_i]] > Max_Temp]  
-        Feasible_Routes_4    = Feasible_Routes_3[Feasible_Routes_3['Destination ' + months[m_i]] > Min_Temp] 
-        Infeasible_Routes_4  = Feasible_Routes_3[Feasible_Routes_3['Destination ' + months[m_i]] < Min_Temp] 
-        Feasible_Routes_5    = Feasible_Routes_4[Feasible_Routes_4['Destination ' + months[m_i]] < Max_Temp] 
-        Infeasible_Routes_5  = Feasible_Routes_4[Feasible_Routes_4['Destination ' + months[m_i]] > Max_Temp] 
-        Infeasible_Routes_6  = Feasible_Routes_5.tail(int(len(Feasible_Routes_5)*(100 - percent_adoption)/100 ))
-        Feasible_Routes      = Feasible_Routes_5.head(int(len(Feasible_Routes_5)*percent_adoption/100 ))
+
+        Routes_and_Temp_Mo                   = Routes_and_Temp.loc[Routes_and_Temp['Month'] == m_i+1 ]   
+        fuel_volume_L                        = Routes_and_Temp_Mo['Fuel Consumed Per Flight (Liters)']  
+        fuel_volume_m_3                      = fuel_volume_L*0.001  
+        W_f                                  = Jet_A_density*fuel_volume_m_3
+        W_residual                           = W_bat-W_f  
+        weight_per_pass                      = 158.757 # in kg  (250 lb for person, 100 lb for luggage) kg 
+        passenger_reductions                 = np.ceil(np.array(W_residual)/weight_per_pass)   
+        passenger_reductions[passenger_reductions < 0] = 0
+        original_Pax_volume                  = np.array(Routes_and_Temp_Mo['Passengers'])
+        remaining_Pax                        = original_Pax_volume - passenger_reductions*np.array(Routes_and_Temp_Mo['No of Flights Per Month'])
+        remaining_Pax[remaining_Pax<0]       = 0
+        Routes_and_Temp_Mo['E_Passengers']   = remaining_Pax  
         
-        # concatenate feasible and infeasible routes 
-        Infeasible_Routes           = pd.concat([Infeasible_Routes_1,Infeasible_Routes_2,Infeasible_Routes_3,Infeasible_Routes_4,Infeasible_Routes_5,Infeasible_Routes_6])    
+        Feasible_Routes_0    = Routes_and_Temp_Mo[Routes_and_Temp_Mo['E_Passengers'] > 0 ] 
+        Infeasible_Routes_0  = Routes_and_Temp_Mo[Routes_and_Temp_Mo['E_Passengers'] < 0 ]   
+        Feasible_Routes_1    = Feasible_Routes_0[Feasible_Routes_0['Distance (miles)'] < Range_mi ] 
+        Infeasible_Routes_1  = Feasible_Routes_0[Feasible_Routes_0['Distance (miles)'] > Range_mi ]  
+        Feasible_Routes_2    = Feasible_Routes_1[Feasible_Routes_1['Origin ' + month] > Min_Temp] 
+        Infeasible_Routes_2  = Feasible_Routes_1[Feasible_Routes_1['Origin ' + month] < Min_Temp] 
+        Feasible_Routes_3    = Feasible_Routes_2[Feasible_Routes_2['Origin ' + month] < Max_Temp] 
+        Infeasible_Routes_3  = Feasible_Routes_2[Feasible_Routes_2['Origin ' + month] > Max_Temp]  
+        Feasible_Routes_4    = Feasible_Routes_3[Feasible_Routes_3['Destination ' + month] > Min_Temp] 
+        Infeasible_Routes_4  = Feasible_Routes_3[Feasible_Routes_3['Destination ' + month] < Min_Temp] 
+        Feasible_Routes_5    = Feasible_Routes_4[Feasible_Routes_4['Destination ' + month] < Max_Temp] 
+        Infeasible_Routes_5  = Feasible_Routes_4[Feasible_Routes_4['Destination ' + month] > Max_Temp] 
+        Feasible_Routes      = Feasible_Routes_5.head(int(len(Feasible_Routes_5)*percent_adoption/100 )) 
+        Infeasible_Routes_6  = Feasible_Routes_5.tail(int(len(Feasible_Routes_5)*(100 - percent_adoption)/100 ))
+        Infeasible_Routes    = pd.concat([Infeasible_Routes_0,Infeasible_Routes_1,Infeasible_Routes_2,Infeasible_Routes_3,Infeasible_Routes_4,Infeasible_Routes_5,Infeasible_Routes_6])     
+
+   
         Infeasible_Passenger_Miles  = np.sum(np.array(Infeasible_Routes[['Distance (miles)']]))
-        Total_Passenger_Miles       = np.sum( np.array(Routes_and_Temp_Mo[['Distance (miles)']]))  
-        no_battery[m_i]             = Total_Passenger_Miles * CO2e_per_mile
-        battery[m_i]                = Infeasible_Passenger_Miles * CO2e_per_mile 
+        Total_Passenger_Miles       = np.sum( np.array(Feasible_Routes[['Distance (miles)']]))  
+        battery[m_i]                = Total_Passenger_Miles * CO2e_per_mile
+        no_battery[m_i]             = Infeasible_Passenger_Miles * CO2e_per_mile 
     
         # Infeasible Routes (Fuel) Energy Carrier Cost Per Seat Mile 
         ASM_jet_A             = np.sum(Infeasible_Routes['Distance (miles)'] * Infeasible_Routes['Passengers'])
         Total_Fuel_Cost_jet_A = np.sum(Infeasible_Routes['Fuel Cost'])
-        # Compute electric CASM
-        CASM_jet_A[m_i]       = 100*Total_Fuel_Cost_jet_A/ASM_jet_A   
         
-        # Feasible Routes (Electric) Energy Carrier Cost Per Seat Mile
-        # reduce passenger capacity to ensure MTOW is fixed 
-        Jet_A_density         = 775.0 #  kg/m3
-        fuel_volume_L         = Feasible_Routes['Fuel Consumed Per Flight (Liters)']  
-        fuel_volume_m_3       = fuel_volume_L*0.001  
-        W_f                   = Jet_A_density*fuel_volume_m_3
-        W_residual            = W_bat-W_f 
-        passenger_reductions  = np.zeros(len(fuel_volume_L))
-        weight_per_pass       = 158.757 # in kg  (250 lb for person, 100 lb for luggage) kg 
-        passenger_reductions[W_residual > 0] =  np.ceil(W_residual/weight_per_pass)  
-         
         # Compute electric CASM
-        electric_flight_passengers = Feasible_Routes['Passengers'] - passenger_reductions
-        joule_to_kWh               = 2.77778e-7
-        Total_Fuel_Cost_electric   = (E_bat*joule_to_kWh*cost_of_electricity)  
-        ASM_electric               = sum(Feasible_Routes['Distance (miles)'] * electric_flight_passengers)
-        CASM_electric[m_i]         = 100*Total_Fuel_Cost_electric/ASM_electric    
+        CASM_jet_A[m_i]       = 100*Total_Fuel_Cost_jet_A/ASM_jet_A    
+        
+        # Compute electric CASM
+        if len(Feasible_Routes['E_Passengers']) == 0:
+            electric_flight_passengers = 0
+            CASM_electric[m_i]         = 0
+        else: 
+            electric_flight_passengers = Feasible_Routes['E_Passengers']  
+            joule_to_kWh               = 2.77778e-7
+            Total_Fuel_Cost_electric   = (E_bat*joule_to_kWh*cost_of_electricity)  
+            ASM_electric               = sum(Feasible_Routes['Distance (miles)'] * electric_flight_passengers)
+            CASM_electric[m_i]         = 100*Total_Fuel_Cost_electric/ASM_electric    
                
     
     #================================================================================================================================================      
@@ -753,7 +775,7 @@ def generate_electric_flight_operations_plots(Routes_and_Temp,Commercial_Batteri
 # ---------------------------------------------------------------------------------------------------------------------------------------------------
 def generate_motor_scatter_plot(Electric_Motor_Development,selected_x_axis,selected_y_axis,switch_off): 
     #template             = pio.templates["minty"] if switch_off else pio.templates["minty_dark"]  
-    unique_brands        = list(Electric_Motor_Development['Production Type'][1:].unique())
+    unique_manufacturers = list(Electric_Motor_Development['Manufacturer'][1:].unique())
     unique_motor_types   = list(Electric_Motor_Development['Motor Type'][1:].unique())
     marker_size          = 15
     opacity_ratio        = 0.8 if switch_off else 1.0
@@ -761,19 +783,20 @@ def generate_motor_scatter_plot(Electric_Motor_Development,selected_x_axis,selec
 
     # Brand Colors: greenyellow, aquamarine, paleturquoise, lightcoral, yellow, lavender ,thistle ,orangered   
     Brand_Colors      = px.colors.qualitative.Pastel 
-    Chemistry_Markers = ['square','x','circle','cross','diamond','triangle-up','triangle-down','star','hourglass'] 
+    Motor_Type_Markers = ['square','x','circle','cross','diamond','triangle-up','triangle-down','star','hourglass'] 
     fig = go.Figure()  
-    for i in range(len(unique_brands)):  
+    for i in range(len(unique_manufacturers)):  
         for j in range(len(unique_motor_types)):
-            data_1 = Electric_Motor_Development.loc[Electric_Motor_Development['Production Type'] == unique_brands[i]] 
-            data_2 = data_1.loc[Electric_Motor_Development['Motor Type'] == unique_motor_types[j]]  
-            models = data_2["Manufacturer"]                 
+            data_1    = Electric_Motor_Development.loc[Electric_Motor_Development['Manufacturer'] == unique_manufacturers[i]] 
+            data_2    = data_1.loc[Electric_Motor_Development['Motor Type'] == unique_motor_types[j]]  
+            developer = data_2["Manufacturer"]                 
+            coolant   = data_2["Coolant"]                 
             fig.add_trace(go.Scatter( x        = np.array(data_2[selected_x_axis]), 
                                  y             = np.array(data_2[selected_y_axis]),  
                                  mode          = 'markers', 
                                  name          ="",                                    
-                                 marker        = dict(size=marker_size,color=Brand_Colors[i],opacity=opacity_ratio,symbol = Chemistry_Markers[j]),
-                                 hovertemplate = 'Model: ' + models + '<br>' + 'Motor Type: ' + unique_motor_types[j]  + '<br>'  + selected_x_axis + ': %{x} <br>' + selected_y_axis + ': %{y}',
+                                 marker        = dict(size=marker_size,color=Brand_Colors[i],opacity=opacity_ratio,symbol = Motor_Type_Markers[j]),
+                                 hovertemplate = 'Manufacturer: ' + developer  + '<br>' + 'Motor Type: ' + unique_motor_types[j] + '<br>' + 'Coolant: ' + coolant   + '<br>'  + selected_x_axis + ': %{x} <br>' + selected_y_axis + ': %{y}',
                                  ))  
  
     fig.update_layout(xaxis_title = selected_x_axis,
