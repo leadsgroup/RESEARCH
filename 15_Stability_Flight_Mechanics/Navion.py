@@ -90,8 +90,11 @@ def base_analysis(vehicle,stability_method, run_stability,configs):
         #  Stability Analysis
         if stability_method == "avl":
             stability                                   = RCAIDE.Framework.Analyses.Stability.AVL()     
-            stability.settings.filenames.avl_bin_name   = 'C:\\Users\\Matteo\\Documents\\UIUC\\avl.exe' #/Users/matthewclarke/Documents/AVL/avl3.35'     
-            stability.settings.print_output             = False 
+            #stability.settings.filenames.avl_bin_name   = 'C:\\Users\\Matteo\\Documents\\UIUC\\avl.exe' #/Users/matthewclarke/Documents/AVL/avl3.35'   
+            stability.settings.filenames.avl_bin_name   =  '/Users/matthewclarke/Documents/LEADS/CODES/AVL/avl3.35'     
+            stability.settings.print_output             = False  
+            stability.settings.trim_aircraft            = False 
+
         elif stability_method == "vlm":
             stability                                   = RCAIDE.Framework.Analyses.Stability.VLM_Perturbation_Method() 
         #elif stability_method == "analytical":

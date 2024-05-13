@@ -10,8 +10,9 @@ import json
 import plotly.io as pio
 import plotly.figure_factory as ff 
 import os  
+import json
  
-
+ 
 def main():
     
     # ---------------------------------------------------------------------------------------------------------------------------------------------------
@@ -58,35 +59,35 @@ def main():
     #fig_3 = generate_battery_dev_map(Battery_Development,selected_sector,selected_type,switch_off)  
     #fig_3.show()
 
-    #switch_off            = False     
-    #month_no              = 1 
-    #fig_4 = generate_US_bat_temperature_map(US_Temperature_F,month_no,switch_off) 
-    #fig_4.show()
+    switch_off            = False     
+    month_no              = 1 
+    fig_4 = generate_US_bat_temperature_map(US_Temperature_F,month_no,switch_off) 
+    fig_4.show()
     
   
-    aircraft              = 'Boeing 737 MAX-8'
-    battery_choice        = Commercial_Batteries['Battery Name'][13] 
-    weight_fraction       = 35
-    system_voltage        = 400 
-    propulsive_efficiency = 90
-    percent_adoption      = 100 
-    month_no              = 1 
-    switch_off            = False 
-    cost_of_electricity   = 140 # per Kw 
-    fig_5, fig_6, fig_7, fig_8,fig_9,fig_10 = generate_electric_flight_operations_plots(Routes_and_Temp,Commercial_Batteries,aircraft,battery_choice,weight_fraction,system_voltage,propulsive_efficiency,percent_adoption,month_no,cost_of_electricity,switch_off)
+    #aircraft              = 'Boeing 737 MAX-8'
+    #battery_choice        = Commercial_Batteries['Battery Name'][13] 
+    #weight_fraction       = 35
+    #system_voltage        = 400 
+    #propulsive_efficiency = 90
+    #percent_adoption      = 100 
+    #month_no              = 1 
+    #switch_off            = False 
+    #cost_of_electricity   = 0.3 # per Kw 
+    #fig_5, fig_6, fig_7, fig_8,fig_9,fig_10 = generate_electric_flight_operations_plots(Routes_and_Temp,Commercial_Batteries,aircraft,battery_choice,weight_fraction,system_voltage,propulsive_efficiency,percent_adoption,month_no,cost_of_electricity,switch_off)
                 
-    fig_5.show()
-    fig_6.show()
-    fig_7.show()
-    fig_8.show()
-    fig_9.show()
-    fig_10.show()
+    #fig_5.show()
+    #fig_6.show()
+    #fig_7.show()
+    #fig_8.show()
+    #fig_9.show()
+    #fig_10.show()
  
-    selected_x_axis    = list(Electric_Motor_Development.columns.values)[4:14][1]
-    selected_y_axis    = list(Electric_Motor_Development.columns.values)[4:14][2]
-    switch_off         = False      
-    fig_11             = generate_motor_scatter_plot(Electric_Motor_Development,selected_x_axis,selected_y_axis,switch_off)   
-    fig_11.show()      
+    #selected_x_axis    = list(Electric_Motor_Development.columns.values)[4:14][1]
+    #selected_y_axis    = list(Electric_Motor_Development.columns.values)[4:14][2]
+    #switch_off         = False      
+    #fig_11             = generate_motor_scatter_plot(Electric_Motor_Development,selected_x_axis,selected_y_axis,switch_off)   
+    #fig_11.show()      
     return 
     
     
@@ -348,10 +349,11 @@ def generate_battery_dev_map(Battery_Development,selected_sector,selected_type,s
  
 def generate_US_bat_temperature_map(US_Temperature_F,month_no,switch_off):  
     #template             = pio.templates["minty"] if switch_off else pio.templates["minty_dark"]    
-    font_size            = 16  
+    font_size            = 16
     
-    with urlopen('https://raw.githubusercontent.com/plotly/datasets/master/geojson-counties-fips.json') as response:
-        counties = json.load(response) 
+    # Opening JSON file
+    f = open('counties_fips.json') 
+    counties = json.load(f) 
     month = list(US_Temperature_F.columns.values)[6:18][month_no]  
     US_Temperature_F['FIPS'] = US_Temperature_F['FIPS'].apply('{:0>5}'.format)
     us_temperature_map= px.choropleth(US_Temperature_F, geojson=counties, locations='FIPS', color = month,
@@ -710,7 +712,7 @@ def generate_electric_flight_operations_plots(Routes_and_Temp,Commercial_Batteri
         else: 
             electric_flight_passengers = Feasible_Routes['E_Passengers']  
             joule_to_kWh               = 2.77778e-7
-            Total_Fuel_Cost_electric   = (E_bat*joule_to_kWh*cost_of_electricity)  
+            Total_Fuel_Cost_electric   = sum( (E_bat*joule_to_kWh*cost_of_electricity) * np.array(Feasible_Routes['No of Flights Per Month']) )
             ASM_electric               = sum(Feasible_Routes['Distance (miles)'] * electric_flight_passengers)
             CASM_electric[m_i]         = 100*Total_Fuel_Cost_electric/ASM_electric    
                
