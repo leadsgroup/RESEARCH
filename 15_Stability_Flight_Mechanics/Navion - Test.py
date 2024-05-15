@@ -93,6 +93,10 @@ def base_analysis(vehicle,stability_method, run_stability,configs):
             stability.settings.print_output             = False 
         elif stability_method == "vlm":
             stability                                   = RCAIDE.Framework.Analyses.Stability.VLM_Perturbation_Method() 
+            stability.settings.discretize_control_surfaces  = True
+            stability.settings.model_fuselage               = True                
+            stability.settings.model_nacelle                = True
+            
         #elif stability_method == "analytical":
             #stability                                   = RCAIDE.Framework.Analyses.Stability.Analytical_Approximation() 
     
@@ -130,7 +134,7 @@ def vehicle_setup():
     #   Initialize the Vehicle
     # ------------------------------------------------------------------ 
     vehicle     = RCAIDE.Vehicle()
-    vehicle.tag = 'Navion' 
+    vehicle.tag = 'Test_Wing' 
 
     # ------------------------------------------------------------------
     #   Vehicle-level Properties
@@ -143,7 +147,7 @@ def vehicle_setup():
     vehicle.mass_properties.center_of_gravity         = [[2.239696797,0,-0.131189711 ]]
     vehicle.envelope.ultimate_load                    = 5.7
     vehicle.envelope.limit_load                       = 3.8
-    vehicle.reference_area                            = 17.112 
+    vehicle.reference_area                            = 1
     vehicle.passengers                                = 2 
     # ------------------------------------------------------------------        
     #   Main Wing
@@ -153,18 +157,18 @@ def vehicle_setup():
     wing.tag                              = 'main_wing' 
     wing.sweeps.quarter_chord             = 0 * Units.degrees 
     wing.thickness_to_chord               = 0.12
-    wing.areas.reference                  = 17.112
-    wing.chords.mean_aerodynamic          = 1.74 
+    wing.areas.reference                  = 1
+    wing.chords.mean_aerodynamic          = 1
     wing.taper                            = 1 
-    wing.aspect_ratio                     = 6.04  
-    wing.spans.projected                  = 10.166
-    wing.chords.root                      = 2.1944 
-    wing.chords.tip                       = 2.1944
+    wing.aspect_ratio                     = 1
+    wing.spans.projected                  = 1
+    wing.chords.root                      = 1
+    wing.chords.tip                       = 1
     wing.twists.root                      = 0 * Units.degrees  
     wing.twists.tip                       = 0 * Units.degrees   
     wing.dihedral                         = 0 * Units.degrees   
-    wing.origin                           = [[1.652555594, 0.,-0.6006666]]
-    wing.aerodynamic_center               = [1.852555594, 0., 6006666 ] # INCORRECT 
+    wing.origin                           = [[0, 0, 0]]
+    wing.aerodynamic_center               = [0, 0, 0]
     wing.vertical                         = False
     wing.symmetric                        = True
     wing.high_lift                        = True 
