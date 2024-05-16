@@ -81,7 +81,7 @@ def vehicle_setup():
     vehicle.mass_properties.moments_of_inertia.tensor = [[0,0,0]] # Unknown 
     vehicle.mass_properties.max_fuel                  = 5000
     vehicle.design_mach_number                        = 0.41 
-    vehicle.design_range                              = 1528000  
+    vehicle.design_range                              = 5471000 *Units.meter  
     vehicle.design_cruise_alt                         = 25000 *Units.feet
 
     # envelope properties

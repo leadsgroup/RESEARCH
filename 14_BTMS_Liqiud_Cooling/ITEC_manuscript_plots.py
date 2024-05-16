@@ -13,6 +13,7 @@ from RCAIDE.Visualization.Common import set_axes, plot_style
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 import numpy as np 
+import pandas as pd 
 import pickle 
 
 def main():     
@@ -24,14 +25,16 @@ def main():
     file_name_2 = 'X_57_w_no_HEX'     
     res_No_Hex = load_results(file_name_2)
 
-    plot_flight_profile(res_No_Hex)
-    plot_reservoir_conditions(res_Hex)
-    plot_heat_acquisition_system_conditions(res_Hex)
-    plot_heat_exchanger_system_conditions(res_Hex)
-    plot_battery_cell_conditions_1(res_Hex,res_No_Hex)
-    plot_battery_cell_conditions_2(res_Hex,res_No_Hex)
-    plot_cooling_drag(res_Hex,res_No_Hex)
-    plot_percentage_operation(res_Hex)
+    #plot_flight_profile(res_No_Hex)
+    #plot_reservoir_conditions(res_Hex)
+    #plot_heat_acquisition_system_conditions(res_Hex)
+    #plot_heat_exchanger_system_conditions(res_Hex)
+    #plot_battery_cell_conditions_1(res_Hex,res_No_Hex)
+    #plot_battery_cell_conditions_2(res_Hex,res_No_Hex)
+    #plot_cooling_drag(res_Hex,res_No_Hex)
+    #plot_percentage_operation(res_Hex)
+    save_current_csv(res_Hex)
+
     return
 # ----------------------------------------------------------------------------------------------------------------------
 #  PLOTS COMMON AXIS 
@@ -97,6 +100,37 @@ def plot_style():
 
     return plot_parameters
 
+def save_current_csv(res_No_Hex,
+                     save_csv = True,
+                        show_legend = True,
+                        save_filename = "Ambient_temperature",
+                        file_type = ".csv"):
+    current = []
+    t    = []
+    for network in res_No_Hex.segments[0].analyses.energy.networks: 
+        busses  = network.busses
+        for bus in busses: 
+            for battery in bus.batteries:         
+    
+                for i in range(len(res_No_Hex.segments)): 
+        
+                    time     = res_No_Hex.segments[i].conditions.frames.inertial.time[:,0] / Units.s
+                    battery_conditions_No_Hex  = res_No_Hex.segments[i].conditions.energy[bus.tag][battery.tag]         
+                    pack_current        = battery_conditions_No_Hex.cell.current[:,0]
+                    reservoir_temperature = battery_conditions_No_Hex.thermal_management_system.RES.coolant_temperature[:,0]
+                    t_ambient           = res_No_Hex.segments[i].conditions.freestream.temperature[:,0] 
+                    
+                    current.append(t_ambient)
+                    t.append(time)
+          
+        current = np.hstack(current)
+        t       = np.hstack(t)
+        df = pd.DataFrame({'Time': t, 'Current': current})
+        
+        if save_csv:
+            df.to_csv(f'IEEE_ITEC_final_plots/{save_filename}{file_type}', index=False)
+        return 
+    
 
 # ----------------------------------------------------------------------------------------------------------------------
 #   Plot Flight Profile and Airspeed
@@ -167,7 +201,7 @@ def plot_reservoir_conditions(res_Hex,
                               save_filename = "Reservoir_temperature_conditions",
                               file_type = ".png"):
 
-    # get plotting style 
+    # get plotting style df = pd.DataFrame({'Column1': variable1, 'Column2': variable2})
     ps = plot_style()    
 
     # get line colors for plots 
