@@ -536,9 +536,12 @@ def vehicle_setup(BTMS_flag):
     propeller.tag                                    = 'propeller_1'  
     propeller.tip_radius                             = 2.59
     propeller.number_of_blades                       = 3
-    propeller.hub_radius                             = 10.    * Units.inches 
-    propeller.cruise.design_freestream_velocity      = 130 * Units.kts 
-    propeller.cruise.design_angular_velocity         = 2700. * Units.rpm 
+    propeller.hub_radius                             = 10.    * Units.inches
+
+    propeller.cruise.design_freestream_velocity      = 130 * Units.kts      
+    speed_of_sound                                   = 343 
+    propeller.cruise.design_tip_mach                 = 0.65
+    propeller.cruise.design_angular_velocity         = propeller.cruise.design_tip_mach *speed_of_sound/propeller.tip_radius
     propeller.cruise.design_Cl                       = 0.7
     propeller.cruise.design_altitude                 = 8000. * Units.feet 
     propeller.cruise.design_thrust                   = 15000  # 100000
@@ -836,7 +839,7 @@ def mission_setup(analyses):
     segment.analyses.extend( analyses.hex_descent_operation )       
     segment.altitude_start                                = 5000   * Units.feet 
     segment.altitude_end                                  = 1000 * Units.feet  
-    segment.air_speed_end                                 = 110 * Units['mph']   
+    segment.air_speed_end                                 = 100 * Units['mph']   
     segment.climb_rate                                    = -200 * Units['ft/min']  
     
     # define flight dynamics to model 
@@ -852,15 +855,13 @@ def mission_setup(analyses):
                
     # ------------------------------------------------------------------
     #  Downleg_Altitude Segment Flight 1 
-    # ------------------------------------------------------------------ 
-    segment = Segments.Cruise.Constant_Acceleration_Constant_Altitude(base_segment) 
+    # ------------------------------------------------------------------
+
+    segment = Segments.Cruise.Constant_Speed_Constant_Altitude(base_segment)
     segment.tag = 'Downleg'
-    segment.analyses.extend(analyses.hex_descent_operation)   
-    segment.air_speed_end                                 = 45.0 * Units['m/s']            
-    segment.distance                                      = 6000 * Units.feet
-    segment.acceleration                                  = -0.025  * Units['m/s/s']   
-    segment.descent_rate                                  = 300 * Units['ft/min']   
-    
+    segment.analyses.extend(analyses.hex_cruise_operation)  
+    segment.air_speed                                     = 100 * Units['mph']   
+    segment.distance                                      = 6000 * Units.feet 
     # define flight dynamics to model 
     segment.flight_dynamics.force_x                       = True  
     segment.flight_dynamics.force_z                       = True     
@@ -943,8 +944,7 @@ def mission_setup(analyses):
     segment.analyses.extend( analyses.max_hex_operation)   
     segment.altitude_start                                = 1000 * Units.feet
     segment.altitude_end                                  = 500.0 * Units.feet
-    segment.air_speed_start                               = 45 
-    segment.air_speed_end                                 = 40    
+    segment.air_speed_end                                 = 90 * Units['mph']  
     segment.climb_rate                                    = -350 * Units['ft/min'] 
     
     # define flight dynamics to model 
@@ -966,8 +966,7 @@ def mission_setup(analyses):
     segment.analyses.extend( analyses.max_hex_operation)      
     segment.altitude_start                                = 500.0 * Units.feet
     segment.altitude_end                                  = 00.0 * Units.feet
-    segment.air_speed_start                               = 40 
-    segment.air_speed_end                                 = 35   
+    segment.air_speed_end                                 = 80 * Units['mph']  
     segment.climb_rate                                    = -300 * Units['ft/min']   
     
     # define flight dynamics to model 
@@ -1001,6 +1000,47 @@ def mission_setup(analyses):
      
 
     return mission
+
+def missions_setup(mission): 
+ 
+    missions         = RCAIDE.Framework.Mission.Missions()
+    
+    # base mission 
+    mission.tag  = 'base_mission'
+    missions.append(mission)
+ 
+    return missions  
+
+
+# ----------------------------------------------------------------------
+#   Plot Mission
+# ----------------------------------------------------------------------
+
+def plot_mission(results):
+    
+    plot_propulsor_throttles(results)
+    
+    plot_flight_conditions(results) 
+    
+    plot_aerodynamic_forces(results)
+
+    plot_aerodynamic_coefficients(results)  
+    
+    plot_aircraft_velocities(results)
+    
+    plot_battery_pack_conditions(results)
+    
+    plot_battery_cell_conditions(results)
+    
+    plot_battery_degradation(results)
+
+    plot_rotor_conditions(results) 
+
+    plot_electric_propulsor_efficiencies(results)
+    
+    plot_battery_temperature(results) 
+
+    return
 
 
 def base_analysis(vehicle):
@@ -1069,46 +1109,6 @@ def analyses_setup(configs):
 
     return analyses
 
-def missions_setup(mission): 
- 
-    missions         = RCAIDE.Framework.Mission.Missions()
-    
-    # base mission 
-    mission.tag  = 'base_mission'
-    missions.append(mission)
- 
-    return missions  
-
-
-# ----------------------------------------------------------------------
-#   Plot Mission
-# ----------------------------------------------------------------------
-
-def plot_mission(results):
-    
-    plot_propulsor_throttles(results)
-    
-    plot_flight_conditions(results) 
-    
-    plot_aerodynamic_forces(results)
-
-    plot_aerodynamic_coefficients(results)  
-    
-    plot_aircraft_velocities(results)
-    
-    plot_battery_pack_conditions(results)
-    
-    plot_battery_cell_conditions(results)
-    
-    plot_battery_degradation(results)
-
-    plot_rotor_conditions(results) 
-
-    plot_electric_propulsor_efficiencies(results)
-    
-    plot_battery_temperature(results) 
-
-    return
 
 
 # ----------------------------------------------------------------------        
