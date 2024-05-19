@@ -71,7 +71,7 @@ def full_setup():
     mission  = mission_setup(configs_analyses,vehicle)
     missions_analyses = missions_setup(mission)
 
-    analyses = RCAIDE.Analyses.Analysis.Container()
+    analyses = RCAIDE.Framework.Analyses.Analysis.Container()
     analyses.configs  = configs_analyses
     analyses.missions = missions_analyses
 
@@ -732,11 +732,11 @@ def mission_setup(analyses):
     # ------------------------------------------------------------------
     #   Initialize the Mission
     # ------------------------------------------------------------------
-    mission = RCAIDE.Framework.Analyses.Mission.Sequential_Segments()
+    mission = RCAIDE.Framework.Mission.Sequential_Segments()
     mission.tag = 'mission' 
 
     # unpack Segments module
-    Segments = RCAIDE.Framework.Analyses.Mission.Segments  
+    Segments = RCAIDE.Framework.Mission.Segments  
     base_segment = Segments.Segment() 
     base_segment.temperature_deviation  = 15
     #base_segment.state.numerics.number_of_control_points    = 10
@@ -1024,11 +1024,11 @@ def loiter_mission_setup(analyses):
     # ------------------------------------------------------------------
     #   Initialize the Mission
     # ------------------------------------------------------------------
-    mission = RCAIDE.Analyses.Mission.Sequential_Segments()
+    mission = RCAIDE.Mission.Sequential_Segments()
     mission.tag = 'mission' 
 
     # unpack Segments module
-    Segments = RCAIDE.Analyses.Mission.Segments  
+    Segments = RCAIDE.Mission.Segments  
     base_segment = Segments.Segment()  
 
     # ------------------------------------------------------------------
@@ -1059,7 +1059,7 @@ def loiter_mission_setup(analyses):
 
 def missions_setup(analyses): 
 
-    missions         = RCAIDE.Analyses.Mission.Missions()
+    missions         = RCAIDE.Mission.Missions()
 
     # base mission 
     base_mission = mission_setup(analyses) 
