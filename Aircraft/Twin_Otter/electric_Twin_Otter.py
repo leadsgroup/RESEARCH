@@ -14,7 +14,9 @@ from RCAIDE.Library.Methods.Weights.Correlation_Buildups.Propulsion import nasa_
 from RCAIDE.Library.Methods.Energy.Sources.Battery.Common           import initialize_from_circuit_configuration
 from RCAIDE.Library.Methods.Geometry.Two_Dimensional.Planform       import wing_segmented_planform 
 from RCAIDE.Library.Methods.Weights.Physics_Based_Buildups.Electric import compute_weight , converge_weight 
-from RCAIDE.Library.Plots                                           import *     
+from RCAIDE.Library.Plots                                           import *  
+from RCAIDE.Library.Methods.Energy.Thermal_Management.Common.Heat_Exchanger_Systems.Cross_Flow_Heat_Exchanger        import design_cross_flow_heat_exchanger
+from RCAIDE.Library.Methods.Energy.Thermal_Management.Batteries.Wavy_Channel_Heat_Acquisition  import design_wavy_channel    
 
 # python imports 
 import numpy as np 
@@ -26,10 +28,12 @@ import matplotlib.pyplot        as plt
 #   Main
 # ----------------------------------------------------------------------
 
-def main():   
+def main():
+
+    BTMS_flag = True 
     
     # vehicle data
-    vehicle  = vehicle_setup()
+    vehicle  = vehicle_setup(BTMS_flag)
     #plot_3d_vehicle(vehicle)
     
     # Set up vehicle configs
@@ -52,7 +56,7 @@ def main():
     return 
  
     
-def vehicle_setup(): 
+def vehicle_setup(BTMS_flag): 
     
 
     #------------------------------------------------------------------------------------------------------------------------------------
@@ -470,18 +474,46 @@ def vehicle_setup():
     # Battery
     #------------------------------------------------------------------------------------------------------------------------------------  
     bat                                                    = RCAIDE.Library.Components.Energy.Batteries.Lithium_Ion_NMC()
-    bat.tag                                                = 'li_ion_battery'
-    bat.pack.electrical_configuration.series               = 200   
-    bat.pack.electrical_configuration.parallel             = 130
-    bat.cell.nominal_capacity            = 3.8 #55  
+    bat.pack.electrical_configuration.series               = 200 # 130
+    bat.pack.electrical_configuration.parallel             = 180 # 200   
+    bat.cell.nominal_capacity                              = 3.8 #55  
     initialize_from_circuit_configuration(bat,module_weight_factor = 1.25)  
     bat.module.number_of_modules                           = 20 
     bat.module.geometrtic_configuration.total              = bat.pack.electrical_configuration.total
     bat.module.voltage                                     = bat.pack.maximum_voltage/bat.module.number_of_modules # assumes modules are connected in parallel, must be less than max_module_voltage (~50) /safety_factor (~ 1.5)  
     bat.module.geometrtic_configuration.normal_count       = 25
-    bat.module.geometrtic_configuration.parallel_count     = 80
-    bat.thermal_management_system.heat_acquisition_system  = RCAIDE.Library.Components.Thermal_Management.Batteries.Heat_Acquisition_Systems.Direct_Air()      
-    bus.voltage                                            = bat.pack.maximum_voltage  
+    bat.module.geometrtic_configuration.parallel_count     = 80 # 52 
+    bus.voltage                                            = bat.pack.maximum_voltage 
+  
+    if BTMS_flag:
+        # Reservoir for Battery TMS
+        RES                                                    = RCAIDE.Library.Components.Thermal_Management.Common.Reservoirs.Reservoir()
+        bat.thermal_management_system.reservoir                = RES
+        # Battery Heat Removal System 
+        
+        HAS                                                    = RCAIDE.Library.Components.Thermal_Management.Batteries.Wavy_Channel() 
+        HAS.design_altitude                                    = 2500. * Units.feet  
+        atmosphere                                             = RCAIDE.Framework.Analyses.Atmospheric.US_Standard_1976() 
+        atmo_data                                              = atmosphere.compute_values(altitude = HAS.design_altitude)     
+        HAS.coolant_inlet_temperature                          = atmo_data.temperature[0,0]  
+        HAS.design_battery_operating_temperature               = 313
+        HAS.design_heat_removed                                = 50000  
+        HAS                                                    = design_wavy_channel(HAS,bat) 
+        bat.thermal_management_system.heat_removal_system      = HAS
+    
+        # Battery Heat Exchanger               
+        HEX                                                    = RCAIDE.Library.Components.Thermal_Management.Common.Heat_Exchanger_Systems.Cross_Flow_Heat_Exchanger() 
+        HEX.design_altitude                                    = 2500. * Units.feet 
+        HEX.inlet_temperature_of_cold_fluid                    = atmo_data.temperature[0,0]   
+        HEX                                                    = design_cross_flow_heat_exchanger(HEX,HAS,bat)
+        bat.thermal_management_system.heat_exchanger_system    = HEX  
+    
+        # Battery Heat Addition System 
+        #HAA                                                    = RCAIDE.Energy.Thermal_Management.Batteries.Heat_Addition_Systems.Coil_Heat_Addition()
+        #HAA.design_heat_to_add                                 = 15000 #W
+        #HAA                                                    = design_heating_coil(HAA,RES,bat)
+        #bat.thermal_management_system.heat_addition_system     = HAA 
+    
     bus.batteries.append(bat)            
     
 
@@ -531,7 +563,7 @@ def vehicle_setup():
     motor.efficiency                                 = 0.98
     motor.origin                                     = [[4.0,2.8129,1.22 ]]   
     motor.nominal_voltage                            = bat.pack.maximum_voltage * 0.8
-    motor.no_load_current                            = 1
+    motor.no_load_current                            = 1 # 2
     motor.rotor_radius                               = propeller.tip_radius
     motor.design_torque                              = propeller.cruise.design_torque 
     motor.angular_velocity                           = propeller.cruise.design_angular_velocity # Horse power of gas engine variant  750 * Units['hp']
@@ -599,7 +631,6 @@ def vehicle_setup():
 # ---------------------------------------------------------------------
 #   Define the Configurations
 # ---------------------------------------------------------------------
-
 def configs_setup(vehicle):
 
     # ------------------------------------------------------------------
@@ -610,9 +641,37 @@ def configs_setup(vehicle):
     base_config = RCAIDE.Library.Components.Configs.Config(vehicle)
     base_config.tag = 'base'  
     configs.append(base_config) 
+    
 
-    # done!
+    config = RCAIDE.Library.Components.Configs.Config(vehicle)
+    config.tag = 'max_hex_operation'  
+    config.networks.all_electric.busses.bus.batteries.lithium_ion_nmc.thermal_management_system.heat_exchanger_system.percent_operation = 1
+    configs.append(config) 
+     
+    config = RCAIDE.Library.Components.Configs.Config(vehicle)
+    config.tag = 'hex_low_alt_climb_operation'  
+    config.networks.all_electric.busses.bus.batteries.lithium_ion_nmc.thermal_management_system.heat_exchanger_system.percent_operation = 0.07
+    configs.append(config)     
+
+    config = RCAIDE.Library.Components.Configs.Config(vehicle)
+    config.tag = 'hex_high_alt_climb_operation'  
+    config.networks.all_electric.busses.bus.batteries.lithium_ion_nmc.thermal_management_system.heat_exchanger_system.percent_operation = 0.3
+    configs.append(config)        
+
+    config = RCAIDE.Library.Components.Configs.Config(vehicle)
+    config.tag = 'hex_cruise_operation'  
+    config.networks.all_electric.busses.bus.batteries.lithium_ion_nmc.thermal_management_system.heat_exchanger_system.percent_operation = 0.25
+    configs.append(config)         
+    
+
+    config = RCAIDE.Library.Components.Configs.Config(vehicle)
+    config.tag = 'hex_descent_operation'  
+    config.networks.all_electric.busses.bus.batteries.lithium_ion_nmc.thermal_management_system.heat_exchanger_system.percent_operation = 0.5
+    configs.append(config)                   
+ 
+ 
     return configs
+
 
 # ----------------------------------------------------------------------
 #   Define the Mission
@@ -643,7 +702,7 @@ def mission_setup(analyses):
     ## ------------------------------------------------------------------      
     #segment = Segments.Ground.Takeoff(base_segment)
     #segment.tag = "Takeoff"  
-    #segment.analyses.extend( analyses.base )
+    #segment.analyses.extend( analyses.max_hex_operation )
     #segment.velocity_start                                   = Vstall*0.1  
     #segment.velocity_end                                     = Vstall  
     #segment.friction_coefficient                             = 0.04 
@@ -659,7 +718,7 @@ def mission_setup(analyses):
     # ------------------------------------------------------------------ 
     segment = Segments.Climb.Linear_Speed_Constant_Rate(base_segment) 
     segment.tag = 'Departure_End_of_Runway'       
-    segment.analyses.extend( analyses.base )  
+    segment.analyses.extend( analyses.max_hex_operation )  
     segment.altitude_start                                = 0.0 * Units.feet
     segment.altitude_end                                  = 50.0 * Units.feet
     segment.air_speed_start                               = 45  * Units['m/s'] 
@@ -684,7 +743,7 @@ def mission_setup(analyses):
     # ------------------------------------------------------------------ 
     segment = Segments.Climb.Linear_Speed_Constant_Rate(base_segment) 
     segment.tag = 'Initial_CLimb_Area' 
-    segment.analyses.extend( analyses.base )   
+    segment.analyses.extend( analyses.max_hex_operation )   
     segment.altitude_start                                = 50.0 * Units.feet
     segment.altitude_end                                  = 500.0 * Units.feet 
     segment.air_speed_end                                 = 50 * Units['m/s']   
@@ -707,7 +766,7 @@ def mission_setup(analyses):
     # ------------------------------------------------------------------ 
     segment = Segments.Climb.Linear_Speed_Constant_Rate(base_segment) 
     segment.tag = 'Climb_1'        
-    segment.analyses.extend( analyses.base )      
+    segment.analyses.extend( analyses.hex_low_alt_climb_operation )      
     segment.altitude_start                                = 500.0 * Units.feet
     segment.altitude_end                                  = 2500 * Units.feet  
     segment.air_speed_end                                 = 120 * Units.kts 
@@ -730,7 +789,7 @@ def mission_setup(analyses):
     # ------------------------------------------------------------------ 
     segment = Segments.Climb.Linear_Speed_Constant_Rate(base_segment)
     segment.tag = "Climb_2"
-    segment.analyses.extend( analyses.base )
+    segment.analyses.extend( analyses.hex_high_alt_climb_operation)
     segment.altitude_start                                = 2500.0  * Units.feet
     segment.altitude_end                                  = 5000   * Units.feet  
     segment.air_speed_end                                 = 130 * Units.kts 
@@ -752,7 +811,7 @@ def mission_setup(analyses):
     # ------------------------------------------------------------------ 
     segment = Segments.Cruise.Constant_Speed_Constant_Altitude(base_segment)
     segment.tag = "Cruise" 
-    segment.analyses.extend(analyses.base) 
+    segment.analyses.extend(analyses.hex_cruise_operation) 
     segment.altitude                                      = 5000   * Units.feet 
     segment.air_speed                                     = 130 * Units.kts
     segment.distance                                      = 50.   * Units.nautical_mile  
@@ -774,7 +833,7 @@ def mission_setup(analyses):
     # ------------------------------------------------------------------ 
     segment = Segments.Climb.Linear_Speed_Constant_Rate(base_segment) 
     segment.tag = "Decent"  
-    segment.analyses.extend( analyses.base )       
+    segment.analyses.extend( analyses.hex_descent_operation )       
     segment.altitude_start                                = 5000   * Units.feet 
     segment.altitude_end                                  = 1000 * Units.feet  
     segment.air_speed_end                                 = 110 * Units['mph']   
@@ -796,7 +855,7 @@ def mission_setup(analyses):
     # ------------------------------------------------------------------ 
     segment = Segments.Cruise.Constant_Acceleration_Constant_Altitude(base_segment) 
     segment.tag = 'Downleg'
-    segment.analyses.extend(analyses.base)   
+    segment.analyses.extend(analyses.hex_descent_operation)   
     segment.air_speed_end                                 = 45.0 * Units['m/s']            
     segment.distance                                      = 6000 * Units.feet
     segment.acceleration                                  = -0.025  * Units['m/s/s']   
@@ -818,7 +877,7 @@ def mission_setup(analyses):
     ## ------------------------------------------------------------------ 
     #segment = Segments.Climb.Constant_Speed_Constant_Rate(base_segment) 
     #segment.tag = 'Reserve_Climb'        
-    #segment.analyses.extend( analyses.base )      
+    #segment.analyses.extend( analyses.hex_low_alt_climb_operation)      
     #segment.altitude_end                                  = 5000 * Units.feet
     #segment.air_speed                                     = 120 * Units['mph']
     #segment.climb_rate                                    = 500* Units['ft/min']  
@@ -839,7 +898,7 @@ def mission_setup(analyses):
     ## ------------------------------------------------------------------ 
     #segment = Segments.Cruise.Constant_Speed_Constant_Altitude_Loiter(base_segment) 
     #segment.tag = 'Reserve_Cruise'  
-    #segment.analyses.extend(analyses.base)  
+    #segment.analyses.extend(analyses.hex_cruise_operation)  
     #segment.altitude                                      = 5000 * Units.feet
     #segment.air_speed                                     = 130 * Units.kts
     #segment.time                                          = 60*30 * Units.sec  
@@ -860,7 +919,7 @@ def mission_setup(analyses):
     ## ------------------------------------------------------------------ 
     #segment = Segments.Descent.Constant_Speed_Constant_Rate(base_segment) 
     #segment.tag = 'Reserve_Descent'
-    #segment.analyses.extend( analyses.base )    
+    #segment.analyses.extend( analyses.hex_descent_operation)    
     #segment.altitude_end                                  = 1000 * Units.feet 
     #segment.air_speed                                     = 110 * Units['mph']
     #segment.descent_rate                                  = 300 * Units['ft/min']   
@@ -881,7 +940,7 @@ def mission_setup(analyses):
     # ------------------------------------------------------------------ 
     segment = Segments.Climb.Linear_Speed_Constant_Rate(base_segment)
     segment.tag = 'Baseleg'
-    segment.analyses.extend( analyses.base)   
+    segment.analyses.extend( analyses.max_hex_operation)   
     segment.altitude_start                                = 1000 * Units.feet
     segment.altitude_end                                  = 500.0 * Units.feet
     segment.air_speed_start                               = 45 
@@ -904,7 +963,7 @@ def mission_setup(analyses):
     segment = Segments.Climb.Linear_Speed_Constant_Rate(base_segment)
     segment_name = 'Final_Approach'
     segment.tag = segment_name          
-    segment.analyses.extend( analyses.base)      
+    segment.analyses.extend( analyses.max_hex_operation)      
     segment.altitude_start                                = 500.0 * Units.feet
     segment.altitude_end                                  = 00.0 * Units.feet
     segment.air_speed_start                               = 40 
@@ -927,7 +986,7 @@ def mission_setup(analyses):
     ## ------------------------------------------------------------------  
     #segment = Segments.Ground.Landing(base_segment)
     #segment.tag = "Landing"   
-    #segment.analyses.extend( analyses.base) 
+    #segment.analyses.extend( analyses.max_hex_operation) 
     #segment.velocity_start                                   = Vstall  
     #segment.velocity_end                                     = Vstall*0.1  
     #segment.friction_coefficient                             = 0.04 
