@@ -8,55 +8,39 @@
 #----------------------------------------------------------------------
 #   Imports
 # ---------------------------------------------------------------------   
-from RCAIDE.Visualization.Performance.Aerodynamics.Vehicle import *  
-from RCAIDE.Visualization.Performance.Aerodynamics.Rotor   import *  
-from RCAIDE.Visualization.Performance.Mission              import *  
-from RCAIDE.Visualization.Performance.Energy.Common        import *  
-from RCAIDE.Visualization.Performance.Energy.Battery       import *   
-from RCAIDE.Visualization.Performance.Noise                import *   
-from RCAIDE.Visualization.Geometry                         import * 
+from RCAIDE.Library.Plots                                           import *  
 
 # ----------------------------------------------------------------------
 #   Plot Results
 # ----------------------------------------------------------------------  
 def plot_results(results,run_noise_model,save_figure_flag):  
     
-    # Plots fligh conditions 
+    plot_propulsor_throttles(results)
+    
     plot_flight_conditions(results) 
     
-    # Plot arcraft trajectory
-    plot_flight_trajectory(results)
-    
-    
-    # Plot Aerodynamic Coefficients
+    plot_aerodynamic_forces(results)
+
     plot_aerodynamic_coefficients(results)  
     
-    # Plot Aircraft Flight Speed
-    plot_aircraft_velocities(results) 
-
-    # Plot Aircraft Stability
-    plot_stability_coefficients(results) 
+    plot_aircraft_velocities(results)
     
-    # Plot Aircraft Electronics
     plot_battery_pack_conditions(results)
     
-    # Plot Propeller Conditions 
+    plot_battery_cell_conditions(results)
+    
+    plot_battery_degradation(results)
+
     plot_rotor_conditions(results) 
+
+    plot_electric_propulsor_efficiencies(results)
     
-    # Plot Electric Motor and Propeller Efficiencies 
-    plot_electric_motor_and_rotor_efficiencies(results)
+    plot_battery_temperature(results)
     
-    # Plot rotor Disc and Power Loading
-    plot_disc_power_loading(results)   
-    
-    # Plot Battery Degradation  
-    plot_battery_degradation(results)   
-    
-    if run_noise_model: 
-        # Plot noise level
-        plot_ground_noise_levels(results)
-        
-        # Plot noise contour
-        plot_flight_profile_noise_contours(results) 
+    plot_heat_acquisition_system_conditions(results)
+
+    plot_heat_exchanger_system_conditions(results)
+
+    plot_reservoir_conditions(results)    
                         
     return

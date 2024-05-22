@@ -10,15 +10,9 @@
 #   Imports
 # ---------------------------------------------------------------------
 import RCAIDE
-from RCAIDE.Core import Units, Data   
+from RCAIDE.Framework.Core import Units, Data   
 import pickle
-from RCAIDE.Visualization.Performance.Aerodynamics.Vehicle                 import *  
-from RCAIDE.Visualization.Performance.Mission                              import *  
-from RCAIDE.Visualization.Performance.Aerodynamics.Rotor import *  
-from RCAIDE.Visualization.Performance.Energy.Battery                       import *   
-from RCAIDE.Visualization.Performance.Noise                                import *  
-from RCAIDE.Visualization.Geometry.Three_Dimensional.plot_3d_vehicle       import plot_3d_vehicle 
-from RCAIDE.Visualization.Geometry                                         import *
+from RCAIDE.Library.Plots                                           import *  
 
 import time  
 import numpy as np
@@ -50,7 +44,7 @@ def main():
     # -------------------------------------------------------------------------------------------  
     simulated_days             = 1               # number of days simulated 
     flights_per_day            = 1               # number of flights per day   
-    recharge_battery           = False           # flag to simulate battery recharge  
+    recharge_battery           = True           # flag to simulate battery recharge  
     plot_mission               = True            # plot mission flag  
     resize_aircraft            = True
     control_points             = 16              # number of control points per segment 
@@ -87,52 +81,37 @@ def main():
         # SET UP MISSION PROFILE  
         # -------------------------------------------------------------------------------------------    
         base_mission      = Missions.repeated_flight_operation_setup(configs_analyses,vehicle,simulated_days,flights_per_day,control_points,recharge_battery,meta_data)
-        missions_analyses = Missions.missions_setup(base_mission) 
-    
-        # -------------------------------------------------------------------------------------------    
-        # DEFINE ANALYSES 
-        # -------------------------------------------------------------------------------------------
-        analyses          = RCAIDE.Analyses.Analysis.Container()
-        analyses.configs  = configs_analyses
-        analyses.missions = missions_analyses 
-        
-    
-        # -------------------------------------------------------------------------------------------    
-        # FINALIZE SIMULATION 
-        # -------------------------------------------------------------------------------------------    
-        configs.finalize()
-        analyses.finalize()   
-    
-        # -------------------------------------------------------------------------------------------    
-        # APPEND MISSION TO SIMULATION 
-        # -------------------------------------------------------------------------------------------    
-        mission           = analyses.missions.base
-        
+        missions_analyses = Missions.missions_setup(base_mission)
+       
     
         # -------------------------------------------------------------------------------------------    
         # RUN SIMULATION !!
         # -------------------------------------------------------------------------------------------
-        noise_results     = mission.evaluate() 
+        results     = missions_analyses.base.evaluate()
+        
+
     
+       
+        
         # -------------------------------------------------------------------------------------------    
         # SAVE RESULTS
         # -------------------------------------------------------------------------------------------
         filename          = 'CTOL_Baseline'
-        save_results(noise_results,filename)   
+        save_results(results,filename)   
     
     else:
         filename          = 'CTOL_Baseline'
-        noise_results = load_results(filename) 
+        results = load_results(filename) 
         
     if plot_mission: 
-        Plots.plot_results(noise_results,run_noise_model,save_figure_flag = True)       
+        Plots.plot_results(results,run_noise_model,save_figure_flag = True)       
     
     
     tf = time.time() 
     print ('time taken: '+ str(round(((tf-ti)/60),3)) + ' mins')   
     
     
-    elapsed_range = noise_results.segments[-1].conditions.frames.inertial.aircraft_range[-1,0]
+    elapsed_range = results.segments[-1].conditions.frames.inertial.aircraft_range[-1,0]
     print('True Range     : ' + str(round(meta_data.flight_range/Units.nmi,2))  + ' nmi')   
     print('Computed Range : ' + str(round(elapsed_range/Units.nmi,2)) + ' nmi')   
         

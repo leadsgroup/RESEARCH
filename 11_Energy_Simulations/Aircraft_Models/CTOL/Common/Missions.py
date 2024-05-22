@@ -11,11 +11,11 @@
 #   Imports
 # ---------------------------------------------------------------------
 import RCAIDE
-from RCAIDE.Core import Units    
+from RCAIDE.Framework.Core import Units    
 import numpy as np 
-from RCAIDE.Methods.Performance.estimate_stall_speed   import estimate_stall_speed 
-from RCAIDE.Methods.Utilities.Chebyshev  import chebyshev_data
-from RCAIDE.Methods.Utilities.Chebyshev  import linear_data
+from RCAIDE.Library.Methods.Performance.estimate_stall_speed   import estimate_stall_speed 
+from RCAIDE.Library.Methods.Utilities.Chebyshev  import chebyshev_data
+from RCAIDE.Library.Methods.Utilities.Chebyshev  import linear_data
 
 # ------------------------------------------------------------------
 #   Baseline Mission Setup
@@ -841,42 +841,22 @@ def repeated_flight_operation_setup(analyses,vehicle,simulated_days = 1,flights_
     # ------------------------------------------------------------------
     #   Initialize the Mission
     # ------------------------------------------------------------------
+    mission = RCAIDE.Framework.Mission.Sequential_Segments()
+    mission.tag = 'mission' 
 
-    mission     = RCAIDE.Analyses.Mission.Sequential_Segments()
-    mission.tag = 'repeated_flight_operation'
-
-    # airport
-    airport           = RCAIDE.Attributes.Airports.Airport()
-    airport.altitude   = 0.0  * Units.ft
-    airport.delta_isa  = 0.0
-    airport.atmosphere = RCAIDE.Attributes.Atmospheres.Earth.US_Standard_1976() 
-    mission.airport    = airport      
-
-    atmosphere         = RCAIDE.Analyses.Atmospheric.US_Standard_1976() 
-    atmo_data          = atmosphere.compute_values(altitude = airport.altitude,temperature_deviation= 1.)     
-
+    atmosphere         = RCAIDE.Framework.Analyses.Atmospheric.US_Standard_1976() 
+    atmo_data          = atmosphere.compute_values(altitude = 0 ,temperature_deviation= 1.)
+        
     # unpack Segments module
-    Segments = RCAIDE.Analyses.Mission.Segments
-
-    # base segment           
-    base_segment                                                              = Segments.Segment()  
-    ones_row                                                                  = base_segment.state.ones_row
-    base_segment.process.initialize.initialize_battery                        = RCAIDE.Methods.Missions.Segments.Common.Energy.initialize_battery 
-    base_segment.process.finalize.post_process.update_battery_state_of_health = RCAIDE.Methods.Missions.Segments.Common.Energy.update_battery_state_of_health  
-    base_segment.process.finalize.inertial_position                           = RCAIDE.Methods.Missions.Segments.Common.Frames.integrate_inertial_horizontal_position 
-    base_segment.process.finalize.post_process.noise                          = RCAIDE.Methods.Missions.Segments.Common.Noise.compute_noise 
-    base_segment.state.numerics.number_control_points                         = control_points
-    base_segment.state.numerics.discretization_method                         = linear_data 
-    bat                                                                       = vehicle.networks.battery_electric_rotor.battery
-    base_segment.charging_SOC_cutoff                                          = bat.cell.charging_SOC_cutoff 
-    base_segment.charging_current                                             = bat.charging_current
-    base_segment.charging_voltage                                             = bat.charging_voltage 
-    base_segment.battery_discharge                                            = True   
+    Segments = RCAIDE.Framework.Mission.Segments  
+    base_segment = Segments.Segment() 
+  
 
     # VSTALL Calculation  
+    vehicle        = analyses.base.aerodynamics.geometry
     vehicle_mass   = vehicle.mass_properties.max_takeoff
     reference_area = vehicle.reference_area 
-    Vstall         = estimate_stall_speed(vehicle_mass,reference_area,altitude = 0.0,maximum_lift_coefficient = 1.2)    
+    Vstall         = estimate_stall_speed(vehicle_mass,reference_area,altitude = 0.0,maximum_lift_coefficient = 1.2) 
           
     
     for day in range(simulated_days):
@@ -894,175 +874,320 @@ def repeated_flight_operation_setup(analyses,vehicle,simulated_days = 1,flights_
             #   Takeoff Roll
             # ------------------------------------------------------------------
         
-            segment = Segments.Ground.Takeoff(base_segment)
-            segment.tag = "Takeoff"  + "_F_" + str(flight_no) + "_D_" + str (day)  
-            segment.analyses.extend( analyses.base )
-            segment.velocity_start                                   = Vstall*0.1  
-            segment.velocity_end                                     = Vstall  
-            segment.friction_coefficient                             = 0.04 
-            segment.state.unknowns.time                              = 10.            
-            segment.altitude                                         = 0.0  
-            segment.true_course_angle                                = airport_geospacial_data.true_course_angle  
-            segment.battery_pack_temperature                         = atmo_data.temperature[0,0]
-            if (day == 0) and (f_idx == 0):        
-                segment.battery_energy                               = vehicle.networks.battery_electric_rotor.battery.pack.max_energy   
-                segment.initial_battery_resistance_growth_factor     = 1
-                segment.initial_battery_capacity_fade_factor         = 1
-            segment = vehicle.networks.battery_electric_rotor.add_unknowns_and_residuals_to_segment(segment)          
-            # add to misison
-            mission.append_segment(segment) 
+            #segment = Segments.Ground.Takeoff(base_segment)
+            #segment.tag = "Takeoff"  + "_F_" + str(flight_no) + "_D_" + str (day)  
+            #segment.analyses.extend( analyses.base )
+            #segment.velocity_start                                   = Vstall*0.1  
+            #segment.velocity_end                                     = Vstall  
+            #segment.friction_coefficient                             = 0.04 
+            #segment.state.unknowns.time                              = 10.            
+            #segment.altitude                                         = 0.0  
+            #segment.true_course_angle                                = airport_geospacial_data.true_course_angle  
+            #segment.battery_pack_temperature                         = atmo_data.temperature[0,0]
+            #if (day == 0) and (f_idx == 0):        
+                #segment.battery_energy                               = vehicle.networks.battery_electric_rotor.battery.pack.max_energy   
+                #segment.initial_battery_resistance_growth_factor     = 1
+                #segment.initial_battery_capacity_fade_factor         = 1
+            #segment = vehicle.networks.battery_electric_rotor.add_unknowns_and_residuals_to_segment(segment)          
+            ## add to misison
+            #mission.append_segment(segment) 
              
             # ------------------------------------------------------------------
             #   Departure End of Runway Segment Flight 1 : 
             # ------------------------------------------------------------------ 
             segment = Segments.Climb.Linear_Speed_Constant_Rate(base_segment) 
-            segment.tag = 'Departure_End_of_Runway'   + "_F_" + str(flight_no) + "_D_" + str (day)     
-            segment.analyses.extend( analyses.base )           
-            segment.altitude_start                                   = 0.0 * Units.feet
-            segment.altitude_end                                     = 50.0 * Units.feet
-            segment.air_speed_start                                  = Vstall  
-            segment.air_speed_end                                    = Vstall*1.1        
-            segment.climb_rate                                       = 600 * Units['ft/min'] 
-            segment.true_course_angle                                = airport_geospacial_data.true_course_angle    
-            segment = vehicle.networks.battery_electric_rotor.add_unknowns_and_residuals_to_segment(segment, initial_rotor_power_coefficients  = [0.3])    
-            mission.append_segment(segment)  
-                        
+            segment.tag = "DER"  + "_F_" + str(flight_no) + "_D_" + str (day)  
+            segment.analyses.extend( analyses.max_hex_operation )  
+            segment.altitude_start                                = 0.0 * Units.feet
+            segment.altitude_end                                  = 50.0 * Units.feet
+            segment.air_speed_start                               = 45  * Units['m/s'] 
+            segment.air_speed_end                                 = 45
+        
+            segment.initial_battery_state_of_charge                  = 1.0
+            if (day == 0) and (f_idx == 0):        
+                segment.initial_battery_resistance_growth_factor     = 1
+                segment.initial_battery_capacity_fade_factor         = 1            
+                    
+            # define flight dynamics to model 
+            segment.flight_dynamics.force_x                       = True  
+            segment.flight_dynamics.force_z                       = True   
+            segment.battery_pack_temperature                      = atmo_data.temperature[0,0]
+            
+            # define flight controls 
+            segment.flight_controls.throttle.active               = True           
+            segment.flight_controls.throttle.assigned_propulsors  = [['starboard_propulsor','port_propulsor']] 
+            segment.flight_controls.body_angle.active             = True                  
+               
+            mission.append_segment(segment)
+            
             # ------------------------------------------------------------------
             #   Initial Climb Area Segment Flight 1  
             # ------------------------------------------------------------------ 
             segment = Segments.Climb.Linear_Speed_Constant_Rate(base_segment) 
-            segment.tag = 'Initial_CLimb_Area'  + "_F_" + str(flight_no) + "_D" + str (day)
-            segment.analyses.extend( analyses.base )   
-            segment.altitude_start                                   = 50.0 * Units.feet
-            segment.altitude_end                                     = 500.0 * Units.feet
-            segment.air_speed_start                                  = Vstall*1.1     
-            segment.air_speed_end                                    = Vstall*1.2  
-            segment.climb_rate                                       = 600 * Units['ft/min']  
-            segment.true_course_angle                                = airport_geospacial_data.true_course_angle    
-            segment = vehicle.networks.battery_electric_rotor.add_unknowns_and_residuals_to_segment(segment)    
-            mission.append_segment(segment) 
-                    
+            segment.tag = 'Initial_CLimb_Area'  + "_F_" + str(flight_no) + "_D_" + str (day)   
+            segment.analyses.extend( analyses.max_hex_operation )   
+            segment.altitude_start                                = 50.0 * Units.feet
+            segment.altitude_end                                  = 500.0 * Units.feet 
+            segment.air_speed_end                                 = 50 * Units['m/s']   
+            segment.climb_rate                                    = 600 * Units['ft/min']   
+            
+            # define flight dynamics to model 
+            segment.flight_dynamics.force_x                       = True  
+            segment.flight_dynamics.force_z                       = True     
+            
+            # define flight controls 
+            segment.flight_controls.throttle.active               = True           
+            segment.flight_controls.throttle.assigned_propulsors  = [['starboard_propulsor','port_propulsor']] 
+            segment.flight_controls.body_angle.active             = True                  
+                  
+            mission.append_segment(segment)  
+           
+                     
             # ------------------------------------------------------------------
             #   Climb Segment Flight 1 
             # ------------------------------------------------------------------ 
             segment = Segments.Climb.Linear_Speed_Constant_Rate(base_segment) 
-            segment.tag = 'Climb'   + "_F_" + str(flight_no) + "_D" + str (day)      
-            segment.analyses.extend( analyses.base )         
-            segment.altitude_start                                   = 500.0 * Units.feet
-            segment.altitude_end                                     = 1500 * Units.feet 
-            segment.air_speed_start                                  = Vstall*1.2  
-            segment.air_speed_end                                    = 130.* Units['mph']    
-            segment.climb_rate                                       = 500* Units['ft/min']
-            segment.true_course_angle                                = airport_geospacial_data.true_course_angle       
-            segment = vehicle.networks.battery_electric_rotor.add_unknowns_and_residuals_to_segment(segment,  initial_throttles = [0.85])   
-            mission.append_segment(segment)  
+            segment.tag = 'Climb_1' + "_F_" + str(flight_no) + "_D_" + str (day)    
+            segment.analyses.extend( analyses.hex_low_alt_climb_operation )      
+            segment.altitude_start                                = 500.0 * Units.feet
+            segment.altitude_end                                  = 2500 * Units.feet  
+            segment.air_speed_end                                 = 120 * Units.kts 
+            segment.climb_rate                                    = 500* Units['ft/min']  
             
+            # define flight dynamics to model 
+            segment.flight_dynamics.force_x                       = True  
+            segment.flight_dynamics.force_z                       = True     
+            
+            # define flight controls 
+            segment.flight_controls.throttle.active               = True           
+            segment.flight_controls.throttle.assigned_propulsors  = [['starboard_propulsor','port_propulsor']] 
+            segment.flight_controls.body_angle.active             = True                 
+                   
+            mission.append_segment(segment)
+            
+                
             # ------------------------------------------------------------------
-            #   Cruise Segment Flight 1 
+            #   Climb 1 : constant Speed, constant rate segment 
             # ------------------------------------------------------------------ 
-            segment = Segments.Cruise.Constant_Speed_Constant_Altitude(base_segment) 
-            segment.tag = 'Cruise'  + "_F_" + str(flight_no) + "_D" + str (day) 
-            segment.analyses.extend(analyses.base) 
-            segment.air_speed                                        = 130.* Units['mph']        
-            cruise_distance                                          = airport_geospacial_data.flight_range - 31.5615*Units.nmi  
-            segment.altitude                                         = 1500 * Units.feet 
-            segment.distance                                         = cruise_distance          
-            segment.true_course_angle                                = airport_geospacial_data.true_course_angle    
-            segment = vehicle.networks.battery_electric_rotor.add_unknowns_and_residuals_to_segment(segment,  initial_throttles = [0.8]) 
-            mission.append_segment(segment)  
+            segment = Segments.Climb.Linear_Speed_Constant_Rate(base_segment)
+            segment.tag = "Climb_2" + "_F_" + str(flight_no) + "_D_" + str (day)   
+            segment.analyses.extend( analyses.hex_high_alt_climb_operation)
+            segment.altitude_start                                = 2500.0  * Units.feet
+            segment.altitude_end                                  = 5000   * Units.feet  
+            segment.air_speed_end                                 = 130 * Units.kts 
+            segment.climb_rate                                    = 700.034 * Units['ft/min']   
             
+            # define flight dynamics to model 
+            segment.flight_dynamics.force_x                       = True  
+            segment.flight_dynamics.force_z                       = True     
+            
+            # define flight controls 
+            segment.flight_controls.throttle.active               = True           
+            segment.flight_controls.throttle.assigned_propulsors  = [['starboard_propulsor','port_propulsor']] 
+            segment.flight_controls.body_angle.active             = True                 
+                    
+            mission.append_segment(segment)
+        
+            # ------------------------------------------------------------------
+            #   Cruise Segment: constant Speed, constant altitude
+            # ------------------------------------------------------------------ 
+            segment = Segments.Cruise.Constant_Speed_Constant_Altitude(base_segment)
+            segment.tag = "Cruise"  + "_F_" + str(flight_no) + "_D_" + str (day)   
+            segment.analyses.extend(analyses.hex_cruise_operation) 
+            segment.altitude                                      = 5000   * Units.feet 
+            segment.air_speed                                     = 130 * Units.kts
+            segment.distance                                      = 50.   * Units.nautical_mile  
+            
+            # define flight dynamics to model 
+            segment.flight_dynamics.force_x                       = True  
+            segment.flight_dynamics.force_z                       = True     
+            
+            # define flight controls 
+            segment.flight_controls.throttle.active               = True           
+            segment.flight_controls.throttle.assigned_propulsors  = [['starboard_propulsor','port_propulsor']] 
+            segment.flight_controls.body_angle.active             = True                  
+                  
+            mission.append_segment(segment)    
+        
+        
             # ------------------------------------------------------------------
             #   Descent Segment Flight 1   
             # ------------------------------------------------------------------ 
             segment = Segments.Climb.Linear_Speed_Constant_Rate(base_segment) 
-            segment.tag = 'Descent'   + "_F_" + str(flight_no) + "_D" + str (day)      
-            segment.analyses.extend( analyses.base )       
-            segment.altitude_start                                   = 1500 * Units.feet  
-            segment.altitude_end                                     = 1000.0 * Units.feet
-            segment.air_speed_start                                  = 130.* Units['mph']    
-            segment.air_speed_end                                    = Vstall*1.3
-            segment.climb_rate                                       = -300 * Units['ft/min']
-            segment.true_course_angle                                = airport_geospacial_data.true_course_angle      
-            segment = vehicle.networks.battery_electric_rotor.add_unknowns_and_residuals_to_segment(segment,  initial_throttles = [0.8])  
-            mission.append_segment(segment)  
-             
-        
+            segment.tag = "Decent" + "_F_" + str(flight_no) + "_D_" + str (day)     
+            segment.analyses.extend( analyses.hex_descent_operation )       
+            segment.altitude_start                                = 5000   * Units.feet 
+            segment.altitude_end                                  = 1000 * Units.feet  
+            segment.air_speed_end                                 = 100 * Units['mph']   
+            segment.climb_rate                                    = -200 * Units['ft/min']  
+            
+            # define flight dynamics to model 
+            segment.flight_dynamics.force_x                       = True  
+            segment.flight_dynamics.force_z                       = True     
+            
+            # define flight controls 
+            segment.flight_controls.throttle.active               = True           
+            segment.flight_controls.throttle.assigned_propulsors  = [['starboard_propulsor','port_propulsor']] 
+            segment.flight_controls.body_angle.active             = True                 
+                  
+            mission.append_segment(segment)   
+                       
             # ------------------------------------------------------------------
             #  Downleg_Altitude Segment Flight 1 
-            # ------------------------------------------------------------------ 
-            segment = Segments.Cruise.Constant_Acceleration_Constant_Altitude(base_segment) 
-            segment.tag = 'Downleg' + "_F_" + str(flight_no) + "_D" + str (day)
-            segment.analyses.extend(analyses.base) 
-            segment.air_speed_start                                  = Vstall*1.3
-            segment.air_speed_end                                    = Vstall*1.2             
-            segment.distance                                         =  6000 * Units.feet
-            segment.acceleration                                     = -0.05 * Units['m/s/s']  
-            segment.true_course_angle                                = airport_geospacial_data.true_course_angle     
-            segment = vehicle.networks.battery_electric_rotor.add_unknowns_and_residuals_to_segment(segment,  initial_throttles = [0.7])  
-            mission.append_segment(segment)        
+            # ------------------------------------------------------------------
+        
+            segment = Segments.Cruise.Constant_Speed_Constant_Altitude(base_segment)
+            segment.tag = 'Downleg' + "_F_" + str(flight_no) + "_D_" + str (day)   
+            segment.analyses.extend(analyses.hex_cruise_operation)  
+            segment.air_speed                                     = 100 * Units['mph']   
+            segment.distance                                      = 6000 * Units.feet 
+            # define flight dynamics to model 
+            segment.flight_dynamics.force_x                       = True  
+            segment.flight_dynamics.force_z                       = True     
+            
+            # define flight controls 
+            segment.flight_controls.throttle.active               = True           
+            segment.flight_controls.throttle.assigned_propulsors  = [['starboard_propulsor','port_propulsor']] 
+            segment.flight_controls.body_angle.active             = True                   
+                    
+            mission.append_segment(segment)     
+            
+            ## ------------------------------------------------------------------
+            ##  Reserve Climb 
+            ## ------------------------------------------------------------------ 
+            #segment = Segments.Climb.Constant_Speed_Constant_Rate(base_segment) 
+            #segment.tag = 'Reserve_Climb' + "_F_" + str(flight_no) + "_D_" + str (day)           
+            #segment.analyses.extend( analyses.hex_low_alt_climb_operation)      
+            #segment.altitude_end                                  = 5000 * Units.feet
+            #segment.air_speed                                     = 120 * Units['mph']
+            #segment.climb_rate                                    = 500* Units['ft/min']  
+            
+            ## define flight dynamics to model 
+            #segment.flight_dynamics.force_x                       = True  
+            #segment.flight_dynamics.force_z                       = True     
+            
+            ## define flight controls 
+            #segment.flight_controls.throttle.active               = True           
+            #segment.flight_controls.throttle.assigned_propulsors  = [['starboard_propulsor','port_propulsor']] 
+            #segment.flight_controls.body_angle.active             = True                
+                
+            #mission.append_segment(segment)
+            
+            ## ------------------------------------------------------------------
+            ##  Researve Cruise Segment 
+            ## ------------------------------------------------------------------ 
+            #segment = Segments.Cruise.Constant_Speed_Constant_Altitude_Loiter(base_segment) 
+            #segment.tag = 'Reserve_Cruise'  + "_F_" + str(flight_no) + "_D_" + str (day)    
+            #segment.analyses.extend(analyses.hex_cruise_operation)  
+            #segment.altitude                                      = 5000 * Units.feet
+            #segment.air_speed                                     = 130 * Units.kts
+            #segment.time                                          = 60*30 * Units.sec  
+            
+            ## define flight dynamics to model 
+            #segment.flight_dynamics.force_x                       = True  
+            #segment.flight_dynamics.force_z                       = True     
+            
+            ## define flight controls 
+            #segment.flight_controls.throttle.active               = True           
+            #segment.flight_controls.throttle.assigned_propulsors  = [['starboard_propulsor','port_propulsor']] 
+            #segment.flight_controls.body_angle.active             = True                  
+               
+            #mission.append_segment(segment)     
+            
+            ## ------------------------------------------------------------------
+            ##  Researve Descent
+            ## ------------------------------------------------------------------ 
+            #segment = Segments.Descent.Constant_Speed_Constant_Rate(base_segment) 
+            #segment.tag = 'Reserve_Descent' + "_F_" + str(flight_no) + "_D_" + str (day)   
+            #segment.analyses.extend( analyses.hex_descent_operation)    
+            #segment.altitude_end                                  = 1000 * Units.feet 
+            #segment.air_speed                                     = 110 * Units['mph']
+            #segment.descent_rate                                  = 300 * Units['ft/min']   
+            
+            ## define flight dynamics to model 
+            #segment.flight_dynamics.force_x                       = True  
+            #segment.flight_dynamics.force_z                       = True     
+            
+            ## define flight controls 
+            #segment.flight_controls.throttle.active               = True           
+            #segment.flight_controls.throttle.assigned_propulsors  = [['starboard_propulsor','port_propulsor']] 
+            #segment.flight_controls.body_angle.active             = True                
+            #mission.append_segment(segment)  
+        
             
             # ------------------------------------------------------------------
             #  Baseleg Segment Flight 1  
             # ------------------------------------------------------------------ 
             segment = Segments.Climb.Linear_Speed_Constant_Rate(base_segment)
-            segment.tag = 'Baseleg' + "_F_" + str(flight_no) + "_D" + str (day)
-            segment.analyses.extend( analyses.base)   
-            segment.altitude_start                                   = 1000 * Units.feet
-            segment.altitude_end                                     = 500.0 * Units.feet
-            segment.air_speed_start                                  = Vstall*1.2  
-            segment.air_speed_end                                    = Vstall*1.1  
-            segment.climb_rate                                       = -300 * Units['ft/min'] 
-            segment.true_course_angle                                = airport_geospacial_data.true_course_angle   
-            segment = vehicle.networks.battery_electric_rotor.add_unknowns_and_residuals_to_segment(segment ,  initial_throttles = [0.7])
-            mission.append_segment(segment)   
+            segment.tag = 'Baseleg' + "_F_" + str(flight_no) + "_D_" + str (day)   
+            segment.analyses.extend( analyses.max_hex_operation)   
+            segment.altitude_start                                = 1000 * Units.feet
+            segment.altitude_end                                  = 500.0 * Units.feet
+            segment.air_speed_end                                 = 90 * Units['mph']  
+            segment.climb_rate                                    = -350 * Units['ft/min'] 
+            
+            # define flight dynamics to model 
+            segment.flight_dynamics.force_x                       = True  
+            segment.flight_dynamics.force_z                       = True     
+            
+            # define flight controls 
+            segment.flight_controls.throttle.active               = True           
+            segment.flight_controls.throttle.assigned_propulsors  = [['starboard_propulsor','port_propulsor']] 
+            segment.flight_controls.body_angle.active             = True                
+            mission.append_segment(segment) 
         
             # ------------------------------------------------------------------
             #  Final Approach Segment Flight 1  
             # ------------------------------------------------------------------ 
             segment = Segments.Climb.Linear_Speed_Constant_Rate(base_segment)
-            segment_name = 'Final_Approach' + "_F_" + str(flight_no) + "_D" + str (day)
+            segment_name = 'Final_Approach' + "_F_" + str(flight_no) + "_D_" + str (day)   
             segment.tag = segment_name          
-            segment.analyses.extend( analyses.base)            
-            segment.altitude_start                                   = 500.0 * Units.feet
-            segment.altitude_end                                     = 00.0 * Units.feet
-            segment.air_speed_start                                  = Vstall*1.1  
-            segment.air_speed_end                                    = Vstall 
-            segment.climb_rate                                       = -300 * Units['ft/min'] 
-            segment.state.unknowns.throttle                          =  0.8 * ones_row(1)   
-            segment.true_course_angle                                = airport_geospacial_data.true_course_angle   
-            segment = vehicle.networks.battery_electric_rotor.add_unknowns_and_residuals_to_segment(segment, initial_rotor_power_coefficients  = [0.3],  initial_throttles = [0.8] )  
-            mission.append_segment(segment)   
+            segment.analyses.extend( analyses.max_hex_operation)      
+            segment.altitude_start                                = 500.0 * Units.feet
+            segment.altitude_end                                  = 00.0 * Units.feet
+            segment.air_speed_end                                 = 80 * Units['mph']  
+            segment.climb_rate                                    = -300 * Units['ft/min']   
             
+            # define flight dynamics to model 
+            segment.flight_dynamics.force_x                       = True  
+            segment.flight_dynamics.force_z                       = True     
+            
+            # define flight controls 
+            segment.flight_controls.throttle.active               = True           
+            segment.flight_controls.throttle.assigned_propulsors  = [['starboard_propulsor','port_propulsor']] 
+            segment.flight_controls.body_angle.active             = True                      
+            mission.append_segment(segment)  
         
+        
+            ## ------------------------------------------------------------------
+            ##   Landing  
+            ## ------------------------------------------------------------------  
+            #segment = Segments.Ground.Landing(base_segment)
+            #segment.tag = "Landing"  + "_F_" + str(flight_no) + "_D_" + str (day)     
+            #segment.analyses.extend( analyses.max_hex_operation) 
+            #segment.velocity_start                                   = Vstall  
+            #segment.velocity_end                                     = Vstall*0.1  
+            #segment.friction_coefficient                             = 0.04 
+            #segment.state.unknowns.elapsed_time                      = 30.            
+            #segment.altitude                                         = 0.0  
+            #segment.state.unknowns.velocity_x                        = 0.1* Vstall  
+            #mission.append_segment(segment)
+            
             # ------------------------------------------------------------------
-            #   Landing  
-            # ------------------------------------------------------------------  
-            segment = Segments.Ground.Landing(base_segment)
-            segment.tag = "Landing"  + "_F_" + str(flight_no) + "_D_" + str (day)  
-            segment.analyses.extend( analyses.base) 
-            segment.velocity_start                                   = Vstall  
-            segment.velocity_end                                     = Vstall*0.1  
-            segment.friction_coefficient                             = 0.04 
-            segment.state.unknowns.time                              = 30.            
-            segment.altitude                                         = 0.0  
-            segment.state.unknowns.velocity_x                        = 0.1* Vstall * ones_row(1)   
-            segment.true_course_angle                                = airport_geospacial_data.true_course_angle   
-            segment = vehicle.networks.battery_electric_rotor.add_unknowns_and_residuals_to_segment(segment,  initial_throttles = [0.3])          
-            # add to misison
-            mission.append_segment(segment)   
+            #   Mission definition complete    
+            # ------------------------------------------------------------------            
   
             if recharge_battery:
                 # ------------------------------------------------------------------
                 #  Charge Segment: 
                 # ------------------------------------------------------------------     
                 # Charge Model 
-                segment                                             = Segments.Ground.Battery_Charge_Discharge(base_segment)     
+                segment                                             = Segments.Ground.Battery_Recharge(base_segment)     
                 segment.tag  = 'Charge_Day' + "_F_" + str(flight_no) + "_D" + str (day)  
                 segment.analyses.extend(analyses.base)           
                 segment.battery_discharge = False     
                 if flight_no  == flights_per_day:  
-                    segment.increment_battery_cycle_day=True            
-                segment = vehicle.networks.battery_electric_rotor.add_unknowns_and_residuals_to_segment(segment)    
+                    segment.increment_battery_cycle_day=True               
                 mission.append_segment(segment)   
     
     
@@ -1873,7 +1998,7 @@ def uber_mission_setup(analyse,vehicle,simulated_days = 1,flights_per_day = 1,co
 def missions_setup(base_mission):
 
     # the mission container
-    missions = RCAIDE.Analyses.Mission.Mission.Container()
+    missions         = RCAIDE.Framework.Mission.Missions()
 
     # ------------------------------------------------------------------
     #   Base Mission

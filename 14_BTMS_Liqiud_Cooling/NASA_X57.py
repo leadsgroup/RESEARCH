@@ -28,7 +28,7 @@ import matplotlib.pyplot        as plt
 def main():     
 
     # vehicle data 
-    BTMS_flag = False 
+    BTMS_flag = True 
     file_name = 'X_57_HEX'    
 
     vehicle   = vehicle_setup(BTMS_flag) 

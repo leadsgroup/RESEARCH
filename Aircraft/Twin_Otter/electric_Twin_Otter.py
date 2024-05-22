@@ -1038,7 +1038,13 @@ def plot_mission(results):
 
     plot_electric_propulsor_efficiencies(results)
     
-    plot_battery_temperature(results) 
+    plot_battery_temperature(results)
+    
+    plot_heat_acquisition_system_conditions(results)
+
+    plot_heat_exchanger_system_conditions(results)
+
+    plot_reservoir_conditions(results)    
 
     return
 
