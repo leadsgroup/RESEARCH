@@ -857,7 +857,12 @@ def repeated_flight_operation_setup(analyses,vehicle,simulated_days = 1,flights_
     vehicle_mass   = vehicle.mass_properties.max_takeoff
     reference_area = vehicle.reference_area 
     Vstall         = estimate_stall_speed(vehicle_mass,reference_area,altitude = 0.0,maximum_lift_coefficient = 1.2) 
-          
+        
+    bat                   = vehicle.networks.all_electric.busses.bus.batteries.lithium_ion_nmc
+    Charging_C_Rate       = 1
+    pack_charging_current = bat.cell.nominal_capacity * Charging_C_Rate *  bat.pack.electrical_configuration.series
+    pack_capacity_Ah      =  bat.cell.nominal_capacity * bat.pack.electrical_configuration.series
+    charging_time         = 0.9 * (pack_capacity_Ah)/pack_charging_current * Units.hrs  
     
     for day in range(simulated_days):
         
@@ -1184,10 +1189,11 @@ def repeated_flight_operation_setup(analyses,vehicle,simulated_days = 1,flights_
                 # Charge Model 
                 segment                                             = Segments.Ground.Battery_Recharge(base_segment)     
                 segment.tag  = 'Charge_Day' + "_F_" + str(flight_no) + "_D" + str (day)  
-                segment.analyses.extend(analyses.base)           
-                segment.battery_discharge = False     
+                segment.analyses.extend(analyses.max_hex_operation)  
+                segment.time                          = charging_time 
+                segment.current                       = pack_charging_current          
                 if flight_no  == flights_per_day:  
-                    segment.increment_battery_cycle_day=True               
+                    segment.increment_battery_age_by_one_day =True               
                 mission.append_segment(segment)   
     
     
