@@ -711,7 +711,7 @@ def vehicle_setup():
     generator.connected_engine                 = ['right_turbine'] 
     generator.mass_properties.mass             = motor.mass_properties.mass
      
-    
+    net.hybrid_electrical_power_split_ratio 
     generator.no_load_torque                   = 20
     generator.efficiency                       = 0.98    
     generator.nominal_voltage                  = bat.pack.maximum_voltage
