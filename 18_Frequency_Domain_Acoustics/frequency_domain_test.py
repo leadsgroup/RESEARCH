@@ -2,10 +2,10 @@
 
 # Imports    
 import RCAIDE
-from RCAIDE.Core import Units, Data  
-from RCAIDE.Methods.Noise.Frequency_Domain_Buildup.Rotor   import rotor_noise
-from RCAIDE.Analyses.Mission.Common                        import Results  
-from RCAIDE.Analyses.Mission.Segments.Segment              import Segment 
+from RCAIDE.Framework.Core import Units, Data  
+from RCAIDE.Library.Methods.Noise.Frequency_Domain_Buildup.Rotor   import rotor_noise
+from RCAIDE.Framework.Analyses.Mission.Common                        import Results  
+from RCAIDE.Framework.Analyses.Mission.Segments.Segment              import Segment 
 
 # Python Imports  
 import sys 
