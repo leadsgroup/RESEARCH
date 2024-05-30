@@ -693,9 +693,9 @@ def vehicle_setup():
     bat.pack.electrical_configuration.series        = 140
     bat.pack.electrical_configuration.parallel      = 100
     initialize_from_circuit_configuration(bat)
-    bat.module.number_of_modules                    = 14
+    bat.pack.number_of_modules                    = 14
     bat.module.geometric_configuration.total        = bat.pack.electrical_configuration.total
-    bat.module.voltage                              = bat.pack.maximum_voltage/bat.module.number_of_modules
+    bat.module.voltage                              = bat.pack.maximum_voltage/bat.pack.number_of_modules
     bat.module.geomtric_configuration.normal_count  = 24
     bat.module.geomtric_configuration.prallel_count = 40
     bat.thermal_management_system                   = RCAIDE.Energy.Thermal_Management.Batteries.Atmospheric_Air_Convection_Heat_Exchanger()

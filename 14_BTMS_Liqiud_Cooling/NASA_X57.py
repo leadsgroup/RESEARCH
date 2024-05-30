@@ -480,7 +480,7 @@ def vehicle_setup(BTMS_flag):
     bat.module.geometrtic_configuration.normal_count       = 20 
     bat.module.geometrtic_configuration.parallel_count     = 28
     bat.module.number_of_cells                             = bat.module.geometrtic_configuration.normal_count *bat.module.geometrtic_configuration.parallel_count 
-    bus.voltage                                            = bat.pack.maximum_voltage   
+    bus.voltage                                            = bat.pack.maximum_voltage 
     
     if BTMS_flag:
         # Reservoir for Battery TMS

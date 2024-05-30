@@ -456,12 +456,12 @@ def vehicle_setup(resize_aircraft,vehicle_name = 'CTOL_CRM') :
         bat.pack.electrical_configuration.parallel             = 180 # 200   
         bat.cell.nominal_capacity                              = 3.8 #55  
         initialize_from_circuit_configuration(bat,module_weight_factor = 1.25)  
-        bat.module.number_of_modules                           = 20 
+        bat.pack.number_of_modules                             = 20 
         bat.module.geometrtic_configuration.total              = bat.pack.electrical_configuration.total
-        bat.module.voltage                                     = bat.pack.maximum_voltage/bat.module.number_of_modules # assumes modules are connected in parallel, must be less than max_module_voltage (~50) /safety_factor (~ 1.5)  
+        bat.module.voltage                                     = bat.pack.maximum_voltage/bat.pack.number_of_modules # assumes modules are connected in parallel, must be less than max_module_voltage (~50) /safety_factor (~ 1.5)  
         bat.module.geometrtic_configuration.normal_count       = 25
         bat.module.geometrtic_configuration.parallel_count     = 80 # 52 
-        bus.voltage                                            = bat.pack.maximum_voltage 
+        bus.voltage                                            = bat.pack.maximum_voltage   
         BTMS_flag = True
         if BTMS_flag:
             # Reservoir for Battery TMS

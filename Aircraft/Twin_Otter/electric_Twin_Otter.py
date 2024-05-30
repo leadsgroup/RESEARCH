@@ -474,15 +474,15 @@ def vehicle_setup(BTMS_flag):
     # Battery
     #------------------------------------------------------------------------------------------------------------------------------------  
     bat                                                    = RCAIDE.Library.Components.Energy.Batteries.Lithium_Ion_NMC()
-    bat.pack.electrical_configuration.series               = 200 # 130
-    bat.pack.electrical_configuration.parallel             = 180 # 200   
-    bat.cell.nominal_capacity                              = 3.8 #55  
+    bat.pack.electrical_configuration.series               = 120  
+    bat.pack.electrical_configuration.parallel             = 250   
+    bat.cell.nominal_capacity                              = 3.8  
     initialize_from_circuit_configuration(bat,module_weight_factor = 1.25)  
-    bat.module.number_of_modules                           = 20 
+    bat.module.number_of_modules                           = 12
     bat.module.geometrtic_configuration.total              = bat.pack.electrical_configuration.total
     bat.module.voltage                                     = bat.pack.maximum_voltage/bat.module.number_of_modules # assumes modules are connected in parallel, must be less than max_module_voltage (~50) /safety_factor (~ 1.5)  
-    bat.module.geometrtic_configuration.normal_count       = 25
-    bat.module.geometrtic_configuration.parallel_count     = 80 # 52 
+    bat.module.geometrtic_configuration.normal_count       = bat.module.geometrtic_configuration.total/bat.module.number_of_modules / 40
+    bat.module.geometrtic_configuration.parallel_count     = 50
     bus.voltage                                            = bat.pack.maximum_voltage 
   
     if BTMS_flag:
@@ -544,7 +544,7 @@ def vehicle_setup(BTMS_flag):
     propeller.cruise.design_angular_velocity         = propeller.cruise.design_tip_mach *speed_of_sound/propeller.tip_radius
     propeller.cruise.design_Cl                       = 0.7
     propeller.cruise.design_altitude                 = 8000. * Units.feet 
-    propeller.cruise.design_thrust                   = 15000  # 100000
+    propeller.cruise.design_thrust                   = 12500  
     propeller.clockwise_rotation                     = False
     propeller.variable_pitch                         = True  
     propeller.origin                                 = [[3.5,2.8129,1.22 ]]   
@@ -565,8 +565,8 @@ def vehicle_setup(BTMS_flag):
     motor                                            = RCAIDE.Library.Components.Propulsors.Converters.DC_Motor()
     motor.efficiency                                 = 0.98
     motor.origin                                     = [[4.0,2.8129,1.22 ]]   
-    motor.nominal_voltage                            = bat.pack.maximum_voltage * 0.8
-    motor.no_load_current                            = 1 # 2
+    motor.nominal_voltage                            = bat.pack.maximum_voltage 
+    motor.no_load_current                            = 1
     motor.rotor_radius                               = propeller.tip_radius
     motor.design_torque                              = propeller.cruise.design_torque 
     motor.angular_velocity                           = propeller.cruise.design_angular_velocity # Horse power of gas engine variant  750 * Units['hp']
@@ -648,30 +648,41 @@ def configs_setup(vehicle):
 
     config = RCAIDE.Library.Components.Configs.Config(vehicle)
     config.tag = 'max_hex_operation'  
-    config.networks.all_electric.busses.bus.batteries.lithium_ion_nmc.thermal_management_system.heat_exchanger_system.percent_operation = 1
+    config.networks.all_electric.busses.bus.batteries.lithium_ion_nmc.thermal_management_system.heat_exchanger_system.percent_operation = 1 
+    config.networks.all_electric.busses.bus.batteries.lithium_ion_nmc.thermal_management_system.heat_acquisition_system.percent_operation = 1
     configs.append(config) 
      
     config = RCAIDE.Library.Components.Configs.Config(vehicle)
     config.tag = 'hex_low_alt_climb_operation'  
-    config.networks.all_electric.busses.bus.batteries.lithium_ion_nmc.thermal_management_system.heat_exchanger_system.percent_operation = 0.07
+    config.networks.all_electric.busses.bus.batteries.lithium_ion_nmc.thermal_management_system.heat_exchanger_system.percent_operation = 0.5
+    config.networks.all_electric.busses.bus.batteries.lithium_ion_nmc.thermal_management_system.heat_acquisition_system.percent_operation = 0.5
     configs.append(config)     
 
     config = RCAIDE.Library.Components.Configs.Config(vehicle)
     config.tag = 'hex_high_alt_climb_operation'  
-    config.networks.all_electric.busses.bus.batteries.lithium_ion_nmc.thermal_management_system.heat_exchanger_system.percent_operation = 0.3
+    config.networks.all_electric.busses.bus.batteries.lithium_ion_nmc.thermal_management_system.heat_exchanger_system.percent_operation = 0.5
+    config.networks.all_electric.busses.bus.batteries.lithium_ion_nmc.thermal_management_system.heat_acquisition_system.percent_operation = 0.5
     configs.append(config)        
 
     config = RCAIDE.Library.Components.Configs.Config(vehicle)
     config.tag = 'hex_cruise_operation'  
-    config.networks.all_electric.busses.bus.batteries.lithium_ion_nmc.thermal_management_system.heat_exchanger_system.percent_operation = 0.25
+    config.networks.all_electric.busses.bus.batteries.lithium_ion_nmc.thermal_management_system.heat_exchanger_system.percent_operation = 0.3
+    config.networks.all_electric.busses.bus.batteries.lithium_ion_nmc.thermal_management_system.heat_acquisition_system.percent_operation = 0.3
     configs.append(config)         
     
 
     config = RCAIDE.Library.Components.Configs.Config(vehicle)
     config.tag = 'hex_descent_operation'  
-    config.networks.all_electric.busses.bus.batteries.lithium_ion_nmc.thermal_management_system.heat_exchanger_system.percent_operation = 0.5
+    config.networks.all_electric.busses.bus.batteries.lithium_ion_nmc.thermal_management_system.heat_exchanger_system.percent_operation = 0.2
+    config.networks.all_electric.busses.bus.batteries.lithium_ion_nmc.thermal_management_system.heat_acquisition_system.percent_operation = 0.2
     configs.append(config)                   
  
+
+    config = RCAIDE.Library.Components.Configs.Config(vehicle)
+    config.tag = 'recharge'  
+    config.networks.all_electric.busses.bus.batteries.lithium_ion_nmc.thermal_management_system.heat_exchanger_system.percent_operation   = 0.5 
+    config.networks.all_electric.busses.bus.batteries.lithium_ion_nmc.thermal_management_system.heat_acquisition_system.percent_operation = 0.5 
+    configs.append(config)  
  
     return configs
 
@@ -700,6 +711,27 @@ def mission_setup(analyses):
     reference_area = vehicle.reference_area 
     Vstall         = estimate_stall_speed(vehicle_mass,reference_area,altitude = 0.0,maximum_lift_coefficient = 1.2)
     
+
+    bat                   = vehicle.networks.all_electric.busses.bus.batteries.lithium_ion_nmc
+    Charging_C_Rate       = 2
+    pack_charging_current = bat.cell.nominal_capacity * Charging_C_Rate *  bat.pack.electrical_configuration.series
+    pack_capacity_Ah      =  bat.cell.nominal_capacity * bat.pack.electrical_configuration.parallel
+    charging_time         = (pack_capacity_Ah)/pack_charging_current * Units.hrs
+    
+
+    ## ------------------------------------------------------------------
+    ##   Taxi 
+    ## ------------------------------------------------------------------      
+    #segment = Segments.Ground.Taxi(base_segment)
+    #segment.tag = "Taxi"  
+    #segment.analyses.extend( analyses.max_hex_operation ) 
+    #segment.velocity                                        = Vstall  
+    #segment.friction_coefficient                             = 0.04 
+    #segment.state.unknowns.elapsed_time                      = 10.            
+    #segment.altitude                                         = 0.0      
+    #segment.initial_battery_state_of_charge                  = 1.0 
+    #mission.append_segment(segment)  
+    
     ## ------------------------------------------------------------------
     ##   Takeoff
     ## ------------------------------------------------------------------      
@@ -727,7 +759,7 @@ def mission_setup(analyses):
     segment.air_speed_start                               = 45  * Units['m/s'] 
     segment.air_speed_end                                 = 45
 
-    segment.initial_battery_state_of_charge                  = 1.0
+    segment.initial_battery_state_of_charge               = 1.0
     
             
     # define flight dynamics to model 
@@ -859,7 +891,7 @@ def mission_setup(analyses):
 
     segment = Segments.Cruise.Constant_Speed_Constant_Altitude(base_segment)
     segment.tag = 'Downleg'
-    segment.analyses.extend(analyses.hex_cruise_operation)  
+    segment.analyses.extend(analyses.hex_descent_operation)  
     segment.air_speed                                     = 100 * Units['mph']   
     segment.distance                                      = 6000 * Units.feet 
     # define flight dynamics to model 
@@ -941,7 +973,7 @@ def mission_setup(analyses):
     # ------------------------------------------------------------------ 
     segment = Segments.Climb.Linear_Speed_Constant_Rate(base_segment)
     segment.tag = 'Baseleg'
-    segment.analyses.extend( analyses.max_hex_operation)   
+    segment.analyses.extend( analyses.hex_descent_operation)   
     segment.altitude_start                                = 1000 * Units.feet
     segment.altitude_end                                  = 500.0 * Units.feet
     segment.air_speed_end                                 = 90 * Units['mph']  
@@ -963,7 +995,7 @@ def mission_setup(analyses):
     segment = Segments.Climb.Linear_Speed_Constant_Rate(base_segment)
     segment_name = 'Final_Approach'
     segment.tag = segment_name          
-    segment.analyses.extend( analyses.max_hex_operation)      
+    segment.analyses.extend( analyses.hex_descent_operation)      
     segment.altitude_start                                = 500.0 * Units.feet
     segment.altitude_end                                  = 00.0 * Units.feet
     segment.air_speed_end                                 = 80 * Units['mph']  
@@ -985,7 +1017,7 @@ def mission_setup(analyses):
     ## ------------------------------------------------------------------  
     #segment = Segments.Ground.Landing(base_segment)
     #segment.tag = "Landing"   
-    #segment.analyses.extend( analyses.max_hex_operation) 
+    #segment.analyses.extend( analyses.hex_descent_operation) 
     #segment.velocity_start                                   = Vstall  
     #segment.velocity_end                                     = Vstall*0.1  
     #segment.friction_coefficient                             = 0.04 
@@ -995,10 +1027,21 @@ def mission_setup(analyses):
     #mission.append_segment(segment)
     
     # ------------------------------------------------------------------
-    #   Mission definition complete    
-    # ------------------------------------------------------------------
-     
+    #  Charge Segment: 
+    # ------------------------------------------------------------------     
+    # Charge Model 
+    segment                               = Segments.Ground.Battery_Recharge(base_segment)     
+    segment.tag  = 'Charge_Day'
+    segment.state.numerics.number_of_control_points  = 32 
+    segment.analyses.extend(analyses.recharge)  
+    segment.time                          = charging_time 
+    segment.current                       = pack_charging_current        
+    mission.append_segment(segment)   
 
+    
+    # ------------------------------------------------------------------
+    #   Mission definition complete    
+    # ------------------------------------------------------------------ 
     return mission
 
 def missions_setup(mission): 
@@ -1036,9 +1079,7 @@ def plot_mission(results):
 
     plot_rotor_conditions(results) 
 
-    plot_electric_propulsor_efficiencies(results)
-    
-    plot_battery_temperature(results)
+    plot_electric_propulsor_efficiencies(results) 
     
     plot_heat_acquisition_system_conditions(results)
 

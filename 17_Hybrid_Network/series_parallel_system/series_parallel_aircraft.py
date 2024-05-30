@@ -768,12 +768,12 @@ def vehicle_setup():
     #------------------------------------------------------------------------------------------------------------------------------------  
     # Electronic Speed Controller    
     #------------------------------------------------------------------------------------------------------------------------------------  
-    esc_1            = RCAIDE.Energy.Distributors.Electronic_Speed_Controller()
+    esc_1            = RCAIDE.Library.Components.Propulsors.Modulators.Electronic_Speed_Controller()
     esc_1.tag        = 'esc_1'
     esc_1.efficiency = 0.95 
     HPCU.electronic_speed_controllers.append(esc_1)  
  
-    esc_2            = RCAIDE.Energy.Distributors.Electronic_Speed_Controller()
+    esc_2            = RCAIDE.Library.Components.Propulsors.Modulators.Electronic_Speed_Controller()
     esc_2.tag        = 'esc_2'
     esc_2.efficiency = 0.95 
     HPCU.electronic_speed_controllers.append(esc_2)     
@@ -781,13 +781,13 @@ def vehicle_setup():
     #------------------------------------------------------------------------------------------------------------------------------------           
     # Battery
     #------------------------------------------------------------------------------------------------------------------------------------  
-    bat                                                    = RCAIDE.Energy.Storages.Batteries.Lithium_Ion_NMC() 
+    bat                                                    = RCAIDE.Library.Components.Energy.Batteries.Lithium_Ion_NMC() 
     bat.pack.electrical_configuration.series               = 140   
     bat.pack.electrical_configuration.parallel             = 100
     initialize_from_circuit_configuration(bat)  
-    bat.module.number_of_modules                           = 14  
+    bat.pack.number_of_modules                           = 14  
     bat.module.geometrtic_configuration.total              = bat.pack.electrical_configuration.total
-    bat.module.voltage                                     = bat.pack.maximum_voltage/bat.module.number_of_modules # assumes modules are connected in parallel, must be less than max_module_voltage (~50) /safety_factor (~ 1.5)  
+    bat.module.voltage                                     = bat.pack.maximum_voltage/bat.pack.number_of_modules # assumes modules are connected in parallel, must be less than max_module_voltage (~50) /safety_factor (~ 1.5)  
     bat.module.geometrtic_configuration.normal_count       = 24
     bat.module.geometrtic_configuration.parallel_count     = 40
     bat.thermal_management_system                          = RCAIDE.Energy.Thermal_Management.Batteries.Atmospheric_Air_Convection_Heat_Exchanger()      
@@ -797,7 +797,7 @@ def vehicle_setup():
     #------------------------------------------------------------------------------------------------------------------------------------           
     # Motors 
     #------------------------------------------------------------------------------------------------------------------------------------      
-    motor                         = RCAIDE.Energy.Converters.Motor()
+    motor                         = RCAIDE.Library.Components.Propulsors.Converters.DC_Motor()
     motor.efficiency              = 0.98 
     motor.nominal_voltage         = bat.pack.maximum_voltage 
     motor.no_load_current         = 1

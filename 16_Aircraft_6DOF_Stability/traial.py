@@ -660,13 +660,13 @@ def vehicle_setup() :
     #------------------------------------------------------------------------------------------------------------------------------------  
     # Battery   
     #------------------------------------------------------------------------------------------------------------------------------------  
-    bat                                                    = RCAIDE.Energy.Storages.Batteries.Lithium_Ion_NMC() 
+    bat                                                    = RCAIDE.Library.Components.Energy.Batteries.Lithium_Ion_NMC() 
     bat.pack.electrical_configuration.series               = 140   
     bat.pack.electrical_configuration.parallel             = 100
     initialize_from_circuit_configuration(bat)  
-    bat.module.number_of_modules                           = 14 
+    bat.pack.number_of_modules                           = 14 
     bat.module.geometrtic_configuration.total              = bat.pack.electrical_configuration.total
-    bat.module.voltage                                     = bat.pack.maximum_voltage/bat.module.number_of_modules 
+    bat.module.voltage                                     = bat.pack.maximum_voltage/bat.pack.number_of_modules 
     bat.module.geometrtic_configuration.normal_count       = 25
     bat.module.geometrtic_configuration.parallel_count     = 40
     bus.voltage                      =  bat.pack.maximum_voltage  
@@ -675,7 +675,7 @@ def vehicle_setup() :
     #------------------------------------------------------------------------------------------------------------------------------------  
     # Forward Cruise Propulsor System - Electronic Speed Controller    
     #------------------------------------------------------------------------------------------------------------------------------------  
-    propeller_esc                   = RCAIDE.Energy.Distributors.Electronic_Speed_Controller() 
+    propeller_esc                   = RCAIDE.Library.Components.Propulsors.Modulators.Electronic_Speed_Controller() 
     propeller_esc.efficiency        = 0.95  
     propeller_esc.tag               = 'propeller_esc'  
     propeller_esc.propulsor_group   = 'forward_propulsor'  
@@ -736,7 +736,7 @@ def vehicle_setup() :
     #------------------------------------------------------------------------------------------------------------------------------------  
     # Forward Cruise Propulsor System - Propeller Motors 
     #------------------------------------------------------------------------------------------------------------------------------------     
-    propeller_motor                          = RCAIDE.Energy.Converters.Motor()
+    propeller_motor                          = RCAIDE.Library.Components.Propulsors.Converters.DC_Motor()
     propeller_motor.efficiency               = 0.95
     propeller_motor.tag                      = 'propeller_motor_1'
     propeller_motor.origin                   = propeller.origin
@@ -762,7 +762,7 @@ def vehicle_setup() :
     #------------------------------------------------------------------------------------------------------------------------------------  
     # Lift Propulsor System - Electronic Speed Controller
     #------------------------------------------------------------------------------------------------------------------------------------    
-    lift_rotor_esc                   = RCAIDE.Energy.Distributors.Electronic_Speed_Controller()
+    lift_rotor_esc                   = RCAIDE.Library.Components.Propulsors.Modulators.Electronic_Speed_Controller()
     lift_rotor_esc.propulsor_group   = 'lift_propulsor'
     lift_rotor_esc.efficiency        = 0.95
     for i in range(8):
@@ -821,7 +821,7 @@ def vehicle_setup() :
     #------------------------------------------------------------------------------------------------------------------------------------               
     # Lift Propulsor System - Lift Rotor Motors 
     #------------------------------------------------------------------------------------------------------------------------------------  
-    lift_rotor_motor                         = RCAIDE.Energy.Converters.Motor()
+    lift_rotor_motor                         = RCAIDE.Library.Components.Propulsors.Converters.DC_Motor()
     lift_rotor_motor.efficiency              = 0.9
     lift_rotor_motor.nominal_voltage         = bat.pack.maximum_voltage*3/4  
     lift_rotor_motor.origin                  = lift_rotor.origin 

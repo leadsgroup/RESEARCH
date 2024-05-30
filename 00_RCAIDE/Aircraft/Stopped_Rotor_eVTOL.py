@@ -613,17 +613,17 @@ def vehicle_setup() :
     forward_bus.tag                                        = 'forward_bus'
      
     # Battery    
-    forward_battery                                                    = RCAIDE.Energy.Storages.Batteries.Lithium_Ion_NMC() 
+    forward_battery                                                    = RCAIDE.Library.Components.Energy.Batteries.Lithium_Ion_NMC() 
     forward_battery.tag                                                = 'forward_bus_battery'
     forward_battery.pack.electrical_configuration.series               = 140   
     forward_battery.pack.electrical_configuration.parallel             = 60
     initialize_from_circuit_configuration(forward_battery)  
-    forward_battery.module.number_of_modules                           = 14 
+    forward_battery.pack.number_of_modules                           = 14 
     forward_battery.module.geometrtic_configuration.total              = forward_battery.pack.electrical_configuration.total
-    forward_battery.module.voltage                                     = forward_battery.pack.maximum_voltage/forward_battery.module.number_of_modules 
+    forward_battery.module.voltage                                     = forward_battery.pack.maximum_voltage/forward_battery.pack.number_of_modules 
     forward_battery.module.geometrtic_configuration.normal_count       = 25
     forward_battery.module.geometrtic_configuration.parallel_count     = 40 
-    forward_bus.voltage                                    =  forward_battery.pack.maximum_voltage  
+    forward_bus.voltage                                    =  forward_battery.pack.noninal_voltage  
     forward_bus.batteries.append(forward_battery)     
      
     # Payload   
@@ -687,14 +687,14 @@ def vehicle_setup() :
     lift_bus.tag                                                    = 'lift_bus' 
 
     # Battery    
-    lift_battery                                                    = RCAIDE.Energy.Storages.Batteries.Lithium_Ion_NMC() 
+    lift_battery                                                    = RCAIDE.Library.Components.Energy.Batteries.Lithium_Ion_NMC() 
     lift_battery.tag                                                = 'lift_bus_battery'
     lift_battery.pack.electrical_configuration.series               = 140   
     lift_battery.pack.electrical_configuration.parallel             = 20
     initialize_from_circuit_configuration(lift_battery)  
-    lift_battery.module.number_of_modules                           = 14 
+    lift_battery.pack.number_of_modules                           = 14 
     lift_battery.module.geometrtic_configuration.total              = lift_battery.pack.electrical_configuration.total
-    lift_battery.module.voltage                                     = lift_battery.pack.maximum_voltage/lift_battery.module.number_of_modules 
+    lift_battery.module.voltage                                     = lift_battery.pack.maximum_voltage/lift_battery.pack.number_of_modules 
     lift_battery.module.geometrtic_configuration.normal_count       = 25
     lift_battery.module.geometrtic_configuration.parallel_count     = 40 
     lift_bus.voltage                                                =  lift_battery.pack.maximum_voltage  

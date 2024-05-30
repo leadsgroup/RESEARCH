@@ -85,7 +85,7 @@ def main():
     
         # -------------------------------------------------------------------------------------------    
         # SET UP MISSION PROFILE  
-        # -------------------------------------------------------------------------------------------    
+        # ------------------------------------------------------------------------------------------- 
         base_mission      = Missions.baseline_mission_setup(configs_analyses,simulated_days,flights_per_day,control_points,recharge_battery,meta_data)
         missions_analyses = Missions.missions_setup(base_mission) 
     
