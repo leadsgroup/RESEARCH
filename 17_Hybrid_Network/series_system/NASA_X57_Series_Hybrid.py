@@ -9,7 +9,7 @@
 # RCAIDE imports 
 import RCAIDE
 from RCAIDE.Core import Units  
-from RCAIDE.Energy.Networks.Series_Hybrid_Network               import Series_Hybrid_Network
+from RCAIDE.Framework.Networks.Series_Hybrid_Network               import Series_Hybrid_Network
 from RCAIDE.Methods.Energy.Propulsors.Turboelectric_Propulsor   import design_turboelectric_turbine
 from RCAIDE.Methods.Energy.Propulsors.Converters.Rotor          import design_propeller 
 from RCAIDE.Methods.Energy.Propulsors.Converters.DC_Motor       import design_motor 
