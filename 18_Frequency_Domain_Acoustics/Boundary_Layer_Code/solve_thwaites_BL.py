@@ -36,7 +36,7 @@ def solve_thwaites_BL(l,Re_L,x_i,Ve_i,dVe_i, theta_0):
     return H,delta_star,delta,cf,theta,Re_x,Re_theta
 
 
-def getH(lambda_val ): 
+def getH(lambda_val): 
     """ Computes the shape factor, H
 
     Assumptions:

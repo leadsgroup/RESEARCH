@@ -8,16 +8,16 @@
 # ----------------------------------------------------------------------------------------------------------------------
 # RCAIDE imports 
 import RCAIDE
-from RCAIDE.Core import Units  
-from RCAIDE.Energy.Networks.Series_Hybrid_Network               import Series_Hybrid_Network
-from RCAIDE.Methods.Energy.Propulsors.Turboelectric_Propulsor   import design_turboelectric_turbine
-from RCAIDE.Methods.Energy.Propulsors.Converters.Rotor          import design_propeller 
-from RCAIDE.Methods.Energy.Propulsors.Converters.DC_Motor       import design_motor 
-from RCAIDE.Methods.Energy.Propulsors.Converters.Generator      import design_generator
-from RCAIDE.Methods.Weights.Correlation_Buildups.Propulsion     import nasa_motor
-from RCAIDE.Methods.Energy.Sources.Battery.Common               import initialize_from_circuit_configuration
-from RCAIDE.Methods.Geometry.Two_Dimensional.Planform           import wing_segmented_planform 
-from RCAIDE.Visualization                                                        import *     
+from RCAIDE.Framework.Core import Units  
+from RCAIDE.Framework.Networks.Series_Hybrid_Network               import Series_Hybrid_Network
+from RCAIDE.Library.Methods.Energy.Propulsors.Turboelectric_Propulsor   import design_turboelectric_turbine
+from RCAIDE.Library.Methods.Energy.Propulsors.Converters.Rotor          import design_propeller 
+from RCAIDE.Library.Methods.Energy.Propulsors.Converters.DC_Motor       import design_motor 
+from RCAIDE.Library.Methods.Energy.Propulsors.Converters.Generator      import design_generator
+from RCAIDE.Library.Methods.Weights.Correlation_Buildups.Propulsion     import nasa_motor
+from RCAIDE.Library.Methods.Energy.Sources.Battery.Common               import initialize_from_circuit_configuration
+from RCAIDE.Library.Methods.Geometry.Two_Dimensional.Planform           import wing_segmented_planform 
+from RCAIDE.Library.Plots import * 
 
 # python imports 
 import numpy as np 
@@ -711,21 +711,23 @@ def vehicle_setup():
     generator.connected_engine                 = ['right_turbine'] 
     generator.mass_properties.mass             = motor.mass_properties.mass
      
-    
+    net.hybrid_electrical_power_split_ratio 
     generator.no_load_torque                   = 20
-    generator.efficiency                       = 0.98    
+    generator.efficiency                       = 0.95    
     generator.nominal_voltage                  = bat.pack.maximum_voltage
     
     generator.shaft_radius = 0.1
     right_gas_turbine.shaft_radius = 0.08
     
+    
+    
     generator.shaft_input_power                = right_gas_turbine.low_pressure_turbine.inputs.shaft_power_off_take * right_gas_turbine.mechanical_efficiency
-    generator.design_power = 20000 #net.generator_power  # generator.design_power = generator.shaft_input_power * generator.efficiency
+    generator.design_power = 60000 #net.generator_power  # generator.design_power = generator.shaft_input_power * generator.efficiency
     
     generator.no_load_current = 1
     generator.current = generator.design_power / generator.nominal_voltage
     
-    generator.design_torque = 4000    #right_gas_turbine.shaft_torque * generator.shaft_radius / right_gas_turbine.shaft_radius
+    generator.design_torque = 400    #right_gas_turbine.shaft_torque * generator.shaft_radius / right_gas_turbine.shaft_radius
     generator.design_omega = generator.design_power/generator.design_torque
     
     #generator.current = generator.design_power / generator.nominal_voltag
@@ -764,8 +766,8 @@ def configs_setup(vehicle):
     #   Initialize Configurations
     # ------------------------------------------------------------------
 
-    configs     = RCAIDE.Components.Configs.Config.Container() 
-    base_config = RCAIDE.Components.Configs.Config(vehicle)
+    configs     = RCAIDE.Library.Components.Configs.Config.Container() 
+    base_config = RCAIDE.Library.Components.Configs.Config(vehicle)
     base_config.tag = 'base'  
     configs.append(base_config) 
 
@@ -779,7 +781,7 @@ def configs_setup(vehicle):
 
 def analyses_setup(configs):
 
-    analyses = RCAIDE.Analyses.Analysis.Container()
+    analyses = RCAIDE.Framework.Analyses.Analysis.Container()
 
     # build a base analysis for each config
     for tag,config in configs.items():
@@ -793,34 +795,34 @@ def base_analysis(vehicle):
     # ------------------------------------------------------------------
     #   Initialize the Analyses
     # ------------------------------------------------------------------     
-    analyses = RCAIDE.Analyses.Vehicle()
+    analyses = RCAIDE.Framework.Analyses.Vehicle()
  
     # ------------------------------------------------------------------
     #  Weights
-    weights = RCAIDE.Analyses.Weights.Weights_eVTOL()
+    weights = RCAIDE.Framework.Analyses.Weights.Weights_eVTOL()
     weights.vehicle = vehicle
     analyses.append(weights)
 
     # ------------------------------------------------------------------
     #  Aerodynamics Analysis
-    aerodynamics = RCAIDE.Analyses.Aerodynamics.Subsonic_VLM() 
+    aerodynamics = RCAIDE.Framework.Analyses.Aerodynamics.Subsonic_VLM() 
     aerodynamics.geometry = vehicle 
     analyses.append(aerodynamics)  
  
     # ------------------------------------------------------------------
     #  Energy
-    energy= RCAIDE.Analyses.Energy.Energy()
+    energy= RCAIDE.Framework.Analyses.Energy.Energy()
     energy.networks= vehicle.networks 
     analyses.append(energy)
 
     # ------------------------------------------------------------------
     #  Planet Analysis
-    planet = RCAIDE.Analyses.Planets.Planet()
+    planet = RCAIDE.Framework.Analyses.Planets.Planet()
     analyses.append(planet)
 
     # ------------------------------------------------------------------
     #  Atmosphere Analysis
-    atmosphere = RCAIDE.Analyses.Atmospheric.US_Standard_1976()
+    atmosphere = RCAIDE.Framework.Analyses.Atmospheric.US_Standard_1976()
     atmosphere.features.planet = planet.features
     analyses.append(atmosphere)   
     
@@ -837,11 +839,11 @@ def mission_setup(analyses):
     # ------------------------------------------------------------------
     #   Initialize the Mission
     # ------------------------------------------------------------------
-    mission = RCAIDE.Analyses.Mission.Sequential_Segments()
+    mission = RCAIDE.Framework.Mission.Sequential_Segments()
     mission.tag = 'mission' 
 
     # unpack Segments module
-    Segments = RCAIDE.Analyses.Mission.Segments  
+    Segments = RCAIDE.Framework.Mission.Segments  
     base_segment = Segments.Segment() 
     
     # ------------------------------------------------------------------
@@ -1001,7 +1003,7 @@ def mission_setup(analyses):
 
 def missions_setup(mission): 
  
-    missions         = RCAIDE.Analyses.Mission.Missions()
+    missions         = RCAIDE.Framework.Mission.Missions()
     
     # base mission 
     mission.tag  = 'base_mission'
