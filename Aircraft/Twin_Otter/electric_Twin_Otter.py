@@ -715,37 +715,39 @@ def mission_setup(analyses):
     bat                   = vehicle.networks.all_electric.busses.bus.batteries.lithium_ion_nmc
     Charging_C_Rate       = 2
     pack_charging_current = bat.cell.nominal_capacity * Charging_C_Rate *  bat.pack.electrical_configuration.series
-    pack_capacity_Ah      =  bat.cell.nominal_capacity * bat.pack.electrical_configuration.parallel
+    pack_capacity_Ah      = bat.cell.nominal_capacity * bat.pack.electrical_configuration.parallel
     charging_time         = (pack_capacity_Ah)/pack_charging_current * Units.hrs
     
 
-    ## ------------------------------------------------------------------
-    ##   Taxi 
-    ## ------------------------------------------------------------------      
-    #segment = Segments.Ground.Taxi(base_segment)
-    #segment.tag = "Taxi"  
-    #segment.analyses.extend( analyses.max_hex_operation ) 
-    #segment.velocity                                        = Vstall  
-    #segment.friction_coefficient                             = 0.04 
-    #segment.state.unknowns.elapsed_time                      = 10.            
-    #segment.altitude                                         = 0.0      
-    #segment.initial_battery_state_of_charge                  = 1.0 
-    #mission.append_segment(segment)  
+    # ------------------------------------------------------------------
+    #   Taxi 
+    # ------------------------------------------------------------------      
+    segment = Segments.Ground.Taxi(base_segment)
+    segment.tag = "Taxi"  
+    segment.analyses.extend( analyses.max_hex_operation)  
+    segment.velocity                                      = 25 * Units.knots 
+    segment.initial_battery_state_of_charge               = 1.0
+
+    segment.flight_dynamics.force_x                       = True   
+    segment.flight_controls.throttle.active               = True           
+    segment.flight_controls.throttle.assigned_propulsors  = [['starboard_propulsor','port_propulsor']]
     
-    ## ------------------------------------------------------------------
-    ##   Takeoff
-    ## ------------------------------------------------------------------      
-    #segment = Segments.Ground.Takeoff(base_segment)
-    #segment.tag = "Takeoff"  
-    #segment.analyses.extend( analyses.max_hex_operation )
-    #segment.velocity_start                                   = Vstall*0.1  
-    #segment.velocity_end                                     = Vstall  
-    #segment.friction_coefficient                             = 0.04 
-    #segment.state.unknowns.elapsed_time                      = 10.            
-    #segment.altitude                                         = 0.0      
-    #segment.initial_battery_state_of_charge                  = 1.0 
+    mission.append_segment(segment)  
+    
+    # ------------------------------------------------------------------
+    #   Takeoff
+    # ------------------------------------------------------------------      
+    segment = Segments.Ground.Takeoff(base_segment)
+    segment.tag = "Takeoff"  
+    segment.analyses.extend( analyses.max_hex_operation ) 
+    segment.velocity_end                                     = Vstall*1.2  
+    segment.friction_coefficient                             = 0.04   
+    segment.throttle                                         = 0.8   
+    
+    segment.flight_dynamics.force_x                           = True 
+    segment.flight_controls.elapsed_time.active               = True         
    
-    #mission.append_segment(segment) 
+    mission.append_segment(segment) 
   
     
     # ------------------------------------------------------------------
@@ -756,11 +758,8 @@ def mission_setup(analyses):
     segment.analyses.extend( analyses.max_hex_operation )  
     segment.altitude_start                                = 0.0 * Units.feet
     segment.altitude_end                                  = 50.0 * Units.feet
-    segment.air_speed_start                               = 45  * Units['m/s'] 
-    segment.air_speed_end                                 = 45
-
-    segment.initial_battery_state_of_charge               = 1.0
-    
+    segment.air_speed_start                               = Vstall *1.2  
+    segment.air_speed_end                                 = Vstall *1.25  
             
     # define flight dynamics to model 
     segment.flight_dynamics.force_x                       = True  
@@ -781,7 +780,7 @@ def mission_setup(analyses):
     segment.analyses.extend( analyses.max_hex_operation )   
     segment.altitude_start                                = 50.0 * Units.feet
     segment.altitude_end                                  = 500.0 * Units.feet 
-    segment.air_speed_end                                 = 50 * Units['m/s']   
+    segment.air_speed_end                                 = Vstall *1.3 
     segment.climb_rate                                    = 600 * Units['ft/min']   
     
     # define flight dynamics to model 
@@ -1012,19 +1011,18 @@ def mission_setup(analyses):
     mission.append_segment(segment)  
 
 
-    ## ------------------------------------------------------------------
-    ##   Landing  
-    ## ------------------------------------------------------------------  
-    #segment = Segments.Ground.Landing(base_segment)
-    #segment.tag = "Landing"   
-    #segment.analyses.extend( analyses.hex_descent_operation) 
-    #segment.velocity_start                                   = Vstall  
-    #segment.velocity_end                                     = Vstall*0.1  
-    #segment.friction_coefficient                             = 0.04 
-    #segment.state.unknowns.elapsed_time                      = 30.            
-    #segment.altitude                                         = 0.0  
-    #segment.state.unknowns.velocity_x                        = 0.1* Vstall  
-    #mission.append_segment(segment)
+    # ------------------------------------------------------------------
+    #   Landing  
+    # ------------------------------------------------------------------  
+    segment = Segments.Ground.Landing(base_segment)
+    segment.tag = "Landing"   
+    segment.analyses.extend( analyses.hex_descent_operation)  
+    segment.velocity_end                                     = Vstall*0.1  
+    
+    segment.flight_dynamics.force_x                           = True 
+    segment.flight_controls.elapsed_time.active               = True
+    
+    mission.append_segment(segment)
     
     # ------------------------------------------------------------------
     #  Charge Segment: 
