@@ -30,7 +30,7 @@ import matplotlib.pyplot        as plt
 
 def main():
 
-    BTMS_flag = True 
+    BTMS_flag = True
     
     # vehicle data
     vehicle  = vehicle_setup(BTMS_flag)
@@ -478,10 +478,10 @@ def vehicle_setup(BTMS_flag):
     bat.pack.electrical_configuration.parallel             = 250   
     bat.cell.nominal_capacity                              = 3.8  
     initialize_from_circuit_configuration(bat,module_weight_factor = 1.25)  
-    bat.module.number_of_modules                           = 12
+    bat.pack.number_of_modules                           = 12
     bat.module.geometrtic_configuration.total              = bat.pack.electrical_configuration.total
-    bat.module.voltage                                     = bat.pack.maximum_voltage/bat.module.number_of_modules # assumes modules are connected in parallel, must be less than max_module_voltage (~50) /safety_factor (~ 1.5)  
-    bat.module.geometrtic_configuration.normal_count       = bat.module.geometrtic_configuration.total/bat.module.number_of_modules / 40
+    bat.module.voltage                                     = bat.pack.maximum_voltage/bat.pack.number_of_modules # assumes modules are connected in parallel, must be less than max_module_voltage (~50) /safety_factor (~ 1.5)  
+    bat.module.geometrtic_configuration.normal_count       = bat.module.geometrtic_configuration.total/bat.pack.number_of_modules / 50
     bat.module.geometrtic_configuration.parallel_count     = 50
     bus.voltage                                            = bat.pack.maximum_voltage 
   
@@ -497,7 +497,7 @@ def vehicle_setup(BTMS_flag):
         atmo_data                                              = atmosphere.compute_values(altitude = HAS.design_altitude)     
         HAS.coolant_inlet_temperature                          = atmo_data.temperature[0,0]  
         HAS.design_battery_operating_temperature               = 313
-        HAS.design_heat_removed                                = 50000  
+        HAS.design_heat_removed                                = 25000  
         HAS                                                    = design_wavy_channel(HAS,bat) 
         bat.thermal_management_system.heat_removal_system      = HAS
     
@@ -507,12 +507,7 @@ def vehicle_setup(BTMS_flag):
         HEX.inlet_temperature_of_cold_fluid                    = atmo_data.temperature[0,0]   
         HEX                                                    = design_cross_flow_heat_exchanger(HEX,HAS,bat)
         bat.thermal_management_system.heat_exchanger_system    = HEX  
-    
-        # Battery Heat Addition System 
-        #HAA                                                    = RCAIDE.Energy.Thermal_Management.Batteries.Heat_Addition_Systems.Coil_Heat_Addition()
-        #HAA.design_heat_to_add                                 = 15000 #W
-        #HAA                                                    = design_heating_coil(HAA,RES,bat)
-        #bat.thermal_management_system.heat_addition_system     = HAA 
+
     
     bus.batteries.append(bat)            
     
@@ -640,48 +635,60 @@ def configs_setup(vehicle):
     #   Initialize Configurations
     # ------------------------------------------------------------------
 
-    configs     = RCAIDE.Library.Components.Configs.Config.Container() 
-    base_config = RCAIDE.Library.Components.Configs.Config(vehicle)
+    configs         = RCAIDE.Library.Components.Configs.Config.Container() 
+    base_config     = RCAIDE.Library.Components.Configs.Config(vehicle)
     base_config.tag = 'base'  
-    configs.append(base_config) 
+    configs.append(base_config)
     
-
-    config = RCAIDE.Library.Components.Configs.Config(vehicle)
-    config.tag = 'max_hex_operation'  
-    config.networks.all_electric.busses.bus.batteries.lithium_ion_nmc.thermal_management_system.heat_exchanger_system.percent_operation = 1 
-    config.networks.all_electric.busses.bus.batteries.lithium_ion_nmc.thermal_management_system.heat_acquisition_system.percent_operation = 1
-    configs.append(config) 
+    config                                                = RCAIDE.Library.Components.Configs.Config(vehicle) 
+    config.tag                                            = 'max_hex_operation'
+    config_tms                                            = config.networks.all_electric.busses.bus.batteries.lithium_ion_nmc.thermal_management_system
+    config_tms.heat_exchanger_system.percent_operation    = 1 
+    config_tms.heat_acquisition_system.percent_operation  = 1
+    config_tms.heat_exchanger_system.fan_operation        = True
+    configs.append(config)  
      
-    config = RCAIDE.Library.Components.Configs.Config(vehicle)
-    config.tag = 'hex_low_alt_climb_operation'  
-    config.networks.all_electric.busses.bus.batteries.lithium_ion_nmc.thermal_management_system.heat_exchanger_system.percent_operation = 0.5
-    config.networks.all_electric.busses.bus.batteries.lithium_ion_nmc.thermal_management_system.heat_acquisition_system.percent_operation = 0.5
+ 
+    config                                                = RCAIDE.Library.Components.Configs.Config(vehicle)   
+    config.tag                                            = 'hex_low_alt_climb_operation'
+    config_tms                                            = config.networks.all_electric.busses.bus.batteries.lithium_ion_nmc.thermal_management_system
+    config_tms.heat_exchanger_system.percent_operation    = 0.5
+    config_tms.heat_acquisition_system.percent_operation  = 0.5
+    config_tms.heat_exchanger_system.fan_operation        = True
     configs.append(config)     
 
-    config = RCAIDE.Library.Components.Configs.Config(vehicle)
-    config.tag = 'hex_high_alt_climb_operation'  
-    config.networks.all_electric.busses.bus.batteries.lithium_ion_nmc.thermal_management_system.heat_exchanger_system.percent_operation = 0.5
-    config.networks.all_electric.busses.bus.batteries.lithium_ion_nmc.thermal_management_system.heat_acquisition_system.percent_operation = 0.5
+    config                                                = RCAIDE.Library.Components.Configs.Config(vehicle)
+    config.tag                                            = 'hex_high_alt_climb_operation'
+    config_tms                                            = config.networks.all_electric.busses.bus.batteries.lithium_ion_nmc.thermal_management_system
+    config_tms.heat_exchanger_system.percent_operation    = 0.2
+    config_tms.heat_acquisition_system.percent_operation  = 0.5
+    config_tms.heat_exchanger_system.fan_operation        = True
     configs.append(config)        
 
-    config = RCAIDE.Library.Components.Configs.Config(vehicle)
-    config.tag = 'hex_cruise_operation'  
-    config.networks.all_electric.busses.bus.batteries.lithium_ion_nmc.thermal_management_system.heat_exchanger_system.percent_operation = 0.3
-    config.networks.all_electric.busses.bus.batteries.lithium_ion_nmc.thermal_management_system.heat_acquisition_system.percent_operation = 0.3
+    config                                                = RCAIDE.Library.Components.Configs.Config(vehicle) 
+    config.tag                                            = 'hex_cruise_operation'
+    config_tms                                            = config.networks.all_electric.busses.bus.batteries.lithium_ion_nmc.thermal_management_system
+    config_tms.heat_exchanger_system.percent_operation    = 0.1
+    config_tms.heat_acquisition_system.percent_operation  = 0.8
+    config_tms.heat_exchanger_system.fan_operation        = False
     configs.append(config)         
     
 
-    config = RCAIDE.Library.Components.Configs.Config(vehicle)
-    config.tag = 'hex_descent_operation'  
-    config.networks.all_electric.busses.bus.batteries.lithium_ion_nmc.thermal_management_system.heat_exchanger_system.percent_operation = 0.2
-    config.networks.all_electric.busses.bus.batteries.lithium_ion_nmc.thermal_management_system.heat_acquisition_system.percent_operation = 0.2
+    config                                               = RCAIDE.Library.Components.Configs.Config(vehicle) 
+    config.tag                                           = 'hex_descent_operation'
+    config_tms                                           = config.networks.all_electric.busses.bus.batteries.lithium_ion_nmc.thermal_management_system
+    config_tms.heat_exchanger_system.percent_operation   = 0.1
+    config_tms.heat_acquisition_system.percent_operation = 0.8
+    config_tms.heat_exchanger_system.fan_operation       = False
     configs.append(config)                   
  
 
-    config = RCAIDE.Library.Components.Configs.Config(vehicle)
-    config.tag = 'recharge'  
-    config.networks.all_electric.busses.bus.batteries.lithium_ion_nmc.thermal_management_system.heat_exchanger_system.percent_operation   = 0.5 
-    config.networks.all_electric.busses.bus.batteries.lithium_ion_nmc.thermal_management_system.heat_acquisition_system.percent_operation = 0.5 
+    config                                               = RCAIDE.Library.Components.Configs.Config(vehicle)
+    config.tag                                           = 'recharge'
+    config_tms                                           = config.networks.all_electric.busses.bus.batteries.lithium_ion_nmc.thermal_management_system
+    config_tms.heat_exchanger_system.percent_operation   = 1.0
+    config_tms.heat_acquisition_system.percent_operation = 1.0
+    config_tms.heat_exchanger_system.fan_operation       = True
     configs.append(config)  
  
     return configs
@@ -702,7 +709,8 @@ def mission_setup(analyses):
 
     # unpack Segments module
     Segments = RCAIDE.Framework.Mission.Segments  
-    base_segment = Segments.Segment() 
+    base_segment = Segments.Segment()
+    base_segment.temperature_deviation  = -25
   
 
     # VSTALL Calculation  
@@ -713,7 +721,7 @@ def mission_setup(analyses):
     
 
     bat                   = vehicle.networks.all_electric.busses.bus.batteries.lithium_ion_nmc
-    Charging_C_Rate       = 2
+    Charging_C_Rate       = 1
     pack_charging_current = bat.cell.nominal_capacity * Charging_C_Rate *  bat.pack.electrical_configuration.series
     pack_capacity_Ah      = bat.cell.nominal_capacity * bat.pack.electrical_configuration.parallel
     charging_time         = (pack_capacity_Ah)/pack_charging_current * Units.hrs
@@ -848,7 +856,7 @@ def mission_setup(analyses):
     segment.analyses.extend(analyses.hex_cruise_operation) 
     segment.altitude                                      = 5000   * Units.feet 
     segment.air_speed                                     = 130 * Units.kts
-    segment.distance                                      = 50.   * Units.nautical_mile  
+    segment.distance                                      = 60.   * Units.nautical_mile  
     
     # define flight dynamics to model 
     segment.flight_dynamics.force_x                       = True  
@@ -1030,7 +1038,7 @@ def mission_setup(analyses):
     # Charge Model 
     segment                               = Segments.Ground.Battery_Recharge(base_segment)     
     segment.tag  = 'Charge_Day'
-    segment.state.numerics.number_of_control_points  = 32 
+    segment.state.numerics.number_of_control_points  = 64 
     segment.analyses.extend(analyses.recharge)  
     segment.time                          = charging_time 
     segment.current                       = pack_charging_current        
@@ -1059,25 +1067,25 @@ def missions_setup(mission):
 
 def plot_mission(results):
     
-    plot_propulsor_throttles(results)
+    #plot_propulsor_throttles(results)
     
     plot_flight_conditions(results) 
     
-    plot_aerodynamic_forces(results)
+    #plot_aerodynamic_forces(results)
 
-    plot_aerodynamic_coefficients(results)  
+    #plot_aerodynamic_coefficients(results)  
     
-    plot_aircraft_velocities(results)
+    #plot_aircraft_velocities(results)
     
     plot_battery_pack_conditions(results)
     
-    plot_battery_cell_conditions(results)
+    #plot_battery_cell_conditions(results)
     
-    plot_battery_degradation(results)
+    #plot_battery_degradation(results)
 
-    plot_rotor_conditions(results) 
+    #plot_rotor_conditions(results) 
 
-    plot_electric_propulsor_efficiencies(results) 
+    #plot_electric_propulsor_efficiencies(results) 
     
     plot_heat_acquisition_system_conditions(results)
 
