@@ -475,7 +475,7 @@ def vehicle_setup(BTMS_flag):
     #------------------------------------------------------------------------------------------------------------------------------------  
     bat                                                    = RCAIDE.Library.Components.Energy.Batteries.Lithium_Ion_NMC()
     bat.pack.electrical_configuration.series               = 120  
-    bat.pack.electrical_configuration.parallel             = 250   
+    bat.pack.electrical_configuration.parallel             = 210   #250
     bat.cell.nominal_capacity                              = 3.8  
     initialize_from_circuit_configuration(bat,module_weight_factor = 1.25)  
     bat.pack.number_of_modules                           = 12
@@ -639,6 +639,16 @@ def configs_setup(vehicle):
     base_config     = RCAIDE.Library.Components.Configs.Config(vehicle)
     base_config.tag = 'base'  
     configs.append(base_config)
+
+    
+    config                                                = RCAIDE.Library.Components.Configs.Config(vehicle) 
+    config.tag                                            = 'no_hex_operation'
+    config_tms                                            = config.networks.all_electric.busses.bus.batteries.lithium_ion_nmc.thermal_management_system
+    config_tms.heat_exchanger_system.percent_operation    = 0 
+    config_tms.heat_acquisition_system.percent_operation  = 0
+    config_tms.heat_exchanger_system.fan_operation        = False
+    configs.append(config)  
+     
     
     config                                                = RCAIDE.Library.Components.Configs.Config(vehicle) 
     config.tag                                            = 'max_hex_operation'
@@ -730,11 +740,20 @@ def mission_setup(analyses):
     # ------------------------------------------------------------------
     #   Taxi 
     # ------------------------------------------------------------------      
+    segment = Segments.Ground.Idle(base_segment)
+    segment.tag = "Idle"  
+    segment.analyses.extend(analyses.no_hex_operation)  
+    segment.time                               = 0.5 * Units.hr
+    segment.initial_battery_state_of_charge    = 1.0  
+    mission.append_segment(segment)
+     
+    # ------------------------------------------------------------------
+    #   Taxi 
+    # ------------------------------------------------------------------      
     segment = Segments.Ground.Taxi(base_segment)
     segment.tag = "Taxi"  
     segment.analyses.extend( analyses.max_hex_operation)  
-    segment.velocity                                      = 25 * Units.knots 
-    segment.initial_battery_state_of_charge               = 1.0
+    segment.velocity                                      = 25 * Units.knots  
 
     segment.flight_dynamics.force_x                       = True   
     segment.flight_controls.throttle.active               = True           
@@ -856,7 +875,7 @@ def mission_setup(analyses):
     segment.analyses.extend(analyses.hex_cruise_operation) 
     segment.altitude                                      = 5000   * Units.feet 
     segment.air_speed                                     = 130 * Units.kts
-    segment.distance                                      = 60.   * Units.nautical_mile  
+    segment.distance                                      = 20.   * Units.nautical_mile  
     
     # define flight dynamics to model 
     segment.flight_dynamics.force_x                       = True  
