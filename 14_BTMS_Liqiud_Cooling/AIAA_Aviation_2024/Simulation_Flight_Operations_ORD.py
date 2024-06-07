@@ -24,12 +24,6 @@ import Vehicle
 import Analyses 
 import Missions
 import Plots  
-try:
-    #import vsp 
-    from RCAIDE.Input_Output.OpenVSP.vsp_write import write 
-except ImportError:
-    # This allows RCAIDE to build without OpenVSP
-    pass   
 
 # ----------------------------------------------------------------------
 #   Main
@@ -37,7 +31,7 @@ except ImportError:
 def main():  
     # start simulation clock
     ti                         = time.time()
-    RUN_NEW_MODEL_FLAG         = True 
+    RUN_NEW_MODEL_FLAG         = False 
     
     # -------------------------------------------------------------------------------------------    
     # SET UP SIMULATION PARAMETERS   
@@ -46,8 +40,8 @@ def main():
     flights_per_day            = 1               # number of flights per day   
     recharge_battery           = True            # flag to simulate battery recharge  
     plot_mission               = True            # plot mission flag  
-    resize_aircraft            = True
-    aircraft_range             = 50 *Units.nmi   # total ground distance  
+    resize_aircraft            = False
+    #aircraft_range             = 50 *Units.nmi   # total ground distance  
     
 
     if RUN_NEW_MODEL_FLAG:    
@@ -73,24 +67,24 @@ def main():
         # -------------------------------------------------------------------------------------------    
         # SAVE RESULTS
         # -------------------------------------------------------------------------------------------
-        filename          = 'CTOL_Baseline'
+        filename          = 'Simulation_Result_Twin_Otter_ORD'
         save_results(results,filename)   
     
     else:
-        filename          = 'CTOL_Baseline'
+        filename          = 'Simulation_Result_Twin_Otter_ORD'
         results = load_results(filename) 
         
     if plot_mission: 
-        Plots.plot_results(results,save_figure_flag = True)       
+        Plots.plot_results(results,save_figure_flag = False)       
     
     
     tf = time.time() 
     print ('time taken: '+ str(round(((tf-ti)/60),3)) + ' mins')   
     
     
-    elapsed_range = results.segments[-1].conditions.frames.inertial.aircraft_range[-1,0]
-    print('True Range     : ' + str(round(meta_data.flight_range/Units.nmi,2))  + ' nmi')   
-    print('Computed Range : ' + str(round(elapsed_range/Units.nmi,2)) + ' nmi')   
+    #elapsed_range = results.segments[-1].conditions.frames.inertial.aircraft_range[-1,0]
+    #print('True Range     : ' + str(round(meta_data.flight_range/Units.nmi,2))  + ' nmi')   
+    #print('Computed Range : ' + str(round(elapsed_range/Units.nmi,2)) + ' nmi')   
         
     return 
 

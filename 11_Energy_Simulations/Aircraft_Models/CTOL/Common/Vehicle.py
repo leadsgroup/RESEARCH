@@ -462,7 +462,7 @@ def vehicle_setup(resize_aircraft,vehicle_name = 'CTOL_CRM') :
         bat.module.geometrtic_configuration.normal_count       = 25
         bat.module.geometrtic_configuration.parallel_count     = 80 # 52 
         bus.voltage                                            = bat.pack.maximum_voltage   
-        BTMS_flag = True
+        BTMS_flag = False
         if BTMS_flag:
             # Reservoir for Battery TMS
             RES                                                    = RCAIDE.Library.Components.Thermal_Management.Common.Reservoirs.Reservoir()

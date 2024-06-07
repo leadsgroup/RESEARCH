@@ -13,7 +13,7 @@ from RCAIDE.Library.Plots                                           import *
 # ----------------------------------------------------------------------
 #   Plot Results
 # ----------------------------------------------------------------------  
-def plot_results(results,run_noise_model,save_figure_flag):  
+def plot_results(results,save_figure_flag):  
     
     #plot_propulsor_throttles(results)
     
