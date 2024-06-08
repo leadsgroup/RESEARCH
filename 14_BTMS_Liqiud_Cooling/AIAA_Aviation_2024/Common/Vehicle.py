@@ -23,6 +23,7 @@ from RCAIDE.Library.Methods.Energy.Thermal_Management.Batteries.Wavy_Channel_Hea
 import numpy as np 
 from copy import deepcopy
 import os 
+import matplotlib.pyplot        as plt
 import pickle
 
 # ----------------------------------------------------------------------
@@ -36,12 +37,14 @@ def vehicle_setup(resize_aircraft,vehicle_name) :
     
     if resize_aircraft:
     
+        
+    
         #------------------------------------------------------------------------------------------------------------------------------------
         #   Initialize the Vehicle
         #------------------------------------------------------------------------------------------------------------------------------------
     
         vehicle = RCAIDE.Vehicle()
-        vehicle.tag   = vehicle_name
+        vehicle.tag = 'Twin_Otter'
     
      
         # ################################################# Vehicle-level Properties ########################################################  
@@ -93,7 +96,7 @@ def vehicle_setup(resize_aircraft,vehicle_name) :
         wing.dynamic_pressure_ratio           = 1.0  
         ospath                                = os.path.abspath(__file__)
         separator                             = os.path.sep
-        rel_path                              = os.path.dirname(ospath) + separator + '..' + separator + '..' + separator + '..' + separator 
+        rel_path                              = os.path.dirname(ospath) + separator + '..' + separator +'..' + separator + '..' + separator 
         airfoil                               = RCAIDE.Library.Components.Airfoils.Airfoil()
         airfoil.tag                           = 'Clark_y' 
         airfoil.coordinate_file               = rel_path + 'Airfoils' + separator + 'Clark_y.txt'   # absolute path     
@@ -451,17 +454,17 @@ def vehicle_setup(resize_aircraft,vehicle_name) :
         # Battery
         #------------------------------------------------------------------------------------------------------------------------------------  
         bat                                                    = RCAIDE.Library.Components.Energy.Batteries.Lithium_Ion_NMC()
-        bat.pack.electrical_configuration.series               = 200 # 130
-        bat.pack.electrical_configuration.parallel             = 180 # 200   
-        bat.cell.nominal_capacity                              = 3.8 #55  
+        bat.pack.electrical_configuration.series               = 120  
+        bat.pack.electrical_configuration.parallel             = 210   #250
+        bat.cell.nominal_capacity                              = 3.8  
         initialize_from_circuit_configuration(bat,module_weight_factor = 1.25)  
-        bat.pack.number_of_modules                             = 20 
+        bat.pack.number_of_modules                           = 12
         bat.module.geometrtic_configuration.total              = bat.pack.electrical_configuration.total
         bat.module.voltage                                     = bat.pack.maximum_voltage/bat.pack.number_of_modules # assumes modules are connected in parallel, must be less than max_module_voltage (~50) /safety_factor (~ 1.5)  
-        bat.module.geometrtic_configuration.normal_count       = 25
-        bat.module.geometrtic_configuration.parallel_count     = 80 # 52 
-        bus.voltage                                            = bat.pack.maximum_voltage   
-        BTMS_flag = False
+        bat.module.geometrtic_configuration.normal_count       = bat.module.geometrtic_configuration.total/bat.pack.number_of_modules / 50
+        bat.module.geometrtic_configuration.parallel_count     = 50
+        bus.voltage                                            = bat.pack.maximum_voltage 
+        BTMS_flag = True
         if BTMS_flag:
             # Reservoir for Battery TMS
             RES                                                    = RCAIDE.Library.Components.Thermal_Management.Common.Reservoirs.Reservoir()
@@ -474,7 +477,7 @@ def vehicle_setup(resize_aircraft,vehicle_name) :
             atmo_data                                              = atmosphere.compute_values(altitude = HAS.design_altitude)     
             HAS.coolant_inlet_temperature                          = atmo_data.temperature[0,0]  
             HAS.design_battery_operating_temperature               = 313
-            HAS.design_heat_removed                                = 50000  
+            HAS.design_heat_removed                                = 25000  
             HAS                                                    = design_wavy_channel(HAS,bat) 
             bat.thermal_management_system.heat_removal_system      = HAS
         
@@ -484,8 +487,8 @@ def vehicle_setup(resize_aircraft,vehicle_name) :
             HEX.inlet_temperature_of_cold_fluid                    = atmo_data.temperature[0,0]   
             HEX                                                    = design_cross_flow_heat_exchanger(HEX,HAS,bat)
             bat.thermal_management_system.heat_exchanger_system    = HEX  
+    
         
-          
         bus.batteries.append(bat)            
         
     
@@ -516,7 +519,7 @@ def vehicle_setup(resize_aircraft,vehicle_name) :
         propeller.cruise.design_angular_velocity         = propeller.cruise.design_tip_mach *speed_of_sound/propeller.tip_radius
         propeller.cruise.design_Cl                       = 0.7
         propeller.cruise.design_altitude                 = 8000. * Units.feet 
-        propeller.cruise.design_thrust                   = 15000  # 100000
+        propeller.cruise.design_thrust                   = 12500  
         propeller.clockwise_rotation                     = False
         propeller.variable_pitch                         = True  
         propeller.origin                                 = [[3.5,2.8129,1.22 ]]   
@@ -537,8 +540,8 @@ def vehicle_setup(resize_aircraft,vehicle_name) :
         motor                                            = RCAIDE.Library.Components.Propulsors.Converters.DC_Motor()
         motor.efficiency                                 = 0.98
         motor.origin                                     = [[4.0,2.8129,1.22 ]]   
-        motor.nominal_voltage                            = bat.pack.maximum_voltage * 0.8
-        motor.no_load_current                            = 1 # 2
+        motor.nominal_voltage                            = bat.pack.maximum_voltage 
+        motor.no_load_current                            = 1
         motor.rotor_radius                               = propeller.tip_radius
         motor.design_torque                              = propeller.cruise.design_torque 
         motor.angular_velocity                           = propeller.cruise.design_angular_velocity # Horse power of gas engine variant  750 * Units['hp']
@@ -599,11 +602,12 @@ def vehicle_setup(resize_aircraft,vehicle_name) :
         #------------------------------------------------------------------------------------------------------------------------------------   
         converge_weight(vehicle) 
         breakdown = compute_weight(vehicle)
-        print(breakdown)          
+        print(breakdown)
+    
         vehicle.weight_breakdown  = breakdown
         #compute_component_centers_of_gravity(vehicle)
         #vehicle.center_of_gravity() 
-        save_aircraft_geometry(vehicle,vehicle.tag)        
+        save_aircraft_geometry(vehicle,vehicle_name)        
         
     else: 
         vehicle = load_aircraft_geometry(vehicle_name) 
@@ -615,7 +619,7 @@ def vehicle_setup(resize_aircraft,vehicle_name) :
 # ---------------------------------------------------------------------
 #   Define the Configurations
 # --------------------------------------------------------------------- 
-def configs_setup(vehicle):
+def configs_setup(vehicle, tms_operation, f_idx):
 
     # ------------------------------------------------------------------
     #   Initialize Configurations
@@ -630,8 +634,8 @@ def configs_setup(vehicle):
     config                                                = RCAIDE.Library.Components.Configs.Config(vehicle) 
     config.tag                                            = 'no_hex_operation'
     config_tms                                            = config.networks.all_electric.busses.bus.batteries.lithium_ion_nmc.thermal_management_system
-    config_tms.heat_exchanger_system.percent_operation    = 0 
-    config_tms.heat_acquisition_system.percent_operation  = 0
+    config_tms.heat_exchanger_system.percent_operation    = tms_operation['no_hex_operation_hex'][f_idx]
+    config_tms.heat_acquisition_system.percent_operation  = tms_operation['no_hex_operation_has'][f_idx]
     config_tms.heat_exchanger_system.fan_operation        = False
     configs.append(config)  
      
@@ -639,8 +643,8 @@ def configs_setup(vehicle):
     config                                                = RCAIDE.Library.Components.Configs.Config(vehicle) 
     config.tag                                            = 'max_hex_operation'
     config_tms                                            = config.networks.all_electric.busses.bus.batteries.lithium_ion_nmc.thermal_management_system
-    config_tms.heat_exchanger_system.percent_operation    = 1 
-    config_tms.heat_acquisition_system.percent_operation  = 1
+    config_tms.heat_exchanger_system.percent_operation    = tms_operation['max_hex_operation_hex'][f_idx] 
+    config_tms.heat_acquisition_system.percent_operation  = tms_operation['max_hex_operation_has'][f_idx]
     config_tms.heat_exchanger_system.fan_operation        = True
     configs.append(config)  
      
@@ -656,16 +660,16 @@ def configs_setup(vehicle):
     config                                                = RCAIDE.Library.Components.Configs.Config(vehicle)
     config.tag                                            = 'hex_high_alt_climb_operation'
     config_tms                                            = config.networks.all_electric.busses.bus.batteries.lithium_ion_nmc.thermal_management_system
-    config_tms.heat_exchanger_system.percent_operation    = 0.2
-    config_tms.heat_acquisition_system.percent_operation  = 0.5
+    config_tms.heat_exchanger_system.percent_operation    = tms_operation['hex_low_alt_climb_operation_hex'][f_idx]
+    config_tms.heat_acquisition_system.percent_operation  = tms_operation['hex_low_alt_climb_operation_has'][f_idx]
     config_tms.heat_exchanger_system.fan_operation        = True
     configs.append(config)        
 
     config                                                = RCAIDE.Library.Components.Configs.Config(vehicle) 
     config.tag                                            = 'hex_cruise_operation'
     config_tms                                            = config.networks.all_electric.busses.bus.batteries.lithium_ion_nmc.thermal_management_system
-    config_tms.heat_exchanger_system.percent_operation    = 0.1
-    config_tms.heat_acquisition_system.percent_operation  = 0.8
+    config_tms.heat_exchanger_system.percent_operation    = tms_operation['hex_cruise_operation_hex'][f_idx]
+    config_tms.heat_acquisition_system.percent_operation  = tms_operation['hex_cruise_operation_has'][f_idx]
     config_tms.heat_exchanger_system.fan_operation        = False
     configs.append(config)         
     
@@ -673,8 +677,8 @@ def configs_setup(vehicle):
     config                                               = RCAIDE.Library.Components.Configs.Config(vehicle) 
     config.tag                                           = 'hex_descent_operation'
     config_tms                                           = config.networks.all_electric.busses.bus.batteries.lithium_ion_nmc.thermal_management_system
-    config_tms.heat_exchanger_system.percent_operation   = 0.1
-    config_tms.heat_acquisition_system.percent_operation = 0.8
+    config_tms.heat_exchanger_system.percent_operation   = tms_operation['hex_descent_operation_hex'][f_idx]
+    config_tms.heat_acquisition_system.percent_operation = tms_operation['hex_descent_operation_has'][f_idx]
     config_tms.heat_exchanger_system.fan_operation       = False
     configs.append(config)                   
  
@@ -682,8 +686,8 @@ def configs_setup(vehicle):
     config                                               = RCAIDE.Library.Components.Configs.Config(vehicle)
     config.tag                                           = 'recharge'
     config_tms                                           = config.networks.all_electric.busses.bus.batteries.lithium_ion_nmc.thermal_management_system
-    config_tms.heat_exchanger_system.percent_operation   = 1.0
-    config_tms.heat_acquisition_system.percent_operation = 1.0
+    config_tms.heat_exchanger_system.percent_operation   = tms_operation['recharge_hex'][f_idx]
+    config_tms.heat_acquisition_system.percent_operation = tms_operation['recharge_has'][f_idx]
     config_tms.heat_exchanger_system.fan_operation       = True
     configs.append(config)  
  

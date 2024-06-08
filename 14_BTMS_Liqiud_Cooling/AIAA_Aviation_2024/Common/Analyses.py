@@ -2,8 +2,7 @@
 # Analyses.py
 # 
 # Created: May 2019, M Clarke
-#          Sep 2020, M.Clarke
-#          May 2024, S S. Shekar 
+#          Sep 2020, M.Clarke 
 
 '''
 
@@ -31,6 +30,7 @@ def analyses_setup(configs):
 # Base Analysis
 # ------------------------------------------------------------------
 def base_analysis(vehicle):
+                  
 
     # ------------------------------------------------------------------
     #   Initialize the Analyses
@@ -81,6 +81,5 @@ def base_analysis(vehicle):
     atmosphere = RCAIDE.Framework.Analyses.Atmospheric.US_Standard_1976()
     atmosphere.features.planet = planet.features
     analyses.append(atmosphere)   
-   
 
-    return analyses   
+    return analyses

@@ -16,109 +16,113 @@ import numpy as np
 from RCAIDE.Library.Methods.Performance.estimate_stall_speed   import estimate_stall_speed 
 from RCAIDE.Library.Methods.Utilities.Chebyshev  import chebyshev_data
 from RCAIDE.Library.Methods.Utilities.Chebyshev  import linear_data
-import Analyses
+
+import sys
+sys.path.append('Common')  
+
 import Vehicle
+import Analyses
 
 # ------------------------------------------------------------------
 #   Repeated Flight Operation Setup
 # ------------------------------------------------------------------
-def repeated_flight_operation_setup(vehicle,simulated_days,flights_per_day, recharge_battery):
+def repeated_flight_operation_setup(vehicle,simulated_days,flight_no, idle_time, taxi_time, cruise_distance, mean_temperature,tms_operation, recharge_battery, airport, month):
     
-     
     # ------------------------------------------------------------------
     #   Initialize the Mission
     # ------------------------------------------------------------------
     mission = RCAIDE.Framework.Mission.Sequential_Segments()
     mission.tag = 'mission' 
-
+    
+    atmosphere         = RCAIDE.Framework.Analyses.Atmospheric.US_Standard_1976() 
+    atmo_data          = atmosphere.compute_values(altitude = 0 ,temperature_deviation= 1.)
+    
+    # unpack Segments module
+    Segments = RCAIDE.Framework.Mission.Segments  
+    base_segment = Segments.Segment()
+    
+    
     bat                   = vehicle.networks.all_electric.busses.bus.batteries.lithium_ion_nmc
     Charging_C_Rate       = 1
     pack_charging_current = bat.cell.nominal_capacity * Charging_C_Rate *  bat.pack.electrical_configuration.series
-    pack_capacity_Ah      =  bat.cell.nominal_capacity * bat.pack.electrical_configuration.series
-    charging_time         = 0.9 * (pack_capacity_Ah)/pack_charging_current * Units.hrs  
+    pack_capacity_Ah      = bat.cell.nominal_capacity * bat.pack.electrical_configuration.parallel
+    charging_time         = (pack_capacity_Ah)/pack_charging_current * Units.hrs
+    
     
     for day in range(simulated_days):
+                
+        base_segment.temperature_deviation = (mean_temperature[0] + 273) - atmo_data.temperature[0][0]
         
-        print(' ***********  Day ' + str(day) + ' ***********  ')
+        print(' *********** '+ str(airport) +' ' + str(month) + ' ***********  ')
         
-        for f_idx in range(flights_per_day):
-            
-            flight_no = f_idx + 1
-            print(' ***********  Flight: ' + str(flight_no) + ' ***********  ')
-            
-            # unpack Segments module
-            Segments = RCAIDE.Framework.Mission.Segments  
-            base_segment = Segments.Segment()
-            base_segment.temperature_deviation  = 15            
+        for f_idx in range(len(flight_no)): 
+            current_flight_no = f_idx + 1
+            print(' ***********  Flight ' + str(current_flight_no) + ' ***********  ')
             
             
             # -------------------------------------------------------------------------------------------    
             # SET UP CONFIGURATIONS 
             # -------------------------------------------------------------------------------------------
-            configs           = Vehicle.configs_setup(vehicle)  
-            #meta_data = Data(#add data about HEX operation)            
-            analyses  = Analyses.analyses_setup(configs)
+            configs           = Vehicle.configs_setup(vehicle, tms_operation, f_idx)  
+            analyses          = Analyses.analyses_setup(configs)
             
-            # -------------------------------------------------------------------------------------------    
-            # V_Stall Calculation
-            # -------------------------------------------------------------------------------------------    
+            # VSTALL Calculation  
             vehicle        = analyses.base.aerodynamics.geometry
             vehicle_mass   = vehicle.mass_properties.max_takeoff
             reference_area = vehicle.reference_area 
-            Vstall         = estimate_stall_speed(vehicle_mass,reference_area,altitude = 0.0,maximum_lift_coefficient = 1.2)             
-                        
+            Vstall         = estimate_stall_speed(vehicle_mass,reference_area,altitude = 0.0,maximum_lift_coefficient = 1.2)            
             
-            ## ------------------------------------------------------------------
-            ##   Idle 
-            ## ------------------------------------------------------------------      
-            #segment = Segments.Ground.Idle(base_segment)
-            #segment.tag = "Idle" + "_F_" + str(flight_no) + "_D_" + str (day)  
-            #segment.analyses.extend(analyses.no_hex_operation)  
-            #segment.time                               = 0.5 * Units.hr
-            #segment.initial_battery_state_of_charge    = 1.0  
-            #mission.append_segment(segment)
             
-            ## ------------------------------------------------------------------
-            ##   Taxi 
-            ## ------------------------------------------------------------------      
-            #segment = Segments.Ground.Taxi(base_segment)
-            #segment.tag = "Taxi" + "_F_" + str(flight_no) + "_D_" + str (day) 
-            #segment.analyses.extend( analyses.max_hex_operation)  
-            #segment.velocity                                      = 25 * Units.knots  
+            # ------------------------------------------------------------------
+            #   Idle  cruise_distance[f_idx]
+            # ------------------------------------------------------------------      
+            segment = Segments.Ground.Idle(base_segment)
+            segment.tag = "Idle"+ "_F_" + str(current_flight_no) + "_D" + str (day)    
+            segment.analyses.extend(analyses.no_hex_operation)  
+            segment.time                               = idle_time[f_idx]* Units.hr
+            segment.initial_battery_state_of_charge    = 1.0  
+            mission.append_segment(segment)
+             
+            # ------------------------------------------------------------------
+            #   Taxi 
+            # ------------------------------------------------------------------      
+            segment = Segments.Ground.Taxi(base_segment)
+            segment.tag = "Taxi"+ "_F_" + str(current_flight_no) + "_D" + str (day)    
+            segment.analyses.extend( analyses.max_hex_operation)  
+            segment.velocity                                      = 25 * Units.knots
+            segment.time                                          = taxi_time[f_idx]* Units.mins
         
-            #segment.flight_dynamics.force_x                       = True   
-            #segment.flight_controls.throttle.active               = True           
-            #segment.flight_controls.throttle.assigned_propulsors  = [['starboard_propulsor','port_propulsor']]
+            segment.flight_dynamics.force_x                       = True   
+            segment.flight_controls.throttle.active               = True           
+            segment.flight_controls.throttle.assigned_propulsors  = [['starboard_propulsor','port_propulsor']]
+            mission.append_segment(segment)  
             
-            #mission.append_segment(segment)              
+            # ------------------------------------------------------------------
+            #   Takeoff
+            # ------------------------------------------------------------------      
+            segment = Segments.Ground.Takeoff(base_segment)
+            segment.tag = "Takeoff"+ "_F_" + str(current_flight_no) + "_D" + str (day)    
+            segment.analyses.extend( analyses.max_hex_operation ) 
+            segment.velocity_end                                     = Vstall*1.2  
+            segment.friction_coefficient                             = 0.04   
+            segment.throttle                                         = 0.8   
             
-            ## ------------------------------------------------------------------
-            ##   Takeoff
-            ## ------------------------------------------------------------------      
-            #segment = Segments.Ground.Takeoff(base_segment)
-            #segment.tag = "Takeoff" + "_F_" + str(flight_no) + "_D_" + str (day) 
-            #segment.analyses.extend( analyses.max_hex_operation ) 
-            #segment.velocity_end                                     = Vstall*1.2  
-            #segment.friction_coefficient                             = 0.04   
-            #segment.throttle                                         = 0.8   
-            
-            #segment.flight_dynamics.force_x                           = True 
-            #segment.flight_controls.elapsed_time.active               = True         
+            segment.flight_dynamics.force_x                           = True 
+            segment.flight_controls.elapsed_time.active               = True         
            
-            #mission.append_segment(segment)
-            
+            mission.append_segment(segment) 
           
+            
             # ------------------------------------------------------------------
             #   Departure End of Runway Segment Flight 1 : 
             # ------------------------------------------------------------------ 
             segment = Segments.Climb.Linear_Speed_Constant_Rate(base_segment) 
-            segment.tag = 'Departure_End_of_Runway' + "_F_" + str(flight_no) + "_D_" + str (day)       
+            segment.tag = 'Departure_End_of_Runway'+ "_F_" + str(current_flight_no) + "_D" + str (day)         
             segment.analyses.extend( analyses.max_hex_operation )  
             segment.altitude_start                                = 0.0 * Units.feet
             segment.altitude_end                                  = 50.0 * Units.feet
             segment.air_speed_start                               = Vstall *1.2  
-            segment.air_speed_end                                 = Vstall *1.25
-            segment.initial_battery_state_of_charge    = 1.0  
+            segment.air_speed_end                                 = Vstall *1.25  
                     
             # define flight dynamics to model 
             segment.flight_dynamics.force_x                       = True  
@@ -135,7 +139,7 @@ def repeated_flight_operation_setup(vehicle,simulated_days,flights_per_day, rech
             #   Initial Climb Area Segment Flight 1  
             # ------------------------------------------------------------------ 
             segment = Segments.Climb.Linear_Speed_Constant_Rate(base_segment) 
-            segment.tag = 'Initial_CLimb_Area'  + "_F_" + str(flight_no) + "_D_" + str (day)  
+            segment.tag = 'Initial_CLimb_Area' + "_F_" + str(current_flight_no) + "_D" + str (day)  
             segment.analyses.extend( analyses.max_hex_operation )   
             segment.altitude_start                                = 50.0 * Units.feet
             segment.altitude_end                                  = 500.0 * Units.feet 
@@ -158,7 +162,7 @@ def repeated_flight_operation_setup(vehicle,simulated_days,flights_per_day, rech
             #   Climb Segment Flight 1 
             # ------------------------------------------------------------------ 
             segment = Segments.Climb.Linear_Speed_Constant_Rate(base_segment) 
-            segment.tag = 'Climb_1'  + "_F_" + str(flight_no) + "_D_" + str (day)         
+            segment.tag = 'Climb_1' + "_F_" + str(current_flight_no) + "_D" + str (day)         
             segment.analyses.extend( analyses.hex_low_alt_climb_operation )      
             segment.altitude_start                                = 500.0 * Units.feet
             segment.altitude_end                                  = 2500 * Units.feet  
@@ -181,7 +185,7 @@ def repeated_flight_operation_setup(vehicle,simulated_days,flights_per_day, rech
             #   Climb 1 : constant Speed, constant rate segment 
             # ------------------------------------------------------------------ 
             segment = Segments.Climb.Linear_Speed_Constant_Rate(base_segment)
-            segment.tag = "Climb_2" + "_F_" + str(flight_no) + "_D_" + str (day) 
+            segment.tag = "Climb_2"+ "_F_" + str(current_flight_no) + "_D" + str (day)  
             segment.analyses.extend( analyses.hex_high_alt_climb_operation)
             segment.altitude_start                                = 2500.0  * Units.feet
             segment.altitude_end                                  = 5000   * Units.feet  
@@ -203,11 +207,11 @@ def repeated_flight_operation_setup(vehicle,simulated_days,flights_per_day, rech
             #   Cruise Segment: constant Speed, constant altitude
             # ------------------------------------------------------------------ 
             segment = Segments.Cruise.Constant_Speed_Constant_Altitude(base_segment)
-            segment.tag = "Cruise"  + "_F_" + str(flight_no) + "_D_" + str (day) 
+            segment.tag = "Cruise" + "_F_" + str(current_flight_no) + "_D" + str (day)  
             segment.analyses.extend(analyses.hex_cruise_operation) 
             segment.altitude                                      = 5000   * Units.feet 
             segment.air_speed                                     = 130 * Units.kts
-            segment.distance                                      = 20.   * Units.nautical_mile  
+            segment.distance                                      = cruise_distance[f_idx]* Units.nautical_mile  
             
             # define flight dynamics to model 
             segment.flight_dynamics.force_x                       = True  
@@ -225,7 +229,7 @@ def repeated_flight_operation_setup(vehicle,simulated_days,flights_per_day, rech
             #   Descent Segment Flight 1   
             # ------------------------------------------------------------------ 
             segment = Segments.Climb.Linear_Speed_Constant_Rate(base_segment) 
-            segment.tag = "Decent" + "_F_" + str(flight_no) + "_D_" + str (day)   
+            segment.tag = "Decent" + "_F_" + str(current_flight_no) + "_D" + str (day)   
             segment.analyses.extend( analyses.hex_descent_operation )       
             segment.altitude_start                                = 5000   * Units.feet 
             segment.altitude_end                                  = 1000 * Units.feet  
@@ -248,7 +252,7 @@ def repeated_flight_operation_setup(vehicle,simulated_days,flights_per_day, rech
             # ------------------------------------------------------------------
         
             segment = Segments.Cruise.Constant_Speed_Constant_Altitude(base_segment)
-            segment.tag = 'Downleg' + "_F_" + str(flight_no) + "_D_" + str (day) 
+            segment.tag = 'Downleg'+ "_F_" + str(current_flight_no) + "_D" + str (day)  
             segment.analyses.extend(analyses.hex_descent_operation)  
             segment.air_speed                                     = 100 * Units['mph']   
             segment.distance                                      = 6000 * Units.feet 
@@ -261,13 +265,14 @@ def repeated_flight_operation_setup(vehicle,simulated_days,flights_per_day, rech
             segment.flight_controls.throttle.assigned_propulsors  = [['starboard_propulsor','port_propulsor']] 
             segment.flight_controls.body_angle.active             = True                   
                     
-            mission.append_segment(segment)                 
-                      
+            mission.append_segment(segment)     
+            
+             
             # ------------------------------------------------------------------
             #  Baseleg Segment Flight 1  
             # ------------------------------------------------------------------ 
             segment = Segments.Climb.Linear_Speed_Constant_Rate(base_segment)
-            segment.tag = 'Baseleg'+ "_F_" + str(flight_no) + "_D_" + str (day)
+            segment.tag = 'Baseleg'+ "_F_" + str(current_flight_no) + "_D" + str (day)  
             segment.analyses.extend( analyses.hex_descent_operation)   
             segment.altitude_start                                = 1000 * Units.feet
             segment.altitude_end                                  = 500.0 * Units.feet
@@ -288,7 +293,7 @@ def repeated_flight_operation_setup(vehicle,simulated_days,flights_per_day, rech
             #  Final Approach Segment Flight 1  
             # ------------------------------------------------------------------ 
             segment = Segments.Climb.Linear_Speed_Constant_Rate(base_segment)
-            segment_name = 'Final_Approach'+ "_F_" + str(flight_no) + "_D_" + str (day)
+            segment_name = 'Final_Approach'+ "_F_" + str(current_flight_no) + "_D" + str (day)  
             segment.tag = segment_name          
             segment.analyses.extend( analyses.hex_descent_operation)      
             segment.altitude_start                                = 500.0 * Units.feet
@@ -311,7 +316,7 @@ def repeated_flight_operation_setup(vehicle,simulated_days,flights_per_day, rech
             #   Landing  
             # ------------------------------------------------------------------  
             segment = Segments.Ground.Landing(base_segment)
-            segment.tag = "Landing"+ "_F_" + str(flight_no) + "_D_" + str (day)   
+            segment.tag = "Landing"+ "_F_" + str(current_flight_no) + "_D" + str (day)     
             segment.analyses.extend( analyses.hex_descent_operation)  
             segment.velocity_end                                     = Vstall*0.1  
             
@@ -325,7 +330,7 @@ def repeated_flight_operation_setup(vehicle,simulated_days,flights_per_day, rech
             # ------------------------------------------------------------------     
             # Charge Model 
             segment                               = Segments.Ground.Battery_Recharge(base_segment)     
-            segment.tag  = 'Charge_Day'+ "_F_" + str(flight_no) + "_D_" + str (day)
+            segment.tag  = 'Charge_Day'+ "_F_" + str(current_flight_no) + "_D" + str (day)  
             segment.state.numerics.number_of_control_points  = 64 
             segment.analyses.extend(analyses.recharge)  
             segment.time                          = charging_time 
@@ -335,17 +340,18 @@ def repeated_flight_operation_setup(vehicle,simulated_days,flights_per_day, rech
             
             # ------------------------------------------------------------------
             #   Mission definition complete    
-            # ------------------------------------------------------------------ 
+            # ------------------------------------------------------------------       
     
-            
+         
     return mission 
+
 
 # ----------------------------------------------------------------------
 #   Missions Setup
 # ----------------------------------------------------------------------
-def missions_setup(base_mission): 
- 
-   # the mission container
+def missions_setup(base_mission):
+
+    # the mission container
     missions         = RCAIDE.Framework.Mission.Missions()
 
     # ------------------------------------------------------------------
@@ -353,5 +359,7 @@ def missions_setup(base_mission):
     # ------------------------------------------------------------------
 
     missions.base = base_mission
-    
-    return missions  
+
+
+    # done!
+    return missions

@@ -19,7 +19,7 @@ def plot_results(results,save_figure_flag):
     
     plot_flight_conditions(results) 
     
-    #plot_aerodynamic_forces(results)
+    plot_aerodynamic_forces(results)
 
     #plot_aerodynamic_coefficients(results)  
     
@@ -27,19 +27,20 @@ def plot_results(results,save_figure_flag):
     
     plot_battery_pack_conditions(results)
     
-    #plot_battery_cell_conditions(results)
+    plot_battery_cell_conditions(results)
     
-    #plot_battery_degradation(results)
+    plot_battery_degradation(results)
 
     #plot_rotor_conditions(results) 
 
-    #plot_electric_propulsor_efficiencies(results) 
+    #plot_electric_propulsor_efficiencies(results)
+    
+   #plot_battery_temperature(results)
     
     plot_heat_acquisition_system_conditions(results)
 
     plot_heat_exchanger_system_conditions(results)
 
     plot_reservoir_conditions(results)    
-    
                         
     return

@@ -35,7 +35,7 @@ def plot_results(results,run_noise_model,save_figure_flag):
 
     plot_electric_propulsor_efficiencies(results)
     
-    plot_battery_temperature(results)
+   #plot_battery_temperature(results)
     
     plot_heat_acquisition_system_conditions(results)
 
