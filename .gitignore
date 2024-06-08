@@ -65,6 +65,7 @@ nosetests.xml
 *.fig
 *.IGS
 *.pptx
+*.xlsx
 
 # Geometry
 *.geo
