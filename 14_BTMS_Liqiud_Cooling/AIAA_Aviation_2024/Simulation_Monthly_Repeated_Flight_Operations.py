@@ -18,8 +18,12 @@ from RCAIDE.Library.Plots                                           import *
 import time  
 import numpy as np
 import pylab as plt
-import pandas as pd 
-import sys 
+import pandas as pd
+import sys
+import os
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
 sys.path.append('Common')  
 
 import Vehicle
@@ -31,7 +35,7 @@ import Plots
 # ----------------------------------------------------------------------
 #   Main
 # ----------------------------------------------------------------------
-def main():  
+def main(airport, month):  
     # start simulation clock
     ti                         = time.time()
     RUN_NEW_MODEL_FLAG         = True
@@ -44,8 +48,6 @@ def main():
     plot_mission               = True            # plot mission flag  
     resize_aircraft            = False
    
-    airport = 'ORD'
-    month = 'July'
     
     simulation_meta_data_path =  'Simulation_Plan.xlsx'
     flight_no, idle_time, taxi_time, cruise_distance, mean_temperature, tms_operation = get_flight_data(simulation_meta_data_path, airport, month)
@@ -153,8 +155,50 @@ def get_flight_data(file_path, airport, month):
     
     
     return flight_no, idle_time, taxi_time, cruise_distance, mean_temperature, tms_operation
-if __name__ == '__main__': 
-    main()    
+
+def show_notification():
+    os.system('osascript -e \'display notification "The simulation has completed successfully." with title "Simulation Complete"\'')
+
+def play_sound():
+    # Play a default system sound on macOS
+    os.system('afplay /System/Library/Sounds/Glass.aiff')
+
+def simulation_complete(airport, month):
+    play_sound()
+    show_notification()
+    send_email(airport, month)
+    
+def send_email(airport, month):
+    # Outlook credentials
+    yahoo_user = 'sai.sankalp@yahoo.com'
+    yahoo_password = 'zlofcfakwwmutfwl'
+    
+    # Email content
+    msg = MIMEMultipart()
+    msg['From'] = yahoo_user
+    msg['To'] = '4085921097@tmomail.net'  
+    body = 'The simulation ' + str(airport) + ' '+ str(month) + ' is complete.'
+    msg.attach(MIMEText(body, 'plain'))
+
+    try:
+        # Setup the server and send email
+        server = smtplib.SMTP('smtp.mail.yahoo.com', 587)
+        server.starttls()
+        server.login(yahoo_user, yahoo_password)
+        text = msg.as_string()
+        server.sendmail(yahoo_user, msg['To'], text)
+        server.quit()
+        print('Email sent successfully!')
+    except Exception as e:
+        print(f'Failed to send email: {e}')
+
+    
+if __name__ == '__main__':
+    airport = 'ORD'
+    month = 'July'    
+    main(airport, month)
+    simulation_complete(airport, month)  
     plt.show()
-     
+
+   
 
