@@ -50,7 +50,7 @@ def main(airport, month):
    
     
     simulation_meta_data_path =  'Simulation_Plan.xlsx'
-    flight_no, idle_time, taxi_time, cruise_distance, mean_temperature, tms_operation = get_flight_data(simulation_meta_data_path, airport, month)
+    flight_no, idle_time, taxi_time, cruise_distance, mean_temperature, ceiling_altitude, tms_operation = get_flight_data(simulation_meta_data_path, airport, month)
   
 
     if RUN_NEW_MODEL_FLAG:    
@@ -64,7 +64,7 @@ def main(airport, month):
         # -------------------------------------------------------------------------------------------    
         # SET UP MISSION PROFILE  
         # -------------------------------------------------------------------------------------------    
-        base_mission      = Missions.repeated_flight_operation_setup(vehicle,simulated_days,flight_no, idle_time, taxi_time, cruise_distance, mean_temperature,tms_operation, recharge_battery, airport, month)
+        base_mission      = Missions.repeated_flight_operation_setup(vehicle,simulated_days,flight_no, idle_time, taxi_time, cruise_distance, mean_temperature,ceiling_altitude, tms_operation, recharge_battery, airport, month)
         missions_analyses = Missions.missions_setup(base_mission)
        
     
@@ -135,6 +135,7 @@ def get_flight_data(file_path, airport, month):
     taxi_time = filtered_df['Taxi_Time'].tolist()
     cruise_distance = filtered_df['Cruise_Distance'].tolist()
     mean_temperature = filtered_df['Mean_Temperature'].tolist()
+    ceiling_altitude = filtered_df['ceiling_altitude'].tolist()
     
     tms_operation = {
            'no_hex_operation_has': filtered_df['no_hex_operation_has'].tolist(),
@@ -154,7 +155,7 @@ def get_flight_data(file_path, airport, month):
        }    
     
     
-    return flight_no, idle_time, taxi_time, cruise_distance, mean_temperature, tms_operation
+    return flight_no, idle_time, taxi_time, cruise_distance, mean_temperature,ceiling_altitude, tms_operation
 
 def show_notification():
     os.system('osascript -e \'display notification "The simulation has completed successfully." with title "Simulation Complete"\'')
@@ -166,7 +167,7 @@ def play_sound():
 def simulation_complete(airport, month):
     play_sound()
     show_notification()
-    send_email(airport, month)
+    #send_email(airport, month)
     
 def send_email(airport, month):
     # Outlook credentials
@@ -195,10 +196,11 @@ def send_email(airport, month):
     
 if __name__ == '__main__':
     airport = 'ORD'
-    month = 'July'    
+    month = 'January'    
     main(airport, month)
     simulation_complete(airport, month)  
     plt.show()
 
    
+
 

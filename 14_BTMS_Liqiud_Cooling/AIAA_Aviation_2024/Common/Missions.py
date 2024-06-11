@@ -26,7 +26,7 @@ import Analyses
 # ------------------------------------------------------------------
 #   Repeated Flight Operation Setup
 # ------------------------------------------------------------------
-def repeated_flight_operation_setup(vehicle,simulated_days,flight_no, idle_time, taxi_time, cruise_distance, mean_temperature,tms_operation, recharge_battery, airport, month):
+def repeated_flight_operation_setup(vehicle,simulated_days,flight_no, idle_time, taxi_time, cruise_distance, mean_temperature,ceiling_altitude, tms_operation, recharge_battery, airport, month):
     
     # ------------------------------------------------------------------
     #   Initialize the Mission
@@ -51,7 +51,7 @@ def repeated_flight_operation_setup(vehicle,simulated_days,flight_no, idle_time,
     
     for day in range(simulated_days):
                 
-        base_segment.temperature_deviation = (mean_temperature[0] + 273) - atmo_data.temperature[0][0]
+        base_segment.temperature_deviation = (mean_temperature[0] + 274) - atmo_data.temperature[0][0]
         
         print(' *********** '+ str(airport) +' ' + str(month) + ' ***********  ')
         
@@ -188,7 +188,7 @@ def repeated_flight_operation_setup(vehicle,simulated_days,flight_no, idle_time,
             segment.tag = "Climb_2"+ "_F_" + str(current_flight_no) + "_D" + str (day)  
             segment.analyses.extend( analyses.hex_high_alt_climb_operation)
             segment.altitude_start                                = 2500.0  * Units.feet
-            segment.altitude_end                                  = 5000   * Units.feet  
+            segment.altitude_end                                  = ceiling_altitude[f_idx]   * Units.feet  
             segment.air_speed_end                                 = 130 * Units.kts 
             segment.climb_rate                                    = 700.034 * Units['ft/min']   
             
@@ -209,7 +209,7 @@ def repeated_flight_operation_setup(vehicle,simulated_days,flight_no, idle_time,
             segment = Segments.Cruise.Constant_Speed_Constant_Altitude(base_segment)
             segment.tag = "Cruise" + "_F_" + str(current_flight_no) + "_D" + str (day)  
             segment.analyses.extend(analyses.hex_cruise_operation) 
-            segment.altitude                                      = 5000   * Units.feet 
+            segment.altitude                                      = ceiling_altitude[f_idx]    * Units.feet 
             segment.air_speed                                     = 130 * Units.kts
             segment.distance                                      = cruise_distance[f_idx]* Units.nautical_mile  
             
@@ -231,7 +231,7 @@ def repeated_flight_operation_setup(vehicle,simulated_days,flight_no, idle_time,
             segment = Segments.Climb.Linear_Speed_Constant_Rate(base_segment) 
             segment.tag = "Decent" + "_F_" + str(current_flight_no) + "_D" + str (day)   
             segment.analyses.extend( analyses.hex_descent_operation )       
-            segment.altitude_start                                = 5000   * Units.feet 
+            segment.altitude_start                                = ceiling_altitude[f_idx]    * Units.feet 
             segment.altitude_end                                  = 1000 * Units.feet  
             segment.air_speed_end                                 = 100 * Units['mph']   
             segment.climb_rate                                    = -200 * Units['ft/min']  
