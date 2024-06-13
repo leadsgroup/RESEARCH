@@ -34,33 +34,33 @@ def main():
 def brayton_cycle_with_regenerator(): 
     
     # Inputs 
-    M0                                         = 0
-    T0                                         = 520 #288.889
-    gamma                                      = 1.4
-    Cp                                         = 0.24
-    LHV                                        = 18400
-    Tt4                                        = 2600 #1444.444
-    pi_c                                       = np.linspace(2,18,100)
-    Chi                                        = [1.02, 1.04]
+    M0                                         = 0                                  #[-]
+    T0                                         = 520                                #[R]
+    gamma                                      = 1.4                                #[-]
+    Cp                                         = 0.24                               #[Btu/(lbm*R)]
+    LHV                                        = 18400                              #[Btu/lbm]
+    Tt4                                        = 2600                               #[R]
+    pi_c                                       = np.linspace(2,18,100)              #[-]
+    x                                          = [1.02, 1.04]                       #[-]
     
     # Equations   
-    tau_lambda                                 = Tt4/T0                                                                        
-    tau_r                                      = 1 + ((gamma - 1)/2)*M0**2                                                                              
-    tau_c                                      = pi_c**((gamma - 1)/gamma)
-    C_shaft                                    = np.zeros((len(Chi), len(pi_c)))
-    Psp                                        = np.zeros((len(Chi), len(pi_c)))   
-    f                                          = np.zeros((len(Chi), len(pi_c)))  
-    PSFC                                       = np.zeros((len(Chi), len(pi_c)))  
-    eta_T                                      = np.zeros((len(Chi), len(pi_c)))  
-    tau_t                                      = np.zeros((len(Chi), len(pi_c)))  
+    tau_lambda                                 = Tt4/T0                             #[-]                                                  
+    tau_r                                      = 1 + ((gamma - 1)/2)*M0**2          #[-]                                                                     
+    tau_c                                      = pi_c**((gamma - 1)/gamma)          #[-]
+    C_shaft                                    = np.zeros((len(x), len(pi_c)))      #[-]
+    Psp                                        = np.zeros((len(x), len(pi_c)))      #[hp/(lbm/sec)]   
+    f                                          = np.zeros((len(x), len(pi_c)))      #[-]  
+    PSFC                                       = np.zeros((len(x), len(pi_c)))      #[hp/(lb/hr)/hp]  
+    eta_T                                      = np.zeros((len(x), len(pi_c)))      #[-] 
+    tau_t                                      = np.zeros((len(x), len(pi_c)))      #[-]  
  
-    for i in range(len(Chi)): 
-        C_shaft[i,:]                           = tau_lambda*(1 - Chi[i]/(tau_r*tau_c)) - tau_r*(tau_c - 1)                                            
-        Psp[i,:]                               = Cp*T0*C_shaft[i]*1.4148532041
-        f[i,:]                                 = (Cp*T0*tau_lambda/LHV)*(1 - Chi[i]/(tau_r*tau_c))
-        PSFC[i,:]                              = f[i]/Psp[i]*3600
-        eta_T[i,:]                             = 1 - (tau_r*(tau_c - 1))/(tau_lambda*(1 - Chi[i]/(tau_r*tau_c)))
-        tau_t[i,:]                             = (Chi[i]/(tau_r*tau_c))
+    for i in range(len(x)): 
+        C_shaft[i,:]                           = tau_lambda*(1 - x[i]/(tau_r*tau_c)) - tau_r*(tau_c - 1)       #[-]                                 
+        Psp[i,:]                               = Cp*T0*C_shaft[i]*1.4148532041                                 #[hp/(lbm/sec)]
+        f[i,:]                                 = (Cp*T0*tau_lambda/LHV)*(1 - x[i]/(tau_r*tau_c))               #[-]
+        PSFC[i,:]                              = f[i]/Psp[i]*3600/1.4148532041                                 #[hp/(lb/hr)/hp] Units unclear
+        eta_T[i,:]                             = 1 - (tau_r*(tau_c - 1))/(tau_lambda*(1 - x[i]/(tau_r*tau_c))) #[-]
+        tau_t[i,:]                             = (x[i]/(tau_r*tau_c))                                          #[-]
         
     return Psp*np.ones(100), f*np.ones(100), PSFC*np.ones(100), eta_T*np.ones(100), C_shaft*np.ones(100), tau_t*np.ones(100), pi_c
 
@@ -70,60 +70,60 @@ def first_order_analysis():
 
     fig = plt.figure()
     axis = fig.add_subplot(1,1,1)
-    axis.set_xlabel('Compressor Pressure Ratio')
-    axis.set_ylabel('Specific Power')
-    axis.plot(pi_c, Psp[0,:], label = 'Chi = 1.02' ) 
-    axis.plot(pi_c, Psp[1,:], label = 'Chi = 1.04' ) 
+    axis.set_xlabel('Compressor Pressure Ratio [-]')
+    axis.set_ylabel('Specific Power [hp/(lbm/sec)]')
+    axis.plot(pi_c, Psp[0,:], label = 'x = 1.02' ) 
+    axis.plot(pi_c, Psp[1,:], label = 'x = 1.04' ) 
     axis.legend()
     axis.grid()
     fig.tight_layout()
     
     fig = plt.figure()
     axis = fig.add_subplot(1,1,1)
-    axis.set_xlabel('Compressor Pressure Ratio')
-    axis.set_ylabel('f')
-    axis.plot(pi_c, f[0,:], label = 'Chi = 1.02' ) 
-    axis.plot(pi_c, f[1,:], label = 'Chi = 1.04' )
+    axis.set_xlabel('Compressor Pressure Ratio [-]')
+    axis.set_ylabel('f [-]')
+    axis.plot(pi_c, f[0,:], label = 'x = 1.02' ) 
+    axis.plot(pi_c, f[1,:], label = 'x = 1.04' )
     axis.legend()
     axis.grid()
     fig.tight_layout()  
     
     fig = plt.figure()
     axis = fig.add_subplot(1,1,1)
-    axis.set_xlabel('Compressor Pressure Ratio')
-    axis.set_ylabel('PSFC')
-    axis.plot(pi_c, PSFC[0,:], label = 'Chi = 1.02' ) 
-    axis.plot(pi_c, PSFC[1,:], label = 'Chi = 1.04' )
+    axis.set_xlabel('Compressor Pressure Ratio [-]')
+    axis.set_ylabel('PSFC [hp/(lb/hr)/hp]')
+    axis.plot(pi_c, PSFC[0,:], label = 'x = 1.02' ) 
+    axis.plot(pi_c, PSFC[1,:], label = 'x = 1.04' )
     axis.legend()
     axis.grid()
     fig.tight_layout()     
     
     fig = plt.figure()
     axis = fig.add_subplot(1,1,1)
-    axis.set_xlabel('Compressor Pressure Ratio')
-    axis.set_ylabel('eta_T')
-    axis.plot(pi_c, eta_T[0,:], label = 'Chi = 1.02' ) 
-    axis.plot(pi_c, eta_T[1,:], label = 'Chi = 1.04' )
+    axis.set_xlabel('Compressor Pressure Ratio [-]')
+    axis.set_ylabel('eta_T [-]')
+    axis.plot(pi_c, eta_T[0,:], label = 'x = 1.02' ) 
+    axis.plot(pi_c, eta_T[1,:], label = 'x = 1.04' )
     axis.legend()
     axis.grid()
     fig.tight_layout()     
  
     fig = plt.figure()
     axis = fig.add_subplot(1,1,1)
-    axis.set_xlabel('Compressor Pressure Ratio')
-    axis.set_ylabel('C_shaft')
-    axis.plot(pi_c, C_shaft[0,:], label = 'Chi = 1.02' )
-    axis.plot(pi_c, C_shaft[1,:], label = 'Chi = 1.04' )
+    axis.set_xlabel('Compressor Pressure Ratio [-]')
+    axis.set_ylabel('C_shaft [-]')
+    axis.plot(pi_c, C_shaft[0,:], label = 'x = 1.02' )
+    axis.plot(pi_c, C_shaft[1,:], label = 'x = 1.04' )
     axis.legend()
     axis.grid()
     fig.tight_layout()  
     
     fig = plt.figure()
     axis = fig.add_subplot(1,1,1)
-    axis.set_xlabel('Compressor Pressure Ratio')
-    axis.set_ylabel('tau_t')
-    axis.plot(pi_c, tau_t[0,:], label = 'Chi = 1.02' )
-    axis.plot(pi_c, tau_t[1,:], label = 'Chi = 1.04' )
+    axis.set_xlabel('Compressor Pressure Ratio [-]')
+    axis.set_ylabel('tau_t [-]')
+    axis.plot(pi_c, tau_t[0,:], label = 'x = 1.02' )
+    axis.plot(pi_c, tau_t[1,:], label = 'x = 1.04' )
     axis.legend()
     axis.grid()
     fig.tight_layout()   
