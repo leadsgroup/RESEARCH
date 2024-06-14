@@ -82,8 +82,8 @@ class MainWindow(Qt.QMainWindow):
         colors = vtkNamedColors()  
         
         #vehicle = Concorde_vehicle_setup()
-        #vehicle = B737_vehicle_setup()
-        vehicle = EVTOL_vehicle_setup()
+        vehicle = B737_vehicle_setup()
+        #vehicle = EVTOL_vehicle_setup()
         
         number_of_airfoil_points = 21
         for wing in vehicle.wings:  
@@ -287,38 +287,38 @@ def write_azimuthal_cell_values(f, n_cells, n_a):
     """
     rlap=0
     adjacent_cells = np.zeros((n_cells, 4) )
-    i = np.arange(n_cells)
+    #i = np.arange(n_cells)
 
-    if i==(n_a-1+n_a*rlap): 
-        b    = i-(n_a-1)
-        c    = i+1
-        rlap = rlap+1
-    else:
-        b = i+1
-        c = i+n_a+1 
-    a        = i
-    d        = i+n_a
-    adjacent_cells[i, 0] = a
-    adjacent_cells[i, 1] = b
-    adjacent_cells[i, 2] = c
-    adjacent_cells[i, 3] = d
+    #if i==(n_a-1+n_a*rlap): 
+        #b    = i-(n_a-1)
+        #c    = i+1
+        #rlap = rlap+1
+    #else:
+        #b = i+1
+        #c = i+n_a+1 
+    #a        = i
+    #d        = i+n_a
+    #adjacent_cells[i, 0] = a
+    #adjacent_cells[i, 1] = b
+    #adjacent_cells[i, 2] = c
+    #adjacent_cells[i, 3] = d
     
     
     
-    #for i in range(n_cells):  
-        #if i==(n_a-1+n_a*rlap): 
-            #b    = i-(n_a-1)
-            #c    = i+1
-            #rlap = rlap+1
-        #else:
-            #b = i+1
-            #c = i+n_a+1 
-        #a        = i
-        #d        = i+n_a
-        #adjacent_cells[i, 0] = a
-        #adjacent_cells[i, 1] = b
-        #adjacent_cells[i, 2] = c
-        #adjacent_cells[i, 3] = d 
+    for i in range(n_cells):  
+        if i==(n_a-1+n_a*rlap): 
+            b    = i-(n_a-1)
+            c    = i+1
+            rlap = rlap+1
+        else:
+            b = i+1
+            c = i+n_a+1 
+        a        = i
+        d        = i+n_a
+        adjacent_cells[i, 0] = a
+        adjacent_cells[i, 1] = b
+        adjacent_cells[i, 2] = c
+        adjacent_cells[i, 3] = d 
     return adjacent_cells
 
 
