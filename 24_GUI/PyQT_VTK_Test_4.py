@@ -230,10 +230,9 @@ def generate_vtk_object(pts):
     size = np.shape(X) 
     for i, fxi in enumerate(X): 
         points.InsertPoint(i, fxi) 
+        scalars.InsertTuple1(i, i)  
     for pt in geom_pts:
-        polys.InsertNextCell(mkVtkIdList(pt))
-    for i, _ in enumerate(X):
-        scalars.InsertTuple1(i, i)   
+        polys.InsertNextCell(mkVtkIdList(pt)) 
 
     # We now assign the pieces to the vtkPolyData.
     comp.SetPoints(points)
