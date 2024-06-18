@@ -229,61 +229,65 @@ def turboshaft_engine(altitude,mach):
     # Run engine 
     # ------------------------------------------------------------------------------------------------------------------------ 
 
-    #thrust             = np.zeros_like(altitude )
-    #overall_efficiency = np.zeros_like(altitude )
-    #for i in range(len(altitude)):
+    power              = np.zeros_like(altitude)
+    thermal_efficiency = np.zeros_like(altitude)
+    PSFC               = np.zeros_like(altitude)
+    
+    for i in range(len(altitude)):
 
-        #atmosphere_sls = RCAIDE.Analyses.Atmospheric.US_Standard_1976()
-        #atmo_data      = atmosphere_sls.compute_values(altitude[i],0.0)
-        #planet         = RCAIDE.Attributes.Planets.Earth()
+        atmosphere_sls = RCAIDE.Framework.Analyses.Atmospheric.US_Standard_1976()
+        atmo_data      = atmosphere_sls.compute_values(altitude[i],0.0)
+        planet         = RCAIDE.Library.Attributes.Planets.Earth()
 
-        #p   = atmo_data.pressure          
-        #T   = atmo_data.temperature       
-        #rho = atmo_data.density          
-        #a   = atmo_data.speed_of_sound    
-        #mu  = atmo_data.dynamic_viscosity      
+        p   = atmo_data.pressure          
+        T   = atmo_data.temperature       
+        rho = atmo_data.density          
+        a   = atmo_data.speed_of_sound    
+        mu  = atmo_data.dynamic_viscosity      
 
-        ## setup conditions
-        #conditions_sls = RCAIDE.Analyses.Mission.Common.Results()            
+        # setup conditions
+        
+        conditions_sls = RCAIDE.Framework.Mission.Common.Results()
+        conditions_sls.conditions = RCAIDE.Framework.Mission.Common.Conditions()
 
-        ## freestream conditions    
-        #conditions_sls.freestream.altitude                    = np.atleast_2d(altitude[i])
-        #conditions_sls.freestream.mach_number                 = np.atleast_2d(mach[i])
-        #conditions_sls.freestream.pressure                    = np.atleast_2d(p)
-        #conditions_sls.freestream.temperature                 = np.atleast_2d(T)
-        #conditions_sls.freestream.density                     = np.atleast_2d(rho)
-        #conditions_sls.freestream.dynamic_viscosity           = np.atleast_2d(mu)
-        #conditions_sls.freestream.gravity                     = np.atleast_2d(planet.sea_level_gravity)
-        #conditions_sls.freestream.isentropic_expansion_factor = np.atleast_2d(turboshaft.working_fluid.compute_gamma(T,p))
-        #conditions_sls.freestream.Cp                          = np.atleast_2d(turboshaft.working_fluid.compute_cp(T,p))
-        #conditions_sls.freestream.R                           = np.atleast_2d(turboshaft.working_fluid.gas_specific_constant)
-        #conditions_sls.freestream.speed_of_sound              = np.atleast_2d(a)
-        #conditions_sls.freestream.velocity                    = np.atleast_2d(a*mach[i])  
+        # freestream conditions    
+        conditions_sls.freestream.altitude                    = np.atleast_2d(altitude[i])
+        conditions_sls.freestream.mach_number                 = np.atleast_2d(mach[i])
+        conditions_sls.freestream.pressure                    = np.atleast_2d(p)
+        conditions_sls.freestream.temperature                 = np.atleast_2d(T)
+        conditions_sls.freestream.density                     = np.atleast_2d(rho)
+        conditions_sls.freestream.dynamic_viscosity           = np.atleast_2d(mu)
+        conditions_sls.freestream.gravity                     = np.atleast_2d(planet.sea_level_gravity)
+        conditions_sls.freestream.isentropic_expansion_factor = np.atleast_2d(turboshaft.working_fluid.compute_gamma(T,p))
+        conditions_sls.freestream.Cp                          = np.atleast_2d(turboshaft.working_fluid.compute_cp(T,p))
+        conditions_sls.freestream.R                           = np.atleast_2d(turboshaft.working_fluid.gas_specific_constant)
+        conditions_sls.freestream.speed_of_sound              = np.atleast_2d(a)
+        conditions_sls.freestream.velocity                    = np.atleast_2d(a*mach[i])  
 
-        #net          = RCAIDE.Energy.Networks.turboshaft_Engine()  
-        #fuel_line    = RCAIDE.Energy.Distributors.Fuel_Line()  
-        #fuel_line.turboshafts.append(turboshaft)       
-        #net.fuel_lines.append(fuel_line)   
+        net          = RCAIDE.Framework.Networks.Turboshaft_Engine_Network()  
+        fuel_line    = RCAIDE.Library.Components.Energy.Distribution.Fuel_Line()  
+        fuel_line.propulsors.append(turboshaft)       
+        net.fuel_lines.append(fuel_line)   
 
-        #conditions_sls.energy[fuel_line.tag]                                = RCAIDE.Analyses.Mission.Common.Conditions()         
-        #conditions_sls.noise[fuel_line.tag]                                 = RCAIDE.Analyses.Mission.Common.Conditions()      
-        #sorted_propulsors                                                   = compute_unique_propulsor_groups(fuel_line)
-        #fuel_line_results                                                   = conditions_sls.energy[fuel_line.tag] 
-        #fuel_line_results[turboshaft.propulsor_group]                         = RCAIDE.Analyses.Mission.Common.Conditions()
-        #fuel_line_results[turboshaft.propulsor_group].turboshaft                = RCAIDE.Analyses.Mission.Common.Conditions() 
-        #fuel_line_results[turboshaft.propulsor_group].unique_turboshaft_tags    = sorted_propulsors.unique_turboshaft_tags 
+        conditions_sls.condition.energy[fuel_line.tag]                         = RCAIDE.Framework.Mission.Common.Conditions()         
+        conditions_sls.condition.noise[fuel_line.tag]                          = RCAIDE.Framework.Mission.Common.Conditions()      
+        #sorted_propulsors                                                     = compute_unique_propulsor_groups(fuel_line)
+        fuel_line_results                                                     = conditions_sls.energy[fuel_line.tag] 
+        #fuel_line_results[turboshaft.propulsor_group]                         = RCAIDE.Framework.Mission.Common.Conditions()
+        #fuel_line_results[turboshaft.propulsor_group].turboshaft              = RCAIDE.Framework.Mission.Common.Conditions() 
+        #fuel_line_results[turboshaft.propulsor_group].unique_turboshaft_tags  = sorted_propulsors.unique_turboshaft_tags 
         #fuel_line_results.N_turboshafts                                       = sorted_propulsors.N_turboshafts
-        #noise_results                                                       = conditions_sls.noise[fuel_line.tag]
-        #noise_results[turboshaft.propulsor_group]                             = RCAIDE.Analyses.Mission.Common.Conditions() 
-        #noise_results[turboshaft.propulsor_group].turboshaft                    = RCAIDE.Analyses.Mission.Common.Conditions() 
-        #fuel_line_results[turboshaft.propulsor_group].turboshaft.throttle       = np.array([[1.0]])  
+        #noise_results                                                         = conditions_sls.noise[fuel_line.tag]
+        #noise_results[turboshaft.propulsor_group]                             = RCAIDE.Framework.Mission.Common.Conditions() 
+        #noise_results[turboshaft.propulsor_group].turboshaft                  = RCAIDE.Framework.Mission.Common.Conditions() 
+        #fuel_line_results[turboshaft.propulsor_group].turboshaft.throttle     = np.array([[1.0]])  
 
-        #T , P, mdot,sfc,eta_prop,eta = compute_turboshaft_performance(0,fuel_line,turboshaft.propulsor_group,fuel_line.turboshafts,1,conditions_sls)   
+        total_power, thermal_efficiency, power_specific_fuel_consumption  = compute_turboshaft_performance(fuel_line,conditions_sls)
+        power[i]              = np.linalg.norm(P)
+        thermal_efficiency[i] = thermal_efficiency
+        PSFC[i]               = power_specific_fuel_consumption
 
-        #thrust[i]             = np.linalg.norm(T)
-        #overall_efficiency[i] = eta 
-
-    #return thrust , overall_efficiency
+    return power , thermal_efficiency, PSFC
     
 # ----------------------------------------------------------------------
 #   Save Results
