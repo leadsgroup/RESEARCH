@@ -248,7 +248,7 @@ def turboshaft_engine(altitude,mach):
         # setup conditions
         
         conditions_sls = RCAIDE.Framework.Mission.Common.Results()
-
+        conditions_sls.conditions = RCAIDE.Framework.Mission.Common.Conditions()
 
         # freestream conditions    
         conditions_sls.freestream.altitude                    = np.atleast_2d(altitude[i])
@@ -269,8 +269,8 @@ def turboshaft_engine(altitude,mach):
         fuel_line.propulsors.append(turboshaft)       
         net.fuel_lines.append(fuel_line)   
 
-        conditions_sls.energy[fuel_line.tag]                                  = RCAIDE.Framework.Mission.Common.Conditions()         
-        conditions_sls.noise[fuel_line.tag]                                   = RCAIDE.Framework.Mission.Common.Conditions()      
+        conditions_sls.condition.energy[fuel_line.tag]                         = RCAIDE.Framework.Mission.Common.Conditions()         
+        conditions_sls.condition.noise[fuel_line.tag]                          = RCAIDE.Framework.Mission.Common.Conditions()      
         #sorted_propulsors                                                     = compute_unique_propulsor_groups(fuel_line)
         fuel_line_results                                                     = conditions_sls.energy[fuel_line.tag] 
         #fuel_line_results[turboshaft.propulsor_group]                         = RCAIDE.Framework.Mission.Common.Conditions()
