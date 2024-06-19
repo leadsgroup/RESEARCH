@@ -135,13 +135,13 @@ def second_order_analysis():
     altitude           = np.linspace(0,36000,10)*Units.feet 
     mach               = np.ones_like(altitude)*0.001 
 
-    power_baseline , overall_efficiency_baseline = turboshaft_engine(altitude,mach) 
+    power_baseline , overall_efficiency_baseline,   PSFC= turboshaft_engine(altitude,mach) 
 
     fig = plt.figure('Turboshaft')
     axis = fig.add_subplot(1,2,1)
     axis.set_ylabel('altitude [ft]')
     axis.set_xlabel('Power [W]')
-    axis.plot(power_baseline/Units.Watts,altitude/Units.feet, color = 'black', label = 'baseline')    
+    axis.plot(power_baseline  ,altitude/Units.feet, color = 'black', label = 'baseline')    
     axis.grid()  
     axis.legend()    
 
@@ -273,7 +273,7 @@ def turboshaft_engine(altitude,mach):
         state.conditions.freestream.velocity                    = np.atleast_2d(a*mach[i])  
         
         # initialize data structure for turshaft operating conditions (for energy ) 
-        state.conditions.energy[fuel_line.tag]               = RCAIDE.Framework.Mission.Common.Conditions()  
+        state.conditions.energy[fuel_line.tag]                                    = RCAIDE.Framework.Mission.Common.Conditions()  
         state.conditions.energy[fuel_line.tag][fuel_tank.tag]                     = RCAIDE.Framework.Mission.Common.Conditions()  
         state.conditions.energy[fuel_line.tag][fuel_tank.tag].mass_flow_rate      = np.zeros((1,1))     
         state.conditions.energy[fuel_line.tag][fuel_tank.tag].mass                = np.zeros((1,1))   
@@ -281,18 +281,17 @@ def turboshaft_engine(altitude,mach):
         state.conditions.energy[fuel_line.tag][turboshaft.tag].throttle           = np.array([[1.0]])
         state.conditions.energy[fuel_line.tag][turboshaft.tag].y_axis_rotation    = np.zeros((1,1)) 
         state.conditions.energy[fuel_line.tag][turboshaft.tag].thrust             = np.zeros((1,1))
-        state.conditions.energy[fuel_line.tag][turboshaft.tag].power              = np.zeros((1,1))
-        
+        state.conditions.energy[fuel_line.tag][turboshaft.tag].power              = np.zeros((1,1)) 
 
         # initialize data structure for turshaft operating conditions (for noise )       
         state.conditions.noise[fuel_line.tag]                                     = RCAIDE.Framework.Mission.Common.Conditions()              
         state.conditions.noise[fuel_line.tag][turboshaft.tag]                     = RCAIDE.Framework.Mission.Common.Conditions() 
         state.conditions.noise[fuel_line.tag][turboshaft.tag].turboshaft          = RCAIDE.Framework.Mission.Common.Conditions() 
                 
-        total_power, thermal_efficiency, power_specific_fuel_consumption  = compute_turboshaft_performance(fuel_line,state)
+        total_power, eta_thermal, power_specific_fuel_consumption  = compute_turboshaft_performance(fuel_line,state)
         power[i]              = total_power[0][0]
-        thermal_efficiency[i] = thermal_efficiency
-        PSFC[i]               = power_specific_fuel_consumption
+        thermal_efficiency[i] = eta_thermal[0][0]
+        PSFC[i]               = power_specific_fuel_consumption[0][0]
 
     return power , thermal_efficiency, PSFC
     
