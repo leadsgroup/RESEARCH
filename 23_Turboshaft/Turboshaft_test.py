@@ -14,10 +14,7 @@ from RCAIDE.Library.Plots                                          import *
 # python imports 
 import numpy                                                       as np  
 import pickle
-from copy                                                          import deepcopy
-import matplotlib.pyplot                                           as plt  
-import os   
-import matplotlib.cm                                               as cm
+import matplotlib.pyplot                                           as plt    
 
 # ----------------------------------------------------------------------
 #   Main
@@ -132,7 +129,7 @@ def first_order_analysis():
 def second_order_analysis():  
 
     altitude           = np.linspace(0,36000,10)*Units.feet 
-    mach               = np.ones_like(altitude)*0.001 
+    mach               = np.ones_like(altitude)*0.1 
 
     power_baseline , thermal_efficiency_baseline, PSFC = turboshaft_engine(altitude,mach) 
 
@@ -170,9 +167,11 @@ def turboshaft_engine(altitude,mach):
     turboshaft.origin                              = [[13.72, 4.86,-1.1]] 
     turboshaft.engine_length                       = 2.71     
     turboshaft.bypass_ratio                        = 0    
-    turboshaft.design_altitude                     = 35000.0*Units.ft
+    turboshaft.design_altitude                     = 36000.0*Units.ft
     turboshaft.design_mach_number                  = 0.1   
     turboshaft.design_power                        = 522000.0*Units.W 
+    turboshaft.mass_flow_rate_design               = 1.9
+        
                                                    
     # working fluid                                
     turboshaft.working_fluid                       = RCAIDE.Library.Attributes.Gases.Air() 
@@ -248,8 +247,8 @@ def turboshaft_engine(altitude,mach):
     for i in range(len(altitude)):                                                
                                                                                   
         # define atmospheric properties                                           
-        atmosphere_sls                                                            = RCAIDE.Framework.Analyses.Atmospheric.US_Standard_1976()
-        atmo_data                                                                 = atmosphere_sls.compute_values(altitude[i],0.0)
+        atmosphere                                                                = RCAIDE.Framework.Analyses.Atmospheric.US_Standard_1976()
+        atmo_data                                                                 = atmosphere.compute_values(altitude[i],0.0)
         planet                                                                    = RCAIDE.Library.Attributes.Planets.Earth() 
         p                                                                         = atmo_data.pressure          
         T                                                                         = atmo_data.temperature       
@@ -275,14 +274,13 @@ def turboshaft_engine(altitude,mach):
         state.conditions.freestream.speed_of_sound                                = np.atleast_2d(a)
         state.conditions.freestream.velocity                                      = np.atleast_2d(a*mach[i])  
         
-        # initialize data structure for turshaft operating conditions (for energy ) 
+        # initialize data structure for turboshaft operating conditions (for energy) 
         state.conditions.energy[fuel_line.tag]                                    = RCAIDE.Framework.Mission.Common.Conditions()  
         state.conditions.energy[fuel_line.tag][fuel_tank.tag]                     = RCAIDE.Framework.Mission.Common.Conditions()  
         state.conditions.energy[fuel_line.tag][fuel_tank.tag].mass_flow_rate      = np.zeros((1,1))     
         state.conditions.energy[fuel_line.tag][fuel_tank.tag].mass                = np.zeros((1,1))   
         state.conditions.energy[fuel_line.tag][turboshaft.tag]                    = RCAIDE.Framework.Mission.Common.Conditions() 
         state.conditions.energy[fuel_line.tag][turboshaft.tag].throttle           = np.array([[1.0]])
-        state.conditions.energy[fuel_line.tag][turboshaft.tag].y_axis_rotation    = np.zeros((1,1)) 
         state.conditions.energy[fuel_line.tag][turboshaft.tag].thrust             = np.zeros((1,1))
         state.conditions.energy[fuel_line.tag][turboshaft.tag].power              = np.zeros((1,1)) 
 
@@ -292,6 +290,7 @@ def turboshaft_engine(altitude,mach):
         state.conditions.noise[fuel_line.tag][turboshaft.tag].turboshaft          = RCAIDE.Framework.Mission.Common.Conditions() 
                 
         total_power, eta_thermal, power_specific_fuel_consumption                 = compute_turboshaft_performance(fuel_line,state)
+        
         power[i]                                                                  = total_power[0][0]
         thermal_efficiency[i]                                                     = eta_thermal[0][0]
         PSFC[i]                                                                   = power_specific_fuel_consumption[0][0]
