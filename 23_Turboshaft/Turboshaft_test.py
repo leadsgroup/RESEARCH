@@ -170,8 +170,7 @@ def turboshaft_engine(altitude,mach):
     turboshaft.design_altitude                     = 36000.0*Units.ft
     turboshaft.design_mach_number                  = 0.1   
     turboshaft.design_power                        = 522000.0*Units.W 
-    turboshaft.mass_flow_rate_design               = 1.9
-        
+    turboshaft.mass_flow_rate_design               = 1.9 #[kg/s]
                                                    
     # working fluid                                
     turboshaft.working_fluid                       = RCAIDE.Library.Attributes.Gases.Air() 
@@ -191,7 +190,6 @@ def turboshaft_engine(altitude,mach):
     compressor.tag                                 = 'compressor'
     compressor.polytropic_efficiency               = 0.91
     compressor.pressure_ratio                      = 1.9  
-    compressor.mass_flow_rate                      = 1.9 
     turboshaft.compressor                          = compressor
 
     # low pressure turbine  
