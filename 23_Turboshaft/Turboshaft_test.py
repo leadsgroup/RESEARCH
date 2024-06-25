@@ -190,6 +190,7 @@ def turboshaft_engine(altitude,mach):
     compressor.tag                                 = 'compressor'
     compressor.polytropic_efficiency               = 0.91
     compressor.pressure_ratio                      = 1.9  
+    compressor.mass_flow_rate                      = 1.9 
     turboshaft.compressor                          = compressor
 
     # low pressure turbine  
