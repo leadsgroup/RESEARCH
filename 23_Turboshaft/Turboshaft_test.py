@@ -189,7 +189,7 @@ def turboshaft_engine(altitude,mach):
     compressor                                     = RCAIDE.Library.Components.Propulsors.Converters.Compressor()    
     compressor.tag                                 = 'compressor'
     compressor.polytropic_efficiency               = 0.91
-    compressor.pressure_ratio                      = 1.9  
+    compressor.pressure_ratio                      = 12  
     compressor.mass_flow_rate                      = 1.9 
     turboshaft.compressor                          = compressor
 
