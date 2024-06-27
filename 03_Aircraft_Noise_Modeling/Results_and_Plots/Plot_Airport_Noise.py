@@ -1,9 +1,9 @@
 import numpy as np
-from RCAIDE.Core import Units , Data 
+from RCAIDE.Framework.Core import Units , Data 
 import matplotlib.pyplot as plt 
 import matplotlib.colors
 import matplotlib.colors as colors   
-from RCAIDE.Visualization.Topography                                          import *  
+#from RCAIDE.Visualization.Topography                                          import *  
 import pickle
 
 
