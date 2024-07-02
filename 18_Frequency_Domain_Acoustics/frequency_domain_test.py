@@ -4,17 +4,18 @@
 import RCAIDE
 from RCAIDE.Framework.Core import Units, Data  
 from RCAIDE.Library.Methods.Noise.Frequency_Domain_Buildup.Rotor   import rotor_noise
-from RCAIDE.Framework.Analyses.Mission.Common                        import Results  
-from RCAIDE.Framework.Analyses.Mission.Segments.Segment              import Segment 
+from RCAIDE.Framework.Mission.Common                        import Results  
+from RCAIDE.Framework.Mission.Segments.Segment              import Segment 
 
 # Python Imports  
 import sys 
 import numpy as np 
 import matplotlib.pyplot as plt  
 
-sys.path.append('Rotors')
+sys.path.append('../')
 # the analysis functions
 
+from Custom_Propeller import Custom_Propeller
 from F8745_D4_Propeller  import F8745_D4_Propeller
 from APC_11x4_Propeller  import APC_11x4_Propeller 
 # ----------------------------------------------------------------------
@@ -42,8 +43,8 @@ def main():
 # ------------------------------------------------------------------  
 def Hararmonic_Noise_Validation(PP):
      
-    bus                            = RCAIDE.Energy.Networks.Distribution.Electrical_Bus() 
-    propulsor                      = RCAIDE.Energy.Propulsion.Propulsor() 
+    bus                            = RCAIDE.Library.Components.Energy.Distribution.Electrical_Bus() 
+    propulsor                      = RCAIDE.Library.Components.Propulsors.Propulsor() 
     rotor                          = F8745_D4_Propeller() 
     propulsor.rotor                = rotor  
     bus.propulsors.append(propulsor) 
@@ -84,6 +85,7 @@ def Hararmonic_Noise_Validation(PP):
     conditions.frames.inertial.velocity_vector             = np.array([[77.2, 0. ,0.],[ 77.0,0.,0.], [ 77.2, 0. ,0.]]) 
     conditions.energy.throttle                             = np.ones((ctrl_pts,1))*1.0 
     rotor.inputs.omega                                     = np.atleast_2d(test_omega).T   
+    rotor.inputs.pitch_command                             = np.ones((ctrl_pts,1))*0.0 
     conditions.frames.planet.true_course_angle             = np.zeros((ctrl_pts,3,3)) 
     conditions.frames.planet.true_course_angle[:,0,0]      = np.cos(true_course_angle),
     conditions.frames.planet.true_course_angle[:,0,1]      = - np.sin(true_course_angle)
@@ -107,14 +109,14 @@ def Hararmonic_Noise_Validation(PP):
     F, Q, P, Cp , noise_data , etap                        = rotor.spin(conditions) 
 
     # Prepare Inputs for Noise Model   
-    conditions.noise.total_microphone_locations            = np.repeat(positions[ np.newaxis,:,: ],1,axis=0)
+    conditions.noise.relative_microphone_locations         = np.repeat(positions[ np.newaxis,:,: ],1,axis=0)
     conditions.aerodynamics.angle_of_attack                = np.ones((ctrl_pts,1))* 0. * Units.degrees 
     segment                                                = Segment() 
     segment.state.conditions                               = conditions
     segment.state.conditions.expand_rows(ctrl_pts) 
-    noise                                                  = RCAIDE.Analyses.Noise.Frequency_Domain_Buildup() 
+    noise                                                  = RCAIDE.Framework.Analyses.Noise.Frequency_Domain_Buildup() 
     settings                                               = noise.settings   
-    num_mic                                                = len(conditions.noise.total_microphone_locations[0] )  
+    num_mic                                                = len(conditions.noise.relative_microphone_locations[0] )  
     conditions.noise.number_of_microphones                 = num_mic
                  
     # Run Frequency Domain Rotor Noise Model          
@@ -213,8 +215,8 @@ def Hararmonic_Noise_Validation(PP):
 # Broadband Noise Validation
 # ------------------------------------------------------------------     
 def Broadband_Noise_Validation(PP):   
-    bus                            = RCAIDE.Energy.Networks.Distribution.Electrical_Bus()  
-    propulsor                      = RCAIDE.Energy.Propulsion.Propulsor() 
+    bus                            = RCAIDE.Library.Components.Energy.Distribution.Electrical_Bus()  
+    propulsor                      = RCAIDE.Library.Components.Propulsors.Propulsor() 
     rotor                          = APC_11x4_Propeller()  
     propulsor.rotor                = rotor   
     bus.propulsors.append(propulsor)
@@ -244,7 +246,8 @@ def Broadband_Noise_Validation(PP):
             positions[i][:] = [S*np.sin(theta[i]*Units.degrees- np.pi/2),-S*np.cos(theta[i]*Units.degrees - np.pi/2), 0.0] 
 
     # Define conditions  
-    rotor.inputs.omega                                    = np.atleast_2d(APC_SF_omega_vector).T
+    rotor.inputs.omega                                     = np.atleast_2d(APC_SF_omega_vector).T
+    rotor.inputs.pitch_command                             = np.ones((ctrl_pts,1))*0.0
     conditions                                             = Results() 
     conditions.freestream.density                          = np.ones((ctrl_pts,1)) * density
     conditions.freestream.dynamic_viscosity                = np.ones((ctrl_pts,1)) * dynamic_viscosity   
@@ -278,7 +281,7 @@ def Broadband_Noise_Validation(PP):
     APC_SF_thrust, APC_SF_torque, APC_SF_power, APC_SF_Cp, noise_data , APC_SF_etap  =  rotor.spin(conditions)  
 
     # Prepare Inputs for Rotor Noise Model     
-    conditions.noise.total_microphone_locations             = np.repeat(positions[ np.newaxis,:,: ],ctrl_pts,axis=0)
+    conditions.noise.relative_microphone_locations          = np.repeat(positions[ np.newaxis,:,: ],ctrl_pts,axis=0)
     conditions.aerodynamics.angle_of_attack                 = np.ones((ctrl_pts,1))* 0. * Units.degrees 
     segment                                                 = Segment() 
     segment.state.conditions                                = conditions
@@ -498,5 +501,4 @@ def setup_noise_settings(sts):
 if __name__ == '__main__': 
     main()    
     plt.show()   
-    
     
