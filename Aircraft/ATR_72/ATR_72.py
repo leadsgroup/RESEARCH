@@ -295,11 +295,13 @@ def vehicle_setup():
     fuselage.lengths.cabin                      = fuselage.lengths.total- (fuselage.lengths.nose + fuselage.lengths.tail  )
     fuselage.width                              = 2.985093814  
     fuselage.heights.maximum                    = 2.755708426  
-    fuselage.areas.side_projected               = 1.0 # incorrect 
-    fuselage.areas.wetted                       = 1.0 # incorrect 
-    fuselage.areas.front_projected              = 1.0 # incorrect 
-    fuselage.effective_diameter                 = 2.985093814  
-    fuselage.differential_pressure              = 1.0
+    fuselage.areas.side_projected               = fuselage.heights.maximum * fuselage.lengths.total * Units['meters**2'] 
+    fuselage.areas.wetted                       = np.pi * fuselage.width/2 * fuselage.lengths.total * Units['meters**2'] 
+    fuselage.areas.front_projected              = np.pi * fuselage.width/2      * Units['meters**2']  
+    fuselage.differential_pressure              = 5.0e4 * Units.pascal
+    fuselage.heights.at_quarter_length          = fuselage.heights.maximum * Units.meter
+    fuselage.heights.at_three_quarters_length   = fuselage.heights.maximum * Units.meter
+    fuselage.heights.at_wing_root_quarter_chord = fuselage.heights.maximum* Units.meter
     
      # Segment  
     segment                                     = RCAIDE.Components.Lofted_Body_Segment.Segment() 
