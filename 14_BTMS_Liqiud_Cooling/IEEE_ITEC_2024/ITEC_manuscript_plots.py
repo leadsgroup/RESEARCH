@@ -8,9 +8,11 @@
 #  IMPORT
 # ----------------------------------------------------------------------------------------------------------------------  
 
-from RCAIDE.Core import Units, Data 
-from RCAIDE.Visualization.Common import set_axes, plot_style
+from RCAIDE.Framework.Core import Units, Data 
+from RCAIDE.Library.Plots.Common import set_axes, plot_style
 import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
+
 import matplotlib.cm as cm
 import numpy as np 
 import pandas as pd 
@@ -22,8 +24,8 @@ def main():
     file_name_1 = 'X_57_HEX'   
     res_Hex     = load_results(file_name_1) 
 
-    file_name_2 = 'X_57_w_no_HEX'     
-    res_No_Hex = load_results(file_name_2)
+    #file_name_2 = 'X_57_w_no_HEX'     
+    #res_No_Hex = load_results(file_name_2)
 
     #plot_flight_profile(res_No_Hex)
     #plot_reservoir_conditions(res_Hex)
@@ -103,7 +105,7 @@ def plot_style():
 def save_current_csv(res_No_Hex,
                      save_csv = True,
                         show_legend = True,
-                        save_filename = "Ambient_temperature",
+                        save_filename = "Voltage_variation",
                         file_type = ".csv"):
     current = []
     t    = []
@@ -118,17 +120,19 @@ def save_current_csv(res_No_Hex,
                     battery_conditions_No_Hex  = res_No_Hex.segments[i].conditions.energy[bus.tag][battery.tag]         
                     pack_current        = battery_conditions_No_Hex.cell.current[:,0]
                     reservoir_temperature = battery_conditions_No_Hex.thermal_management_system.RES.coolant_temperature[:,0]
-                    t_ambient           = res_No_Hex.segments[i].conditions.freestream.temperature[:,0] 
+                    voltage = battery_conditions_No_Hex.cell.voltage_under_load[:,0]
+                    t_ambient           = res_No_Hex.segments[i].conditions.freestream.temperature[:,0]
                     
-                    current.append(t_ambient)
+                    
+                    current.append(voltage)
                     t.append(time)
           
         current = np.hstack(current)
         t       = np.hstack(t)
-        df = pd.DataFrame({'Time': t, 'Current': current})
+        df = pd.DataFrame({'Time': t, 'Voltage': current})
         
         if save_csv:
-            df.to_csv(f'IEEE_ITEC_final_plots/{save_filename}{file_type}', index=False)
+            df.to_csv('{save_filename}{file_type}', index=False)
         return 
     
 

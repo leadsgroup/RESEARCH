@@ -38,7 +38,7 @@ import Plots
 def main(airport, month):  
     # start simulation clock
     ti                         = time.time()
-    RUN_NEW_MODEL_FLAG         = True
+    RUN_NEW_MODEL_FLAG         = False
     
     # -------------------------------------------------------------------------------------------    
     # SET UP SIMULATION PARAMETERS   
@@ -88,13 +88,16 @@ def main(airport, month):
     
     
     tf = time.time() 
-    print ('time taken: '+ str(round(((tf-ti)/60),3)) + ' mins')   
+    print ('time taken: '+ str(round(((tf-ti)/60),3)) + ' mins')
     
     
-    #elapsed_range = results.segments[-1].conditions.frames.inertial.aircraft_range[-1,0]
-    #print('True Range     : ' + str(round(meta_data.flight_range/Units.nmi,2))  + ' nmi')   
-    #print('Computed Range : ' + str(round(elapsed_range/Units.nmi,2)) + ' nmi')   
+    for i in range(len(flight_no)):
         
+        starting_range =  results.segments[1+(i*14)].conditions.frames.inertial.aircraft_range[-1,0] /Units.nmi
+        final_range = results.segments[12+(i*14)].conditions.frames.inertial.aircraft_range[-1,0]/Units.nmi
+        print(final_range-starting_range)
+    #fill_range_data(simulation_meta_data_path, airport, month,flight_range)  
+    
     return 
 
 
@@ -114,8 +117,30 @@ def load_results(filename):
     load_file = filename + '.pkl' 
     with open(load_file, 'rb') as file:
         results = pickle.load(file) 
-    return results  
+    return results
 
+## ------------------------------------------------------------------
+##   Write Simulation Data
+## ------------------------------------------------------------------   
+
+#def fill_range_data(file_path, airport, month, range_data):
+    
+    #df = pd.read_excel(file_path, sheet_name=airport)
+    
+    ## Fill forward missing values in 'Airport' and 'Month' columns
+    #df['Month'].fillna(method='ffill', inplace=True)
+    
+    ## Filter the dataframe based on airport and month
+    #filtered_df = df[(df['Month'] == month)]
+    
+    #for i in range(min(8, len(filtered_df))):
+        #range_data[i] = filtered_df['Range'].iloc[i]
+    
+    #with pd.ExcelWriter(file_path) as writer:
+        #filtered_df.to_excel(writer, sheet_name=airport, index=False) 
+    
+    #return    
+    
 # ------------------------------------------------------------------
 #   Load Simulation Data
 # ------------------------------------------------------------------   
@@ -195,12 +220,16 @@ def send_email(airport, month):
 
     
 if __name__ == '__main__':
-    airport = 'ORD'
-    month = 'January'    
-    main(airport, month)
-    simulation_complete(airport, month)  
+    #airports = ['ORD', 'DFW']
+    #months = ['January','February', 'March', 'April', 'May', 'June', 'July', 'September', 'October', 'November', 'December']
+    airports = ['DFW']
+    months = ['January']#, 'July']#, 'April']
+    
+    
+    for j in range(len(airports)):   
+        for i in range(len(months)):
+            airport = airports[j]
+            month = months[i]    
+            main(airport, month)
+            simulation_complete(airport, month)  
     plt.show()
-
-   
-
-

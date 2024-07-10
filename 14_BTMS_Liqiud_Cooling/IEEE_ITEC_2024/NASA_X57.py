@@ -28,7 +28,7 @@ import matplotlib.pyplot        as plt
 def main():     
 
     # vehicle data 
-    BTMS_flag = True 
+    BTMS_flag = False 
     file_name = 'X_57_HEX'    
 
     vehicle   = vehicle_setup(BTMS_flag) 
@@ -140,7 +140,7 @@ def vehicle_setup(BTMS_flag):
     wing.dynamic_pressure_ratio                = 1.0   
     ospath                                     = os.path.abspath(__file__)
     separator                                  = os.path.sep
-    rel_path                                   = ospath.split( 'NASA_X57.py')[0]  +  '..' + separator   
+    rel_path                                   = ospath.split( 'NASA_X57.py')[0]  +  '..' + separator + '..' + separator   
     airfoil                                    = RCAIDE.Library.Components.Airfoils.Airfoil() 
     airfoil.coordinate_file                    = rel_path + 'Airfoils' + separator + 'NACA_63_412.txt'   # absolute path         
 
@@ -1024,11 +1024,11 @@ def loiter_mission_setup(analyses):
     # ------------------------------------------------------------------
     #   Initialize the Mission
     # ------------------------------------------------------------------
-    mission = RCAIDE.Mission.Sequential_Segments()
+    mission = RCAIDE.Framework.Mission.Sequential_Segments()
     mission.tag = 'mission' 
 
     # unpack Segments module
-    Segments = RCAIDE.Mission.Segments  
+    Segments = RCAIDE.Framework.Mission.Segments  
     base_segment = Segments.Segment()  
 
     # ------------------------------------------------------------------
@@ -1059,7 +1059,7 @@ def loiter_mission_setup(analyses):
 
 def missions_setup(analyses): 
 
-    missions         = RCAIDE.Mission.Missions()
+    missions         = RCAIDE.Framework.Mission.Missions()
 
     # base mission 
     base_mission = mission_setup(analyses) 
@@ -1081,7 +1081,7 @@ def plot_mission(results):
     
     plot_aerodynamic_forces(results)
     
-    plot_drag_components(results)
+    #plot_drag_components(results)
 
     plot_aircraft_velocities(results)
 
