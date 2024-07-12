@@ -37,9 +37,10 @@ def main():
     selected_airpots      = "All Airports" # ["Top 5 Airports","Top 10 Airports","Top 20 Airports", "Top 50 Airports",  "All Airports"]
     percent_adoption      = 100 
     month_no              = 1 
+    percent_H2_process    = [75,80,95] 
     switch_off            = False  
     H2_dollars_per_gal    =  0 
-    fig_5, fig_6, fig_7, fig_8,fig_9,fig_10 = generate_electric_flight_operations_plots(Flight_Ops,Commercial_H2,aircraft,selected_airpots,percent_H2_process , volume_fraction,percent_adoption,month_no,H2_dollars_per_gal ,switch_off)
+    fig_5,fig_6, fig_7, fig_8,fig_9,fig_10 = generate_electric_flight_operations_plots(Flight_Ops,Commercial_H2,aircraft,selected_airpots,percent_H2_process , volume_fraction,percent_adoption,month_no,H2_dollars_per_gal ,switch_off)
                 
       
     return 
@@ -63,7 +64,7 @@ def generate_electric_flight_operations_plots(Flight_Ops,Commercial_H2,aircraft,
         #S_ref           = 61.0   
         #L_div_D         = CL_cruise/CD_cruise 
         
-    elif aircraft == 'Embraer 190': 
+    if aircraft == 'Embraer 190': 
         P_max           = 15.27 * 1E6
         W_0             = 52290    
         fuel_volume     = 16629 
