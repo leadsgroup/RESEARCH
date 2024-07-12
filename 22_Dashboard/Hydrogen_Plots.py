@@ -53,26 +53,24 @@ def generate_electric_flight_operations_plots(Flight_Ops,Commercial_H2,aircraft,
     
     if aircraft == 'ATR 72-600': 
         P_max           = 1568083 
-        W_0             = 23000   
-        thrust_coef     = 0.000017678 # incorrect  
+        W_0             = 23000    
         fuel_volume     = 6410.2
         fuel_economy    = 3.27 
         passengers      = 72 
         CL_cruise       = 0.55   # incorrect  
-        fuselage_volume = 100 # CHANGE 
+        fuselage_volume =  
         CD_cruise       = 0.035  # incorrect  
         S_ref           = 61.0   
         L_div_D         = CL_cruise/CD_cruise 
         
     elif aircraft == 'Embraer 190': 
         P_max           =  
-        W_0             = 52290 
-        thrust_coef     = 0.000017678 # incorrect    
+        W_0             = 52290    
         fuel_volume     = 16629 
         fuel_economy    = 3.54 
-        passengers      = 100 
-        fuselage_volume = 100 # CHANGE 
-        SFC_lb_lbfhr    = 100 # CHANGE  
+        passengers      = 106
+        fuselage_volume = 75.56964 
+        SFC_lb_lbfhr    =  
         CL_cruise       = 0.55   # incorrect 
         CD_cruise       = 0.035  # incorrect 
         S_ref           = 92.53 
@@ -80,8 +78,7 @@ def generate_electric_flight_operations_plots(Flight_Ops,Commercial_H2,aircraft,
         
     elif aircraft == "Boeing 737 MAX-8":
         P_max           = 15000000 
-        W_0             = 79015.8   
-        thrust_coef     = 0.000017678  
+        W_0             = 79015.8    
         fuel_volume     = 26024 
         fuel_economy    = 2.04 
         passengers      = 162  
@@ -94,8 +91,7 @@ def generate_electric_flight_operations_plots(Flight_Ops,Commercial_H2,aircraft,
         
     elif aircraft == 'Airbus A320 neo': 
         P_max           = 15000000 
-        W_0             = 78000
-        thrust_coef     = 0.000017678  
+        W_0             = 78000 
         fuel_volume     = 26024  
         fuel_economy    = 2.04  
         passengers      = 162
@@ -108,55 +104,52 @@ def generate_electric_flight_operations_plots(Flight_Ops,Commercial_H2,aircraft,
         L_div_D         = CL_cruise/CD_cruise
         
     elif aircraft == "Boeing 787-8": 
-        P_max           =  
-        thrust_coef     = 0.000017678 
+        P_max           =   
         fuel_volume     = 126206  
         fuel_economy    = 2.68    
         passengers      = 238
-        SFC_lb_lbfhr             = 100 # CHANGE  
+        SFC_lb_lbfhr    = 
         W_0             = 227900   
         CL_cruise       = 0.055 
-        fuselage_volume = 100 # CHANGE 
+        fuselage_volume = 480.8650
         CD_cruise       = 0.035
         S_ref           = 377
         L_div_D         = CL_cruise/CD_cruise
         
 
     elif aircraft == "Boeing 777-300": 
-        P_max           =  
-        thrust_coef     = 0.000017678 
+        P_max           = 68 * 1E6
         fuel_volume     = 126206  
         fuel_economy    = 2.68    
         passengers      = 238
-        SFC_lb_lbfhr             = 100 # CHANGE  
+        SFC_lb_lbfhr    = 0.51 
         W_0             = 227900   
         CL_cruise       = 0.055 
-        fuselage_volume = 100 # CHANGE 
+        fuselage_volume = 682.008 
         CD_cruise       = 0.035
         S_ref           = 377
         L_div_D         = CL_cruise/CD_cruise
         
-    elif aircraft == 'Airbus A350-1000':
-        P_max          =  
-        thrust_coef    = 0.000017678   
-        fuel_volume    = 166488        # liters 
-        fuel_economy   = 2.85          # L/100km per Pax
-        SFC_lb_lbfhr   = 100 # CHANGE  
-        passengers     = 327  
-        W_0            = 322050 
-        fuselage_volume = 100 # CHANGE  
-        CL_cruise      = 0.055 
-        CD_cruise      = 0.035
-        S_ref          = 464.3
-        L_div_D        = CL_cruise/CD_cruise      
+    #elif aircraft == 'Airbus A350-1000':
+        #P_max          =   
+        #fuel_volume    = 166488        # liters 
+        #fuel_economy   = 2.85          # L/100km per Pax
+        #SFC_lb_lbfhr   =  
+        #passengers     = 327  
+        #W_0            = 322050 
+        #fuselage_volume = 
+        #CL_cruise      = 0.055 
+        #CD_cruise      = 0.035
+        #S_ref          = 464.3
+        #L_div_D        = CL_cruise/CD_cruise      
               
     
-    density_JetA  = 820.0  
-    density_H2    = 70 # kg /m3  
+    density_JetA      = 820.0  
+    density_H2        = 70 # kg /m3  
     gallons_to_Liters  = 3.78541
-    airspeed   =  0.75 * 343
-    SFC       =  SFC_lb_lbfhr * 9.80665
-    SFC_H2    =   SFC  * 0.35 
+    airspeed           = 0.75 * 343
+    SFC                = SFC_lb_lbfhr * 9.80665
+    SFC_H2             = SFC  * 0.35 
 
     
     H2_vol   =  volume_fraction * fuselage_volume
