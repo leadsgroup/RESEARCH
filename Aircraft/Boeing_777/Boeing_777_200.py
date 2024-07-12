@@ -44,12 +44,12 @@ def main():
 
     # plot vehicle 
     plot_3d_vehicle(vehicle,
-                    min_x_axis_limit            = -5,
-                    max_x_axis_limit            = 40,
-                    min_y_axis_limit            = -20,
-                    max_y_axis_limit            = 20,
-                    min_z_axis_limit            = -20,
-                    max_z_axis_limit            = 20)          
+                    min_x_axis_limit            = -1,
+                    max_x_axis_limit            = 100,
+                    min_y_axis_limit            = -50,
+                    max_y_axis_limit            = 50,
+                    min_z_axis_limit            = -50,
+                    max_z_axis_limit            = 50)          
     
     return
 
@@ -405,24 +405,24 @@ def vehicle_setup():
     fuselage.Segments.append(segment)
     
 
-    # Segment  
-    segment                                     = RCAIDE.Library.Components.Fuselages.Segment() 
-    segment.tag                                 = 'segment_3'    
-    segment.percent_x_location                  = 0.0013698630136986301 
-    segment.percent_z_location                  = 0.0005097406105412695 
-    segment.height                              = 1.0105126311743573 
-    segment.width                               = 0.5860983155721387 
-    fuselage.Segments.append(segment)
+    ## Segment  
+    #segment                                     = RCAIDE.Library.Components.Fuselages.Segment() 
+    #segment.tag                                 = 'segment_3'    
+    #segment.percent_x_location                  = 0.0013698630136986301 
+    #segment.percent_z_location                  = 0.0005097406105412695 
+    #segment.height                              = 1.0105126311743573 
+    #segment.width                               = 0.5860983155721387 
+    #fuselage.Segments.append(segment)
     
 
-    # Segment  
-    segment                                     = RCAIDE.Library.Components.Fuselages.Segment() 
-    segment.tag                                 = 'segment_4'    
-    segment.percent_x_location                  = 0.0027397260273972603 
-    segment.percent_z_location                  = 0.00106519949517538 
-    segment.height                              = 1.1902153719637647 
-    segment.width                               = 0.9369298914718769 
-    fuselage.Segments.append(segment)
+    ## Segment  
+    #segment                                     = RCAIDE.Library.Components.Fuselages.Segment() 
+    #segment.tag                                 = 'segment_4'    
+    #segment.percent_x_location                  = 0.0027397260273972603 
+    #segment.percent_z_location                  = 0.00106519949517538 
+    #segment.height                              = 1.1902153719637647 
+    #segment.width                               = 0.9369298914718769 
+    #fuselage.Segments.append(segment)
     
 
     # Segment  
@@ -732,18 +732,18 @@ def vehicle_setup():
     # append propulsor to distribution line
     
 
-    ## Nacelle 
-    #nacelle                                     = RCAIDE.Library.Components.Nacelles.Body_of_Revolution_Nacelle()
-    #nacelle.diameter                            = 3.87
-    #nacelle.length                              = 5.27571429 
-    #nacelle.tag                                 = 'nacelle_1'
-    #nacelle.inlet_diameter                      = 3.1
-    #nacelle.origin                              = [[26.72797886 , 9.69802 , -2.04 ]] 
-    #nacelle.areas.wetted                        = 1.1*np.pi*nacelle.diameter*nacelle.length
-    #nacelle_airfoil                             = RCAIDE.Library.Components.Airfoils.NACA_4_Series_Airfoil()
-    #nacelle_airfoil.NACA_4_Series_code          = '2410'
-    #nacelle.Airfoil.append(nacelle_airfoil) 
-    #turbofan.nacelle                            = nacelle
+    # Nacelle 
+    nacelle                                     = RCAIDE.Library.Components.Nacelles.Body_of_Revolution_Nacelle()
+    nacelle.diameter                            = 3.87
+    nacelle.length                              = 5.27571429 
+    nacelle.tag                                 = 'nacelle_1'
+    nacelle.inlet_diameter                      = 3.1
+    nacelle.origin                              = [[26.72797886 , 9.69802 , -2.04 ]] 
+    nacelle.areas.wetted                        = 1.1*np.pi*nacelle.diameter*nacelle.length
+    nacelle_airfoil                             = RCAIDE.Library.Components.Airfoils.NACA_4_Series_Airfoil()
+    nacelle_airfoil.NACA_4_Series_code          = '2410'
+    nacelle.Airfoil.append(nacelle_airfoil) 
+    turbofan.nacelle                            = nacelle
     
     fuel_line.propulsors.append(turbofan)
     
@@ -756,7 +756,7 @@ def vehicle_setup():
     turbofan_2.active_fuel_tanks                = ['b777_fuel_tank'] 
     turbofan_2.tag                              = 'port_ge90_propulsor' 
     turbofan_2.origin                           = [[ 25.72797886 , -9.69802 , -2.04  ]]   # change origin 
-    #turbofan_2.nacelle.origin                   = [[26.72797886 , -9.69802 , -2.04 ]]  
+    turbofan_2.nacelle.origin                   = [[26.72797886 , -9.69802 , -2.04 ]]  
          
     # append propulsor to distribution line 
     fuel_line.propulsors.append(turbofan_2)

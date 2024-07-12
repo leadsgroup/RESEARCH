@@ -429,8 +429,7 @@ def generate_electric_flight_operations_plots(Routes_and_Temp,Commercial_Batteri
         L_div_D         = CL_cruise/CD_cruise
         
     #elif aircraft == "Boeing 787-8": 
-        #P_max           =  
-        #thrust_coef     = 0.000017678 
+        #P_max           =   
         #fuel_volume     = 126206  
         #fuel_economy    = 2.68    
         #passengers      = 238
