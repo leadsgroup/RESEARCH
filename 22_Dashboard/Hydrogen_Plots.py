@@ -64,15 +64,15 @@ def generate_electric_flight_operations_plots(Flight_Ops,Commercial_H2,aircraft,
         #L_div_D         = CL_cruise/CD_cruise 
         
     elif aircraft == 'Embraer 190': 
-        P_max           =  
+        P_max           = 15.27 * 1E6
         W_0             = 52290    
         fuel_volume     = 16629 
         fuel_economy    = 3.54 
         passengers      = 106
         fuselage_volume = 75.56964 
-        SFC_lb_lbfhr    =  
-        CL_cruise       = 0.55   # incorrect 
-        CD_cruise       = 0.035  # incorrect 
+        SFC_lb_lbfhr    = 0.624 
+        CL_cruise       = 0.501
+        CD_cruise       = 0.0342 
         S_ref           = 92.53 
         L_div_D         = CL_cruise/CD_cruise
         
@@ -82,7 +82,7 @@ def generate_electric_flight_operations_plots(Flight_Ops,Commercial_H2,aircraft,
         fuel_volume     = 26024 
         fuel_economy    = 2.04 
         passengers      = 162  
-        SFC_cruise      = 0.6262 # (lb / lbf - hr)
+        SFC_lb_lbfhr    = 0.6262 # (lb / lbf - hr) , in cruise 
         fuselage_volume = 129.742 # fuselage cabin length * fuselage radius^2 * pi * 0.5 (where passengers are)
         CD_cruise       = 0.027
         CL_cruise       = 0.569
@@ -96,7 +96,7 @@ def generate_electric_flight_operations_plots(Flight_Ops,Commercial_H2,aircraft,
         fuel_economy    = 2.04  
         passengers      = 162
         W_0             = 79015.8  
-        SFC_cruise      = 0.6262 # (lb / lbf - hr)
+        SFC_lb_lbfhr    = 0.6262 # (lb / lbf - hr), in cruise 
         fuselage_volume = 129.742 # fuselage cabin length * fuselage radius^2 * pi * 0.5 (where passengers are)
         CL_cruise       = 0.55 
         CD_cruise       = 0.035
