@@ -37,156 +37,64 @@ def main():
     selected_airpots      = "All Airports" # ["Top 5 Airports","Top 10 Airports","Top 20 Airports", "Top 50 Airports",  "All Airports"]
     percent_adoption      = 100 
     month_no              = 1 
-    percent_H2_process    = [75,80,95] 
     switch_off            = False  
-    H2_dollars_per_gal    =  0 
-    fig_5,fig_6, fig_7, fig_8,fig_9,fig_10 = generate_electric_flight_operations_plots(Flight_Ops,Commercial_H2,aircraft,selected_airpots,percent_H2_process , volume_fraction,percent_adoption,month_no,H2_dollars_per_gal ,switch_off)
+    H2_dollars_per_gal    = 0
+    percent_H2_color      = [75,80,95]    
+    fig_5, fig_6, fig_7, fig_8,fig_9,fig_10 = generate_electric_flight_operations_plots(Flight_Ops,Commercial_H2,aircraft,selected_airpots,percent_H2_color , volume_fraction,percent_adoption,month_no,H2_dollars_per_gal ,switch_off)
                 
       
     return 
     
      
-def generate_electric_flight_operations_plots(Flight_Ops,Commercial_H2,aircraft,selected_airpots,percent_H2_process , volume_fraction,percent_adoption,month_no,H2_dollars_per_gal ,switch_off): 
+def generate_electric_flight_operations_plots(Flight_Ops,Commercial_H2,aircraft,selected_airpots,percent_H2_color , volume_fraction,percent_adoption,month_no,H2_dollars_per_gal ,switch_off): 
     mapbox_access_token  = "pk.eyJ1IjoibWFjbGFya2UiLCJhIjoiY2xyanpiNHN6MDhsYTJqb3h6YmJjY2w5MyJ9.pQed7pZ9CnJL-mtqm1X8DQ"     
     map_style            = None if switch_off else 'dark'  
     #template             = pio.templates["minty"] if switch_off else pio.templates["minty_dark"] 
-    font_size            = 16     
-    
-    #if aircraft == 'ATR 72-600': 
-        #P_max           = 1568083 
-        #W_0             = 23000    
-        #fuel_volume     = 6410.2
-        #fuel_economy    = 3.27 
-        #passengers      = 72 
-        #CL_cruise       =  
-        #fuselage_volume =  
-        #CD_cruise       =  
-        #S_ref           = 61.0   
-        #L_div_D         = CL_cruise/CD_cruise 
-        
-    if aircraft == 'Embraer 190': 
-        P_max           = 15.27 * 1E6
-        W_0             = 52290    
-        fuel_volume     = 16629 
-        fuel_economy    = 3.54 
-        passengers      = 106
-        fuselage_volume = 75.56964 
-        SFC_lb_lbfhr    = 0.624 
-        CL_cruise       = 0.501
-        CD_cruise       = 0.0342 
-        S_ref           = 92.53 
-        L_div_D         = CL_cruise/CD_cruise
-        
-    elif aircraft == "Boeing 737 MAX-8":
-        P_max           = 15000000 
-        W_0             = 79015.8    
-        fuel_volume     = 26024 
-        fuel_economy    = 2.04 
-        passengers      = 162  
-        SFC_lb_lbfhr    = 0.6262 # (lb / lbf - hr) , in cruise 
-        fuselage_volume = 129.742 # fuselage cabin length * fuselage radius^2 * pi * 0.5 (where passengers are)
-        CD_cruise       = 0.027
-        CL_cruise       = 0.569
-        S_ref           = 124.862
-        L_div_D         = CL_cruise/CD_cruise
-        
-    elif aircraft == 'Airbus A320 neo': 
-        P_max           = 15000000 
-        W_0             = 78000 
-        fuel_volume     = 26024  
-        fuel_economy    = 2.04  
-        passengers      = 162
-        W_0             = 79015.8  
-        SFC_lb_lbfhr    = 0.6262 # (lb / lbf - hr), in cruise 
-        fuselage_volume = 129.742 # fuselage cabin length * fuselage radius^2 * pi * 0.5 (where passengers are)
-        CL_cruise       = 0.55 
-        CD_cruise       = 0.035
-        S_ref           = 127   
-        L_div_D         = CL_cruise/CD_cruise
-        
-    #elif aircraft == "Boeing 787-8": 
-        #P_max           =   
-        #fuel_volume     = 126206  
-        #fuel_economy    = 2.68    
-        #passengers      = 238
-        #SFC_lb_lbfhr    = 
-        #W_0             = 227900   
-        #CL_cruise       = 0.055 
-        #fuselage_volume = 480.8650
-        #CD_cruise       = 0.035
-        #S_ref           = 377
-        #L_div_D         = CL_cruise/CD_cruise
-        
-
-    elif aircraft == "Boeing 777-300": 
-        P_max           = 68 * 1E6
-        fuel_volume     = 126206  
-        fuel_economy    = 2.68    
-        passengers      = 238
-        SFC_lb_lbfhr    = 0.51 
-        W_0             = 227900   
-        CL_cruise       = 0.055 
-        fuselage_volume = 682.008 
-        CD_cruise       = 0.035
-        S_ref           = 377
-        L_div_D         = CL_cruise/CD_cruise
-        
-    #elif aircraft == 'Airbus A350-1000':
-        #P_max          =   
-        #fuel_volume    = 166488        # liters 
-        #fuel_economy   = 2.85          # L/100km per Pax
-        #SFC_lb_lbfhr   =  
-        #passengers     = 327  
-        #W_0            = 322050 
-        #fuselage_volume = 
-        #CL_cruise      = 0.055 
-        #CD_cruise      = 0.035
-        #S_ref          = 464.3
-        #L_div_D        = CL_cruise/CD_cruise      
+    font_size            = 16      
               
-    
-    density_JetA      = 820.0  
-    density_H2        = 70 # kg /m3  
+    mean_SFC           = 0.5
+    density_JetA       = 820.0  # kg /m3  
+    density_H2         = 70     # kg /m3  
     gallons_to_Liters  = 3.78541
     airspeed           = 0.75 * 343
-    SFC                = SFC_lb_lbfhr * 9.80665
-    SFC_H2             = SFC  * 0.35 
-
-    
-    H2_vol   =  volume_fraction * fuselage_volume
-    W_final  =  W_0  -  (H2_vol * density_H2) *0.9 # only 90% of fuel is used up 
-    
+    SFC_H2             = mean_SFC * 0.35
+    L_div_D            = 17
+      
     #================================================================================================================================================  
     # Compute Feasible Routes 
-    #================================================================================================================================================        
-    # Step 1: Compute Range   
-    H2_volume       = fuselage_volume * volume_fraction   
-    Range           = (airspeed / 9.81) * (1 / SFC_H2) *  (L_div_D) *  (W_0 / W_final)
-    Range_mi        = Range * 0.000621371 
+    #================================================================================================================================================
+    # Step 1extract variables from data sheet 
+    Routes_and_Temp_Mo    = Flight_Ops[Flight_Ops['Month'] == month_no+1 ]  
+    original_pax_capacity = np.array(Routes_and_Temp_Mo['Passengers'])
     
-    #  Step 2: Compute modified passenger capacity  
-    Routes_and_Temp_Mo                   = Flight_Ops[Flight_Ops['Month'] == month_no+1 ]    
-    passenger_reductions                 = H2_volume * (fuselage_volume /passengers)
-    original_Pax_volume                  = np.array(Routes_and_Temp_Mo['Passengers'])
-    remaining_Pax                        = original_Pax_volume - passenger_reductions*np.array(Routes_and_Temp_Mo['No of Flights Per Month'])
-    remaining_Pax[remaining_Pax<0]       = 0
-    Routes_and_Temp_Mo['H2_Passengers']  = remaining_Pax
+    # Step 2: Use regression of passengers, available fuselage volume and weight to  compute h2 volume  
+    aircraft_volume  = 0.0003 * (original_pax_capacity**3) - 0.0893*(original_pax_capacity**2) + 10.1*(original_pax_capacity **1) - 314.21
+    H2_volume        = volume_fraction *aircraft_volume
+     
+    # Step 3: Compute max range of each aircraft
+    Weight_empty  = 4.2778* (original_pax_capacity**2) - 450.54*(original_pax_capacity**2)+ 25076
+    Weight_Pax    = (1 -  volume_fraction) *  250 *  original_pax_capacity
+    Weight_H2     = H2_volume * density_H2 * 9.81
+    Weight_H2_0   = Weight_empty + Weight_Pax  + Weight_H2 
+    Weight_H2_f   = Weight_H2_0 - Weight_H2 * 0.95 # only 90% of fuel is used up  
+    Range         = (airspeed / 9.81) * (1 / SFC_H2) *  (L_div_D) *  (Weight_H2_0 /Weight_H2_f)
+    Range_mi      = Range * 0.000621371 # conversion to mile 
     
+    # Step 4: Compute modified passenger capacity   
+    Routes_and_Temp_Mo['H2_Passengers']  = (1 - volume_fraction) *  np.array(Routes_and_Temp_Mo['Passengers']) 
        
-    # Step 1: compute the percentages of different types of fuels used 
+    # Step 5: compute the percentages of different types of fuels used 
     H2_process_percentages_list  = [0]
-    H2_process_percentages_list  += percent_H2_process
+    H2_process_percentages_list  += percent_H2_color
     H2_process_percentages_list  += [100]
-    H2_process_percentages       = np.diff(np.array(H2_process_percentages_list))/100  
+    H2_process_percentages       = np.diff(np.array(H2_process_percentages_list))/100   
     
-    
-    # Step 2: determine the percentage of different H2 production processes 
+    # Step 6: determine the percentage of different H2 production processes 
     if Commercial_H2['H2 Fuel Name'][0] not in selected_fuels:  
         selected_fuels         = [Commercial_H2['H2 Fuel Name'][0]] + selected_fuels
-        H2_process_percentages = np.hstack((np.array([0]),H2_process_percentages)) 
+        H2_process_percentages = np.hstack((np.array([0]),H2_process_percentages))
     mask                  = Commercial_H2['H2 Fuel Name'].isin(selected_fuels)
-    fuels_used            = Commercial_H2[mask] 
-    
+    fuels_used            = Commercial_H2[mask]
     num_fuels             = len(selected_fuels)
     cumulative_fuel_use   = np.zeros(num_fuels) 
     H2_LCA_val            = np.zeros(num_fuels) 
@@ -198,7 +106,7 @@ def generate_electric_flight_operations_plots(Flight_Ops,Commercial_H2,aircraft,
     H2_LCA_val[0]     = 89
     Jet_A_LCA_val[0]  = 89 
       
-    # Step 3: Filter flight data based on option selected: i.e. top 10, top 20, top 50, all airpots 
+    # Step 7: Filter flight data based on option selected: i.e. top 10, top 20, top 50, all airpots 
     Airport_Routes     = Flight_Ops[['Passengers','Origin Airport','Destination City']]
     Cumulative_Flights = Airport_Routes.groupby('Origin Airport', as_index=False).sum()[Airport_Routes.columns]
     if  selected_airpots   == "Top 5 Airports":
@@ -213,7 +121,7 @@ def generate_electric_flight_operations_plots(Flight_Ops,Commercial_H2,aircraft,
         Busiest_Airports   = Cumulative_Flights.sort_values(by=['Passengers'], ascending = False) 
     Airport_List = list(Busiest_Airports['Origin Airport'])
     
-    # Step 4: Filter airports that will support H2 and those that wont support H2 
+    # Step 8: Filter airports that will support H2 and those that wont support H2 
     mask_1               = Flight_Ops['Origin Airport'].isin(Airport_List)
     H2_Airports          = Flight_Ops[mask_1]
     Non_H2_Airports      = Flight_Ops[~mask_1] 
@@ -222,16 +130,16 @@ def generate_electric_flight_operations_plots(Flight_Ops,Commercial_H2,aircraft,
     Feasible_Routes_1    = Feasible_Routes_0[Feasible_Routes_0['Distance (miles)'] < Range_mi ] 
     Infeasible_Routes_1  = Feasible_Routes_0[Feasible_Routes_0['Distance (miles)'] > Range_mi ] 
     
-    # Step 8: Out of H2 supporting airports, use the percent adoption to determine how many flights at that airport will use H2     
+    # Step 9: Out of H2 supporting airports, use the percent adoption to determine how many flights at that airport will use H2     
     Flight_at_H2_Airports_Using_H2  = Feasible_Routes_1.sample(frac=(percent_adoption/100))
     Infeasible_Routes_2             = Feasible_Routes_1[~Feasible_Routes_1.index.isin(Flight_at_H2_Airports_Using_H2.index)]
     Non_H2_Flights                  = pd.concat([Non_H2_Airports,Infeasible_Routes_0,Infeasible_Routes_1,Infeasible_Routes_2])# add list of flights from non supporting airports to non-H2 flights  
         
-    # Step 9: Get total volume of each H2 required at the airports 
+    # Step 10: Get total volume of each H2 required at the airports 
     equivalent_JetA_consumed = np.array(Flight_at_H2_Airports_Using_H2['Total Fuel Per Route (Gal)'])
     airport_H2_volumes       = (density_JetA / density_H2) *  equivalent_JetA_consumed  
         
-    # Steps 14 and 15 Determine Cost per Seat Mile and Emissions  
+    # Steps 11 and 12 Determine Cost per Seat Mile and Emissions  
     CASM_jet_A  = np.zeros(12) 
     CASM_H2     = np.zeros(12) 
     Emissions_w_H2       = np.zeros(12) 

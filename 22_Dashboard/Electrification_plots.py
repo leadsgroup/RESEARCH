@@ -380,49 +380,54 @@ def generate_electric_flight_operations_plots(Routes_and_Temp,Commercial_Batteri
     #template             = pio.templates["minty"] if switch_off else pio.templates["minty_dark"] 
     font_size            = 16     
     
-    if aircraft == 'ATR 72-600': 
-        P_max           = 1568083 
-        W_0             = 23000   
-        thrust_coef     = 0.000017678 # incorrect  
-        fuel_volume     = 6410.2
-        fuel_economy    = 3.27 
-        passengers      = 72 
-        CL_cruise       = 0.55   # incorrect  
-        CD_cruise       = 0.035  # incorrect  
-        S_ref           = 61.0   
-        L_div_D         = CL_cruise/CD_cruise 
+
+    #if aircraft == 'ATR 72-600': 
+        #P_max           = 1568083 
+        #W_0             = 23000    
+        #fuel_volume     = 6410.2
+        #fuel_economy    = 3.27 
+        #passengers      = 72 
+        #CL_cruise       =  
+        #fuselage_volume =  
+        #CD_cruise       =  
+        #S_ref           = 61.0   
+        #L_div_D         = CL_cruise/CD_cruise 
         
-    #elif aircraft == 'Embraer 190': 
-        #P_max           =  
-        #W_0             = 52290 
-        #thrust_coef     = 0.000017678 # incorrect    
-        #fuel_volume     = 16629 
-        #fuel_economy    = 3.54 
-        #passengers      = 100 
-        #CL_cruise       = 0.55   # incorrect 
-        #CD_cruise       = 0.035  # incorrect 
-        #S_ref           = 92.53 
-        #L_div_D         = CL_cruise/CD_cruise  
+    if aircraft == 'Embraer 190': 
+        P_max           = 15.27 * 1E6
+        W_0             = 52290    
+        fuel_volume     = 16629 
+        fuel_economy    = 3.54 
+        passengers      = 106
+        fuselage_volume = 75.56964 
+        SFC_lb_lbfhr    = 0.624 
+        CL_cruise       = 0.501
+        CD_cruise       = 0.0342 
+        S_ref           = 92.53 
+        L_div_D         = CL_cruise/CD_cruise
+        
     elif aircraft == "Boeing 737 MAX-8":
         P_max           = 15000000 
-        W_0             = 79015.8   
-        thrust_coef     = 0.000017678  
+        W_0             = 79015.8    
         fuel_volume     = 26024 
         fuel_economy    = 2.04 
         passengers      = 162  
-        CL_cruise       = 0.55 
-        CD_cruise       = 0.035
-        S_ref           = 127 
+        SFC_lb_lbfhr    = 0.6262 # (lb / lbf - hr) , in cruise 
+        fuselage_volume = 129.742 # fuselage cabin length * fuselage radius^2 * pi * 0.5 (where passengers are)
+        CD_cruise       = 0.027
+        CL_cruise       = 0.569
+        S_ref           = 124.862
         L_div_D         = CL_cruise/CD_cruise
         
     elif aircraft == 'Airbus A320 neo': 
         P_max           = 15000000 
-        W_0             = 78000
-        thrust_coef     = 0.000017678  
+        W_0             = 78000 
         fuel_volume     = 26024  
         fuel_economy    = 2.04  
         passengers      = 162
         W_0             = 79015.8  
+        SFC_lb_lbfhr    = 0.6262 # (lb / lbf - hr), in cruise 
+        fuselage_volume = 129.742 # fuselage cabin length * fuselage radius^2 * pi * 0.5 (where passengers are)
         CL_cruise       = 0.55 
         CD_cruise       = 0.035
         S_ref           = 127   
@@ -433,23 +438,40 @@ def generate_electric_flight_operations_plots(Routes_and_Temp,Commercial_Batteri
         #fuel_volume     = 126206  
         #fuel_economy    = 2.68    
         #passengers      = 238
+        #SFC_lb_lbfhr    = 
         #W_0             = 227900   
         #CL_cruise       = 0.055 
+        #fuselage_volume = 480.8650
         #CD_cruise       = 0.035
         #S_ref           = 377
         #L_div_D         = CL_cruise/CD_cruise
         
+
+    elif aircraft == "Boeing 777-300": 
+        P_max           = 68 * 1E6
+        fuel_volume     = 126206  
+        fuel_economy    = 2.68    
+        passengers      = 238
+        SFC_lb_lbfhr    = 0.51 
+        W_0             = 227900   
+        CL_cruise       = 0.055 
+        fuselage_volume = 682.008 
+        CD_cruise       = 0.035
+        S_ref           = 377
+        L_div_D         = CL_cruise/CD_cruise
+        
     #elif aircraft == 'Airbus A350-1000':
-        #P_max          =  
-        #thrust_coef    = 0.000017678   
+        #P_max          =   
         #fuel_volume    = 166488        # liters 
-        #fuel_economy   = 2.85          # L/100km per Pax 
+        #fuel_economy   = 2.85          # L/100km per Pax
+        #SFC_lb_lbfhr   =  
         #passengers     = 327  
-        #W_0            = 322050  
+        #W_0            = 322050 
+        #fuselage_volume = 
         #CL_cruise      = 0.055 
         #CD_cruise      = 0.035
         #S_ref          = 464.3
-        #L_div_D        = CL_cruise/CD_cruise      
+        #L_div_D        = CL_cruise/CD_cruise       
              
     CO2e_per_mile      = 9.0736                 
     Wh_per_kg_to_J     = 3600.0
