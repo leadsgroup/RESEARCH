@@ -1,4 +1,5 @@
-# Created:  Jul 2023, M. Clarke
+
+    # Created:  Jul 2023, M. Clarke
 # Modified: Jun 2024, M. Guidotti & D.J. Lee
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -8,7 +9,7 @@
 # RCAIDE imports 
 import RCAIDE
 from RCAIDE.Framework.Core                                         import Units    
-from RCAIDE.Library.Methods.Energy.Propulsors.Turboshaft_Propulsor import design_turboshaft, compute_turboshaft_performance
+from RCAIDE.Library.Methods.Propulsors.Turboshaft_Propulsor import design_turboshaft, compute_turboshaft_performance
 from RCAIDE.Library.Plots                                          import *     
 
 # python imports 

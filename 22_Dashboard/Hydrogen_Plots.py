@@ -64,19 +64,20 @@ def generate_electric_flight_operations_plots(Flight_Ops,Commercial_H2,aircraft,
         S_ref           = 61.0   
         L_div_D         = CL_cruise/CD_cruise 
         
-    #elif aircraft == 'Embraer 190': 
-        #P_max           =  
-        #W_0             = 52290 
-        #thrust_coef     = 0.000017678 # incorrect    
-        #fuel_volume     = 16629 
-        #fuel_economy    = 3.54 
-        #passengers      = 100 
-        #fuselage_volume = 100 # CHANGE 
-        #SFC             = 100 # CHANGE  
-        #CL_cruise       = 0.55   # incorrect 
-        #CD_cruise       = 0.035  # incorrect 
-        #S_ref           = 92.53 
-        #L_div_D         = CL_cruise/CD_cruise  
+    elif aircraft == 'Embraer 190': 
+        P_max           =  
+        W_0             = 52290 
+        thrust_coef     = 0.000017678 # incorrect    
+        fuel_volume     = 16629 
+        fuel_economy    = 3.54 
+        passengers      = 100 
+        fuselage_volume = 100 # CHANGE 
+        SFC             = 100 # CHANGE  
+        CL_cruise       = 0.55   # incorrect 
+        CD_cruise       = 0.035  # incorrect 
+        S_ref           = 92.53 
+        L_div_D         = CL_cruise/CD_cruise
+        
     elif aircraft == "Boeing 737 MAX-8":
         P_max           = 15000000 
         W_0             = 79015.8   
@@ -106,33 +107,33 @@ def generate_electric_flight_operations_plots(Flight_Ops,Commercial_H2,aircraft,
         S_ref           = 127   
         L_div_D         = CL_cruise/CD_cruise
         
-    #elif aircraft == "Boeing 787-8": 
-        #P_max           =  
-        #thrust_coef     = 0.000017678 
-        #fuel_volume     = 126206  
-        #fuel_economy    = 2.68    
-        #passengers      = 238
-        #SFC             = 100 # CHANGE  
-        #W_0             = 227900   
-        #CL_cruise       = 0.055 
-        #fuselage_volume = 100 # CHANGE 
-        #CD_cruise       = 0.035
-        #S_ref           = 377
-        #L_div_D         = CL_cruise/CD_cruise
+    elif aircraft == "Boeing 787-8": 
+        P_max           =  
+        thrust_coef     = 0.000017678 
+        fuel_volume     = 126206  
+        fuel_economy    = 2.68    
+        passengers      = 238
+        SFC             = 100 # CHANGE  
+        W_0             = 227900   
+        CL_cruise       = 0.055 
+        fuselage_volume = 100 # CHANGE 
+        CD_cruise       = 0.035
+        S_ref           = 377
+        L_div_D         = CL_cruise/CD_cruise
         
-    #elif aircraft == 'Airbus A350-1000':
-        #P_max          =  
-        #thrust_coef    = 0.000017678   
-        #fuel_volume    = 166488        # liters 
-        #fuel_economy   = 2.85          # L/100km per Pax
-        #SFC             = 100 # CHANGE  
-        #passengers     = 327  
-        #W_0            = 322050 
-        #fuselage_volume = 100 # CHANGE  
-        #CL_cruise      = 0.055 
-        #CD_cruise      = 0.035
-        #S_ref          = 464.3
-        #L_div_D        = CL_cruise/CD_cruise      
+    elif aircraft == 'Airbus A350-1000':
+        P_max          =  
+        thrust_coef    = 0.000017678   
+        fuel_volume    = 166488        # liters 
+        fuel_economy   = 2.85          # L/100km per Pax
+        SFC             = 100 # CHANGE  
+        passengers     = 327  
+        W_0            = 322050 
+        fuselage_volume = 100 # CHANGE  
+        CL_cruise      = 0.055 
+        CD_cruise      = 0.035
+        S_ref          = 464.3
+        L_div_D        = CL_cruise/CD_cruise      
               
     
     density_JetA  = 820.0  

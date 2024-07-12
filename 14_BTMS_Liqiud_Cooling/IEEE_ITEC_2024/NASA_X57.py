@@ -7,8 +7,8 @@
 import RCAIDE
 from RCAIDE.Framework.Core import Units , Data 
 from RCAIDE.Framework.Networks.All_Electric_Network                                 import All_Electric_Network
-from RCAIDE.Library.Methods.Energy.Propulsors.Converters.Rotor                           import design_propeller 
-from RCAIDE.Library.Methods.Energy.Propulsors.Converters.DC_Motor                        import design_motor 
+from RCAIDE.Library.Methods.Propulsors.Converters.Rotor                           import design_propeller 
+from RCAIDE.Library.Methods.Propulsors.Converters.DC_Motor                        import design_motor 
 from RCAIDE.Library.Methods.Weights.Correlation_Buildups.Propulsion                      import nasa_motor
 from RCAIDE.Library.Methods.Energy.Sources.Battery.Common                                import initialize_from_circuit_configuration
 from RCAIDE.Library.Methods.Geometry.Two_Dimensional.Planform                            import wing_segmented_planform   

@@ -7,10 +7,10 @@
 import RCAIDE
 from RCAIDE.Framework.Core import Units   
 from RCAIDE.Framework.Networks.Series_Hybrid_Network               import Series_Hybrid_Network
-from RCAIDE.Library.Methods.Energy.Propulsors.Turboelectric_Propulsor  import design_turboelectric_turbine
-from RCAIDE.Library.Methods.Energy.Propulsors.Converters.Generator     import design_generator
-from RCAIDE.Library.Methods.Energy.Propulsors.Converters.DC_Motor      import design_motor 
-from RCAIDE.Library.Methods.Energy.Propulsors.Converters.Rotor         import design_propeller  
+from RCAIDE.Library.Methods.Propulsors.Turboelectric_Propulsor  import design_turboelectric_turbine
+from RCAIDE.Library.Methods.Propulsors.Converters.Generator     import design_generator
+from RCAIDE.Library.Methods.Propulsors.Converters.DC_Motor      import design_motor 
+from RCAIDE.Library.Methods.Propulsors.Converters.Rotor         import design_propeller  
 from RCAIDE.Library.Methods.Weights.Correlation_Buildups.Propulsion    import nasa_motor
 from RCAIDE.Library.Methods.Energy.Sources.Battery.Common              import initialize_from_circuit_configuration  
 from RCAIDE.Library.Methods.Weights.Physics_Based_Buildups.Electric    import compute_weight , converge_weight
