@@ -51,21 +51,24 @@ def generate_electric_flight_operations_plots(Flight_Ops,Commercial_H2,aircraft,
     map_style            = None if switch_off else 'dark'  
     #template             = pio.templates["minty"] if switch_off else pio.templates["minty_dark"] 
     font_size            = 16      
-              
-    mean_SFC           = 0.5
+
+    L_div_D            = 17              
+    mean_SFC_Imperial  = 0.5 # lbm/lbf-hr
+    
+    
     density_JetA       = 820.0  # kg /m3  
     density_H2         = 70     # kg /m3  
     gallons_to_Liters  = 3.78541
     airspeed           = 0.75 * 343
-    SFC_H2             = mean_SFC * 0.35
-    L_div_D            = 17
+    mean_SFC_SI        = mean_SFC_Imperial * 9.80665
+    SFC_H2             = mean_SFC_SI * 0.35
       
     #================================================================================================================================================  
     # Compute Feasible Routes 
     #================================================================================================================================================
-    # Step 1extract variables from data sheet 
+    # Step 1: extract variables from data sheet 
     Routes_and_Temp_Mo    = Flight_Ops[Flight_Ops['Month'] == month_no+1 ]  
-    original_pax_capacity = np.array(Routes_and_Temp_Mo['Passengers'])
+    original_pax_capacity = np.array(Routes_and_Temp_Mo['Passenger Capacity'])
     
     # Step 2: Use regression of passengers, available fuselage volume and weight to  compute h2 volume  
     aircraft_volume  = 0.0003 * (original_pax_capacity**3) - 0.0893*(original_pax_capacity**2) + 10.1*(original_pax_capacity **1) - 314.21
@@ -76,7 +79,7 @@ def generate_electric_flight_operations_plots(Flight_Ops,Commercial_H2,aircraft,
     Weight_Pax    = (1 -  volume_fraction) *  250 *  original_pax_capacity
     Weight_H2     = H2_volume * density_H2 * 9.81
     Weight_H2_0   = Weight_empty + Weight_Pax  + Weight_H2 
-    Weight_H2_f   = Weight_H2_0 - Weight_H2 * 0.95 # only 90% of fuel is used up  
+    Weight_H2_f   = Weight_H2_0 - (Weight_H2*0.95) # only 90% of fuel is used up  
     Range         = (airspeed / 9.81) * (1 / SFC_H2) *  (L_div_D) *  (Weight_H2_0 /Weight_H2_f)
     Range_mi      = Range * 0.000621371 # conversion to mile 
     
