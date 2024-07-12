@@ -74,12 +74,12 @@ def generate_electric_flight_operations_plots(Flight_Ops,Commercial_H2,aircraft,
     aircraft_volume  = 0.0003 * (original_pax_capacity**3) - 0.0893*(original_pax_capacity**2) + 10.1*(original_pax_capacity **1) - 314.21
     H2_volume        = volume_fraction *aircraft_volume
      
-    # Step 3: Compute max range of each aircraft
+    # Step 3: Compute max range of each aircraft using range equation 
     Weight_empty  = 4.2778* (original_pax_capacity**2) - 450.54*(original_pax_capacity**2)+ 25076
     Weight_Pax    = (1 -  volume_fraction) *  250 *  original_pax_capacity
     Weight_H2     = H2_volume * density_H2 * 9.81
     Weight_H2_0   = Weight_empty + Weight_Pax  + Weight_H2 
-    Weight_H2_f   = Weight_H2_0 - (Weight_H2*0.95) # only 90% of fuel is used up  
+    Weight_H2_f   = Weight_H2_0 - (Weight_H2*0.95) # only 90% of fuel is used up 
     Range         = (airspeed / 9.81) * (1 / SFC_H2) *  (L_div_D) *  (Weight_H2_0 /Weight_H2_f)
     Range_mi      = Range * 0.000621371 # conversion to mile 
     
