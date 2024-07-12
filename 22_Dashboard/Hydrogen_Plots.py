@@ -51,17 +51,17 @@ def generate_electric_flight_operations_plots(Flight_Ops,Commercial_H2,aircraft,
     #template             = pio.templates["minty"] if switch_off else pio.templates["minty_dark"] 
     font_size            = 16     
     
-    if aircraft == 'ATR 72-600': 
-        P_max           = 1568083 
-        W_0             = 23000    
-        fuel_volume     = 6410.2
-        fuel_economy    = 3.27 
-        passengers      = 72 
-        CL_cruise       = 0.55   # incorrect  
-        fuselage_volume =  
-        CD_cruise       = 0.035  # incorrect  
-        S_ref           = 61.0   
-        L_div_D         = CL_cruise/CD_cruise 
+    #if aircraft == 'ATR 72-600': 
+        #P_max           = 1568083 
+        #W_0             = 23000    
+        #fuel_volume     = 6410.2
+        #fuel_economy    = 3.27 
+        #passengers      = 72 
+        #CL_cruise       =  
+        #fuselage_volume =  
+        #CD_cruise       =  
+        #S_ref           = 61.0   
+        #L_div_D         = CL_cruise/CD_cruise 
         
     elif aircraft == 'Embraer 190': 
         P_max           =  
@@ -103,18 +103,18 @@ def generate_electric_flight_operations_plots(Flight_Ops,Commercial_H2,aircraft,
         S_ref           = 127   
         L_div_D         = CL_cruise/CD_cruise
         
-    elif aircraft == "Boeing 787-8": 
-        P_max           =   
-        fuel_volume     = 126206  
-        fuel_economy    = 2.68    
-        passengers      = 238
-        SFC_lb_lbfhr    = 
-        W_0             = 227900   
-        CL_cruise       = 0.055 
-        fuselage_volume = 480.8650
-        CD_cruise       = 0.035
-        S_ref           = 377
-        L_div_D         = CL_cruise/CD_cruise
+    #elif aircraft == "Boeing 787-8": 
+        #P_max           =   
+        #fuel_volume     = 126206  
+        #fuel_economy    = 2.68    
+        #passengers      = 238
+        #SFC_lb_lbfhr    = 
+        #W_0             = 227900   
+        #CL_cruise       = 0.055 
+        #fuselage_volume = 480.8650
+        #CD_cruise       = 0.035
+        #S_ref           = 377
+        #L_div_D         = CL_cruise/CD_cruise
         
 
     elif aircraft == "Boeing 777-300": 
