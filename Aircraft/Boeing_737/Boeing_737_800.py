@@ -554,7 +554,7 @@ def vehicle_setup():
     fuel_tank.tag                               = 'b737_fuel_tank'
     
     # append fuel 
-    fuel                                        = RCAIDE.Library.Attributes.Propellants.Aviation_Gasoline()   
+    fuel                                        = RCAIDE.Library.Attributes.Propellants.Jet_A()   
     fuel.mass_properties.mass                   = vehicle.mass_properties.max_takeoff-vehicle.mass_properties.max_fuel
     fuel.origin                                 = vehicle.wings.main_wing.mass_properties.center_of_gravity      
     fuel.mass_properties.center_of_gravity      = vehicle.wings.main_wing.aerodynamic_center
@@ -829,7 +829,13 @@ def base_analysis(vehicle):
     weights = RCAIDE.Framework.Analyses.Weights.Weights_Transport()
     weights.vehicle = vehicle
     analyses.append(weights)
-
+    
+    # ------------------------------------------------------------------
+    #  Energy
+    emissions = RCAIDE.Framework.Analyses.Emissions.Emission_Index_Correlation_Method()
+    emissions.geometry = vehicle          
+    analyses.append(emissions)
+    
     # ------------------------------------------------------------------
     #  Aerodynamics Analysis
     aerodynamics = RCAIDE.Framework.Analyses.Aerodynamics.Subsonic_VLM()
@@ -969,7 +975,7 @@ def mission_setup(analyses):
     segment.analyses.extend( analyses.cruise ) 
     segment.altitude                                      = 10.668 * Units.km  
     segment.air_speed                                     = 230.412 * Units['m/s']
-    segment.distance                                      = 1000 * Units.nmi   
+    segment.distance                                      = 2500 * Units.nmi   
     
     # define flight dynamics to model 
     segment.flight_dynamics.force_x                       = True  
@@ -1152,7 +1158,10 @@ def plot_mission(results):
     plot_altitude_sfc_weight(results)
     
     # Plot Velocities 
-    plot_aircraft_velocities(results)  
+    plot_aircraft_velocities(results)
+    
+    # CO2 emissions 
+    plot_CO2e_emissions(results)
         
     return
 
