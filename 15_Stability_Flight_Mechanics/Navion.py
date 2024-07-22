@@ -79,7 +79,7 @@ def base_analysis(vehicle,stability_method, run_stability,configs):
 
     # ------------------------------------------------------------------
     #  Aerodynamics Analysis
-    aerodynamics = RCAIDE.Framework.Analyses.Aerodynamics.Subsonic_VLM() 
+    aerodynamics = RCAIDE.Framework.Analyses.Aerodynamics.Vortex_Lattice_Method() 
     aerodynamics.geometry                            = vehicle
     aerodynamics.settings.number_spanwise_vortices   = 30
     aerodynamics.settings.drag_coefficient_increment = 0.0000
@@ -96,7 +96,7 @@ def base_analysis(vehicle,stability_method, run_stability,configs):
             stability.settings.trim_aircraft            = False 
 
         elif stability_method == "vlm":
-            stability                                   = RCAIDE.Framework.Analyses.Stability.VLM_Perturbation_Method() 
+            stability                                   = RCAIDE.Framework.Analyses.Stability.Vortex_Lattice_Perturbation_Method() 
             stability.settings.discretize_control_surfaces  = True
             stability.settings.model_fuselage               = True                
             stability.settings.model_nacelle                = True

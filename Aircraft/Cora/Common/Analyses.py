@@ -49,7 +49,7 @@ def base_analysis(vehicle,run_noise_analysis_flag,use_topology_flag,microphone_t
 
     # ------------------------------------------------------------------
     #  Aerodynamics Analysis
-    aerodynamics = RCAIDE.Analyses.Aerodynamics.Subsonic_VLM()
+    aerodynamics = RCAIDE.Analyses.Aerodynamics.Vortex_Lattice_Method()
     aerodynamics.geometry = vehicle  
     aerodynamics.settings.model_fuselage = True 
     aerodynamics.settings.number_spanwise_vortices           = 25

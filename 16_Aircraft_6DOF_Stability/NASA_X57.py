@@ -665,7 +665,7 @@ def base_analysis(vehicle):
 
     # ------------------------------------------------------------------
     #  Aerodynamics Analysis
-    aerodynamics = RCAIDE.Analyses.Aerodynamics.Subsonic_VLM() 
+    aerodynamics = RCAIDE.Analyses.Aerodynamics.Vortex_Lattice_Method() 
     aerodynamics.process.compute.lift.inviscid_wings.settings.use_surrogate = False 
     aerodynamics.geometry = vehicle 
     analyses.append(aerodynamics)  

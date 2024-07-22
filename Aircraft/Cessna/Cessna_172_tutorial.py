@@ -465,7 +465,7 @@ def base_analysis(vehicle):
     drag_area = 1.4*( total_wheel + total_strut)
     
     
-    aerodynamics = RCAIDE.Analyses.Aerodynamics.Subsonic_VLM() 
+    aerodynamics = RCAIDE.Analyses.Aerodynamics.Vortex_Lattice_Method() 
     aerodynamics.geometry                            = vehicle
     aerodynamics.settings.drag_coefficient_increment = 1.0*drag_area/vehicle.reference_area
     analyses.append(aerodynamics)
