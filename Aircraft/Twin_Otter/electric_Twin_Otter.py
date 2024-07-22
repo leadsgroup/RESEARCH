@@ -357,7 +357,7 @@ def vehicle_setup(BTMS_flag):
     vehicle.append_component(fuselage)
  
     # ##########################################################   Nacelles  ############################################################    
-    nacelle                    = RCAIDE.Library.Components.Nacelles.Nacelle()
+    nacelle                    = RCAIDE.Library.Components.Nacelles.Stack_Nacelle()
     nacelle.tag                = 'nacelle_1'
     nacelle.length             = 2
     nacelle.diameter           = 0.73480616 
