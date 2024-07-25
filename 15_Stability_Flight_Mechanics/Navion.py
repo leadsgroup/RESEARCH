@@ -22,8 +22,8 @@ import pylab as plt
 # ----------------------------------------------------------------------
 
 def main():
-    run_stability     =  True 
-    stability_method  = 'vlm' # either "avl" , "vlm" or "analytical"
+    #run_stability     =  True 
+    #stability_method  = 'vlm' # either "avl" , "vlm" or "analytical"
     
     # vehicle data
     vehicle           = vehicle_setup() 
@@ -32,7 +32,7 @@ def main():
     configs           = configs_setup(vehicle)
 
     # create analyses
-    analyses          = analyses_setup(configs,stability_method,run_stability)
+    analyses          = analyses_setup(configs)
 
     # mission analyses
     mission           = mission_setup(analyses) 
@@ -42,6 +42,24 @@ def main():
 
     # mission analysis 
     results           = missions.base_mission.evaluate()   
+    
+    elevator_deflection        = results.segments.climb.conditions.control_surfaces.elevator.deflection[0,0] / Units.deg  
+    elevator_deflection_true   = -1.6514157380434311
+    elevator_deflection_diff   = np.abs(elevator_deflection - elevator_deflection_true)
+    print('Error: ',elevator_deflection_diff)
+    assert np.abs(elevator_deflection_diff/elevator_deflection_true) < 1e-3
+    
+    aileron_deflection        = results.segments.climb.conditions.control_surfaces.aileron.deflection[0,0] / Units.deg  
+    aileron_deflection_true   = 0.8448403820824947
+    aileron_deflection_diff   = np.abs(aileron_deflection - aileron_deflection_true)
+    print('Error: ',aileron_deflection_diff)
+    assert np.abs(aileron_deflection_diff/aileron_deflection_true) < 1e-3
+    
+    rudder_deflection        = results.segments.climb.conditions.control_surfaces.rudder.deflection[0,0] / Units.deg  
+    rudder_deflection_true   = -2.357495302759012
+    rudder_deflection_diff   = np.abs(rudder_deflection - rudder_deflection_true)
+    print('Error: ',rudder_deflection_diff)
+    assert np.abs(rudder_deflection_diff/rudder_deflection_true) < 1e-3     
 
     # plt results
     plot_mission(results,run_stability)
@@ -52,18 +70,18 @@ def main():
 #   Define the Vehicle Analyses
 # ----------------------------------------------------------------------
 
-def analyses_setup(configs,stability_method,run_stability):
+def analyses_setup(configs):
 
     analyses = RCAIDE.Framework.Analyses.Analysis.Container()
 
     # build a base analysis for each config
     for tag,config in configs.items():
-        analysis = base_analysis(config, stability_method,run_stability, configs)
+        analysis = base_analysis(config, configs)
         analyses[tag] = analysis
 
     return analyses
 
-def base_analysis(vehicle,stability_method, run_stability,configs):
+def base_analysis(vehicle, configs):
 
     # ------------------------------------------------------------------
     #   Initialize the Analyses
@@ -86,35 +104,40 @@ def base_analysis(vehicle,stability_method, run_stability,configs):
     aerodynamics.settings.drag_coefficient_increment = 0.0000
     analyses.append(aerodynamics) 
     
-    if run_stability:
-        # ------------------------------------------------------------------
-        #  Stability Analysis
-        # ------------------------------------------------------------------
-        if stability_method == "avl":
-            stability                                       = RCAIDE.Framework.Analyses.Stability.AVL()     
-            #stability.settings.filenames.avl_bin_name       = 'C:\\Users\\Matteo\\Documents\\UIUC\\avl.exe' #/Users/matthewclarke/Documents/AVL/avl3.35'   
-            stability.settings.filenames.avl_bin_name       =  '/Users/matthewclarke/Documents/LEADS/CODES/AVL/avl3.35'     
-            stability.settings.print_output                 = False  
-            stability.settings.trim_aircraft                = False 
+    #if run_stability:
+        ## ------------------------------------------------------------------
+        ##  Stability Analysis
+        ## ------------------------------------------------------------------
+        #if stability_method == "avl":
+            #stability                                       = RCAIDE.Framework.Analyses.Stability.AVL()     
+            ##stability.settings.filenames.avl_bin_name       = 'C:\\Users\\Matteo\\Documents\\UIUC\\avl.exe' #/Users/matthewclarke/Documents/AVL/avl3.35'   
+            #stability.settings.filenames.avl_bin_name       =  '/Users/matthewclarke/Documents/LEADS/CODES/AVL/avl3.35'     
+            #stability.settings.print_output                 = False  
+            #stability.settings.trim_aircraft                = False 
 
-        elif stability_method == "vlm":
-            stability                                       = RCAIDE.Framework.Analyses.Stability.Vortex_Lattice_Method() 
-            stability.settings.discretize_control_surfaces  = True
-            stability.settings.model_fuselage               = True                
-            stability.settings.model_nacelle                = True
+        #elif stability_method == "vlm":
+            #stability                                       = RCAIDE.Framework.Analyses.Stability.Vortex_Lattice_Method() 
+            #stability.settings.discretize_control_surfaces  = True
+            #stability.settings.model_fuselage               = True                
+            #stability.settings.model_nacelle                = True
             
         #elif stability_method == "analytical":
             #stability                                       = RCAIDE.Framework.Analyses.Stability.Analytical_Approximation() 
     
-        stability.configuration                             = configs
-        stability.geometry                                  = vehicle
-        analyses.append(stability)
+    stability                                       = RCAIDE.Framework.Analyses.Stability.Vortex_Lattice_Method() 
+    stability.settings.discretize_control_surfaces  = True
+    stability.settings.model_fuselage               = True                
+    stability.settings.model_nacelle                = True
+    
+    stability.configuration                             = configs
+    stability.geometry                                  = vehicle
+    analyses.append(stability)
 
     # ------------------------------------------------------------------
     #  Energy
     # ------------------------------------------------------------------
     energy     = RCAIDE.Framework.Analyses.Energy.Energy()
-    energy.networks = vehicle.networks  
+    energy.vehicle = vehicle  
     analyses.append(energy)
 
     # ------------------------------------------------------------------
@@ -181,11 +204,23 @@ def vehicle_setup():
     wing.winglet_fraction                 = 0.0  
     wing.dynamic_pressure_ratio           = 1.0   
     
-    tip_airfoil                           = RCAIDE.Library.Components.Airfoils.Airfoil()
-    tip_airfoil.coordinate_file           = 'Airfoils/NACA_6410.txt' 
+    #tip_airfoil                           = RCAIDE.Library.Components.Airfoils.Airfoil()
+    #tip_airfoil.coordinate_file           = 'Airfoils/NACA_6410.txt' 
  
-    root_airfoil                          = RCAIDE.Library.Components.Airfoils.Airfoil()
-    root_airfoil.coordinate_file          = 'Airfoils/NACA_4415.txt' 
+    #root_airfoil                          = RCAIDE.Library.Components.Airfoils.Airfoil()
+    #root_airfoil.coordinate_file          = 'Airfoils/NACA_4415.txt' 
+    
+    ospath                                = os.path.abspath(__file__)
+    separator                             = os.path.sep
+    rel_path                              = os.path.dirname(ospath) + separator  
+
+    tip_airfoil                           = RCAIDE.Library.Components.Airfoils.NACA_4_Series_Airfoil()
+    tip_airfoil.NACA_4_Series_code        = '6410'      
+    tip_airfoil.coordinate_file           = rel_path + 'Airfoils' + separator + 'NACA_6410.txt' 
+   
+    root_airfoil                          = RCAIDE.Library.Components.Airfoils.NACA_4_Series_Airfoil()
+    root_airfoil.NACA_4_Series_code       = '4415'   
+    root_airfoil.coordinate_file          = rel_path + 'Airfoils' + separator + 'NACA_4415.txt'     
     
     # Wing Segments 
     segment                               = RCAIDE.Library.Components.Wings.Segment()
@@ -533,30 +568,14 @@ def configs_setup(vehicle):
 # ----------------------------------------------------------------------
 #   Plot Mission
 # ----------------------------------------------------------------------
-def plot_mission(results,run_stability):
+def plot_mission(results):
     
-    # Plot Flight Conditions 
-    plot_flight_conditions(results) 
+     # Plot Aircraft Stability 
+    plot_longitudinal_stability(results)  
     
-    # Plot Aerodynamic Coefficients
-    plot_aerodynamic_coefficients(results)  
+    plot_lateral_stability(results) 
     
-    # Plot Aircraft Flight Speed
-    plot_aircraft_velocities(results) 
-
-    # Plot Aircraft Stability
-    if run_stability:
-        plot_longitudinal_stability(results)  
-        
-        plot_lateral_stability(results) 
-        
-        plot_flight_forces_and_moments(results)
-    
-    # Plot Propeller Conditions 
-    plot_rotor_conditions(results) 
-     
-    # Plot Throttle
-    plot_propulsor_throttles(results)   
+    plot_flight_forces_and_moments(results) 
       
     return
  
@@ -594,10 +613,6 @@ def mission_setup(analyses):
     segment.flight_dynamics.force_z                                             = True    
                 
     # define flight controls              
-    segment.assigned_control_variables.RPM.active                               = True           
-    segment.assigned_control_variables.RPM.assigned_propulsors                  = [['ice_propeller']]
-    segment.assigned_control_variables.RPM.initial_guess                        = True 
-    segment.assigned_control_variables.RPM.initial_guess_values                 = [[2500]] 
     segment.assigned_control_variables.throttle.active                          = True           
     segment.assigned_control_variables.throttle.assigned_propulsors             = [['ice_propeller']]    
     segment.assigned_control_variables.body_angle.active                        = True   
@@ -638,10 +653,6 @@ def mission_setup(analyses):
     segment.flight_dynamics.force_z                                             = True    
                 
     # define flight controls              
-    segment.assigned_control_variables.RPM.active                               = True           
-    segment.assigned_control_variables.RPM.assigned_propulsors                  = [['ice_propeller']]
-    segment.assigned_control_variables.RPM.initial_guess                        = True 
-    segment.assigned_control_variables.RPM.initial_guess_values                 = [[2500]] 
     segment.assigned_control_variables.throttle.active                          = True           
     segment.assigned_control_variables.throttle.assigned_propulsors             = [['ice_propeller']]    
     segment.assigned_control_variables.body_angle.active                        = True   
@@ -684,10 +695,6 @@ def mission_setup(analyses):
     segment.flight_dynamics.force_z                                             = True    
                 
     # define flight controls              
-    segment.assigned_control_variables.RPM.active                               = True           
-    segment.assigned_control_variables.RPM.assigned_propulsors                  = [['ice_propeller']]
-    segment.assigned_control_variables.RPM.initial_guess                        = True 
-    segment.assigned_control_variables.RPM.initial_guess_values                 = [[2500]] 
     segment.assigned_control_variables.throttle.active                          = True           
     segment.assigned_control_variables.throttle.assigned_propulsors             = [['ice_propeller']]    
     segment.assigned_control_variables.body_angle.active                        = True   
