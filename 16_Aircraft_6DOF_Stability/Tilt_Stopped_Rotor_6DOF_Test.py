@@ -30,7 +30,7 @@ import  pickle
 def main():           
          
     # vehicle data
-    new_geometry = True 
+    new_geometry = False
     if new_geometry :
         vehicle  = vehicle_setup()
         save_aircraft_geometry(vehicle , 'Tilt_Stopped_Rotor')
