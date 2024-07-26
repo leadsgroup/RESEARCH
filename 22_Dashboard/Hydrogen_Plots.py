@@ -24,14 +24,20 @@ def main():
     H2_filename                     = 'Data' + separator + 'Technology' + separator +  'Technology_Data.xlsx'
     routes_filename                 = 'Data' + separator +  'Air_Travel' + separator + 'American_Airlines_Flight_Ops_and_Climate.xlsx' 
     
-    SAT_data                       = pd.read_excel(H2_filename,sheet_name=['Commercial_H2']) 
-    Commercial_H2                  = SAT_data['Commercial_H2']   
-    a                              = Commercial_H2['Process'] 
-    b                              = Commercial_H2['Feedstock']
-    Commercial_H2["H2 Fuel Name"]  =  a  + ' from ' + b 
+    SAT_data                       = pd.read_excel(H2_filename,sheet_name=['Hydrogen']) 
+    Hydrogen                       = SAT_data['Hydrogen']   
+    a                              = Hydrogen['Feedstock']
+    b                              = Hydrogen['Production Technology'] 
+    Hydrogen["H2 Fuel Name"]  =  a  + ' via ' + b 
     Flight_Ops                     = pd.read_excel(routes_filename,sheet_name=['Sheet1']) 
     Flight_Ops                     = Flight_Ops['Sheet1']
     
+
+    H2_1                  = Hydrogen['H2 Fuel Name'][2] 
+    H2_2                  = Hydrogen['H2 Fuel Name'][1] 
+    H2_3                  = Hydrogen['H2 Fuel Name'][5] 
+    H2_4                  = Hydrogen['H2 Fuel Name'][10]     
+    selected_fuels         = [H2_1,H2_2,H2_3,H2_4]    
     aircraft              = 'Boeing 737 MAX-8' 
     volume_fraction       = 35   
     selected_airpots      = "All Airports" # ["Top 5 Airports","Top 10 Airports","Top 20 Airports", "Top 50 Airports",  "All Airports"]
@@ -39,14 +45,29 @@ def main():
     month_no              = 1 
     switch_off            = False  
     H2_dollars_per_gal    = 0
-    percent_H2_color      = [75,80,95]    
-    fig_5, fig_6, fig_7, fig_8,fig_9,fig_10 = generate_electric_flight_operations_plots(Flight_Ops,Commercial_H2,aircraft,selected_airpots,percent_H2_color , volume_fraction,percent_adoption,month_no,H2_dollars_per_gal ,switch_off)
+    
+    
+    percent_H2_color      = get_H2_distribution(Hydrogen,selected_fuels)  
+    fig_5, fig_6, fig_7, fig_8,fig_9,fig_10 = generate_electric_flight_operations_plots(Flight_Ops,Hydrogen,selected_fuels,aircraft,selected_airpots,percent_H2_color , volume_fraction,percent_adoption,month_no,H2_dollars_per_gal ,switch_off)
                 
       
     return 
+
+def get_H2_distribution(Hydrogen, selected_fuels): 
+    mask                  = Hydrogen['H2 Fuel Name'].isin(selected_fuels)
+    fuels_used            = Hydrogen[mask]
     
+    # get unique colors
+    unique_colors = list(fuels_used['Color'].unique())
+    n =  len(unique_colors)
+    
+    # create list of slider bar options 
+    percent_H2_color   =  np.linspace(0, 100, n+1)
+    slider_bar_options =  list(percent_H2_color[1:-1]) 
+    
+    return  slider_bar_options
      
-def generate_electric_flight_operations_plots(Flight_Ops,Commercial_H2,aircraft,selected_airpots,percent_H2_color , volume_fraction,percent_adoption,month_no,H2_dollars_per_gal ,switch_off): 
+def generate_electric_flight_operations_plots(Flight_Ops,Hydrogen,selected_fuels,aircraft,selected_airpots,percent_H2_color , volume_fraction_unnormalized,percent_adoption,month_no,H2_dollars_per_gal ,switch_off): 
     mapbox_access_token  = "pk.eyJ1IjoibWFjbGFya2UiLCJhIjoiY2xyanpiNHN6MDhsYTJqb3h6YmJjY2w5MyJ9.pQed7pZ9CnJL-mtqm1X8DQ"     
     map_style            = None if switch_off else 'dark'  
     #template             = pio.templates["minty"] if switch_off else pio.templates["minty_dark"] 
@@ -68,20 +89,23 @@ def generate_electric_flight_operations_plots(Flight_Ops,Commercial_H2,aircraft,
     #================================================================================================================================================
     # Step 1: extract variables from data sheet 
     Routes_and_Temp_Mo    = Flight_Ops[Flight_Ops['Month'] == month_no+1 ]  
-    original_pax_capacity = np.array(Routes_and_Temp_Mo['Passenger Capacity'])
+    original_pax_capacity = np.array(Routes_and_Temp_Mo['Estimated Aircraft Capacity'])
     
     # Step 2: Use regression of passengers, available fuselage volume and weight to  compute h2 volume  
     aircraft_volume  = 0.0003 * (original_pax_capacity**3) - 0.0893*(original_pax_capacity**2) + 10.1*(original_pax_capacity **1) - 314.21
+    volume_fraction  = volume_fraction_unnormalized / 100
     H2_volume        = volume_fraction *aircraft_volume
      
     # Step 3: Compute max range of each aircraft using range equation 
-    Weight_empty  = 4.2778* (original_pax_capacity**2) - 450.54*(original_pax_capacity**2)+ 25076
-    Weight_Pax    = (1 -  volume_fraction) *  250 *  original_pax_capacity
-    Weight_H2     = H2_volume * density_H2 * 9.81
-    Weight_H2_0   = Weight_empty + Weight_Pax  + Weight_H2 
-    Weight_H2_f   = Weight_H2_0 - (Weight_H2*0.95) # only 90% of fuel is used up 
-    Range         = (airspeed / 9.81) * (1 / SFC_H2) *  (L_div_D) *  (Weight_H2_0 /Weight_H2_f)
-    Range_mi      = Range * 0.000621371 # conversion to mile 
+    Weight_empty         = 1.2636* (original_pax_capacity**2) + 145.58* (original_pax_capacity)
+    Weight_pass          = 250
+    g                    = 9.81
+    Weight_Pass_total    = (1 -  volume_fraction) * Weight_pass *  original_pax_capacity 
+    Weight_H2            = H2_volume * density_H2 * g
+    Weight_H2_0          = Weight_empty + Weight_Pass_total  + Weight_H2 
+    Weight_H2_f          = Weight_H2_0 - (Weight_H2*0.95) # only 90% of fuel is used up 
+    Range                = (airspeed / g) * (1 / SFC_H2) *  (L_div_D) *  (Weight_H2_0 /Weight_H2_f)
+    Range_mi             = Range * 0.000621371 # conversion to mile 
     
     # Step 4: Compute modified passenger capacity   
     Routes_and_Temp_Mo['H2_Passengers']  = (1 - volume_fraction) *  np.array(Routes_and_Temp_Mo['Passengers']) 
@@ -92,25 +116,26 @@ def generate_electric_flight_operations_plots(Flight_Ops,Commercial_H2,aircraft,
     H2_process_percentages_list  += [100]
     H2_process_percentages       = np.diff(np.array(H2_process_percentages_list))/100   
     
-    # Step 6: determine the percentage of different H2 production processes 
-    if Commercial_H2['H2 Fuel Name'][0] not in selected_fuels:  
-        selected_fuels         = [Commercial_H2['H2 Fuel Name'][0]] + selected_fuels
+    # Step 6: add Jet A 
+    if Hydrogen['H2 Fuel Name'][0] not in selected_fuels:  
+        selected_fuels         = [Hydrogen['H2 Fuel Name'][0]] + selected_fuels
         H2_process_percentages = np.hstack((np.array([0]),H2_process_percentages))
-    mask                  = Commercial_H2['H2 Fuel Name'].isin(selected_fuels)
-    fuels_used            = Commercial_H2[mask]
+        
+    # Step 6: determine the percentage of different H2 production processes 
+    mask                  = Hydrogen['H2 Fuel Name'].isin(selected_fuels)
+    fuels_used            = Hydrogen[mask]
     num_fuels             = len(selected_fuels)
     cumulative_fuel_use   = np.zeros(num_fuels) 
-    H2_LCA_val            = np.zeros(num_fuels) 
-    Jet_A_LCA_val         = np.zeros(num_fuels)   
+    H2_GHG_val            = np.zeros(num_fuels) 
+    Jet_A_GHG_val         = np.zeros(num_fuels)   
     for i in range(1,num_fuels):
         # loop through fuels and get percentage of fuel used by each type
-        cumulative_fuel_use[i]  = H2_process_percentages[i]
-        H2_LCA_val[i]           = Commercial_H2[Commercial_H2['H2 Fuel Name'] == selected_fuels[i]]['LCA Value'] 
-    H2_LCA_val[0]     = 89
-    Jet_A_LCA_val[0]  = 89 
+        H2_GHG_val[i]           = Hydrogen.loc[Hydrogen['H2 Fuel Name'] == selected_fuels[i]]['Direct GHG emissions [kg CO2e/kg H2]'].iloc[0]
+    H2_GHG_val[0]     = 4.36466
+    Jet_A_GHG_val[0]  = 4.36466
       
     # Step 7: Filter flight data based on option selected: i.e. top 10, top 20, top 50, all airpots 
-    Airport_Routes     = Flight_Ops[['Passengers','Origin Airport','Destination City']]
+    Airport_Routes     = Routes_and_Temp_Mo[['Passengers','Origin Airport','Destination City']]
     Cumulative_Flights = Airport_Routes.groupby('Origin Airport', as_index=False).sum()[Airport_Routes.columns]
     if  selected_airpots   == "Top 5 Airports":
         Busiest_Airports   = Cumulative_Flights.sort_values(by=['Passengers'], ascending = False).head(5) 
@@ -125,9 +150,9 @@ def generate_electric_flight_operations_plots(Flight_Ops,Commercial_H2,aircraft,
     Airport_List = list(Busiest_Airports['Origin Airport'])
     
     # Step 8: Filter airports that will support H2 and those that wont support H2 
-    mask_1               = Flight_Ops['Origin Airport'].isin(Airport_List)
-    H2_Airports          = Flight_Ops[mask_1]
-    Non_H2_Airports      = Flight_Ops[~mask_1] 
+    mask_1               = Routes_and_Temp_Mo['Origin Airport'].isin(Airport_List)
+    H2_Airports          = Routes_and_Temp_Mo[mask_1]
+    Non_H2_Airports      = Routes_and_Temp_Mo[~mask_1] 
     Feasible_Routes_0    = H2_Airports[H2_Airports['H2_Passengers'] > 0 ] 
     Infeasible_Routes_0  = H2_Airports[H2_Airports['H2_Passengers'] < 0 ]   
     Feasible_Routes_1    = Feasible_Routes_0[Feasible_Routes_0['Distance (miles)'] < Range_mi ] 
@@ -143,8 +168,8 @@ def generate_electric_flight_operations_plots(Flight_Ops,Commercial_H2,aircraft,
     airport_H2_volumes       = (density_JetA / density_H2) *  equivalent_JetA_consumed  
         
     # Steps 11 and 12 Determine Cost per Seat Mile and Emissions  
-    CASM_jet_A  = np.zeros(12) 
-    CASM_H2     = np.zeros(12) 
+    CASM_jet_A           = np.zeros(12) 
+    CASM_H2              = np.zeros(12) 
     Emissions_w_H2       = np.zeros(12) 
     Emissions_w_o_H2     = np.zeros(12) 
     for m_i in range(12): 
@@ -170,8 +195,8 @@ def generate_electric_flight_operations_plots(Flight_Ops,Commercial_H2,aircraft,
             CASM_H2[m_i]         = 100*Total_Fuel_Cost_H2/ASM_H2   
              
         Emissions_w_H2[m_i]   = np.sum(fuels_used['LCEF (gCO2e/MJ)']*fuels_used['Volumetric Energy Density (MJ/L)']*H2_volumes_mo*gallons_to_Liters) +\
-                                Commercial_H2.loc[0]['LCEF (gCO2e/MJ)']*Commercial_H2.loc[0]['Volumetric Energy Density (MJ/L)']*np.sum(Jet_A_fuel_volume_required_mo)*gallons_to_Liters 
-        Emissions_w_o_H2[m_i] = Commercial_H2.loc[0]['LCEF (gCO2e/MJ)']*Commercial_H2.loc[0]['Volumetric Energy Density (MJ/L)']*(np.sum(H2_volumes_mo) + Jet_A_fuel_volume_required_mo) *gallons_to_Liters
+                                Hydrogen.loc[0]['LCEF (gCO2e/MJ)']*Hydrogen.loc[0]['Volumetric Energy Density (MJ/L)']*np.sum(Jet_A_fuel_volume_required_mo)*gallons_to_Liters 
+        Emissions_w_o_H2[m_i] = Hydrogen.loc[0]['LCEF (gCO2e/MJ)']*Hydrogen.loc[0]['Volumetric Energy Density (MJ/L)']*(np.sum(H2_volumes_mo) + Jet_A_fuel_volume_required_mo) *gallons_to_Liters
            
     
     #================================================================================================================================================  
@@ -357,12 +382,12 @@ def generate_electric_flight_operations_plots(Flight_Ops,Commercial_H2,aircraft,
     Jet_A_name = ["Jet-A"]*num_fuels
     Jet_A_data = {'Cumulative Fuel': Jet_A_name,
             'Fuels' : selected_fuels,
-            'Cumulative LCA Value'        : Jet_A_LCA_val,
+            'Cumulative GHG Value'        : Jet_A_GHG_val,
             } 
     H2_name = ["H2"]*num_fuels
     H2_data = {'Cumulative Fuel': H2_name,
             'Fuels' : selected_fuels,
-            'Cumulative LCA Value'        : H2_LCA_val*cumulative_fuel_use,
+            'Cumulative GHG Value'        : H2_GHG_val*cumulative_fuel_use,
             } 
     Jet_A_Emissions = pd.DataFrame(Jet_A_data)
     H2_Emissions   = pd.DataFrame(H2_data)
@@ -370,7 +395,7 @@ def generate_electric_flight_operations_plots(Flight_Ops,Commercial_H2,aircraft,
     Emissions = pd.concat(frames)
     fig_7               =   px.bar(Emissions,
                                    x="Cumulative Fuel",
-                                   y="Cumulative LCA Value",
+                                   y="Cumulative GHG Value",
                                    color= "Fuels",
                                    color_discrete_sequence=px.colors.qualitative.Pastel)  
     fig_7.update_layout(xaxis_title=None)

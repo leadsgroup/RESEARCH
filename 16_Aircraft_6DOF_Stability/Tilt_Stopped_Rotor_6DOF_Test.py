@@ -30,13 +30,24 @@ import  pickle
 def main():           
          
     # vehicle data
-    new_geometry = False
+    new_geometry = True  
     if new_geometry :
         vehicle  = vehicle_setup()
         save_aircraft_geometry(vehicle , 'Tilt_Stopped_Rotor')
     else: 
-        vehicle = load_aircraft_geometry('Tilt_Stopped_Rotor')
+        vehicle = load_aircraft_geometry('Tilt_Stopped_Rotor') 
+    
+    #------------------------------------------------------------------------------------------------------------------------------------
+    # Compute center of gravity 
+    #------------------------------------------------------------------------------------------------------------------------------------       
+    vehicle.center_of_gravity()
+    
 
+    #------------------------------------------------------------------------------------------------------------------------------------
+    # Compute moment of inertia matrix 
+    #------------------------------------------------------------------------------------------------------------------------------------     
+    vehicle.moment_of_inertia()
+        
     ## plot vehicle 
     #plot_3d_vehicle(vehicle, 
                     #min_x_axis_limit            = -5,
@@ -751,8 +762,8 @@ def vehicle_setup() :
     #------------------------------------------------------------------------------------------------------------------------------------   
     converge_weight(vehicle) 
     breakdown = compute_weight(vehicle)
-    print(breakdown) 
-     
+    print(breakdown)
+    
     return vehicle
 
 
@@ -768,16 +779,50 @@ def configs_setup(vehicle):
     base_config.tag                                                   = 'base'     
     configs.append(base_config) 
 
+    
+    # ---------------------------------------------------------------------
+    #  Forward Flight Configuration 
+    # ---------------------------------------------------------------------  
     forward_config                                                    = RCAIDE.Library.Components.Configs.Config(vehicle)
     forward_config.tag                                                = 'forward_flight'  
-    forward_config.networks.all_electric.busses['lift_bus'].active    = False  
+    forward_config.networks.all_electric.busses['lift_bus'].active    = False    
+    for network in forward_config.networks:
+        bus =  forward_config.networks.all_electric.busses.cruise_bus
+        for propulsor in  bus.propulsors:
+            rotor =  propulsor.rotor
+            rotor.inputs.pitch_command  = rotor.cruise.design_collective_pitch  
     configs.append(forward_config)  
 
-    transition_config                                                 = RCAIDE.Library.Components.Configs.Config(vehicle)
-    transition_config.tag                                             = 'transition_flight'    
-    configs.append(transition_config)
+
+    # ---------------------------------------------------------------------
+    #  Low-Speed Configuration 
+    # ---------------------------------------------------------------------
+    low_speed_transition_config                                       = RCAIDE.Library.Components.Configs.Config(vehicle)
+    low_speed_transition_config.tag                                   = 'low_speed_transition_flight'    
+    for network in low_speed_transition_config.networks:
+        bus =  low_speed_transition_config.networks.all_electric.busses.cruise_bus
+        for propulsor in  bus.propulsors:
+            rotor =  propulsor.rotor
+            rotor.inputs.pitch_command  = rotor.cruise.design_collective_pitch 
+    configs.append(low_speed_transition_config)
     
 
+    # ---------------------------------------------------------------------
+    #  High-Speed Configuration 
+    # ---------------------------------------------------------------------
+    high_speed_transition_config                                                 = RCAIDE.Library.Components.Configs.Config(vehicle)
+    high_speed_transition_config.tag                                             = 'high_speed_transition_flight'    
+    for network in high_speed_transition_config.networks:
+        bus =  high_speed_transition_config.networks.all_electric.busses.cruise_bus
+        for propulsor in  bus.propulsors:
+            rotor =  propulsor.rotor
+            rotor.inputs.pitch_command  = rotor.cruise.design_collective_pitch * 0.5
+    configs.append(high_speed_transition_config)
+    
+
+    # ---------------------------------------------------------------------
+    #  Vertical Flight Configuration 
+    # ---------------------------------------------------------------------
     vertical_config                                                   = RCAIDE.Library.Components.Configs.Config(vehicle)
     vertical_config.tag                                               = 'vertical_flight'
     for network in vertical_config.networks:
@@ -814,7 +859,7 @@ def mission_setup(analyses):
     segment.tag = "Vertical_Climb"   
     segment.analyses.extend( analyses.vertical_flight )  
     segment.altitude_start                                = 0.0  * Units.ft  
-    segment.altitude_end                                  = 200.  * Units.ft   
+    segment.altitude_end                                  = 500.  * Units.ft   
     segment.initial_battery_state_of_charge               = 1.0 
     segment.climb_rate                                    = 500. * Units['ft/min']   
             
@@ -829,98 +874,110 @@ def mission_setup(analyses):
     segment.assigned_control_variables.throttle.initial_guess_values = [[0.5], [0.4125]]   
     mission.append_segment(segment)
     
-    ##------------------------------------------------------------------------------------------------------------------------------------  
-    ## Low-Speed Transition
-    ##------------------------------------------------------------------------------------------------------------------------------------  
+    #------------------------------------------------------------------------------------------------------------------------------------  
+    # Low-Speed Transition
+    #------------------------------------------------------------------------------------------------------------------------------------  
  
-    #segment                                               = Segments.Transition.Constant_Acceleration_Constant_Pitchrate_Constant_Altitude(base_segment)
-    #segment.tag                                           = "Low_Speed_Transition"  
-    #segment.analyses.extend( analyses.transition_flight )
+    segment                                               = Segments.Transition.Constant_Acceleration_Constant_Pitchrate_Constant_Altitude(base_segment)
+    segment.tag                                           = "Low_Speed_Transition"  
+    segment.analyses.extend( analyses.low_speed_transition_flight )
     
-    ## 1.5 mins long 
-    #segment.altitude                                      = 200.  * Units.ft           
-    #segment.air_speed_start                               = 500. * Units['ft/min']
-    #segment.air_speed_end                                 = 92.  * Units['mph'] 
-    #segment.acceleration                                  = 1
-    #segment.pitch_initial                                 = 0.0 * Units.degrees
-    #segment.pitch_final                                   = 2.  * Units.degrees
+    # 1.5 mins long 
+    segment.altitude                                      = 500.  * Units.ft           
+    segment.air_speed_start                               = 500. * Units['ft/min']
+    segment.air_speed_end                                 = 50.  * Units['mph'] 
+    segment.acceleration                                  = 1
+    segment.pitch_initial                                 = 0.0 * Units.degrees
+    segment.pitch_final                                   = 9.0 * Units.degrees
      
 
-    ## define flight dynamics to model 
-    #segment.flight_dynamics.force_x                       = True  
-    #segment.flight_dynamics.force_z                       = True   
-    #segment.flight_dynamics.moment_y                      = True    
+    # define flight dynamics to model 
+    segment.flight_dynamics.force_x                       = True  
+    segment.flight_dynamics.force_z                       = True   
+    segment.flight_dynamics.moment_y                      = True    
     
-    ## define flight controls 
-    #segment.assigned_control_variables.throttle.active               = True           
-    #segment.assigned_control_variables.throttle.assigned_propulsors  = [['front_cruise_propulsor_1','front_cruise_propulsor_2','front_cruise_propulsor_3','front_cruise_propulsor_4'],
-                                                             #['rear_lift_propulsor_1','rear_lift_propulsor_2','rear_lift_propulsor_3','rear_lift_propulsor_4']]
-    #mission.append_segment(segment)  
-  
-    ##------------------------------------------------------------------------------------------------------------------------------------  
-    ##   First Climb
-    ##------------------------------------------------------------------------------------------------------------------------------------  
-    #segment                                               = Segments.Climb.Linear_Speed_Constant_Rate(base_segment)
-    #segment.tag                                           = "Low_Altitude_Climb"   
-    #segment.analyses.extend( analyses.forward_flight ) 
-    #segment.altitude_start                                = 500.0 * Units.ft   
-    #segment.altitude_end                                  = 1000. * Units.ft   
-    #segment.climb_rate                                    = 500.  * Units['ft/min']  
-    #segment.air_speed_end                                 = 105.  * Units['mph'] 
-            
-    ## define flight dynamics to model 
-    #segment.flight_dynamics.force_x                       = True  
-    #segment.flight_dynamics.force_z                       = True     
-    
-    ## define flight controls 
-    #segment.assigned_control_variables.throttle.active               = True           
-    #segment.assigned_control_variables.throttle.assigned_propulsors  = [['front_cruise_propulsor_1','front_cruise_propulsor_2','front_cruise_propulsor_3','front_cruise_propulsor_4']] 
-    #segment.assigned_control_variables.body_angle.active             = True                
-                
-    #mission.append_segment(segment)  
+    # define flight controls 
+    segment.assigned_control_variables.throttle.active               = True           
+    segment.assigned_control_variables.throttle.assigned_propulsors  = [['front_cruise_propulsor_1','front_cruise_propulsor_2','front_cruise_propulsor_3','front_cruise_propulsor_4'],
+                                                             ['rear_lift_propulsor_1','rear_lift_propulsor_2','rear_lift_propulsor_3','rear_lift_propulsor_4']]
+    segment.assigned_control_variables.thrust_vector_angle.active    = True           
+    segment.assigned_control_variables.thrust_vector_angle.assigned_propulsors  = [['front_cruise_propulsor_1','front_cruise_propulsor_2','front_cruise_propulsor_3','front_cruise_propulsor_4']]
+    mission.append_segment(segment)  
+ 
+    #------------------------------------------------------------------------------------------------------------------------------------  
+    # Low-Speed Transition
+    #------------------------------------------------------------------------------------------------------------------------------------  
 
-    ##------------------------------------------------------------------------------------------------------------------------------------  
-    ##  Second Climb
-    ##------------------------------------------------------------------------------------------------------------------------------------  
-    #segment                                               = Segments.Climb.Linear_Speed_Constant_Rate(base_segment)
-    #segment.tag                                           = "High_Altitude_Climb"  
-    #segment.analyses.extend( analyses.forward_flight)   
-    #segment.altitude_start                                = 1000.0 * Units.ft   
-    #segment.altitude_end                                  = 1500. * Units.ft   
-    #segment.climb_rate                                    = 300.  * Units['ft/min'] 
-    #segment.air_speed_end                                 = 110.  * Units['mph']  
+    segment                                               = Segments.Transition.Constant_Acceleration_Constant_Pitchrate_Constant_Altitude(base_segment)
+    segment.tag                                           = "High_Speed_Transition"  
+    segment.analyses.extend( analyses.high_speed_transition_flight )
+
+    # 1.5 mins long 
+    segment.altitude                                      = 500.  * Units.ft           
+    segment.air_speed_start                               = 50.  * Units['mph'] 
+    segment.air_speed_end                                 = 110.  * Units['mph'] 
+    segment.acceleration                                  = 1
+    segment.pitch_initial                                 = 9.0 * Units.degrees
+    segment.pitch_final                                   = 8.0 * Units.degrees
+
+
+    # define flight dynamics to model 
+    segment.flight_dynamics.force_x                       = True  
+    segment.flight_dynamics.force_z                       = True   
+    segment.flight_dynamics.moment_y                      = True    
+
+    # define flight controls 
+    segment.assigned_control_variables.throttle.active               = True           
+    segment.assigned_control_variables.throttle.assigned_propulsors  = [['front_cruise_propulsor_1','front_cruise_propulsor_2','front_cruise_propulsor_3','front_cruise_propulsor_4'],
+                                                                        ['rear_lift_propulsor_1','rear_lift_propulsor_2','rear_lift_propulsor_3','rear_lift_propulsor_4']]
+    segment.assigned_control_variables.thrust_vector_angle.active    = True           
+    segment.assigned_control_variables.thrust_vector_angle.assigned_propulsors  = [['front_cruise_propulsor_1','front_cruise_propulsor_2','front_cruise_propulsor_3','front_cruise_propulsor_4']]
+    mission.append_segment(segment)  
+ 
+
+    #------------------------------------------------------------------------------------------------------------------------------------  
+    #  Second Climb
+    #------------------------------------------------------------------------------------------------------------------------------------  
+    segment                                               = Segments.Climb.Linear_Speed_Constant_Rate(base_segment)
+    segment.tag                                           = "Climb"  
+    segment.analyses.extend( analyses.forward_flight)   
+    segment.altitude_start                                = 500.0 * Units.ft   
+    segment.altitude_end                                  = 1500. * Units.ft   
+    segment.climb_rate                                    = 300.  * Units['ft/min'] 
+    segment.air_speed_start                               = 110.   * Units['mph']  
+    segment.air_speed_end                                 = 150.  * Units['mph']  
               
-    ## define flight dynamics to model   
-    #segment.flight_dynamics.force_x                       = True  
-    #segment.flight_dynamics.force_z                       = True     
+    # define flight dynamics to model   
+    segment.flight_dynamics.force_x                       = True  
+    segment.flight_dynamics.force_z                       = True     
     
-    ## define flight controls 
-    #segment.assigned_control_variables.throttle.active               = True           
-    #segment.assigned_control_variables.throttle.assigned_propulsors  = [['front_cruise_propulsor_1','front_cruise_propulsor_2','front_cruise_propulsor_3','front_cruise_propulsor_4']] 
-    #segment.assigned_control_variables.body_angle.active             = True                
+    # define flight controls 
+    segment.assigned_control_variables.throttle.active               = True           
+    segment.assigned_control_variables.throttle.assigned_propulsors  = [['front_cruise_propulsor_1','front_cruise_propulsor_2','front_cruise_propulsor_3','front_cruise_propulsor_4']] 
+    segment.assigned_control_variables.body_angle.active             = True                
                  
-    #mission.append_segment(segment)  
+    mission.append_segment(segment)  
 
-    ##------------------------------------------------------------------------------------------------------------------------------------  
-    ## Cruise 
-    ##------------------------------------------------------------------------------------------------------------------------------------  
-    #segment                                               = Segments.Cruise.Constant_Speed_Constant_Altitude(base_segment)
-    #segment.tag                                           = "Cruise"  
-    #segment.analyses.extend( analyses.forward_flight )                  
-    #segment.altitude                                      = 1500.0 * Units.ft  
-    #segment.air_speed                                     = 110.  * Units['mph']  
-    #segment.distance                                      = 50 *Units.nmi    
+    #------------------------------------------------------------------------------------------------------------------------------------  
+    # Cruise 
+    #------------------------------------------------------------------------------------------------------------------------------------  
+    segment                                               = Segments.Cruise.Constant_Speed_Constant_Altitude(base_segment)
+    segment.tag                                           = "Cruise"  
+    segment.analyses.extend( analyses.forward_flight )                  
+    segment.altitude                                      = 1500.0 * Units.ft  
+    segment.air_speed                                     = 150.  * Units['mph']  
+    segment.distance                                      = 10 *Units.nmi    
             
-    ## define flight dynamics to model 
-    #segment.flight_dynamics.force_x                       = True  
-    #segment.flight_dynamics.force_z                       = True     
+    # define flight dynamics to model 
+    segment.flight_dynamics.force_x                       = True  
+    segment.flight_dynamics.force_z                       = True     
     
-    ## define flight controls 
-    #segment.assigned_control_variables.throttle.active               = True           
-    #segment.assigned_control_variables.throttle.assigned_propulsors  = [['front_cruise_propulsor_1','front_cruise_propulsor_2','front_cruise_propulsor_3','front_cruise_propulsor_4']] 
-    #segment.assigned_control_variables.body_angle.active             = True                
+    # define flight controls 
+    segment.assigned_control_variables.throttle.active               = True           
+    segment.assigned_control_variables.throttle.assigned_propulsors  = [['front_cruise_propulsor_1','front_cruise_propulsor_2','front_cruise_propulsor_3','front_cruise_propulsor_4']] 
+    segment.assigned_control_variables.body_angle.active             = True                
          
-    #mission.append_segment(segment)   
+    mission.append_segment(segment)   
     
     ##------------------------------------------------------------------------------------------------------------------------------------  
     ##  Descent
@@ -1007,23 +1064,23 @@ def plot_results(results):
     plot_flight_conditions(results) 
     
     # Plot arcraft trajectory
-    plot_flight_trajectory(results)   
+    #plot_flight_trajectory(results)   
 
     plot_propulsor_throttles(results)
     
     # Plot Aircraft Electronics
     plot_battery_pack_conditions(results) 
-    plot_battery_temperature(results)
-    plot_battery_cell_conditions(results) 
-    plot_battery_pack_C_rates(results)
-    plot_battery_degradation(results) 
+    #plot_battery_temperature(results)
+    #plot_battery_cell_conditions(results) 
+    #plot_battery_pack_C_rates(results)
+    #plot_battery_degradation(results) 
     
     # Plot prop_rotor Conditions 
     plot_rotor_conditions(results) 
-    plot_disc_and_power_loading(results)
+    #plot_disc_and_power_loading(results)
     
     # Plot Electric Motor and prop_rotor Efficiencies 
-    plot_electric_propulsor_efficiencies(results)  
+    #plot_electric_propulsor_efficiencies(results)  
       
     return
 
