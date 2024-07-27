@@ -62,13 +62,14 @@ total_emissions_Methane = {species: 0.0 for species in Methane.species_names}
 # Run a loop over decreasing residence times, until the reactor is extinguished.
 states_Methane = ct.SolutionArray(Methane, extra=['tres', 'EI_CO2_Methane', 'EI_CO_Methane', 'EI_NO2_Methane', 'EI_NO_Methane'])
 residence_time = 0.1  # starting residence time
+
 while combustor_Methane.T > 500:
     sim_Methane.initial_time = 0.0  # reset the integrator
     sim_Methane.advance_to_steady_state()
 
     # Ensure combustor.T is a float
     temperature_Methane = combustor_Methane.T if np.isscalar(combustor_Methane.T) else combustor_Methane.T.item()
-    print('tres = {:.2e}; T = {:.1f}'.format(residence_time, temperature_Methane))
+    # print('tres = {:.2e}; T = {:.1f}'.format(residence_time, temperature_Methane))
 
     # Compute mass flow rates
     mdot_fuel = mdot(0)* Methane.molecular_weights[Methane.species_index('CH4')] / Methane.density
@@ -88,8 +89,6 @@ while combustor_Methane.T > 500:
     EI_NO_Methane = (mdot_NO*1000) / mdot_fuel if mdot_fuel > 0 else 0      
     states_Methane.append(combustor_Methane.thermo.state, tres=residence_time, EI_CO2_Methane=EI_CO2_Methane, EI_CO_Methane=EI_CO_Methane, EI_NO2_Methane=EI_NO2_Methane, EI_NO_Methane=EI_NO_Methane)
     residence_time *= 0.9  # decrease the residence time for the next iteration
-
-    
 
 # Print total emissions for each species
 print("\nMethane total emissions for each species (in kg):")
@@ -156,14 +155,14 @@ total_emissions_Ethane = {species: 0.0 for species in Ethane.species_names}
 
 # Run a loop over decreasing residence times, until the reactor is extinguished.
 states_Ethane = ct.SolutionArray(Ethane, extra=['tres', 'EI_CO2_Ethane', 'EI_CO_Ethane', 'EI_NO2_Ethane', 'EI_NO_Ethane'])
-residence_time = 0.1  # starting residence time
+residence_time = 0.01  # starting residence time
 while combustor_Ethane.T > 500:
     sim_Ethane.initial_time = 0.0  # reset the integrator
     sim_Ethane.advance_to_steady_state()
 
     # Ensure combustor.T is a float
     temperature_Ethane = combustor_Ethane.T if np.isscalar(combustor_Ethane.T) else combustor_Ethane.T.item()
-    print('tres = {:.2e}; T = {:.1f}'.format(residence_time, temperature_Ethane))
+    # print('tres = {:.2e}; T = {:.1f}'.format(residence_time, temperature_Ethane))
 
     # Compute mass flow rates
     mdot_fuel = mdot(0)* Ethane.molecular_weights[Ethane.species_index('C2H6')] / Ethane.density
@@ -183,8 +182,6 @@ while combustor_Ethane.T > 500:
     EI_NO_Ethane = (mdot_NO*1000) / mdot_fuel if mdot_fuel > 0 else 0      
     states_Ethane.append(combustor_Ethane.thermo.state, tres=residence_time, EI_CO2_Ethane=EI_CO2_Ethane, EI_CO_Ethane=EI_CO_Ethane, EI_NO2_Ethane=EI_NO2_Ethane, EI_NO_Ethane=EI_NO_Ethane)
     residence_time *= 0.9  # decrease the residence time for the next iteration
-
-    
 
 # Print total emissions for each species
 print("\nEthane total emissions for each species (in kg):")
@@ -258,7 +255,7 @@ while combustor_Propane.T > 500:
 
     # Ensure combustor.T is a float
     temperature_Propane = combustor_Propane.T if np.isscalar(combustor_Propane.T) else combustor_Propane.T.item()
-    print('tres = {:.2e}; T = {:.1f}'.format(residence_time, temperature_Propane))
+    # print('tres = {:.2e}; T = {:.1f}'.format(residence_time, temperature_Propane))
 
     # Compute mass flow rates
     mdot_fuel = mdot(0)* Propane.molecular_weights[Propane.species_index('C3H8')] / Propane.density
@@ -278,8 +275,6 @@ while combustor_Propane.T > 500:
     EI_NO_Propane = (mdot_NO*1000) / mdot_fuel if mdot_fuel > 0 else 0      
     states_Propane.append(combustor_Propane.thermo.state, tres=residence_time, EI_CO2_Propane=EI_CO2_Propane, EI_CO_Propane=EI_CO_Propane, EI_NO2_Propane=EI_NO2_Propane, EI_NO_Propane=EI_NO_Propane)
     residence_time *= 0.9  # decrease the residence time for the next iteration
-
-    
 
 # Print total emissions for each species
 print("\nPropane total emissions for each species (in kg):")
