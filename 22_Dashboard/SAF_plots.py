@@ -473,14 +473,14 @@ def generate_saf_flight_operations_plots(Flight_Ops,Commercial_SAF,feedstocks,se
         
         
         if len(Non_SAF_Flights_Mo ) == 0:
-            CASM_jet_A[m_i] = 0
+            pass
         else:
             ASM_jet_A                           = np.sum(Non_SAF_Flights_Mo['Distance (miles)'] * Non_SAF_Flights_Mo['Passengers'])
             Total_Fuel_Cost_jet_A               = np.sum(Non_SAF_Flights_Mo['Fuel Cost']) 
             CASM_jet_A[m_i]                     = 100*Total_Fuel_Cost_jet_A/ASM_jet_A     
        
         if len(Flight_at_SAF_Airports_Using_SAF_Mo)  == 0:
-            CASM_SAF[m_i]   
+            pass
         else:    
             ASM_SAF                             = np.sum(Flight_at_SAF_Airports_Using_SAF_Mo['Distance (miles)'] * Flight_at_SAF_Airports_Using_SAF_Mo['Passengers']) 
             Total_Fuel_Cost_SAF                 = np.sum(Flight_at_SAF_Airports_Using_SAF_Mo['Total Fuel Per Route (Gal)'] ) * SAF_dollars_per_gal 

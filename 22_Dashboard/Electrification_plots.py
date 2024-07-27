@@ -454,7 +454,7 @@ def generate_electric_flight_operations_plots(Routes_and_Temp,Commercial_Batteri
         passengers      = 238
         SFC_lb_lbfhr    = 0.51 
         W_0             = 227900   
-        CL_cruise       = 0.055 
+        CL_cruise       = 0.55 
         fuselage_volume = 682.008 
         CD_cruise       = 0.035
         S_ref           = 377
