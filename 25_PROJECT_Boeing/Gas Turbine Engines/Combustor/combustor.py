@@ -67,7 +67,7 @@ while combustor.T > 500:
     print('tres = {:.2e}; T = {:.1f}'.format(residence_time, temperature))
 
     # Compute mass flow rates
-    mdot_fuel = mdot(0)# * gas.molecular_weights[gas.species_index('CH4')] / gas.density
+    mdot_fuel = mdot(0)* gas.molecular_weights[gas.species_index('CH4')] / gas.density
     for species in gas.species_names:
         species_index = gas.species_index(species)
         mdot_species = combustor.thermo[species].Y * combustor.thermo.density * combustor.volume / residence_time
@@ -75,13 +75,13 @@ while combustor.T > 500:
 
     # Compute emission index for CO2
     mdot_CO2 = total_emissions['CO2']
-    EI_CO2 = mdot_CO2 / mdot_fuel if mdot_fuel > 0 else 0
+    EI_CO2 = (mdot_CO2*1000) / mdot_fuel if mdot_fuel > 0 else 0
     mdot_CO = total_emissions['CO']
-    EI_CO = mdot_CO / mdot_fuel if mdot_fuel > 0 else 0    
+    EI_CO = (mdot_CO*1000) / mdot_fuel if mdot_fuel > 0 else 0    
     mdot_NO2 = total_emissions['NO2']
-    EI_NO2 = mdot_NO2 / mdot_fuel if mdot_fuel > 0 else 0 
+    EI_NO2 = (mdot_NO2*1000) / mdot_fuel if mdot_fuel > 0 else 0 
     mdot_NO = total_emissions['NO']
-    EI_NO = mdot_NO / mdot_fuel if mdot_fuel > 0 else 0      
+    EI_NO = (mdot_NO*1000) / mdot_fuel if mdot_fuel > 0 else 0      
     states.append(combustor.thermo.state, tres=residence_time, EI_CO2=EI_CO2, EI_CO=EI_CO, EI_NO2=EI_NO2, EI_NO=EI_NO)
     residence_time *= 0.9  # decrease the residence time for the next iteration
 
@@ -95,28 +95,22 @@ for species, total_emission in total_emissions.items():
     print(f"{species}: {total_emission_scalar:.6e} kg")
 
 # Plot results
-f, ax1 = plt.subplots(1, 1)
-ax1.plot(states.tres, states.EI_CO2, '.-', color='C0')
-ax1.set_xlabel('residence time [s]')
-ax1.set_ylabel('Emission Index CO2 [kg/kg fuel]', color='C0')
-f.tight_layout()
-
-f, ax1 = plt.subplots(1, 1)
-ax1.plot(states.tres, states.EI_CO, '.-', color='C0')
-ax1.set_xlabel('residence time [s]')
-ax1.set_ylabel('Emission Index CO [kg/kg fuel]', color='C0')
-f.tight_layout()
-
-f, ax1 = plt.subplots(1, 1)
-ax1.plot(states.tres, states.EI_NO2, '.-', color='C0')
-ax1.set_xlabel('residence time [s]')
-ax1.set_ylabel('Emission Index NO2 [kg/kg fuel]', color='C0')
-f.tight_layout()
-
-f, ax1 = plt.subplots(1, 1)
-ax1.plot(states.tres, states.EI_NO, '.-', color='C0')
-ax1.set_xlabel('residence time [s]')
-ax1.set_ylabel('Emission Index NO [kg/kg fuel]', color='C0')
-f.tight_layout()
+f, ax1 = plt.subplots(2, 2, figsize=(16, 12))
+ax1[0, 0].plot(states.tres, states.EI_CO2, '.-', color='C0')
+ax1[0, 0].set_xlabel('residence time [s]')
+ax1[0, 0].set_title('Emission Index CO2', color='C0')
+ax1[0, 0].set_ylabel('EI [g/kg]')
+ax1[0, 1].plot(states.tres, states.EI_CO, '.-', color='C1')
+ax1[0, 1].set_xlabel('residence time [s]')
+ax1[0, 1].set_title('Emission Index CO', color='C1')
+ax1[0, 1].set_ylabel('EI [g/kg]')
+ax1[1, 0].plot(states.tres, states.EI_NO2, '.-', color='C2')
+ax1[1, 0].set_xlabel('residence time [s]')
+ax1[1, 0].set_title('Emission Index NO2', color='C2')
+ax1[1, 0].set_ylabel('EI [g/kg]')
+ax1[1, 1].plot(states.tres, states.EI_NO, '.-', color='C3')
+ax1[1, 1].set_xlabel('residence time [s]')
+ax1[1, 1].set_title('Emission Index NO', color='C3')
+ax1[1, 1].set_ylabel('EI [g/kg]')
 
 plt.show()
