@@ -172,13 +172,13 @@ while combustor_Ethane.T > 500:
         total_emissions_Ethane[species] += mdot_species_Ethane * residence_time
 
     # Compute emission index for CO2
-    mdot_CO2 = total_emissions_Ethane['CO2']
+    mdot_CO2 = total_emissions_Ethane['CO2']/residence_time
     EI_CO2_Ethane = (mdot_CO2*1000) / mdot_fuel if mdot_fuel > 0 else 0
-    mdot_CO = total_emissions_Ethane['CO']
+    mdot_CO = total_emissions_Ethane['CO']/residence_time
     EI_CO_Ethane = (mdot_CO*1000) / mdot_fuel if mdot_fuel > 0 else 0    
-    mdot_NO2 = total_emissions_Ethane['NO2']
+    mdot_NO2 = total_emissions_Ethane['NO2']/residence_time
     EI_NO2_Ethane = (mdot_NO2*1000) / mdot_fuel if mdot_fuel > 0 else 0 
-    mdot_NO = total_emissions_Ethane['NO']
+    mdot_NO = total_emissions_Ethane['NO']/residence_time
     EI_NO_Ethane = (mdot_NO*1000) / mdot_fuel if mdot_fuel > 0 else 0      
     states_Ethane.append(combustor_Ethane.thermo.state, tres=residence_time, EI_CO2_Ethane=EI_CO2_Ethane, EI_CO_Ethane=EI_CO_Ethane, EI_NO2_Ethane=EI_NO2_Ethane, EI_NO_Ethane=EI_NO_Ethane)
     residence_time *= 0.9  # decrease the residence time for the next iteration
@@ -269,13 +269,13 @@ while combustor_Propane.T > 500:
         total_emissions_Propane[species] += mdot_species_Propane * residence_time
 
     # Compute emission index for CO2
-    mdot_CO2 = total_emissions_Propane['CO2']
+    mdot_CO2 = total_emissions_Propane['CO2']/residence_time
     EI_CO2_Propane = (mdot_CO2*1000) / mdot_fuel if mdot_fuel > 0 else 0
-    mdot_CO = total_emissions_Propane['CO']
+    mdot_CO = total_emissions_Propane['CO']/residence_time
     EI_CO_Propane = (mdot_CO*1000) / mdot_fuel if mdot_fuel > 0 else 0    
-    mdot_NO2 = total_emissions_Propane['NO2']
+    mdot_NO2 = total_emissions_Propane['NO2']/residence_time
     EI_NO2_Propane = (mdot_NO2*1000) / mdot_fuel if mdot_fuel > 0 else 0 
-    mdot_NO = total_emissions_Propane['NO']
+    mdot_NO = total_emissions_Propane['NO']/residence_time
     EI_NO_Propane = (mdot_NO*1000) / mdot_fuel if mdot_fuel > 0 else 0      
     states_Propane.append(combustor_Propane.thermo.state, tres=residence_time, EI_CO2_Propane=EI_CO2_Propane, EI_CO_Propane=EI_CO_Propane, EI_NO2_Propane=EI_NO2_Propane, EI_NO_Propane=EI_NO_Propane)
     residence_time *= 0.9  # decrease the residence time for the next iteration
