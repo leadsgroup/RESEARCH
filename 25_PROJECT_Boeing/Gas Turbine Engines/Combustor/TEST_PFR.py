@@ -1,13 +1,3 @@
-"""
-Perfectly Stirred Reactor (PSR) + Plug Flow Reactor (PFR)
-=========================================================
-
-This code solves a PSR + PFR problem.
-The PFR is computed as a chain of reactors.
-Methane, Ethane and Propane emissions are computed.
-
-"""
-
 import cantera as ct
 import numpy as np
 import matplotlib.pyplot as plt
@@ -92,64 +82,47 @@ for species, total_emission in total_emissions_Methane_PSR.items():
 # Calculate outflow velocity from PSR
 mass_flow_rate_out = mdot(0)  # mass flow rate out of the combustor
 density_out = combustor_Methane_PSR.thermo.density  # density of the gas in the combustor
-area_out = 0.02  # Assuming the area is 1 m^2 for simplification
+area_out = 1  # Assuming the area is 1 m^2 for simplification
 outflow_velocity = mass_flow_rate_out / (density_out * area_out)
 
 # Extract the final state of the methane combustor
-final_state = combustor_Methane_PSR.thermo.state
 final_temperature = combustor_Methane_PSR.T
 final_pressure = combustor_Methane_PSR.thermo.P
-final_composition_X = combustor_Methane_PSR.thermo.X
-final_composition_Y = combustor_Methane_PSR.thermo.Y
+final_composition = combustor_Methane_PSR.thermo.Y
 
 #######################################################################
 # Plug Flow Reactor (PFR)
 #######################################################################
 
-#T_0 = final_temperature  # inlet temperature [K]
-#P_0 = final_pressure  # constant pressure [Pa]
-#X_0 = final_composition_X
-#length = 1.5  # *approximate* PFR length [m]
-#u_0 = outflow_velocity  # inflow velocity [m/s]
-#PFR_area = area_out  # cross-sectional area [m**2]
-
-T_0 = final_temperature
+T_0 = final_temperature  # inlet temperature [K]
 P_0 = final_pressure  # constant pressure [Pa]
-X_0 = final_composition_X
-length = 1.5e-1  # *approximate* PFR length [m]
+Y_0 = final_composition
+length = 1.5  # *approximate* PFR length [m]
 u_0 = outflow_velocity  # inflow velocity [m/s]
-PFR_area = 0.02
+PFR_area = area_out  # cross-sectional area [m**2]
 
 # Resolution: The PFR will be simulated by 'n_steps' time steps or by a chain
 # of 'n_steps' stirred reactors.
 n_steps = 1000
 
-# The plug flow reactor is represented by a linear chain of zero-dimensional
-# reactors. The gas at the inlet to the first one has the specified inlet
-# composition, and for all others the inlet composition is fixed at the
-# composition of the reactor immediately upstream. Since in a PFR model there
-# is no diffusion, the upstream reactors are not affected by any downstream
-# reactors, and therefore the problem may be solved by simply marching from
-# the first to last reactor, integrating each one to steady state.
-
 # import the gas model and set the initial conditions
 Methane_PFR = ct.Solution('gri30.yaml')
-Methane_PFR.TPX = T_0, P_0, X_0
+Methane_PFR.TPY = T_0, P_0, Y_0
 mass_flow_rate_PFR = u_0 * Methane_PFR.density * PFR_area
 dz = length / n_steps
 PFR_vol = PFR_area * dz
+
+# create a reservoir to represent the reactor immediately upstream. Note
+# that the gas object is set already to the state of the upstream reactor
+inlet_Methane_PFR = ct.Reservoir(Methane_PFR)
 
 # create a new reactor
 combustor_Methane_PFR = ct.IdealGasReactor(Methane_PFR)
 combustor_Methane_PFR.volume = PFR_vol
 
-# create a reservoir to represent the reactor immediately upstream. Note
-# that the gas object is set already to the state of the upstream reactor
-inlet_Methane_PFR = ct.Reservoir(Methane_PFR,name='inlet')
-
 # create a reservoir for the reactor to exhaust into. The composition of
 # this reservoir is irrelevant.
-exhaust_Methane_PFR = ct.Reservoir(Methane_PFR,name='exhaust')
+exhaust_Methane_PFR = ct.Reservoir(Methane_PFR)
 
 # The mass flow rate into the reactor will be fixed by using a
 # MassFlowController object.
@@ -173,7 +146,7 @@ residence_time_PFR = np.zeros_like(PFR_z)
 mdot_fuel_PFR = np.zeros_like(PFR_z)
 states_Methane_PFR = ct.SolutionArray(combustor_Methane_PFR.thermo)
 
-# Initialize lists for emission indices
+# Initialize lists for emission indices and CO2 mole fraction
 EI_CO2_PFR = []
 EI_CO_PFR = []
 EI_NO2_PFR = []
@@ -198,11 +171,6 @@ for n in range(n_steps):
     # Compute emission indices
     mdot_fuel_PFR[n] = mdot_fuel
     
-    for species in Methane_PFR.species_names:
-        species_index_Methane_PFR = Methane_PFR.species_index(species)
-        mdot_species_Methane_PFR = combustor_Methane_PFR.thermo[species].Y * combustor_Methane_PFR.thermo.density * combustor_Methane_PFR.volume / residence_time_PFR_n[n]
-        total_emissions_Methane_PFR[species] += mdot_species_Methane_PFR * residence_time_PFR_n[n]
-
     mdot_CO2_PFR = mass_flow_rate_PFR * Methane_PFR['CO2'].Y * Methane_PFR.molecular_weights[Methane_PFR.species_index('CO2')] / Methane_PFR.density
     EI_CO2_PFR.append((mdot_CO2_PFR * 1000) / mdot_fuel_PFR[n] if mdot_fuel_PFR[n] > 0 else 0)
     
@@ -218,17 +186,14 @@ for n in range(n_steps):
     # Store CO2 mole fraction
     CO2_mole_fraction_PFR.append(Methane_PFR['CO2'].Y)
 
-# Print total emissions for each species from the PFR
-print("\nMethane PFR emissions for each species (in kg):")
-for species_PFR, total_emission_PFR in total_emissions_Methane_PFR.items():
-    total_emission_scalar_PFR = np.sum(total_emission_PFR) if isinstance(total_emission_PFR, np.ndarray) else total_emission_PFR
-    print(f"{species_PFR}: {total_emission_scalar_PFR:.6e} kg")
-print("\nMethane emissions for each species (in kg):")
-for species, total_emission in total_emissions_Methane_PSR.items():
-    for species_PFR, total_emission_PFR in total_emissions_Methane_PFR.items():
-        total_emission_scalar = np.sum(total_emission) if isinstance(total_emission, np.ndarray) else total_emission
-        total_emission_scalar_PFR = np.sum(total_emission_PFR) if isinstance(total_emission_PFR, np.ndarray) else total_emission_PFR
-    print(f"{species}: {total_emission_scalar + total_emission_scalar_PFR:.6e} kg")
+# Plot CO2 mole fraction against reactor steps
+plt.figure()
+plt.plot(range(n_steps), CO2_mole_fraction_PFR, label='CO2 Mole Fraction')
+plt.xlabel('Reactor Step')
+plt.ylabel('CO2 Mole Fraction')
+plt.legend()
+plt.title('CO2 Mole Fraction along the PFR')
+plt.show()
 
 # Plot results
 f, ax1 = plt.subplots(2, 2, figsize=(16, 12))
@@ -252,26 +217,25 @@ ax1[1, 1].set_ylabel('EI [g/kg]')
 
 # Plotting emission indices
 plt.figure()
-plt.plot(residence_time_PFR, EI_CO2_PFR, label='EI CO')
-#plt.plot(PFR_z, EI_CO_PFR, label='EI CO')
-#plt.plot(PFR_z, EI_NO2_PFR, label='EI NO2')
-#plt.plot(PFR_z, EI_NO_PFR, label='EI NO')
-plt.xlabel('Distance (m)')
+plt.plot(residence_time_PFR, EI_CO2_PFR, label='EI CO2')
+plt.plot(residence_time_PFR, EI_CO_PFR, label='EI CO')
+plt.plot(residence_time_PFR, EI_NO2_PFR, label='EI NO2')
+plt.plot(residence_time_PFR, EI_NO_PFR, label='EI NO')
+plt.xlabel('Residence Time (s)')
 plt.ylabel('Emission Index (g/kg fuel)')
 plt.legend()
 plt.title('Emission Indices along the PFR')
 
-#plt.figure()
-#plt.plot(PFR_z, states_Methane_PFR.T, label='Reactor Chain')
-#plt.xlabel('$z$ [m]')
-#plt.ylabel('$T$ [K]')
-#plt.legend(loc=0)
-#plt.figure()
+plt.figure()
+plt.plot(PFR_z, states_Methane_PFR.T, label='Reactor Chain')
+plt.xlabel('$z$ [m]')
+plt.ylabel('$T$ [K]')
+plt.legend(loc=0)
 
 plt.figure()
-plt.plot(residence_time_PFR, states_Methane_PFR.X[:, Methane_PFR.species_index('CO2')], label='Reactor Chain')
+plt.plot(residence_time_PFR, states_Methane_PFR.X[:, Methane_PFR.species_index('H2')], label='Reactor Chain')
 plt.xlabel('$t$ [s]')
-plt.ylabel('$X_{CO2}$ [-]')
+plt.ylabel('$X_{H_2}$ [-]')
 plt.legend(loc=0)
 
 plt.show()
