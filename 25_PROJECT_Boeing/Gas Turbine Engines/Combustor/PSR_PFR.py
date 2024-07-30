@@ -246,208 +246,6 @@
 #plt.xlabel('$z$ [ms]')
 #plt.ylabel('$Y_{NO2}$ [-]')
 #plt.legend(loc=0)
-##plt.show()
-
-# -------------------------------------------------------------------------------------------------------------------------------------------------------------
-
-################################################################
-##
-## Constant pressure or Constant-volume reactor, 
-##             adiabatic kinetics simulation.
-##              
-################################################################
-
-##import :
-
-#import sys
-#from cantera import *
-#import numpy as np
-#import matplotlib.pyplot as plt
-
-
-##################################################################
-## Prepare your run
-##################################################################
-##Mechanism used for the process
-#cti = Solution('gri30.yaml')
-#air = Solution('air.yaml')
-
-##Gaseous fuel species
-#fuel_species = 'CH4'
-
-##Number of species in the.cti file.
-#m=cti.n_species
-
-##Find fuel, nitrogen, and oxygen indices
-#fuel_species = 'CH4'
-#ifuel = cti.species_index(fuel_species)
-#io2 = cti.species_index('O2')
-#in2 = cti.species_index('N2')
-
-#if ifuel < 0:
-    #raise "fuel species "+fuel_species+" not present!"
-
-#if cti.n_atoms(fuel_species,'O') > 0 or  cti.n_atoms(fuel_species,'N') > 0:
-    #raise "Error: only hydrocarbon fuels are supported."
-
-##################
-##Enter general parameters
-
-        ##Stoechiometry
-
-#print ("-------------------------------------------------------- ")
-#print ("    THERMO PROPERTIES: ")
-#print ("-------------------------------------------------------- ")
-
-#phi        = input('Enter Stoichiometric ratio phi : ')
-#phi        = float(phi)
-#print ("")
-
-                ##Air composition
-#air_N2_O2_ratio = 3.76   
-#stoich_O2 = cti.n_atoms(fuel_species,'C') + 0.25*cti.n_atoms(fuel_species,'H')
-
-                ##Mass fraction vector
-#x = np.zeros(m,'d')
-#x[ifuel] = phi
-#x[io2] = stoich_O2
-#x[in2] = stoich_O2*air_N2_O2_ratio
-
-
-        ## Specify intial pressures and temperature of the reactor
-#Ti = input('Enter temperature (in kelvin) : ')
-#Ti = float(Ti)       # Kelvin
-
-#Pi = input('Enter pressure (in bar) : ')
-#Pi = float(Pi)*1e5         # Pascal
-
-
-        ##Set initial conditions
-#cti.TPX = Ti, Pi, x
-
-
-##################################################################
-## Program starts here
-##################################################################
-##Create the batch reactor
-#r   = IdealGasReactor(cti)
-
-
-##Specify the conditions: Pression or Volume constant
-#print ("--------------------------------------------------- ")
-#print ("    Equilibirum conditions: "                        )
-#print ("--------------------------------------------------- ")
-#print (""                                                    )
-#print ("For a constant volume equilibrium, enter :      UV " )
-#print ("For a constant pressure equilibrium, enter :    HP " )
-#print (""                                                    )
-#cond  = input('Specify the equilibrium condition : ')
-#cond  = str(cond)
-#print ("")
-#while cond != 'HP' and cond != 'UV':
-    #print ("You must choose between UV and HP !  ")
-    #cond  = raw_input('Specify the equilibrium condition : ')
-    #cond  = str(cond)
-
-        ##Particular case of a constant-pressure reactor
-#if cond == 'HP':
-        ## Define a wall between the reactor and the environment, and
-        ## make it flexible, so that the pressure in the reactor is held
-        ## at the environment pressure.
-    #env 		    = Reservoir(air)
-    #w 		            = Wall(r,env)
-    #w.expansion_rate_coeff = 1.0e6   # set expansion parameter. dV/dt = KA(P_1 - P_2)
-    #w.area                 = 1.0       # set wall area
-
-
-## Now create a reactor network consisting of the single batch reactor
-## Reason: the only way to advance reactors in time is through a network
-#sim = ReactorNet([r])
-
-##################
-##Computational properties: we're going to advance the network in time
-
-#print (""                                                         )
-#print ("-------------------------------------------------------- ")
-#print ("    COMPUTATIONAL PROPERTIES: "                           )
-#print ("-------------------------------------------------------- ")
-#print (""                                                         )
-
-        ## Initial simulation time
-#time = 4.0e-1
-
-        ## Specify the number of time steps
-#nt        = input('Enter number of time steps: ')
-#nt        = int(nt)
-
-        ## Specify the time step
-#dtms	  = input('Enter the time step (in ms): ')
-#dtms	  = int(dtms)
-
-#dt = dtms * 1.0e-3 #s
-
-##################
-##Run the simulation
-
-        ##parameters
-#tim = np.zeros(nt,'d')
-#temp = np.zeros(nt,'d')
-#press = np.zeros(nt,'d')
-#mfrac = np.zeros([nt,m],'d')
-
-        ##Loop for nt time steps of dt seconds. 
-#print ('time [s] ,   T [K] ,   p [Pa] ,   u [J/kg]')
-#for n in range(nt):
-    #time += dt
-    #sim.advance(time)
-    #tim[n] = time
-    #temp[n] = r.T
-    #press[n] = r.thermo.P
-    #for i in range(m):
-        #mfrac[n,i]=r.thermo[cti.species_name(i)].Y
-    #print ('%10.3e %10.3f %10.3f %14.6e' % (sim.time, r.T, 
-                                           #r.thermo.P, r.thermo.h))
-
-
-##################################################################
-## Save your results if needed
-##################################################################
-## write output CSV file for importing into Excel
-##if cond == 'HP':
-    ##csvfile = 'Reactor_HP.csv'
-##elif cond == 'UV':
-    ##csvfile = 'Reactor_UV.csv'
-
-##csv_file = csvfile
-##with open(csv_file, 'w') as outfile:
-    ##writer = csv.writer(outfile)
-    ##writer.writerow(['Time','Temperature','Pressure']+cti.species_names)
-    ##for n in range(nt):
-        ##writer.writerow([tim[n], temp[n], press[n]]+list(mfrac[n,:]))
-##print ('output written to '+csvfile)
-
-
-##################################################################
-## Plot your results
-##################################################################
-
-#plt.clf()
-#plt.subplot(2,2,1)
-#plt.plot(tim,temp[:])
-#plt.xlabel('Time (s)');
-#plt.ylabel('Temperature (K)');
-#plt.subplot(2,2,2)
-#plt.plot(tim,mfrac[:,cti.species_index('OH')])
-#plt.xlabel('Time (s)');
-#plt.ylabel('OH Mass Fraction');
-#plt.subplot(2,2,3)
-#plt.plot(tim,mfrac[:,cti.species_index('H')]);
-#plt.xlabel('Time (s)');
-#plt.ylabel('H Mass Fraction');
-#plt.subplot(2,2,4)
-#plt.plot(tim,mfrac[:,cti.species_index('H2')]);
-#plt.xlabel('Time (s)');
-#plt.ylabel('H2 Mass Fraction');
 #plt.show()
 
 # -------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -508,6 +306,7 @@ total_emissions_Methane_PSR = {species: 0.0 for species in Methane_PSR.species_n
 
 # Run a loop over decreasing residence times, until the reactor is extinguished.
 states_Methane_PSR = ct.SolutionArray(Methane_PSR, extra=['tres', 'EI_CO2_Methane_PSR', 'EI_CO_Methane_PSR', 'EI_NO2_Methane_PSR', 'EI_NO_Methane_PSR'])
+#residence_time_PFR_n[n] = combustor_Methane_PFR.mass / mass_flow_rate_PFR
 residence_time_PSR = 0.1  # starting residence time
 
 while combustor_Methane_PSR.T > 500:
@@ -528,13 +327,13 @@ while combustor_Methane_PSR.T > 500:
 
     # Compute emission index for CO2
     mdot_CO2 = total_emissions_Methane_PSR['CO2']/residence_time_PSR
-    EI_CO2_Methane_PSR = (mdot_CO2*1000) / mdot_fuel if mdot_fuel > 0 else 0
+    EI_CO2_Methane_PSR = (mdot_CO2) / mdot_fuel if mdot_fuel > 0 else 0
     mdot_CO = total_emissions_Methane_PSR['CO']/residence_time_PSR
-    EI_CO_Methane_PSR = (mdot_CO*1000) / mdot_fuel if mdot_fuel > 0 else 0    
+    EI_CO_Methane_PSR = (mdot_CO) / mdot_fuel if mdot_fuel > 0 else 0    
     mdot_NO2 = total_emissions_Methane_PSR['NO2']/residence_time_PSR
-    EI_NO2_Methane_PSR = (mdot_NO2*1000) / mdot_fuel if mdot_fuel > 0 else 0 
+    EI_NO2_Methane_PSR = (mdot_NO2) / mdot_fuel if mdot_fuel > 0 else 0 
     mdot_NO = total_emissions_Methane_PSR['NO']/residence_time_PSR
-    EI_NO_Methane_PSR = (mdot_NO*1000) / mdot_fuel if mdot_fuel > 0 else 0      
+    EI_NO_Methane_PSR = (mdot_NO) / mdot_fuel if mdot_fuel > 0 else 0      
     states_Methane_PSR.append(combustor_Methane_PSR.thermo.state, tres=residence_time_PSR, EI_CO2_Methane_PSR=EI_CO2_Methane_PSR, EI_CO_Methane_PSR=EI_CO_Methane_PSR, EI_NO2_Methane_PSR=EI_NO2_Methane_PSR, EI_NO_Methane_PSR=EI_NO_Methane_PSR)
     residence_time_PSR *= 0.9  # decrease the residence time for the next iteration
 
@@ -562,10 +361,10 @@ final_composition_Y = combustor_Methane_PSR.thermo.Y
 # Plug Flow Reactor (PFR)
 #######################################################################
 
-#T_0 = final_temperature  # inlet temperature [K]
-#P_0 = final_pressure  # constant pressure [Pa]
-T_0 = 1400  #[K]
-P_0 = 13.93 * 100000 #[Pa]
+T_0 = final_temperature  # inlet temperature [K]
+P_0 = final_pressure  # constant pressure [Pa]
+#T_0 = 1400  #[K]
+#P_0 = 13.93 * 100000 #[Pa]
 X_0 = final_composition_X
 length = 0.15  # *approximate* PFR length [m]
 u_0 = outflow_velocity  # inflow velocity [m/s]
@@ -664,19 +463,19 @@ for n in range(n_steps):
     
     # NO2
     mdot_NO2_PFR = combustor_Methane_PFR.thermo['NO2'].Y * combustor_Methane_PFR.thermo.density * u_PFR[n] * PFR_area
-    EI_NO2_PFR[n] = (mdot_NO2_PFR * 1000) / mdot_fuel_PFR[n] if mdot_fuel_PFR[n] > 0 else 0
+    EI_NO2_PFR[n] = (mdot_NO2_PFR) / mdot_fuel_PFR[n] if mdot_fuel_PFR[n] > 0 else 0
     
     # NO
     mdot_NO_PFR = combustor_Methane_PFR.thermo['NO'].Y * combustor_Methane_PFR.thermo.density * u_PFR[n] * PFR_area
-    EI_NO_PFR[n] = (mdot_NO_PFR * 1000) / mdot_fuel_PFR[n] if mdot_fuel_PFR[n] > 0 else 0
+    EI_NO_PFR[n] = (mdot_NO_PFR) / mdot_fuel_PFR[n] if mdot_fuel_PFR[n] > 0 else 0
     
     # CO2
     mdot_CO2_PFR = combustor_Methane_PFR.thermo['CO2'].Y * combustor_Methane_PFR.thermo.density * u_PFR[n] * PFR_area
-    EI_CO2_PFR[n] = (mdot_CO2_PFR * 1000) / mdot_fuel_PFR[n] if mdot_fuel_PFR[n] > 0 else 0
+    EI_CO2_PFR[n] = (mdot_CO2_PFR) / mdot_fuel_PFR[n] if mdot_fuel_PFR[n] > 0 else 0
     
     # CO
     mdot_CO_PFR = combustor_Methane_PFR.thermo['CO'].Y * combustor_Methane_PFR.thermo.density * u_PFR[n] * PFR_area
-    EI_CO_PFR[n] = (mdot_CO_PFR * 1000) / mdot_fuel_PFR[n] if mdot_fuel_PFR[n] > 0 else 0
+    EI_CO_PFR[n] = (mdot_CO_PFR) / mdot_fuel_PFR[n] if mdot_fuel_PFR[n] > 0 else 0
         
 
 ## Print total emissions for each species from the PFR
@@ -697,19 +496,19 @@ f.suptitle('CH4 PSR Emissions')
 ax1[0, 0].plot(states_Methane_PSR.tres, states_Methane_PSR.EI_CO2_Methane_PSR, '.-', color='C0')
 ax1[0, 0].set_xlabel('residence time [s]')
 ax1[0, 0].set_title('Emission Index CO2', color='C0')
-ax1[0, 0].set_ylabel('EI [g/kg]')
+ax1[0, 0].set_ylabel('EI [kg/kg]')
 ax1[0, 1].plot(states_Methane_PSR.tres, states_Methane_PSR.EI_CO_Methane_PSR, '.-', color='C1')
 ax1[0, 1].set_xlabel('residence time [s]')
 ax1[0, 1].set_title('Emission Index CO', color='C1')
-ax1[0, 1].set_ylabel('EI [g/kg]')
+ax1[0, 1].set_ylabel('EI [kg/kg]')
 ax1[1, 0].plot(states_Methane_PSR.tres, states_Methane_PSR.EI_NO2_Methane_PSR, '.-', color='C2')
 ax1[1, 0].set_xlabel('residence time [s]')
 ax1[1, 0].set_title('Emission Index NO2', color='C2')
-ax1[1, 0].set_ylabel('EI [g/kg]')
+ax1[1, 0].set_ylabel('EI [kg/kg]')
 ax1[1, 1].plot(states_Methane_PSR.tres, states_Methane_PSR.EI_NO_Methane_PSR, '.-', color='C3')
 ax1[1, 1].set_xlabel('residence time [s]')
 ax1[1, 1].set_title('Emission Index NO', color='C3')
-ax1[1, 1].set_ylabel('EI [g/kg]')
+ax1[1, 1].set_ylabel('EI [kg/kg]')
 
 #Plotting emission indices
 plt.figure()
