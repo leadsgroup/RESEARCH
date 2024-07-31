@@ -10,16 +10,16 @@ import matplotlib.pyplot as plt
 JetA_PSR = ct.Solution('JetFuelSurrogate.yaml')
 
 # Create a Reservoir for the inlet, set to a methane/air mixture at a specified equivalence ratio
-equiv_ratio = 0.5  # lean combustion
+equiv_ratio = 1  # lean combustion
 JetA_PSR.TP = 2000.0, 25*ct.one_atm
 length = 0.2 #this length is double that of the previously considered legnth
 area = 0.1 #initial cross-sectional area [m**2]
 
 # Assuming the fuel is primarily n-dodecane (C12H26)
 fuel = 'N-C12H26:0.6, A1CH3:0.2, A1:0.2'
-oxidizer = 'O2:1.0, N2:3.76'  # Air
+oxidizer = 'O2:0.21, N2:0.79'  # Air
 
-JetA_PSR.set_equivalence_ratio(equiv_ratio, fuel, oxidizer)
+JetA_PSR.set_equivalence_ratio(equiv_ratio, fuel, oxidizer,basis='mass')
 inlet_JetA_PSR = ct.Reservoir(JetA_PSR)
 
 # Create the combustor, and fill it initially with a mixture consisting of the equilibrium products of the inlet mixture.
@@ -33,6 +33,8 @@ exhaust_JetA_PSR = ct.Reservoir(JetA_PSR)
 # Use a variable mass flow rate to keep the residence time in the reactor constant.
 def mdot(t):
     return combustor_JetA_PSR.mass / residence_time_PSR
+
+mass_air = (combustor_JetA_PSR.thermo['O2'].Y + combustor_JetA_PSR.thermo['N2'].Y)*combustor_JetA_PSR.mass
 
 inlet_mfc_JetA_PSR = ct.MassFlowController(inlet_JetA_PSR, combustor_JetA_PSR, mdot=mdot)
 
@@ -48,7 +50,7 @@ total_emissions_JetA_PSR = {species: 0.0 for species in JetA_PSR.species_names}
 # Run a loop over decreasing residence times, until the reactor is extinguished.
 states_JetA_PSR = ct.SolutionArray(JetA_PSR, extra=['tres', 'EI_CO2_JetA_PSR', 'EI_CO_JetA_PSR', 'EI_H2O_JetA_PSR'])
 #residence_time_PFR_n[n] = combustor_JetA_PFR.mass / mass_flow_rate_PFR
-residence_time_PSR = 0.1  # starting residence time
+residence_time_PSR = 0.01  # starting residence time
 
 while combustor_JetA_PSR.T > 2100:
     sim_JetA_PSR.initial_time = 0.0  # reset the integrator
@@ -58,21 +60,17 @@ while combustor_JetA_PSR.T > 2100:
     temperature_JetA_PSR = combustor_JetA_PSR.T if np.isscalar(combustor_JetA_PSR.T) else combustor_JetA_PSR.T.item()
 
     # Compute mass flow rates
-    #mdot_fuel = mdot(0)* JetA_PSR.molecular_weights[JetA_PSR.species_index('CH4')] / JetA_PSR.density
-    mdot_fuel = mdot(0) * (JetA_PSR.Y[JetA_PSR.species_index('N-C12H26')] + JetA_PSR.Y[JetA_PSR.species_index('A1CH3')] + JetA_PSR.Y[JetA_PSR.species_index('A1')])
+    m_fuel = combustor_JetA_PSR.mass*(combustor_JetA_PSR.thermo['N-C12H26'].Y + combustor_JetA_PSR.thermo['A1CH3'].Y + combustor_JetA_PSR.thermo['A1'].Y)    
+    mdot_fuel = m_fuel/residence_time_PSR
     for species in JetA_PSR.species_names:
         species_index_JetA_PSR = JetA_PSR.species_index(species)
-        #mdot_species_JetA_PSR = combustor_JetA_PSR.thermo[species].Y * combustor_JetA_PSR.thermo.density * combustor_JetA_PSR.volume / residence_time_PSR
-        mdot_species_JetA_PSR = combustor_JetA_PSR.thermo[species].Y * mdot_fuel
+        mdot_species_JetA_PSR = combustor_JetA_PSR.thermo[species].Y * combustor_JetA_PSR.mass / residence_time_PSR
         total_emissions_JetA_PSR[species] += mdot_species_JetA_PSR * residence_time_PSR
-
+    
     # Compute emission index for CO2
-    mdot_CO2 = total_emissions_JetA_PSR['CO2']/residence_time_PSR
-    EI_CO2_JetA_PSR = (mdot_CO2) / mdot_fuel if mdot_fuel > 0 else 0
-    mdot_CO = total_emissions_JetA_PSR['CO']/residence_time_PSR
-    EI_CO_JetA_PSR = (mdot_CO) / mdot_fuel if mdot_fuel > 0 else 0      
-    mdot_H2O = total_emissions_JetA_PSR['H2O']/residence_time_PSR
-    EI_H2O_JetA_PSR = (mdot_H2O) / mdot_fuel if mdot_fuel > 0 else 0      
+    EI_CO2_JetA_PSR = total_emissions_JetA_PSR['CO2'] / (combustor_JetA_PSR.mass - mass_air)
+    EI_CO_JetA_PSR = total_emissions_JetA_PSR['CO'] / (combustor_JetA_PSR.mass - mass_air)      
+    EI_H2O_JetA_PSR = total_emissions_JetA_PSR['H2O'] / (combustor_JetA_PSR.mass - mass_air)
     states_JetA_PSR.append(combustor_JetA_PSR.thermo.state, tres=residence_time_PSR, EI_CO2_JetA_PSR=EI_CO2_JetA_PSR, EI_CO_JetA_PSR=EI_CO_JetA_PSR, EI_H2O_JetA_PSR=EI_H2O_JetA_PSR)
     residence_time_PSR *= 0.9  # decrease the residence time for the next iteration
 
