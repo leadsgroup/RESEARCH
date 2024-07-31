@@ -10,10 +10,10 @@ import matplotlib.pyplot as plt
 JetA_PSR = ct.Solution('JetFuelSurrogate.yaml')
 
 # Create a Reservoir for the inlet, set to a methane/air mixture at a specified equivalence ratio
-equiv_ratio = 1  # lean combustion
+equiv_ratio = 0.5  # lean combustion
 JetA_PSR.TP = 2000.0, 25*ct.one_atm
-length = 0.2 #this length is double that of the previously considered legnth
-area = 0.1 #initial cross-sectional area [m**2]
+length = 0.6 #this length is double that of the previously considered legnth
+area = 0.05 #initial cross-sectional area [m**2]
 
 # Assuming the fuel is primarily n-dodecane (C12H26)
 fuel = 'N-C12H26:0.6, A1CH3:0.2, A1:0.2'
@@ -67,7 +67,7 @@ while combustor_JetA_PSR.T > 2100:
         mdot_species_JetA_PSR = combustor_JetA_PSR.thermo[species].Y * combustor_JetA_PSR.mass / residence_time_PSR
         total_emissions_JetA_PSR[species] += mdot_species_JetA_PSR * residence_time_PSR
     
-    # Compute emission index for CO2
+    # Compute emission index 
     EI_CO2_JetA_PSR = total_emissions_JetA_PSR['CO2'] / (combustor_JetA_PSR.mass - mass_air)
     EI_CO_JetA_PSR = total_emissions_JetA_PSR['CO'] / (combustor_JetA_PSR.mass - mass_air)      
     EI_H2O_JetA_PSR = total_emissions_JetA_PSR['H2O'] / (combustor_JetA_PSR.mass - mass_air)
