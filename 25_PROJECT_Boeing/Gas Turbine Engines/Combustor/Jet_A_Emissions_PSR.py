@@ -12,6 +12,8 @@ JetA_PSR = ct.Solution('JetFuelSurrogate.yaml')
 # Create a Reservoir for the inlet, set to a methane/air mixture at a specified equivalence ratio
 equiv_ratio = 0.5  # lean combustion
 JetA_PSR.TP = 2000.0, 25*ct.one_atm
+length = 0.2 #this length is double that of the previously considered legnth
+area = 0.1 #initial cross-sectional area [m**2]
 
 # Assuming the fuel is primarily n-dodecane (C12H26)
 fuel = 'N-C12H26:0.6, A1CH3:0.2, A1:0.2'
@@ -23,7 +25,7 @@ inlet_JetA_PSR = ct.Reservoir(JetA_PSR)
 # Create the combustor, and fill it initially with a mixture consisting of the equilibrium products of the inlet mixture.
 JetA_PSR.equilibrate('HP')
 combustor_JetA_PSR = ct.IdealGasReactor(JetA_PSR)
-combustor_JetA_PSR.volume = 1.0
+combustor_JetA_PSR.volume = length*area
 
 # Create a reservoir for the exhaust
 exhaust_JetA_PSR = ct.Reservoir(JetA_PSR)
@@ -85,11 +87,9 @@ for species, total_emission in total_emissions_JetA_PSR.items():
 f, ax1 = plt.subplots(3, 1, figsize=(16, 12))
 f.suptitle('JetA Surrogate PSR Emissions')
 ax1[0].plot(states_JetA_PSR.tres, states_JetA_PSR.EI_CO2_JetA_PSR, '.-', color='C0')
-ax1[0].set_xlabel('residence time [s]')
 ax1[0].set_title('Emission Index CO2', color='C0')
 ax1[0].set_ylabel('EI [kg/kg]')
 ax1[1].plot(states_JetA_PSR.tres, states_JetA_PSR.EI_CO_JetA_PSR, '.-', color='C1')
-ax1[1].set_xlabel('residence time [s]')
 ax1[1].set_title('Emission Index CO', color='C1')
 ax1[1].set_ylabel('EI [kg/kg]')
 ax1[2].plot(states_JetA_PSR.tres, states_JetA_PSR.EI_H2O_JetA_PSR, '.-', color='C2')

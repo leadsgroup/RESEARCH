@@ -13,7 +13,7 @@ fuel = 'N-C12H26'
 
 T_0 = 2000  #[K]
 p_0 = 25*ct.one_atm 
-mass_flow_rate = 0.6589695  #[kg/s]
+mass_flow_rate = 20  #[kg/s]
 composition_0 = 'N-C12H26:1, O2:1.0, N2:3.76'
 length = 0.2 #this length is double that of the previously considered legnth
 area_0 = 5e-3 #initial cross-sectional area [m**2]
