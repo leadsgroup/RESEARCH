@@ -48,7 +48,7 @@ sim_JetA_PSR = ct.ReactorNet([combustor_JetA_PSR])
 total_emissions_JetA_PSR = {species: 0.0 for species in JetA_PSR.species_names}
 
 # Run a loop over decreasing residence times, until the reactor is extinguished.
-states_JetA_PSR = ct.SolutionArray(JetA_PSR, extra=['tres', 'EI_CO2_JetA_PSR', 'EI_CO_JetA_PSR', 'EI_H2O_JetA_PSR'])
+states_JetA_PSR = ct.SolutionArray(JetA_PSR, extra=['tres', 'EI_CO2_JetA_PSR', 'EI_CO_JetA_PSR', 'EI_H2O_JetA_PSR', 'EI_NO2_JetA_PSR', 'EI_NO_JetA_PSR', 'EI_soot_JetA_PSR'])
 #residence_time_PFR = combustor_JetA_PFR.mass / mass_flow_rate_PFR
 residence_time_PSR = 0.01  # starting residence time
 
@@ -70,8 +70,11 @@ while combustor_JetA_PSR.T > 2100:
     # Compute emission index 
     EI_CO2_JetA_PSR = total_emissions_JetA_PSR['CO2'] / (combustor_JetA_PSR.mass - mass_air)
     EI_CO_JetA_PSR = total_emissions_JetA_PSR['CO'] / (combustor_JetA_PSR.mass - mass_air)      
-    EI_H2O_JetA_PSR = total_emissions_JetA_PSR['H2O'] / (combustor_JetA_PSR.mass - mass_air)
-    states_JetA_PSR.append(combustor_JetA_PSR.thermo.state, tres=residence_time_PSR, EI_CO2_JetA_PSR=EI_CO2_JetA_PSR, EI_CO_JetA_PSR=EI_CO_JetA_PSR, EI_H2O_JetA_PSR=EI_H2O_JetA_PSR)
+    EI_H2O_JetA_PSR = total_emissions_JetA_PSR['H2O'] / (combustor_JetA_PSR.mass - mass_air)      
+    EI_NO2_JetA_PSR = total_emissions_JetA_PSR['NO2'] / (combustor_JetA_PSR.mass - mass_air)      
+    EI_NO_JetA_PSR = total_emissions_JetA_PSR['NO'] / (combustor_JetA_PSR.mass - mass_air)      
+    EI_soot_JetA_PSR = total_emissions_JetA_PSR['CSOLID'] / (combustor_JetA_PSR.mass - mass_air)
+    states_JetA_PSR.append(combustor_JetA_PSR.thermo.state, tres=residence_time_PSR, EI_CO2_JetA_PSR=EI_CO2_JetA_PSR, EI_CO_JetA_PSR=EI_CO_JetA_PSR, EI_H2O_JetA_PSR=EI_H2O_JetA_PSR, EI_NO2_JetA_PSR=EI_NO2_JetA_PSR, EI_NO_JetA_PSR=EI_NO_JetA_PSR, EI_soot_JetA_PSR=EI_soot_JetA_PSR)
     residence_time_PSR *= 0.9 
 
 # Print total emissions for each species
@@ -98,5 +101,22 @@ ax1[2].set_xlabel('residence time [s]')
 ax1[2].axhline(y=1.34, color='r', linestyle='--')
 ax1[2].annotate('Typical EI value: 1.34', xy=(0.5, 1.34), xytext=(0.5, 1.36), textcoords='data', color='r', arrowprops=dict(facecolor='r', arrowstyle='->'))
 ax1[2].set_title('Emission Index H2O', color='C2')
+ax1[2].set_ylabel('EI [kg/kg]')
+
+f, ax1 = plt.subplots(3, 1, figsize=(16, 12))
+f.suptitle('JetA Surrogate PSR Emissions')
+subtitle = f'Equivalence ratio: {equiv_ratio}, Temperature: {JetA_PSR.T:.1f} K, Pressure: {JetA_PSR.P/ct.one_atm:.1f} atm, Length: {length} m, Area: {area} m^2'
+plt.figtext(0.5, 0.925, subtitle, ha='center', fontsize=12)
+ax1[0].plot(states_JetA_PSR.tres, states_JetA_PSR.EI_NO2_JetA_PSR, '.-', color='C0')
+#ax1[0].axhline(y=3.16, color='r', linestyle='--')
+#ax1[0].annotate('Typical EI value: 3.16', xy=(0.5, 3.16), xytext=(0.5, 3.18), textcoords='data', color='r', arrowprops=dict(facecolor='r', arrowstyle='->'))
+ax1[0].set_title('Emission Index NO2', color='C0')
+ax1[0].set_ylabel('EI [kg/kg]')
+ax1[1].plot(states_JetA_PSR.tres, states_JetA_PSR.EI_NO_JetA_PSR, '.-', color='C1')
+ax1[1].set_title('Emission Index NO', color='C1')
+ax1[1].set_ylabel('EI [kg/kg]')
+ax1[2].plot(states_JetA_PSR.tres, states_JetA_PSR.EI_soot_JetA_PSR, '.-', color='C2')
+ax1[2].set_xlabel('residence time [s]')
+ax1[2].set_title('Emission Index C-soot', color='C2')
 ax1[2].set_ylabel('EI [kg/kg]')
 plt.show()
