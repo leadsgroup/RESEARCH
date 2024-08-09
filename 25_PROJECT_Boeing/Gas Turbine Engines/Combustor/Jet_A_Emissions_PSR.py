@@ -12,7 +12,7 @@ import matplotlib.pyplot as plt
 JetA_PSR = ct.Solution('chem.yaml')                         # [2]    More accurate kinetic mechanism, slower simulation
                                                             
 # set initial conditions                                    
-T_0    = 700                                                # [K]    combustor inlet temperature 
+T_0    = 800                                                # [K]    combustor inlet temperature 
 P_0    = 20 * ct.one_atm                                    # [atm]  combustor pressure 
 length = 0.6                                                # [m]    combustor length 
 area   = 0.15                                               # [m**2] combustor cross-sectional area
@@ -57,10 +57,14 @@ inlet_mfc_JetA_PSR = ct.MassFlowController(inlet_JetA_PSR, combustor_JetA_PSR, m
 # Set the outlet to the downstream reservoir. This will determine the
 # pressure in the reactor. The value of K will only affect the transient
 # pressure difference.
-outlet_mfc_JetA_PSR = ct.PressureController(combustor_JetA_PSR, exhaust_JetA_PSR, primary=inlet_mfc_JetA_PSR, K=0.01)  # set the outlet to the downstream resevoir
+outlet_mfc_JetA_PSR = ct.PressureController(combustor_JetA_PSR, exhaust_JetA_PSR, primary=inlet_mfc_JetA_PSR, K=1e-5)  # set the outlet to the downstream resevoir
 
 # The simulation only contains one reactor
 sim_JetA_PSR = ct.ReactorNet([combustor_JetA_PSR])
+
+# Set the relative and absolute tolerances for the integrator
+sim_JetA_PSR.rtol = 1e-10                                                                                               # set the relative tolerance for the integrator
+sim_JetA_PSR.atol = 1e-22                                                                                              # set the absolute tolerance for the integrator
 
 # Initialize total mass emission dictionary
 total_emissions_JetA_PSR = {species: 0.0 for species in JetA_PSR.species_names}
@@ -74,7 +78,12 @@ residence_time_PSR = 0.01  # starting residence time
 while combustor_JetA_PSR.T > 2100:
     sim_JetA_PSR.initial_time = 0.0  # reset the integrator
     # integrate the reactor forward in time until steady state is reached
-    sim_JetA_PSR.advance_to_steady_state()
+    
+    try:
+        sim_JetA_PSR.advance_to_steady_state()
+    except ct.CanteraError as e:
+        print(f"Error at residence time {residence_time_PSR:.5e}: {e}")
+        break    
 
     # Compute mass flow rates
     for species in JetA_PSR.species_names:
@@ -119,7 +128,7 @@ while combustor_JetA_PSR.T > 2100:
                            EI_NO_JetA_PSR=EI_NO_JetA_PSR, EI_soot_JetA_PSR=EI_soot_JetA_PSR, X_CO2=X_CO2, X_CO=X_CO, X_H2O=X_H2O, 
                            X_NO2=X_NO2, X_NO=X_NO, X_soot=X_soot, Y_CO2=Y_CO2, Y_CO=Y_CO, Y_H2O=Y_H2O, Y_NO2=Y_NO2, Y_NO=Y_NO, Y_soot=Y_soot, 
                            M_CO2=M_CO2, M_CO=M_CO, M_H2O=M_H2O, M_NO2=M_NO2, M_NO=M_NO, M_soot=M_soot)    
-    residence_time_PSR *= 0.9
+    residence_time_PSR *= 0.95
 
 # Plot results
 f, ax1 = plt.subplots(3, 1, figsize=(16, 12))

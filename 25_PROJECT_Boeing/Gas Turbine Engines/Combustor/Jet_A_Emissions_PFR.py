@@ -15,8 +15,8 @@ import matplotlib.pyplot as plt
 # the first to last reactor, integrating each one to steady state.
 
 # import kinetic mechanism for Jet A + air
-JetA_PFR = ct.Solution('JetFuelSurrogate.yaml')             # [1]    Simpler kinetic mechanism, faster simulation
-#JetA_PFR = ct.Solution('chem.yaml')                        # [2]    More accurate kinetic mechanism, slower simulation
+#JetA_PFR = ct.Solution('JetFuelSurrogate.yaml')             # [1]    Simpler kinetic mechanism, faster simulation
+JetA_PFR = ct.Solution('chem.yaml')                        # [2]    More accurate kinetic mechanism, slower simulation
                                                             
 # set initial conditions                                    
 T_0    = 700                                                # [K]    combustor inlet temperature 
@@ -29,8 +29,8 @@ n_steps = 100                                               # [-]    number of i
 
 # define the fuel and oxidizer composition by species 
 # and molar fraction    
-fuel     = 'N-C12H26:0.6, A1CH3:0.2, A1:0.2'                                                                                                              # [1] Simpler kinetic mechanism, faster simulation    
-#fuel = 'NC10H22:0.16449, NC12H26:0.34308, NC16H34:0.10335, IC8H18:0.08630, NC7H14:0.07945, C6H5C2H5: 0.07348, C6H5C4H9: 0.05812, C10H7CH3: 0.10972'      # [2] More accurate kinetic mechanism, slower simulation    
+#fuel     = 'N-C12H26:0.6, A1CH3:0.2, A1:0.2'                                                                                                              # [1] Simpler kinetic mechanism, faster simulation    
+fuel = 'NC10H22:0.16449, NC12H26:0.34308, NC16H34:0.10335, IC8H18:0.08630, NC7H14:0.07945, C6H5C2H5: 0.07348, C6H5C4H9: 0.05812, C10H7CH3: 0.10972'      # [2] More accurate kinetic mechanism, slower simulation    
 oxidizer = 'O2:0.2095, N2:0.7809, AR:0.0093, CO2:0.0003'                                                                                                  # air composition
 
 # compute additional combustor parameters 
@@ -136,12 +136,20 @@ for n in range(n_steps):
     Y_NO[n] = combustor_JetA_PFR.thermo['NO'].Y[0]                                                                     # vector of molar ratio for NO
     Y_soot[n] = combustor_JetA_PFR.thermo['CSOLID'].Y[0]                                                               # vector of molar ratio for soot  
     
-    M_CO2[n] = combustor_JetA_PFR.thermo['CO2'].Y[0] * combustor_JetA_PFR.mass                                        # vector of mass for CO2
-    M_CO[n] = combustor_JetA_PFR.thermo['CO'].Y[0] * combustor_JetA_PFR.mass                                          # vector of mass for CO
-    M_H2O[n] = combustor_JetA_PFR.thermo['H2O'].Y[0] * combustor_JetA_PFR.mass                                        # vector of mass for H2O
-    M_NO2[n] = combustor_JetA_PFR.thermo['NO2'].Y[0] * combustor_JetA_PFR.mass                                        # vector of mass for NO2
-    M_NO[n] = combustor_JetA_PFR.thermo['NO'].Y[0] * combustor_JetA_PFR.mass                                          # vector of mass for NO
-    M_soot[n] = combustor_JetA_PFR.thermo['CSOLID'].Y[0] * combustor_JetA_PFR.mass                                    # vector of mass for soot    
+    if n == 0:
+        M_CO2[n] = Y_CO2[n] * combustor_JetA_PFR.mass                                                                  
+        M_CO[n] = Y_CO[n] * combustor_JetA_PFR.mass                                                                    
+        M_H2O[n] = Y_H2O[n] * combustor_JetA_PFR.mass                                                                  
+        M_NO2[n] = Y_NO2[n] * combustor_JetA_PFR.mass                                                                  
+        M_NO[n] = Y_NO[n] * combustor_JetA_PFR.mass                                                                    
+        M_soot[n] = Y_soot[n] * combustor_JetA_PFR.mass                                                                
+    else:
+        M_CO2[n] = M_CO2[n-1] + Y_CO2[n] * combustor_JetA_PFR.mass                                                     # vector of mass for CO2
+        M_CO[n] = M_CO[n-1] + Y_CO[n] * combustor_JetA_PFR.mass                                                        # vector of mass for CO
+        M_H2O[n] = M_H2O[n-1] + Y_H2O[n] * combustor_JetA_PFR.mass                                                     # vector of mass for H2O
+        M_NO2[n] = M_NO2[n-1] + Y_NO2[n] * combustor_JetA_PFR.mass                                                     # vector of mass for NO2
+        M_NO[n] = M_NO[n-1] + Y_NO[n] * combustor_JetA_PFR.mass                                                        # vector of mass for NO
+        M_soot[n] = M_soot[n-1] + Y_soot[n] * combustor_JetA_PFR.mass                                                  # vector of mass for soot       
     
     for species in JetA_PFR.species_names:
         total_emissions_JetA_PFR[species] += combustor_JetA_PFR.thermo[species].Y * combustor_JetA_PFR.mass            # total emissions for each species
