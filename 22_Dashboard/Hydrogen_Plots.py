@@ -28,7 +28,8 @@ def main():
     Hydrogen                       = SAT_data['Hydrogen']   
     a                              = Hydrogen['Feedstock']
     b                              = Hydrogen['Production Technology'] 
-    Hydrogen["H2 Fuel Name"]  =  a  + ' via ' + b 
+    c                              = Hydrogen['Production Process'] 
+    Hydrogen["H2 Fuel Name"]  =  a  + ' via ' + b +  ' using ' + c
     Flight_Ops                     = pd.read_excel(routes_filename,sheet_name=['Sheet1']) 
     Flight_Ops                     = Flight_Ops['Sheet1']
     
@@ -37,21 +38,23 @@ def main():
     H2_2                  = Hydrogen['H2 Fuel Name'][1] 
     H2_3                  = Hydrogen['H2 Fuel Name'][5] 
     H2_4                  = Hydrogen['H2 Fuel Name'][10]     
-    selected_fuels         = [H2_1,H2_2,H2_3,H2_4]     
-    volume_fraction       = 10  
-    selected_airpots      = "All Airports" # ["Top 5 Airports","Top 10 Airports","Top 20 Airports", "Top 50 Airports",  "All Airports"]
-    percent_adoption      = 100  
-    altitude              = 36000
+    selected_h2           = [H2_1,H2_2,H2_3,H2_4]      # DONE  
+    h2_vol_percentage     = 15  
+    h2_airports           = " Top 50 Airports" # DONE  # ["Top 5 Airports","Top 10 Airports","Top 20 Airports", "Top 50 Airports",  "All Airports"]
+    h2_percent_adoption   = 100  # DONE 
+    h2_cruise_alt         = 35000 # DONE 
     mean_SFC_Imperial     = 0.6 # lbm/lbf-hr
-    H2_dollars_per_gal    = 8.50
+    H2_dollars_per_gal    = 8.50  # DONE 
     switch_off            = False  
     
     
-    slider_bar_options      = get_H2_distribution(Hydrogen,selected_fuels)
-    fig  =  generate_H2_slider_bar(Hydrogen,selected_fuels,slider_bar_options)
+    percent_H2_color      = get_H2_distribution(Hydrogen,selected_h2)
+    fig  =  generate_H2_slider_bar(Hydrogen,selected_h2,percent_H2_color)
     fig.show()
     
-    fig_1, fig_2, fig_3, fig_4,fig_5 ,fig_6 = generate_electric_flight_operations_plots(Flight_Ops,Hydrogen,mean_SFC_Imperial, selected_fuels,altitude,selected_airpots,slider_bar_options, volume_fraction,percent_adoption,H2_dollars_per_gal ,switch_off)
+    
+    fig_1, fig_2, fig_3, fig_4,fig_5 ,fig_6 = generate_electric_flight_operations_plots(Flight_Ops,Hydrogen,selected_h2,mean_SFC_Imperial,h2_cruise_alt,h2_airports,percent_H2_color,h2_vol_percentage,h2_percent_adoption,H2_dollars_per_gal,switch_off)
+ 
 
     fig_1.show()
     fig_2.show()
@@ -98,15 +101,19 @@ def Density_given_height(h_G):
     rho_SI =  rho *  515.378818 # conversion to kg / m3
     return rho_SI   
 
+#def generate_electric_flight_operations_plots(Flight_Ops,Hydrogen,mean_SFC_Imperial,selected_fuels,altitude,selected_airpots,percent_H2_color,volume_fraction_unnormalized,percent_adoption,H2_dollars_per_gal,switch_off): 
 
-     
-def generate_electric_flight_operations_plots(Flight_Ops,Hydrogen,mean_SFC_Imperial,selected_fuels,altitude,selected_airpots,percent_H2_color,volume_fraction_unnormalized,percent_adoption,H2_dollars_per_gal,switch_off): 
+
+def generate_electric_flight_operations_plots(Flight_Ops,Hydrogen,selected_h2,mean_SFC_Imperial,h2_cruise_alt,h2_airports,percent_H2_color,h2_vol_percentage,h2_percent_adoption,H2_dollars_per_gal,switch_off): 
     mapbox_access_token  = "pk.eyJ1IjoibWFjbGFya2UiLCJhIjoiY2xyanpiNHN6MDhsYTJqb3h6YmJjY2w5MyJ9.pQed7pZ9CnJL-mtqm1X8DQ"     
     map_style            = None if switch_off else 'dark'  
     #template             = pio.templates["minty"] if switch_off else pio.templates["minty_dark"] 
-    font_size            = 16      
- 
-    rho                    = Density_given_height(altitude) 
+    font_size            = 16    
+     
+    #================================================================================================================================================  
+    # Unit Conversions 
+    #================================================================================================================================================    
+    rho                    = Density_given_height(h2_cruise_alt) 
     density_JetA           = 820.0  # kg /m3  
     density_H2             = 70     # kg /m3  
     gallons_to_Liters      = 3.78541
@@ -115,9 +122,8 @@ def generate_electric_flight_operations_plots(Flight_Ops,Hydrogen,mean_SFC_Imper
     imperial_to_SI_SFC     = 2.832545029426566e-05
     g                      = 9.81
     mile_to_meters         = 0.000621371 
-    mass_pass              = 250  # average mass of passenger and their luggage in kg
-    ratio_JetA_to_H2_SFC   =  0.35 
-    SFC_H2                 = mean_SFC_Imperial * imperial_to_SI_SFC * ratio_JetA_to_H2_SFC
+    mass_pass              = 250  # average mass of passenger and their luggage in kg 
+    SFC_H2                 = mean_SFC_Imperial * imperial_to_SI_SFC 
       
     #================================================================================================================================================  
     # Compute Feasible Routes 
@@ -133,7 +139,7 @@ def generate_electric_flight_operations_plots(Flight_Ops,Hydrogen,mean_SFC_Imper
     CD                      = 8E-07* (original_pax_capacity**2) - 0.0003* (original_pax_capacity) + 0.0615
     
     # Normalize volume fraction 
-    volume_fraction         = volume_fraction_unnormalized / 100
+    volume_fraction         = h2_vol_percentage / 100
     
     # Apply volume fraction 
     H2_volume               = volume_fraction *aircraft_volume
@@ -157,35 +163,39 @@ def generate_electric_flight_operations_plots(Flight_Ops,Hydrogen,mean_SFC_Imper
     percentage_H2_process       = np.diff(np.array(percentage_H2_process_vals))/100   
      
     # Step 6: determine the percentage of different H2 production processes 
-    mask                  = Hydrogen['H2 Fuel Name'].isin(selected_fuels)
+    mask                  = Hydrogen['H2 Fuel Name'].isin(selected_h2)
     fuels_used            = Hydrogen[mask] 
       
     # Step 7: Filter flight data based on option selected: i.e. top 10, top 20, top 50, all airpots 
     Airport_Routes     = Flight_Ops[['Passengers','Origin Airport','Destination City']]
     Cumulative_Flights = Airport_Routes.groupby('Origin Airport', as_index=False).sum()[Airport_Routes.columns]
-    if  selected_airpots   == "Top 5 Airports":
-        Busiest_Airports   = Cumulative_Flights.sort_values(by=['Passengers'], ascending = False).head(5) 
-    if  selected_airpots   == "Top 10 Airports":
-        Busiest_Airports   = Cumulative_Flights.sort_values(by=['Passengers'], ascending = False).head(10) 
-    elif  selected_airpots =="Top 20 Airports":
-        Busiest_Airports   = Cumulative_Flights.sort_values(by=['Passengers'], ascending = False).head(20) 
-    elif  selected_airpots == "Top 50 Airports":
-        Busiest_Airports   = Cumulative_Flights.sort_values(by=['Passengers'], ascending = False).head(50) 
-    elif  selected_airpots == "All Airports":
-        Busiest_Airports   = Cumulative_Flights.sort_values(by=['Passengers'], ascending = False) 
-    Airport_List = list(Busiest_Airports['Origin Airport'])
+    if  h2_airports   == " Top 5 Airports":
+        Busiest_H2_Airports   = Cumulative_Flights.sort_values(by=['Passengers'], ascending = False).head(5) 
+    if  h2_airports   == " Top 10 Airports":
+        Busiest_H2_Airports   = Cumulative_Flights.sort_values(by=['Passengers'], ascending = False).head(10) 
+    elif  h2_airports ==" Top 20 Airports":
+        Busiest_H2_Airports   = Cumulative_Flights.sort_values(by=['Passengers'], ascending = False).head(20) 
+    elif  h2_airports == " Top 50 Airports":
+        Busiest_H2_Airports   = Cumulative_Flights.sort_values(by=['Passengers'], ascending = False).head(50) 
+    elif  h2_airports == " All Airports":
+        Busiest_H2_Airports   = Cumulative_Flights.sort_values(by=['Passengers'], ascending = False) 
+    Airport_List = list(Busiest_H2_Airports['Origin Airport'])
     
     # Step 8: Filter airports that will support H2 and those that wont support H2 
-    mask_1               = Flight_Ops['Origin Airport'].isin(Airport_List)
-    H2_Airports          = Flight_Ops[mask_1]
-    Non_H2_Airports      = Flight_Ops[~mask_1] 
-    Feasible_Routes_0    = H2_Airports[H2_Airports['H2_Passengers'] > 0 ] 
-    Infeasible_Routes_0  = H2_Airports[H2_Airports['H2_Passengers'] < 0 ]   
-    Feasible_Routes_1    = Feasible_Routes_0[Feasible_Routes_0['Distance (miles)'] < Range_mi ] 
-    Infeasible_Routes_1  = Feasible_Routes_0[Feasible_Routes_0['Distance (miles)'] > Range_mi ] 
+    mask_1                 = Flight_Ops['Origin Airport'].isin(Airport_List)
+    H2_Airports            = Flight_Ops[mask_1]
+    Non_H2_Airports        = Flight_Ops[~mask_1]
+    H2_Airports_Range      = Range_mi[mask_1]  
+    
+
+    Feasible_Routes_0    = H2_Airports[H2_Airports['Distance (miles)'] > H2_Airports_Range ] 
+    Infeasible_Routes_0  = H2_Airports[H2_Airports['Distance (miles)'] < H2_Airports_Range ]     
+
+    Feasible_Routes_1    = Feasible_Routes_0[Feasible_Routes_0['H2_Passengers'] > 0 ] 
+    Infeasible_Routes_1  = Feasible_Routes_0[Feasible_Routes_0['H2_Passengers'] < 0 ]   
     
     # Step 9: Out of H2 supporting airports, use the percent adoption to determine how many flights at that airport will use H2     
-    Flight_at_H2_Airports_Using_H2  = Feasible_Routes_1.sample(frac=(percent_adoption/100))
+    Flight_at_H2_Airports_Using_H2  = Feasible_Routes_1.sample(frac=(h2_percent_adoption/100))
     Infeasible_Routes_2             = Feasible_Routes_1[~Feasible_Routes_1.index.isin(Flight_at_H2_Airports_Using_H2.index)]
     Non_H2_Flights                  = pd.concat([Non_H2_Airports,Infeasible_Routes_0,Infeasible_Routes_1,Infeasible_Routes_2])# add list of flights from non supporting airports to non-H2 flights  
         
@@ -220,13 +230,13 @@ def generate_electric_flight_operations_plots(Flight_Ops,Hydrogen,mean_SFC_Imper
         
         # CO2e of the Hydrogen-powered flights in the scenario with flight operations with H2 tech
         CO2e_w_H2_only_H2    = np.sum(np.array(fuels_used['Direct GHG emissions [kg CO2e/kg H2]'])*percentage_H2_process)*H2_volumes_mo
-
+ 
         # CO2e of the JetA-powered flights in the scenario with flight operations with H2 tech        
         CO2e_w_H2_fuel_only  = JetA_GHG * Non_H2_Flights_JetA_vol_mo * gallons_to_Liters * liters_to_cubic_meters *  density_JetA 
         
         # Total CO2e flights in the scenario with flight operations with H2 tech
         CO2e_w_H2[m_i]       = CO2e_w_H2_only_H2 +  CO2e_w_H2_fuel_only
-
+ 
         # Total CO2e flights in the scenario with flight operations without H2 tech        
         CO2e_w_o_H2[m_i]     = JetA_GHG * Total_JetA_no_H2 
            
@@ -285,7 +295,7 @@ def generate_electric_flight_operations_plots(Flight_Ops,Hydrogen,mean_SFC_Imper
         marker = dict(
             size = airport_marker_size,
             color = airport_marker_color, ))) 
-
+ 
     fig_1.add_trace(go.Scattergeo( 
         lon = Flight_Ops['Origin Longitude (Deg.)'],
         lat = Flight_Ops['Origin Latitude (Deg.)'], 
@@ -303,7 +313,7 @@ def generate_electric_flight_operations_plots(Flight_Ops,Hydrogen,mean_SFC_Imper
                       margin        = {'t':0,'l':0,'b':0,'r':0},  
                       mapbox        = dict( accesstoken=mapbox_access_token,style=map_style,
                                             center=go.layout.mapbox.Center( lat=30, lon= 230 )))   
-
+ 
     #================================================================================================================================================      
     # Passenger vs Distance Traveled 
     #================================================================================================================================================     
@@ -337,8 +347,8 @@ def generate_electric_flight_operations_plots(Flight_Ops,Hydrogen,mean_SFC_Imper
     fig_3 = go.Figure()
     Airport_Routes     = Flight_at_H2_Airports_Using_H2[['Passengers','Origin Airport','Destination City']]
     Cumulative_Flights = Airport_Routes.groupby(['Origin Airport']).sum()
-    Busiest_Airports   = Cumulative_Flights.sort_values(by=['Passengers'], ascending = False).head(10) 
-    Alphabetical_List  = Busiest_Airports.sort_values(by=['Origin Airport'])  
+    Busiest_H2_Airports   = Cumulative_Flights.sort_values(by=['Passengers'], ascending = False).head(10) 
+    Alphabetical_List  = Busiest_H2_Airports.sort_values(by=['Origin Airport'])  
     fig_3.add_trace(go.Bar( x=list(Alphabetical_List['Passengers'].index),
                        y=np.array(Alphabetical_List['Passengers']),
                        marker_color=colors2[0])) 
@@ -387,7 +397,7 @@ def generate_electric_flight_operations_plots(Flight_Ops,Hydrogen,mean_SFC_Imper
                           y=0.99,
                           xanchor="center",
                           x=0.4 )) 
-
+ 
     #================================================================================================================================================      
     # Emissions Comparison 
     #================================================================================================================================================   
@@ -407,18 +417,10 @@ def generate_electric_flight_operations_plots(Flight_Ops,Hydrogen,mean_SFC_Imper
                           yanchor="top",
                           y=0.99,
                           xanchor="center",
-                          x=0.4 )) 
-     
-    #fig_1["layout"]["template"] = template  
-    #fig_2["layout"]["template"] = template 
-    #fig_3["layout"]["template"] = template  
-    #fig_4["layout"]["template"] = template 
-    #fig_5["layout"]["template"] = template  
-    #fig_6["layout"]["template"] = template 
+                          x=0.4 ))  
     
-    return fig_1, fig_2, fig_3, fig_4,fig_5 ,fig_6
-
-
+    return fig_1, fig_2, fig_3, fig_4,fig_5 ,fig_6 
+     
 # ---------------------------------------------------------------------------------------------------------------------------------------------------
 # Motor Plots
 # ---------------------------------------------------------------------------------------------------------------------------------------------------
