@@ -79,13 +79,13 @@ while combustor_Methane.T > 500:
         total_emissions_Methane[species] += mdot_species_Methane * residence_time
 
     # Compute emission index for CO2
-    mdot_CO2 = total_emissions_Methane['CO2']
+    mdot_CO2 = total_emissions_Methane['CO2']/residence_time
     EI_CO2_Methane = (mdot_CO2*1000) / mdot_fuel if mdot_fuel > 0 else 0
-    mdot_CO = total_emissions_Methane['CO']
+    mdot_CO = total_emissions_Methane['CO']/residence_time
     EI_CO_Methane = (mdot_CO*1000) / mdot_fuel if mdot_fuel > 0 else 0    
-    mdot_NO2 = total_emissions_Methane['NO2']
+    mdot_NO2 = total_emissions_Methane['NO2']/residence_time
     EI_NO2_Methane = (mdot_NO2*1000) / mdot_fuel if mdot_fuel > 0 else 0 
-    mdot_NO = total_emissions_Methane['NO']
+    mdot_NO = total_emissions_Methane['NO']/residence_time
     EI_NO_Methane = (mdot_NO*1000) / mdot_fuel if mdot_fuel > 0 else 0      
     states_Methane.append(combustor_Methane.thermo.state, tres=residence_time, EI_CO2_Methane=EI_CO2_Methane, EI_CO_Methane=EI_CO_Methane, EI_NO2_Methane=EI_NO2_Methane, EI_NO_Methane=EI_NO_Methane)
     residence_time *= 0.9  # decrease the residence time for the next iteration
@@ -172,13 +172,13 @@ while combustor_Ethane.T > 500:
         total_emissions_Ethane[species] += mdot_species_Ethane * residence_time
 
     # Compute emission index for CO2
-    mdot_CO2 = total_emissions_Ethane['CO2']
+    mdot_CO2 = total_emissions_Ethane['CO2']/residence_time
     EI_CO2_Ethane = (mdot_CO2*1000) / mdot_fuel if mdot_fuel > 0 else 0
-    mdot_CO = total_emissions_Ethane['CO']
+    mdot_CO = total_emissions_Ethane['CO']/residence_time
     EI_CO_Ethane = (mdot_CO*1000) / mdot_fuel if mdot_fuel > 0 else 0    
-    mdot_NO2 = total_emissions_Ethane['NO2']
+    mdot_NO2 = total_emissions_Ethane['NO2']/residence_time
     EI_NO2_Ethane = (mdot_NO2*1000) / mdot_fuel if mdot_fuel > 0 else 0 
-    mdot_NO = total_emissions_Ethane['NO']
+    mdot_NO = total_emissions_Ethane['NO']/residence_time
     EI_NO_Ethane = (mdot_NO*1000) / mdot_fuel if mdot_fuel > 0 else 0      
     states_Ethane.append(combustor_Ethane.thermo.state, tres=residence_time, EI_CO2_Ethane=EI_CO2_Ethane, EI_CO_Ethane=EI_CO_Ethane, EI_NO2_Ethane=EI_NO2_Ethane, EI_NO_Ethane=EI_NO_Ethane)
     residence_time *= 0.9  # decrease the residence time for the next iteration
@@ -189,6 +189,10 @@ for species, total_emission in total_emissions_Ethane.items():
     # Ensure total_emission is a float
     total_emission_scalar = total_emission if np.isscalar(total_emission) else total_emission.item()
     print(f"{species}: {total_emission_scalar:.6e} kg")
+
+
+
+
 
 # Plot results
 f, ax1 = plt.subplots(2, 2, figsize=(16, 12))
@@ -265,13 +269,13 @@ while combustor_Propane.T > 500:
         total_emissions_Propane[species] += mdot_species_Propane * residence_time
 
     # Compute emission index for CO2
-    mdot_CO2 = total_emissions_Propane['CO2']
+    mdot_CO2 = total_emissions_Propane['CO2']/residence_time
     EI_CO2_Propane = (mdot_CO2*1000) / mdot_fuel if mdot_fuel > 0 else 0
-    mdot_CO = total_emissions_Propane['CO']
+    mdot_CO = total_emissions_Propane['CO']/residence_time
     EI_CO_Propane = (mdot_CO*1000) / mdot_fuel if mdot_fuel > 0 else 0    
-    mdot_NO2 = total_emissions_Propane['NO2']
+    mdot_NO2 = total_emissions_Propane['NO2']/residence_time
     EI_NO2_Propane = (mdot_NO2*1000) / mdot_fuel if mdot_fuel > 0 else 0 
-    mdot_NO = total_emissions_Propane['NO']
+    mdot_NO = total_emissions_Propane['NO']/residence_time
     EI_NO_Propane = (mdot_NO*1000) / mdot_fuel if mdot_fuel > 0 else 0      
     states_Propane.append(combustor_Propane.thermo.state, tres=residence_time, EI_CO2_Propane=EI_CO2_Propane, EI_CO_Propane=EI_CO_Propane, EI_NO2_Propane=EI_NO2_Propane, EI_NO_Propane=EI_NO_Propane)
     residence_time *= 0.9  # decrease the residence time for the next iteration
