@@ -3,7 +3,7 @@ import plotly.graph_objects as go
 from plotly.graph_objs import *
 import numpy as np           
 import pandas as pd
-from scipy.io import netcdf 
+from scipy.io import netcdf
 from  mpl_toolkits.basemap import Basemap
 from urllib.request import urlopen
 import json
@@ -42,27 +42,27 @@ def main():
     selected_x_axis    = list(Commercial_Batteries.columns.values)[4:18][7]
     selected_y_axis    = list(Commercial_Batteries.columns.values)[4:18][9]
     switch_off         = False      
-    fig_1              = generate_battery_scatter_plot(Commercial_Batteries,selected_brand,selected_chemistry,selected_x_axis,selected_y_axis,switch_off)
-    fig_1.show()
+    #fig_1              = generate_battery_scatter_plot(Commercial_Batteries,selected_brand,selected_chemistry,selected_x_axis,selected_y_axis,switch_off)
+    #fig_1.show()
     
     bat_1           = Commercial_Batteries['Battery Name'][5] 
     bat_2           = Commercial_Batteries['Battery Name'][13] 
     bat_3           = Commercial_Batteries['Battery Name'][6] 
     switch_off         = False      
-    fig_2           =  generate_battery_spider_plot(Commercial_Batteries,bat_1,bat_2,bat_3,switch_off) 
-    fig_2.show()
+    #fig_2           =  generate_battery_spider_plot(Commercial_Batteries,bat_1,bat_2,bat_3,switch_off) 
+    #fig_2.show()
     
 
     selected_sector = 'All'
     selected_type   = 'All'
     switch_off         = False  
-    fig_3 = generate_battery_dev_map(Battery_Development,selected_sector,selected_type,switch_off)  
-    fig_3.show()
+    #fig_3 = generate_battery_dev_map(Battery_Development,selected_sector,selected_type,switch_off)  
+    #fig_3.show()
 
     switch_off            = False     
     month_no              = 1 
-    fig_4 = generate_US_bat_temperature_map(US_Temperature_F,month_no,switch_off) 
-    fig_4.show()
+    #fig_4 = generate_US_bat_temperature_map(US_Temperature_F,month_no,switch_off) 
+    #fig_4.show()
     
   
     aircraft              = 'Boeing 737 MAX-8'
@@ -86,8 +86,8 @@ def main():
     selected_x_axis    = list(Electric_Motor_Development.columns.values)[4:14][1]
     selected_y_axis    = list(Electric_Motor_Development.columns.values)[4:14][2]
     switch_off         = False      
-    fig_11             = generate_motor_scatter_plot(Electric_Motor_Development,selected_x_axis,selected_y_axis,switch_off)   
-    fig_11.show()      
+    #fig_11             = generate_motor_scatter_plot(Electric_Motor_Development,selected_x_axis,selected_y_axis,switch_off)   
+    #fig_11.show()      
     return 
     
     
@@ -488,7 +488,8 @@ def generate_electric_flight_operations_plots(Routes_and_Temp,Commercial_Batteri
     data            = Commercial_Batteries[Commercial_Batteries['Battery Name'] == battery_choice]  
     data            = Commercial_Batteries[Commercial_Batteries['Battery Name'] == battery_choice] 
     V_cell          = np.array(data['Nominal Voltage (V)'])[0]
-    e_cell          = np.array(data['Gravimetric Energy Density (Wh/kg)'])[0] *Wh_per_kg_to_J
+    #e_cell          = np.array(data['Gravimetric Energy Density (Wh/kg)'])[0] *Wh_per_kg_to_J
+    e_cell          = np.array([235, 236]) *Wh_per_kg_to_J
     q_cell          = np.array(data['Capacity (mAh)'])[0]/1000 * Ah_to_C  # conversion to coulombs
     i_max           = np.array(data['Maximum Discharge Current (A)'])[0] # amps   
     Min_Temp        = np.array(data['Minimum Disharge Temperature (°C)'])[0]*9/5 + 32
