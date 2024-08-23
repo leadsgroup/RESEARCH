@@ -59,29 +59,29 @@ def main():
     #fig_3 = generate_battery_dev_map(Battery_Development,selected_sector,selected_type,switch_off)  
     #fig_3.show()
 
-    switch_off            = False     
-    month_no              = 1 
-    fig_4 = generate_US_bat_temperature_map(US_Temperature_F,month_no,switch_off) 
-    fig_4.show()
+    #switch_off            = False     
+    #month_no              = 1 
+    #fig_4 = generate_US_bat_temperature_map(US_Temperature_F,month_no,switch_off) 
+    #fig_4.show()
     
   
-    #aircraft              = 'Boeing 737 MAX-8'
-    #battery_choice        = Commercial_Batteries['Battery Name'][13] 
-    #weight_fraction       = 35
-    #system_voltage        = 400 
-    #propulsive_efficiency = 90
-    #percent_adoption      = 100 
-    #month_no              = 1 
-    #switch_off            = False 
-    #cost_of_electricity   = 0.3 # per Kw 
-    #fig_5, fig_6, fig_7, fig_8,fig_9,fig_10 = generate_electric_flight_operations_plots(Routes_and_Temp,Commercial_Batteries,aircraft,battery_choice,weight_fraction,system_voltage,propulsive_efficiency,percent_adoption,month_no,cost_of_electricity,switch_off)
+    aircraft              = 'Boeing 737 MAX-8'
+    battery_choice        = Commercial_Batteries['Battery Name'][13] 
+    weight_fraction       = 35
+    system_voltage        = 400 
+    propulsive_efficiency = 90
+    percent_adoption      = 100 
+    month_no              = 1 
+    switch_off            = False 
+    cost_of_electricity   = 0.3 # per Kw 
+    fig_5, fig_6, fig_7, fig_8,fig_9,fig_10 = generate_electric_flight_operations_plots(Routes_and_Temp,Commercial_Batteries,aircraft,battery_choice,weight_fraction,system_voltage,propulsive_efficiency,percent_adoption,month_no,cost_of_electricity,switch_off)
                 
-    #fig_5.show()
-    #fig_6.show()
-    #fig_7.show()
-    #fig_8.show()
-    #fig_9.show()
-    #fig_10.show()
+    fig_5.show()
+    fig_6.show()
+    fig_7.show()
+    fig_8.show()
+    fig_9.show()
+    fig_10.show()
  
     #selected_x_axis    = list(Electric_Motor_Development.columns.values)[4:14][1]
     #selected_y_axis    = list(Electric_Motor_Development.columns.values)[4:14][2]
