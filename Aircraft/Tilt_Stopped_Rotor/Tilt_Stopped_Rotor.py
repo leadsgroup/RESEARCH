@@ -30,7 +30,7 @@ import  pickle
 def main():           
          
     # vehicle data
-    new_geometry =  False 
+    new_geometry = False 
     if new_geometry :
         vehicle  = vehicle_setup()
         save_aircraft_geometry(vehicle , 'Tilt_Stopped_Rotor')
@@ -91,8 +91,8 @@ def base_analysis(vehicle):
 
     # ------------------------------------------------------------------
     #  Aerodynamics Analysis
-    aerodynamics          = RCAIDE.Framework.Analyses.Aerodynamics.Vortex_Lattice_Method() 
-    aerodynamics.geometry = vehicle
+    aerodynamics         = RCAIDE.Framework.Analyses.Aerodynamics.Vortex_Lattice_Method() 
+    aerodynamics.vehicle = vehicle
     aerodynamics.settings.drag_coefficient_increment = 0.0000
     analyses.append(aerodynamics)   
 
@@ -139,6 +139,8 @@ def vehicle_setup() :
     vehicle.mass_properties.max_takeoff       = 2700 
     vehicle.mass_properties.takeoff           = vehicle.mass_properties.max_takeoff
     vehicle.mass_properties.operating_empty   = vehicle.mass_properties.max_takeoff
+    vehicle.mass_properties.center_of_gravity = [[ 2.1345, 0 , 0 ]] 
+    vehicle.mass_properties.moments_of_inertia.tensor = np.array([[164627.7,0.0,0.0],[0.0,471262.4,0.0],[0.0,0.0,554518.7]])
     vehicle.envelope.ultimate_load            = 5.7   
     vehicle.envelope.limit_load               = 3.  
     vehicle.passengers                        = 5 
@@ -290,7 +292,7 @@ def vehicle_setup() :
     fuselage.lengths.tail                       = 1.5
     fuselage.lengths.cabin                      = 4.46 
     fuselage.lengths.total                      = 6.46
-    fuselage.width                              = 5.85 * Units.feet      # change 
+    fuselage.width                              = 1.75
     fuselage.heights.maximum                    = 4.65 * Units.feet      # change 
     fuselage.heights.at_quarter_length          = 3.75 * Units.feet      # change 
     fuselage.heights.at_wing_root_quarter_chord = 4.65 * Units.feet      # change 
@@ -494,7 +496,7 @@ def vehicle_setup() :
     bat                                                    = RCAIDE.Library.Components.Energy.Batteries.Lithium_Ion_NMC() 
     bat.tag                                                = 'cruise_bus_battery'
     bat.pack.electrical_configuration.series               = 140   
-    bat.pack.electrical_configuration.parallel             = 60
+    bat.pack.electrical_configuration.parallel             = 100
     initialize_from_circuit_configuration(bat)  
     bat.module.number_of_modules                           = 14 
     bat.module.geometrtic_configuration.total              = bat.pack.electrical_configuration.total
@@ -534,8 +536,8 @@ def vehicle_setup() :
     prop_rotor.oei.design_thrust                            = Hover_Load/7  
     prop_rotor.oei.design_freestream_velocity               = np.sqrt(prop_rotor.oei.design_thrust/(2*1.2*np.pi*(prop_rotor.tip_radius**2)))   
     prop_rotor.cruise.design_altitude                       = 1500 * Units.feet
-    prop_rotor.cruise.design_thrust                         = 2500    
-    prop_rotor.cruise.design_freestream_velocity            = 130.* Units['mph']
+    prop_rotor.cruise.design_thrust                         = 3000    
+    prop_rotor.cruise.design_freestream_velocity            = 150.* Units['mph']
     prop_rotor.variable_pitch                               = True  
     airfoil                                                = RCAIDE.Library.Components.Airfoils.Airfoil()
     airfoil.coordinate_file                                = rel_path + 'Airfoils' + separator + 'NACA_4412.txt'
@@ -771,7 +773,10 @@ def configs_setup(vehicle):
 
     forward_config                                                    = RCAIDE.Library.Components.Configs.Config(vehicle)
     forward_config.tag                                                = 'forward_flight'  
-    forward_config.networks.all_electric.busses['lift_bus'].active    = False  
+    forward_config.networks.all_electric.busses.lift_bus.active       = False
+    for propulsor in  forward_config.networks.all_electric.busses.cruise_bus.propulsors:
+        rotor                          =  propulsor.rotor
+        rotor.orientation_euler_angles =  [0,0,0]
     configs.append(forward_config)  
 
     transition_config                                                 = RCAIDE.Library.Components.Configs.Config(vehicle)
@@ -780,8 +785,11 @@ def configs_setup(vehicle):
     
 
     vertical_config                                                   = RCAIDE.Library.Components.Configs.Config(vehicle)
-    vertical_config.tag                                               = 'vertical_flight'  
-    vertical_config.networks.all_electric.busses['cruise_bus'].active = False  
+    vertical_config.tag                                               = 'vertical_flight'   
+    for bus in vertical_config.networks.all_electric.busses:
+        for propulsor in  bus.propulsors:
+            rotor                          =  propulsor.rotor
+            rotor.orientation_euler_angles =  [0,np.pi / 2,0]
     configs.append(vertical_config)   
      
     return configs
@@ -898,26 +906,26 @@ def mission_setup(analyses):
                  
     #mission.append_segment(segment)  
 
-    ##------------------------------------------------------------------------------------------------------------------------------------  
-    ## Cruise 
-    ##------------------------------------------------------------------------------------------------------------------------------------  
-    #segment                                               = Segments.Cruise.Constant_Speed_Constant_Altitude(base_segment)
-    #segment.tag                                           = "Cruise"  
-    #segment.analyses.extend( analyses.forward_flight )                  
-    #segment.altitude                                      = 1500.0 * Units.ft  
-    #segment.air_speed                                     = 110.  * Units['mph']  
-    #segment.distance                                      = 50 *Units.nmi    
+    #------------------------------------------------------------------------------------------------------------------------------------  
+    # Cruise 
+    #------------------------------------------------------------------------------------------------------------------------------------  
+    segment                                               = Segments.Cruise.Constant_Speed_Constant_Altitude(base_segment)
+    segment.tag                                           = "Cruise"  
+    segment.analyses.extend( analyses.forward_flight )                  
+    segment.altitude                                      = 1500.0 * Units.ft  
+    segment.air_speed                                     = 150.  * Units['mph']  
+    segment.distance                                      = 50 *Units.nmi    
             
-    ## define flight dynamics to model 
-    #segment.flight_dynamics.force_x                       = True  
-    #segment.flight_dynamics.force_z                       = True     
+    # define flight dynamics to model 
+    segment.flight_dynamics.force_x                       = True  
+    segment.flight_dynamics.force_z                       = True     
     
-    ## define flight controls 
-    #segment.assigned_control_variables.throttle.active               = True           
-    #segment.assigned_control_variables.throttle.assigned_propulsors  = [['front_cruise_propulsor_1','front_cruise_propulsor_2','front_cruise_propulsor_3','front_cruise_propulsor_4']] 
-    #segment.assigned_control_variables.body_angle.active             = True                
+    # define flight controls 
+    segment.assigned_control_variables.throttle.active               = True           
+    segment.assigned_control_variables.throttle.assigned_propulsors  = [['front_cruise_propulsor_1','front_cruise_propulsor_2','front_cruise_propulsor_3','front_cruise_propulsor_4']] 
+    segment.assigned_control_variables.body_angle.active             = True                
          
-    #mission.append_segment(segment)   
+    mission.append_segment(segment)   
     
     ##------------------------------------------------------------------------------------------------------------------------------------  
     ##  Descent
