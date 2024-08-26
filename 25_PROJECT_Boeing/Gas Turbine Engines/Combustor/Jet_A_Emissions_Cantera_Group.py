@@ -15,15 +15,15 @@ def main():
     tpfr      = np.array([5 ,10]) * 1E-4 # np.linspace(1,10,10)*1e-4 # psr residence time in sec
     tpsr      = np.array([5e-3,5e-3])
     
-    #dict_fuel = {'N-C12H26':0.6, 'A1CH3':0.2, 'A1':0.2}
-    dict_fuel = {'NC10H22':0.16449, 'NC12H26':0.34308, 'NC16H34':0.10335, 'IC8H18':0.08630, 'NC7H14':0.07945, 'C6H5C2H5': 0.07348, 'C6H5C4H9': 0.05812, 'C10H7CH3': 0.10972}      # [2] More accurate kinetic mechanism, slower simulation    
+    dict_fuel = {'N-C12H26':0.6, 'A1CH3':0.2, 'A1':0.2}
+    #dict_fuel = {'NC10H22':0.16449, 'NC12H26':0.34308, 'NC16H34':0.10335, 'IC8H18':0.08630, 'NC7H14':0.07945, 'C6H5C2H5': 0.07348, 'C6H5C4H9': 0.05812, 'C10H7CH3': 0.10972}      # [2] More accurate kinetic mechanism, slower simulation    
     dict_oxy = {'O2':0.2095, 'N2':0.7809, 'AR':0.0093, 'CO2':0.0003}
     
-    #gas = ct.Solution('JetFuelSurrogate.yaml')
-    gas = ct.Solution('chem.yaml')  
+    gas = ct.Solution('JetFuelSurrogate.yaml')
+    #gas = ct.Solution('chem.yaml')  
     #-------------------------------------------------------------------------------- 
-    #list_sp = ['CO', 'CO2', 'H2O']
-    list_sp   = ['CO', 'CO2', 'H2O', 'NO', 'NO2', 'CSOLID']
+    list_sp = ['CO', 'CO2', 'H2O']
+    #list_sp   = ['CO', 'CO2', 'H2O', 'NO', 'NO2', 'CSOLID']
     col_names = ['tau(s)', 'Tout(K)'] + ['X_' +str(sp) for sp in list_sp] + ['Y_' +str(sp) for sp in list_sp] + ['EI_' +str(sp) for sp in list_sp]
     df        = pd.DataFrame(columns=col_names)
     
@@ -111,34 +111,34 @@ def plot_emission(df,gas,equ_ratio):
     ax1[2].set_title('Emission Index H2O', color='C2')
     ax1[2].set_ylabel('EI [kg/kg]')
     
-    f, ax1 = plt.subplots(3, 1, figsize=(16, 12))
-    f.suptitle('Jet-A EI')
-    subtitle = f'Equivalence ratio: {equ_ratio[0]}, Temperature: {gas.T:.1f} K, Pressure: {gas.P/ct.one_atm:.1f} atm,'
-    plt.figtext(0.5, 0.925, subtitle, ha='center', fontsize=12)
-    ax1[0].plot(df['tau(s)'], df['EI_NO2'], '.-', color='C0')
-    ax1[0].axhline(y=0.01, color='r', linestyle='--')
-    ax1[0].annotate('Typical EI value: 0.01', xy=(0.5, 0.01), xytext=(0.5, 0.008), textcoords='data', color='r', arrowprops=dict(facecolor='r', arrowstyle='->'))
-    ax1[0].set_title('Emission Index NO2', color='C0')
-    ax1[0].set_ylabel('EI [kg/kg]')
-    ax1[1].plot(df['tau(s)'], df['EI_NO'], '.-', color='C1')
-    ax1[1].axhline(y=0.01, color='r', linestyle='--')
-    ax1[1].annotate('Typical EI value: 0.01', xy=(0.5, 0.01), xytext=(0.5, 0.008), textcoords='data', color='r', arrowprops=dict(facecolor='r', arrowstyle='->'))
-    ax1[1].set_title('Emission Index NO', color='C1')
-    ax1[1].set_ylabel('EI [kg/kg]')
-    ax1[2].plot(df['tau(s)'], df['EI_CSOLID'], '.-', color='C2')
-    ax1[2].axhline(y=0.00004, color='r', linestyle='--')
-    ax1[2].annotate('Typical EI value: 0.00004', xy=(0.5, 0.00004), xytext=(0.5, -0.00196), textcoords='data', color='r', arrowprops=dict(facecolor='r', arrowstyle='->'))
-    ax1[2].set_xlabel('PFR residence time [s]')
-    ax1[2].set_title('Emission Index C-soot', color='C2')
-    ax1[2].set_ylabel('EI [kg/kg]')
+    #f, ax1 = plt.subplots(3, 1, figsize=(16, 12))
+    #f.suptitle('Jet-A EI')
+    #subtitle = f'Equivalence ratio: {equ_ratio[0]}, Temperature: {gas.T:.1f} K, Pressure: {gas.P/ct.one_atm:.1f} atm,'
+    #plt.figtext(0.5, 0.925, subtitle, ha='center', fontsize=12)
+    #ax1[0].plot(df['tau(s)'], df['EI_NO2'], '.-', color='C0')
+    #ax1[0].axhline(y=0.01, color='r', linestyle='--')
+    #ax1[0].annotate('Typical EI value: 0.01', xy=(0.5, 0.01), xytext=(0.5, 0.008), textcoords='data', color='r', arrowprops=dict(facecolor='r', arrowstyle='->'))
+    #ax1[0].set_title('Emission Index NO2', color='C0')
+    #ax1[0].set_ylabel('EI [kg/kg]')
+    #ax1[1].plot(df['tau(s)'], df['EI_NO'], '.-', color='C1')
+    #ax1[1].axhline(y=0.01, color='r', linestyle='--')
+    #ax1[1].annotate('Typical EI value: 0.01', xy=(0.5, 0.01), xytext=(0.5, 0.008), textcoords='data', color='r', arrowprops=dict(facecolor='r', arrowstyle='->'))
+    #ax1[1].set_title('Emission Index NO', color='C1')
+    #ax1[1].set_ylabel('EI [kg/kg]')
+    #ax1[2].plot(df['tau(s)'], df['EI_CSOLID'], '.-', color='C2')
+    #ax1[2].axhline(y=0.00004, color='r', linestyle='--')
+    #ax1[2].annotate('Typical EI value: 0.00004', xy=(0.5, 0.00004), xytext=(0.5, -0.00196), textcoords='data', color='r', arrowprops=dict(facecolor='r', arrowstyle='->'))
+    #ax1[2].set_xlabel('PFR residence time [s]')
+    #ax1[2].set_title('Emission Index C-soot', color='C2')
+    #ax1[2].set_ylabel('EI [kg/kg]')
     
     plt.figure(figsize=(16, 12))
     plt.plot(df['tau(s)'], df['X_CO2'], '.-', label='CO2 Mole Fraction', color='C0')
     plt.plot(df['tau(s)'], df['X_CO'], '.-', label='CO Mole Fraction', color='C1')
     plt.plot(df['tau(s)'], df['X_H2O'], '.-', label='H2O Mole Fraction', color='C2')
-    plt.plot(df['tau(s)'], df['X_NO2'], '.-', label='NO2 Mole Fraction', color='C3')
-    plt.plot(df['tau(s)'], df['X_NO'], '.-', label='NO Mole Fraction', color='C4')
-    plt.plot(df['tau(s)'], df['X_CSOLID'], '.-', label='Soot Mole Fraction', color='C5')
+    #plt.plot(df['tau(s)'], df['X_NO2'], '.-', label='NO2 Mole Fraction', color='C3')
+    #plt.plot(df['tau(s)'], df['X_NO'], '.-', label='NO Mole Fraction', color='C4')
+    #plt.plot(df['tau(s)'], df['X_CSOLID'], '.-', label='Soot Mole Fraction', color='C5')
     plt.xlabel('PFR residence time [s]')
     plt.ylabel('Mole Fraction')
     plt.title('Mole Fraction of CO2, CO, H2O, NO2, NO and soot vs. PFR residence time')
@@ -149,9 +149,9 @@ def plot_emission(df,gas,equ_ratio):
     plt.plot(df['tau(s)'], df['Y_CO2'], '.-', label='CO2 Mass Fraction', color='C0')
     plt.plot(df['tau(s)'], df['Y_CO'], '.-', label='CO Mass Fraction', color='C1')
     plt.plot(df['tau(s)'], df['Y_H2O'], '.-', label='H2O Mass Fraction', color='C2')
-    plt.plot(df['tau(s)'], df['Y_NO2'], '.-', label='NO2 Mass Fraction', color='C3')
-    plt.plot(df['tau(s)'], df['Y_NO'], '.-', label='NO Mass Fraction', color='C4')
-    plt.plot(df['tau(s)'], df['Y_CSOLID'], '.-', label='Soot Mass Fraction', color='C5')
+    #plt.plot(df['tau(s)'], df['Y_NO2'], '.-', label='NO2 Mass Fraction', color='C3')
+    #plt.plot(df['tau(s)'], df['Y_NO'], '.-', label='NO Mass Fraction', color='C4')
+    #plt.plot(df['tau(s)'], df['Y_CSOLID'], '.-', label='Soot Mass Fraction', color='C5')
     plt.xlabel('PFR residence time [s]')
     plt.ylabel('Mass Fraction')
     plt.title('Mass Fraction of CO2, CO, H2O, NO2, NO and soot vs. PFR residence time')
