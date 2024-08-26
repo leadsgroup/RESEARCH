@@ -6,12 +6,20 @@ import time
 
 def main():
 
-    ti = time.time()    
+    ti = time.time()
+    
+    # ENGINE DESIGN PARAMETRS 
+    area_out    = 1  # Assuming the area is 1 m^2 for simplification
         
+    # INPUT PARAMTERTERS  
+    P_stag0   =  np.array([600,600])
+    T_stag0   =  np.array([25,25]) 
+    
     # initial conditions 
-    temp      = np.array([600,600]) # K
-    patm      = np.array([25,25]) # atm
-    equ_ratio = np.array([0.7, 0.7]) 
+    temp      = 0 # MATTEO NEED TO UPDATE 
+    patm      = 0 # MATTEO NEED TO UPDATE 
+
+    equivalence_ratio = np.array([0.7, 0.7]) 
     tpfr      = np.array([5 ,10]) * 1E-4 # np.linspace(1,10,10)*1e-4 # psr residence time in sec
     tpsr      = np.array([5e-3,5e-3])
     
@@ -28,7 +36,7 @@ def main():
     df        = pd.DataFrame(columns=col_names)
     
     for n in range(len(tpfr)):
-        gas, EI, phi, h, T_stag, P_stag = combustor(tpfr[n],temp[n],patm[n],equ_ratio[n],tpsr[n],dict_fuel,dict_oxy,gas)
+        gas, EI, phi, h, T_stag, P_stag = combustor(tpfr[n],temp[n],patm[n],equivalence_ratio[n],tpsr[n],dict_fuel,dict_oxy,gas,area_out)
         sp_idx = [gas.species_index(sp) for sp in list_sp]
         data_n = [tpfr[n], gas.T, phi, h, T_stag, P_stag] + list(gas.X[sp_idx]) + list(gas.Y[sp_idx]) + list(EI[sp_idx])
         df.loc[n] = data_n
@@ -37,34 +45,31 @@ def main():
     elapsed_time = round((tf-ti)/len(tpfr),2)
     print('Simulation Time: ' + str(elapsed_time) + ' seconds per timestep')   
         
-    plot_emission(df,gas,equ_ratio)
+    plot_emission(df,gas,equivalence_ratio)
     
     return 
  
-def combustor(tau,temp,patm,equ_ratio,tpsr,dict_fuel, dict_oxy, gas):
+def combustor(tau,temp,patm,equivalence_ratio,tpsr,dict_fuel, dict_oxy, gas,area_out):
     
     """ combustor simulation using a simple psr-pfr reactor network with varying pfr residence time """
 
     gas.TP = temp, patm*ct.one_atm
-    gas.set_equivalence_ratio(equ_ratio, fuel = dict_fuel, oxidizer = dict_oxy )
+    gas.set_equivalence_ratio(equivalence_ratio, fuel = dict_fuel, oxidizer = dict_oxy )
         
     comp_fuel = list(dict_fuel.keys())
     Y_fuel = gas[comp_fuel].Y
     
-    # psr (flame zone)
-    
-    upstream = ct.Reservoir(gas)
+    # psr (flame zone) 
+    upstream   = ct.Reservoir(gas)
     downstream = ct.Reservoir(gas)
         
     gas.equilibrate('HP')
-    psr = ct.IdealGasReactor(gas)
+    psr        = ct.IdealGasReactor(gas) 
+    func_mdot  = lambda t: psr.mass/tpsr
     
-    func_mdot = lambda t: psr.mass/tpsr
-    
-    inlet = ct.MassFlowController(upstream, psr)
+    inlet                = ct.MassFlowController(upstream, psr)
     inlet.mass_flow_rate = func_mdot
-    outlet = ct.Valve(psr, downstream, K=100)
-            
+    outlet  = ct.Valve(psr, downstream, K=100) 
     sim_psr = ct.ReactorNet([psr])
         
     try:
@@ -80,32 +85,40 @@ def combustor(tau,temp,patm,equ_ratio,tpsr,dict_fuel, dict_oxy, gas):
         sim_pfr.advance(tau) # sim_pfr.advance(tpfr)
     except RuntimeError:
         pass
-        
+    
+    # Determine massflow rate of flow into combustion chamber 
     mdot           = inlet.mass_flow_rate
     mdot_fuel      = sum(mdot * Y_fuel)
-    Emission_Index = gas.Y * mdot/mdot_fuel
     
-    density_out = pfr.thermo.density  # density of the gas in the combustor
-    area_out = 1  # Assuming the area is 1 m^2 for simplification
-    vel = mdot / (density_out * area_out)   
-    a = gas.sound_speed
-    M = vel/a
-    cp = gas.cp_mass
-    cv = gas.cv_mass
-    gamma = cp/cv
-    phi = gas.equivalence_ratio(fuel = dict_fuel, oxidizer = dict_oxy )
-    h = gas.h
+    # Determine Emission Indices 
+    Emission_Index = gas.Y * mdot/mdot_fuel 
+    
+    # Extract properties of combustor flow 
+    a           = gas.sound_speed # speed of sound 
+    rho_out     = pfr.thermo.density  # density of the gas in the combustor 
+    cp          = gas.cp_mass # specific heat at constant pressure 
+    cv          = gas.cv_mass # specific heat at constant volume 
+    gamma       = cp/cv
+    h           = gas.h # enthalpy
+    vel         = mdot / (rho_out * area_out) # velocity of flow exiting the combustor  
+    M           = vel/a # Mach number 
+    
+    phi = gas.equivalence_ratio(fuel = dict_fuel, oxidizer = dict_oxy ) 
+    
+    # Stagnation temperature 
     T_stag = gas.T/(1 + ((gamma - 1)/2)*M**2)
+    
+    # stagnation pressure 
     P_stag = gas.P*(T_stag/gas.T)**(gamma/(gamma - 1))
     
     return (gas, Emission_Index, phi, h, T_stag, P_stag) 
 
     
-def plot_emission(df,gas,equ_ratio): 
+def plot_emission(df,gas,equivalence_ratio): 
     # Plot results
     f, ax1 = plt.subplots(3, 1, figsize=(16, 12))
     f.suptitle('Jet-A EI')
-    subtitle = f'Equivalence ratio: {equ_ratio[0]}, Temperature: {gas.T:.1f} K, Pressure: {gas.P/ct.one_atm:.1f} atm,'
+    subtitle = f'Equivalence ratio: {equivalence_ratio[0]}, Temperature: {gas.T:.1f} K, Pressure: {gas.P/ct.one_atm:.1f} atm,'
     plt.figtext(0.5, 0.925, subtitle, ha='center', fontsize=12)
     ax1[0].plot(df['tau(s)'], df['EI_CO2'], '.-', color='C0')
     ax1[0].axhline(y=3.16, color='r', linestyle='--')
@@ -126,7 +139,7 @@ def plot_emission(df,gas,equ_ratio):
     
     #f, ax1 = plt.subplots(3, 1, figsize=(16, 12))
     #f.suptitle('Jet-A EI')
-    #subtitle = f'Equivalence ratio: {equ_ratio[0]}, Temperature: {gas.T:.1f} K, Pressure: {gas.P/ct.one_atm:.1f} atm,'
+    #subtitle = f'Equivalence ratio: {equivalence_ratio[0]}, Temperature: {gas.T:.1f} K, Pressure: {gas.P/ct.one_atm:.1f} atm,'
     #plt.figtext(0.5, 0.925, subtitle, ha='center', fontsize=12)
     #ax1[0].plot(df['tau(s)'], df['EI_NO2'], '.-', color='C0')
     #ax1[0].axhline(y=0.01, color='r', linestyle='--')
