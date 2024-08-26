@@ -24,13 +24,13 @@ def main():
     #-------------------------------------------------------------------------------- 
     list_sp = ['CO', 'CO2', 'H2O']
     #list_sp   = ['CO', 'CO2', 'H2O', 'NO', 'NO2', 'CSOLID']
-    col_names = ['tau(s)', 'Tout(K)'] + ['X_' +str(sp) for sp in list_sp] + ['Y_' +str(sp) for sp in list_sp] + ['EI_' +str(sp) for sp in list_sp]
+    col_names = ['tau(s)', 'Tout(K)', 'EqRatio','Ent', 'Tstag', 'Pstag'] + ['X_' +str(sp) for sp in list_sp] + ['Y_' +str(sp) for sp in list_sp] + ['EI_' +str(sp) for sp in list_sp]
     df        = pd.DataFrame(columns=col_names)
     
     for n in range(len(tpfr)):
-        gas, EI = combustor(tpfr[n],temp[n],patm[n],equ_ratio[n],tpsr[n],dict_fuel,dict_oxy,gas)
+        gas, EI, phi, h, T_stag, P_stag = combustor(tpfr[n],temp[n],patm[n],equ_ratio[n],tpsr[n],dict_fuel,dict_oxy,gas)
         sp_idx = [gas.species_index(sp) for sp in list_sp]
-        data_n = [tpfr[n], gas.T] + list(gas.X[sp_idx]) + list(gas.Y[sp_idx]) + list(EI[sp_idx])
+        data_n = [tpfr[n], gas.T, phi, h, T_stag, P_stag] + list(gas.X[sp_idx]) + list(gas.Y[sp_idx]) + list(EI[sp_idx])
         df.loc[n] = data_n
     
     tf           = time.time()
@@ -85,7 +85,20 @@ def combustor(tau,temp,patm,equ_ratio,tpsr,dict_fuel, dict_oxy, gas):
     mdot_fuel      = sum(mdot * Y_fuel)
     Emission_Index = gas.Y * mdot/mdot_fuel
     
-    return (gas, Emission_Index) 
+    density_out = pfr.thermo.density  # density of the gas in the combustor
+    area_out = 1  # Assuming the area is 1 m^2 for simplification
+    vel = mdot / (density_out * area_out)   
+    a = gas.sound_speed
+    M = vel/a
+    cp = gas.cp_mass
+    cv = gas.cv_mass
+    gamma = cp/cv
+    phi = gas.equivalence_ratio(fuel = dict_fuel, oxidizer = dict_oxy )
+    h = gas.h
+    T_stag = gas.T/(1 + ((gamma - 1)/2)*M**2)
+    P_stag = gas.P*(T_stag/gas.T)**(gamma/(gamma - 1))
+    
+    return (gas, Emission_Index, phi, h, T_stag, P_stag) 
 
     
 def plot_emission(df,gas,equ_ratio): 
@@ -157,6 +170,39 @@ def plot_emission(df,gas,equ_ratio):
     plt.title('Mass Fraction of CO2, CO, H2O, NO2, NO and soot vs. PFR residence time')
     plt.legend()
     plt.grid(True)
+    
+    plt.figure(figsize=(16, 12))
+    plt.plot(df['tau(s)'], df['Tout(K)'], '.-', label='Temperature', color='C0')
+    plt.plot(df['tau(s)'], df['Tstag'], '.-', label='Stagnation Temperature', color='C1')
+    plt.xlabel('PFR residence time [s]')
+    plt.ylabel('Stagnation Temperature [K]')
+    plt.title('Stagnation Temperature vs. PFR residence time')
+    plt.legend()
+    plt.grid(True)    
+    
+    plt.figure(figsize=(16, 12))
+    plt.plot(df['tau(s)'], df['Pstag'], '.-', label='Stagnation Temperature', color='C0')
+    plt.xlabel('PFR residence time [s]')
+    plt.ylabel('Stagnation Pressure [Pa]')
+    plt.title('Stagnation Pressure vs. PFR residence time')
+    plt.legend()
+    plt.grid(True) 
+    
+    plt.figure(figsize=(16, 12))
+    plt.plot(df['tau(s)'], df['Ent'], '.-', label='Stagnation Temperature', color='C0')
+    plt.xlabel('PFR residence time [s]')
+    plt.ylabel('Enthalpy [J]')
+    plt.title('Enthalpy vs. PFR residence time')
+    plt.legend()
+    plt.grid(True)  
+    
+    plt.figure(figsize=(16, 12))
+    plt.plot(df['tau(s)'], df['EqRatio'], '.-', label='Stagnation Temperature', color='C0')
+    plt.xlabel('PFR residence time [s]')
+    plt.ylabel('Equivalence Ratio [-]')
+    plt.title('Equivalence Ratio vs. PFR residence time')
+    plt.legend()
+    plt.grid(True)      
     
     plt.show() 
  
