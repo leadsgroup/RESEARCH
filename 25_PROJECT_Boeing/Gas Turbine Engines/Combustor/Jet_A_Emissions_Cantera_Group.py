@@ -4,14 +4,13 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 def main(): 
-    # initial conditions
-    
-    temp = 600 # K
-    patm = 25 # atm
+    # initial conditions 
+    temp      = 600 # K
+    patm      = 25 # atm
     equ_ratio = 0.7
     
     list_tpfr = np.linspace(0.01,10,10)*1e-4 # psr residence time in sec
-    tpsr = 5e-3 
+    tpsr      = 5e-3 
     
     #dict_fuel = {'N-C12H26':0.6, 'A1CH3':0.2, 'A1':0.2}
     dict_fuel = {'NC10H22':0.16449, 'NC12H26':0.34308, 'NC16H34':0.10335, 'IC8H18':0.08630, 'NC7H14':0.07945, 'C6H5C2H5': 0.07348, 'C6H5C4H9': 0.05812, 'C10H7CH3': 0.10972}      # [2] More accurate kinetic mechanism, slower simulation    
@@ -143,7 +142,7 @@ def combustor(tau,temp,patm,equ_ratio,tpsr,dict_fuel, dict_oxy, gas):
     sim_pfr = ct.ReactorNet([pfr])
     
     try:
-        sim_pfr.advance(tpfr)
+        sim_pfr.advance(tau) # sim_pfr.advance(tpfr)
     except RuntimeError:
         pass
         
