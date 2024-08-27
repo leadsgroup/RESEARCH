@@ -1,7 +1,8 @@
 # RCAIDE imports 
 import RCAIDE
-from RCAIDE.Framework.Core import Units   
+from RCAIDE.Framework.Core import Units , Data   
 from RCAIDE.Library.Methods.Propulsors.Turbofan_Propulsor          import design_turbofan
+from RCAIDE.Framework.Mission.Common      import  Conditions
 
 # python imports 
 import numpy as np  
@@ -17,71 +18,236 @@ import matplotlib.cm as cm
 
 def main(): 
     # Define Engine  
-    turbofan  =  JT9D_7_turbofan_engine( )
+    turbofan  =  JT9D_7_turbofan_engine()
   
     # Run engine
-    altitude            = np.linspace(0,36000,1000) *Units.feet
-    mach                = np.array([0.5])
-    motor_work          = None
-    regenerator         = None
-    shaft_power_offtake = None
-    thrust              = np.zeros_like(altitude )
-    overall_efficiency  = np.zeros_like(altitude )
+    altitude            = np.linspace(0,36000,10) *Units.feet
+    mach_number         = np.linspace(1E-4,0.8,9)
+    thrust              = np.zeros((len(altitude),len(mach_number)))
+    overall_efficiency  = np.zeros((len(altitude),len(mach_number)))
+    thermal_efficiency  = np.zeros((len(altitude),len(mach_number)))
     
-    for i in range(len(altitude)):
-
-        atmosphere_sls = RCAIDE.Analyses.Atmospheric.US_Standard_1976()
-        atmo_data      = atmosphere_sls.compute_values(altitude[i],0.0)
-        planet         = RCAIDE.Attributes.Planets.Earth()
-
-        p   = atmo_data.pressure          
-        T   = atmo_data.temperature       
-        rho = atmo_data.density          
-        a   = atmo_data.speed_of_sound    
-        mu  = atmo_data.dynamic_viscosity      
-
-        # setup conditions
-        conditions_sls = RCAIDE.Analyses.Mission.Common.Results()            
-
-        # freestream conditions    
-        conditions_sls.freestream.altitude                    = np.atleast_2d(altitude[i])
-        conditions_sls.freestream.mach_number                 = np.atleast_2d(mach[i])
-        conditions_sls.freestream.pressure                    = np.atleast_2d(p)
-        conditions_sls.freestream.temperature                 = np.atleast_2d(T)
-        conditions_sls.freestream.density                     = np.atleast_2d(rho)
-        conditions_sls.freestream.dynamic_viscosity           = np.atleast_2d(mu)
-        conditions_sls.freestream.gravity                     = np.atleast_2d(planet.sea_level_gravity)
-        conditions_sls.freestream.isentropic_expansion_factor = np.atleast_2d(turbofan.working_fluid.compute_gamma(T,p))
-        conditions_sls.freestream.Cp                          = np.atleast_2d(turbofan.working_fluid.compute_cp(T,p))
-        conditions_sls.freestream.R                           = np.atleast_2d(turbofan.working_fluid.gas_specific_constant)
-        conditions_sls.freestream.speed_of_sound              = np.atleast_2d(a)
-        conditions_sls.freestream.velocity                    = np.atleast_2d(a*mach[i])  
-
-        net          = RCAIDE.Energy.Networks.Turbofan_Engine()  
-        fuel_line    = RCAIDE.Energy.Distributors.Fuel_Line()  
-        fuel_line.turbofans.append(turbofan)       
-        net.fuel_lines.append(fuel_line)   
-
-        conditions_sls.energy[fuel_line.tag]                                = RCAIDE.Analyses.Mission.Common.Conditions()         
-        conditions_sls.noise[fuel_line.tag]                                 = RCAIDE.Analyses.Mission.Common.Conditions()      
-        sorted_propulsors                                                   = compute_unique_propulsor_groups(fuel_line)
-        fuel_line_results                                                   = conditions_sls.energy[fuel_line.tag] 
-        fuel_line_results[turbofan.propulsor_group]                         = RCAIDE.Analyses.Mission.Common.Conditions()
-        fuel_line_results[turbofan.propulsor_group].turbofan                = RCAIDE.Analyses.Mission.Common.Conditions() 
-        fuel_line_results[turbofan.propulsor_group].unique_turbofan_tags    = sorted_propulsors.unique_turbofan_tags 
-        fuel_line_results.N_turbofans                                       = sorted_propulsors.N_turbofans
-        noise_results                                                       = conditions_sls.noise[fuel_line.tag]
-        noise_results[turbofan.propulsor_group]                             = RCAIDE.Analyses.Mission.Common.Conditions() 
-        noise_results[turbofan.propulsor_group].turbofan                    = RCAIDE.Analyses.Mission.Common.Conditions() 
-        fuel_line_results[turbofan.propulsor_group].turbofan.throttle       = np.array([[1.0]])  
-
-        T , P, mdot,sfc,eta_prop,eta = compute_propulsor_performance(0,fuel_line,turbofan.propulsor_group,fuel_line.turbofans,1,conditions_sls)   
-
-        thrust[i]             = np.linalg.norm(T)
-        overall_efficiency[i] = eta  
- 
-    return 
+    for i in range(len(altitude)): 
+        for j in range(len(mach_number)):
+            planet         = RCAIDE.Library.Attributes.Planets.Earth()
+            atmosphere     = RCAIDE.Framework.Analyses.Atmospheric.US_Standard_1976()
+            atmo_data      = atmosphere.compute_values(altitude[i])
+            
+            p   = atmo_data.pressure          
+            T   = atmo_data.temperature       
+            rho = atmo_data.density          
+            a   = atmo_data.speed_of_sound    
+            mu  = atmo_data.dynamic_viscosity     
+                
+            conditions = RCAIDE.Framework.Mission.Common.Results() 
+            conditions.freestream.altitude                    = np.atleast_1d(0)
+            conditions.freestream.mach_number                 = np.atleast_1d(mach_number[j])
+            conditions.freestream.pressure                    = np.atleast_1d(p)
+            conditions.freestream.temperature                 = np.atleast_1d(T)
+            conditions.freestream.density                     = np.atleast_1d(rho)
+            conditions.freestream.dynamic_viscosity           = np.atleast_1d(mu)
+            conditions.freestream.gravity                     = np.atleast_2d(planet.sea_level_gravity)
+            conditions.freestream.isentropic_expansion_factor = np.atleast_1d(turbofan.working_fluid.compute_gamma(T,p))
+            conditions.freestream.Cp                          = np.atleast_1d(turbofan.working_fluid.compute_cp(T,p))
+            conditions.freestream.R                           = np.atleast_1d(turbofan.working_fluid.gas_specific_constant)
+            conditions.freestream.speed_of_sound              = np.atleast_1d(a)
+            conditions.freestream.velocity                    = np.atleast_1d(a*mach_number[j])  
+        
+            ## setup conditions  
+            fuel_line                = RCAIDE.Library.Components.Energy.Distributors.Fuel_Line()
+            segment                  = RCAIDE.Framework.Mission.Segments.Segment()  
+            segment.state.conditions = conditions     
+            segment.state.conditions.energy[fuel_line.tag] = Conditions()
+            segment.state.conditions.noise[fuel_line.tag]  = Conditions()
+            turbofan.append_operating_conditions(segment,fuel_line) 
+            for tag, item in  turbofan.items(): 
+                if issubclass(type(item), RCAIDE.Library.Components.Component):
+                    item.append_operating_conditions(segment,fuel_line,turbofan) 
+            
+            # set throttle
+            segment.state.conditions.energy[fuel_line.tag][turbofan.tag].throttle[:,0] = 1.0  
+            T,M,P,_,_ = turbofan.compute_performance(segment.state,fuel_line)
+                  
+            combustor                 = turbofan.combustor 
+            core_nozzle               = turbofan.core_nozzle
+            fan_nozzle                = turbofan.fan_nozzle 
+            bypass_ratio              = turbofan.bypass_ratio  
+        
+            # unpack component conditions
+            turbofan_conditions     = conditions.energy[fuel_line.tag][turbofan.tag] 
+            core_nozzle_conditions  = turbofan_conditions[core_nozzle.tag]
+            fan_nozzle_conditions   = turbofan_conditions[fan_nozzle.tag] 
+            
+            # extract properties
+            U_e             = fan_nozzle_conditions.outputs.velocity
+            U_e1            = core_nozzle_conditions.outputs.velocity 
+            mdot_air_core   = turbofan_conditions.core_mass_flow_rate
+            mdot_air_fan    = bypass_ratio *  mdot_air_core  
+            fuel_enthalpy   = combustor.fuel_data.specific_energy 
+            mdot_fuel       = turbofan_conditions.fuel_flow_rate 
+            U_0             = a*mach_number[j]
+            h_f             = combustor.fuel_data.specific_energy  
+            
+            thrust[i,j]             = np.linalg.norm(T)
+            
+            # Overall Efficiency;  Aircraft and Rocket Propulsion Eqn 2.22 
+            overall_efficiency[i,j] = thrust[i,j] * U_0 / (mdot_fuel * fuel_enthalpy)
+            
+            # Thermal efficiecny ;  Aircraft and Rocket Propulsion Eqn 5.49 
+            thermal_efficiency[i,j] = U_0 *( mdot_air_core*(((U_e**2) /2 ) - ((U_0**2) /2 )   ) + mdot_air_fan *(((U_e1**2) /2 ) - ((U_0**2) /2 ) ) +  mdot_fuel*((U_e**2) /2 )   ) /(mdot_fuel *h_f)  
     
+    plot_results(altitude,mach_number,thrust,overall_efficiency,thermal_efficiency)
+    return
+
+def plot_results(altitude,mach_number,thrust,overall_efficiency,thermal_efficiency):
+    ps =  plot_style(number_of_lines = len(mach_number)) 
+    
+    fig    =  plt.figure('Thrust')
+    fig.set_size_inches(7, 6)
+    axis_1 = fig.add_subplot(1,1,1)
+    for i in  range(len(mach_number)):
+        axis_1.plot(thrust[:,i]/Units.lbf,altitude/Units.feet, color = ps.color[i], linestyle = ps.line_style[0],
+                    marker = ps.markers[0], linewidth = ps.line_width, label = 'Mach =' + str( round(mach_number[i], 2))) 
+    axis_1.set_xlabel('Thrust (lb)')
+    axis_1.set_ylabel('Altitude (ft)')
+    axis_1.legend()
+    fig.tight_layout()
+    
+    return
+
+def plot_style(number_of_lines= 10): 
+    plt.rcParams['axes.linewidth'] = 1.
+    plt.rcParams["font.family"] = "Times New Roman"
+    parameters = {'axes.labelsize': 20,
+                  'xtick.labelsize': 14,
+                  'ytick.labelsize': 14,
+                  'axes.titlesize': 18,
+                  #figure.dpi': 1200
+                  }
+
+
+    # Universal Plot Settings  
+    plt.rcParams.update(parameters)
+    plot_parameters                        = Data()
+    plot_parameters.line_width             = 1.5  
+    plot_parameters.line_style             = ['-','--']
+    plot_parameters.marker_size            = 4
+    plot_parameters.legend_fontsize        = '12'
+    plot_parameters.legend_title_font_size = 14
+    plot_parameters.axis_font_size         = 16
+    plot_parameters.title_font_size        = 16   
+    plot_parameters.markers                =  ['o','x','o','v','P','p','^','D','*']
+    plot_parameters.color                  = cm.inferno(np.linspace(0,0.9,number_of_lines)) 
+
+
+    return plot_parameters
+
+def GE_90_engine():
+
+    
+    #------------------------------------------------------------------------------------------------------------------------------------  
+    # Propulsor: Starboard Propulsor
+    #------------------------------------------------------------------------------------------------------------------------------------         
+    turbofan                                    = RCAIDE.Library.Components.Propulsors.Turbofan() 
+    turbofan.tag                                = 'starboard_ge90_propulsor'
+    turbofan.active_fuel_tanks                  = ['b777_fuel_tank']   
+    turbofan.origin                             = [[ 25.72797886 , 9.69802 , -2.04  ]]
+    turbofan.mass_properties.mass               = 7893
+    turbofan.engine_length                      = 7.29
+    turbofan.bypass_ratio                       = 9
+    turbofan.design_altitude                    = 35000.0*Units.ft
+    turbofan.design_mach_number                 = 0.78   
+    turbofan.design_thrust                      = 80000  * Units.N  
+
+
+    # fan                
+    fan                                         = RCAIDE.Library.Components.Propulsors.Converters.Fan()   
+    fan.tag                                     = 'fan'
+    fan.polytropic_efficiency                   = 0.93
+    fan.pressure_ratio                          = 1.7   
+    turbofan.fan                                = fan        
+
+    # working fluid                   
+    turbofan.working_fluid                      = RCAIDE.Library.Attributes.Gases.Air() 
+
+    
+    # Ram inlet 
+    ram                                         = RCAIDE.Library.Components.Propulsors.Converters.Ram()
+    ram.tag                                     = 'ram' 
+    turbofan.ram                                = ram 
+          
+    # inlet nozzle          
+    inlet_nozzle                                = RCAIDE.Library.Components.Propulsors.Converters.Compression_Nozzle()
+    inlet_nozzle.tag                            = 'inlet nozzle'
+    inlet_nozzle.polytropic_efficiency          = 0.98
+    inlet_nozzle.pressure_ratio                 = 0.98 
+    turbofan.inlet_nozzle                       = inlet_nozzle 
+
+    # low pressure compressor    
+    low_pressure_compressor                       = RCAIDE.Library.Components.Propulsors.Converters.Compressor()    
+    low_pressure_compressor.tag                   = 'lpc'
+    low_pressure_compressor.polytropic_efficiency = 0.91
+    low_pressure_compressor.pressure_ratio        = 1.9   
+    turbofan.low_pressure_compressor              = low_pressure_compressor
+
+    ## high pressure compressor  
+    #medium_pressure_compressor                       = RCAIDE.Library.Components.Propulsors.Converters.Compressor()    
+    #medium_pressure_compressor.tag                   = 'hpc'
+    #medium_pressure_compressor.polytropic_efficiency = 0.91
+    #medium_pressure_compressor.pressure_ratio        = 12.38 
+    #turbofan.high_pressure_compressor              = high_pressure_compressor
+
+    # high pressure compressor  
+    high_pressure_compressor                       = RCAIDE.Library.Components.Propulsors.Converters.Compressor()    
+    high_pressure_compressor.tag                   = 'hpc'
+    high_pressure_compressor.polytropic_efficiency = 0.91
+    high_pressure_compressor.pressure_ratio        = 12.38 
+    turbofan.high_pressure_compressor              = high_pressure_compressor
+    
+
+    # low pressure turbine  
+    low_pressure_turbine                           = RCAIDE.Library.Components.Propulsors.Converters.Turbine()   
+    low_pressure_turbine.tag                       ='lpt'
+    low_pressure_turbine.mechanical_efficiency     = 0.99
+    low_pressure_turbine.polytropic_efficiency     = 0.93 
+    turbofan.low_pressure_turbine                  = low_pressure_turbine
+   
+    # high pressure turbine     
+    high_pressure_turbine                          = RCAIDE.Library.Components.Propulsors.Converters.Turbine()   
+    high_pressure_turbine.tag                      ='hpt'
+    high_pressure_turbine.mechanical_efficiency    = 0.99
+    high_pressure_turbine.polytropic_efficiency    = 0.93 
+    turbofan.high_pressure_turbine                 = high_pressure_turbine 
+
+    # combustor  
+    combustor                                      = RCAIDE.Library.Components.Propulsors.Converters.Combustor()   
+    combustor.tag                                  = 'Comb'
+    combustor.efficiency                           = 0.99 
+    combustor.alphac                               = 1.0     
+    combustor.turbine_inlet_temperature            = 1500
+    combustor.pressure_ratio                       = 0.95
+    combustor.fuel_data                            = RCAIDE.Library.Attributes.Propellants.Jet_A()  
+    turbofan.combustor                             = combustor
+
+    # core nozzle
+    core_nozzle                                    = RCAIDE.Library.Components.Propulsors.Converters.Expansion_Nozzle()   
+    core_nozzle.tag                                = 'core nozzle'
+    core_nozzle.polytropic_efficiency              = 0.95
+    core_nozzle.pressure_ratio                     = 0.99  
+    turbofan.core_nozzle                           = core_nozzle
+             
+    # fan nozzle             
+    fan_nozzle                                     = RCAIDE.Library.Components.Propulsors.Converters.Expansion_Nozzle()   
+    fan_nozzle.tag                                 = 'fan nozzle'
+    fan_nozzle.polytropic_efficiency               = 0.95
+    fan_nozzle.pressure_ratio                      = 0.99 
+    turbofan.fan_nozzle                            = fan_nozzle 
+    
+    # design turbofan
+    design_turbofan(turbofan)  
+    # append propulsor to distribution line 
+    
+    return turbofan
 
 def JT9D_7_turbofan_engine(): 
 
@@ -126,6 +292,7 @@ def JT9D_7_turbofan_engine():
     high_pressure_compressor.tag                   = 'hpc'
     high_pressure_compressor.polytropic_efficiency = 0.91
     high_pressure_compressor.pressure_ratio        = 10.2 
+    turbofan.high_pressure_compressor              = high_pressure_compressor
 
     # combustor  
     combustor                                      = RCAIDE.Library.Components.Propulsors.Converters.Combustor()   
