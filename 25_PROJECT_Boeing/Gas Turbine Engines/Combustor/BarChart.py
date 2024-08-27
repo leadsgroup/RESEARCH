@@ -18,26 +18,37 @@ import matplotlib.cm as cm
 
 def main(): 
     # Define Engine  
-    CO2_PSR = 2.5
-    CO2_PFR = 2.6
-    CO2_TOT = 3.16
+    CO2_PSR = 2.6
+    CO2_PFR = 2.65
+    CO2_TOT = 3.174
     CO2_EI  = 3.16
-    plot_results(CO2_PSR,CO2_PFR,CO2_TOT,CO2_EI)
+    err_PSR = ((np.abs(CO2_PSR - CO2_EI))/CO2_EI)*100
+    err_PFR = ((np.abs(CO2_PFR - CO2_EI))/CO2_EI)*100
+    err_TOT = ((np.abs(CO2_TOT - CO2_EI))/CO2_EI)*100
+    
+    plot_results(CO2_PSR,CO2_PFR,CO2_TOT,CO2_EI, err_PSR, err_PFR, err_TOT)
     return
 
-def plot_results(CO2_PSR,CO2_PFR,CO2_TOT,CO2_EI):
+def plot_results(CO2_PSR,CO2_PFR,CO2_TOT,CO2_EI, err_PSR, err_PFR, err_TOT):
         # Get plot style
     ps = plot_style()
 
     # Data for plotting
     categories = ['PSR', 'PFR', 'PSR + PFR']
     values = [CO2_PSR, CO2_PFR, CO2_TOT]
+    errors = [err_PSR, err_PFR, err_TOT]
 
     # Create the figure and axis
     fig, axis_1 = plt.subplots(figsize=(7, 6))
+    fig2, axis_2 = plt.subplots(figsize=(7, 6))
+    
+    # Generate gradient colors of blue
+    cmap = plt.get_cmap("Blues")
+    colors = [cmap((i / (len(values) - 0.25)) + 0.5) for i in range(len(values))]    
 
     # Create bars
-    bars = axis_1.bar(categories, values, color=ps.color[0:3])
+    bars = axis_1.bar(categories, values, color=colors)
+    bars2 = axis_2.bar(categories, errors, color=colors)
 
     # Add a horizontal dotted line for CO2 EI
     axis_1.axhline(y=CO2_EI, color='r', linestyle='--', label=f'EI CO2 = {CO2_EI:.2f}')
@@ -45,12 +56,15 @@ def plot_results(CO2_PSR,CO2_PFR,CO2_TOT,CO2_EI):
     # Set labels and title
     axis_1.set_ylabel('EI [kg/kg]')
     axis_1.set_title('Emission Index of CO2')
+    axis_2.set_ylabel('Percentage error [%]')
+    axis_2.set_title('Percentage error for CO2 EI models')    
 
     # Add legend
-    axis_1.legend(fontsize = ps.legend_fontsize,bbox_to_anchor=(0.05, 0.95),loc='upper left')     
+    axis_1.legend(fontsize = ps.legend_fontsize,bbox_to_anchor=(0.05, 0.95),loc='upper left') 
 
     # Adjust layout
     fig.tight_layout()
+    fig2.tight_layout()
 
     # Show plot
     plt.show()
