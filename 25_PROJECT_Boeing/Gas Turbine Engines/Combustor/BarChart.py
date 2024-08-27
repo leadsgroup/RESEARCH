@@ -19,24 +19,48 @@ import matplotlib.cm as cm
 def main(): 
     # Define Engine  
     CO2_PSR = 2.6
-    CO2_PFR = 2.65
-    CO2_TOT = 3.174
+    CO2_PFR = 2.62929774
+    CO2_TOT = 3.161527
     CO2_EI  = 3.16
-    err_PSR = ((np.abs(CO2_PSR - CO2_EI))/CO2_EI)*100
-    err_PFR = ((np.abs(CO2_PFR - CO2_EI))/CO2_EI)*100
-    err_TOT = ((np.abs(CO2_TOT - CO2_EI))/CO2_EI)*100
+    CO2_err_PSR = ((np.abs(CO2_PSR - CO2_EI))/CO2_EI)*100
+    CO2_err_PFR = ((np.abs(CO2_PFR - CO2_EI))/CO2_EI)*100
+    CO2_err_TOT = ((np.abs(CO2_TOT - CO2_EI))/CO2_EI)*100
     
-    plot_results(CO2_PSR,CO2_PFR,CO2_TOT,CO2_EI, err_PSR, err_PFR, err_TOT)
+    CO_PSR = 
+    CO_PFR = 0.25463357
+    CO_TOT = 0.000061
+    CO_EI  = 0.00201
+    CO_err_PSR = ((np.abs(CO_PSR - CO_EI))/CO_EI)*100
+    CO_err_PFR = ((np.abs(CO_PFR - CO_EI))/CO_EI)*100
+    CO_err_TOT = ((np.abs(CO_TOT - CO_EI))/CO_EI)*100
+    
+    H2O_PSR = 
+    H2O_PFR = 1.14962815
+    H2O_TOT = 1.210699
+    H2O_EI  = 1.34 
+    H2O_err_PSR = ((np.abs(H2O_PSR - H2O_EI))/H2O_EI)*100
+    H2O_err_PFR = ((np.abs(H2O_PFR - H2O_EI))/H2O_EI)*100
+    H2O_err_TOT = ((np.abs(H2O_TOT - H2O_EI))/H2O_EI)*100   
+    
+    NOx_PSR = 
+    NOx_PFR = 6.94051579e-02 + 7.01306185e-05
+    NOx_TOT = 0.155204 + 0.202018
+    NOx_EI  = 0.01514 
+    NOx_err_PSR = ((np.abs(NOx_PSR - NOx_EI))/NOx_EI)*100
+    NOx_err_PFR = ((np.abs(NOx_PFR - NOx_EI))/NOx_EI)*100
+    NOx_err_TOT = ((np.abs(NOx_TOT - NOx_EI))/NOx_EI)*100    
+    
+    plot_results(CO2_PSR,CO2_PFR,CO2_TOT,CO2_EI, CO2_err_PSR, CO2_err_PFR, CO2_err_TOT)
     return
 
-def plot_results(CO2_PSR,CO2_PFR,CO2_TOT,CO2_EI, err_PSR, err_PFR, err_TOT):
+def plot_results(CO2_PSR,CO2_PFR,CO2_TOT,CO2_EI, CO2_err_PSR, CO2_err_PFR, CO2_err_TOT):
         # Get plot style
     ps = plot_style()
 
     # Data for plotting
     categories = ['PSR', 'PFR', 'PSR + PFR']
     values = [CO2_PSR, CO2_PFR, CO2_TOT]
-    errors = [err_PSR, err_PFR, err_TOT]
+    errors = [CO2_err_PSR, CO2_err_PFR, CO2_err_TOT]
 
     # Create the figure and axis
     fig, axis_1 = plt.subplots(figsize=(7, 6))

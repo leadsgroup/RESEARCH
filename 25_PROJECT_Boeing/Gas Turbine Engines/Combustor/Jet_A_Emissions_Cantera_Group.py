@@ -8,8 +8,8 @@ def main():
 
     ti        = time.time()
     
-    gas = ct.Solution('JetFuelSurrogate.yaml')   # Less accurate model (no NOx), faster
-    #gas = ct.Solution('chem.yaml')              # More accurate model (NOx), slower    
+    #gas = ct.Solution('JetFuelSurrogate.yaml')   # Less accurate model (no NOx), faster
+    gas = ct.Solution('chem.yaml')              # More accurate model (NOx), slower    
     
     # ENGINE DESIGN PARAMETRS 
     area_out  = 1  # Assuming the area is 1 m^2 for simplification
@@ -29,13 +29,13 @@ def main():
     residence_time_pfr      = np.array([5 ,10]) * 1E-4 # np.linspace(1,10,10)*1e-4 # Residence time in Secondary Zone
     #residence_time_pfr      = np.linspace(1,10,10)*1e-4 # Residence time in Secondary Zone
 
-    dict_fuel = {'N-C12H26':0.6, 'A1CH3':0.2, 'A1':0.2} # Less accurate model (no NOx), faster
-    #dict_fuel = {'NC10H22':0.16449, 'NC12H26':0.34308, 'NC16H34':0.10335, 'IC8H18':0.08630, 'NC7H14':0.07945, 'C6H5C2H5': 0.07348, 'C6H5C4H9': 0.05812, 'C10H7CH3': 0.10972}      # More accurate model (NOx), slower   
+    #dict_fuel = {'N-C12H26':0.6, 'A1CH3':0.2, 'A1':0.2} # Less accurate model (no NOx), faster
+    dict_fuel = {'NC10H22':0.16449, 'NC12H26':0.34308, 'NC16H34':0.10335, 'IC8H18':0.08630, 'NC7H14':0.07945, 'C6H5C2H5': 0.07348, 'C6H5C4H9': 0.05812, 'C10H7CH3': 0.10972}      # More accurate model (NOx), slower   
     dict_oxy = {'O2':0.2095, 'N2':0.7809, 'AR':0.0093, 'CO2':0.0003}
 
     #-------------------------------------------------------------------------------- 
-    list_sp = ['CO', 'CO2', 'H2O'] # Less accurate model (no NOx), faster
-    #list_sp   = ['CO', 'CO2', 'H2O', 'NO', 'NO2', 'CSOLID'] # More accurate model (NOx), slower
+    #list_sp = ['CO', 'CO2', 'H2O'] # Less accurate model (no NOx), faster
+    list_sp   = ['CO', 'CO2', 'H2O', 'NO', 'NO2', 'CSOLID'] # More accurate model (NOx), slower
     col_names = ['tau(s)', 'Tout(K)', 'T_stag_out','P_stag_out', 'h_stag_out', 'FAR'] + ['X_' +str(sp) for sp in list_sp] + ['Y_' +str(sp) for sp in list_sp] + ['EI_' +str(sp) for sp in list_sp]
     df        = pd.DataFrame(columns=col_names)
     
