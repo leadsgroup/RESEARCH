@@ -17,12 +17,13 @@ import matplotlib.cm as cm
 # ----------------------------------------------------------------------
 
 def main(): 
-    # Define Engine  
-    turbofan  =  JT9D_7_turbofan_engine()
+    # Define Engine
+    PSR_PFR_combustor_model_flag  =  True 
+    turbofan  =  JT9D_7_turbofan_engine(PSR_PFR_combustor_model_flag )
   
     # Run engine
-    altitude            =   np.linspace(0,35000,8) *Units.feet
-    mach_number         =  np.linspace(1E-4,0.8,9)
+    altitude            =  np.array([35000])*Units.feet # np.linspace(0,35000,8) *Units.feet
+    mach_number         =  np.array([0.78]) # np.linspace(1E-4,0.8,9)
     thrust              = np.zeros((len(altitude),len(mach_number)))
     overall_efficiency  = np.zeros((len(altitude),len(mach_number)))
     thermal_efficiency  = np.zeros((len(altitude),len(mach_number)))
@@ -185,7 +186,7 @@ def plot_style(number_of_lines= 10):
 
     return plot_parameters
 
-def GE_90_engine():
+def GE_90_engine(PSR_PFR_combustor_model_flag ):
 
     
     #------------------------------------------------------------------------------------------------------------------------------------  
@@ -292,15 +293,16 @@ def GE_90_engine():
     
     return turbofan
 
-def JT9D_7_turbofan_engine(): 
+def JT9D_7_turbofan_engine(PSR_PFR_combustor_model_flag ): 
 
     turbofan                                    = RCAIDE.Library.Components.Propulsors.Turbofan() 
     turbofan.tag                                = 'turbofan'
     turbofan.origin                             = [[13.72, 4.86,-1.1]] 
     turbofan.engine_length                      = 2.71     
+    turbofan.engine_diameter                    = 2.428
     turbofan.bypass_ratio                       = 4.8 # checked  
     turbofan.design_altitude                    = 35000.0*Units.ft # checked  
-    turbofan.design_mach_number                 = 0.78    # checked  
+    turbofan.design_mach_number                 = 0.78    # checked
     turbofan.design_thrust                      = 10000*Units.lbf # checked   
 
     # fan                
@@ -344,7 +346,8 @@ def JT9D_7_turbofan_engine():
     combustor.alphac                               = 1.0     
     combustor.turbine_inlet_temperature            = 1273.889
     combustor.pressure_ratio                       = 0.95
-    combustor.fuel_data                            = RCAIDE.Library.Attributes.Propellants.Jet_A1()  
+    combustor.use_PSR_PFR_combustor_model          = PSR_PFR_combustor_model_flag 
+    combustor.fuel_data                            = RCAIDE.Library.Attributes.Propellants.Jet_A()  
     turbofan.combustor                             = combustor
 
     # low pressure turbine  
