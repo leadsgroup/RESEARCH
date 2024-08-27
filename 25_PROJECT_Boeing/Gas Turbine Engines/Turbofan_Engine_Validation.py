@@ -113,8 +113,7 @@ def main():
             # Overall Efficiency;  Aircraft and Rocket Propulsion Eqn 2.22 
             overall_efficiency[i,j] = thrust[i,j] * U_0 / (mdot_fuel * fuel_enthalpy)
             
-            # Thermal efficiecny ;  Aircraft and Rocket Propulsion Eqn 5.49 
-            #thermal_efficiency[i,j] = U_0 *( mdot_air_core*(((U_e**2)/2)-((U_0**2)/2)) + mdot_air_fan*(((U_e1**2)/2)-((U_0**2)/2)) +  mdot_fuel*((U_e**2)/2) ) /(mdot_fuel *h_f)
+            # Thermal efficiecny ;  Aircraft and Rocket Propulsion Eqn 5.49  
             thermal_efficiency[i,j] = 1 -  (  (mdot_air_core +  mdot_fuel)*(h_e -  h_0) + mdot_air_fan*(h_e1 - h_0) + mdot_fuel *h_0  ) /( (mdot_air_core +  mdot_fuel)*h_t4 - mdot_air_core *h_t3 )  
     plot_results(altitude,mach_number,thrust,overall_efficiency,thermal_efficiency)
     return
