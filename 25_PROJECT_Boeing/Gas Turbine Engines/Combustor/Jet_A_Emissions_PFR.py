@@ -15,8 +15,8 @@ import matplotlib.pyplot as plt
 # the first to last reactor, integrating each one to steady state.
 
 # import kinetic mechanism for Jet A + air
-#JetA_PFR = ct.Solution('JetFuelSurrogate.yaml')             # [1]    Simpler kinetic mechanism, faster simulation
-JetA_PFR = ct.Solution('chem.yaml')                        # [2]    More accurate kinetic mechanism, slower simulation
+JetA_PFR = ct.Solution('JetFuelSurrogate.yaml')             # [1]    Simpler kinetic mechanism, faster simulation
+#JetA_PFR = ct.Solution('chem.yaml')                        # [2]    More accurate kinetic mechanism, slower simulation
                                                             
 # set initial conditions                                    
 T_0    = 700                                                # [K]    combustor inlet temperature 
@@ -29,8 +29,8 @@ n_steps = 100                                               # [-]    number of i
 
 # define the fuel and oxidizer composition by species 
 # and molar fraction    
-#fuel     = 'N-C12H26:0.6, A1CH3:0.2, A1:0.2'                                                                                                              # [1] Simpler kinetic mechanism, faster simulation    
-fuel = 'NC10H22:0.16449, NC12H26:0.34308, NC16H34:0.10335, IC8H18:0.08630, NC7H14:0.07945, C6H5C2H5: 0.07348, C6H5C4H9: 0.05812, C10H7CH3: 0.10972'      # [2] More accurate kinetic mechanism, slower simulation    
+fuel     = 'N-C12H26:0.6, A1CH3:0.2, A1:0.2'                                                                                                              # [1] Simpler kinetic mechanism, faster simulation    
+#fuel = 'NC10H22:0.16449, NC12H26:0.34308, NC16H34:0.10335, IC8H18:0.08630, NC7H14:0.07945, C6H5C2H5: 0.07348, C6H5C4H9: 0.05812, C10H7CH3: 0.10972'      # [2] More accurate kinetic mechanism, slower simulation    
 oxidizer = 'O2:0.2095, N2:0.7809, AR:0.0093, CO2:0.0003'                                                                                                  # air composition
 
 # compute additional combustor parameters 
@@ -79,27 +79,27 @@ residence_time_PFR = np.zeros_like(PFR_z)                                       
 X_CO2 = np.zeros_like(PFR_z)                                                                                           # initialize the vector of molar ratio for CO2
 X_CO = np.zeros_like(PFR_z)                                                                                            # initialize the vector of molar ratio for CO
 X_H2O = np.zeros_like(PFR_z)                                                                                           # initialize the vector of molar ratio for H2O
-X_NO2 = np.zeros_like(PFR_z)                                                                                           # initialize the vector of molar ratio for NO2
-X_NO = np.zeros_like(PFR_z)                                                                                            # initialize the vector of molar ratio for NO
-X_soot = np.zeros_like(PFR_z)                                                                                          # initialize the vector of molar ratio for soot
+#X_NO2 = np.zeros_like(PFR_z)                                                                                           # initialize the vector of molar ratio for NO2
+#X_NO = np.zeros_like(PFR_z)                                                                                            # initialize the vector of molar ratio for NO
+#X_soot = np.zeros_like(PFR_z)                                                                                          # initialize the vector of molar ratio for soot
 Y_CO2 = np.zeros_like(PFR_z)                                                                                           # initialize the vector of mass ratio for CO2
 Y_CO = np.zeros_like(PFR_z)                                                                                            # initialize the vector of mass ratio for CO
 Y_H2O = np.zeros_like(PFR_z)                                                                                           # initialize the vector of mass ratio for H2O
-Y_NO2 = np.zeros_like(PFR_z)                                                                                           # initialize the vector of mass ratio for NO2
-Y_NO = np.zeros_like(PFR_z)                                                                                            # initialize the vector of mass ratio for NO
-Y_soot = np.zeros_like(PFR_z)                                                                                          # initialize the vector of mass ratio for soot
+#Y_NO2 = np.zeros_like(PFR_z)                                                                                           # initialize the vector of mass ratio for NO2
+#Y_NO = np.zeros_like(PFR_z)                                                                                            # initialize the vector of mass ratio for NO
+#Y_soot = np.zeros_like(PFR_z)                                                                                          # initialize the vector of mass ratio for soot
 M_CO2 = np.zeros_like(PFR_z)                                                                                           # initialize the vector of mass for CO2
 M_CO = np.zeros_like(PFR_z)                                                                                            # initialize the vector of mass for CO
 M_H2O = np.zeros_like(PFR_z)                                                                                           # initialize the vector of mass for H2O
-M_NO2 = np.zeros_like(PFR_z)                                                                                           # initialize the vector of mass ratio for NO2
-M_NO = np.zeros_like(PFR_z)                                                                                            # initialize the vector of mass ratio for NO
-M_soot = np.zeros_like(PFR_z)                                                                                          # initialize the vector of mass ratio for soot
+#M_NO2 = np.zeros_like(PFR_z)                                                                                           # initialize the vector of mass ratio for NO2
+#M_NO = np.zeros_like(PFR_z)                                                                                            # initialize the vector of mass ratio for NO
+#M_soot = np.zeros_like(PFR_z)                                                                                          # initialize the vector of mass ratio for soot
 EI_CO2_JetA_PFR = np.zeros_like(PFR_z)                                                                                 # initialize the vector of EI for CO2
 EI_CO_JetA_PFR = np.zeros_like(PFR_z)                                                                                  # initialize the vector of EI for CO
 EI_H2O_JetA_PFR = np.zeros_like(PFR_z)                                                                                 # initialize the vector of EI for H2O
-EI_NO2_JetA_PFR = np.zeros_like(PFR_z)                                                                                 # initialize the vector of EI for NO2
-EI_NO_JetA_PFR = np.zeros_like(PFR_z)                                                                                  # initialize the vector of EI for NO
-EI_soot_JetA_PFR = np.zeros_like(PFR_z)                                                                                # initialize the vector of EI for soot
+#EI_NO2_JetA_PFR = np.zeros_like(PFR_z)                                                                                 # initialize the vector of EI for NO2
+#EI_NO_JetA_PFR = np.zeros_like(PFR_z)                                                                                  # initialize the vector of EI for NO
+#EI_soot_JetA_PFR = np.zeros_like(PFR_z)                                                                                # initialize the vector of EI for soot
 mass = 0                                                                                                               # initialize the mass of Jet A + air
 mass_air = 0                                                                                                           # initialize the mass air
 states_JetA_PFR = ct.SolutionArray(combustor_JetA_PFR.thermo, extra=['mass', 'mass_air'])                              # define the variables of the solution
@@ -124,32 +124,32 @@ for n in range(n_steps):
     X_CO2[n] = combustor_JetA_PFR.thermo['CO2'].X[0]                                                                   # vector of molar ratio for CO2
     X_CO[n] = combustor_JetA_PFR.thermo['CO'].X[0]                                                                     # vector of molar ratio for CO
     X_H2O[n] = combustor_JetA_PFR.thermo['H2O'].X[0]                                                                   # vector of molar ratio for H2O
-    X_NO2[n] = combustor_JetA_PFR.thermo['NO2'].X[0]                                                                   # vector of molar ratio for NO2
-    X_NO[n] = combustor_JetA_PFR.thermo['NO'].X[0]                                                                     # vector of molar ratio for NO
-    X_soot[n] = combustor_JetA_PFR.thermo['CSOLID'].X[0]                                                               # vector of molar ratio for soot
+    #X_NO2[n] = combustor_JetA_PFR.thermo['NO2'].X[0]                                                                   # vector of molar ratio for NO2
+    #X_NO[n] = combustor_JetA_PFR.thermo['NO'].X[0]                                                                     # vector of molar ratio for NO
+    #X_soot[n] = combustor_JetA_PFR.thermo['CSOLID'].X[0]                                                               # vector of molar ratio for soot
     
     # Extract mass fractions
     Y_CO2[n] = combustor_JetA_PFR.thermo['CO2'].Y[0]                                                                   # vector of mass ratio for CO2
     Y_CO[n] = combustor_JetA_PFR.thermo['CO'].Y[0]                                                                     # vector of mass ratio for CO
     Y_H2O[n] = combustor_JetA_PFR.thermo['H2O'].Y[0]                                                                   # vector of mass ratio for H2O
-    Y_NO2[n] = combustor_JetA_PFR.thermo['NO2'].Y[0]                                                                   # vector of molar ratio for NO2
-    Y_NO[n] = combustor_JetA_PFR.thermo['NO'].Y[0]                                                                     # vector of molar ratio for NO
-    Y_soot[n] = combustor_JetA_PFR.thermo['CSOLID'].Y[0]                                                               # vector of molar ratio for soot  
+    #Y_NO2[n] = combustor_JetA_PFR.thermo['NO2'].Y[0]                                                                   # vector of molar ratio for NO2
+    #Y_NO[n] = combustor_JetA_PFR.thermo['NO'].Y[0]                                                                     # vector of molar ratio for NO
+    #Y_soot[n] = combustor_JetA_PFR.thermo['CSOLID'].Y[0]                                                               # vector of molar ratio for soot  
     
     if n == 0:
         M_CO2[n] = Y_CO2[n] * combustor_JetA_PFR.mass                                                                  
         M_CO[n] = Y_CO[n] * combustor_JetA_PFR.mass                                                                    
         M_H2O[n] = Y_H2O[n] * combustor_JetA_PFR.mass                                                                  
-        M_NO2[n] = Y_NO2[n] * combustor_JetA_PFR.mass                                                                  
-        M_NO[n] = Y_NO[n] * combustor_JetA_PFR.mass                                                                    
-        M_soot[n] = Y_soot[n] * combustor_JetA_PFR.mass                                                                
+        #M_NO2[n] = Y_NO2[n] * combustor_JetA_PFR.mass                                                                  
+        #M_NO[n] = Y_NO[n] * combustor_JetA_PFR.mass                                                                    
+        #M_soot[n] = Y_soot[n] * combustor_JetA_PFR.mass                                                                
     else:
         M_CO2[n] = M_CO2[n-1] + Y_CO2[n] * combustor_JetA_PFR.mass                                                     # vector of mass for CO2
         M_CO[n] = M_CO[n-1] + Y_CO[n] * combustor_JetA_PFR.mass                                                        # vector of mass for CO
         M_H2O[n] = M_H2O[n-1] + Y_H2O[n] * combustor_JetA_PFR.mass                                                     # vector of mass for H2O
-        M_NO2[n] = M_NO2[n-1] + Y_NO2[n] * combustor_JetA_PFR.mass                                                     # vector of mass for NO2
-        M_NO[n] = M_NO[n-1] + Y_NO[n] * combustor_JetA_PFR.mass                                                        # vector of mass for NO
-        M_soot[n] = M_soot[n-1] + Y_soot[n] * combustor_JetA_PFR.mass                                                  # vector of mass for soot       
+        #M_NO2[n] = M_NO2[n-1] + Y_NO2[n] * combustor_JetA_PFR.mass                                                     # vector of mass for NO2
+        #M_NO[n] = M_NO[n-1] + Y_NO[n] * combustor_JetA_PFR.mass                                                        # vector of mass for NO
+        #M_soot[n] = M_soot[n-1] + Y_soot[n] * combustor_JetA_PFR.mass                                                  # vector of mass for soot       
     
     for species in JetA_PFR.species_names:
         total_emissions_JetA_PFR[species] += combustor_JetA_PFR.thermo[species].Y * combustor_JetA_PFR.mass            # total emissions for each species
@@ -161,9 +161,9 @@ for n in range(n_steps):
     EI_CO2_JetA_PFR[n] = total_emissions_JetA_PFR['CO2'] / (mass - mass_air)                                           # vector of EI for CO2
     EI_CO_JetA_PFR[n] = total_emissions_JetA_PFR['CO'] / (mass - mass_air)                                             # vector of EI for CO
     EI_H2O_JetA_PFR[n] = total_emissions_JetA_PFR['H2O'] / (mass - mass_air)                                           # vector of EI for H2O
-    EI_NO2_JetA_PFR[n] = total_emissions_JetA_PFR['NO2'] / (mass - mass_air)                                           # vector of EI for NO2
-    EI_NO_JetA_PFR[n] = total_emissions_JetA_PFR['NO'] / (mass - mass_air)                                             # vector of EI for NO
-    EI_soot_JetA_PFR[n] = total_emissions_JetA_PFR['CSOLID'] / (mass - mass_air)                                       # vector of EI for soot    
+    #EI_NO2_JetA_PFR[n] = total_emissions_JetA_PFR['NO2'] / (mass - mass_air)                                           # vector of EI for NO2
+    #EI_NO_JetA_PFR[n] = total_emissions_JetA_PFR['NO'] / (mass - mass_air)                                             # vector of EI for NO
+    #EI_soot_JetA_PFR[n] = total_emissions_JetA_PFR['CSOLID'] / (mass - mass_air)                                       # vector of EI for soot    
     
     states_JetA_PFR.append(combustor_JetA_PFR.thermo.state, mass=mass, mass_air=mass_air)                              # write output data
 
@@ -189,34 +189,34 @@ ax1[2].annotate('Typical EI value: 1.34', xy=(0.5, 1.34), xytext=(0.5, 1.32), te
 ax1[2].set_title('Emission Index H2O', color='C2')
 ax1[2].set_ylabel('EI [kg/kg]')
 
-f, ax1 = plt.subplots(3, 1, figsize=(16, 12))
-f.suptitle('JetA Surrogate PFR Emissions')
-subtitle = f'Equivalence ratio: {equiv_ratio}, Temperature: {JetA_PFR.T:.1f} K, Pressure: {JetA_PFR.P/ct.one_atm:.1f} atm, Length: {length} m, Area: {area} m^2'
-plt.figtext(0.5, 0.925, subtitle, ha='center', fontsize=12)
-ax1[0].plot(PFR_z, EI_NO2_JetA_PFR, '.-', color='C0')
-ax1[0].axhline(y=0.01, color='r', linestyle='--')
-ax1[0].annotate('Typical EI value: 0.01', xy=(0.5, 0.01), xytext=(0.5, 0.008), textcoords='data', color='r', arrowprops=dict(facecolor='r', arrowstyle='->'))
-ax1[0].set_title('Emission Index NO2', color='C0')
-ax1[0].set_ylabel('EI [kg/kg]')
-ax1[1].plot(PFR_z, EI_NO_JetA_PFR, '.-', color='C1')
-ax1[1].axhline(y=0.01, color='r', linestyle='--')
-ax1[1].annotate('Typical EI value: 0.01', xy=(0.5, 0.01), xytext=(0.5, 0.008), textcoords='data', color='r', arrowprops=dict(facecolor='r', arrowstyle='->'))
-ax1[1].set_title('Emission Index NO', color='C1')
-ax1[1].set_ylabel('EI [kg/kg]')
-ax1[2].plot(PFR_z, EI_soot_JetA_PFR, '.-', color='C2')
-ax1[2].axhline(y=0.00004, color='r', linestyle='--')
-ax1[2].annotate('Typical EI value: 0.00004', xy=(0.5, 0.00004), xytext=(0.5, -0.00196), textcoords='data', color='r', arrowprops=dict(facecolor='r', arrowstyle='->'))
-ax1[2].set_xlabel('Combustor length [m]')
-ax1[2].set_title('Emission Index C-soot', color='C2')
-ax1[2].set_ylabel('EI [kg/kg]')
+#f, ax1 = plt.subplots(3, 1, figsize=(16, 12))
+#f.suptitle('JetA Surrogate PFR Emissions')
+#subtitle = f'Equivalence ratio: {equiv_ratio}, Temperature: {JetA_PFR.T:.1f} K, Pressure: {JetA_PFR.P/ct.one_atm:.1f} atm, Length: {length} m, Area: {area} m^2'
+#plt.figtext(0.5, 0.925, subtitle, ha='center', fontsize=12)
+#ax1[0].plot(PFR_z, EI_NO2_JetA_PFR, '.-', color='C0')
+#ax1[0].axhline(y=0.01, color='r', linestyle='--')
+#ax1[0].annotate('Typical EI value: 0.01', xy=(0.5, 0.01), xytext=(0.5, 0.008), textcoords='data', color='r', arrowprops=dict(facecolor='r', arrowstyle='->'))
+#ax1[0].set_title('Emission Index NO2', color='C0')
+#ax1[0].set_ylabel('EI [kg/kg]')
+#ax1[1].plot(PFR_z, EI_NO_JetA_PFR, '.-', color='C1')
+#ax1[1].axhline(y=0.01, color='r', linestyle='--')
+#ax1[1].annotate('Typical EI value: 0.01', xy=(0.5, 0.01), xytext=(0.5, 0.008), textcoords='data', color='r', arrowprops=dict(facecolor='r', arrowstyle='->'))
+#ax1[1].set_title('Emission Index NO', color='C1')
+#ax1[1].set_ylabel('EI [kg/kg]')
+#ax1[2].plot(PFR_z, EI_soot_JetA_PFR, '.-', color='C2')
+#ax1[2].axhline(y=0.00004, color='r', linestyle='--')
+#ax1[2].annotate('Typical EI value: 0.00004', xy=(0.5, 0.00004), xytext=(0.5, -0.00196), textcoords='data', color='r', arrowprops=dict(facecolor='r', arrowstyle='->'))
+#ax1[2].set_xlabel('Combustor length [m]')
+#ax1[2].set_title('Emission Index C-soot', color='C2')
+#ax1[2].set_ylabel('EI [kg/kg]')
 
 plt.figure(figsize=(16, 12))
 plt.plot(PFR_z, X_CO2, '.-', label='CO2 Mole Fraction', color='C0')
 plt.plot(PFR_z, X_CO, '.-', label='CO Mole Fraction', color='C1')
 plt.plot(PFR_z, X_H2O, '.-', label='H2O Mole Fraction', color='C2')
-plt.plot(PFR_z, X_NO2, '.-', label='NO2 Mole Fraction', color='C3')
-plt.plot(PFR_z, X_NO, '.-', label='NO Mole Fraction', color='C4')
-plt.plot(PFR_z, X_soot, '.-', label='Soot Mole Fraction', color='C5')
+#plt.plot(PFR_z, X_NO2, '.-', label='NO2 Mole Fraction', color='C3')
+#plt.plot(PFR_z, X_NO, '.-', label='NO Mole Fraction', color='C4')
+#plt.plot(PFR_z, X_soot, '.-', label='Soot Mole Fraction', color='C5')
 plt.xlabel('Combustor length [m]')
 plt.ylabel('Mole Fraction')
 plt.title('Mole Fraction of CO2, CO, H2O, NO2, NO and soot vs. combustor length')
@@ -227,9 +227,9 @@ plt.figure(figsize=(16, 12))
 plt.plot(PFR_z, Y_CO2, '.-', label='CO2 Mass Fraction', color='C0')
 plt.plot(PFR_z, Y_CO, '.-', label='CO Mass Fraction', color='C1')
 plt.plot(PFR_z, Y_H2O, '.-', label='H2O Mass Fraction', color='C2')
-plt.plot(PFR_z, Y_NO2, '.-', label='NO2 Mass Fraction', color='C3')
-plt.plot(PFR_z, Y_NO, '.-', label='NO Mass Fraction', color='C4')
-plt.plot(PFR_z, Y_soot, '.-', label='Soot Mass Fraction', color='C5')
+#plt.plot(PFR_z, Y_NO2, '.-', label='NO2 Mass Fraction', color='C3')
+#plt.plot(PFR_z, Y_NO, '.-', label='NO Mass Fraction', color='C4')
+#plt.plot(PFR_z, Y_soot, '.-', label='Soot Mass Fraction', color='C5')
 plt.xlabel('Combustor length [m]')
 plt.ylabel('Mass Fraction')
 plt.title('Mass Fraction of CO2, CO, H2O, NO2, NO and soot vs. combustor length')
@@ -240,9 +240,9 @@ plt.figure(figsize=(16, 12))
 plt.plot(PFR_z, M_CO2, '.-', label='CO2 Mass', color='C0')
 plt.plot(PFR_z, M_CO, '.-', label='CO Mass', color='C1')
 plt.plot(PFR_z, M_H2O, '.-', label='H2O Mass', color='C2')
-plt.plot(PFR_z, M_NO2, '.-', label='NO2 Mass', color='C3')
-plt.plot(PFR_z, M_NO, '.-', label='NO Mass', color='C4')
-plt.plot(PFR_z, M_soot, '.-', label='Soot Mass', color='C5')
+#plt.plot(PFR_z, M_NO2, '.-', label='NO2 Mass', color='C3')
+#plt.plot(PFR_z, M_NO, '.-', label='NO Mass', color='C4')
+#plt.plot(PFR_z, M_soot, '.-', label='Soot Mass', color='C5')
 plt.xlabel('Combustor length [m]')
 plt.ylabel('Mass[kg]')
 plt.title('Mass of CO2, CO, H2O, NO2, NO and soot vs. combustor length')

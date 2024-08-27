@@ -6,50 +6,54 @@ import time
 
 def main():
 
-    ti = time.time()
+    ti        = time.time()
+    
+    gas = ct.Solution('JetFuelSurrogate.yaml')   # Less accurate model (no NOx), faster
+    #gas = ct.Solution('chem.yaml')              # More accurate model (NOx), slower    
     
     # ENGINE DESIGN PARAMETRS 
-    area_out    = 1  # Assuming the area is 1 m^2 for simplification
+    area_out  = 1  # Assuming the area is 1 m^2 for simplification
         
     # INPUT PARAMTERTERS  
-    T_stag0   =  np.array([600,600])
-    P_stag0   =  np.array([25,25])*ct.one_atm 
+    T_stag0   = np.array([800,800])             # Stagnation Temperature (Tt_in)
+    P_stag0   = np.array([25,25])*ct.one_atm    # Stagnation Pressure (Pt_in)
+    M0        = np.array([0.2,0.2])              # Inlet Mach number
+    gamma     = gas.cp_mass / gas.cv_mass
+    equivalence_ratio       = np.array([0.7, 0.7])
     
     # initial conditions 
-    temp      = T_stag0 # MATTEO NEED TO UPDATE 
-    patm      = P_stag0 # MATTEO NEED TO UPDATE 
+    temp      = T_stag0 / (1 + 0.5 * (gamma - 1) * M0**2)                         # Static Temperature
+    patm      = P_stag0 / (1 + 0.5 * (gamma - 1) * M0**2)**(gamma / (gamma - 1))  # Static Pressure
+ 
+    residence_time_psr      = np.array([5e-3,5e-3]) # Residence time in Flame Zone
+    residence_time_pfr      = np.array([5 ,10]) * 1E-4 # np.linspace(1,10,10)*1e-4 # Residence time in Secondary Zone
+    #residence_time_pfr      = np.linspace(1,10,10)*1e-4 # Residence time in Secondary Zone
 
-    equivalence_ratio = np.array([0.7, 0.7]) 
-    tpfr      = np.array([5 ,10]) * 1E-4 # np.linspace(1,10,10)*1e-4 # psr residence time in sec
-    tpsr      = np.array([5e-3,5e-3])
-    
-    dict_fuel = {'N-C12H26':0.6, 'A1CH3':0.2, 'A1':0.2}
-    #dict_fuel = {'NC10H22':0.16449, 'NC12H26':0.34308, 'NC16H34':0.10335, 'IC8H18':0.08630, 'NC7H14':0.07945, 'C6H5C2H5': 0.07348, 'C6H5C4H9': 0.05812, 'C10H7CH3': 0.10972}      # [2] More accurate kinetic mechanism, slower simulation    
+    dict_fuel = {'N-C12H26':0.6, 'A1CH3':0.2, 'A1':0.2} # Less accurate model (no NOx), faster
+    #dict_fuel = {'NC10H22':0.16449, 'NC12H26':0.34308, 'NC16H34':0.10335, 'IC8H18':0.08630, 'NC7H14':0.07945, 'C6H5C2H5': 0.07348, 'C6H5C4H9': 0.05812, 'C10H7CH3': 0.10972}      # More accurate model (NOx), slower   
     dict_oxy = {'O2':0.2095, 'N2':0.7809, 'AR':0.0093, 'CO2':0.0003}
-    
-    gas = ct.Solution('JetFuelSurrogate.yaml')
-    #gas = ct.Solution('chem.yaml')  
+
     #-------------------------------------------------------------------------------- 
-    list_sp = ['CO', 'CO2', 'H2O']
-    #list_sp   = ['CO', 'CO2', 'H2O', 'NO', 'NO2', 'CSOLID']
-    col_names = ['tau(s)', 'Tout(K)', 'EqRatio','Ent', 'tau_b', 'pi_b'] + ['X_' +str(sp) for sp in list_sp] + ['Y_' +str(sp) for sp in list_sp] + ['EI_' +str(sp) for sp in list_sp]
+    list_sp = ['CO', 'CO2', 'H2O'] # Less accurate model (no NOx), faster
+    #list_sp   = ['CO', 'CO2', 'H2O', 'NO', 'NO2', 'CSOLID'] # More accurate model (NOx), slower
+    col_names = ['tau(s)', 'Tout(K)', 'T_stag_out','P_stag_out', 'h_stag_out', 'FAR'] + ['X_' +str(sp) for sp in list_sp] + ['Y_' +str(sp) for sp in list_sp] + ['EI_' +str(sp) for sp in list_sp]
     df        = pd.DataFrame(columns=col_names)
     
-    for n in range(len(tpfr)):
-        gas, EI, phi, h, tau_b, pi_b = combustor(tpfr[n],temp[n],patm[n],equivalence_ratio[n],tpsr[n],dict_fuel,dict_oxy,gas,area_out)
+    for n in range(len(residence_time_pfr)):
+        gas, EI, T_stag_out, P_stag_out, h_stag_out, FAR = combustor(residence_time_pfr[n],temp[n],patm[n],equivalence_ratio[n],residence_time_psr[n],dict_fuel,dict_oxy,gas,area_out)
         sp_idx = [gas.species_index(sp) for sp in list_sp]
-        data_n = [tpfr[n], gas.T, phi, h, tau_b, pi_b] + list(gas.X[sp_idx]) + list(gas.Y[sp_idx]) + list(EI[sp_idx])
+        data_n = [residence_time_pfr[n], gas.T, T_stag_out, P_stag_out, h_stag_out, FAR] + list(gas.X[sp_idx]) + list(gas.Y[sp_idx]) + list(EI[sp_idx])
         df.loc[n] = data_n
     
     tf           = time.time()
-    elapsed_time = round((tf-ti)/len(tpfr),2)
+    elapsed_time = round((tf-ti)/len(residence_time_pfr),2)
     print('Simulation Time: ' + str(elapsed_time) + ' seconds per timestep')   
         
     plot_emission(df,gas,equivalence_ratio)
     
     return 
  
-def combustor(tau,temp,patm,equivalence_ratio,tpsr,dict_fuel, dict_oxy, gas,area_out):
+def combustor(tau,temp,patm,equivalence_ratio,residence_time_psr,dict_fuel, dict_oxy, gas,area_out):
     
     """ combustor simulation using a simple psr-pfr reactor network with varying pfr residence time """
 
@@ -65,7 +69,7 @@ def combustor(tau,temp,patm,equivalence_ratio,tpsr,dict_fuel, dict_oxy, gas,area
         
     gas.equilibrate('HP')
     psr        = ct.IdealGasReactor(gas) 
-    func_mdot  = lambda t: psr.mass/tpsr
+    func_mdot  = lambda t: psr.mass/residence_time_psr
     
     inlet                = ct.MassFlowController(upstream, psr)
     inlet.mass_flow_rate = func_mdot
@@ -82,39 +86,41 @@ def combustor(tau,temp,patm,equivalence_ratio,tpsr,dict_fuel, dict_oxy, gas,area
     sim_pfr = ct.ReactorNet([pfr])
     
     try:
-        sim_pfr.advance(tau) # sim_pfr.advance(tpfr)
+        sim_pfr.advance(tau) # sim_pfr.advance(residence_time_pfr)
     except RuntimeError:
         pass
     
     # Determine massflow rate of flow into combustion chamber 
     mdot           = inlet.mass_flow_rate
     mdot_fuel      = sum(mdot * Y_fuel)
+    mdot_air       = mdot - mdot_fuel  # Assuming all mass flow that is not fuel is air
     
     # Determine Emission Indices 
     Emission_Index = gas.Y * mdot/mdot_fuel 
     
     # Extract properties of combustor flow 
-    #a           = gas.sound_speed # speed of sound 
-    #rho_out     = pfr.thermo.density  # density of the gas in the combustor 
-    #cp          = gas.cp_mass # specific heat at constant pressure 
-    #cv          = gas.cv_mass # specific heat at constant volume 
-    #gamma       = cp/cv
-    h           = gas.h # enthalpy
-    #vel         = mdot / (rho_out * area_out) # velocity of flow exiting the combustor  
-    #M           = vel/a # Mach number 
+    a_out      = gas.sound_speed  # Speed of sound at PFR outlet
+    rho_out    = gas.density # density of the gas in the combustor
+    gamma      = gas.cp_mass / gas.cv_mass
+    h          = gas.h # enthalpy
+    vel_out    = mdot / (rho_out * area_out)  # Outlet velocity (m/s)  
+    M_out      = vel_out / a_out  # Outlet Mach number
     
-    phi = gas.equivalence_ratio(fuel = dict_fuel, oxidizer = dict_oxy ) 
+    phi        = gas.equivalence_ratio(fuel = dict_fuel, oxidizer = dict_oxy ) 
     
-    ## Stagnation temperature 
-    #T_stag = gas.T/(1 + ((gamma - 1)/2)*M**2)
+    # Stagnation temperature 
+    T_stag_out = gas.T * (1 + 0.5 * (gamma - 1) * (M_out)**2)
     
-    ## stagnation pressure 
-    #P_stag = gas.P*(T_stag/gas.T)**(gamma/(gamma - 1))
+    # stagnation pressure 
+    P_stag_out = gas.P * (1 + 0.5 * (gamma - 1) * (M_out)**2)**(gamma / (gamma - 1))
     
-    tau_b = gas.T/temp
-    pi_b  = gas.P/(patm*ct.one_atm)
+    # Stagnation enthalpy 
+    h_stag_out = h + 0.5 * vel_out**2 
     
-    return (gas, Emission_Index, phi, h, tau_b, pi_b) 
+    # Fuel-to-air ratio (FAR)
+    FAR      = mdot_fuel / mdot_air    
+    
+    return (gas, Emission_Index, T_stag_out, P_stag_out, h_stag_out, FAR) 
 
     
 def plot_emission(df,gas,equivalence_ratio): 
@@ -188,31 +194,31 @@ def plot_emission(df,gas,equivalence_ratio):
     plt.grid(True)
     
     plt.figure(figsize=(16, 12))
-    plt.plot(df['tau(s)'], df['tau_b'], '.-', color='C0')
+    plt.plot(df['tau(s)'], df['T_stag_out'], '.-', color='C0')
     plt.xlabel('PFR residence time [s]')
-    plt.ylabel('tau_b [-]')
-    plt.title('tau_b vs. PFR residence time')
+    plt.ylabel('T_stag_out [K]')
+    plt.title('T_stag_out vs. PFR residence time')
     plt.grid(True)    
     
     plt.figure(figsize=(16, 12))
-    plt.plot(df['tau(s)'], df['pi_b'], '.-', color='C0')
+    plt.plot(df['tau(s)'], df['P_stag_out'], '.-', color='C0')
     plt.xlabel('PFR residence time [s]')
-    plt.ylabel('pi_b [-]')
-    plt.title('pi_b vs. PFR residence time')
+    plt.ylabel('P_stag_out [atm]')
+    plt.title('P_stag_out vs. PFR residence time')
     plt.grid(True) 
     
     plt.figure(figsize=(16, 12))
-    plt.plot(df['tau(s)'], df['Ent'], '.-', color='C0')
+    plt.plot(df['tau(s)'], df['h_stag_out'], '.-', color='C0')
     plt.xlabel('PFR residence time [s]')
-    plt.ylabel('Enthalpy [J]')
-    plt.title('Enthalpy vs. PFR residence time')
+    plt.ylabel('h_stag_out [J]')
+    plt.title('h_stag_out vs. PFR residence time')
     plt.grid(True)  
     
     plt.figure(figsize=(16, 12))
-    plt.plot(df['tau(s)'], df['EqRatio'], '.-', color='C0')
+    plt.plot(df['tau(s)'], df['FAR'], '.-', color='C0')
     plt.xlabel('PFR residence time [s]')
-    plt.ylabel('Equivalence Ratio [-]')
-    plt.title('Equivalence Ratio vs. PFR residence time')
+    plt.ylabel('FAR [-]')
+    plt.title('FAR vs. PFR residence time')
     plt.grid(True)      
     
     plt.show() 
