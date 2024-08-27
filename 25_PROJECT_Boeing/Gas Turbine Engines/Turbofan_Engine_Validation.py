@@ -21,8 +21,8 @@ def main():
     turbofan  =  JT9D_7_turbofan_engine()
   
     # Run engine
-    altitude            = np.linspace(0,36000,10) *Units.feet
-    mach_number         = np.linspace(1E-4,0.8,9)
+    altitude            =   np.linspace(0,35000,8) *Units.feet
+    mach_number         =  np.linspace(1E-4,0.8,9)
     thrust              = np.zeros((len(altitude),len(mach_number)))
     overall_efficiency  = np.zeros((len(altitude),len(mach_number)))
     thermal_efficiency  = np.zeros((len(altitude),len(mach_number)))
@@ -66,36 +66,56 @@ def main():
             
             # set throttle
             segment.state.conditions.energy[fuel_line.tag][turbofan.tag].throttle[:,0] = 1.0  
-            T,M,P,_,_ = turbofan.compute_performance(segment.state,fuel_line)
+            Thrust,_,_,_,_ = turbofan.compute_performance(segment.state,fuel_line)
                   
-            combustor                 = turbofan.combustor 
+            ram                       = turbofan.ram
+            inlet_nozzle              = turbofan.inlet_nozzle
+            low_pressure_compressor   = turbofan.low_pressure_compressor
+            high_pressure_compressor  = turbofan.high_pressure_compressor
+            fan                       = turbofan.fan
+            combustor                 = turbofan.combustor
+            high_pressure_turbine     = turbofan.high_pressure_turbine
+            low_pressure_turbine      = turbofan.low_pressure_turbine
             core_nozzle               = turbofan.core_nozzle
             fan_nozzle                = turbofan.fan_nozzle 
             bypass_ratio              = turbofan.bypass_ratio  
         
             # unpack component conditions
-            turbofan_conditions     = conditions.energy[fuel_line.tag][turbofan.tag] 
+            turbofan_conditions     = conditions.energy[fuel_line.tag][turbofan.tag]
+            ram_conditions          = turbofan_conditions[ram.tag]    
+            fan_conditions          = turbofan_conditions[fan.tag]    
+            inlet_nozzle_conditions = turbofan_conditions[inlet_nozzle.tag]
             core_nozzle_conditions  = turbofan_conditions[core_nozzle.tag]
-            fan_nozzle_conditions   = turbofan_conditions[fan_nozzle.tag] 
+            fan_nozzle_conditions   = turbofan_conditions[fan_nozzle.tag]
+            lpc_conditions          = turbofan_conditions[low_pressure_compressor.tag]
+            hpc_conditions          = turbofan_conditions[high_pressure_compressor.tag]
+            lpt_conditions          = turbofan_conditions[low_pressure_turbine.tag]
+            hpt_conditions          = turbofan_conditions[high_pressure_turbine.tag]
+            combustor_conditions    = turbofan_conditions[combustor.tag] 
             
             # extract properties
-            U_e             = fan_nozzle_conditions.outputs.velocity
-            U_e1            = core_nozzle_conditions.outputs.velocity 
+            U_e             = core_nozzle_conditions.outputs.velocity 
+            U_e1            = fan_nozzle_conditions.outputs.velocity  
             mdot_air_core   = turbofan_conditions.core_mass_flow_rate
             mdot_air_fan    = bypass_ratio *  mdot_air_core  
             fuel_enthalpy   = combustor.fuel_data.specific_energy 
             mdot_fuel       = turbofan_conditions.fuel_flow_rate 
             U_0             = a*mach_number[j]
-            h_f             = combustor.fuel_data.specific_energy  
+            h_f             = combustor.fuel_data.specific_energy
+            h_e1            = fan_nozzle_conditions.outputs.static_enthalpy
+            h_e             = core_nozzle_conditions.outputs.static_enthalpy
+            h_0             = turbofan.working_fluid.compute_cp(T,p) * T 
+            h_t4            = combustor_conditions.outputs.stagnation_enthalpy
+            h_t3            = hpc_conditions.outputs.stagnation_enthalpy     
             
-            thrust[i,j]             = np.linalg.norm(T)
+            thrust[i,j]             = np.linalg.norm(Thrust)
             
             # Overall Efficiency;  Aircraft and Rocket Propulsion Eqn 2.22 
             overall_efficiency[i,j] = thrust[i,j] * U_0 / (mdot_fuel * fuel_enthalpy)
             
             # Thermal efficiecny ;  Aircraft and Rocket Propulsion Eqn 5.49 
-            thermal_efficiency[i,j] = U_0 *( mdot_air_core*(((U_e**2) /2 ) - ((U_0**2) /2 )   ) + mdot_air_fan *(((U_e1**2) /2 ) - ((U_0**2) /2 ) ) +  mdot_fuel*((U_e**2) /2 )   ) /(mdot_fuel *h_f)  
-    
+            #thermal_efficiency[i,j] = U_0 *( mdot_air_core*(((U_e**2)/2)-((U_0**2)/2)) + mdot_air_fan*(((U_e1**2)/2)-((U_0**2)/2)) +  mdot_fuel*((U_e**2)/2) ) /(mdot_fuel *h_f)
+            thermal_efficiency[i,j] = 1 -  (  (mdot_air_core +  mdot_fuel)*(h_e -  h_0) + mdot_air_fan*(h_e1 - h_0) + mdot_fuel *h_0  ) /( (mdot_air_core +  mdot_fuel)*h_t4 - mdot_air_core *h_t3 )  
     plot_results(altitude,mach_number,thrust,overall_efficiency,thermal_efficiency)
     return
 
@@ -108,10 +128,34 @@ def plot_results(altitude,mach_number,thrust,overall_efficiency,thermal_efficien
     for i in  range(len(mach_number)):
         axis_1.plot(thrust[:,i]/Units.lbf,altitude/Units.feet, color = ps.color[i], linestyle = ps.line_style[0],
                     marker = ps.markers[0], linewidth = ps.line_width, label = 'Mach =' + str( round(mach_number[i], 2))) 
-    axis_1.set_xlabel('Thrust (lb)')
+    axis_1.set_xlabel('Thrust (lbf)')
     axis_1.set_ylabel('Altitude (ft)')
     axis_1.legend()
     fig.tight_layout()
+    
+
+    fig_2    =  plt.figure('Thermal Efficiency')
+    fig_2.set_size_inches(7, 6)
+    axis_2 = fig_2.add_subplot(1,1,1)
+    for i in  range(len(mach_number)):
+        axis_2.plot(thermal_efficiency[:,i],altitude/Units.feet, color = ps.color[i], linestyle = ps.line_style[0],
+                    marker = ps.markers[0], linewidth = ps.line_width, label = 'Mach =' + str( round(mach_number[i], 2))) 
+    axis_2.set_xlabel('Thermal Efficiency')
+    axis_2.set_ylabel('Altitude (ft)')
+    axis_2.legend()
+    fig_2.tight_layout()
+    
+
+    fig_3    =  plt.figure('Overall Efficiency')
+    fig_3.set_size_inches(7, 6)
+    axis_3 = fig_3.add_subplot(1,1,1)
+    for i in  range(len(mach_number)):
+        axis_3.plot(overall_efficiency[:,i],altitude/Units.feet, color = ps.color[i], linestyle = ps.line_style[0],
+                    marker = ps.markers[0], linewidth = ps.line_width, label = 'Mach =' + str( round(mach_number[i], 2))) 
+    axis_3.set_xlabel('Overall Efficiency')
+    axis_3.set_ylabel('Altitude (ft)')
+    axis_3.legend()
+    fig_3.tight_layout()        
     
     return
 
