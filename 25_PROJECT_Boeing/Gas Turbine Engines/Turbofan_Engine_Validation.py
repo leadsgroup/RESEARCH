@@ -299,7 +299,7 @@ def JT9D_7_turbofan_engine(PSR_PFR_combustor_model_flag ):
     turbofan.tag                                = 'turbofan'
     turbofan.origin                             = [[13.72, 4.86,-1.1]] 
     turbofan.engine_length                      = 2.71     
-    turbofan.engine_diameter                    = 2.428
+    turbofan.engine_diameter                    = 2.37
     turbofan.bypass_ratio                       = 4.8 # checked  
     turbofan.design_altitude                    = 35000.0*Units.ft # checked  
     turbofan.design_mach_number                 = 0.78    # checked
@@ -309,7 +309,7 @@ def JT9D_7_turbofan_engine(PSR_PFR_combustor_model_flag ):
     fan                                         = RCAIDE.Library.Components.Propulsors.Converters.Fan()   
     fan.tag                                     = 'fan'
     fan.polytropic_efficiency                   = 0.93
-    fan.pressure_ratio                          = 1.56 
+    fan.pressure_ratio                          = 1.6 
     turbofan.fan                                = fan        
 
     # working fluid                   
