@@ -173,11 +173,23 @@ def vehicle_setup():
     vehicle.mass_properties.max_takeoff               = 2948 * Units.pounds
     vehicle.mass_properties.takeoff                   = 2948 * Units.pounds
     vehicle.mass_properties.moments_of_inertia.tensor = np.array([[164627.7,0.0,0.0],[0.0,471262.4,0.0],[0.0,0.0,554518.7]])
-    vehicle.mass_properties.center_of_gravity         = [[2.239696797,0,-0.131189711 ]]
-    vehicle.envelope.ultimate_load                    = 5.7
-    vehicle.envelope.limit_load                       = 3.8
+    vehicle.mass_properties.center_of_gravity         = [[2.239696797,0,-0.131189711 ]] 
     vehicle.reference_area                            = 17.112 
     vehicle.passengers                                = 2 
+    
+
+    # envelope properties                       
+    vehicle.envelope.ultimate_load              = 5.7
+    vehicle.envelope.limit_load                 = 3.8
+                                                
+    cruise_speed                                = 120 * Units['mph']
+    altitude                                    = 12000 * Units['mph']
+    atmo                                        = RCAIDE.Framework.Analyses.Atmospheric.US_Standard_1976()
+    freestream                                  = atmo.compute_values(0.)
+    freestream0                                 = atmo.compute_values(altitude)
+    mach_number                                 = (cruise_speed/freestream.speed_of_sound)[0][0] 
+    vehicle.design_dynamic_pressure             = ( .5 *freestream0.density*(cruise_speed*cruise_speed))[0][0]
+    vehicle.design_mach_number                  =  mach_number
     
     # ------------------------------------------------------------------        
     #   Main Wing
@@ -441,17 +453,17 @@ def vehicle_setup():
     vehicle.fuel                                = fuel
 
     # ########################################################  Energy Network  #########################################################  
-    net                                         = RCAIDE.Framework.Networks.Internal_Combustion_Engine_Network()   
+    net                                         = RCAIDE.Framework.Networks.Fuel()   
 
     #------------------------------------------------------------------------------------------------------------------------------------  
     # Bus
     #------------------------------------------------------------------------------------------------------------------------------------  
-    fuel_line                                   = RCAIDE.Library.Components.Energy.Distribution.Fuel_Line()   
+    fuel_line                                   = RCAIDE.Library.Components.Energy.Distributors.Fuel_Line()   
 
     #------------------------------------------------------------------------------------------------------------------------------------  
     #  Fuel Tank & Fuel
     #------------------------------------------------------------------------------------------------------------------------------------       
-    fuel_tank                                   = RCAIDE.Library.Components.Energy.Fuel_Tanks.Fuel_Tank()
+    fuel_tank                                   = RCAIDE.Library.Components.Energy.Distributors.Fuel_Line()
     fuel_tank.origin                            = wing.origin  
     fuel                                        = RCAIDE.Library.Attributes.Propellants.Aviation_Gasoline() 
     fuel.mass_properties.mass                   = 319 *Units.lbs 
@@ -519,6 +531,9 @@ def vehicle_setup():
     #------------------------------------------------------------------------------------------------------------------------------------ 
     #   Vehicle Definition Complete
     #------------------------------------------------------------------------------------------------------------------------------------ 
+    results                  = RCAIDE.Library.Methods.Weights.Correlation_Buildups.General_Aviation.empty(vehicle) 
+    vehicle.weight_breakdown = results 
+    vehicle.mass_properties.operating_empty = results.empty    
     return vehicle
 
 # ----------------------------------------------------------------------

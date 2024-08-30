@@ -115,7 +115,7 @@ def combustor(tau,temp,patm,equivalence_ratio,residence_time_psr,dict_fuel, dict
     P_stag_out = gas.P * (1 + 0.5 * (gamma - 1) * (M_out)**2)**(gamma / (gamma - 1))
     
     # Stagnation enthalpy 
-    h_stag_out = T_stag_out[cpt,0] * gas.cp_mass
+    h_stag_out = T_stag_out  * gas.cp_mass
     
     # Fuel-to-air ratio (FAR)
     FAR      = mdot_fuel / mdot_air    
