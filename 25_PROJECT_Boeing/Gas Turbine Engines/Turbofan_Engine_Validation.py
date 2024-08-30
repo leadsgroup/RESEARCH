@@ -20,8 +20,8 @@ import time
 
 def main():  
     # Run engine
-    altitude            = np.array([35000])  *Units.feet # np.linspace(0,35000,8) *Units.feet
-    mach_number         = np.array([0.78])  # np.linspace(1E-4,0.8,9)
+    altitude            = np.array([35000]) # np.linspace(0,35000,8) *Units.feet
+    mach_number         = np.array([0.78]) # np.linspace(1E-4,0.8,9)
     thrust              = np.zeros((len(altitude),len(mach_number)))
     overall_efficiency  = np.zeros((len(altitude),len(mach_number)))
     thermal_efficiency  = np.zeros((len(altitude),len(mach_number)))
@@ -101,7 +101,7 @@ def main():
             combustor_conditions    = turbofan_conditions[combustor.tag]
             
             # compute emission indices 
-            #emissions_index_CRN_method(combustor,turbofan_conditions,conditions)
+            emissions_index_CRN_method(combustor,turbofan_conditions,conditions)
             
             # extract properties
             U_e             = core_nozzle_conditions.outputs.velocity 
@@ -210,7 +210,7 @@ def plot_results(altitude,mach_number,thrust,overall_efficiency,thermal_efficien
     for i in  range(len(mach_number)):
         axis_5.plot(m_dot_core[:,i],altitude/Units.feet, color = ps.color[i], linestyle = ps.line_style[0],
                     marker = ps.markers[0], linewidth = ps.line_width, label = 'Mach =' + str( round(mach_number[i], 2))) 
-    axis_5.set_xlabel(r'$dot{m}_{core}$ (kg/s)')
+    axis_5.set_xlabel(r'$\dot{m}_{core}$ (kg/s)')
     axis_5.set_ylabel('Altitude (ft)')
     axis_5.legend()
     fig_5.tight_layout()    
@@ -222,7 +222,7 @@ def plot_results(altitude,mach_number,thrust,overall_efficiency,thermal_efficien
     for i in  range(len(mach_number)):
         axis_6.plot(fuel_flow_rate[:,i],altitude/Units.feet, color = ps.color[i], linestyle = ps.line_style[0],
                     marker = ps.markers[0], linewidth = ps.line_width, label = 'Mach =' + str( round(mach_number[i], 2))) 
-    axis_6.set_xlabel(r'$\dot{m}_{core}$ (kg/s)')
+    axis_6.set_xlabel(r'Flow Rate (kg/s)')
     axis_6.set_ylabel('Altitude (ft)')
     axis_6.legend()
     fig_6.tight_layout()
