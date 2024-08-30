@@ -6,18 +6,18 @@
 # RCAIDE imports 
 import RCAIDE      
 from RCAIDE.Framework.Core import Units  
-from RCAIDE.Framework.Networks.Propulsion.All_Electric_Network                 import All_Electric_Network
-from RCAIDE.Framework.Networks.Thermal_Management.All_Electric_Thermal_Management_Network           import All_Electric_Thermal_Management_Network
+from RCAIDE.Framework.Networks.Electric                 import Electric
+#from RCAIDE.Framework.Networks.Thermal_Management.All_Electric_Thermal_Management_Network           import All_Electric_Thermal_Management_Network
 from RCAIDE.Library.Methods.Propulsors.Converters.Rotor      import design_propeller 
 from RCAIDE.Library.Methods.Performance.estimate_stall_speed        import estimate_stall_speed 
 from RCAIDE.Library.Methods.Propulsors.Converters.DC_Motor   import design_motor 
 from RCAIDE.Library.Methods.Weights.Correlation_Buildups.Propulsion import nasa_motor
-from RCAIDE.Library.Methods.Energy.Sources.Battery.Common           import initialize_from_circuit_configuration
-from RCAIDE.Library.Methods.Geometry.Two_Dimensional.Planform       import wing_segmented_planform 
+from RCAIDE.Library.Methods.Energy.Sources.Batteries.Common           import initialize_from_circuit_configuration
+from RCAIDE.Library.Methods.Geometry.Planform       import wing_segmented_planform 
 from RCAIDE.Library.Methods.Weights.Physics_Based_Buildups.Electric import compute_weight , converge_weight 
 from RCAIDE.Library.Plots                                           import *  
-from RCAIDE.Library.Methods.Energy.Thermal_Management.Common.Heat_Exchanger_Systems.Cross_Flow_Heat_Exchanger        import design_cross_flow_heat_exchanger
-from RCAIDE.Library.Methods.Energy.Thermal_Management.Batteries.Wavy_Channel_Heat_Acquisition  import design_wavy_channel    
+#from RCAIDE.Library.Methods.Energy.Thermal_Management.Common.Heat_Exchanger_Systems.Cross_Flow_Heat_Exchanger        import design_cross_flow_heat_exchanger
+#from RCAIDE.Library.Methods.Energy.Thermal_Management.Batteries.Wavy_Channel_Heat_Acquisition  import design_wavy_channel    
 
 # python imports 
 import numpy as np 
@@ -35,7 +35,7 @@ def main():
     
     # vehicle data
     vehicle  = vehicle_setup(BTMS_flag)
-    plot_3d_vehicle(vehicle)
+    #plot_3d_vehicle(vehicle)
     
     # Set up vehicle configs
     configs  = configs_setup(vehicle)
@@ -462,19 +462,20 @@ def vehicle_setup(BTMS_flag):
     #add to vehicle                             
     vehicle.landing_gear                        = landing_gear
 
-
+ 
     # ########################################################  Energy Network  #########################################################  
-    net                              = All_Electric_Network()   
+    net                              = RCAIDE.Framework.Networks.Electric()   
 
     #------------------------------------------------------------------------------------------------------------------------------------  
     # Bus
     #------------------------------------------------------------------------------------------------------------------------------------  
-    bus                              = RCAIDE.Library.Components.Energy.Distribution.Electrical_Bus()  
+    bus                              = RCAIDE.Library.Components.Energy.Distributors.Electrical_Bus()
+    
 
     #------------------------------------------------------------------------------------------------------------------------------------           
     # Battery
     #------------------------------------------------------------------------------------------------------------------------------------  
-    bat                                                    = RCAIDE.Library.Components.Energy.Batteries.Lithium_Ion_NMC()
+    bat                                                    = RCAIDE.Library.Components.Energy.Sources.Batteries.Lithium_Ion_NMC()
     bat.pack.electrical_configuration.series               = 120  
     bat.pack.electrical_configuration.parallel             = 210   #250
     bat.cell.nominal_capacity                              = 3.8  
@@ -486,7 +487,22 @@ def vehicle_setup(BTMS_flag):
     bat.module.geometrtic_configuration.parallel_count     = 50
     bus.voltage                                            = bat.pack.maximum_voltage
     
-    bus.batteries.append(bat)            
+    bus.batteries.append(bat)
+    
+    bat1                                                    = RCAIDE.Library.Components.Energy.Sources.Batteries.Lithium_Ion_LFP()
+    bat1.pack.electrical_configuration.series               = 120  
+    bat1.pack.electrical_configuration.parallel             = 210   #250
+    bat1.cell.nominal_capacity                              = 3.8  
+    initialize_from_circuit_configuration(bat1,module_weight_factor = 1.25)  
+    bat1.pack.number_of_modules                           = 12
+    bat1.module.geometrtic_configuration.total              = bat1.pack.electrical_configuration.total
+    bat1.module.voltage                                     = bat1.pack.maximum_voltage/bat1.pack.number_of_modules # assumes modules are connected in parallel, must be less than max_module_voltage (~50) /safety_factor (~ 1.5)  
+    bat1.module.geometrtic_configuration.normal_count       = bat1.module.geometrtic_configuration.total/bat1.pack.number_of_modules / 50
+    bat1.module.geometrtic_configuration.parallel_count     = 50
+    bus.voltage                                            = bat1.pack.maximum_voltage
+    
+    bus.batteries.append(bat1)
+        
     
 
     #------------------------------------------------------------------------------------------------------------------------------------  
@@ -497,7 +513,7 @@ def vehicle_setup(BTMS_flag):
     starboard_propulsor.active_batteries             = ['li_ion_battery']   
   
     # Electronic Speed Controller       
-    esc                                              = RCAIDE.Library.Components.Propulsors.Modulators.Electronic_Speed_Controller()
+    esc                                              = RCAIDE.Library.Components.Energy.Modulators.Electronic_Speed_Controller()
     esc.tag                                          = 'esc_1'
     esc.efficiency                                   = 0.95 
     esc.origin                                       = [[3.8,2.8129,1.22 ]]   
@@ -542,7 +558,7 @@ def vehicle_setup(BTMS_flag):
     motor.rotor_radius                               = propeller.tip_radius
     motor.design_torque                              = propeller.cruise.design_torque 
     motor.angular_velocity                           = propeller.cruise.design_angular_velocity # Horse power of gas engine variant  750 * Units['hp']
-    motor                                            = design_motor(motor)  
+    design_motor(motor)  
     motor.mass_properties.mass                       = nasa_motor(motor.design_torque) 
     starboard_propulsor.motor                        = motor 
  
@@ -592,17 +608,45 @@ def vehicle_setup(BTMS_flag):
     # append bus   
     net.busses.append(bus)
     
-    vehicle.append_energy_network(net)
+
+    ###------------------------------------------------------------------------------------------------------------------------------------  
+    ## Coolant Line
+    ##------------------------------------------------------------------------------------------------------------------------------------  
+    #coolant_line                      = RCAIDE.Library.Components.Energy.Distributors.Coolant_Line(bus)
+    #coolant_line_1                      = RCAIDE.Library.Components.Energy.Distributors.Coolant_Line(bus)
+    #net.coolant_lines.append(coolant_line)
+    #net.coolant_lines.append(coolant_line_1)
+    
+    ###------------------------------------------------------------------------------------------------------------------------------------  
+    ### Battery Thermal Management 
+    ###------------------------------------------------------------------------------------------------------------------------------------      
+    #has1                               = RCAIDE.Library.Components.Thermal_Management.Batteries.Air_Cooled()
+    #has1.tag =  'FOR nmc'
+    #has2                               = RCAIDE.Library.Components.Thermal_Management.Batteries.Air_Cooled()
+    #has2.tag =  'FOR lfp'    
     
     
-    # ########################################################  Thermal Management Network  #########################################################  
-    tms_net                              = All_Electric_Thermal_Management_Network()
-    coolant_line                         = RCAIDE.Library.Components.Energy.Distribution.Coolant_Line()
+    #coolant_line.batteries[bat.tag].append(has1)
+   #
+    vehicle.append_energy_network(net)   
     
+     
+         
+    
+    
+    ## ########################################################  Thermal Management Network  #########################################################  
+    #tms_net                              = All_Electric_Thermal_Management_Network()
+    #coolant_line_1                       = RCAIDE.Library.Components.Energy.Distribution.Coolant_Line()
+    #components                            = [vehicle.propulsion_networks.all_electric.busses.bus.batteries.lithium_ion_nmc, vehicle.propulsion_networks.all_electric.busses.bus.batteries.lithium_ion_lfp]
+    ##coolant_line_2                      = RCAIDE.Library.Components.Energy.Distribution.Coolant_Line()
+
+    #tms_net.create_thermal_architecture(components, coolant_line_1,'Direct Air')
+    
+    #tms_net.create_battery_thermal_architecture([vehicle.propulsion_networks.all_electric.busses.bus.batteries.lithium_ion_lfp], coolant_line_2,'Wavy Channel' )
 
     # Reservoir for Battery TMS
-    RES                                                    = RCAIDE.Library.Components.Thermal_Management.Common.Reservoirs.Reservoir()
-    coolant_line.reservoir.append(RES)
+    #RES                                                    = RCAIDE.Library.Components.Thermal_Management.Common.Reservoirs.Reservoir()
+    #coolant_line.Reservoir.append(RES)
 
     ## Battery Heat Removal System     
     #HAS                                                    = RCAIDE.Library.Components.Thermal_Management.Batteries.Wavy_Channel() 
@@ -623,14 +667,17 @@ def vehicle_setup(BTMS_flag):
     #coolant_line.hex.append(HEX)
     
     
-    tms_net.coolant_lines.append(coolant_line)
-    vehicle.append_thermal_management_subnetwork(tms_net)
+    # append bus   
+    #net.busses.append(bus)
+    
+    #vehicle.append_energy_network(net)
+
     
     #------------------------------------------------------------------------------------------------------------------------------------
     # ##################################   Determine Vehicle Mass Properties Using Physic Based Methods  ################################ 
     #------------------------------------------------------------------------------------------------------------------------------------   
-    converge_weight(vehicle) 
-    breakdown = compute_weight(vehicle)
+    #converge_weight(vehicle) 
+    #breakdown = compute_weight(vehicle)
     #print(breakdown)  
      
     return vehicle
@@ -729,7 +776,7 @@ def mission_setup(analyses):
     # unpack Segments module
     Segments = RCAIDE.Framework.Mission.Segments  
     base_segment = Segments.Segment()
-    base_segment.temperature_deviation  = -25
+    base_segment.temperature_deviation  = 2.5
   
 
     # VSTALL Calculation  
@@ -739,11 +786,11 @@ def mission_setup(analyses):
     Vstall         = estimate_stall_speed(vehicle_mass,reference_area,altitude = 0.0,maximum_lift_coefficient = 1.2)
     
 
-    bat                   = vehicle.propulsion_networks.all_electric.busses.bus.batteries.lithium_ion_nmc
-    Charging_C_Rate       = 1
-    pack_charging_current = bat.cell.nominal_capacity * Charging_C_Rate *  bat.pack.electrical_configuration.series
-    pack_capacity_Ah      = bat.cell.nominal_capacity * bat.pack.electrical_configuration.parallel
-    charging_time         = (pack_capacity_Ah)/pack_charging_current * Units.hrs
+    #bat                   = vehicle.propulsion_networks.all_electric.busses.bus.batteries.lithium_ion_nmc
+    #Charging_C_Rate       = 1
+    #pack_charging_current = bat.cell.nominal_capacity * Charging_C_Rate *  bat.pack.electrical_configuration.series
+    #pack_capacity_Ah      = bat.cell.nominal_capacity * bat.pack.electrical_configuration.parallel
+    #charging_time         = (pack_capacity_Ah)/pack_charging_current * Units.hrs
     
 
     ## ------------------------------------------------------------------
@@ -794,7 +841,8 @@ def mission_setup(analyses):
     segment.analyses.extend( analyses.base )  
     #segment.analyses.extend( analyses.max_hex_operation )  
     segment.altitude_start                                = 0.0 * Units.feet
-    segment.altitude_end                                  = 50.0 * Units.feet
+    segment.altitude_end                                  = 5
+    0.0 * Units.feet
     segment.air_speed_start                               = Vstall *1.2  
     segment.air_speed_end                                 = Vstall *1.25
     segment.initial_battery_state_of_charge    = 1.0  
@@ -1069,18 +1117,18 @@ def mission_setup(analyses):
     
     mission.append_segment(segment)
     
-    # ------------------------------------------------------------------
-    #  Charge Segment: 
-    # ------------------------------------------------------------------     
-    # Charge Model 
-    segment                               = Segments.Ground.Battery_Recharge(base_segment)     
-    segment.tag  = 'Charge_Day'
-    segment.analyses.extend( analyses.base )
-    segment.state.numerics.number_of_control_points  = 64 
-    #segment.analyses.extend(analyses.recharge)  
-    segment.time                          = charging_time 
-    segment.current                       = pack_charging_current        
-    mission.append_segment(segment)   
+    ## ------------------------------------------------------------------
+    ##  Charge Segment: 
+    ## ------------------------------------------------------------------     
+    ## Charge Model 
+    #segment                               = Segments.Ground.Battery_Recharge(base_segment)     
+    #segment.tag  = 'Charge_Day'
+    #segment.analyses.extend( analyses.base )
+    #segment.state.numerics.number_of_control_points  = 64 
+    ##segment.analyses.extend(analyses.recharge)  
+    #segment.time                          = charging_time 
+    #segment.current                       = pack_charging_current        
+    #mission.append_segment(segment)   
 
     
     # ------------------------------------------------------------------
@@ -1171,10 +1219,10 @@ def base_analysis(vehicle):
 
     # ------------------------------------------------------------------
     #  Energy
-    energy= RCAIDE.Framework.Analyses.Energy.Energy()
-    energy.networks = vehicle.propulsion_networks 
+    energy          = RCAIDE.Framework.Analyses.Energy.Energy()
+    energy.vehicle  = vehicle 
     analyses.append(energy)
-
+    
     # ------------------------------------------------------------------
     #  Planet Analysis
     planet = RCAIDE.Framework.Analyses.Planets.Planet()
