@@ -5,10 +5,10 @@ def main():
     '''This scripts appends the temperature data of the counties within the US to data frame with airports recursively '''
     
     # load data
-    airline          = 'Top_10_Major_US_Airlines'
-    airline_file     = 'US_Airline_Flight_Operations_2019.xlsx'
+    airline          = 'American_Airlines'
+    airline_file     = 'American_Airlines_Flight_Operations_2019.csv'
     temperature_file = '../US_Climate/Monthly_US_County_Temperature_2019.xlsx'
-    Airline_data     = pd.read_excel(airline_file,sheet_name=[airline])[airline] 
+    Airline_data     = pd.read_csv(airline_file)     # pd.read_excel(airline_file,sheet_name=[airline])[airline] 
     Temperature_data = pd.read_excel(temperature_file,sheet_name=['US_County_Temperature_F'])['US_County_Temperature_F']  
     
     # county lats and longs 
