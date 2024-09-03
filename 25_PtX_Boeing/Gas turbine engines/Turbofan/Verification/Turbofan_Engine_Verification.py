@@ -1,17 +1,16 @@
 # RCAIDE imports 
 import RCAIDE
-from RCAIDE.Framework.Core import Units , Data   
-from RCAIDE.Library.Methods.Propulsors.Turbofan_Propulsor          import design_turbofan
-from RCAIDE.Framework.Mission.Common      import  Conditions
-from RCAIDE.Library.Methods.Emissions.emissions_index_CRN_method import  emissions_index_CRN_method
+from   RCAIDE.Framework.Core                                import Units , Data   
+from   RCAIDE.Library.Methods.Propulsors.Turbofan_Propulsor import design_turbofan
+from   RCAIDE.Framework.Mission.Common                      import  Conditions
 
 # python imports 
-import numpy as np  
+import numpy             as np  
 import pickle
-from copy import deepcopy
+from   copy              import deepcopy
 import matplotlib.pyplot as plt  
 import os   
-import matplotlib.cm as cm
+import matplotlib.cm     as cm
 import time 
 
 # ----------------------------------------------------------------------
@@ -20,8 +19,8 @@ import time
 
 def main():  
     # Run engine
-    altitude            = np.array([35000]) # np.linspace(0,35000,8) *Units.feet
-    mach_number         = np.array([0.78]) # np.linspace(1E-4,0.8,9)
+    altitude            = np.linspace(0,35000,10)*Units.feet
+    mach_number         = np.linspace(1E-4,0.8,10)
     thrust              = np.zeros((len(altitude),len(mach_number)))
     overall_efficiency  = np.zeros((len(altitude),len(mach_number)))
     thermal_efficiency  = np.zeros((len(altitude),len(mach_number)))
@@ -32,8 +31,10 @@ def main():
     Pt_4           = np.zeros((len(altitude),len(mach_number))) 
     m_dot_core     = np.zeros((len(altitude),len(mach_number)))
     fuel_flow_rate = np.zeros((len(altitude),len(mach_number)))
+    m_dot_air_tot  = np.zeros((len(altitude),len(mach_number)))
+    TSFC           = np.zeros((len(altitude),len(mach_number)))
     
-    turbofan       = JT9D_7_turbofan_engine()            
+    turbofan       = GE_90_engine()            
     for i in range(len(altitude)): 
         for j in range(len(mach_number)):
             planet         = RCAIDE.Library.Attributes.Planets.Earth()
@@ -46,8 +47,8 @@ def main():
             a   = atmo_data.speed_of_sound    
             mu  = atmo_data.dynamic_viscosity     
                 
-            conditions = RCAIDE.Framework.Mission.Common.Results() 
-            conditions.freestream.altitude                    = np.atleast_1d(0)
+            conditions                                        = RCAIDE.Framework.Mission.Common.Results() 
+            conditions.freestream.altitude                    = np.atleast_1d(altitude[i])
             conditions.freestream.mach_number                 = np.atleast_1d(mach_number[j])
             conditions.freestream.pressure                    = np.atleast_1d(p)
             conditions.freestream.temperature                 = np.atleast_1d(T)
@@ -60,7 +61,7 @@ def main():
             conditions.freestream.speed_of_sound              = np.atleast_1d(a)
             conditions.freestream.velocity                    = np.atleast_1d(a*mach_number[j])  
         
-            ## setup conditions  
+            # setup conditions  
             fuel_line                = RCAIDE.Library.Components.Energy.Distributors.Fuel_Line()
             segment                  = RCAIDE.Framework.Mission.Segments.Segment()  
             segment.state.conditions = conditions     
@@ -100,9 +101,6 @@ def main():
             hpt_conditions          = turbofan_conditions[high_pressure_turbine.tag]
             combustor_conditions    = turbofan_conditions[combustor.tag]
             
-            # compute emission indices 
-            emissions_index_CRN_method(combustor,turbofan_conditions,conditions)
-            
             # extract properties
             U_e             = core_nozzle_conditions.outputs.velocity 
             U_e1            = fan_nozzle_conditions.outputs.velocity  
@@ -130,28 +128,30 @@ def main():
             Tt_4[i,j]           = hpt_conditions.inputs.stagnation_temperature 
             Pt_4[i,j]           = hpt_conditions.inputs.stagnation_pressure 
             m_dot_core[i,j]     = turbofan_conditions.core_mass_flow_rate   
-            fuel_flow_rate[i,j] = turbofan_conditions.fuel_flow_rate                    
-
-                
-    plot_results(altitude,mach_number,thrust,overall_efficiency,thermal_efficiency,Tt_3,Pt_3,Tt_4,Pt_4,m_dot_core,fuel_flow_rate)
+            fuel_flow_rate[i,j] = turbofan_conditions.fuel_flow_rate
+            m_dot_air_tot[i,j]  = turbofan_conditions.core_mass_flow_rate + bypass_ratio * turbofan_conditions.core_mass_flow_rate
+            TSFC[i,j]                = turbofan.TSFC
+      
+    plot_results(altitude,mach_number,thrust,overall_efficiency,thermal_efficiency,Tt_3,Pt_3,Tt_4,Pt_4,m_dot_core,fuel_flow_rate,m_dot_air_tot)
     
     return
 
-def plot_results(altitude,mach_number,thrust,overall_efficiency,thermal_efficiency,Tt_3,Pt_3,Tt_4,Pt_4,m_dot_core,fuel_flow_rate):
+def plot_results(altitude,mach_number,thrust,overall_efficiency,thermal_efficiency,Tt_3,Pt_3,Tt_4,Pt_4,m_dot_core,fuel_flow_rate,m_dot_air_tot):
     ps =  plot_style(number_of_lines = len(mach_number)) 
     
     fig    =  plt.figure('Thrust')
     fig.set_size_inches(7, 6)
     axis_1 = fig.add_subplot(1,1,1) 
     for i in  range(len(mach_number)):
-        axis_1.plot(thrust[:,i]/Units.lbf,altitude/Units.feet, color = ps.color[i], linestyle = ps.line_style[0],
+        axis_1.plot(thrust[:,i],altitude, color = ps.color[i], linestyle = ps.line_style[0],
                     marker = ps.markers[0], linewidth = ps.line_width, label = 'Mach =' + str( round(mach_number[i], 2))) 
-    axis_1.set_xlabel('Thrust (lbf)')
-    axis_1.set_ylabel('Altitude (ft)')
+    axis_1.axvline(x=77850, color='r', linestyle='--', label=f'Design thrust in cruise = 77850 N')        
+    axis_1.set_xlabel('Thrust [N]')
+    axis_1.set_ylabel('Altitude [m]')
+    
     axis_1.legend()
     fig.tight_layout()
     
-
     fig_2    =  plt.figure('Thermal Efficiency')
     fig_2.set_size_inches(7, 6)
     axis_2 = fig_2.add_subplot(1,1,1) 
@@ -159,11 +159,10 @@ def plot_results(altitude,mach_number,thrust,overall_efficiency,thermal_efficien
         axis_2.plot(thermal_efficiency[:,i],altitude/Units.feet, color = ps.color[i], linestyle = ps.line_style[0],
                     marker = ps.markers[0],linewidth = ps.line_width, label = 'Mach =' + str( round(mach_number[i], 2))) 
     axis_2.set_xlabel('Thermal Efficiency')
-    axis_2.set_ylabel('Altitude (ft)')
+    axis_2.set_ylabel('Altitude [ft]')
     axis_2.legend()
     fig_2.tight_layout()
     
-
     fig_3    =  plt.figure('Overall Efficiency')
     fig_3.set_size_inches(7, 6)
     axis_3 = fig_3.add_subplot(1,1,1) 
@@ -171,13 +170,10 @@ def plot_results(altitude,mach_number,thrust,overall_efficiency,thermal_efficien
         axis_3.plot(overall_efficiency[:,i],altitude/Units.feet, color = ps.color[i], linestyle = ps.line_style[0],
                     marker = ps.markers[0], linewidth = ps.line_width, label = 'Mach =' + str( round(mach_number[i], 2))) 
     axis_3.set_xlabel('Overall Efficiency')
-    axis_3.set_ylabel('Altitude (ft)')
+    axis_3.set_ylabel('Altitude [ft]')
     axis_3.legend()
     fig_3.tight_layout()
     
-    
-
-
     fig_4    =  plt.figure('Stagnation Properties')
     fig_4.set_size_inches(7, 6)
     axis_4_1 = fig_4.add_subplot(2,2,1)
@@ -189,29 +185,28 @@ def plot_results(altitude,mach_number,thrust,overall_efficiency,thermal_efficien
         axis_4_2.plot(Pt_3[:,i],altitude/Units.feet, color = ps.color[i], linestyle = ps.line_style[0], marker = ps.markers[0], linewidth = ps.line_width, label = 'Mach =' + str( round(mach_number[i], 2)))
         axis_4_3.plot(Tt_4[:,i],altitude/Units.feet, color = ps.color[i], linestyle = ps.line_style[0], marker = ps.markers[0], linewidth = ps.line_width, label = 'Mach =' + str( round(mach_number[i], 2)))
         axis_4_4.plot(Pt_4[:,i],altitude/Units.feet, color = ps.color[i], linestyle = ps.line_style[0], marker = ps.markers[0], linewidth = ps.line_width, label = 'Mach =' + str( round(mach_number[i], 2))) 
-    axis_4_1.set_xlabel(r'Entering $T_t$ (K)')
-    axis_4_2.set_xlabel(r'Entering $P_t$ (K)')
-    axis_4_3.set_xlabel(r'Exiting $T_t$ (Pa)')
-    axis_4_4.set_xlabel(r'Exising $P_t$ (Pa)')
-    axis_4_1.set_ylabel('Altitude (ft)')
-    axis_4_2.set_ylabel('Altitude (ft)')
-    axis_4_3.set_ylabel('Altitude (ft)')
-    axis_4_4.set_ylabel('Altitude (ft)')
+    axis_4_1.set_xlabel(r'Entering $T_t$ [K]')
+    axis_4_2.set_xlabel(r'Entering $P_t$ [K]')
+    axis_4_3.set_xlabel(r'Exiting $T_t$ [Pa]')
+    axis_4_4.set_xlabel(r'Exising $P_t$ [Pa]')
+    axis_4_1.set_ylabel('Altitude [ft]')
+    axis_4_2.set_ylabel('Altitude [ft]')
+    axis_4_3.set_ylabel('Altitude [ft]')
+    axis_4_4.set_ylabel('Altitude [ft]')
     axis_4_1.legend()
     axis_4_2.legend()
     axis_4_3.legend()
     axis_4_4.legend()
     fig_4.tight_layout()    
     
-
     fig_5    =  plt.figure('Core Mass Flow')
     fig_5.set_size_inches(7, 6)
     axis_5 = fig_5.add_subplot(1,1,1) 
     for i in  range(len(mach_number)):
         axis_5.plot(m_dot_core[:,i],altitude/Units.feet, color = ps.color[i], linestyle = ps.line_style[0],
                     marker = ps.markers[0], linewidth = ps.line_width, label = 'Mach =' + str( round(mach_number[i], 2))) 
-    axis_5.set_xlabel(r'$\dot{m}_{core}$ (kg/s)')
-    axis_5.set_ylabel('Altitude (ft)')
+    axis_5.set_xlabel(r'$\dot{m}_{core}$ [kg/s]')
+    axis_5.set_ylabel('Altitude [ft]')
     axis_5.legend()
     fig_5.tight_layout()    
  
@@ -222,8 +217,8 @@ def plot_results(altitude,mach_number,thrust,overall_efficiency,thermal_efficien
     for i in  range(len(mach_number)):
         axis_6.plot(fuel_flow_rate[:,i],altitude/Units.feet, color = ps.color[i], linestyle = ps.line_style[0],
                     marker = ps.markers[0], linewidth = ps.line_width, label = 'Mach =' + str( round(mach_number[i], 2))) 
-    axis_6.set_xlabel(r'Flow Rate (kg/s)')
-    axis_6.set_ylabel('Altitude (ft)')
+    axis_6.set_xlabel(r'Flow Rate [kg/s]')
+    axis_6.set_ylabel('Altitude [ft]')
     axis_6.legend()
     fig_6.tight_layout()
     
@@ -239,7 +234,6 @@ def plot_style(number_of_lines= 10):
                   #figure.dpi': 1200
                   }
 
-
     # Universal Plot Settings  
     plt.rcParams.update(parameters)
     plot_parameters                        = Data()
@@ -253,10 +247,9 @@ def plot_style(number_of_lines= 10):
     plot_parameters.markers                =  ['o','x','o','v','P','p','^','D','*']
     plot_parameters.color                  = cm.inferno(np.linspace(0,0.9,number_of_lines)) 
 
-
     return plot_parameters
 
-def GE_90_engine(PSR_PFR_combustor_model_flag ):
+def GE_90_engine():
 
     
     #------------------------------------------------------------------------------------------------------------------------------------  
@@ -268,22 +261,20 @@ def GE_90_engine(PSR_PFR_combustor_model_flag ):
     turbofan.origin                             = [[ 25.72797886 , 9.69802 , -2.04  ]]
     turbofan.mass_properties.mass               = 7893
     turbofan.engine_length                      = 7.29
-    turbofan.bypass_ratio                       = 9
+    turbofan.bypass_ratio                       = 8.5
     turbofan.design_altitude                    = 35000.0*Units.ft
-    turbofan.design_mach_number                 = 0.78   
-    turbofan.design_thrust                      = 80000  * Units.N  
-
+    turbofan.design_mach_number                 = 0.8   
+    turbofan.design_thrust                      = 77850  * Units.N  
 
     # fan                
     fan                                         = RCAIDE.Library.Components.Propulsors.Converters.Fan()   
     fan.tag                                     = 'fan'
-    fan.polytropic_efficiency                   = 0.93
-    fan.pressure_ratio                          = 1.7   
+    fan.polytropic_efficiency                   = 0.915
+    fan.pressure_ratio                          = 1.58   
     turbofan.fan                                = fan        
 
     # working fluid                   
     turbofan.working_fluid                      = RCAIDE.Library.Attributes.Gases.Air() 
-
     
     # Ram inlet 
     ram                                         = RCAIDE.Library.Components.Propulsors.Converters.Ram()
@@ -301,23 +292,15 @@ def GE_90_engine(PSR_PFR_combustor_model_flag ):
     low_pressure_compressor                       = RCAIDE.Library.Components.Propulsors.Converters.Compressor()    
     low_pressure_compressor.tag                   = 'lpc'
     low_pressure_compressor.polytropic_efficiency = 0.91
-    low_pressure_compressor.pressure_ratio        = 1.9   
+    low_pressure_compressor.pressure_ratio        = 1.26   
     turbofan.low_pressure_compressor              = low_pressure_compressor
-
-    ## high pressure compressor  
-    #medium_pressure_compressor                       = RCAIDE.Library.Components.Propulsors.Converters.Compressor()    
-    #medium_pressure_compressor.tag                   = 'hpc'
-    #medium_pressure_compressor.polytropic_efficiency = 0.91
-    #medium_pressure_compressor.pressure_ratio        = 12.38 
-    #turbofan.high_pressure_compressor              = high_pressure_compressor
 
     # high pressure compressor  
     high_pressure_compressor                       = RCAIDE.Library.Components.Propulsors.Converters.Compressor()    
     high_pressure_compressor.tag                   = 'hpc'
-    high_pressure_compressor.polytropic_efficiency = 0.91
-    high_pressure_compressor.pressure_ratio        = 12.38 
+    high_pressure_compressor.polytropic_efficiency = 0.9
+    high_pressure_compressor.pressure_ratio        = 20
     turbofan.high_pressure_compressor              = high_pressure_compressor
-    
 
     # low pressure turbine  
     low_pressure_turbine                           = RCAIDE.Library.Components.Propulsors.Converters.Turbine()   
@@ -338,7 +321,7 @@ def GE_90_engine(PSR_PFR_combustor_model_flag ):
     combustor.tag                                  = 'Comb'
     combustor.efficiency                           = 0.99 
     combustor.alphac                               = 1.0     
-    combustor.turbine_inlet_temperature            = 1500
+    combustor.turbine_inlet_temperature            = 1430
     combustor.pressure_ratio                       = 0.95
     combustor.fuel_data                            = RCAIDE.Library.Attributes.Propellants.Jet_A()  
     turbofan.combustor                             = combustor
