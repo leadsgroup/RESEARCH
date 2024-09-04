@@ -268,6 +268,8 @@ def GE_90_engine(PSR_PFR_combustor_model_flag ):
     turbofan.origin                             = [[ 25.72797886 , 9.69802 , -2.04  ]]
     turbofan.mass_properties.mass               = 7893
     turbofan.engine_length                      = 7.29
+    turbofan.engine_diameter                    = 3.1
+    turbofan.engine_height                      = 3.95
     turbofan.bypass_ratio                       = 9
     turbofan.design_altitude                    = 35000.0*Units.ft
     turbofan.design_mach_number                 = 0.78   
