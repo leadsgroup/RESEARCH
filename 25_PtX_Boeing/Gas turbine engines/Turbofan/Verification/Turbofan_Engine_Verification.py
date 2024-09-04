@@ -82,7 +82,7 @@ def main():
                     item.append_operating_conditions(segment,fuel_line,turbofan) 
             
             # set throttle
-            segment.state.conditions.energy[fuel_line.tag][turbofan.tag].throttle[:,0] = 0.8  
+            segment.state.conditions.energy[fuel_line.tag][turbofan.tag].throttle[:,0] = 1  
             Thrust,_,_,_,_ = turbofan.compute_performance(segment.state,fuel_line)
                   
             ram                       = turbofan.ram
