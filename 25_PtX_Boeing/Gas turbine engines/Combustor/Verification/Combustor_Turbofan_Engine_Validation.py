@@ -20,7 +20,7 @@ import time
 
 def main():  
     # Run engine
-    altitude            = np.array([35000]) # np.linspace(0,35000,8) *Units.feet
+    altitude            = np.array([35000])*Units.feet # np.linspace(0,35000,8) *Units.feet
     mach_number         = np.array([0.78]) # np.linspace(1E-4,0.8,9)
     thrust              = np.zeros((len(altitude),len(mach_number)))
     overall_efficiency  = np.zeros((len(altitude),len(mach_number)))
