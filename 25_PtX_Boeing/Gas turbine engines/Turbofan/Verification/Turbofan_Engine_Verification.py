@@ -135,7 +135,7 @@ def main():
             m_dot_core[i,j]     = turbofan_conditions.core_mass_flow_rate   
             fuel_flow_rate[i,j] = turbofan_conditions.fuel_flow_rate
             m_dot_air_tot[i,j]  = turbofan_conditions.core_mass_flow_rate + bypass_ratio * turbofan_conditions.core_mass_flow_rate
-            TSFC[i,j]           = turbofan.TSFC
+            TSFC[i,j]           = turbofan.TSFC # [N/N-s]
       
     plot_results(altitude,mach_number,thrust,overall_efficiency,thermal_efficiency,Tt_3,Pt_3,Tt_4,Pt_4,m_dot_core,fuel_flow_rate,m_dot_air_tot)
     
