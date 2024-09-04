@@ -125,12 +125,14 @@ def main():
             
             Tt_3[i,j]           = hpc_conditions.outputs.stagnation_temperature 
             Pt_3[i,j]           = hpc_conditions.outputs.stagnation_pressure
+            #T_3[i,j]            = Tt_3[i,j] / (1 + 0.5 * (conditions.freestream.isentropic_expansion_factor - 1) * (M_out)**2)
+            #P_3[i,j]            = Pt_3[i,j] / (1 + 0.5 * (conditions.freestream.isentropic_expansion_factor - 1) * (M_out)**2)**(conditions.freestream.isentropic_expansion_factor / (conditions.freestream.isentropic_expansion_factor - 1))       
             Tt_4[i,j]           = hpt_conditions.inputs.stagnation_temperature 
             Pt_4[i,j]           = hpt_conditions.inputs.stagnation_pressure 
             m_dot_core[i,j]     = turbofan_conditions.core_mass_flow_rate   
             fuel_flow_rate[i,j] = turbofan_conditions.fuel_flow_rate
             m_dot_air_tot[i,j]  = turbofan_conditions.core_mass_flow_rate + bypass_ratio * turbofan_conditions.core_mass_flow_rate
-            TSFC[i,j]                = turbofan.TSFC
+            TSFC[i,j]           = turbofan.TSFC
       
     plot_results(altitude,mach_number,thrust,overall_efficiency,thermal_efficiency,Tt_3,Pt_3,Tt_4,Pt_4,m_dot_core,fuel_flow_rate,m_dot_air_tot)
     
