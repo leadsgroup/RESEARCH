@@ -13,6 +13,11 @@ import os
 import matplotlib.cm     as cm
 import time 
 
+# References:
+# [1]: https://ptabdata.blob.core.windows.net/files/2017/IPR2017-00999/v20_GE-1019%20Turbofan%20and%20Turbojet%20Engines%20Database%20Handbook.pdf
+# [2]: https://arc.aiaa.org/doi/epdf/10.2514/1.C034463
+# [3]: https://arc.aiaa.org/doi/full/10.2514/1.C036529
+
 # ----------------------------------------------------------------------
 #   Main
 # ----------------------------------------------------------------------
@@ -20,7 +25,7 @@ import time
 def main():  
     # Run engine
     altitude            = np.array([35000])*Units.feet 
-    mach_number         = np.array([0.8]) # np.linspac
+    mach_number         = np.array([0.8]) 
     #altitude            = np.linspace(0,35000,10)*Units.feet
     #mach_number         = np.linspace(1E-4,0.8,10)
     thrust              = np.zeros((len(altitude),len(mach_number)))
@@ -36,8 +41,9 @@ def main():
     m_dot_air_tot  = np.zeros((len(altitude),len(mach_number)))
     TSFC           = np.zeros((len(altitude),len(mach_number)))
     
-    #turbofan       = GE90_94B_engine()
-    turbofan       = CFM56_7B27_engine()
+    turbofan       = GE90_94B_engine()
+    #turbofan       = CFM56_7B27_engine()
+    #turbofan       = JT9D_7_turbofan_engine()
     for i in range(len(altitude)): 
         for j in range(len(mach_number)):
             planet         = RCAIDE.Library.Attributes.Planets.Earth()
@@ -76,7 +82,7 @@ def main():
                     item.append_operating_conditions(segment,fuel_line,turbofan) 
             
             # set throttle
-            segment.state.conditions.energy[fuel_line.tag][turbofan.tag].throttle[:,0] = 1.0  
+            segment.state.conditions.energy[fuel_line.tag][turbofan.tag].throttle[:,0] = 0.8  
             Thrust,_,_,_,_ = turbofan.compute_performance(segment.state,fuel_line)
                   
             ram                       = turbofan.ram
@@ -259,24 +265,21 @@ def GE90_94B_engine():
     #------------------------------------------------------------------------------------------------------------------------------------  
     # Propulsor: Starboard Propulsor
     #------------------------------------------------------------------------------------------------------------------------------------         
-    turbofan                                    = RCAIDE.Library.Components.Propulsors.Turbofan() 
-    turbofan.tag                                = 'starboard_ge90_propulsor'
-    turbofan.active_fuel_tanks                  = ['b777_fuel_tank']   
+    turbofan                                    = RCAIDE.Library.Components.Propulsors.Turbofan()    
     turbofan.origin                             = [[ 25.72797886 , 9.69802 , -2.04  ]]
-    turbofan.mass_properties.mass               = 7893
-    turbofan.engine_length                      = 7.29
-    turbofan.engine_diameter                    = 3.4
-    turbofan.engine_height                      = 3.95 
-    turbofan.bypass_ratio                       = 8.5
-    turbofan.design_altitude                    = 35000.0*Units.ft
-    turbofan.design_mach_number                 = 0.8   
-    turbofan.design_thrust                      = 73000 * Units.N  
+    turbofan.mass_properties.mass               = 7550                       # CHECKED Ref. [1] Page 197
+    turbofan.engine_length                      = 4.897                      # CHECKED Ref. [1] Page 197
+    turbofan.engine_diameter                    = 3.124                      # CHECKED Ref. [1] Page 197
+    turbofan.bypass_ratio                       = 8.7                        # CHECKED Ref. [1] Page 197
+    turbofan.design_altitude                    = 35000.0*Units.ft           # CHECKED Ref. [2] Page 9
+    turbofan.design_mach_number                 = 0.8                        # CHECKED Ref. [2] Page 9
+    turbofan.design_thrust                      = 72988.199301 * Units.N     # CHECKED Ref. [2] Page 9
 
     # fan                
     fan                                         = RCAIDE.Library.Components.Propulsors.Converters.Fan()   
     fan.tag                                     = 'fan'
-    fan.polytropic_efficiency                   = 0.915
-    fan.pressure_ratio                          = 1.58   
+    fan.polytropic_efficiency                   = 0.9153                     # CHECKED Ref. [2] Page 9
+    fan.pressure_ratio                          = 1.65                       # CHECKED Ref. [1] Page 197
     turbofan.fan                                = fan        
 
     # working fluid                   
@@ -290,58 +293,58 @@ def GE90_94B_engine():
     # inlet nozzle          
     inlet_nozzle                                = RCAIDE.Library.Components.Propulsors.Converters.Compression_Nozzle()
     inlet_nozzle.tag                            = 'inlet nozzle'
-    inlet_nozzle.polytropic_efficiency          = 0.98
-    inlet_nozzle.pressure_ratio                 = 0.98 
+    inlet_nozzle.polytropic_efficiency          = 0.98                                        
+    inlet_nozzle.pressure_ratio                 = 0.99 
     turbofan.inlet_nozzle                       = inlet_nozzle 
 
     # low pressure compressor    
     low_pressure_compressor                       = RCAIDE.Library.Components.Propulsors.Converters.Compressor()    
     low_pressure_compressor.tag                   = 'lpc'
-    low_pressure_compressor.polytropic_efficiency = 0.91
-    low_pressure_compressor.pressure_ratio        = 1.26   
+    low_pressure_compressor.polytropic_efficiency = 0.91                     # CHECKED Ref. [3] Page 14
+    low_pressure_compressor.pressure_ratio        = 1.26                     # CHECKED Ref. [2] Page 9   
     turbofan.low_pressure_compressor              = low_pressure_compressor
 
     # high pressure compressor  
     high_pressure_compressor                       = RCAIDE.Library.Components.Propulsors.Converters.Compressor()    
     high_pressure_compressor.tag                   = 'hpc'
-    high_pressure_compressor.polytropic_efficiency = 0.9
-    high_pressure_compressor.pressure_ratio        = 20.033
+    high_pressure_compressor.polytropic_efficiency = 0.9                        # CHECKED Ref. [3] Page 14
+    high_pressure_compressor.pressure_ratio        = 20.033                     # CHECKED Ref. [2] Page 9
     turbofan.high_pressure_compressor              = high_pressure_compressor
 
     # low pressure turbine  
     low_pressure_turbine                           = RCAIDE.Library.Components.Propulsors.Converters.Turbine()   
     low_pressure_turbine.tag                       ='lpt'
-    low_pressure_turbine.mechanical_efficiency     = 0.99
-    low_pressure_turbine.polytropic_efficiency     = 0.9228 
+    low_pressure_turbine.mechanical_efficiency     = 0.99                     # CHECKED Ref. [3] Page 14
+    low_pressure_turbine.polytropic_efficiency     = 0.93                     # CHECKED Ref. [3] Page 14
     turbofan.low_pressure_turbine                  = low_pressure_turbine
    
     # high pressure turbine     
     high_pressure_turbine                          = RCAIDE.Library.Components.Propulsors.Converters.Turbine()   
     high_pressure_turbine.tag                      ='hpt'
-    high_pressure_turbine.mechanical_efficiency    = 0.99
-    high_pressure_turbine.polytropic_efficiency    = 0.93 
+    high_pressure_turbine.mechanical_efficiency    = 0.99                     # CHECKED Ref. [3] Page 14
+    high_pressure_turbine.polytropic_efficiency    = 0.93                     # CHECKED Ref. [3] Page 14 
     turbofan.high_pressure_turbine                 = high_pressure_turbine 
 
     # combustor  
     combustor                                      = RCAIDE.Library.Components.Propulsors.Converters.Combustor()   
     combustor.tag                                  = 'Comb'
-    combustor.efficiency                           = 0.997    
-    combustor.turbine_inlet_temperature            = 1430
-    combustor.pressure_ratio                       = 0.95
+    combustor.efficiency                           = 0.997                    # CHECKED Ref. [2] Page 9
+    combustor.turbine_inlet_temperature            = 1430                     # CHECKED Ref. [3] Page 14
+    combustor.pressure_ratio                       = 0.94                     # CHECKED Ref. [2] Page 9
     combustor.fuel_data                            = RCAIDE.Library.Attributes.Propellants.Jet_A()  
     turbofan.combustor                             = combustor
 
     # core nozzle
     core_nozzle                                    = RCAIDE.Library.Components.Propulsors.Converters.Expansion_Nozzle()   
     core_nozzle.tag                                = 'core nozzle'
-    core_nozzle.polytropic_efficiency              = 0.95
+    core_nozzle.polytropic_efficiency              = 0.98                     # CHECKED Ref. [2] Page 9
     core_nozzle.pressure_ratio                     = 0.99  
     turbofan.core_nozzle                           = core_nozzle
              
     # fan nozzle             
     fan_nozzle                                     = RCAIDE.Library.Components.Propulsors.Converters.Expansion_Nozzle()   
     fan_nozzle.tag                                 = 'fan nozzle'
-    fan_nozzle.polytropic_efficiency               = 0.95
+    fan_nozzle.polytropic_efficiency               = 0.98                     # CHECKED Ref. [2] Page 9
     fan_nozzle.pressure_ratio                      = 0.99 
     turbofan.fan_nozzle                            = fan_nozzle 
     
