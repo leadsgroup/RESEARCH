@@ -257,7 +257,6 @@ def plot_style(number_of_lines= 10):
     return plot_parameters
 
 def GE_90_engine(PSR_PFR_combustor_model_flag ):
-
     
     #------------------------------------------------------------------------------------------------------------------------------------  
     # Propulsor: Starboard Propulsor
