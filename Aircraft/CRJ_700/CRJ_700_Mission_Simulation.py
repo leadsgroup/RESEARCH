@@ -1,5 +1,5 @@
 '''
-Bombardier/Mitsubishi CRJ-700 series aircraft. twin turbofan regional jet with two tail mounted engines.'''
+Bombardier/Mitsubishi CRJ-700 series aircraft. twin turbofan regional jet with two tail mounted engines. '''
 
 # ----------------------------------------------------------------------
 #   Imports
