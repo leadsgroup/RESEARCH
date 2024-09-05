@@ -134,8 +134,6 @@ def main():
             
             Tt_3[i,j]           = hpc_conditions.outputs.stagnation_temperature 
             Pt_3[i,j]           = hpc_conditions.outputs.stagnation_pressure
-            #T_3[i,j]            = Tt_3[i,j] / (1 + 0.5 * (conditions.freestream.isentropic_expansion_factor - 1) * (M_out)**2)
-            #P_3[i,j]            = Pt_3[i,j] / (1 + 0.5 * (conditions.freestream.isentropic_expansion_factor - 1) * (M_out)**2)**(conditions.freestream.isentropic_expansion_factor / (conditions.freestream.isentropic_expansion_factor - 1))       
             Tt_4[i,j]           = hpt_conditions.inputs.stagnation_temperature 
             Pt_4[i,j]           = hpt_conditions.inputs.stagnation_pressure 
             m_dot_core[i,j]     = turbofan_conditions.core_mass_flow_rate   
@@ -270,7 +268,7 @@ def GE90_94B_engine():
     turbofan.mass_properties.mass               = 7550                       # CHECKED Ref. [1] Page 197
     turbofan.engine_length                      = 4.897                      # CHECKED Ref. [1] Page 197
     turbofan.engine_diameter                    = 3.124                      # CHECKED Ref. [1] Page 197
-    turbofan.bypass_ratio                       = 8.7                        # CHECKED Ref. [1] Page 197
+    turbofan.bypass_ratio                       = 8.7877                        # CHECKED Ref. [1] Page 197
     turbofan.design_altitude                    = 35000.0*Units.ft           # CHECKED Ref. [2] Page 9
     turbofan.design_mach_number                 = 0.8                        # CHECKED Ref. [2] Page 9
     turbofan.design_thrust                      = 72988.199301 * Units.N     # CHECKED Ref. [2] Page 9
