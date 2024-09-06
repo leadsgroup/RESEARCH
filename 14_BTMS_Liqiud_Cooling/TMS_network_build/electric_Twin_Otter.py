@@ -489,19 +489,19 @@ def vehicle_setup(BTMS_flag):
     
     bus.batteries.append(bat)
     
-    bat1                                                    = RCAIDE.Library.Components.Energy.Sources.Batteries.Lithium_Ion_LFP()
-    bat1.pack.electrical_configuration.series               = 120  
-    bat1.pack.electrical_configuration.parallel             = 210   #250
-    bat1.cell.nominal_capacity                              = 3.8  
-    initialize_from_circuit_configuration(bat1,module_weight_factor = 1.25)  
-    bat1.pack.number_of_modules                           = 12
-    bat1.module.geometrtic_configuration.total              = bat1.pack.electrical_configuration.total
-    bat1.module.voltage                                     = bat1.pack.maximum_voltage/bat1.pack.number_of_modules # assumes modules are connected in parallel, must be less than max_module_voltage (~50) /safety_factor (~ 1.5)  
-    bat1.module.geometrtic_configuration.normal_count       = bat1.module.geometrtic_configuration.total/bat1.pack.number_of_modules / 50
-    bat1.module.geometrtic_configuration.parallel_count     = 50
-    bus.voltage                                            = bat1.pack.maximum_voltage
+    #bat1                                                    = RCAIDE.Library.Components.Energy.Sources.Batteries.Lithium_Ion_LFP()
+    #bat1.pack.electrical_configuration.series               = 120  
+    #bat1.pack.electrical_configuration.parallel             = 210   #250
+    #bat1.cell.nominal_capacity                              = 3.8  
+    #initialize_from_circuit_configuration(bat1,module_weight_factor = 1.25)  
+    #bat1.pack.number_of_modules                           = 12
+    #bat1.module.geometrtic_configuration.total              = bat1.pack.electrical_configuration.total
+    #bat1.module.voltage                                     = bat1.pack.maximum_voltage/bat1.pack.number_of_modules # assumes modules are connected in parallel, must be less than max_module_voltage (~50) /safety_factor (~ 1.5)  
+    #bat1.module.geometrtic_configuration.normal_count       = bat1.module.geometrtic_configuration.total/bat1.pack.number_of_modules / 50
+    #bat1.module.geometrtic_configuration.parallel_count     = 50
+    #bus.voltage                                            = bat1.pack.maximum_voltage
     
-    bus.batteries.append(bat1)
+    #bus.batteries.append(bat1)
         
     
 
@@ -609,25 +609,51 @@ def vehicle_setup(BTMS_flag):
     net.busses.append(bus)
     
 
-    ###------------------------------------------------------------------------------------------------------------------------------------  
-    ## Coolant Line
     ##------------------------------------------------------------------------------------------------------------------------------------  
-    #coolant_line                      = RCAIDE.Library.Components.Energy.Distributors.Coolant_Line(bus)
+    # Coolant Line
+    #------------------------------------------------------------------------------------------------------------------------------------  
+    coolant_line                      = RCAIDE.Library.Components.Energy.Distributors.Coolant_Line(bus)
     #coolant_line_1                      = RCAIDE.Library.Components.Energy.Distributors.Coolant_Line(bus)
-    #net.coolant_lines.append(coolant_line)
+    net.coolant_lines.append(coolant_line)
     #net.coolant_lines.append(coolant_line_1)
     
-    ###------------------------------------------------------------------------------------------------------------------------------------  
-    ### Battery Thermal Management 
-    ###------------------------------------------------------------------------------------------------------------------------------------      
-    #has1                               = RCAIDE.Library.Components.Thermal_Management.Batteries.Air_Cooled()
+    ##------------------------------------------------------------------------------------------------------------------------------------  
+    ## Battery Thermal Management 
+    ##------------------------------------------------------------------------------------------------------------------------------------      
+    HAS                              = RCAIDE.Library.Components.Thermal_Management.Batteries.Air_Cooled()
+    #HAS                                                    = RCAIDE.Library.Components.Thermal_Management.Batteries.Liquid_Cooled_Wavy_Channel(coolant_line)
+    #HAS2                                                    = RCAIDE.Library.Components.Thermal_Management.Batteries.Liquid_Cooled_Wavy_Channel(coolant_line) 
+    #HAS.design_altitude                                    = 2500. * Units.feet  
+    #atmosphere                                             = RCAIDE.Framework.Analyses.Atmospheric.US_Standard_1976() 
+    #atmo_data                                              = atmosphere.compute_values(altitude = HAS.design_altitude)     
+    #HAS.coolant_inlet_temperature                          = atmo_data.temperature[0,0]  
+    #HAS.design_battery_operating_temperature               = 313
+    #HAS.design_heat_removed                                = 25000  
+    #HAS                                                    = design_wavy_channel(HAS,bat) 
+    
+    
+   
+    coolant_line.batteries[bat.tag].append(HAS)
+    #coolant_line.batteries[bat1.tag].append(HAS2)
+                                            
+    ## Battery Heat Exchanger               
+    #HEX                                                    = RCAIDE.Library.Components.Thermal_Management.Heat_Exchangers.Cross_Flow_Heat_Exchanger() 
+    #HEX.design_altitude                                    = 2500. * Units.feet 
+    #HEX.inlet_temperature_of_cold_fluid                    = atmo_data.temperature[0,0]   
+    ##HEX                                                    = design_cross_flow_heat_exchanger(HEX,HAS,bat)    
+    #coolant_line.heat_exchangers.append(HEX)
+    
+    ## Reservoir for Battery TMS
+    #RES                                                    = RCAIDE.Library.Components.Thermal_Management.Reservoirs.Reservoir()
+
+    #coolant_line.reservoirs.append(RES)
+    
+    
     #has1.tag =  'FOR nmc'
     #has2                               = RCAIDE.Library.Components.Thermal_Management.Batteries.Air_Cooled()
     #has2.tag =  'FOR lfp'    
     
-    
-    #coolant_line.batteries[bat.tag].append(has1)
-   #
+
     vehicle.append_energy_network(net)   
     
      
