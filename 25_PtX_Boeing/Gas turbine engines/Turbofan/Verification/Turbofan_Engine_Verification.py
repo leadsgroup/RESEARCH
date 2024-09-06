@@ -267,17 +267,14 @@ def GE90_94B_engine():
     turbofan.mass_properties.mass               = 7550                       # CHECKED Ref. [1] Page 197
     turbofan.engine_length                      = 4.897                      # CHECKED Ref. [1] Page 197
     turbofan.engine_diameter                    = 3.124                      # CHECKED Ref. [1] Page 197
-    turbofan.bypass_ratio                       = 8.7877                     # CHECKED Ref. [1] Page 197
+    turbofan.bypass_ratio                       = 8.7                     # CHECKED Ref. [1] Page 197
     turbofan.design_altitude                    = 35000.0*Units.ft           # CHECKED Ref. [2] Page 9
     turbofan.design_mach_number                 = 0.8                        # CHECKED Ref. [2] Page 9
     turbofan.design_thrust                      = 72988.199301 * Units.N     # CHECKED Ref. [2] Page 9
-
-    # fan                
-    fan                                         = RCAIDE.Library.Components.Propulsors.Converters.Fan()   
-    fan.tag                                     = 'fan'
-    fan.polytropic_efficiency                   = 0.9153                     # CHECKED Ref. [2] Page 9
-    fan.pressure_ratio                          = 1.65                       # CHECKED Ref. [1] Page 197
-    turbofan.fan                                = fan        
+    #turbofan.design_altitude                    = 0.0*Units.ft           # CHECKED Ref. [2] Page 9
+    #turbofan.design_mach_number                 = 0.0001                        # CHECKED Ref. [2] Page 9
+    #turbofan.design_thrust                      = 416796 * Units.N     # CHECKED Ref. [2] Page 9    
+    #turbofan.overall_pressure_ratio             = 40                         # CHECKED Ref. [1] Page 197
 
     # working fluid                   
     turbofan.working_fluid                      = RCAIDE.Library.Attributes.Gases.Air() 
@@ -293,7 +290,14 @@ def GE90_94B_engine():
     inlet_nozzle.polytropic_efficiency          = 0.98                                        
     inlet_nozzle.pressure_ratio                 = 0.99
     inlet_nozzle.compressibility_effects        = True
-    turbofan.inlet_nozzle                       = inlet_nozzle 
+    turbofan.inlet_nozzle                       = inlet_nozzle
+    
+    # fan                
+    fan                                         = RCAIDE.Library.Components.Propulsors.Converters.Fan()   
+    fan.tag                                     = 'fan'
+    fan.polytropic_efficiency                   = 0.9153                     # CHECKED Ref. [2] Page 9
+    fan.pressure_ratio                          = 1.65                       # CHECKED Ref. [1] Page 197
+    turbofan.fan                                = fan        
 
     # low pressure compressor    
     low_pressure_compressor                       = RCAIDE.Library.Components.Propulsors.Converters.Compressor()    
@@ -348,7 +352,6 @@ def GE90_94B_engine():
     
     # design turbofan
     design_turbofan(turbofan)  
-    # append propulsor to distribution line 
     
     return turbofan
 
