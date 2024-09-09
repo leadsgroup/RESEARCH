@@ -267,10 +267,10 @@ def GE90_94B_engine():
     turbofan.mass_properties.mass               = 7550                       # CHECKED Ref. [1] Page 197
     turbofan.engine_length                      = 4.897                      # CHECKED Ref. [1] Page 197
     turbofan.engine_diameter                    = 3.124                      # CHECKED Ref. [1] Page 197
-    turbofan.bypass_ratio                       = 8.7                     # CHECKED Ref. [1] Page 197
+    turbofan.bypass_ratio                       = 8.5                     # CHECKED Ref. [1] Page 197
     turbofan.design_altitude                    = 35000.0*Units.ft           # CHECKED Ref. [2] Page 9
     turbofan.design_mach_number                 = 0.8                        # CHECKED Ref. [2] Page 9
-    turbofan.design_thrust                      = 72988.199301 * Units.N     # CHECKED Ref. [2] Page 9
+    turbofan.design_thrust                      = 77850 * Units.N     # CHECKED Ref. [2] Page 9
     #turbofan.design_altitude                    = 0.0*Units.ft           # CHECKED Ref. [2] Page 9
     #turbofan.design_mach_number                 = 0.0001                        # CHECKED Ref. [2] Page 9
     #turbofan.design_thrust                      = 416796 * Units.N     # CHECKED Ref. [2] Page 9    
@@ -295,8 +295,8 @@ def GE90_94B_engine():
     # fan                
     fan                                         = RCAIDE.Library.Components.Propulsors.Converters.Fan()   
     fan.tag                                     = 'fan'
-    fan.polytropic_efficiency                   = 0.9153                     # CHECKED Ref. [2] Page 9
-    fan.pressure_ratio                          = 1.65                       # CHECKED Ref. [1] Page 197
+    fan.polytropic_efficiency                   = 0.92                     # CHECKED Ref. [2] Page 9
+    fan.pressure_ratio                          = 1.58                       # CHECKED Ref. [1] Page 197
     turbofan.fan                                = fan        
 
     # low pressure compressor    
@@ -310,7 +310,7 @@ def GE90_94B_engine():
     high_pressure_compressor                       = RCAIDE.Library.Components.Propulsors.Converters.Compressor()    
     high_pressure_compressor.tag                   = 'hpc'
     high_pressure_compressor.polytropic_efficiency = 0.9                        # CHECKED Ref. [3] Page 14
-    high_pressure_compressor.pressure_ratio        = 20.033                     # CHECKED Ref. [2] Page 9
+    high_pressure_compressor.pressure_ratio        = 20                     # CHECKED Ref. [2] Page 9
     turbofan.high_pressure_compressor              = high_pressure_compressor
 
     # low pressure turbine  
@@ -330,7 +330,7 @@ def GE90_94B_engine():
     # combustor  
     combustor                                      = RCAIDE.Library.Components.Propulsors.Converters.Combustor()   
     combustor.tag                                  = 'Comb'
-    combustor.efficiency                           = 0.997                    # CHECKED Ref. [2] Page 9
+    combustor.efficiency                           = 0.99                    # CHECKED Ref. [2] Page 9
     combustor.turbine_inlet_temperature            = 1430                     # CHECKED Ref. [3] Page 14
     combustor.pressure_ratio                       = 0.94                     # CHECKED Ref. [2] Page 9
     combustor.fuel_data                            = RCAIDE.Library.Attributes.Propellants.Jet_A()  
