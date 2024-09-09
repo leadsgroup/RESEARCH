@@ -37,7 +37,7 @@ def main():
     H2O_PSR = 0.62397382
     H2O_PFR = 1.14962815
     H2O_TOT = 1.210699
-    H2O_EI  = 1.34 
+    H2O_EI  = 1.231 
     H2O_err_PSR = ((np.abs(H2O_PSR - H2O_EI))/H2O_EI)*100
     H2O_err_PFR = ((np.abs(H2O_PFR - H2O_EI))/H2O_EI)*100
     H2O_err_TOT = ((np.abs(H2O_TOT - H2O_EI))/H2O_EI)*100   
