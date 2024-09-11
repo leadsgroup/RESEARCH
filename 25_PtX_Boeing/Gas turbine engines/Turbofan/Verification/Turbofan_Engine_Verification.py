@@ -23,10 +23,10 @@ import time
 
 def main():  
 
-    altitude            = np.array([35000])*Units.feet 
-    mach_number         = np.array([0.8]) 
-    #altitude            = np.linspace(0,35000,10)*Units.feet
-    #mach_number         = np.linspace(1E-4,0.8,10)
+    #altitude            = np.array([35000])*Units.feet 
+    #mach_number         = np.array([0.8]) 
+    altitude            = np.linspace(0,35000,20)*Units.feet
+    mach_number         = np.linspace(0.1,0.8,8)
     thrust              = np.zeros((len(altitude),len(mach_number)))
     overall_efficiency  = np.zeros((len(altitude),len(mach_number)))
     thermal_efficiency  = np.zeros((len(altitude),len(mach_number)))
@@ -138,7 +138,7 @@ def main():
             m_dot_core[i,j]                                   = turbofan_conditions.core_mass_flow_rate   
             fuel_flow_rate[i,j]                               = turbofan_conditions.fuel_flow_rate
             m_dot_air_tot[i,j]                                = turbofan_conditions.core_mass_flow_rate + bypass_ratio * turbofan_conditions.core_mass_flow_rate
-            TSFC[i,j]                                         = turbofan.TSFC # [N/N-s]
+            #TSFC[i,j]                                         = turbofan.TSFC # [N/N-s]
       
     plot_results(altitude,mach_number,thrust,overall_efficiency,thermal_efficiency,Tt_3,Pt_3,Tt_4,Pt_4,m_dot_core,fuel_flow_rate,m_dot_air_tot)
     
@@ -152,8 +152,7 @@ def plot_results(altitude,mach_number,thrust,overall_efficiency,thermal_efficien
     axis_1 = fig.add_subplot(1,1,1) 
     for i in  range(len(mach_number)):
         axis_1.plot(thrust[:,i],altitude, color = ps.color[i], linestyle = ps.line_style[0],
-                    marker = ps.markers[0], linewidth = ps.line_width, label = 'Mach =' + str( round(mach_number[i], 2))) 
-    axis_1.axvline(x=77850, color='r', linestyle='--', label=f'Design thrust in cruise = 77850 N')        
+                    marker = ps.markers[0], linewidth = ps.line_width, label = 'Mach =' + str( round(mach_number[i], 2)))     
     axis_1.set_xlabel('Thrust [N]')
     axis_1.set_ylabel('Altitude [m]')
     
@@ -196,7 +195,7 @@ def plot_results(altitude,mach_number,thrust,overall_efficiency,thermal_efficien
     axis_4_1.set_xlabel(r'Entering $T_t$ [K]')
     axis_4_2.set_xlabel(r'Entering $P_t$ [K]')
     axis_4_3.set_xlabel(r'Exiting $T_t$ [Pa]')
-    axis_4_4.set_xlabel(r'Exising $P_t$ [Pa]')
+    axis_4_4.set_xlabel(r'Exiting $P_t$ [Pa]')
     axis_4_1.set_ylabel('Altitude [ft]')
     axis_4_2.set_ylabel('Altitude [ft]')
     axis_4_3.set_ylabel('Altitude [ft]')
