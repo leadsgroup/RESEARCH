@@ -8,143 +8,260 @@ def main():
 
     ti        = time.time()
     
-    mix_air_fuel = ct.Solution('JetFuelSurrogate.yaml')   # Less accurate model (no NOx), faster
-    #mix_air_fuel = ct.Solution('chem.yaml')              # More accurate model (NOx), slower 
-    
-    area_out  = 1                                         # [m**2]
-        
-    # INPUT PARAMTERTERS  
-    T_stag0   = np.array([800,800])                       # [K]  Stagnation Temperature (Tt_in)
-    P_stag0   = np.array([25,25])*ct.one_atm              # [Pa] Stagnation Pressure (Pt_in) 
-    M0        = np.array([0.1,0.1])                       # [-]  Inlet Mach number
-    gamma     = mix_air_fuel.cp / mix_air_fuel.cv
-    equivalence_ratio       = np.array([0.7, 0.7])
-    
-    # initial conditions 
-    temp      = T_stag0 / (1 + 0.5 * (gamma - 1) * M0**2)                         # Static Temperature
-    press      = P_stag0 / (1 + 0.5 * (gamma - 1) * M0**2)**(gamma / (gamma - 1))  # Static Pressure
- 
-    residence_time_psr      = np.array([5e-3,5e-3]) # Residence time in Flame Zone
-    residence_time_pfr      = np.array([5 ,5]) * 1E-4 # np.linspace(1,10,10)*1e-4 # Residence time in Secondary Zone
-    #residence_time_pfr      = np.linspace(1,10,10)*1e-4 # Residence time in Secondary Zone
+    #--------------------------------------------------------------------------------
 
+    # Engine inputs 
+    T_stag_0                = 700                                       # [K]  
+    P_stag_0                = 2000000                                   # [Pa] 
+    FAR                     = 0.02                                      # [-]
+    FAR_TO                  = 0.0275                                    # [-]
+    FAR_st                  = 0.068                                     # [-]
+    mdot_fuel               = 0.8                                       # [kg/s]
+    mdot_fuel_TO            = 1.2                                       # [kg/s]
+    mdot_air                = mdot_fuel/FAR                             # [kg/s]
+    mdot_air_TO             = mdot_fuel_TO/FAR_TO                       # [kg/s]     
+    
+    # Primary Zone inputs
+    N_PZ                    = 21                                        # [-]
+    V_PZ                    = 0.0023                                    # [m**3]           
+    phi_PZ_des              = 1.7                                       # [-]
+    S_PZ                    = 0.39                                      # [-]           
+    phi_SZ_des              = 0.7                                       # [-]           
+    l_SA_SM                 = 0.55                                      # [-]          
+    l_SA_FM                 = 0.055                                     # [-]
+    LHV_input_fuel          = 1 #FIX
+    LHV_model_fuel          = 1 #FIX
+    F_SC                    = LHV_input_fuel/LHV_model_fuel             # [-]
+    
+    #Secondary Zone inputs
+    A_SZ                    = 0.15                                      # [m**2]
+    L_SZ                    = 0.075                                     # [m]           
+    l_DA_start              = 0.95                                      # [-]          
+    l_DA_end                = 0.1                                       # [-] 
+    f_SM                    = 0.5                                       # [-]
+    
     dict_fuel = {'N-C12H26':0.6, 'A1CH3':0.2, 'A1':0.2} # Less accurate model (no NOx), faster
     #dict_fuel = {'NC10H22':0.16449, 'NC12H26':0.34308, 'NC16H34':0.10335, 'IC8H18':0.08630, 'NC7H14':0.07945, 'C6H5C2H5': 0.07348, 'C6H5C4H9': 0.05812, 'C10H7CH3': 0.10972}      # More accurate model (NOx), slower   
-    dict_oxy = {'O2':0.2095, 'N2':0.7809, 'AR':0.0093, 'CO2':0.0003}
+    dict_oxy = {'O2':0.2095, 'N2':0.7809, 'AR':0.0093, 'CO2':0.0003}    
 
-    #-------------------------------------------------------------------------------- 
-    list_sp = ['CO2', 'CO', 'H2O'] # Less accurate model (no NOx), faster
+    #--------------------------------------------------------------------------------
+    
+    list_sp = ['CO2', 'CO', 'H2O']                          # Less accurate model (no NOx), faster
     #list_sp   = ['CO2', 'CO', 'H2O', 'NO', 'NO2', 'CSOLID'] # More accurate model (NOx), slower
     col_names = ['tau(s)', 'Tout(K)', 'T_stag_out','P_stag_out', 'h_stag_out', 'FAR'] + ['X_' +str(sp) for sp in list_sp] + ['Y_' +str(sp) for sp in list_sp] + ['EI_' +str(sp) for sp in list_sp]
     df        = pd.DataFrame(columns=col_names)
     
-    for n in range(len(residence_time_pfr)):
-        mix_air_fuel, EI, T_stag_out, P_stag_out, h_stag_out, FAR = combustor(residence_time_pfr[n],temp[n],press[n],equivalence_ratio[n],residence_time_psr[n],dict_fuel,dict_oxy,mix_air_fuel,area_out)
-        sp_idx = [mix_air_fuel.species_index(sp) for sp in list_sp]
-        data_n = [residence_time_pfr[n], mix_air_fuel.T, T_stag_out, P_stag_out, h_stag_out, FAR] + list(mix_air_fuel.X[sp_idx]) + list(mix_air_fuel.Y[sp_idx]) + list(EI[sp_idx])
-        df.loc[n] = data_n
-        print(EI[sp_idx])
+    Fuel, EI, T_stag_out, P_stag_out, h_stag_out, FAR = combustor(dict_fuel, dict_oxy, T_stag_0, P_stag_0, FAR, FAR_TO, FAR_st, mdot_fuel, mdot_fuel_TO, mdot_air, mdot_air_TO, N_PZ, V_PZ, phi_PZ_des, S_PZ, phi_SZ_des, l_SA_SM, l_SA_FM, F_SC, A_SZ, L_SZ, l_DA_start, l_DA_end, f_SM)
+    #sp_idx = [Fuel.species_index(sp) for sp in list_sp]
+    #data_n = [residence_time_pfr[n], Fuel.T, T_stag_out, P_stag_out, h_stag_out, FAR] + list(Fuel.X[sp_idx]) + list(Fuel.Y[sp_idx]) + list(EI[sp_idx])
+    #df.loc[n] = data_n
+    #print(EI[sp_idx])
     
     tf           = time.time()
     elapsed_time = round((tf-ti)/len(residence_time_pfr),2)
     print('Simulation Time: ' + str(elapsed_time) + ' seconds per timestep')   
         
-    #plot_emission(df,mix_air_fuel,equivalence_ratio)
+    #plot_emission(df,Fuel,equivalence_ratio)
     
     return 
  
-def combustor(tau,temp,press,equivalence_ratio,residence_time_psr,dict_fuel, dict_oxy, mix_air_fuel,area_out):
+def combustor(dict_fuel, dict_oxy, T_stag_0, P_stag_0, FAR, FAR_TO, FAR_st, mdot_fuel, mdot_fuel_TO, mdot_air, mdot_air_TO, N_PZ, V_PZ, phi_PZ_des, S_PZ, phi_SZ_des, l_SA_SM, l_SA_FM, F_SC, A_SZ, L_SZ, l_DA_start, l_DA_end, f_SM):
+        
+    Fuel = ct.Solution('JetFuelSurrogate.yaml')
+    Fuel.TP = T_stag_0, P_stag_0
     
-    """ combustor simulation using a simple psr-pfr reactor network with varying pfr residence time """
+    sigma_phi = S_PZ*phi_PZ_des
+    f_air_PZ  = (mdot_fuel_TO*F_SC)/(phi_PZ_des*mdot_air_TO*FAR_st)
+    phi_sign       = (mdot_fuel*F_SC)/(f_air_PZ*mdot_air*FAR_st)
+    V_PZ_i                   = V_PZ/N_PZ
+    
+    upstream   = ct.Reservoir(Fuel)
+    mixer      = ct.IdealGasReactor(Fuel)    
+    
+    for i in N_PZ:
+        f_phi[i]   = (1/(np.sqrt(2*np.pi)*sigma_phi)) * np.exp((-(phi_sign[i] - phi_PZ_des)**2)/(2*sigma_phi**2))*Delta_phi
 
-    mix_air_fuel.TP = temp, press
-    mix_air_fuel.set_equivalence_ratio(equivalence_ratio, fuel = dict_fuel, oxidizer = dict_oxy )
-        
-    comp_fuel  = list(dict_fuel.keys())
-    Y_fuel     = mix_air_fuel[comp_fuel].Y
+        Fuel.set_equivalence_ratio(phi[i], fuel = dict_fuel, oxidizer = dict_oxy)
+        Fuel.equilibrate('HP')
+        PSR[i]     = ct.IdealGasReactor(Fuel)
+        PSR[i].volume               = V_PZ_i
+        rho[i]                      = Fuel.density
+        t_res_psr_i              = V_PZ_i/(rho_i*(m_dot_fuel_i + m_dot_air_i))
+        func_mdot  = lambda t: PSR[i].mass/t_res_psr_i
+        inlet                = ct.MassFlowController(upstream, PSR[[i]])
+        inlet.mass_flow_rate = func_mdot*f_phi[i]
+        outlet  = ct.Valve(psr, mixer, K=100) 
+        sim_psr = ct.ReactorNet([PSR[i]])
+        sim_psr.advance(t_res_psr_i)         
     
-    # psr (flame zone) 
-    upstream   = ct.Reservoir(mix_air_fuel)
-    downstream = ct.Reservoir(mix_air_fuel)
-        
-    mix_air_fuel.equilibrate('HP')
-    psr        = ct.IdealGasReactor(mix_air_fuel) 
-    func_mdot  = lambda t: psr.mass/residence_time_psr
     
-    inlet                = ct.MassFlowController(upstream, psr)
-    inlet.mass_flow_rate = func_mdot
-    outlet               = ct.Valve(psr, downstream, K=100) 
-    sim_psr              = ct.ReactorNet([psr])
-        
-    sim_psr.advance_to_steady_state()
-    #sim_psr.advance(residence_time_pfr)
+   
+    
+    
+    comp_fuel                = list(dict_fuel.keys())
+    Y_fuel                   = Fuel[comp_fuel].Y    
+    
+    Air_composition          = 'O2:0.21, N2:0.78, AR:0.01'
+    mdot_air                 = 14*0.7
+    mdot_air_d               = 14*0.3
+    T_injection_air          = temp
+    P_injection_air          = press  
+    Air                      = ct.Solution('air.yaml')
+    Air.TPX                  = T_injection_air, P_injection_air, Air_composition   
+    
+    dilution_air_1           = Air
+    dilution_air_1.TPX       = T_injection_air, P_injection_air, Air_composition 
+    
+    dilution_air_2           = Air
+    dilution_air_2.TPX       = T_injection_air, P_injection_air, Air_composition 
+    
+    dilution_air_3           = Air
+    dilution_air_3.TPX       = T_injection_air, P_injection_air, Air_composition     
+    
+    Fuel_composition         = 'N-C12H26:0.6, A1CH3:0.2, A1:0.2'
+    mdot_fuel                = 0.65
+    T_injection_fuel         = 300
+    P_injection_fuel         = ct.one_atm 
+    Fuel                     = ct.Solution('JetFuelSurrogate.yaml')  
+    Fuel.TPX                 = T_injection_fuel, P_injection_fuel, Fuel_composition 
+    
+    mdot_tot                 = mdot_air + mdot_air_d + mdot_fuel    
     
     # ----------------------------------------------------------------
-    # -------------- Addition of first dilution air #1 ---------------
+    # ----------------------- CRN Components -------------------------
     # ----------------------------------------------------------------
     
-    # Addition of first dilution air #1
+    res_air                  = ct.Reservoir(Air, name='air')
+    res_fuel                 = ct.Reservoir(Fuel, name='fuel')
+    mixer_1                  = ct.IdealGasReactor(Fuel, name='mixer 1')
+    PSR                      = ct.IdealGasReactor(Fuel, name='PSR') 
+    res_d_1                  = ct.Reservoir(dilution_air_1, name='dilution air 1')
+    mixer_2                  = ct.IdealGasReactor(Fuel, name='mixer 2') 
+    PFR_1                    = ct.IdealGasConstPressureReactor(Fuel, name='PFR 1')
+    res_d_2                  = ct.Reservoir(dilution_air_2, name='dilution air 2')
+    mixer_3                  = ct.IdealGasReactor(Fuel, name='mixer 3') 
+    PFR_2                    = ct.IdealGasConstPressureReactor(Fuel, name='PFR 2')   
+    res_d_3                  = ct.Reservoir(dilution_air_3, name='dilution air 3')
+    mixer_4                  = ct.IdealGasReactor(Fuel, name='mixer 4')    
+    PFR_3                    = ct.IdealGasConstPressureReactor(Fuel, name='PFR 2') 
     
-    gas_a           = ct.Solution('air.yaml')
-    gas_a.TPX       = 300.0, ct.one_atm, 'O2:0.21, N2:0.78, AR:0.01'
-    res_a           = ct.Reservoir(gas_a, name='air')
-    res_b           = downstream
-    downstream_pfr  = ct.IdealGasConstPressureReactor(mix_air_fuel)
-    mixer           = ct.IdealGasReactor(mix_air_fuel, name='mixer')
-    mfc1            = ct.MassFlowController(res_a, mixer, mdot=10)
-    mfc2            = ct.MassFlowController(res_b, mixer, mdot=func_mdot)    
-    outlet          = ct.Valve(mixer, downstream_pfr, K=10.0)
-    sim_mixer_1     = ct.ReactorNet([mixer])    
+    # ----------------------------------------------------------------
+    # ---------------------- Air + Fuel Mixing -----------------------
+    # ---------------------------------------------------------------- 
+    
+    mfc1_1                   = ct.MassFlowController(res_air, mixer_1, mdot = mdot_air)
+    mfc2_1                   = ct.MassFlowController(res_fuel, mixer_1, mdot = mdot_fuel)    
+    outlet_1                 = ct.Valve(mixer_1, PSR, K=10.0)
+    sim_mixer_1              = ct.ReactorNet([mixer_1])    
     sim_mixer_1.advance_to_steady_state()
-    #sim_mixer_1.advance(residence_time_pfr)
+    #sim_mixer_1.advance(residence_time_pfr)     
+    
+    # ----------------------------------------------------------------
+    # ----------------------------- PSRs -----------------------------
+    # ----------------------------------------------------------------    
+    
+    PSR.volume               = 1
+    #Fuel.TP                  = temp, press
+    Fuel.equilibrate('HP')
+    #Fuel.set_equivalence_ratio(equivalence_ratio, fuel = dict_fuel, oxidizer = dict_oxy )  
+    outlet_2                 = ct.Valve(PSR, mixer_2, K=100) 
+    sim_psr                  = ct.ReactorNet([PSR])
+    #sim_psr.advance_to_steady_state()
+    sim_psr.advance(residence_time_psr)
+    
+    # ----------------------------------------------------------------
+    # ----------------- Addition of dilution air #1 ------------------
+    # ----------------------------------------------------------------
+    
+    mfc1_2                   = ct.MassFlowController(res_d_1, mixer_2, mdot=mdot_air_d/3)   
+    outlet_3                 = ct.Valve(mixer_2, PFR_1, K=10.0)
+    sim_mixer_2              = ct.ReactorNet([mixer_2])    
+    sim_mixer_2.advance_to_steady_state()
+    #sim_mixer_2.advance(residence_time_pfr)
     
     # ----------------------------------------------------------------
     # ---------------------------- PFR #1 ----------------------------
     # ----------------------------------------------------------------
     
-    sim_pfr_1 = ct.ReactorNet([downstream_pfr])
+    outlet_4                 = ct.Valve(PFR_1, mixer_3, K=100)
+    sim_pfr_1                = ct.ReactorNet([PFR_1])
+    #sim_pfr_1.advance_to_steady_state() 
+    sim_pfr_1.advance(residence_time_pfr)
     
-    sim_pfr_1.advance_to_steady_state() 
-    # sim_pfr_1.advance(residence_time_pfr)
+    # ----------------------------------------------------------------
+    # ----------------- Addition of dilution air #2 ------------------
+    # ---------------------------------------------------------------- 
     
-    # Determine massflow rate of flow into combustion chamber 
-    mdot           = inlet.mass_flow_rate
-    mdot_fuel      = sum(mdot * Y_fuel)
-    mdot_air       = mdot - mdot_fuel  # Assuming all mass flow that is not fuel is air
+    mfc1_3                   = ct.MassFlowController(res_d_2, mixer_3, mdot=mdot_air_d/3)   
+    outlet_5                 = ct.Valve(mixer_3, PFR_2, K=10.0)
+    sim_mixer_3              = ct.ReactorNet([mixer_3])    
+    sim_mixer_3.advance_to_steady_state()
+    #sim_mixer_3.advance(residence_time_pfr)    
     
+    # ----------------------------------------------------------------
+    # ---------------------------- PFR #2 ----------------------------
+    # ----------------------------------------------------------------
+    
+    outlet_6                 = ct.Valve(PFR_2, mixer_4, K=100)
+    sim_pfr_2                = ct.ReactorNet([PFR_2])
+    #sim_pfr_2.advance_to_steady_state() 
+    sim_pfr_2.advance(residence_time_pfr)  
+    
+    # ----------------------------------------------------------------
+    # ------------------- Addition of cooling air --------------------
+    # ---------------------------------------------------------------- 
+    
+    mfc1_4                   = ct.MassFlowController(res_d_3, mixer_4, mdot=mdot_air_d/3)  
+    outlet_7                 = ct.Valve(mixer_4, PFR_3, K=10.0)
+    sim_mixer_4              = ct.ReactorNet([mixer_4])    
+    sim_mixer_4.advance_to_steady_state()
+    #sim_mixer_4.advance(residence_time_pfr)    
+    
+    # ----------------------------------------------------------------
+    # ---------------------------- PFR #3 ----------------------------
+    # ----------------------------------------------------------------
+    
+    sim_pfr_3                = ct.ReactorNet([PFR_3])
+    #sim_pfr_3.advance_to_steady_state() 
+    sim_pfr_3.advance(residence_time_pfr)     
+    
+    # ----------------------------------------------------------------
+    # --------------------- Additional computations ------------------
+    # ----------------------------------------------------------------    
+          
     # Determine Emission Indices 
-    Emission_Index = mix_air_fuel.Y * mdot/mdot_fuel 
+    Emission_Index = Fuel.Y * mdot_tot/mdot_fuel 
     
     # Extract properties of combustor flow 
-    a_out      = mix_air_fuel.sound_speed  # Speed of sound at PFR outlet
-    rho_out    = mix_air_fuel.density # density of the mix_air_fuel in the combustor
-    gamma      = mix_air_fuel.cp_mass / mix_air_fuel.cv_mass
-    h          = mix_air_fuel.h # enthalpy
+    a_out      = Fuel.sound_speed  # Speed of sound at PFR outlet
+    rho_out    = Fuel.density # density of the Fuel in the combustor
+    gamma      = Fuel.cp_mass / Fuel.cv_mass
+    h          = Fuel.h # enthalpy
     vel_out    = mdot / (rho_out * area_out)  # Outlet velocity (m/s)  
     M_out      = vel_out / a_out  # Outlet Mach number
     
-    phi        = mix_air_fuel.equivalence_ratio(fuel = dict_fuel, oxidizer = dict_oxy ) 
+    phi        = Fuel.equivalence_ratio(fuel = dict_fuel, oxidizer = dict_oxy) 
     
     # Stagnation temperature 
-    T_stag_out = mix_air_fuel.T * (1 + 0.5 * (gamma - 1) * (M_out)**2)
+    T_stag_out = Fuel.T * (1 + 0.5 * (gamma - 1) * (M_out)**2)
     
     # stagnation pressure 
-    P_stag_out = mix_air_fuel.P * (1 + 0.5 * (gamma - 1) * (M_out)**2)**(gamma / (gamma - 1))
+    P_stag_out = Fuel.P * (1 + 0.5 * (gamma - 1) * (M_out)**2)**(gamma / (gamma - 1))
     
     # Stagnation enthalpy 
-    h_stag_out = T_stag_out  * mix_air_fuel.cp_mass
+    h_stag_out = T_stag_out  * Fuel.cp_mass
     
     # Fuel-to-air ratio (FAR)
-    FAR      = mdot_fuel / mdot_air    
+    FAR      = mdot_fuel / (mdot_air + mdot_air_d)   
     
-    return (mix_air_fuel, Emission_Index, T_stag_out, P_stag_out, h_stag_out, FAR) 
+    return (Fuel, Emission_Index, T_stag_out, P_stag_out, h_stag_out, FAR) 
 
     
-def plot_emission(df,mix_air_fuel,equivalence_ratio): 
+def plot_emission(df,Fuel,equivalence_ratio): 
     # Plot results
     f, ax1 = plt.subplots(3, 1, figsize=(16, 12))
     f.suptitle('Jet-A EI')
-    subtitle = f'Equivalence ratio: {equivalence_ratio[0]}, Temperature: {mix_air_fuel.T:.1f} K, Pressure: {mix_air_fuel.P/ct.one_atm:.1f} atm,'
+    subtitle = f'Equivalence ratio: {equivalence_ratio[0]}, Temperature: {Fuel.T:.1f} K, Pressure: {Fuel.P/ct.one_atm:.1f} atm,'
     plt.figtext(0.5, 0.925, subtitle, ha='center', fontsize=12)
     ax1[0].plot(df['tau(s)'], df['EI_CO2'], '.-', color='C0')
     ax1[0].axhline(y=3.16, color='r', linestyle='--')
@@ -165,7 +282,7 @@ def plot_emission(df,mix_air_fuel,equivalence_ratio):
     
     #f, ax1 = plt.subplots(3, 1, figsize=(16, 12))
     #f.suptitle('Jet-A EI')
-    #subtitle = f'Equivalence ratio: {equivalence_ratio[0]}, Temperature: {mix_air_fuel.T:.1f} K, Pressure: {mix_air_fuel.P/ct.one_atm:.1f} atm,'
+    #subtitle = f'Equivalence ratio: {equivalence_ratio[0]}, Temperature: {Fuel.T:.1f} K, Pressure: {Fuel.P/ct.one_atm:.1f} atm,'
     #plt.figtext(0.5, 0.925, subtitle, ha='center', fontsize=12)
     #ax1[0].plot(df['tau(s)'], df['EI_NO2'], '.-', color='C0')
     #ax1[0].axhline(y=0.01, color='r', linestyle='--')
