@@ -23,10 +23,10 @@ import time
 
 def main():  
 
-    altitude            = np.array([35000])*Units.feet 
-    mach_number         = np.array([0.8]) 
-    #altitude            = np.linspace(0,35000,10)*Units.feet
-    #mach_number         = np.linspace(1E-4,0.8,10)
+    #altitude            = np.array([35000])*Units.feet 
+    #mach_number         = np.array([0.8]) 
+    altitude            = np.linspace(0,35000,20)*Units.feet
+    mach_number         = np.linspace(0.1,0.8,8)
     thrust              = np.zeros((len(altitude),len(mach_number)))
     overall_efficiency  = np.zeros((len(altitude),len(mach_number)))
     thermal_efficiency  = np.zeros((len(altitude),len(mach_number)))
@@ -138,7 +138,7 @@ def main():
             m_dot_core[i,j]                                   = turbofan_conditions.core_mass_flow_rate   
             fuel_flow_rate[i,j]                               = turbofan_conditions.fuel_flow_rate
             m_dot_air_tot[i,j]                                = turbofan_conditions.core_mass_flow_rate + bypass_ratio * turbofan_conditions.core_mass_flow_rate
-            TSFC[i,j]                                         = turbofan.TSFC # [N/N-s]
+            #TSFC[i,j]                                         = turbofan.TSFC # [N/N-s]
       
     plot_results(altitude,mach_number,thrust,overall_efficiency,thermal_efficiency,Tt_3,Pt_3,Tt_4,Pt_4,m_dot_core,fuel_flow_rate,m_dot_air_tot)
     
@@ -152,8 +152,7 @@ def plot_results(altitude,mach_number,thrust,overall_efficiency,thermal_efficien
     axis_1 = fig.add_subplot(1,1,1) 
     for i in  range(len(mach_number)):
         axis_1.plot(thrust[:,i],altitude, color = ps.color[i], linestyle = ps.line_style[0],
-                    marker = ps.markers[0], linewidth = ps.line_width, label = 'Mach =' + str( round(mach_number[i], 2))) 
-    axis_1.axvline(x=77850, color='r', linestyle='--', label=f'Design thrust in cruise = 77850 N')        
+                    marker = ps.markers[0], linewidth = ps.line_width, label = 'Mach =' + str( round(mach_number[i], 2)))     
     axis_1.set_xlabel('Thrust [N]')
     axis_1.set_ylabel('Altitude [m]')
     
@@ -196,7 +195,7 @@ def plot_results(altitude,mach_number,thrust,overall_efficiency,thermal_efficien
     axis_4_1.set_xlabel(r'Entering $T_t$ [K]')
     axis_4_2.set_xlabel(r'Entering $P_t$ [K]')
     axis_4_3.set_xlabel(r'Exiting $T_t$ [Pa]')
-    axis_4_4.set_xlabel(r'Exising $P_t$ [Pa]')
+    axis_4_4.set_xlabel(r'Exiting $P_t$ [Pa]')
     axis_4_1.set_ylabel('Altitude [ft]')
     axis_4_2.set_ylabel('Altitude [ft]')
     axis_4_3.set_ylabel('Altitude [ft]')
@@ -267,17 +266,14 @@ def GE90_94B_engine():
     turbofan.mass_properties.mass               = 7550                       # CHECKED Ref. [1] Page 197
     turbofan.engine_length                      = 4.897                      # CHECKED Ref. [1] Page 197
     turbofan.engine_diameter                    = 3.124                      # CHECKED Ref. [1] Page 197
-    turbofan.bypass_ratio                       = 8.7877                     # CHECKED Ref. [1] Page 197
+    turbofan.bypass_ratio                       = 8.5                     # CHECKED Ref. [1] Page 197
     turbofan.design_altitude                    = 35000.0*Units.ft           # CHECKED Ref. [2] Page 9
     turbofan.design_mach_number                 = 0.8                        # CHECKED Ref. [2] Page 9
-    turbofan.design_thrust                      = 72988.199301 * Units.N     # CHECKED Ref. [2] Page 9
-
-    # fan                
-    fan                                         = RCAIDE.Library.Components.Propulsors.Converters.Fan()   
-    fan.tag                                     = 'fan'
-    fan.polytropic_efficiency                   = 0.9153                     # CHECKED Ref. [2] Page 9
-    fan.pressure_ratio                          = 1.65                       # CHECKED Ref. [1] Page 197
-    turbofan.fan                                = fan        
+    turbofan.design_thrust                      = 77850 * Units.N     # CHECKED Ref. [2] Page 9
+    #turbofan.design_altitude                    = 0.0*Units.ft           # CHECKED Ref. [2] Page 9
+    #turbofan.design_mach_number                 = 0.0001                        # CHECKED Ref. [2] Page 9
+    #turbofan.design_thrust                      = 416796 * Units.N     # CHECKED Ref. [2] Page 9    
+    #turbofan.overall_pressure_ratio             = 40                         # CHECKED Ref. [1] Page 197
 
     # working fluid                   
     turbofan.working_fluid                      = RCAIDE.Library.Attributes.Gases.Air() 
@@ -293,7 +289,14 @@ def GE90_94B_engine():
     inlet_nozzle.polytropic_efficiency          = 0.98                                        
     inlet_nozzle.pressure_ratio                 = 0.99
     inlet_nozzle.compressibility_effects        = True
-    turbofan.inlet_nozzle                       = inlet_nozzle 
+    turbofan.inlet_nozzle                       = inlet_nozzle
+    
+    # fan                
+    fan                                         = RCAIDE.Library.Components.Propulsors.Converters.Fan()   
+    fan.tag                                     = 'fan'
+    fan.polytropic_efficiency                   = 0.92                     # CHECKED Ref. [2] Page 9
+    fan.pressure_ratio                          = 1.58                       # CHECKED Ref. [1] Page 197
+    turbofan.fan                                = fan        
 
     # low pressure compressor    
     low_pressure_compressor                       = RCAIDE.Library.Components.Propulsors.Converters.Compressor()    
@@ -306,7 +309,7 @@ def GE90_94B_engine():
     high_pressure_compressor                       = RCAIDE.Library.Components.Propulsors.Converters.Compressor()    
     high_pressure_compressor.tag                   = 'hpc'
     high_pressure_compressor.polytropic_efficiency = 0.9                        # CHECKED Ref. [3] Page 14
-    high_pressure_compressor.pressure_ratio        = 20.033                     # CHECKED Ref. [2] Page 9
+    high_pressure_compressor.pressure_ratio        = 20                     # CHECKED Ref. [2] Page 9
     turbofan.high_pressure_compressor              = high_pressure_compressor
 
     # low pressure turbine  
@@ -326,7 +329,7 @@ def GE90_94B_engine():
     # combustor  
     combustor                                      = RCAIDE.Library.Components.Propulsors.Converters.Combustor()   
     combustor.tag                                  = 'Comb'
-    combustor.efficiency                           = 0.997                    # CHECKED Ref. [2] Page 9
+    combustor.efficiency                           = 0.99                    # CHECKED Ref. [2] Page 9
     combustor.turbine_inlet_temperature            = 1430                     # CHECKED Ref. [3] Page 14
     combustor.pressure_ratio                       = 0.94                     # CHECKED Ref. [2] Page 9
     combustor.fuel_data                            = RCAIDE.Library.Attributes.Propellants.Jet_A()  
@@ -348,7 +351,6 @@ def GE90_94B_engine():
     
     # design turbofan
     design_turbofan(turbofan)  
-    # append propulsor to distribution line 
     
     return turbofan
 

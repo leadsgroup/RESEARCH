@@ -9,7 +9,7 @@ def main():
     ti        = time.time()
     
     #gas = ct.Solution('JetFuelSurrogate.yaml')   # Less accurate model (no NOx), faster
-    gas = ct.Solution('chem.yaml')              # More accurate model (NOx), slower    
+    gas = ct.Solution('chem.yaml')              # More accurate model (NOx), slower 
     
     # ENGINE DESIGN PARAMETRS 
     area_out  = 1  # Assuming the area is 1 m^2 for simplification
