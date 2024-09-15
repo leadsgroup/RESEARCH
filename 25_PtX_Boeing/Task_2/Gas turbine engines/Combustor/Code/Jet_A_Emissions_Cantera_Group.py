@@ -45,6 +45,10 @@ def main():
         data_n = [residence_time_pfr[n], gas.T, T_stag_out, P_stag_out, h_stag_out, FAR] + list(gas.X[sp_idx]) + list(gas.Y[sp_idx]) + list(EI[sp_idx])
         df.loc[n] = data_n
     
+    print(df['EI_CO2'])
+    print(df['EI_CO'])
+    print(df['EI_H2O'])
+    
     tf           = time.time()
     elapsed_time = round((tf-ti)/len(residence_time_pfr),2)
     print('Simulation Time: ' + str(elapsed_time) + ' seconds per timestep')   
