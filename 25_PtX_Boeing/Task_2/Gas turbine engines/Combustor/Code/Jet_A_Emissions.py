@@ -18,15 +18,15 @@ def main():
     FAR                     = 0.02                                      # [-]    Fuel-to-Air ratio
     FAR_TO                  = 0.0275                                    # [-]    Fuel-to-Air ratio during TO 
     FAR_st                  = 0.068                                     # [-]    Stoichiometric Fuel-to-Air ratio
-    mdot_air_tot            = 40                                        # [kg/s] Air mass flow going through all combustors
-    mdot_air_TO_tot         = 44                                        # [kg/s] Air mass flow going through all combustors during TO 
-    mdot_fuel_tot           = mdot_air_tot*FAR                          # [kg/s] Fuel mass flow going through all combustors
-    mdot_fuel_TO_tot        = mdot_air_TO_tot*FAR_TO                    # [kg/s] Fuel mass flow going through all combustors during TO 
+    m_dot_air_tot            = 40                                        # [kg/s] Air mass flow going through all combustors
+    m_dot_air_TO_tot         = 44                                        # [kg/s] Air mass flow going through all combustors during TO 
+    m_dot_fuel_tot           = m_dot_air_tot*FAR                          # [kg/s] Fuel mass flow going through all combustors
+    m_dot_fuel_TO_tot        = m_dot_air_TO_tot*FAR_TO                    # [kg/s] Fuel mass flow going through all combustors during TO 
     N_comb                  = 9                                         # [-]    Number of can-annular combustors
-    mdot_air_id             = mdot_air_tot/N_comb                       # [kg/s] Ideal Air mass flow inside each combustor, scaled inside each PSR to vary the Equivalence Ratio
-    mdot_air_TO_id          = mdot_air_TO_tot/N_comb                    # [kg/s] Air mass flow inside each combustor during TO
-    mdot_fuel               = mdot_fuel_tot/N_comb                      # [kg/s] Fuel mass flow inside each combustor
-    mdot_fuel_TO            = mdot_fuel_TO_tot/N_comb                   # [kg/s] Fuel mass flow inside each combustor during TO    
+    m_dot_air_id             = m_dot_air_tot/N_comb                       # [kg/s] Ideal Air mass flow inside each combustor, scaled inside each PSR to vary the Equivalence Ratio
+    m_dot_air_TO_id          = m_dot_air_TO_tot/N_comb                    # [kg/s] Air mass flow inside each combustor during TO
+    m_dot_fuel               = m_dot_fuel_tot/N_comb                      # [kg/s] Fuel mass flow inside each combustor
+    m_dot_fuel_TO            = m_dot_fuel_TO_tot/N_comb                   # [kg/s] Fuel mass flow inside each combustor during TO    
     
     # Primary Zone Inputs
     N_PZ                    = 4                                         # [-]    Number of PSR (EVEN)
@@ -58,7 +58,7 @@ def main():
     df        = pd.DataFrame(columns=col_names)
     
     for n in range(1):
-        gas, EI, T_stag_out, P_stag_out, h_stag_out, FAR = combustor(Fuel, Air, dict_fuel, dict_oxy, T_stag_0, P_stag_0, FAR, FAR_TO, FAR_st, mdot_fuel, mdot_fuel_TO, mdot_air_id, mdot_air_TO_id, N_PZ, V_PZ, phi_PZ_des, S_PZ, phi_SZ_des, l_SA_SM, l_SA_FM, F_SC, A_SZ, L_SZ, l_DA_start, l_DA_end, f_SM)
+        gas, EI, T_stag_out, P_stag_out, h_stag_out, FAR = combustor(Fuel, Air, dict_fuel, dict_oxy, T_stag_0, P_stag_0, FAR, FAR_TO, FAR_st, m_dot_fuel, m_dot_fuel_TO, m_dot_air_id, m_dot_air_TO_id, N_PZ, V_PZ, phi_PZ_des, S_PZ, phi_SZ_des, l_SA_SM, l_SA_FM, F_SC, A_SZ, L_SZ, l_DA_start, l_DA_end, f_SM)
         sp_idx = [gas.species_index(sp) for sp in list_sp]
         data_n = [gas.T, T_stag_out, P_stag_out, h_stag_out, FAR] + list(gas.X[sp_idx]) + list(gas.Y[sp_idx]) + list(EI[sp_idx])
         df.loc[n] = data_n
@@ -73,57 +73,49 @@ def main():
     
     return 
  
-def combustor(Fuel, Air, dict_fuel, dict_oxy, T_stag_0, P_stag_0, FAR, FAR_TO, FAR_st, mdot_fuel, mdot_fuel_TO, mdot_air_id, mdot_air_TO, N_PZ, V_PZ, phi_PZ_des, S_PZ, phi_SZ_des, l_SA_SM, l_SA_FM, F_SC, A_SZ, L_SZ, l_DA_start, l_DA_end, f_SM):
+def combustor(Fuel, Air, dict_fuel, dict_oxy, T_stag_0, P_stag_0, FAR, FAR_TO, FAR_st, m_dot_fuel, m_dot_fuel_TO, m_dot_air_id, m_dot_air_TO, N_PZ, V_PZ, phi_PZ_des, S_PZ, phi_SZ_des, l_SA_SM, l_SA_FM, F_SC, A_SZ, L_SZ, l_DA_start, l_DA_end, f_SM):
     
     # ----------------------------------------------------------------
     # ---------------------- Initial Parameters ----------------------
     # ----------------------------------------------------------------    
       
-    f_air_PZ              = (mdot_fuel_TO*F_SC)/(phi_PZ_des*mdot_air_TO*FAR_st) # Fraction of total air present in the combustor that enters the Primary Zone
-    f_air_SZ              = 1 - f_air_PZ                                        # Fraction of total air present in the combustor that enters the Secondary Zone  
-    mdot_air              = f_air_PZ*mdot_air_id                                # Air mass flow going through the PSRs
-    phi_sign              = ((mdot_fuel*F_SC)/mdot_air)/(FAR_st)                # Mean Equivalence Ratio
-    sigma_phi             = S_PZ*phi_sign                                       # Standard deviation of the Equivalence Ratio    
-    mdot_air_PSR          = mdot_air/N_PZ                                       # Air mass flow going through each PSR
-    mdot_fuel_PSR         = mdot_fuel/N_PZ                                      # Fuel mass flow going through each PSR
-    V_PZ_PSR              = V_PZ/N_PZ                                           # Volume of each PSR
-    phi_PSR               = np.linspace(0, 2*phi_sign, N_PZ)                    # Distribution of Equivalence Ratio through the PSRs
-    Delta_phi             = np.abs(phi_PSR[0] - phi_PSR[1])                     # Difference between two subsequent Equivalence Ratios
+    f_air_PZ               = (m_dot_fuel_TO*F_SC)/(phi_PZ_des*m_dot_air_TO*FAR_st) # Fraction of total air present in the combustor that enters the Primary Zone
+    f_air_SZ               = 1 - f_air_PZ                                          # Fraction of total air present in the combustor that enters the Secondary Zone  
+    m_dot_air              = f_air_PZ*m_dot_air_id                                 # Air mass flow going through the PSRs
+    phi_sign               = ((m_dot_fuel*F_SC)/m_dot_air)/(FAR_st)                # Mean Equivalence Ratio
+    sigma_phi              = S_PZ*phi_sign                                         # Standard deviation of the Equivalence Ratio    
+    m_dot_air_PSR          = m_dot_air/N_PZ                                        # Air mass flow going through each PSR
+    m_dot_fuel_PSR         = m_dot_fuel/N_PZ                                       # Fuel mass flow going through each PSR
+    V_PZ_PSR               = V_PZ/N_PZ                                             # Volume of each PSR
+    phi_PSR                = np.linspace(0, 2*phi_sign, N_PZ)                      # Distribution of Equivalence Ratio through the PSRs
+    Delta_phi              = np.abs(phi_PSR[0] - phi_PSR[1])                       # Difference between two subsequent Equivalence Ratios
+    comp_fuel              = list(dict_fuel.keys())                                # Fuel components
     
     # ----------------------------------------------------------------
     # ---------------------------- PSR #1 ----------------------------
     # ---------------------------------------------------------------- 
     
-    f_fuel_PZ_1           = (1 / (np.sqrt(2 * np.pi) * sigma_phi)) * np.exp((-(phi[0] - phi_sign) ** 2) / (2 * sigma_phi ** 2)) * Delta_phi  # Fraction of mass flow entering reactor i at equivalence ratio phi_i
-    Fuel_1                = ct.Solution('JetFuelSurrogate.yaml')
-    Fuel_1.TP             = T_stag_0, P_stag_0
+    f_fuel_PZ_1            = (1 / (np.sqrt(2 * np.pi) * sigma_phi)) * np.exp((-(phi[0] - phi_sign) ** 2) / (2 * sigma_phi ** 2)) * Delta_phi  # Fraction of mass flow entering reactor i at equivalence ratio phi_i
+    Fuel_1                 = ct.Solution('JetFuelSurrogate.yaml')
+    Fuel_1.TP              = T_stag_0, P_stag_0
     Fuel_1.set_equivalence_ratio(phi[0], fuel=dict_fuel, oxidizer=dict_oxy)
-    Fuel_1.equilibrate('HP')    
-    
-    # Create PSR for this iteration
-    PSR_1                 = ct.IdealGasReactor(Fuel_1)
-    PSR_1.volume          = V_PZ_PSR
+    Fuel_1.equilibrate('HP')   
+    rho_1                  = Fuel_1.density
+    m_dot_fuel_1           = m_dot_fuel_PSR * f_fuel_PZ_1
+    mass_flow_rate_1       = m_dot_fuel_1 + m_dot_air_PSR  
+    upstream_1             = ct.Reservoir(Fuel_1) 
+    mixer_12               = ct.IdealGasReactor(Fuel_1)
+    inlet_1                = ct.MassFlowController(upstream_1, PSR_1)
+    inlet_1.mass_flow_rate = mass_flow_rate_1    
+    outlet_1               = ct.MassFlowController(PSR_1, mixer_12) 
+    Y_fuel_1               = Fuel_1[comp_fuel].Y                              
+    PSR_1                  = ct.IdealGasReactor(Fuel_1)
+    PSR_1.volume           = V_PZ_PSR                            
+    t_res_PSR_1            = V_PZ_PSR / (rho_1 * mass_flow_rate_1)
+    sim_PSR_1              = ct.ReactorNet([PSR_1])
+    sim_PSR_1.advance(t_res_PSR_1)
 
-    m_dot_fuel_1 = mdot_fuel_PSR * f_fuel_PZ_1
-    m_dot_air_i = (mdot_air)/N_PZ
-    mass_flow_rate = m_dot_fuel_i + m_dot_air_i
-        
-    # Create MassFlowController
-    mfc = ct.MassFlowController(upstream, PSR)
-    mfc.mass_flow_rate = mass_flow_rate
-    mass_flow_controllers.append(mfc)
-
-    # Set up the time for the reactor to equilibrate
-    rho = Fuel.density
-    t_res_psr_i = V_PZ_i / (rho * mass_flow_rate)
-
-    # Simulate the PSR
-    sim_psr = ct.ReactorNet([PSR])
-    sim_psr.advance(t_res_psr_i)
-
-# Set up mixing for all the reactors' outlets to go into the final mixer
-for PSR in PSRs:
-    outlet = ct.MassFlowController(PSR, mixer_1)    
+  
     
     
     
@@ -135,8 +127,7 @@ for PSR in PSRs:
     
     
     
-    
-    Fuel.set_equivalence_ratio(equivalence_ratio, fuel = dict_fuel, oxidizer = dict_oxy )
+  
         
     comp_fuel = list(dict_fuel.keys())
     Y_fuel = gas[comp_fuel].Y
@@ -147,10 +138,10 @@ for PSR in PSRs:
         
     gas.equilibrate('HP')
     psr        = ct.IdealGasReactor(gas) 
-    func_mdot  = lambda t: psr.mass/residence_time_psr
+    func_m_dot  = lambda t: psr.mass/residence_time_psr
     
     inlet                = ct.MassFlowController(upstream, psr)
-    inlet.mass_flow_rate = func_mdot
+    inlet.mass_flow_rate = func_m_dot
     outlet  = ct.Valve(psr, downstream, K=100) 
     sim_psr = ct.ReactorNet([psr])
         
@@ -182,8 +173,8 @@ for PSR in PSRs:
         PSRs.append(PSR)
     
         # Calculate mass flow rates
-        m_dot_fuel_i = (mdot_fuel * f_phi[i])/N_PZ
-        m_dot_air_i = (mdot_air)/N_PZ
+        m_dot_fuel_i = (m_dot_fuel * f_phi[i])/N_PZ
+        m_dot_air_i = (m_dot_air)/N_PZ
         mass_flow_rate = m_dot_fuel_i + m_dot_air_i
             
         # Create MassFlowController
@@ -221,12 +212,12 @@ for PSR in PSRs:
     ## ----------------------------------------------------------------
     
     f_FM       = 1 - f_SM
-    f_air_SA   = mdot_fuel_TO/(phi_SZ_des*FAR_st*mdot_air_TO)
+    f_air_SA   = m_dot_fuel_TO/(phi_SZ_des*FAR_st*m_dot_air_TO)
     f_air_DA   = 1 - f_air_PZ - f_air_SA
     
-    beta_SA_SM = (f_air_SA*f_SM*mdot_air)/(l_SA_SM * L_SZ)
-    beta_SA_FM = (f_air_SA*f_FM*mdot_air)/(l_SA_FM * L_SZ)
-    beta_DA    = (f_air_DA*mdot_air)/((l_DA_end - l_DA_start)*L_SZ)
+    beta_SA_SM = (f_air_SA*f_SM*m_dot_air)/(l_SA_SM * L_SZ)
+    beta_SA_FM = (f_air_SA*f_FM*m_dot_air)/(l_SA_FM * L_SZ)
+    beta_DA    = (f_air_DA*m_dot_air)/((l_DA_end - l_DA_start)*L_SZ)
     
     sim = ct.ReactorNet([PFR_1])
     sim.rtol = 1e-4  # Relax the relative tolerance further
@@ -253,7 +244,7 @@ for PSR in PSRs:
         air_mass_flow = max(0, beta_air_in * air.density * dz)
         mfc_air.mass_flow_rate = air_mass_flow
         outlet = ct.MassFlowController(PFR_1, mixer_2)
-        outlet.mass_flow_rate = mdot_air + mdot_fuel + air_mass_flow
+        outlet.mass_flow_rate = m_dot_air + m_dot_fuel + air_mass_flow
         
         try:
             sim.advance(z + dz / 100)
@@ -296,7 +287,7 @@ for PSR in PSRs:
         air_mass_flow = max(0, beta_air_in * air.density * dz)
         mfc_air.mass_flow_rate = air_mass_flow
         outlet = ct.MassFlowController(PFR_2, mixer_2)
-        outlet.mass_flow_rate = mdot_air + mdot_fuel + air_mass_flow
+        outlet.mass_flow_rate = m_dot_air + m_dot_fuel + air_mass_flow
         
         try:
             sim.advance(z + dz / 100)
@@ -325,14 +316,14 @@ for PSR in PSRs:
     # ----------------------------------------------------------------    
           
     # Determine Emission Indices 
-    Emission_Index = Fuel.Y * (mdot_fuel + mdot_air)/mdot_fuel 
+    Emission_Index = Fuel.Y * (m_dot_fuel + m_dot_air)/m_dot_fuel 
     
     # Extract properties of combustor flow 
     a_out      = Fuel.sound_speed  # Speed of sound at PFR outlet
     rho_out    = Fuel.density # density of the Fuel in the combustor
     gamma      = Fuel.cp_mass / Fuel.cv_mass
     h          = Fuel.h # enthalpy
-    vel_out    = (mdot_fuel + mdot_air) / (rho_out * A_SZ)  # Outlet velocity (m/s)  
+    vel_out    = (m_dot_fuel + m_dot_air) / (rho_out * A_SZ)  # Outlet velocity (m/s)  
     M_out      = vel_out / a_out  # Outlet Mach number
     
     phi        = Fuel.equivalence_ratio(fuel = dict_fuel, oxidizer = dict_oxy) 
@@ -347,7 +338,7 @@ for PSR in PSRs:
     h_stag_out = T_stag_out  * Fuel.cp_mass
     
     # Fuel-to-air ratio (FAR)
-    FAR      = mdot_fuel / (mdot_air)   
+    FAR      = m_dot_fuel / (m_dot_air)   
     
     return (Fuel, Emission_Index, T_stag_out, P_stag_out, h_stag_out, FAR) 
 
