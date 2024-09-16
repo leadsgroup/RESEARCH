@@ -47,6 +47,7 @@ def main():
     f_SM                    = 0.5                                       # [-]     
     phi_SZ_des              = 0.7                                       # [-]
     
+    Fuel                    = ct.Solution('JetFuelSurrogate.yaml')
     Air                     = ct.Solution('Air.yaml')
     dict_fuel               = {'N-C12H26':0.6, 'A1CH3':0.2, 'A1':0.2}
     dict_oxy                = {'O2':0.2095,    'N2':0.7809, 'AR':0.0096}    
@@ -95,104 +96,56 @@ def combustor(Fuel, Air, dict_fuel, dict_oxy, T_stag_0, P_stag_0, FAR, FAR_TO, F
     # ---------------------------- PSR #1 ----------------------------
     # ---------------------------------------------------------------- 
     
-    f_fuel_PZ_1            = (1 / (np.sqrt(2 * np.pi) * sigma_phi)) * np.exp((-(phi[0] - phi_sign) ** 2) / (2 * sigma_phi ** 2)) * Delta_phi  # Fraction of mass flow entering reactor i at equivalence ratio phi_i
-    Fuel_1                 = ct.Solution('JetFuelSurrogate.yaml')
+    f_fuel_PZ_1            = (1 / (np.sqrt(2 * np.pi) * sigma_phi)) * np.exp((-(phi_PSR[0] - phi_sign) ** 2) / (2 * sigma_phi ** 2)) * Delta_phi  # Fraction of mass flow entering reactor i at equivalence ratio phi_i
+    Fuel_1                 = Fuel
     Fuel_1.TP              = T_stag_0, P_stag_0
-    Fuel_1.set_equivalence_ratio(phi[0], fuel=dict_fuel, oxidizer=dict_oxy)
+    Fuel_1.set_equivalence_ratio(phi_PSR[0], fuel=dict_fuel, oxidizer=dict_oxy)
     Fuel_1.equilibrate('HP')   
     rho_1                  = Fuel_1.density
     m_dot_fuel_1           = m_dot_fuel_PSR * f_fuel_PZ_1
     mass_flow_rate_1       = m_dot_fuel_1 + m_dot_air_PSR  
     upstream_1             = ct.Reservoir(Fuel_1) 
     mixer_12               = ct.IdealGasReactor(Fuel_1)
+    PSR_1                  = ct.IdealGasReactor(Fuel_1)
+    PSR_1.volume           = V_PZ_PSR
     inlet_1                = ct.MassFlowController(upstream_1, PSR_1)
     inlet_1.mass_flow_rate = mass_flow_rate_1    
     outlet_1               = ct.MassFlowController(PSR_1, mixer_12) 
-    Y_fuel_1               = Fuel_1[comp_fuel].Y                              
-    PSR_1                  = ct.IdealGasReactor(Fuel_1)
-    PSR_1.volume           = V_PZ_PSR                            
+    Y_fuel_1               = Fuel_1[comp_fuel].Y                                                  
     t_res_PSR_1            = V_PZ_PSR / (rho_1 * mass_flow_rate_1)
     sim_PSR_1              = ct.ReactorNet([PSR_1])
     sim_PSR_1.advance(t_res_PSR_1)
-
-  
+    #sim_psr.advance_to_steady_state()
+    Y_fuel_1              = Fuel_1[comp_fuel].Y
     
+    # ----------------------------------------------------------------
+    # ---------------------------- PSR #2 ----------------------------
+    # ---------------------------------------------------------------- 
     
-    
-    
-    
-    
-    
-    
-    
-    
-    
-  
-        
-    comp_fuel = list(dict_fuel.keys())
-    Y_fuel = gas[comp_fuel].Y
-    
-    # psr (flame zone) 
-    upstream   = ct.Reservoir(gas)
-    downstream = ct.Reservoir(gas)
-        
-    gas.equilibrate('HP')
-    psr        = ct.IdealGasReactor(gas) 
-    func_m_dot  = lambda t: psr.mass/residence_time_psr
-    
-    inlet                = ct.MassFlowController(upstream, psr)
-    inlet.mass_flow_rate = func_m_dot
-    outlet  = ct.Valve(psr, downstream, K=100) 
-    sim_psr = ct.ReactorNet([psr])
-        
-    try:
-        sim_psr.advance_to_steady_state()
-    except RuntimeError:
-        pass    
-    
-
-    rho                   = Fuel.density
-    upstream              = ct.Reservoir(Fuel, name='upstream')
-    mixer_1               = ct.IdealGasReactor(Fuel, name='mixer 1')
-    mixer_2               = ct.IdealGasReactor(Fuel, name='mixer 2')
-    comp_fuel             = list(dict_fuel.keys())
-    Y_fuel                = Fuel[comp_fuel].Y     
+    f_fuel_PZ_2            = (1 / (np.sqrt(2 * np.pi) * sigma_phi)) * np.exp((-(phi_PSR[1] - phi_sign) ** 2) / (2 * sigma_phi ** 2)) * Delta_phi  # Fraction of mass flow entering reactor i at equivalence ratio phi_i
+    Fuel_2                 = Fuel
+    Fuel_2.TP              = T_stag_0, P_stag_0
+    Fuel_2.set_equivalence_ratio(phi_PSR[1], fuel=dict_fuel, oxidizer=dict_oxy)
+    Fuel_2.equilibrate('HP')   
+    rho_2                  = Fuel_2.density
+    m_dot_fuel_2           = m_dot_fuel_PSR * f_fuel_PZ_2
+    mass_flow_rate_2       = m_dot_fuel_2 + m_dot_air_PSR  
+    upstream_2             = ct.Reservoir(Fuel_2) 
+    mixer_12               = ct.IdealGasReactor(Fuel_2)
+    PSR_2                  = ct.IdealGasReactor(Fuel_2)
+    PSR_2.volume           = V_PZ_PSR
+    inlet_2                = ct.MassFlowController(upstream_2, PSR_2)
+    inlet_2.mass_flow_rate = mass_flow_rate_2    
+    outlet_2               = ct.MassFlowController(PSR_2, mixer_12) 
+    Y_fuel_2               = Fuel_2[comp_fuel].Y                                                          
+    t_res_PSR_2            = V_PZ_PSR / (rho_2 * mass_flow_rate_2)
+    sim_PSR_2              = ct.ReactorNet([PSR_2])
+    sim_PSR_2.advance(t_res_PSR_2)
+    #sim_psr.advance_to_steady_state()
+    Y_fuel_2              = Fuel_2[comp_fuel].Y     
 
     
-    for i in range(21):
 
-        Delta_phi = np.abs(phi[0] - phi[1])
-        f_phi[i] = (1 / (np.sqrt(2 * np.pi) * sigma_phi)) * np.exp((-(phi[i] - phi_sign) ** 2) / (2 * sigma_phi ** 2)) * Delta_phi  # Fraction of mass flow entering reactor i at equivalence ratio phi_i
-        Fuel.TP = max(T_stag_0, 300), P_stag_0
-        Fuel.set_equivalence_ratio(phi[i], fuel=dict_fuel, oxidizer=dict_oxy)
-        Fuel.equilibrate('HP')
-        
-        # Create PSR for this iteration
-        PSR = ct.IdealGasReactor(Fuel, name=f'PSR {i+1}')
-        PSR.volume = V_PZ_i
-        PSRs.append(PSR)
-    
-        # Calculate mass flow rates
-        m_dot_fuel_i = (m_dot_fuel * f_phi[i])/N_PZ
-        m_dot_air_i = (m_dot_air)/N_PZ
-        mass_flow_rate = m_dot_fuel_i + m_dot_air_i
-            
-        # Create MassFlowController
-        mfc = ct.MassFlowController(upstream, PSR)
-        mfc.mass_flow_rate = mass_flow_rate
-        mass_flow_controllers.append(mfc)
-    
-        # Set up the time for the reactor to equilibrate
-        rho = Fuel.density
-        t_res_psr_i = V_PZ_i / (rho * mass_flow_rate)
-    
-        # Simulate the PSR
-        sim_psr = ct.ReactorNet([PSR])
-        sim_psr.advance(t_res_psr_i)
-    
-    # Set up mixing for all the reactors' outlets to go into the final mixer
-    for PSR in PSRs:
-        outlet = ct.MassFlowController(PSR, mixer_1)
     
     # ----------------------------------------------------------------
     # --------------------------- Mixing -----------------------------
