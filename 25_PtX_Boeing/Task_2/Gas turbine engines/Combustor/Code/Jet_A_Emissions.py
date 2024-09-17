@@ -4,6 +4,16 @@ import pandas               as pd
 import matplotlib.pyplot    as plt
 import time 
 
+'''This code is built to estimate the Emission Index of various species deriving 
+   from the combustion of Jet-A fuel. The model is based on a Chemical Reactor 
+   Network (CRN) built using Cantera.'''
+
+# Created:  Sep 2024, M. Guidotti 
+
+# References:
+# [1]: Allaire, Douglas & Astronautics, Massachusetts. (2007). A physics-based emissions model for aircraft gas turbine combustors. 
+# [2]: Brink, L. F. J. (2020). Modeling the impact of fuel composition on aircraft engine NOx, CO and soot emissions. Masters thesis, Massachusetts Institute of Technology.
+
 def main():
 
     ti                      = time.time()                                           # [s]       Define the initial simulation time
@@ -11,9 +21,8 @@ def main():
     # ------------------------------------------------------------------------------              
     # ------------------------------ Combustor Inputs ------------------------------              
     # ------------------------------------------------------------------------------              
-                                                                                    
-    # General Inputs                                                                
-    full_kin_mech           = False                                                 # [-]       True (around 300 s): Computes EI_CO2, EI_CO, EI_H2O, EI_NO2, EI_NO, EI_CSOOT; False (around ): Computes EI_CO2, EI_CO, EI_H2O
+                                                                                                                                                   
+    full_kin_mech           = False                                                 # [-]       True (simulation time around 300 s): Computes EI_CO2, EI_CO, EI_H2O, EI_NO2, EI_NO, EI_CSOOT; False (simulation time around 60 s): Computes EI_CO2, EI_CO, EI_H2O
     T_stag_0                = 800                                                   # [K]       Stagnation Temperature entering all combustors
     P_stag_0                = 2000000                                               # [Pa]      Stagnation Pressure entering all combustors
     FAR                     = 0.02                                                  # [-]       Fuel-to-Air ratio
@@ -28,15 +37,13 @@ def main():
     m_dot_air_TO            = m_dot_air_TO_tot/N_comb                               # [kg/s]    Air mass flow inside each combustor during TO
     m_dot_fuel              = m_dot_fuel_tot/N_comb                                 # [kg/s]    Fuel mass flow inside each combustor
     m_dot_fuel_TO           = m_dot_fuel_TO_tot/N_comb                              # [kg/s]    Fuel mass flow inside each combustor during TO    
-                                                                                                
-    # Primary Zone Inputs                                                                       
+                                                                                                                                                                     
     N_PZ                    = 8                                                     # [-]       Number of PSR (EVEN, must match the number of PSR below)
     V_PZ                    = 0.0023                                                # [m**3]    Volume of the Primary Zone in a SINGLE combustor, must be split into the different PSRs       
     phi_PZ_des              = 0.7                                                   # [-]       Primary Zone Design Equivalence Ratio
     S_PZ                    = 0.4                                                   # [-]       Mixing parameter, used to define the Equivalence Ratio standard deviation  
     F_SC                    = 0.8                                                   # [-]       Fuel scaler, used to define the fraction of total air present in the combustor that enters the Primary Zone
-                                                                                                
-    #Secondary Zone Inputs                                                                      
+                                                                                                                                                                      
     A_SZ                    = 0.15                                                  # [m**2]    Secondary Zone cross-sectional area
     L_SZ                    = 0.075                                                 # [m]       Secondary Zone length  
     phi_SZ_des_1            = 0.7                                                   # [-]       Design Equivalence Ratio for PFR #1
@@ -59,10 +66,10 @@ def main():
     df                      = pd.DataFrame(columns=col_names)                       # [-]       Assign output variables space to df
                                                                                     
     for n in range(1):                                                              
-        gas, EI, T_stag_out, P_stag_out, h_stag_out = combustor(full_kin_mech, dict_fuel, dict_oxy, T_stag_0, P_stag_0, FAR, FAR_TO, FAR_st, m_dot_fuel, m_dot_fuel_TO, m_dot_air_id, m_dot_air_TO, N_PZ, V_PZ, phi_PZ_des, S_PZ, phi_SZ_des_1, phi_SZ_des_2, phi_SZ_des_3, F_SC, A_SZ, L_SZ)                 # [-]       Run combustor function
+        gas, EI, T_stag_out, P_stag_out, h_stag_out = combustor(full_kin_mech, dict_fuel, dict_oxy, T_stag_0, P_stag_0, FAR, FAR_TO, FAR_st, m_dot_fuel, m_dot_fuel_TO, m_dot_air_id, m_dot_air_TO, N_PZ, V_PZ, phi_PZ_des, S_PZ, phi_SZ_des_1, phi_SZ_des_2, phi_SZ_des_3, F_SC, A_SZ, L_SZ) # [-]       Run combustor function
                                                                                                 
         sp_idx              = [gas.species_index(sp) for sp in list_sp]             # [-]       Retrieve the species index
-        data_n              = [gas.T, T_stag_out, P_stag_out, h_stag_out] + list(gas.X[sp_idx]) + list(gas.Y[sp_idx]) + list(EI[sp_idx])              # [-]       Assign output variables  
+        data_n              = [gas.T, T_stag_out, P_stag_out, h_stag_out] + list(gas.X[sp_idx]) + list(gas.Y[sp_idx]) + list(EI[sp_idx]) # [-]       Assign output variables  
         df.loc[n]           = data_n                                                # [-]       Assign output variables to df 
                                                                                                 
     print(df['EI_CO2'])                                                             # [-]       Print the value of EI_CO2
@@ -122,7 +129,7 @@ def combustor(full_kin_mech, dict_fuel, dict_oxy, T_stag_0, P_stag_0, FAR, FAR_T
     PSR_1.volume            = V_PZ_PSR                                              # [m**3]    Set the PSR volume
     inlet_1                 = ct.MassFlowController(upstream_1, PSR_1)              # [-]       Connect the upstream resevoir with the PSR 
     inlet_1.mass_flow_rate  = mass_flow_rate_1                                      # [kg/s]    Prescribe the inlet mass flow rate 
-    outlet_1                = ct.MassFlowController(PSR_1, mixer_12, mdot=mass_flow_rate_1)          # [-]       Connect the PSR with the downstream mixer with the same mass flow rate                                     
+    outlet_1                = ct.MassFlowController(PSR_1, mixer_12, mdot=mass_flow_rate_1) # [-]       Connect the PSR with the downstream mixer with the same mass flow rate                                     
     t_res_PSR_1             = (rho_1 * V_PZ_PSR) / (mass_flow_rate_1)               # [s]       Compute the residence time inside the PSR
     sim_PSR_1               = ct.ReactorNet([PSR_1])                                # [-]       Set the PSR simulation
     sim_PSR_1.advance(t_res_PSR_1)                                                  # [-]       Run the simulation until the residence time is reached
@@ -149,7 +156,7 @@ def combustor(full_kin_mech, dict_fuel, dict_oxy, T_stag_0, P_stag_0, FAR, FAR_T
     PSR_2.volume            = V_PZ_PSR                                              # [m**3]    Set the PSR volume
     inlet_2                 = ct.MassFlowController(upstream_2, PSR_2)              # [-]       Connect the upstream resevoir with the PSR 
     inlet_2.mass_flow_rate  = mass_flow_rate_2                                      # [kg/s]    Prescribe the inlet mass flow rate 
-    outlet_2                = ct.MassFlowController(PSR_2, mixer_12, mdot=mass_flow_rate_2)          # [-]       Connect the PSR with the downstream mixer with the same mass flow rate               
+    outlet_2                = ct.MassFlowController(PSR_2, mixer_12, mdot=mass_flow_rate_2) # [-]       Connect the PSR with the downstream mixer with the same mass flow rate               
     t_res_PSR_2             = (rho_2 * V_PZ_PSR) / (mass_flow_rate_2)               # [s]       Compute the residence time inside the PSR               
     sim_PSR_2               = ct.ReactorNet([PSR_2])                                # [-]       Set the PSR simulation
     sim_PSR_2.advance(t_res_PSR_2)                                                  # [-]       Run the simulation until the residence time is reached
@@ -177,7 +184,7 @@ def combustor(full_kin_mech, dict_fuel, dict_oxy, T_stag_0, P_stag_0, FAR, FAR_T
     PSR_3.volume            = V_PZ_PSR                                              # [m**3]    Set the PSR volume
     inlet_3                 = ct.MassFlowController(upstream_3, PSR_3)              # [-]       Connect the upstream resevoir with the PSR 
     inlet_3.mass_flow_rate  = mass_flow_rate_3                                      # [kg/s]    Prescribe the inlet mass flow rate 
-    outlet_3                = ct.MassFlowController(PSR_3, mixer_34,mdot=mass_flow_rate_3)          # [-]       Connect the PSR with the downstream mixer with the same mass flow rate                                                 
+    outlet_3                = ct.MassFlowController(PSR_3, mixer_34,mdot=mass_flow_rate_3) # [-]       Connect the PSR with the downstream mixer with the same mass flow rate                                                 
     t_res_PSR_3             = (rho_3 * V_PZ_PSR) / (mass_flow_rate_3)               # [s]       Compute the residence time inside the PSR
     sim_PSR_3               = ct.ReactorNet([PSR_3])                                # [-]       Set the PSR simulation
     sim_PSR_3.advance(t_res_PSR_3)                                                  # [-]       Run the simulation until the residence time is reached
@@ -204,7 +211,7 @@ def combustor(full_kin_mech, dict_fuel, dict_oxy, T_stag_0, P_stag_0, FAR, FAR_T
     PSR_4.volume            = V_PZ_PSR                                              # [m**3]    Set the PSR volume
     inlet_4                 = ct.MassFlowController(upstream_4, PSR_4)              # [-]       Connect the upstream resevoir with the PSR 
     inlet_4.mass_flow_rate  = mass_flow_rate_4                                      # [kg/s]    Prescribe the inlet mass flow rate 
-    outlet_4                = ct.MassFlowController(PSR_4, mixer_34, mdot=mass_flow_rate_4)          # [-]       Connect the PSR with the downstream mixer with the same mass flow rate                                                   
+    outlet_4                = ct.MassFlowController(PSR_4, mixer_34, mdot=mass_flow_rate_4) # [-]       Connect the PSR with the downstream mixer with the same mass flow rate                                                   
     t_res_PSR_4             = (rho_4 * V_PZ_PSR) / (mass_flow_rate_4)               # [s]       Compute the residence time inside the PSR               
     sim_PSR_4               = ct.ReactorNet([PSR_4])                                # [-]       Set the PSR simulation
     sim_PSR_4.advance(t_res_PSR_4)                                                  # [-]       Run the simulation until the residence time is reached
@@ -232,7 +239,7 @@ def combustor(full_kin_mech, dict_fuel, dict_oxy, T_stag_0, P_stag_0, FAR, FAR_T
     PSR_5.volume            = V_PZ_PSR                                              # [m**3]    Set the PSR volume
     inlet_5                 = ct.MassFlowController(upstream_5, PSR_5)              # [-]       Connect the upstream resevoir with the PSR 
     inlet_5.mass_flow_rate  = mass_flow_rate_5                                      # [kg/s]    Prescribe the inlet mass flow rate 
-    outlet_5                = ct.MassFlowController(PSR_5, mixer_56, mdot=mass_flow_rate_5)          # [-]       Connect the PSR with the downstream mixer with the same mass flow rate                                                  
+    outlet_5                = ct.MassFlowController(PSR_5, mixer_56, mdot=mass_flow_rate_5) # [-]       Connect the PSR with the downstream mixer with the same mass flow rate                                                  
     t_res_PSR_5             = (rho_5 * V_PZ_PSR) / (mass_flow_rate_5)               # [s]       Compute the residence time inside the PSR
     sim_PSR_5               = ct.ReactorNet([PSR_5])                                # [-]       Set the PSR simulation
     sim_PSR_5.advance(t_res_PSR_5)                                                  # [-]       Run the simulation until the residence time is reached
@@ -259,7 +266,7 @@ def combustor(full_kin_mech, dict_fuel, dict_oxy, T_stag_0, P_stag_0, FAR, FAR_T
     PSR_6.volume            = V_PZ_PSR                                              # [m**3]    Set the PSR volume
     inlet_6                 = ct.MassFlowController(upstream_6, PSR_6)              # [-]       Connect the upstream resevoir with the PSR 
     inlet_6.mass_flow_rate  = mass_flow_rate_6                                      # [kg/s]    Prescribe the inlet mass flow rate 
-    outlet_6                = ct.MassFlowController(PSR_6, mixer_56, mdot=mass_flow_rate_6)          # [-]       Connect the PSR with the downstream mixer with the same mass flow rate                                                  
+    outlet_6                = ct.MassFlowController(PSR_6, mixer_56, mdot=mass_flow_rate_6) # [-]       Connect the PSR with the downstream mixer with the same mass flow rate                                                  
     t_res_PSR_6             = (rho_6 * V_PZ_PSR) / (mass_flow_rate_6)               # [s]       Compute the residence time inside the PSR               
     sim_PSR_6               = ct.ReactorNet([PSR_6])                                # [-]       Set the PSR simulation
     sim_PSR_6.advance(t_res_PSR_6)                                                  # [-]       Run the simulation until the residence time is reached
@@ -287,7 +294,7 @@ def combustor(full_kin_mech, dict_fuel, dict_oxy, T_stag_0, P_stag_0, FAR, FAR_T
     PSR_7.volume            = V_PZ_PSR                                              # [m**3]    Set the PSR volume
     inlet_7                 = ct.MassFlowController(upstream_7, PSR_7)              # [-]       Connect the upstream resevoir with the PSR 
     inlet_7.mass_flow_rate  = mass_flow_rate_7                                      # [kg/s]    Prescribe the inlet mass flow rate 
-    outlet_7                = ct.MassFlowController(PSR_7, mixer_78,mdot=mass_flow_rate_7)          # [-]       Connect the PSR with the downstream mixer with the same mass flow rate                                                
+    outlet_7                = ct.MassFlowController(PSR_7, mixer_78,mdot=mass_flow_rate_7) # [-]       Connect the PSR with the downstream mixer with the same mass flow rate                                                
     t_res_PSR_7             = (rho_7 * V_PZ_PSR) / (mass_flow_rate_7)               # [s]       Compute the residence time inside the PSR
     sim_PSR_7               = ct.ReactorNet([PSR_7])                                # [-]       Set the PSR simulation
     sim_PSR_7.advance(t_res_PSR_7)                                                  # [-]       Run the simulation until the residence time is reached
@@ -314,7 +321,7 @@ def combustor(full_kin_mech, dict_fuel, dict_oxy, T_stag_0, P_stag_0, FAR, FAR_T
     PSR_8.volume            = V_PZ_PSR                                              # [m**3]    Set the PSR volume
     inlet_8                 = ct.MassFlowController(upstream_8, PSR_8)              # [-]       Connect the upstream resevoir with the PSR 
     inlet_8.mass_flow_rate  = mass_flow_rate_8                                      # [kg/s]    Prescribe the inlet mass flow rate 
-    outlet_8                = ct.MassFlowController(PSR_8, mixer_78,mdot=mass_flow_rate_8)          # [-]       Connect the PSR with the downstream mixer with the same mass flow rate                                                
+    outlet_8                = ct.MassFlowController(PSR_8, mixer_78,mdot=mass_flow_rate_8) # [-]       Connect the PSR with the downstream mixer with the same mass flow rate                                                
     t_res_PSR_8             = (rho_8 * V_PZ_PSR) / (mass_flow_rate_8)               # [s]       Compute the residence time inside the PSR               
     sim_PSR_8               = ct.ReactorNet([PSR_8])                                # [-]       Set the PSR simulation
     sim_PSR_8.advance(t_res_PSR_8)                                                  # [-]       Run the simulation until the residence time is reached
@@ -367,7 +374,7 @@ def combustor(full_kin_mech, dict_fuel, dict_oxy, T_stag_0, P_stag_0, FAR, FAR_T
     # ------------------------------- Mixing 5-6-7-8 -------------------------------
     # ------------------------------------------------------------------------------     
 
-    outlet_5678             = ct.MassFlowController(mixer_5678, mixer_12345678, mdot = (mass_flow_rate_5 + mass_flow_rate_6 + mass_flow_rate_7 + mass_flow_rate_8))# [-]       Connect the mixer with the downstream mixer     
+    outlet_5678             = ct.MassFlowController(mixer_5678, mixer_12345678, mdot = (mass_flow_rate_5 + mass_flow_rate_6 + mass_flow_rate_7 + mass_flow_rate_8)) # [-]       Connect the mixer with the downstream mixer     
     sim_mixer_5678          = ct.ReactorNet([mixer_5678])                           # [-]       Set the mixer simulation  
     sim_mixer_5678.advance_to_steady_state()                                        # [-]       Run the simulation until it reaches steady state
     
@@ -391,7 +398,7 @@ def combustor(full_kin_mech, dict_fuel, dict_oxy, T_stag_0, P_stag_0, FAR, FAR_T
     PFR_1                   = ct.IdealGasConstPressureReactor(Fuel_1)               # [-]       Create the reactor for the PFR
     PFR_1.volume            = A_SZ*(L_SZ/3)                                         # [m**3]    Set the PFR volume
     inlet_air_1             = ct.MassFlowController(res_air_1, mixer_air_1, mdot= m_dot_air_SZ) # [-]       Connect the upstream resevoir with the mixer
-    m_dot_air_1             = mass_flow_rate_1 + mass_flow_rate_2 + mass_flow_rate_3 + mass_flow_rate_4 + mass_flow_rate_5 + mass_flow_rate_6 + mass_flow_rate_7 + mass_flow_rate_8 + m_dot_air_SZ                            # [kg/s]    Total mass flow inside the mixer  
+    m_dot_air_1             = mass_flow_rate_1 + mass_flow_rate_2 + mass_flow_rate_3 + mass_flow_rate_4 + mass_flow_rate_5 + mass_flow_rate_6 + mass_flow_rate_7 + mass_flow_rate_8 + m_dot_air_SZ # [kg/s]    Total mass flow inside the mixer  
     outlet_air_1            = ct.MassFlowController(mixer_air_1, PFR_1, mdot=m_dot_air_1) # [-]       Connect the mixer with the downstream PFR with the same mass flow rate           
     sim_mixer_air_1         = ct.ReactorNet([mixer_air_1])                          # [-]       Set the mixer simulation  
     sim_mixer_air_1.advance_to_steady_state()                                       # [-]       Run the simulation until it reaches steady state
