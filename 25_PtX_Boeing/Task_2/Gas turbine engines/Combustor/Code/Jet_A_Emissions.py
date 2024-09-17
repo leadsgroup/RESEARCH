@@ -13,7 +13,8 @@ def main():
     # ---------------------------------------------------------------- 
 
     # General Inputs 
-    T_stag_0                = 700                                       # [K]    Stagnation Temperature entering all combustors
+    full_kin_mech           = True
+    T_stag_0                = 800                                       # [K]    Stagnation Temperature entering all combustors
     P_stag_0                = 2000000                                   # [Pa]   Stagnation Pressure entering all combustors
     FAR                     = 0.02                                      # [-]    Fuel-to-Air ratio
     FAR_TO                  = 0.0275                                    # [-]    Fuel-to-Air ratio during TO 
@@ -31,35 +32,48 @@ def main():
     # Primary Zone Inputs
     N_PZ                    = 8                                         # [-]    Number of PSR (EVEN, must match the number of PSR below)
     V_PZ                    = 0.0023                                    # [m**3] Volume of the Primary Zone in a SINGLE combustor, must be split into the different PSRs       
-    phi_PZ_des              = 1.77                                      # [-]    Design Equivalence Ratio
-    S_PZ                    = 0.39                                      # [-]    Mixing parameter, used to define the Equivalence Ratio standard deviation  
+    phi_PZ_des              = 0.7                                       # [-]    Design Equivalence Ratio
+    S_PZ                    = 0.5                                       # [-]    Mixing parameter, used to define the Equivalence Ratio standard deviation  
     F_SC                    = 0.8                                       # [-]    Fuel scaler, used to define the fraction of total air present in the combustor that enters the Primary Zone
     
     #Secondary Zone Inputs
     A_SZ                    = 0.15                                      # [m**2] Secondary Zone cross-sectional area
-    L_SZ                    = 0.075                                     # [m]    Secondary Zone length
-    t_mix                   = 0.001                                     # [s]    Mixing residence time
-    n_segments              = 200                                       # [-]    Number of segments for each PFR     
-    phi_SZ_des              = 0.7                                       # [-]
+    L_SZ                    = 0.075                                     # [m]    Secondary Zone length  
+    phi_SZ_des_1            = 0.7                                       # [-]
+    phi_SZ_des_2            = 0.2                                       # [-]
+    phi_SZ_des_3            = 0.2                                       # [-]
     
-    dict_fuel               = {'N-C12H26':0.6, 'A1CH3':0.2, 'A1':0.2}
+    if full_kin_mech:
+        dict_fuel           = {'NC10H22':0.16449, 'NC12H26':0.34308, 'NC16H34':0.10335, 'IC8H18':0.08630, 'NC7H14':0.07945, 'C6H5C2H5': 0.07348, 'C6H5C4H9': 0.05812, 'C10H7CH3': 0.10972}
+    else:
+        dict_fuel           = {'N-C12H26':0.6, 'A1CH3':0.2, 'A1':0.2}
+    
     dict_oxy                = {'O2':0.2095,    'N2':0.7809, 'AR':0.0096}    
 
     #--------------------------------------------------------------------------------
-    
-    list_sp   = ['CO2', 'CO', 'H2O']
+ 
+    if full_kin_mech:
+        list_sp             = ['CO', 'CO2', 'H2O', 'NO', 'NO2', 'CSOLID']
+    else:                   
+        list_sp             = ['CO2', 'CO', 'H2O']
+        
     col_names = ['Tout(K)', 'T_stag_out','P_stag_out', 'h_stag_out', 'FAR'] + ['X_' +str(sp) for sp in list_sp] + ['Y_' +str(sp) for sp in list_sp] + ['EI_' +str(sp) for sp in list_sp]
     df        = pd.DataFrame(columns=col_names)
     
     for n in range(1):
-        gas, EI, T_stag_out, P_stag_out, h_stag_out, FAR = combustor(dict_fuel, dict_oxy, T_stag_0, P_stag_0, FAR, FAR_TO, FAR_st, m_dot_fuel, m_dot_fuel_TO, m_dot_air_id, m_dot_air_TO, N_PZ, V_PZ, phi_PZ_des, S_PZ, phi_SZ_des, F_SC, A_SZ, L_SZ, t_mix)
+        gas, EI, T_stag_out, P_stag_out, h_stag_out, FAR = combustor(full_kin_mech, dict_fuel, dict_oxy, T_stag_0, P_stag_0, FAR, FAR_TO, FAR_st, m_dot_fuel, m_dot_fuel_TO, m_dot_air_id, m_dot_air_TO, N_PZ, V_PZ, phi_PZ_des, S_PZ, phi_SZ_des_1, phi_SZ_des_2, phi_SZ_des_3, F_SC, A_SZ, L_SZ)
         sp_idx = [gas.species_index(sp) for sp in list_sp]
         data_n = [gas.T, T_stag_out, P_stag_out, h_stag_out, FAR] + list(gas.X[sp_idx]) + list(gas.Y[sp_idx]) + list(EI[sp_idx])
         df.loc[n] = data_n
         
     print(df['EI_CO2'])
     print(df['EI_CO'])
-    print(df['EI_H2O'])        
+    print(df['EI_H2O'])
+    
+    if full_kin_mech:
+        print(df['EI_NO'])
+        print(df['EI_NO2'])
+        print(df['EI_CSOLID'])
     
     tf           = time.time()
     elapsed_time = round((tf-ti),2)
@@ -67,7 +81,7 @@ def main():
     
     return 
  
-def combustor(dict_fuel, dict_oxy, T_stag_0, P_stag_0, FAR, FAR_TO, FAR_st, m_dot_fuel, m_dot_fuel_TO, m_dot_air_id, m_dot_air_TO, N_PZ, V_PZ, phi_PZ_des, S_PZ, phi_SZ_des, F_SC, A_SZ, L_SZ, t_mix):
+def combustor(full_kin_mech, dict_fuel, dict_oxy, T_stag_0, P_stag_0, FAR, FAR_TO, FAR_st, m_dot_fuel, m_dot_fuel_TO, m_dot_air_id, m_dot_air_TO, N_PZ, V_PZ, phi_PZ_des, S_PZ, phi_SZ_des_1, phi_SZ_des_2, phi_SZ_des_3, F_SC, A_SZ, L_SZ):
     
     # ----------------------------------------------------------------
     # ---------------------- Initial Parameters ----------------------
@@ -91,7 +105,10 @@ def combustor(dict_fuel, dict_oxy, T_stag_0, P_stag_0, FAR, FAR_TO, FAR_st, m_do
     # ---------------------------------------------------------------- 
     
     f_PZ_1                 = (1 / (np.sqrt(2 * np.pi) * sigma_phi)) * np.exp((-(phi_PSR[0] - phi_sign) ** 2) / (2 * sigma_phi ** 2)) * Delta_phi  # Fraction of mass flow entering reactor i at equivalence ratio phi_i
-    Fuel_1                 = ct.Solution('JetFuelSurrogate.yaml')
+    if full_kin_mech:
+        Fuel_1             = ct.Solution('chem.yaml')
+    else:
+        Fuel_1             = ct.Solution('JetFuelSurrogate.yaml')
     Fuel_1.TP              = T_stag_0, P_stag_0
     Fuel_1.set_equivalence_ratio(phi_PSR[0], fuel=dict_fuel, oxidizer=dict_oxy)
     Fuel_1.equilibrate('HP')   
@@ -117,7 +134,10 @@ def combustor(dict_fuel, dict_oxy, T_stag_0, P_stag_0, FAR, FAR_TO, FAR_st, m_do
     # ---------------------------------------------------------------- 
     
     f_PZ_2                 = (1 / (np.sqrt(2 * np.pi) * sigma_phi)) * np.exp((-(phi_PSR[1] - phi_sign) ** 2) / (2 * sigma_phi ** 2)) * Delta_phi  # Fraction of mass flow entering reactor i at equivalence ratio phi_i
-    Fuel_2                 = ct.Solution('JetFuelSurrogate.yaml')
+    if full_kin_mech:
+        Fuel_2             = ct.Solution('chem.yaml')
+    else:    
+        Fuel_2             = ct.Solution('JetFuelSurrogate.yaml')
     Fuel_2.TP              = T_stag_0, P_stag_0
     Fuel_2.set_equivalence_ratio(phi_PSR[1], fuel=dict_fuel, oxidizer=dict_oxy)
     Fuel_2.equilibrate('HP')   
@@ -142,7 +162,10 @@ def combustor(dict_fuel, dict_oxy, T_stag_0, P_stag_0, FAR, FAR_TO, FAR_st, m_do
     # ---------------------------------------------------------------- 
     
     f_PZ_3                 = (1 / (np.sqrt(2 * np.pi) * sigma_phi)) * np.exp((-(phi_PSR[2] - phi_sign) ** 2) / (2 * sigma_phi ** 2)) * Delta_phi  # Fraction of mass flow entering reactor i at equivalence ratio phi_i
-    Fuel_3                 = ct.Solution('JetFuelSurrogate.yaml')
+    if full_kin_mech:
+        Fuel_3             = ct.Solution('chem.yaml')
+    else:
+        Fuel_3             = ct.Solution('JetFuelSurrogate.yaml')
     Fuel_3.TP              = T_stag_0, P_stag_0
     Fuel_3.set_equivalence_ratio(phi_PSR[2], fuel=dict_fuel, oxidizer=dict_oxy)
     Fuel_3.equilibrate('HP')   
@@ -168,7 +191,10 @@ def combustor(dict_fuel, dict_oxy, T_stag_0, P_stag_0, FAR, FAR_TO, FAR_st, m_do
     # ---------------------------------------------------------------- 
     
     f_PZ_4                 = (1 / (np.sqrt(2 * np.pi) * sigma_phi)) * np.exp((-(phi_PSR[3] - phi_sign) ** 2) / (2 * sigma_phi ** 2)) * Delta_phi  # Fraction of mass flow entering reactor i at equivalence ratio phi_i
-    Fuel_4                 = ct.Solution('JetFuelSurrogate.yaml')
+    if full_kin_mech:
+        Fuel_4             = ct.Solution('chem.yaml')
+    else:
+        Fuel_4             = ct.Solution('JetFuelSurrogate.yaml')
     Fuel_4.TP              = T_stag_0, P_stag_0
     Fuel_4.set_equivalence_ratio(phi_PSR[3], fuel=dict_fuel, oxidizer=dict_oxy)
     Fuel_4.equilibrate('HP')   
@@ -193,7 +219,10 @@ def combustor(dict_fuel, dict_oxy, T_stag_0, P_stag_0, FAR, FAR_TO, FAR_st, m_do
     # ---------------------------------------------------------------- 
     
     f_PZ_5                 = (1 / (np.sqrt(2 * np.pi) * sigma_phi)) * np.exp((-(phi_PSR[4] - phi_sign) ** 2) / (2 * sigma_phi ** 2)) * Delta_phi  # Fraction of mass flow entering reactor i at equivalence ratio phi_i
-    Fuel_5                 = ct.Solution('JetFuelSurrogate.yaml')
+    if full_kin_mech:
+        Fuel_5             = ct.Solution('chem.yaml')
+    else:
+        Fuel_5             = ct.Solution('JetFuelSurrogate.yaml')
     Fuel_5.TP              = T_stag_0, P_stag_0
     Fuel_5.set_equivalence_ratio(phi_PSR[4], fuel=dict_fuel, oxidizer=dict_oxy)
     Fuel_5.equilibrate('HP')   
@@ -219,7 +248,10 @@ def combustor(dict_fuel, dict_oxy, T_stag_0, P_stag_0, FAR, FAR_TO, FAR_st, m_do
     # ---------------------------------------------------------------- 
     
     f_PZ_6                 = (1 / (np.sqrt(2 * np.pi) * sigma_phi)) * np.exp((-(phi_PSR[5] - phi_sign) ** 2) / (2 * sigma_phi ** 2)) * Delta_phi  # Fraction of mass flow entering reactor i at equivalence ratio phi_i
-    Fuel_6                 = ct.Solution('JetFuelSurrogate.yaml')
+    if full_kin_mech:
+        Fuel_6             = ct.Solution('chem.yaml')
+    else:
+        Fuel_6             = ct.Solution('JetFuelSurrogate.yaml')
     Fuel_6.TP              = T_stag_0, P_stag_0
     Fuel_6.set_equivalence_ratio(phi_PSR[5], fuel=dict_fuel, oxidizer=dict_oxy)
     Fuel_6.equilibrate('HP')   
@@ -242,9 +274,12 @@ def combustor(dict_fuel, dict_oxy, T_stag_0, P_stag_0, FAR, FAR_TO, FAR_st, m_do
     # ----------------------------------------------------------------
     # ---------------------------- PSR #7 ----------------------------
     # ---------------------------------------------------------------- 
-    
+
     f_PZ_7                 = (1 / (np.sqrt(2 * np.pi) * sigma_phi)) * np.exp((-(phi_PSR[6] - phi_sign) ** 2) / (2 * sigma_phi ** 2)) * Delta_phi  # Fraction of mass flow entering reactor i at equivalence ratio phi_i
-    Fuel_7                 = ct.Solution('JetFuelSurrogate.yaml')
+    if full_kin_mech:
+        Fuel_7             = ct.Solution('chem.yaml')
+    else:
+        Fuel_7             = ct.Solution('JetFuelSurrogate.yaml')
     Fuel_7.TP              = T_stag_0, P_stag_0
     Fuel_7.set_equivalence_ratio(phi_PSR[6], fuel=dict_fuel, oxidizer=dict_oxy)
     Fuel_7.equilibrate('HP')   
@@ -270,7 +305,10 @@ def combustor(dict_fuel, dict_oxy, T_stag_0, P_stag_0, FAR, FAR_TO, FAR_st, m_do
     # ---------------------------------------------------------------- 
     
     f_PZ_8                 = (1 / (np.sqrt(2 * np.pi) * sigma_phi)) * np.exp((-(phi_PSR[7] - phi_sign) ** 2) / (2 * sigma_phi ** 2)) * Delta_phi  # Fraction of mass flow entering reactor i at equivalence ratio phi_i
-    Fuel_8                 = ct.Solution('JetFuelSurrogate.yaml')
+    if full_kin_mech:
+        Fuel_8             = ct.Solution('chem.yaml')
+    else:
+        Fuel_8             = ct.Solution('JetFuelSurrogate.yaml')
     Fuel_8.TP              = T_stag_0, P_stag_0
     Fuel_8.set_equivalence_ratio(phi_PSR[7], fuel=dict_fuel, oxidizer=dict_oxy)
     Fuel_8.equilibrate('HP')   
@@ -362,9 +400,9 @@ def combustor(dict_fuel, dict_oxy, T_stag_0, P_stag_0, FAR, FAR_TO, FAR_st, m_do
     PFR_1.volume           = A_SZ*(L_SZ/3)
     inlet_air_1            = ct.MassFlowController(res_air_1, mixer_air_1, mdot=m_dot_air_SZ)
     m_dot_air_1            = mass_flow_rate_1 + mass_flow_rate_2 + mass_flow_rate_3 + mass_flow_rate_4 + mass_flow_rate_5 + mass_flow_rate_6 + mass_flow_rate_7 + mass_flow_rate_8 + m_dot_air_SZ
-    outlet_air_1           = ct.MassFlowController(mixer_air_1, PFR_1, mdot=m_dot_air_SZ)
+    outlet_air_1           = ct.MassFlowController(mixer_air_1, PFR_1, mdot=m_dot_air_1)
     sim_mixer_air_1        = ct.ReactorNet([mixer_air_1])
-    sim_mixer_air_1.advance(t_mix)
+    sim_mixer_air_1.advance_to_steady_state()
     
     # ----------------------------------------------------------------
     # ---------------------------- PFR #1 ----------------------------
@@ -373,7 +411,7 @@ def combustor(dict_fuel, dict_oxy, T_stag_0, P_stag_0, FAR, FAR_TO, FAR_st, m_do
     mixer_air_2            = ct.IdealGasReactor(Fuel_1)
     outlet_PFR_1           = ct.MassFlowController(PFR_1, mixer_air_2, mdot=m_dot_air_1)                                                          
     t_res_PFR_1            = (Fuel_1.density * PFR_1.volume) / (m_dot_air_1)
-    Fuel_1.set_equivalence_ratio(phi_SZ_des, fuel=dict_fuel, oxidizer=dict_oxy)
+    Fuel_1.set_equivalence_ratio(phi_SZ_des_1, fuel=dict_fuel, oxidizer=dict_oxy)
     sim_PFR_1              = ct.ReactorNet([PFR_1])
     sim_PFR_1.advance(t_res_PFR_1)
     
@@ -391,7 +429,7 @@ def combustor(dict_fuel, dict_oxy, T_stag_0, P_stag_0, FAR, FAR_TO, FAR_st, m_do
     m_dot_air_2            = m_dot_air_1 + m_dot_air_SZ
     outlet_air_2           = ct.MassFlowController(mixer_air_2, PFR_2, mdot=m_dot_air_2)
     sim_mixer_air_2        = ct.ReactorNet([mixer_air_2])
-    sim_mixer_air_2.advance(t_mix)
+    sim_mixer_air_2.advance_to_steady_state()
     
     # ----------------------------------------------------------------
     # ---------------------------- PFR #2 ----------------------------
@@ -400,7 +438,7 @@ def combustor(dict_fuel, dict_oxy, T_stag_0, P_stag_0, FAR, FAR_TO, FAR_st, m_do
     mixer_air_3            = ct.IdealGasReactor(Fuel_1)
     outlet_PFR_2           = ct.MassFlowController(PFR_2, mixer_air_3, mdot=m_dot_air_2)                                                          
     t_res_PFR_2            = (Fuel_1.density * PFR_2.volume) / (m_dot_air_2)
-    Fuel_1.set_equivalence_ratio(phi_SZ_des, fuel=dict_fuel, oxidizer=dict_oxy)    
+    Fuel_1.set_equivalence_ratio(phi_SZ_des_2, fuel=dict_fuel, oxidizer=dict_oxy)    
     sim_PFR_2              = ct.ReactorNet([PFR_2])
     sim_PFR_2.advance(t_res_PFR_2)    
     
@@ -418,14 +456,14 @@ def combustor(dict_fuel, dict_oxy, T_stag_0, P_stag_0, FAR, FAR_TO, FAR_st, m_do
     m_dot_air_3            = m_dot_air_2 + m_dot_air_SZ
     outlet_air_3           = ct.MassFlowController(mixer_air_3, PFR_3, mdot=m_dot_air_3)
     sim_mixer_air_3        = ct.ReactorNet([mixer_air_3])
-    sim_mixer_air_3.advance(t_mix)
+    sim_mixer_air_3.advance_to_steady_state()
     
     # ----------------------------------------------------------------
     # ---------------------------- PFR #3 ----------------------------
     # ---------------------------------------------------------------- 
                                                            
     t_res_PFR_3            = (Fuel_1.density * PFR_3.volume) / (m_dot_air_3)
-    Fuel_1.set_equivalence_ratio(phi_SZ_des, fuel=dict_fuel, oxidizer=dict_oxy)    
+    Fuel_1.set_equivalence_ratio(phi_SZ_des_3, fuel=dict_fuel, oxidizer=dict_oxy)    
     sim_PFR_3              = ct.ReactorNet([PFR_3])
     sim_PFR_3.advance(t_res_PFR_3)      
        

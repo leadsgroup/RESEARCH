@@ -23,7 +23,7 @@ import time
 
 def main():  
 
-    altitude            = np.array([35006.562])*Units.feet 
+    altitude            = np.array([35000])*Units.feet 
     mach_number         = np.array([0.8]) 
     #altitude            = np.linspace(0,35000,20)*Units.feet
     #mach_number         = np.linspace(0.1,0.8,8)
@@ -284,7 +284,7 @@ def GE90_94B_engine():
     inlet_nozzle.tag                            = 'inlet nozzle'
     #inlet_nozzle.polytropic_efficiency          = 0.98                                        
     inlet_nozzle.pressure_ratio                 = 0.98
-    inlet_nozzle.compressibility_effects        = True
+    inlet_nozzle.compressibility_effects        = False
     turbofan.inlet_nozzle                       = inlet_nozzle
     
     # fan                
