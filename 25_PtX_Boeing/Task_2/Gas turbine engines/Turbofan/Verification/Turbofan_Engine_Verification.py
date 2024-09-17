@@ -26,6 +26,8 @@ import time
 # ----------------------------------------------------------------------
 
 def main():  
+    
+    ti                      = time.time()                                           # [s]       Define the initial simulation time
 
     altitude            = np.array([35000])*Units.feet 
     mach_number         = np.array([0.8]) 
@@ -145,6 +147,11 @@ def main():
             TSFC[i,j]                                         = turbofan.TSFC # [N/N-s]
       
     plot_results(altitude,mach_number,thrust,overall_efficiency,thermal_efficiency,Tt_3,Pt_3,Tt_4,Pt_4,m_dot_core,fuel_flow_rate,m_dot_air_tot)
+    
+    tf                      = time.time()                                           # [s]       Define the final simulation time
+    elapsed_time            = round((tf-ti),2)                                      # [s]       Compute the total simulation time
+
+    print('Simulation Time: ' + str(elapsed_time) + ' seconds per timestep')        # [-]       Print the value of total simulation time    
     
     return
 

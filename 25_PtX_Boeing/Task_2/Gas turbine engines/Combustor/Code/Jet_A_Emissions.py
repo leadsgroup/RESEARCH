@@ -22,7 +22,7 @@ def main():
     # ------------------------------ Combustor Inputs ------------------------------              
     # ------------------------------------------------------------------------------              
                                                                                                                                                    
-    full_kin_mech           = False                                                 # [-]       True (simulation time around 300 s): Computes EI_CO2, EI_CO, EI_H2O, EI_NO2, EI_NO, EI_CSOOT; False (simulation time around 60 s): Computes EI_CO2, EI_CO, EI_H2O
+    high_fidelity_kin_mech  = False                                                 # [-]       True (simulation time around 300 s): Computes EI_CO2, EI_CO, EI_H2O, EI_NO2, EI_NO, EI_CSOOT; False (simulation time around 60 s): Computes EI_CO2, EI_CO, EI_H2O
     T_stag_0                = 800                                                   # [K]       Stagnation Temperature entering all combustors
     P_stag_0                = 2000000                                               # [Pa]      Stagnation Pressure entering all combustors
     FAR                     = 0.02                                                  # [-]       Fuel-to-Air ratio
@@ -50,14 +50,14 @@ def main():
     phi_SZ_des_2            = 0.2                                                   # [-]       Design Equivalence Ratio for PFR #2
     phi_SZ_des_3            = 0.2                                                   # [-]       Design Equivalence Ratio for PFR #3
                                                                                     
-    if full_kin_mech:                                                               
+    if high_fidelity_kin_mech:                                                               
         dict_fuel           = {'NC10H22':0.16449, 'NC12H26':0.34308,'NC16H34':0.10335, 'IC8H18':0.08630,'NC7H14':0.07945, 'C6H5C2H5': 0.07348,'C6H5C4H9': 0.05812, 'C10H7CH3': 0.10972} # [-]       Fuel species and corresponding mole fractions for full fuel model
     else:                                                                                       
         dict_fuel           = {'N-C12H26':0.6, 'A1CH3':0.2, 'A1':0.2}               # [-]       Fuel species and corresponding mole fractions for surrogate fuel model 
                                                                                                 
     dict_oxy                = {'O2':0.2095, 'N2':0.7809, 'AR':0.0096}               # [-]       Air species and corresponding mole fractions     
                                                                                                 
-    if full_kin_mech:                                                                           
+    if high_fidelity_kin_mech:                                                                           
         list_sp             = ['CO', 'CO2', 'H2O', 'NO', 'NO2', 'CSOLID']           # [-]       Fuel species for Emission Index analysis
     else:                                                                                       
         list_sp             = ['CO2', 'CO', 'H2O']                                  # [-]       Fuel species for Emission Index analysis
@@ -66,7 +66,7 @@ def main():
     df                      = pd.DataFrame(columns=col_names)                       # [-]       Assign output variables space to df
                                                                                     
     for n in range(1):                                                              
-        gas, EI, T_stag_out, P_stag_out, h_stag_out = combustor(full_kin_mech, dict_fuel, dict_oxy, T_stag_0, P_stag_0, FAR, FAR_TO, FAR_st, m_dot_fuel, m_dot_fuel_TO, m_dot_air_id, m_dot_air_TO, N_PZ, V_PZ, phi_PZ_des, S_PZ, phi_SZ_des_1, phi_SZ_des_2, phi_SZ_des_3, F_SC, A_SZ, L_SZ) # [-]       Run combustor function
+        gas, EI, T_stag_out, P_stag_out, h_stag_out = combustor(high_fidelity_kin_mech, dict_fuel, dict_oxy, T_stag_0, P_stag_0, FAR, FAR_TO, FAR_st, m_dot_fuel, m_dot_fuel_TO, m_dot_air_id, m_dot_air_TO, N_PZ, V_PZ, phi_PZ_des, S_PZ, phi_SZ_des_1, phi_SZ_des_2, phi_SZ_des_3, F_SC, A_SZ, L_SZ) # [-]       Run combustor function
                                                                                                 
         sp_idx              = [gas.species_index(sp) for sp in list_sp]             # [-]       Retrieve the species index
         data_n              = [gas.T, T_stag_out, P_stag_out, h_stag_out] + list(gas.X[sp_idx]) + list(gas.Y[sp_idx]) + list(EI[sp_idx]) # [-]       Assign output variables  
@@ -76,7 +76,7 @@ def main():
     print(df['EI_CO'])                                                              # [-]       Print the value of EI_CO
     print(df['EI_H2O'])                                                             # [-]       Print the value of EI_H2O
                                                                                                 
-    if full_kin_mech:                                                                           
+    if high_fidelity_kin_mech:                                                                           
         print(df['EI_NO'])                                                          # [-]       Print the value of EI_NO
         print(df['EI_NO2'])                                                         # [-]       Print the value of EI_NO2
         print(df['EI_CSOLID'])                                                      # [-]       Print the value of EI_CSOLID
@@ -88,7 +88,7 @@ def main():
     
     return 
  
-def combustor(full_kin_mech, dict_fuel, dict_oxy, T_stag_0, P_stag_0, FAR, FAR_TO,FAR_st, m_dot_fuel, m_dot_fuel_TO, m_dot_air_id, m_dot_air_TO, N_PZ,V_PZ, phi_PZ_des, S_PZ, phi_SZ_des_1, phi_SZ_des_2, phi_SZ_des_3,F_SC, A_SZ, L_SZ):
+def combustor(high_fidelity_kin_mech, dict_fuel, dict_oxy, T_stag_0, P_stag_0, FAR, FAR_TO,FAR_st, m_dot_fuel, m_dot_fuel_TO, m_dot_air_id, m_dot_air_TO, N_PZ,V_PZ, phi_PZ_des, S_PZ, phi_SZ_des_1, phi_SZ_des_2, phi_SZ_des_3,F_SC, A_SZ, L_SZ):
     
     # ------------------------------------------------------------------------------
     # ----------------------------- Initial Parameters -----------------------------
@@ -112,7 +112,7 @@ def combustor(full_kin_mech, dict_fuel, dict_oxy, T_stag_0, P_stag_0, FAR, FAR_T
     # ------------------------------------------------------------------------------ 
     
     f_PZ_1                  = (1 / (np.sqrt(2 * np.pi) * sigma_phi)) * np.exp((-(phi_PSR[0] - phi_sign) ** 2) / (2 * sigma_phi ** 2)) * Delta_phi # [-]       Fraction of mass flow entering the PSR at the PSR equivalence ratio 
-    if full_kin_mech:                                                                           
+    if high_fidelity_kin_mech:                                                                           
         Fuel_1              = ct.Solution('Jet_A_High_Fidelity.yaml')               # [-]       Import full fuel kinematic mechanism
     else:                                                                                       
         Fuel_1              = ct.Solution('Jet_A_Low_Fidelity.yaml')                # [-]       Import surrogate fuel kinematic mechanism
@@ -140,7 +140,7 @@ def combustor(full_kin_mech, dict_fuel, dict_oxy, T_stag_0, P_stag_0, FAR, FAR_T
     # ------------------------------------------------------------------------------ 
     
     f_PZ_2                  = (1 / (np.sqrt(2 * np.pi) * sigma_phi)) * np.exp((-(phi_PSR[1] - phi_sign) ** 2) / (2 * sigma_phi ** 2)) * Delta_phi # [-]       Fraction of mass flow entering the PSR at the PSR equivalence ratio 
-    if full_kin_mech:                                                                           
+    if high_fidelity_kin_mech:                                                                           
         Fuel_2              = ct.Solution('Jet_A_High_Fidelity.yaml')               # [-]       Import full fuel kinematic mechanism
     else:                                                                                       
         Fuel_2              = ct.Solution('Jet_A_Low_Fidelity.yaml')                # [-]       Import surrogate fuel kinematic mechanism
@@ -167,7 +167,7 @@ def combustor(full_kin_mech, dict_fuel, dict_oxy, T_stag_0, P_stag_0, FAR, FAR_T
     # ------------------------------------------------------------------------------ 
     
     f_PZ_3                  = (1 / (np.sqrt(2 * np.pi) * sigma_phi)) * np.exp((-(phi_PSR[2] - phi_sign) ** 2) / (2 * sigma_phi ** 2)) * Delta_phi # [-]       Fraction of mass flow entering the PSR at the PSR equivalence ratio 
-    if full_kin_mech:                                                                           
+    if high_fidelity_kin_mech:                                                                           
         Fuel_3              = ct.Solution('Jet_A_High_Fidelity.yaml')               # [-]       Import full fuel kinematic mechanism
     else:                                                                                       
         Fuel_3              = ct.Solution('Jet_A_Low_Fidelity.yaml')                # [-]       Import surrogate fuel kinematic mechanism
@@ -195,7 +195,7 @@ def combustor(full_kin_mech, dict_fuel, dict_oxy, T_stag_0, P_stag_0, FAR, FAR_T
     # ------------------------------------------------------------------------------ 
     
     f_PZ_4                  = (1 / (np.sqrt(2 * np.pi) * sigma_phi)) * np.exp((-(phi_PSR[3] - phi_sign) ** 2) / (2 * sigma_phi ** 2)) * Delta_phi # [-]       Fraction of mass flow entering the PSR at the PSR equivalence ratio 
-    if full_kin_mech:                                                                           
+    if high_fidelity_kin_mech:                                                                           
         Fuel_4              = ct.Solution('Jet_A_High_Fidelity.yaml')               # [-]       Import full fuel kinematic mechanism
     else:                                                                                       
         Fuel_4              = ct.Solution('Jet_A_Low_Fidelity.yaml')                # [-]       Import surrogate fuel kinematic mechanism
@@ -222,7 +222,7 @@ def combustor(full_kin_mech, dict_fuel, dict_oxy, T_stag_0, P_stag_0, FAR, FAR_T
     # ------------------------------------------------------------------------------ 
     
     f_PZ_5                  = (1 / (np.sqrt(2 * np.pi) * sigma_phi)) * np.exp((-(phi_PSR[4] - phi_sign) ** 2) / (2 * sigma_phi ** 2)) * Delta_phi # [-]       Fraction of mass flow entering the PSR at the PSR equivalence ratio 
-    if full_kin_mech:                                                                           
+    if high_fidelity_kin_mech:                                                                           
         Fuel_5              = ct.Solution('Jet_A_High_Fidelity.yaml')               # [-]       Import full fuel kinematic mechanism
     else:                                                                                       
         Fuel_5              = ct.Solution('Jet_A_Low_Fidelity.yaml')                # [-]       Import surrogate fuel kinematic mechanism
@@ -250,7 +250,7 @@ def combustor(full_kin_mech, dict_fuel, dict_oxy, T_stag_0, P_stag_0, FAR, FAR_T
     # ------------------------------------------------------------------------------ 
     
     f_PZ_6                  = (1 / (np.sqrt(2 * np.pi) * sigma_phi)) * np.exp((-(phi_PSR[5] - phi_sign) ** 2) / (2 * sigma_phi ** 2)) * Delta_phi # [-]       Fraction of mass flow entering the PSR at the PSR equivalence ratio 
-    if full_kin_mech:                                                                           
+    if high_fidelity_kin_mech:                                                                           
         Fuel_6              = ct.Solution('Jet_A_High_Fidelity.yaml')               # [-]       Import full fuel kinematic mechanism
     else:                                                                                       
         Fuel_6              = ct.Solution('Jet_A_Low_Fidelity.yaml')                # [-]       Import surrogate fuel kinematic mechanism
@@ -277,7 +277,7 @@ def combustor(full_kin_mech, dict_fuel, dict_oxy, T_stag_0, P_stag_0, FAR, FAR_T
     # ------------------------------------------------------------------------------ 
 
     f_PZ_7                  = (1 / (np.sqrt(2 * np.pi) * sigma_phi)) * np.exp((-(phi_PSR[6] - phi_sign) ** 2) / (2 * sigma_phi ** 2)) * Delta_phi # [-]       Fraction of mass flow entering the PSR at the PSR equivalence ratio 
-    if full_kin_mech:                                                                           
+    if high_fidelity_kin_mech:                                                                           
         Fuel_7              = ct.Solution('Jet_A_High_Fidelity.yaml')               # [-]       Import full fuel kinematic mechanism
     else:                                                                                       
         Fuel_7              = ct.Solution('Jet_A_Low_Fidelity.yaml')                # [-]       Import surrogate fuel kinematic mechanism
@@ -305,7 +305,7 @@ def combustor(full_kin_mech, dict_fuel, dict_oxy, T_stag_0, P_stag_0, FAR, FAR_T
     # ------------------------------------------------------------------------------ 
     
     f_PZ_8                  = (1 / (np.sqrt(2 * np.pi) * sigma_phi)) * np.exp((-(phi_PSR[7] - phi_sign) ** 2) / (2 * sigma_phi ** 2)) * Delta_phi # [-]       Fraction of mass flow entering the PSR at the PSR equivalence ratio 
-    if full_kin_mech:                                                                           
+    if high_fidelity_kin_mech:                                                                           
         Fuel_8              = ct.Solution('Jet_A_High_Fidelity.yaml')               # [-]       Import full fuel kinematic mechanism
     else:                                                                                       
         Fuel_8              = ct.Solution('Jet_A_Low_Fidelity.yaml')                # [-]       Import surrogate fuel kinematic mechanism
