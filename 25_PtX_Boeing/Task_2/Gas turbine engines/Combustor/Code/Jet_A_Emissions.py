@@ -40,7 +40,7 @@ def main():
                                                                                                                                                                      
     N_PZ                    = 8                                                     # [-]       Number of PSR (EVEN, must match the number of PSR below)
     V_PZ                    = 0.0023                                                # [m**3]    Volume of the Primary Zone in a SINGLE combustor, must be split into the different PSRs       
-    phi_PZ_des              = 0.7                                                   # [-]       Primary Zone Design Equivalence Ratio
+    phi_PZ_des              = 0.55                                                   # [-]       Primary Zone Design Equivalence Ratio
     S_PZ                    = 0.4                                                   # [-]       Mixing parameter, used to define the Equivalence Ratio standard deviation  
     F_SC                    = 0.8                                                   # [-]       Fuel scaler, used to define the fraction of total air present in the combustor that enters the Primary Zone
                                                                                                                                                                       

@@ -12,9 +12,9 @@ import pickle
 import os                                                   
 import time 
 
-'''This code '''
+'''This code is created to validate the performance of a turbofan engine in RCAIDE.'''
 
-# Created:  Sep 2024, M. Guidotti 
+# Created:  Sep 2024, M. Clarke, M. Guidotti 
 
 # References:
 # [1]: "Turbofan and Turbojet Engines Database Handbook", Elodie Roux. https://ptabdata.blob.core.windows.net/files/2017/IPR2017-00999/v20_GE-1019%20Turbofan%20and%20Turbojet%20Engines%20Database%20Handbook.pdf
