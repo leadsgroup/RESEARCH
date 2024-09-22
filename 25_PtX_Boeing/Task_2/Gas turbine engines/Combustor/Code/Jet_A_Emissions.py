@@ -28,29 +28,22 @@ def main():
     T_stag_0                = 800                                                   # [K]       Stagnation Temperature entering all combustors
     P_stag_0                = 2000000                                               # [Pa]      Stagnation Pressure entering all combustors
     FAR                     = 0.02                                                  # [-]       Fuel-to-Air ratio
-    FAR_TO                  = 0.0275                                                # [-]       Fuel-to-Air ratio during TO 
-    FAR_st                  = 0.068                                                 # [-]       Stoichiometric Fuel-to-Air ratio
     m_dot_air_tot           = 40                                                    # [kg/s]    Air mass flow going through all combustors
-    m_dot_air_TO_tot        = 44                                                    # [kg/s]    Air mass flow going through all combustors during TO 
-    m_dot_fuel_tot          = m_dot_air_tot*FAR                                     # [kg/s]    Fuel mass flow going through all combustors
-    m_dot_fuel_TO_tot       = m_dot_air_TO_tot*FAR_TO                               # [kg/s]    Fuel mass flow going through all combustors during TO 
+    f_air_PZ                = 0.18                                                  # [-]       Fraction of total air present in the combustor that enters the Primary Zone         
     N_comb                  = 10                                                    # [-]       Number of can-annular combustors
-    m_dot_air_id            = m_dot_air_tot/N_comb                                  # [kg/s]    Ideal Air mass flow inside each combustor, scaled inside each PSR to vary the Equivalence Ratio
-    m_dot_air_TO            = m_dot_air_TO_tot/N_comb                               # [kg/s]    Air mass flow inside each combustor during TO
-    m_dot_fuel              = m_dot_fuel_tot/N_comb                                 # [kg/s]    Fuel mass flow inside each combustor
-    m_dot_fuel_TO           = m_dot_fuel_TO_tot/N_comb                              # [kg/s]    Fuel mass flow inside each combustor during TO    
-                                                                                                                                                                     
     N_PZ                    = 8                                                     # [-]       Number of PSR (EVEN, must match the number of PSR below)
-    V_PZ                    = 0.0023                                                # [m**3]    Volume of the Primary Zone in a SINGLE combustor, must be split into the different PSRs       
-    phi_PZ_des              = 0.6                                                   # [-]       Primary Zone Design Equivalence Ratio
-    S_PZ                    = 0.4                                                   # [-]       Mixing parameter, used to define the Equivalence Ratio standard deviation  
-    F_SC                    = 0.8                                                   # [-]       Fuel scaler, used to define the fraction of total air present in the combustor that enters the Primary Zone
-                                                                                                                                                                      
+    A_PZ                    = 0.15                                                  # [m**2]    Primary Zone cross-sectional area     
+    L_PZ                    = 0.0153                                                # [m]       Primary Zone length  
+    phi_sign                = 0.7                                                   # [-]       Primary Zone mean Equivalence Ratio
+    sigma_phi               = 0.5                                                   # [-]       Primary Zone Equivalence Ratio standard deviation                                                                                                                                                      
+    N_SZ                    = 3                                                     # [-]       Number of dilution air inlets        
     A_SZ                    = 0.15                                                  # [m**2]    Secondary Zone cross-sectional area
     L_SZ                    = 0.075                                                 # [m]       Secondary Zone length  
-    phi_SZ_des_1            = 0.7                                                   # [-]       Design Equivalence Ratio for PFR #1
-    phi_SZ_des_2            = 0.2                                                   # [-]       Design Equivalence Ratio for PFR #2
-    phi_SZ_des_3            = 0.2                                                   # [-]       Design Equivalence Ratio for PFR #3
+    phi_SZ                  = 0.2                                                   # [-]       Equivalence Ratio for PFR   
+    
+    m_dot_fuel_tot          = m_dot_air_tot*FAR                                     # [kg/s]    Fuel mass flow going through all combustors
+    m_dot_air               = m_dot_air_tot/N_comb                                  # [kg/s]    Air mass flow inside each combustor, scaled inside each PSR to vary the Equivalence Ratio
+    m_dot_fuel              = m_dot_fuel_tot/N_comb                                 # [kg/s]    Fuel mass flow inside each combustor                                                                                                                                                                    
                                                                                     
     if high_fidelity_kin_mech:                                                               
         dict_fuel           = {'NC10H22':0.16449, 'NC12H26':0.34308,'NC16H34':0.10335, 'IC8H18':0.08630,'NC7H14':0.07945, 'C6H5C2H5': 0.07348,'C6H5C4H9': 0.05812, 'C10H7CH3': 0.10972} # [-]       Fuel species and corresponding mole fractions for full fuel model
@@ -68,7 +61,7 @@ def main():
     df                      = pd.DataFrame(columns=col_names)                       # [-]       Assign output variables space to df
                                                                                     
     for n in range(1):                                                              
-        gas, EI, T_stag_out, P_stag_out, h_stag_out = combustor(high_fidelity_kin_mech, dict_fuel, dict_oxy, T_stag_0, P_stag_0, FAR, FAR_TO, FAR_st, m_dot_fuel, m_dot_fuel_TO, m_dot_air_id, m_dot_air_TO, N_PZ, V_PZ, phi_PZ_des, S_PZ, phi_SZ_des_1, phi_SZ_des_2, phi_SZ_des_3, F_SC, A_SZ, L_SZ) # [-]       Run combustor function
+        gas, EI, T_stag_out, P_stag_out, h_stag_out = combustor(high_fidelity_kin_mech, dict_fuel, dict_oxy, T_stag_0, P_stag_0, FAR, m_dot_fuel, m_dot_air, N_PZ, A_PZ, L_PZ, phi_sign, phi_SZ, A_SZ, L_SZ, f_air_PZ, N_SZ, sigma_phi) # [-]       Run combustor function
                                                                                                 
         sp_idx              = [gas.species_index(sp) for sp in list_sp]             # [-]       Retrieve the species index
         data_n              = [gas.T, T_stag_out, P_stag_out, h_stag_out] + list(gas.X[sp_idx]) + list(gas.Y[sp_idx]) + list(EI[sp_idx]) # [-]       Assign output variables  
@@ -90,21 +83,17 @@ def main():
     
     return 
  
-def combustor(high_fidelity_kin_mech, dict_fuel, dict_oxy, T_stag_0, P_stag_0, FAR, FAR_TO,FAR_st, m_dot_fuel, m_dot_fuel_TO, m_dot_air_id, m_dot_air_TO, N_PZ,V_PZ, phi_PZ_des, S_PZ, phi_SZ_des_1, phi_SZ_des_2, phi_SZ_des_3,F_SC, A_SZ, L_SZ):
+def combustor(high_fidelity_kin_mech, dict_fuel, dict_oxy, T_stag_0, P_stag_0, FAR, m_dot_fuel, m_dot_air, N_PZ, A_PZ, L_PZ, phi_sign, phi_SZ, A_SZ, L_SZ, f_air_PZ, N_SZ, sigma_phi):
     
     # ------------------------------------------------------------------------------
     # ----------------------------- Initial Parameters -----------------------------
     # ------------------------------------------------------------------------------    
       
-    f_air_PZ                = (m_dot_fuel_TO*F_SC)/(phi_PZ_des*m_dot_air_TO*FAR_st) # [-]       Fraction of total air present in the combustor that enters the Primary Zone
     f_air_SZ                = 1 - f_air_PZ                                          # [-]       Fraction of total air present in the combustor that enters the Secondary Zone  
-    m_dot_air_PZ            = f_air_PZ*m_dot_air_id                                 # [kg/s]    Air mass flow going through the Primary Zone
-    m_dot_air_SZ            = (f_air_SZ*m_dot_air_id)/3                             # [kg/s]    Air mass flow going through each dilution air inlet (3 inlets)
-    phi_sign                = ((m_dot_fuel*F_SC)/m_dot_air_PZ)/(FAR_st)             # [-]       Mean Equivalence Ratio
-    sigma_phi               = S_PZ*phi_sign                                         # [-]       Standard deviation of the Equivalence Ratio    
-    m_dot_air_PSR           = m_dot_air_PZ                                          # [kg/s]    Air mass flow going through each PSR
-    m_dot_fuel_PSR          = m_dot_fuel                                            # [kg/s]    Fuel mass flow going through each PSR
-    V_PZ_PSR                = V_PZ/N_PZ                                             # [m**3]    Volume of each PSR
+    m_dot_air_PSR           = f_air_PZ*m_dot_air                                    # [kg/s]    Air mass flow going through each PSR  
+    m_dot_fuel_PSR          = m_dot_fuel                                            # [kg/s]    Fuel mass flow going through each PSR    
+    m_dot_air_SZ            = (f_air_SZ*m_dot_air)/N_SZ                             # [kg/s]    Air mass flow going through each dilution air inlet (3 inlets)
+    V_PZ_PSR                = (A_PZ*L_PZ)/N_PZ                                      # [m**3]    Volume of each PSR
     phi_PSR                 = np.linspace(0.001, 2*phi_sign, N_PZ)                  # [-]       Distribution of Equivalence Ratio through the PSRs
     Delta_phi               = np.abs(phi_PSR[0] - phi_PSR[1])                       # [-]       Difference between two subsequent Equivalence Ratios
     comp_fuel               = list(dict_fuel.keys())                                # [-]       Fuel components
@@ -412,7 +401,7 @@ def combustor(high_fidelity_kin_mech, dict_fuel, dict_oxy, T_stag_0, P_stag_0, F
     mixer_air_2             = ct.IdealGasReactor(Fuel_1)                            # [-]       Create the reactor for the downstream mixer
     outlet_PFR_1            = ct.MassFlowController(PFR_1, mixer_air_2, mdot=m_dot_air_1) # [-]       Connect the PFR with the downstream mixer                                 
     t_res_PFR_1             = (Fuel_1.density * PFR_1.volume) / (m_dot_air_1)       # [s]       Compute the residence time inside the PFR           
-    Fuel_1.set_equivalence_ratio(phi_SZ_des_1, fuel=dict_fuel, oxidizer=dict_oxy)   # [-]       Set the euivalence ratio inside the PFR
+    Fuel_1.set_equivalence_ratio(phi_SZ, fuel=dict_fuel, oxidizer=dict_oxy)   # [-]       Set the euivalence ratio inside the PFR
     sim_PFR_1               = ct.ReactorNet([PFR_1])                                # [-]       Set the PFR simulation
     sim_PFR_1.advance(t_res_PFR_1)                                                  # [-]       Run the simulation until the residence time is reached
     
@@ -439,7 +428,7 @@ def combustor(high_fidelity_kin_mech, dict_fuel, dict_oxy, T_stag_0, P_stag_0, F
     mixer_air_3             = ct.IdealGasReactor(Fuel_1)                            # [-]       Create the reactor for the downstream mixer
     outlet_PFR_2            = ct.MassFlowController(PFR_2, mixer_air_3, mdot=m_dot_air_2) # [-]       Connect the PFR with the downstream mixer                                                               
     t_res_PFR_2             = (Fuel_1.density * PFR_2.volume) / (m_dot_air_2)       # [s]       Compute the residence time inside the PFR           
-    Fuel_1.set_equivalence_ratio(phi_SZ_des_2, fuel=dict_fuel, oxidizer=dict_oxy)   # [-]       Set the euivalence ratio inside the PFR 
+    Fuel_1.set_equivalence_ratio(phi_SZ, fuel=dict_fuel, oxidizer=dict_oxy)   # [-]       Set the euivalence ratio inside the PFR 
     sim_PFR_2               = ct.ReactorNet([PFR_2])                                # [-]       Set the PFR simulation
     sim_PFR_2.advance(t_res_PFR_2)                                                  # [-]       Run the simulation until the residence time is reached
     
@@ -464,7 +453,7 @@ def combustor(high_fidelity_kin_mech, dict_fuel, dict_oxy, T_stag_0, P_stag_0, F
     # ------------------------------------------------------------------------------ 
                                                            
     t_res_PFR_3             = (Fuel_1.density * PFR_3.volume) / (m_dot_air_3)       # [s]       Compute the residence time inside the PFR           
-    Fuel_1.set_equivalence_ratio(phi_SZ_des_3, fuel=dict_fuel, oxidizer=dict_oxy)   # [-]       Set the euivalence ratio inside the PFR  
+    Fuel_1.set_equivalence_ratio(phi_SZ, fuel=dict_fuel, oxidizer=dict_oxy)   # [-]       Set the euivalence ratio inside the PFR  
     sim_PFR_3               = ct.ReactorNet([PFR_3])                                # [-]       Set the PFR simulation                 
     sim_PFR_3.advance(t_res_PFR_3)                                                  # [-]       Run the simulation until the residence time is reached
                                                                                     
@@ -472,7 +461,7 @@ def combustor(high_fidelity_kin_mech, dict_fuel, dict_oxy, T_stag_0, P_stag_0, F
     # ---------------------------- Additional computations -------------------------
     # ------------------------------------------------------------------------------    
           
-    m_dot_input_combustor   = m_dot_fuel + m_dot_air_id                             # [kg/s]    Total mass flow rate entering a single combustor (air + fuel)
+    m_dot_input_combustor   = m_dot_fuel + m_dot_air                                # [kg/s]    Total mass flow rate entering a single combustor (air + fuel)
     Emission_Index          = Fuel_1.Y * (m_dot_input_combustor)/m_dot_fuel         # [-]       Computation of the Emission Index
     a_out                   = Fuel_1.sound_speed                                    # [m/s]     Speed of sound at PFR outlet
     rho_out                 = Fuel_1.density                                        # [kg/m**3] Density of the Fuel_1 
