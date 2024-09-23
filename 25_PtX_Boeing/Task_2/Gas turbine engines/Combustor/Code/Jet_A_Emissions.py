@@ -29,21 +29,22 @@ def main():
     P_stag_0                = 2000000                                               # [Pa]      Stagnation Pressure entering all combustors
     FAR                     = 0.02                                                  # [-]       Fuel-to-Air ratio
     m_dot_air_tot           = 40                                                    # [kg/s]    Air mass flow going through all combustors
-    f_air_PZ                = 0.18                                                  # [-]       Fraction of total air present in the combustor that enters the Primary Zone         
-    N_comb                  = 10                                                    # [-]       Number of can-annular combustors
-    N_PZ                    = 8                                                     # [-]       Number of PSR (EVEN, must match the number of PSR below)
-    A_PZ                    = 0.15                                                  # [m**2]    Primary Zone cross-sectional area     
-    L_PZ                    = 0.0153                                                # [m]       Primary Zone length  
-    phi_sign                = 0.7                                                   # [-]       Primary Zone mean Equivalence Ratio
-    sigma_phi               = 0.5                                                   # [-]       Primary Zone Equivalence Ratio standard deviation                                                                                                                                                      
-    N_SZ                    = 3                                                     # [-]       Number of dilution air inlets        
-    A_SZ                    = 0.15                                                  # [m**2]    Secondary Zone cross-sectional area
-    L_SZ                    = 0.075                                                 # [m]       Secondary Zone length  
-    phi_SZ                  = 0.2                                                   # [-]       Equivalence Ratio for PFR   
+    
+    f_air_PZ                = combustor.f_air_PZ                                         # [-]       Fraction of total air present in the combustor that enters the Primary Zone         
+    N_comb                  = combustor.N_comb                                      # [-]       Number of can-annular combustors
+    N_PZ                    = combustor.N_PZ                                        # [-]       Number of PSR (EVEN, must match the number of PSR below)
+    A_PZ                    = combustor.A_PZ                                        # [m**2]    Primary Zone cross-sectional area     
+    L_PZ                    = combustor.L_PZ                                        # [m]       Primary Zone length  
+    N_SZ                    = combustor.N_SZ                                        # [-]       Number of dilution air inlets        
+    A_SZ                    = combustor.A_SZ                                        # [m**2]    Secondary Zone cross-sectional area
+    L_SZ                    = combustor.L_SZ                                        # [m]       Secondary Zone length  
+    phi_SZ                  = combustor.phi_SZ                                      # [-]       Equivalence Ratio for PFR   
     
     m_dot_fuel_tot          = m_dot_air_tot*FAR                                     # [kg/s]    Fuel mass flow going through all combustors
     m_dot_air               = m_dot_air_tot/N_comb                                  # [kg/s]    Air mass flow inside each combustor, scaled inside each PSR to vary the Equivalence Ratio
     m_dot_fuel              = m_dot_fuel_tot/N_comb                                 # [kg/s]    Fuel mass flow inside each combustor                                                                                                                                                                    
+    phi_sign                = 0.7        # To be changed                                            # [-]       Primary Zone mean Equivalence Ratio
+    sigma_phi               = 0.5        # To be changed                            # [-]       Primary Zone Equivalence Ratio standard deviation                                                                                                                                                      
                                                                                     
     if high_fidelity_kin_mech:                                                               
         dict_fuel           = {'NC10H22':0.16449, 'NC12H26':0.34308,'NC16H34':0.10335, 'IC8H18':0.08630,'NC7H14':0.07945, 'C6H5C2H5': 0.07348,'C6H5C4H9': 0.05812, 'C10H7CH3': 0.10972} # [-]       Fuel species and corresponding mole fractions for full fuel model
