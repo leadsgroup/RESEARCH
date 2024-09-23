@@ -40,6 +40,10 @@ gas_b = ct.Solution('gri30.yaml')
 gas_b.TPX = 300.0, ct.one_atm, 'CH4:1'
 rho_b = gas_b.density
 
+gas_c = ct.Solution('gri30.yaml')
+gas_c.TPX = 300.0, ct.one_atm, 'C2H6:1'
+rho_c = gas_c.density
+
 # %%
 # Create reservoirs for the two inlet streams and for the outlet stream.  The
 # upstream reservoirs could be replaced by reactors, which might themselves be
@@ -49,6 +53,7 @@ rho_b = gas_b.density
 # downstream reactors.
 res_a = ct.Reservoir(gas_a, name='air')
 res_b = ct.Reservoir(gas_b, name='fuel')
+res_c = ct.Reservoir(gas_c, name='fuel2')
 downstream = ct.Reservoir(gas_b, name='outlet')
 
 # %%
@@ -64,6 +69,7 @@ mixer = ct.IdealGasReactor(gas_b, name='mixer')
 # stoichiometric combustion.
 mfc1 = ct.MassFlowController(res_a, mixer, mdot=rho_a*2.5/0.21)
 mfc2 = ct.MassFlowController(res_b, mixer, mdot=rho_b*1.0)
+mfc3 = ct.MassFlowController(res_c, mixer, mdot=rho_c*1.0)
 
 # %%
 # Connect the mixer to the downstream reservoir with a valve.
