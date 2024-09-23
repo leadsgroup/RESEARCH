@@ -59,22 +59,21 @@ def main():
                                                                                                 
     col_names = ['Tout(K)', 'T_stag_out','P_stag_out', 'h_stag_out'] + ['X_' +str(sp) for sp in list_sp] + ['Y_' +str(sp) for sp in list_sp] + ['EI_' +str(sp) for sp in list_sp] # [-]       Define output variables 
     df                      = pd.DataFrame(columns=col_names)                       # [-]       Assign output variables space to df
-                                                                                    
-    for n in range(1):                                                              
-        gas, EI, T_stag_out, P_stag_out, h_stag_out = combustor(high_fidelity_kin_mech, dict_fuel, dict_oxy, T_stag_0, P_stag_0, FAR, m_dot_fuel, m_dot_air, N_PZ, A_PZ, L_PZ, phi_sign, phi_SZ, A_SZ, L_SZ, f_air_PZ, N_SZ, sigma_phi) # [-]       Run combustor function
+                                                                                                                                                 
+    gas, EI, T_stag_out, P_stag_out, h_stag_out = combustor(high_fidelity_kin_mech, dict_fuel, dict_oxy, T_stag_0, P_stag_0, FAR, m_dot_fuel, m_dot_air, N_PZ, A_PZ, L_PZ, phi_sign, phi_SZ, A_SZ, L_SZ, f_air_PZ, N_SZ, sigma_phi) # [-]       Run combustor function
                                                                                                 
-        sp_idx              = [gas.species_index(sp) for sp in list_sp]             # [-]       Retrieve the species index
-        data_n              = [gas.T, T_stag_out, P_stag_out, h_stag_out] + list(gas.X[sp_idx]) + list(gas.Y[sp_idx]) + list(EI[sp_idx]) # [-]       Assign output variables  
-        df.loc[n]           = data_n                                                # [-]       Assign output variables to df 
+    sp_idx              = [gas.species_index(sp) for sp in list_sp]                 # [-]       Retrieve the species index
+    data_n              = [gas.T, T_stag_out, P_stag_out, h_stag_out] + list(gas.X[sp_idx]) + list(gas.Y[sp_idx]) + list(EI[sp_idx]) # [-]       Assign output variables  
+    df.loc[0]           = data_n                                                    # [-]       Assign output variables to df 
                                                                                                 
-    print(df['EI_CO2'])                                                             # [-]       Print the value of EI_CO2
-    print(df['EI_CO'])                                                              # [-]       Print the value of EI_CO
-    print(df['EI_H2O'])                                                             # [-]       Print the value of EI_H2O
+    print('The Emission Index of CO2 is:', '%0.3f'%df.loc[0, 'EI_CO2'], 'kg_CO2/kg_fuel.') # [-]       Print the value of EI_CO2
+    print('The Emission Index of CO is:', '%0.3f'%df.loc[0, 'EI_CO'], 'kg_CO/kg_fuel.') # [-]       Print the value of EI_CO
+    print('The Emission Index of H2O is:', '%0.3f'%df.loc[0, 'EI_H2O'], 'kg_H2O/kg_fuel.') # [-]       Print the value of EI_H2O
                                                                                                 
     if high_fidelity_kin_mech:                                                                           
-        print(df['EI_NO'])                                                          # [-]       Print the value of EI_NO
-        print(df['EI_NO2'])                                                         # [-]       Print the value of EI_NO2
-        print(df['EI_CSOLID'])                                                      # [-]       Print the value of EI_CSOLID
+        print('The Emission Index of NO is:', '%0.3f'%df.loc[0, 'EI_NO'], 'kg_NO/kg_fuel.') # [-]       Print the value of EI_NO
+        print('The Emission Index of NO2 is:', '%0.3f'%df.loc[0, 'EI_NO2'], 'kg_NO2/kg_fuel.') # [-]       Print the value of EI_NO2
+        print('The Emission Index of soot is:', '%0.3f'%df.loc[0, 'EI_CSOLID'], 'kg_soot/kg_fuel.') # [-]       Print the value of EI_CSOLID
                                                                                                 
     tf                      = time.time()                                           # [s]       Define the final simulation time
     elapsed_time            = round((tf-ti),2)                                      # [s]       Compute the total simulation time

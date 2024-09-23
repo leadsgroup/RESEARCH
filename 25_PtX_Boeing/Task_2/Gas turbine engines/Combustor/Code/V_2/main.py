@@ -48,21 +48,20 @@ def main():
     col_names               = ['Tout(K)', 'T_stag_out','P_stag_out', 'h_stag_out'] + ['X_' +str(sp) for sp in combustor_input['dict_fuel']['list_sp']] + ['Y_' +str(sp) for sp in combustor_input['dict_fuel']['list_sp']] + ['EI_' +str(sp) for sp in combustor_input['dict_fuel']['list_sp']] # [-]       Define output variables
     output                  = pd.DataFrame(columns=col_names)                                       # [-]       Assign output variables space to output
 
-    for n in range(1):
-        gas, EI, T_stag_out, P_stag_out, h_stag_out = Combustor(combustor_input) # [-]       Run combustor function
+    gas, EI, T_stag_out, P_stag_out, h_stag_out = Combustor(combustor_input) # [-]       Run combustor function
 
-        sp_idx              = [gas.species_index(sp) for sp in combustor_input.list_sp]             # [-]       Retrieve the species index
-        data_n              = [gas.T, T_stag_out, P_stag_out, h_stag_out] + list(gas.X[sp_idx]) + list(gas.Y[sp_idx]) + list(EI[sp_idx]) # [-]       Assign output variables
-        output.loc[n]       = data_n                                                # [-]       Assign output variables to output
+    sp_idx              = [gas.species_index(sp) for sp in combustor_input.list_sp]             # [-]       Retrieve the species index
+    data_n              = [gas.T, T_stag_out, P_stag_out, h_stag_out] + list(gas.X[sp_idx]) + list(gas.Y[sp_idx]) + list(EI[sp_idx]) # [-]       Assign output variables
+    output.loc[0]       = data_n                                                # [-]       Assign output variables to output
 
-    print(output['EI_CO2'])                                                             # [-]       Print the value of EI_CO2
-    print(output['EI_CO'])                                                              # [-]       Print the value of EI_CO
-    print(output['EI_H2O'])                                                             # [-]       Print the value of EI_H2O
-
-    if combustor_input['high_fidelity_kin_mech']:
-        print(output['EI_NO'])                                                          # [-]       Print the value of EI_NO
-        print(output['EI_NO2'])                                                         # [-]       Print the value of EI_NO2
-        print(output['EI_CSOLID'])                                                      # [-]       Print the value of EI_CSOLID
+    print('The Emission Index of CO2 is:', '%0.3f'%output.loc[0, 'EI_CO2'], 'kg_CO2/kg_fuel.') # [-]       Print the value of EI_CO2
+    print('The Emission Index of CO is:', '%0.3f'%output.loc[0, 'EI_CO'], 'kg_CO/kg_fuel.') # [-]       Print the value of EI_CO
+    print('The Emission Index of H2O is:', '%0.3f'%output.loc[0, 'EI_H2O'], 'kg_H2O/kg_fuel.') # [-]       Print the value of EI_H2O
+                                                                                                
+    if combustor_input['high_fidelity_kin_mech']:                                                                           
+        print('The Emission Index of NO is:', '%0.3f'%output.loc[0, 'EI_NO'], 'kg_NO/kg_fuel.') # [-]       Print the value of EI_NO
+        print('The Emission Index of NO2 is:', '%0.3f'%output.loc[0, 'EI_NO2'], 'kg_NO2/kg_fuel.') # [-]       Print the value of EI_NO2
+        print('The Emission Index of soot is:', '%0.3f'%output.loc[0, 'EI_CSOLID'], 'kg_soot/kg_fuel.') # [-]       Print the value of EI_CSOLID
 
     tf                      = time.time()                                           # [s]       Define the final simulation time
     output.elapsed_time     = round((tf-ti),2)                                      # [s]       Compute the total simulation time
