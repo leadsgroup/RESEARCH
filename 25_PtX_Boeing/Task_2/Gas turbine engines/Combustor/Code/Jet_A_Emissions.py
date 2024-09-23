@@ -66,14 +66,14 @@ def main():
     data_n              = [gas.T, T_stag_out, P_stag_out, h_stag_out] + list(gas.X[sp_idx]) + list(gas.Y[sp_idx]) + list(EI[sp_idx]) # [-]       Assign output variables  
     df.loc[0]           = data_n                                                    # [-]       Assign output variables to df 
                                                                                                 
-    print('The Emission Index of CO2 is:', '%0.3f'%df.loc[0, 'EI_CO2'], 'kg_CO2/kg_fuel.') # [-]       Print the value of EI_CO2
-    print('The Emission Index of CO is:', '%0.3f'%df.loc[0, 'EI_CO'], 'kg_CO/kg_fuel.') # [-]       Print the value of EI_CO
-    print('The Emission Index of H2O is:', '%0.3f'%df.loc[0, 'EI_H2O'], 'kg_H2O/kg_fuel.') # [-]       Print the value of EI_H2O
+    print('The Emission Index of CO2 is:', '%0.6f'%df.loc[0, 'EI_CO2'], 'kg_CO2/kg_fuel.') # [-]       Print the value of EI_CO2
+    print('The Emission Index of CO is:', '%0.6f'%df.loc[0, 'EI_CO'], 'kg_CO/kg_fuel.') # [-]       Print the value of EI_CO
+    print('The Emission Index of H2O is:', '%0.6f'%df.loc[0, 'EI_H2O'], 'kg_H2O/kg_fuel.') # [-]       Print the value of EI_H2O
                                                                                                 
     if high_fidelity_kin_mech:                                                                           
-        print('The Emission Index of NO is:', '%0.3f'%df.loc[0, 'EI_NO'], 'kg_NO/kg_fuel.') # [-]       Print the value of EI_NO
-        print('The Emission Index of NO2 is:', '%0.3f'%df.loc[0, 'EI_NO2'], 'kg_NO2/kg_fuel.') # [-]       Print the value of EI_NO2
-        print('The Emission Index of soot is:', '%0.3f'%df.loc[0, 'EI_CSOLID'], 'kg_soot/kg_fuel.') # [-]       Print the value of EI_CSOLID
+        print('The Emission Index of NO is:', '%0.6f'%df.loc[0, 'EI_NO'], 'kg_NO/kg_fuel.') # [-]       Print the value of EI_NO
+        print('The Emission Index of NO2 is:', '%0.6f'%df.loc[0, 'EI_NO2'], 'kg_NO2/kg_fuel.') # [-]       Print the value of EI_NO2
+        print('The Emission Index of soot is:', '%0.6f'%df.loc[0, 'EI_CSOLID'], 'kg_soot/kg_fuel.') # [-]       Print the value of EI_CSOLID
                                                                                                 
     tf                      = time.time()                                           # [s]       Define the final simulation time
     elapsed_time            = round((tf-ti),2)                                      # [s]       Compute the total simulation time
