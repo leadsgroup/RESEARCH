@@ -162,7 +162,7 @@ def vehicle_setup():
 
     ospath                                = os.path.abspath(__file__)
     separator                             = os.path.sep
-    rel_path                              = os.path.dirname(ospath) + separator  + '..' + separator
+    rel_path                              = os.path.dirname(ospath) + separator # + '..' + separator
 
     tip_airfoil                           = RCAIDE.Library.Components.Airfoils.NACA_4_Series_Airfoil()
     tip_airfoil.NACA_4_Series_code        = '6410'      
@@ -562,11 +562,11 @@ def mission_setup(analyses):
     segment     = Segments.Cruise.Curved_Constant_Radius_Constant_Speed_Constant_Altitude(base_segment)
     segment.tag = "cruise" 
     segment.analyses.extend( analyses.base )   
-    segment.altitude                                                            = 12000. * Units.feet
+    segment.altitude                                                            = 8000. * Units.feet
     segment.air_speed                                                           = 120 * Units['mph']
-    segment.radius                                                              = 10 * Units.nautical_mile  
+    segment.turn_radius                                                              = 10 * Units.mile  
     segment.start_true_course                                                   = 0.0 * Units.degrees 
-    segment.turn_angle                                                          = 90.0 * Units.degrees # + indicated right hand turn, negative indicates left-hand turn defaults to straight flight/won't actually turn?
+    segment.turn_angle                                                          = -9000.0 * Units.degrees # + indicated right hand turn, negative indicates left-hand turn defaults to straight flight/won't actually turn?
     
     # define flight dynamics to model 
     segment.flight_dynamics.force_x                                             = True    
