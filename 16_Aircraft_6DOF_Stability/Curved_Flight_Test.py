@@ -88,7 +88,7 @@ def base_analysis(vehicle, configs):
     stability.settings.discretize_control_surfaces  = True
     stability.settings.model_fuselage               = True                
     stability.settings.model_nacelle                = True  
-    stability.vehicle                               = vehicle
+    stability.vehicle                              = vehicle
     analyses.append(stability)
 
     # ------------------------------------------------------------------
@@ -529,6 +529,9 @@ def configs_setup(vehicle):
 #   Plot Mission
 # ----------------------------------------------------------------------
 def plot_mission(results):
+
+    # Plot Aircraft Stability     
+    plot_flight_trajectory(results)
     
      # Plot Aircraft Stability 
     plot_longitudinal_stability(results)  
@@ -559,12 +562,54 @@ def mission_setup(analyses):
     # ------------------------------------------------------------------    
     #   Cruise Segment: Constant Speed Constant Altitude
     # ------------------------------------------------------------------    
-    segment     = Segments.Cruise.Curved_Constant_Radius_Constant_Speed_Constant_Altitude(base_segment)
+    segment     = Segments.Cruise.Constant_Speed_Constant_Altitude(base_segment)
     segment.tag = "cruise" 
     segment.analyses.extend( analyses.base )   
-    segment.altitude                                                            = 12000. * Units.feet
-    segment.air_speed                                                           = 120 * Units['mph']
-    segment.radius                                                              = 10 * Units.nautical_mile  
+    segment.altitude                                                            = 2000 #12000. * Units.feet
+    segment.air_speed                                                           = 100  #120 * Units['mph']
+    segment.distance                                                            = 2000  # * Units.nautical_mile 
+    #segment.sideslip_angle                                                      = 5 * Units.degrees 
+                
+    # define flight dynamics to model 
+    segment.flight_dynamics.force_x                                             = True    
+    segment.flight_dynamics.force_z                                             = True    
+                
+    # define flight controls              
+    segment.assigned_control_variables.throttle.active                          = True           
+    segment.assigned_control_variables.throttle.assigned_propulsors             = [['ice_propeller']]    
+    segment.assigned_control_variables.body_angle.active                        = True   
+    
+    # Longidinal Flight Mechanics
+    segment.flight_dynamics.moment_y                                            = True 
+    segment.assigned_control_variables.elevator_deflection.active               = True    
+    segment.assigned_control_variables.elevator_deflection.assigned_surfaces    = [['elevator']]
+    segment.assigned_control_variables.elevator_deflection.initial_guess_values = [[0]]     
+   
+    # Lateral Flight Mechanics 
+    segment.flight_dynamics.force_y                                             = True     
+    segment.flight_dynamics.moment_x                                            = True
+    segment.flight_dynamics.moment_z                                            = True 
+    segment.assigned_control_variables.aileron_deflection.active                = True    
+    segment.assigned_control_variables.aileron_deflection.assigned_surfaces     = [['aileron']]
+    segment.assigned_control_variables.aileron_deflection.initial_guess_values  = [[0]] 
+    segment.assigned_control_variables.rudder_deflection.active                 = True    
+    segment.assigned_control_variables.rudder_deflection.assigned_surfaces      = [['rudder']]
+    segment.assigned_control_variables.rudder_deflection.initial_guess_values   = [[0]]
+    segment.assigned_control_variables.bank_angle.active                        = True    
+    segment.assigned_control_variables.bank_angle.initial_guess_values          = [[0]]     
+    
+    mission.append_segment(segment)
+ 
+  
+    # ------------------------------------------------------------------    
+    # Turn Segment: 
+    # ------------------------------------------------------------------    
+    segment     = Segments.Cruise.Curved_Constant_Radius_Constant_Speed_Constant_Altitude(base_segment)
+    segment.tag = "turn" 
+    segment.analyses.extend( analyses.base )   
+    segment.altitude                                                            = 2000 # 12000. * Units.feet
+    segment.air_speed                                                           = 100 #120 * Units['mph']
+    segment.turn_radius                                                         = 2000 # * Units.nautical_mile 
     segment.start_true_course                                                   = 0.0 * Units.degrees 
     segment.turn_angle                                                          = 90.0 * Units.degrees # + indicated right hand turn, negative indicates left-hand turn defaults to straight flight/won't actually turn?
     
