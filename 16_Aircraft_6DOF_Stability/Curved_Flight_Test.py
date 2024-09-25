@@ -17,14 +17,15 @@ from RCAIDE.Library.Plots                               import *
 import os 
 import numpy as np
 import pylab as plt
+import  pickle
 # ----------------------------------------------------------------------
 #   Main
 # ----------------------------------------------------------------------
 
 def main(): 
-    # vehicle data
-    vehicle           = vehicle_setup() 
-
+  
+    vehicle  = vehicle_setup()
+   
     # Set up vehicle configs
     configs           = configs_setup(vehicle)
 
@@ -565,8 +566,8 @@ def mission_setup(analyses):
     segment.altitude                                                            = 8000. * Units.feet
     segment.air_speed                                                           = 120 * Units['mph']
     segment.turn_radius                                                              = 10 * Units.mile  
-    segment.start_true_course                                                   = 0.0 * Units.degrees 
-    segment.turn_angle                                                          = -9000.0 * Units.degrees # + indicated right hand turn, negative indicates left-hand turn defaults to straight flight/won't actually turn?
+    segment.start_true_course                                                   = 30.0 * Units.degrees 
+    segment.turn_angle                                                          = -120.0 * Units.degrees # + indicated right hand turn, negative indicates left-hand turn defaults to straight flight/won't actually turn?
     
     # define flight dynamics to model 
     segment.flight_dynamics.force_x                                             = True    
@@ -607,7 +608,7 @@ def missions_setup(mission):
     mission.tag  = 'base_mission'
     missions.append(mission)
  
-    return missions  
+    return missions
 
 if __name__ == '__main__': 
     main()    
