@@ -567,7 +567,8 @@ def mission_setup(analyses):
     segment.analyses.extend( analyses.base )   
     segment.altitude                                                            = 2000 #12000. * Units.feet
     segment.air_speed                                                           = 100  #120 * Units['mph']
-    segment.distance                                                            = 2000  # * Units.nautical_mile 
+    segment.distance                                                            = 2000  # * Units.nautical_mile
+    segment.true_course                                                          =  45 * Units.degree
     #segment.sideslip_angle                                                      = 5 * Units.degrees 
                 
     # define flight dynamics to model 
