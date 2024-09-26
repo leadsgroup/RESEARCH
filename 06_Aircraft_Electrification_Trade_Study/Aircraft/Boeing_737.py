@@ -24,6 +24,15 @@ def main():
     
     # Step 1 design a vehicle
     vehicle  = vehicle_setup()    
+
+    ## plot vehicle 
+    #plot_3d_vehicle(vehicle,
+                    #min_x_axis_limit            = -5,
+                    #max_x_axis_limit            = 40,
+                    #min_y_axis_limit            = -20,
+                    #max_y_axis_limit            = 20,
+                    #min_z_axis_limit            = -20,
+                    #max_z_axis_limit            = 20)   
     
     # Step 2 create aircraft configuration based on vehicle 
     configs  = configs_setup(vehicle)
@@ -40,16 +49,7 @@ def main():
     
     # Step 6 plot results 
     plot_mission(results)
-    
-
-    # plot vehicle 
-    plot_3d_vehicle(vehicle,
-                    min_x_axis_limit            = -5,
-                    max_x_axis_limit            = 40,
-                    min_y_axis_limit            = -20,
-                    max_y_axis_limit            = 20,
-                    min_z_axis_limit            = -20,
-                    max_z_axis_limit            = 20)          
+           
     
     return
 
@@ -649,7 +649,7 @@ def vehicle_setup():
     fuel_tank.origin                            = wing.origin 
     
     # append fuel 
-    fuel                                        = RCAIDE.Library.Attributes.Propellants.Jet_A1()   
+    fuel                                        = RCAIDE.Library.Attributes.Propellants.Ethane()   
     fuel.mass_properties.mass                   = vehicle.mass_properties.max_takeoff-vehicle.mass_properties.max_fuel
     fuel.origin                                 = vehicle.wings.main_wing.mass_properties.center_of_gravity      
     fuel.mass_properties.center_of_gravity      = vehicle.wings.main_wing.aerodynamic_center

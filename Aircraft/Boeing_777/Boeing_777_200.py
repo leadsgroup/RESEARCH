@@ -23,7 +23,16 @@ import os
 def main():
     
     # Step 1 design a vehicle
-    vehicle  = vehicle_setup()    
+    vehicle  = vehicle_setup()
+    
+    # plot vehicle 
+    plot_3d_vehicle(vehicle,
+                    min_x_axis_limit            = -1,
+                    max_x_axis_limit            = 100,
+                    min_y_axis_limit            = -50,
+                    max_y_axis_limit            = 50,
+                    min_z_axis_limit            = -50,
+                    max_z_axis_limit            = 50)      
     
     # Step 2 create aircraft configuration based on vehicle 
     configs  = configs_setup(vehicle)
@@ -41,15 +50,7 @@ def main():
     # Step 6 plot results 
     plot_mission(results)
     
-
-    # plot vehicle 
-    plot_3d_vehicle(vehicle,
-                    min_x_axis_limit            = -1,
-                    max_x_axis_limit            = 100,
-                    min_y_axis_limit            = -50,
-                    max_y_axis_limit            = 50,
-                    min_z_axis_limit            = -50,
-                    max_z_axis_limit            = 50)          
+     
     
     return
 
@@ -587,37 +588,34 @@ def vehicle_setup():
     # add to vehicle
     vehicle.append_component(fuselage)
     
-    
+     
 
     # ################################################# Energy Network #######################################################         
     # Step 1: Define network
     # Step 2: Define Distribution Type
     # Step 3: Define Propulsors 
     # Step 4: Define Enegy Source 
-    
 
     #------------------------------------------------------------------------------------------------------------------------- 
     #  Turbofan Network
     #-------------------------------------------------------------------------------------------------------------------------   
-    net                                         = RCAIDE.Framework.Networks.Turbofan_Engine_Network()     
+    net                                         = RCAIDE.Framework.Networks.Fuel() 
     
-
     #------------------------------------------------------------------------------------------------------------------------- 
     # Fuel Distrubition Line 
     #------------------------------------------------------------------------------------------------------------------------- 
-    fuel_line                                   = RCAIDE.Library.Components.Energy.Distribution.Fuel_Line()
-    
-
+    fuel_line                                   = RCAIDE.Library.Components.Energy.Distributors.Fuel_Line()  
+     
     #------------------------------------------------------------------------------------------------------------------------- 
     #  Energy Source: Fuel Tank
     #------------------------------------------------------------------------------------------------------------------------- 
     # fuel tank
-    fuel_tank                                   = RCAIDE.Library.Components.Energy.Fuel_Tanks.Fuel_Tank()
-    fuel_tank.origin                            = wing.origin
+    fuel_tank                                   = RCAIDE.Library.Components.Energy.Sources.Fuel_Tanks.Fuel_Tank()
     fuel_tank.tag                               = 'b777_fuel_tank'
+    fuel_tank.origin                            = wing.origin 
     
     # append fuel 
-    fuel                                        = RCAIDE.Library.Attributes.Propellants.Aviation_Gasoline()   
+    fuel                                        = RCAIDE.Library.Attributes.Propellants.Jet_A1()   
     fuel.mass_properties.mass                   = vehicle.mass_properties.max_takeoff-vehicle.mass_properties.max_fuel
     fuel.origin                                 = vehicle.wings.main_wing.mass_properties.center_of_gravity      
     fuel.mass_properties.center_of_gravity      = vehicle.wings.main_wing.aerodynamic_center
@@ -625,7 +623,7 @@ def vehicle_setup():
     fuel_tank.fuel                              = fuel            
     
     # apend fuel tank to dataclass of fuel tanks on fuel line 
-    fuel_line.fuel_tanks.append(fuel_tank) 
+    fuel_line.fuel_tanks.append(fuel_tank)     
 
 
     

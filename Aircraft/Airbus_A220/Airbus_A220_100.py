@@ -30,6 +30,16 @@ def main():
     # Step 1 design a vehicle
     vehicle  = vehicle_setup()    
     
+
+    # plot vehicle 
+    plot_3d_vehicle(vehicle,
+                    min_x_axis_limit            = -5,
+                    max_x_axis_limit            = 40,
+                    min_y_axis_limit            = -20,
+                    max_y_axis_limit            = 20,
+                    min_z_axis_limit            = -20,
+                    max_z_axis_limit            = 20)    
+    
     # Step 2 create aircraft configuration based on vehicle 
     configs  = configs_setup(vehicle)
     
@@ -44,17 +54,7 @@ def main():
     results = missions.base_mission.evaluate()  
     
     # Step 6 plot results 
-    plot_mission(results)
-    
-
-    # plot vehicle 
-    plot_3d_vehicle(vehicle,
-                    min_x_axis_limit            = -5,
-                    max_x_axis_limit            = 40,
-                    min_y_axis_limit            = -20,
-                    max_y_axis_limit            = 20,
-                    min_z_axis_limit            = -20,
-                    max_z_axis_limit            = 20)          
+    plot_mission(results)      
     
     return
 

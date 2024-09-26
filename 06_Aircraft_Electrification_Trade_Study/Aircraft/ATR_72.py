@@ -6,7 +6,7 @@ import RCAIDE
 from RCAIDE.Framework.Core import Units  
 from RCAIDE.Library.Methods.Propulsors.Converters.Rotor     import design_propeller
 from RCAIDE.Library.Methods.Performance.estimate_stall_speed       import estimate_stall_speed 
-from RCAIDE.Library.Methods.Geometry.Two_Dimensional.Planform      import segment_properties   
+from RCAIDE.Library.Methods.Geometry.Planform                     import segment_properties
 from RCAIDE.Library.Plots  import *      
 
 # python imports     
@@ -25,7 +25,16 @@ import os
 def main(): 
 
     vehicle    = vehicle_setup()   
-          
+
+    # plot vehicle 
+    plot_3d_vehicle(vehicle,
+                    min_x_axis_limit            = -5,
+                    max_x_axis_limit            = 40,
+                    min_y_axis_limit            = -20,
+                    max_y_axis_limit            = 20,
+                    min_z_axis_limit            = -20,
+                    max_z_axis_limit            = 20)          
+              
     
     configs    = configs_setup(vehicle)
      
@@ -442,32 +451,40 @@ def vehicle_setup():
     vehicle.landing_gear                        = landing_gear
 
     # ########################################################  Energy Network  #########################################################  
-    net                                         = RCAIDE.Framework.Networks.Internal_Combustion_Engine_Network()   
+    net                                         = RCAIDE.Framework.Networks.Fuel()   
 
     # add the network to the vehicle
     vehicle.append_energy_network(net) 
 
-    #------------------------------------------------------------------------------------------------------------------------------------  
-    # Bus
-    #------------------------------------------------------------------------------------------------------------------------------------  
-    fuel_line                                            = RCAIDE.Library.Components.Energy.Distribution.Fuel_Line()   
 
-    #------------------------------------------------------------------------------------------------------------------------------------  
-    #  Fuel Tank & Fuel
-    #------------------------------------------------------------------------------------------------------------------------------------       
-    fuel_tank                                            = RCAIDE.Library.Components.Energy.Fuel_Tanks.Fuel_Tank()
-    fuel_tank.origin                                     = wing.origin  
-    fuel                                                 = RCAIDE.Library.Attributes.Propellants.Aviation_Gasoline() 
-    fuel.mass_properties.mass                            = 5000
-    fuel.mass_properties.center_of_gravity               = wing.mass_properties.center_of_gravity
-    fuel.internal_volume                                 = fuel.mass_properties.mass/fuel.density  
-    fuel_tank.fuel                                       = fuel     
-    fuel_line.fuel_tanks.append(fuel_tank)  
-
+    #------------------------------------------------------------------------------------------------------------------------- 
+    # Fuel Distrubition Line 
+    #------------------------------------------------------------------------------------------------------------------------- 
+    fuel_line                                   = RCAIDE.Library.Components.Energy.Distributors.Fuel_Line()  
+     
+    #------------------------------------------------------------------------------------------------------------------------- 
+    #  Energy Source: Fuel Tank
+    #------------------------------------------------------------------------------------------------------------------------- 
+    # fuel tank
+    fuel_tank                                   = RCAIDE.Library.Components.Energy.Sources.Fuel_Tanks.Fuel_Tank()
+    fuel_tank.tag                               = 'b777_fuel_tank'
+    fuel_tank.origin                            = wing.origin 
+    
+    # append fuel 
+    fuel                                        = RCAIDE.Library.Attributes.Propellants.Jet_A1()   
+    fuel.mass_properties.mass                   = vehicle.mass_properties.max_takeoff-vehicle.mass_properties.max_fuel
+    fuel.origin                                 = vehicle.wings.main_wing.mass_properties.center_of_gravity      
+    fuel.mass_properties.center_of_gravity      = vehicle.wings.main_wing.aerodynamic_center
+    fuel.internal_volume                        = fuel.mass_properties.mass/fuel.density  
+    fuel_tank.fuel                              = fuel            
+    
+    # apend fuel tank to dataclass of fuel tanks on fuel line 
+    fuel_line.fuel_tanks.append(fuel_tank) 
+     
     #------------------------------------------------------------------------------------------------------------------------------------  
     # Propulsor
     #------------------------------------------------------------------------------------------------------------------------------------   
-    starboard_propulsor                                  = RCAIDE.Library.Components.Propulsors.Turboprop()
+    starboard_propulsor                                  = RCAIDE.Library.Components.Propulsors.ICE_Propeller()
     starboard_propulsor.tag                              = 'starboard_propulsor' 
     starboard_propulsor.active_fuel_tanks                = ['fuel_tank']   
                                                      
@@ -497,7 +514,7 @@ def vehicle_setup():
     propeller.variable_pitch                             = True  
     ospath                                               = os.path.abspath(__file__)
     separator                                            = os.path.sep
-    rel_path                                             = os.path.dirname(ospath) + separator + '..' + separator  
+    rel_path                                             = os.path.dirname(ospath) + separator + '..' + separator  + '..' + separator
     airfoil                                              = RCAIDE.Library.Components.Airfoils.Airfoil()
     airfoil.tag                                          = 'NACA_4412' 
     airfoil.coordinate_file                              =  rel_path + 'Airfoils' + separator + 'NACA_4412.txt'   # absolute path   
