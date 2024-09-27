@@ -62,8 +62,8 @@ def vehicle_setup():
     vehicle.mass_properties.cargo                     =    99770 # kg
 
     # envelope properties
-    vehicle.envelope.ultimate_load = 3.5
-    vehicle.envelope.limit_load    = 1.5
+    vehicle.flight_envelope.ultimate_load = 3.5
+    vehicle.flight_envelope.limit_load    = 1.5
 
     # basic parameters
     vehicle.reference_area         = 565.33
