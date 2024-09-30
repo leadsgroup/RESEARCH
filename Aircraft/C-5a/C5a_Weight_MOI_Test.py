@@ -33,7 +33,7 @@ def main():
     #   CG Location
     # ------------------------------------------------------------------    
     compute_vehicle_center_of_gravity(vehicle) 
-    CG_location = vehicle.mass_properties.center_of_gravity
+    CG_location = np.array([[29.5, 0, 0.547]]) #vehicle.mass_properties.center_of_gravity
     print("C-5a CG location: "+str(CG_location))
     
     # ------------------------------------------------------------------
@@ -42,8 +42,10 @@ def main():
     MOI = calculate_aircraft_MOI(vehicle, CG_location)
 
     print(MOI)
-
-    
+    sft2 = 1.355817
+    C5a_true = np.array([[27800000 , 0, 2460000], [0, 31800000, 0], [2460000, 0, 56200000]]) * sft2
+    error = (MOI - C5a_true) / C5a_true * 100
+    print(error)
     
 if __name__ == '__main__': 
     main()
