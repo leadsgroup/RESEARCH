@@ -8,6 +8,11 @@ def main():
     #  Input values for ideal turboprop
     # ----------------------------------------------------------------------------------------------------------------------
     
+    # 1) Real engine
+    # 2) Eng library James Aircraft for Validation
+    # 3) Integration into RCAIDE
+    # 4) Get ATR 72 / Otter Engine data
+    
     M0         = 0.8                       # [-]
     T0         = 240                       # [K]
     gamma      = 1.4                       # [-]
