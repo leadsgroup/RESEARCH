@@ -29,6 +29,7 @@ import os
 # ----------------------------------------------------------------------
 
 def main():
+    # Ethane
     fuels = [Ethane(), Methane(), Propane(), Ethanol(), Butanol(), Propanol()]
     fuel_names = ["Ethane", "Methane", "Propane", "Ethanol", "Butanol", "Propanol"]
     
@@ -605,7 +606,7 @@ def vehicle_setup(propellant):
     combustor.alphac                               = 1.0     
     combustor.turbine_inlet_temperature            = 1500
     combustor.pressure_ratio                       = 0.95
-    combustor.fuel_data                            = RCAIDE.Library.Attributes.Propellants.Jet_A1()  
+    combustor.fuel_data                            = propellant  
     turbofan.combustor                             = combustor
 
     # core nozzle
