@@ -15,7 +15,7 @@ from RCAIDE.Library.Methods.Stability.Center_of_Gravity            import comput
 from RCAIDE.Library.Methods.Geometry.Planform                      import segment_properties
 from RCAIDE.Library.Plots                                          import *
 from RCAIDE.Library.Methods.Performance.payload_range_diagram      import  payload_range_diagram
-from RCAIDE.Library.Attributes.Propellants.Butanol                 import Butanol
+from RCAIDE.Library.Attributes.Propellants                         import *
 
  
 # Python imports 
@@ -29,39 +29,31 @@ import os
 # ----------------------------------------------------------------------
 
 def main():
+    fuels = [Ethane(), Methane(), Propane(), Ethanol(), Butanol(), Propane()]
+    fuel_names = ["Ethane", "Methane", "Propane", "Ethanol", "Butanol", "Propane"]
     
-    # Step 1 design a vehicle
-    vehicle  = vehicle_setup()
-
-    # plot vehicle 
-    # plot_3d_vehicle(vehicle,
-    #                 min_x_axis_limit            = -5,
-    #                 max_x_axis_limit            = 40,
-    #                 min_y_axis_limit            = -20,
-    #                 max_y_axis_limit            = 20,
-    #                 min_z_axis_limit            = -20,
-    #                 max_z_axis_limit            = 20)          
-    
+    for index, fuel in enumerate(fuels):
+        # Step 1 design a vehicle
+        vehicle  = vehicle_setup(fuel)    
         
-    
-    # Step 2 create aircraft configuration based on vehicle 
-    configs  = configs_setup(vehicle)
-    
-    # Step 3 set up analysis
-    analyses = analyses_setup(configs)
-    
-    # Step 4 set up a flight mission
-    mission = mission_setup(analyses)
-    missions = missions_setup(mission) 
-    
-    # Step 5 execute flight profile
-    results = missions.base_mission.evaluate()
-     
-    initial_mass =  results.segments.takeoff.conditions.weights.total_mass[0,-1]
-    final_mass   =  results.segments.landing.conditions.weights.total_mass[0,-1] 
-    
-    fuel_burn     = initial_mass -  final_mass
-    print('Fuel Burn Mass' ,fuel_burn )
+        # Step 2 create aircraft configuration based on vehicle 
+        configs  = configs_setup(vehicle)
+        
+        # Step 3 set up analysis
+        analyses = analyses_setup(configs)
+        
+        # Step 4 set up a flight mission
+        mission = mission_setup(analyses)
+        missions = missions_setup(mission) 
+        
+        # Step 5 execute flight profile
+        results = missions.base_mission.evaluate()
+        
+        initial_mass =  results.segments.takeoff.conditions.weights.total_mass[0,-1]
+        final_mass   =  results.segments.landing.conditions.weights.total_mass[0,-1] 
+        
+        fuel_burn     = initial_mass -  final_mass
+        print(fuel_names[index], 'Burn Mass' ,fuel_burn)
     
     #payload_range_diagram(vehicle,mission,'cruise',reserves=0., plot_diagram = True)
     
@@ -77,7 +69,7 @@ def main():
 # ----------------------------------------------------------------------
 #   Define V
 # ----------------------------------------------------------------------
-def vehicle_setup(): 
+def vehicle_setup(propellant): 
 
     # ------------------------------------------------------------------
     #   Initialize the Vehicle
@@ -667,7 +659,7 @@ def vehicle_setup():
     fuel_tank.origin                            = wing.origin 
     
     # append fuel 
-    fuel                                        = RCAIDE.Library.Attributes.Propellants.Butanol()   
+    fuel                                        = propellant   
     fuel.mass_properties.mass                   = vehicle.mass_properties.max_takeoff-vehicle.mass_properties.max_fuel
     fuel.origin                                 = vehicle.wings.main_wing.mass_properties.center_of_gravity      
     fuel.mass_properties.center_of_gravity      = vehicle.wings.main_wing.aerodynamic_center
@@ -1119,22 +1111,22 @@ def plot_mission(results):
     png files."""
 
     # Plot Flight Conditions 
-    plot_flight_conditions(results)
+    # plot_flight_conditions(results)
     
-    # Plot Aerodynamic Forces 
-    plot_aerodynamic_forces(results)
+    # # Plot Aerodynamic Forces 
+    # plot_aerodynamic_forces(results)
     
-    # Plot Aerodynamic Coefficients 
-    plot_aerodynamic_coefficients(results)     
+    # # Plot Aerodynamic Coefficients 
+    # plot_aerodynamic_coefficients(results)     
     
-    # Drag Components
-    plot_drag_components(results)
+    # # Drag Components
+    # plot_drag_components(results)
     
-    # Plot Altitude, sfc, vehicle weight 
-    plot_altitude_sfc_weight(results)
+    # # Plot Altitude, sfc, vehicle weight 
+    # plot_altitude_sfc_weight(results)
     
-    # Plot Velocities 
-    plot_aircraft_velocities(results)  
+    # # Plot Velocities 
+    # plot_aircraft_velocities(results)  
         
     return
  
