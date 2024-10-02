@@ -34,13 +34,13 @@ def main():
     vehicle  = vehicle_setup()
 
     # plot vehicle 
-    plot_3d_vehicle(vehicle,
-                    min_x_axis_limit            = -5,
-                    max_x_axis_limit            = 40,
-                    min_y_axis_limit            = -20,
-                    max_y_axis_limit            = 20,
-                    min_z_axis_limit            = -20,
-                    max_z_axis_limit            = 20)          
+    # plot_3d_vehicle(vehicle,
+    #                 min_x_axis_limit            = -5,
+    #                 max_x_axis_limit            = 40,
+    #                 min_y_axis_limit            = -20,
+    #                 max_y_axis_limit            = 20,
+    #                 min_z_axis_limit            = -20,
+    #                 max_z_axis_limit            = 20)          
     
         
     
@@ -145,7 +145,7 @@ def vehicle_setup():
     root_airfoil                          = RCAIDE.Library.Components.Airfoils.Airfoil()
     ospath                                = os.path.abspath(__file__)
     separator                             = os.path.sep
-    rel_path                              = os.path.dirname(ospath) + separator  + '..'  + separator + '..' + separator
+    rel_path                              = os.path.dirname(ospath) + separator  + '..'  + separator + '..' + separator + '..' + separator
     root_airfoil.coordinate_file          = rel_path  + 'Airfoils' + separator + 'B737a.txt'
     
     segment                               = RCAIDE.Library.Components.Wings.Segment()
@@ -667,7 +667,7 @@ def vehicle_setup():
     fuel_tank.origin                            = wing.origin 
     
     # append fuel 
-    fuel                                        = RCAIDE.Library.Attributes.Propellants.Butanol.Butanol()   
+    fuel                                        = RCAIDE.Library.Attributes.Propellants.Butanol()   
     fuel.mass_properties.mass                   = vehicle.mass_properties.max_takeoff-vehicle.mass_properties.max_fuel
     fuel.origin                                 = vehicle.wings.main_wing.mass_properties.center_of_gravity      
     fuel.mass_properties.center_of_gravity      = vehicle.wings.main_wing.aerodynamic_center
