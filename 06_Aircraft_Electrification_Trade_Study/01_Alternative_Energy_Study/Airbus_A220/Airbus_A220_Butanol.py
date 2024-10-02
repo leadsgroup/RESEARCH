@@ -29,8 +29,11 @@ import os
 # ----------------------------------------------------------------------
 
 def main():
-    fuels = [Ethane(), Methane(), Propane(), Ethanol(), Butanol(), Propane()]
-    fuel_names = ["Ethane", "Methane", "Propane", "Ethanol", "Butanol", "Propane"]
+    fuels = [Ethane(), Methane(), Propane(), Ethanol(), Butanol(), Propanol()]
+    fuel_names = ["Ethane", "Methane", "Propane", "Ethanol", "Butanol", "Propanol"]
+    
+    print(fuel_names[:3])
+    print(fuel_names[3:])
     
     for index, fuel in enumerate(fuels):
         # Step 1 design a vehicle
