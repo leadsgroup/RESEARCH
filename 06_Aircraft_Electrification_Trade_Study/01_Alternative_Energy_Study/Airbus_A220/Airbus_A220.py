@@ -33,10 +33,8 @@ def main():
     fuels = [Ethane(), Methane(), Propane(), Ethanol(), Butanol(), Propanol()]
     fuel_names = ["Ethane", "Methane", "Propane", "Ethanol", "Butanol", "Propanol"]
     
-    print(fuel_names[:3])
-    print(fuel_names[3:])
-    
     for index, fuel in enumerate(fuels):
+        print("Running simulation for", fuel_names[index])
         # Step 1 design a vehicle
         vehicle  = vehicle_setup(fuel)    
         
@@ -1113,24 +1111,6 @@ def missions_setup(mission):
 def plot_mission(results):
     """This function plots the results of the mission analysis and saves those results to 
     png files."""
-
-    # Plot Flight Conditions 
-    # plot_flight_conditions(results)
-    
-    # # Plot Aerodynamic Forces 
-    # plot_aerodynamic_forces(results)
-    
-    # # Plot Aerodynamic Coefficients 
-    # plot_aerodynamic_coefficients(results)     
-    
-    # # Drag Components
-    # plot_drag_components(results)
-    
-    # # Plot Altitude, sfc, vehicle weight 
-    # plot_altitude_sfc_weight(results)
-    
-    # # Plot Velocities 
-    # plot_aircraft_velocities(results)  
         
     return
  
