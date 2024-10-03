@@ -526,11 +526,11 @@ def vehicle_setup():
     #------------------------------------------------------------------------------------------------------------------------------------  
     #  Fuel Tank & Fuel
     #------------------------------------------------------------------------------------------------------------------------------------   
-    fuel_tank                                   = RCAIDE.Library.Components.Energy.Sources.Fuel_Tanks.Fuel_Tank()
+    fuel_tank                                   = RCAIDE.Library.Components.Energy.Sources.Fuel_Tanks.Wing_Fuel_Tank()
     fuel_tank.origin                            = wing.origin 
     
     # fuel 
-    fuel                                        = RCAIDE.Library.Attributes.Propellants.Aviation_Gasoline()   
+    fuel                                        = RCAIDE.Library.Attributes.Propellants.Jet_A1()   
     fuel.mass_properties.mass                   = vehicle.mass_properties.max_takeoff-vehicle.mass_properties.max_fuel
     fuel.origin                                 = vehicle.wings.main_wing.mass_properties.center_of_gravity      
     fuel.mass_properties.center_of_gravity      = vehicle.wings.main_wing.aerodynamic_center
@@ -544,7 +544,7 @@ def vehicle_setup():
     #------------------------------------------------------------------------------------------------------------------------------------    
     turbofan                                        = RCAIDE.Library.Components.Propulsors.Turbofan() 
     turbofan.tag                                    = 'outer_starboard_propulsor'
-    turbofan.active_fuel_tanks                      = ['fuel_tank']
+    turbofan.active_fuel_tanks                      = ['wing_fuel_tank']
     turbofan.origin                                 = [[26.429, 17.6, 0.2]] 
     turbofan.engine_length                          = 7.92    
     turbofan.bypass_ratio                           = 8  
@@ -654,7 +654,7 @@ def vehicle_setup():
     # copy turbofan
     turbofan_2                             = deepcopy(turbofan)
     turbofan_2.tag                         = 'inner_starboard_propulsor' 
-    turbofan_2.active_fuel_tanks           = ['fuel_tank'] 
+    turbofan_2.active_fuel_tanks           = ['wing_fuel_tank'] 
     turbofan_2.origin                      = [[23.214,11.2,0.2]]   # change origin  
     turbofan_2.nacelle.origin              = [[23.214,11.2,0.2]]    
     
@@ -668,7 +668,7 @@ def vehicle_setup():
     # copy turbofan
     turbofan_3                             = deepcopy(turbofan)
     turbofan_3.tag                         = 'inner_port_propulsor' 
-    turbofan_3.active_fuel_tanks           = ['fuel_tank'] 
+    turbofan_3.active_fuel_tanks           = ['wing_fuel_tank'] 
     turbofan_3.origin                      = [[23.214, -11.2,0.2]]   # change origin  
     turbofan_3.nacelle.origin              = [[23.214, -11.2,0.2]]    
     
@@ -682,7 +682,7 @@ def vehicle_setup():
     # copy turbofan
     turbofan_4                             = deepcopy(turbofan)
     turbofan_4.tag                         = 'outer_port_propulsor' 
-    turbofan_4.active_fuel_tanks           = ['fuel_tank'] 
+    turbofan_4.active_fuel_tanks           = ['wing_fuel_tank'] 
     turbofan_4.origin                      = [[26.429, -17.6,0.2]]   # change origin  
     turbofan_4.nacelle.origin              = [[26.429, -17.6,0.2]]    
     
