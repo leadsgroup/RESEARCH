@@ -29,9 +29,10 @@ import os
 # ----------------------------------------------------------------------
 
 def main():
-    # Ethane
-    fuels = [Ethane(), Methane(), Propane(), Ethanol(), Butanol(), Propanol()]
-    fuel_names = ["Ethane", "Methane", "Propane", "Ethanol", "Butanol", "Propanol"]
+    # Fuel types within study (10/1/2024)
+    fuels = [Jet_A1(), Ethane(), Methane(), Propane(), Ethanol(), Butanol(), Propanol()]
+    fuel_names = ["Jet A-1", "Ethane", "Methane", "Propane", "Ethanol", "Butanol", "Propanol"]
+
     
     for index, fuel in enumerate(fuels):
         print("Running simulation for", fuel_names[index])
