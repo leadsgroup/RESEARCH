@@ -7,7 +7,6 @@ from RCAIDE.Framework.Core import Units
 from RCAIDE.Library.Methods.Propulsors.Turbofan_Propulsor   import design_turbofan
 from RCAIDE.Library.Methods.Geometry.Planform               import wing_planform, segment_properties
 from RCAIDE.Library.Plots                 import *     
-import Lockheed_C5a
 from RCAIDE.Library.Methods.Weights.Correlation_Buildups import Common           as Common
 from RCAIDE.Library.Methods.Stability.Moment_of_Inertia.calculate_aircraft_MOI import calculate_aircraft_MOI
 from RCAIDE.Library.Methods.Stability.Center_of_Gravity     import compute_vehicle_center_of_gravity
@@ -18,9 +17,10 @@ import numpy as np
 from copy import deepcopy
 import matplotlib.pyplot as plt  
 import os
+import sys
 from RCAIDE.Library.Methods.Stability.Moment_of_Inertia import compute_cuboid_moment_of_inertia
-sys.path.append('../../Vehicles')
-from Lockheed_C5a   import vehicle_setup, configs_setup 
+sys.path.append('../Aircraft/C-5a')
+import Lockheed_C5a
 
 def main():
     vehicle = Lockheed_C5a.vehicle_setup()
