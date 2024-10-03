@@ -29,15 +29,53 @@ import os
 # ----------------------------------------------------------------------
 
 def main():
-    # Fuel types within study (10/1/2024)
-    fuels = [Jet_A1(), Ethane(), Methane(), Propane(), Ethanol(), Butanol(), Propanol()]
-    fuel_names = ["Jet A-1", "Ethane", "Methane", "Propane", "Ethanol", "Butanol", "Propanol"]
-
+    methane_propane = Alkane_Mixture()
+    methane_propane.propellant_1 = Methane()
+    methane_propane.propellant_2 = Propane()
+    methane_propane.propellant_1_mass_fraction = 0.75
+    methane_propane.propellant_2_mass_fraction = 0.25
+    
+    ethane_propane = Alkane_Mixture()
+    ethane_propane.propellant_1 = Ethane()
+    ethane_propane.propellant_2 = Propane()
+    ethane_propane.propellant_1_mass_fraction = 0.75
+    ethane_propane.propellant_2_mass_fraction = 0.25
+    
+    methane_ethane = Alkane_Mixture()
+    methane_ethane.propellant_1 = Methane()
+    methane_ethane.propellant_2 = Ethane()
+    methane_ethane.propellant_1_mass_fraction = 0.75
+    methane_ethane.propellant_2_mass_fraction = 0.25
+    
+    propanol_ethanol = Alcohol_Mixture()
+    propanol_ethanol.propellant_1 = Propanol()
+    propanol_ethanol.propellant_2 = Ethanol()
+    propanol_ethanol.propellant_1_mass_fraction = 0.75
+    propanol_ethanol.propellant_2_mass_fraction = 0.25
+    
+    butanol_ethanol = Alcohol_Mixture()
+    butanol_ethanol.propellant_1 = Butanol()
+    butanol_ethanol.propellant_2 = Ethanol()
+    butanol_ethanol.propellant_1_mass_fraction = 0.75
+    butanol_ethanol.propellant_2_mass_fraction = 0.25
+    
+    butanol_propanol = Alcohol_Mixture()
+    butanol_propanol.propellant_1 = Butanol()
+    butanol_propanol.propellant_2 = Propanol()
+    butanol_propanol.propellant_1_mass_fraction = 0.75
+    butanol_propanol.propellant_2_mass_fraction = 0.25
+        
+    fuels = [# Ethane(), Methane(), Propane(), Ethanol(), Butanol(), Propanol(), \
+        methane_propane, ethane_propane, methane_ethane, propanol_ethanol, butanol_ethanol, butanol_propanol]
+    fuel_names = [# "Ethane", "Methane", "Propane", "Ethanol", "Butanol", "Propanol", \
+        "Methane-Propane 75-25", "Ethane-Propane 75-25", "Methane-Ethane 75-25", \
+        "Propanol-Ethanol 75-25", "Butanol-Ethanol 75-25", "Butanol-Propanol 75-25"]
     
     for index, fuel in enumerate(fuels):
+        fuel.compute_all()
         print("Running simulation for", fuel_names[index])
         # Step 1 design a vehicle
-        vehicle  = vehicle_setup(fuel)    
+        vehicle  = vehicle_setup(fuel)
         
         # Step 2 create aircraft configuration based on vehicle 
         configs  = configs_setup(vehicle)
