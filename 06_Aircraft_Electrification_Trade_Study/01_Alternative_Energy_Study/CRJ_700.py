@@ -178,7 +178,7 @@ def vehicle_setup(propellant):
     root_airfoil                          = RCAIDE.Library.Components.Airfoils.Airfoil()
     ospath                                = os.path.abspath(__file__)
     separator                             = os.path.sep
-    rel_path                              = os.path.dirname(ospath) + separator  + '..'  + separator + '..'  + separator + '..'  + separator 
+    rel_path                              = os.path.dirname(ospath) + separator  + '..'  + separator + '..'  + separator 
     root_airfoil.coordinate_file          = rel_path  + 'Airfoils' + separator + 'B737a.txt'
     segment                               = RCAIDE.Library.Components.Wings.Segment()
     segment.tag                           = 'Root'
