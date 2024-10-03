@@ -13,9 +13,9 @@ from RCAIDE.Framework.Core import Units
 from RCAIDE.Library.Methods.Propulsors.Turbofan_Propulsor          import design_turbofan
 from RCAIDE.Library.Methods.Stability.Center_of_Gravity            import compute_component_centers_of_gravity
 from RCAIDE.Library.Methods.Geometry.Planform                      import segment_properties
-from RCAIDE.Library.Plots                                          import *
-from RCAIDE.Library.Methods.Performance.payload_range_diagram      import  payload_range_diagram
-from RCAIDE.Library.Attributes.Propellants.Butanol                 import Butanol
+from RCAIDE.Library.Plots                                          import *  
+from RCAIDE.Library.Methods.Performance.payload_range_diagram      import payload_range_diagram
+
  
 # Python imports 
 import numpy                                               as np
@@ -33,13 +33,13 @@ def main():
     vehicle  = vehicle_setup()
 
     # plot vehicle 
-    plot_3d_vehicle(vehicle,
-                    min_x_axis_limit            = -5,
-                    max_x_axis_limit            = 40,
-                    min_y_axis_limit            = -20,
-                    max_y_axis_limit            = 20,
-                    min_z_axis_limit            = -20,
-                    max_z_axis_limit            = 20)          
+    #plot_3d_vehicle(vehicle,
+                    #min_x_axis_limit            = -5,
+                    #max_x_axis_limit            = 40,
+                    #min_y_axis_limit            = -20,
+                    #max_y_axis_limit            = 20,
+                    #min_z_axis_limit            = -20,
+                    #max_z_axis_limit            = 20)          
     
         
     
@@ -56,12 +56,11 @@ def main():
     # Step 5 execute flight profile
     results = missions.base_mission.evaluate()
     
-    payload_range_diagram(vehicle,mission,'cruise',reserves=0., plot_diagram = True)
+    # Step 6 get payload-range diagram
+    payload_range_diagram(vehicle, mission, 'cruise', reserves=0., plot_diagram=True)
     
-    # Step 6 plot results 
+    # Step 7 plot results 
     plot_mission(results)
-    
-    
     
 
     return
@@ -82,24 +81,25 @@ def vehicle_setup():
     # ################################################# Vehicle-level Properties ########################################################  
 
     # mass properties
-    vehicle.mass_properties.max_takeoff   = 63100  # kg 
-    vehicle.mass_properties.takeoff       = 63100  # kg 
-    vehicle.mass_properties.max_zero_fuel = 52200  # kg 
-    vehicle.envelope.ultimate_load        = 3.75
-    vehicle.envelope.limit_load           = 1.5
-    vehicle.reference_area                = 112.3* Units['meters**2']
-    vehicle.passengers                    = 135
-    vehicle.systems.control               = "fully powered"
-    vehicle.systems.accessories           = "medium range"   
+    vehicle.mass_properties.max_takeoff      = 63100  # kg 
+    vehicle.mass_properties.takeoff          = 63100  # kg 
+    vehicle.mass_properties.max_zero_fuel    = 52200  # kg
+    vehicle.mass_properties.operating_empty  = 35221   # kg(https://aircraft.airbus.com/sites/g/files/jlcbta126/files/2023-11/A220-ACP-Issue001-00-19Oct2023.pdf)
+    vehicle.envelope.ultimate_load           = 3.75
+    vehicle.envelope.limit_load              = 1.5
+    vehicle.reference_area                   = 112.3* Units['meters**2']
+    vehicle.passengers                       = 135
+    vehicle.systems.control                  = "fully powered"
+    vehicle.systems.accessories              = "medium range"   
     
-    cruise_speed                          = 470 * Units.kts
-    altitude                              = 40000 * Units.feet
-    atmo                                  = RCAIDE.Framework.Analyses.Atmospheric.US_Standard_1976()
-    freestream                            = atmo.compute_values (0.)
-    freestream0                           = atmo.compute_values (altitude)
-    mach_number                           = (cruise_speed/freestream.speed_of_sound)[0][0] 
-    vehicle.design_dynamic_pressure       = ( .5 *freestream0.density*(cruise_speed*cruise_speed))[0][0]
-    vehicle.design_mach_number            =  mach_number
+    cruise_speed                             = 470 * Units.kts
+    altitude                                 = 40000 * Units.feet
+    atmo                                     = RCAIDE.Framework.Analyses.Atmospheric.US_Standard_1976()
+    freestream                               = atmo.compute_values (0.)
+    freestream0                              = atmo.compute_values (altitude)
+    mach_number                              = (cruise_speed/freestream.speed_of_sound)[0][0] 
+    vehicle.design_dynamic_pressure          = ( .5 *freestream0.density*(cruise_speed*cruise_speed))[0][0]
+    vehicle.design_mach_number               =  mach_number
 
 
     #------------------------------------------------------------------------------------------------------------------------------------
@@ -138,7 +138,7 @@ def vehicle_setup():
     root_airfoil                          = RCAIDE.Library.Components.Airfoils.Airfoil()
     ospath                                = os.path.abspath(__file__)
     separator                             = os.path.sep
-    rel_path                              = os.path.dirname(ospath) + separator  + '..'  + separator + '..' + separator
+    rel_path                              = os.path.dirname(ospath) + separator  + '..'  + separator + '..' + separator + '..' + separator
     root_airfoil.coordinate_file          = rel_path  + 'Airfoils' + separator + 'B737a.txt'
     
     segment                               = RCAIDE.Library.Components.Wings.Segment()
@@ -660,7 +660,7 @@ def vehicle_setup():
     fuel_tank.origin                            = wing.origin 
     
     # append fuel 
-    fuel                                        = RCAIDE.Library.Attributes.Propellants.Butanol.Butanol()   
+    fuel                                        = RCAIDE.Library.Attributes.Propellants.Butanol()   
     fuel.mass_properties.mass                   = vehicle.mass_properties.max_takeoff-vehicle.mass_properties.max_fuel
     fuel.origin                                 = vehicle.wings.main_wing.mass_properties.center_of_gravity      
     fuel.mass_properties.center_of_gravity      = vehicle.wings.main_wing.aerodynamic_center
