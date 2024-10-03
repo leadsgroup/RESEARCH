@@ -58,7 +58,7 @@ def vehicle_setup():
     vehicle.mass_properties.takeoff                   =   296750 # kg
     vehicle.mass_properties.max_zero_fuel             =   288000 # kg
     vehicle.mass_properties.max_payload               =   118364 # kg
-    vehicle.mass_properties.max_fuel                  =   150800 # kg
+    vehicle.mass_properties.max_fuel                  =   0.6 * 150800 # kg
     vehicle.mass_properties.cargo                     =    99770 # kg
 
     # envelope properties
@@ -67,33 +67,34 @@ def vehicle_setup():
 
     # basic parameters
     vehicle.reference_area         = 565.33
-    vehicle.passengers             = 83
+    vehicle.passengers             = 0 # 83
     vehicle.systems.control        = "fully powered"
     vehicle.systems.accessories    = "long range"
 
     # ------------------------------------------------------------------
     #   Main Wing
     # ------------------------------------------------------------------
-    wing                         = RCAIDE.Library.Components.Wings.Main_Wing()
-    wing.tag                     = 'main_wing'
-    wing.areas.reference         = 565.33
-    wing.aspect_ratio            = 8.122
-    wing.chords.root             = 14.0
-    wing.chords.tip              = 3.667
-    wing.sweeps.quarter_chord    = 24.0 * Units.deg
-    wing.thickness_to_chord      = 0.131
-    wing.chords.mean_aerodynamic = 8.533 * Units.meter 
-    wing.taper                   = 0.262
-    wing.dihedral                = -3.5 * Units.deg
-    wing.spans.projected         = 66.3
-    wing.origin                  = [[20.0,0,3.913]]
-    wing.vertical                = False
-    wing.symmetric               = True       
-    wing.high_lift               = True
-    wing.areas.exposed           =  1.0* wing.areas.wetted        
-    wing.twists.root             =  0.0* Units.degrees
-    wing.twists.tip              =  0.0* Units.degrees    
-    wing.dynamic_pressure_ratio  = 1.0
+    wing                                   = RCAIDE.Library.Components.Wings.Main_Wing()
+    wing.tag                               = 'main_wing'
+    wing.areas.reference                   = 565.33
+    wing.aspect_ratio                      = 8.122
+    wing.chords.root                       = 14.0
+    wing.chords.tip                        = 3.667
+    wing.sweeps.quarter_chord              = 24.0 * Units.deg
+    wing.thickness_to_chord                = 0.131
+    wing.chords.mean_aerodynamic           = 8.533 * Units.meter 
+    wing.taper                             = 0.262
+    wing.dihedral                          = -3.5 * Units.deg
+    wing.spans.projected                   = 66.3
+    wing.origin                            = [[20.0,0,3.913]]
+    wing.vertical                          = False
+    wing.symmetric                         = True       
+    wing.high_lift                         = True
+    wing.areas.exposed                     =  1.0* wing.areas.wetted        
+    wing.twists.root                       =  0.0* Units.degrees
+    wing.twists.tip                        =  0.0* Units.degrees    
+    wing.dynamic_pressure_ratio            = 1.0
+    wing.mass_properties.center_of_gravity = [[23.0,0,3.913]] 
     
     
     segment = RCAIDE.Library.Components.Wings.Segment()
@@ -527,13 +528,14 @@ def vehicle_setup():
     #  Fuel Tank & Fuel
     #------------------------------------------------------------------------------------------------------------------------------------   
     fuel_tank                                   = RCAIDE.Library.Components.Energy.Sources.Fuel_Tanks.Wing_Fuel_Tank()
-    fuel_tank.origin                            = wing.origin 
+    fuel_tank.origin                            = [[23.0,0,3.913]] # vehicle.wings.main_wing.origin   
+    fuel_tank.mass_properties.center_of_gravity = [[23.0,0,3.913]] #vehicle.wings.main_wing.mass_properties.center_of_gravity    
     
     # fuel 
     fuel                                        = RCAIDE.Library.Attributes.Propellants.Jet_A1()   
-    fuel.mass_properties.mass                   = vehicle.mass_properties.max_takeoff-vehicle.mass_properties.max_fuel
-    fuel.origin                                 = vehicle.wings.main_wing.mass_properties.center_of_gravity      
-    fuel.mass_properties.center_of_gravity      = vehicle.wings.main_wing.aerodynamic_center
+    fuel.mass_properties.mass                   = 1.0 * (vehicle.mass_properties.max_takeoff-vehicle.mass_properties.max_fuel)
+    fuel.origin                                 = [[23.0,0,3.913]]# vehicle.wings.main_wing.origin    
+    fuel.mass_properties.center_of_gravity      = [[23.0,0,3.913]] #vehicle.wings.main_wing.mass_properties.center_of_gravity
     fuel.internal_volume                        = fuel.mass_properties.mass/fuel.density  
     fuel_tank.fuel                              = fuel
     fuel_line.fuel_tanks.append(fuel_tank) 

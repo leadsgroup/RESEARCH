@@ -32,14 +32,17 @@ def main():
     # ------------------------------------------------------------------
     #   CG Location
     # ------------------------------------------------------------------    
-    compute_vehicle_center_of_gravity(vehicle) 
-    CG_location = np.array([[29.5, 0, 0.547]]) #vehicle.mass_properties.center_of_gravity
+    compute_vehicle_center_of_gravity(vehicle)
+    vehicle.mass_properties.center_of_gravity =  np.array([[29.5, 0, 0]]) 
+    CG_location = vehicle.mass_properties.center_of_gravity
+    CG_location_true = np.array([[29.5, 0, 0.547]]) #vehicle.mass_properties.center_of_gravity [[32.4,0,0]]
     print("C-5a CG location: "+str(CG_location))
     
     # ------------------------------------------------------------------
     #   Aircraft MOI
     # ------------------------------------------------------------------    
     MOI = calculate_aircraft_MOI(vehicle, CG_location)
+    #MOI += compute_cuboid_moment_of_inertia()
 
     print(MOI)
     sft2 = 1.355817
