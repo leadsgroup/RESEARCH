@@ -15,6 +15,7 @@ from RCAIDE.Library.Methods.Stability.Center_of_Gravity            import comput
 from RCAIDE.Library.Methods.Geometry.Planform                      import segment_properties
 from RCAIDE.Library.Plots                                          import *  
 from RCAIDE.Library.Methods.Performance.payload_range_diagram      import payload_range_diagram
+from RCAIDE.Library.Attributes.Propellants                         import *
 
  
 # Python imports 
@@ -28,39 +29,87 @@ import os
 # ----------------------------------------------------------------------
 
 def main():
+    methane_propane = Alkane_Mixture()
+    methane_propane.propellant_1 = Methane()
+    methane_propane.propellant_2 = Propane()
+    methane_propane.propellant_1_mass_fraction = 0.75
+    methane_propane.propellant_2_mass_fraction = 0.25
     
-    # Step 1 design a vehicle
-    vehicle  = vehicle_setup()
-
-    # plot vehicle 
-    #plot_3d_vehicle(vehicle,
-                    #min_x_axis_limit            = -5,
-                    #max_x_axis_limit            = 40,
-                    #min_y_axis_limit            = -20,
-                    #max_y_axis_limit            = 20,
-                    #min_z_axis_limit            = -20,
-                    #max_z_axis_limit            = 20)          
+    ethane_propane = Alkane_Mixture()
+    ethane_propane.propellant_1 = Ethane()
+    ethane_propane.propellant_2 = Propane()
+    ethane_propane.propellant_1_mass_fraction = 0.75
+    ethane_propane.propellant_2_mass_fraction = 0.25
     
+    methane_ethane = Alkane_Mixture()
+    methane_ethane.propellant_1 = Methane()
+    methane_ethane.propellant_2 = Ethane()
+    methane_ethane.propellant_1_mass_fraction = 0.75
+    methane_ethane.propellant_2_mass_fraction = 0.25
+    
+    propanol_ethanol = Alcohol_Mixture()
+    propanol_ethanol.propellant_1 = Propanol()
+    propanol_ethanol.propellant_2 = Ethanol()
+    propanol_ethanol.propellant_1_mass_fraction = 0.75
+    propanol_ethanol.propellant_2_mass_fraction = 0.25
+    
+    butanol_ethanol = Alcohol_Mixture()
+    butanol_ethanol.propellant_1 = Butanol()
+    butanol_ethanol.propellant_2 = Ethanol()
+    butanol_ethanol.propellant_1_mass_fraction = 0.75
+    butanol_ethanol.propellant_2_mass_fraction = 0.25
+    
+    butanol_propanol = Alcohol_Mixture()
+    butanol_propanol.propellant_1 = Butanol()
+    butanol_propanol.propellant_2 = Propanol()
+    butanol_propanol.propellant_1_mass_fraction = 0.75
+    butanol_propanol.propellant_2_mass_fraction = 0.25
         
+    fuels = [Ethane(), Methane(), Propane(), Ethanol(), Butanol(), Propanol(), \
+        methane_propane, ethane_propane, methane_ethane, propanol_ethanol, butanol_ethanol, butanol_propanol]
+    fuel_names = ["Ethane", "Methane", "Propane", "Ethanol", "Butanol", "Propanol", \
+        "Methane-Propane 75-25", "Ethane-Propane 75-25", "Methane-Ethane 75-25", \
+        "Propanol-Ethanol 75-25", "Butanol-Ethanol 75-25", "Butanol-Propanol 75-25"]
     
-    # Step 2 create aircraft configuration based on vehicle 
-    configs  = configs_setup(vehicle)
     
-    # Step 3 set up analysis
-    analyses = analyses_setup(configs)
+    for index, fuel in enumerate(fuels):
+        if index >= 6: 
+            fuel.compute_all()
+        
+        print("Running simulation for", fuel_names[index])
     
-    # Step 4 set up a flight mission
-    mission = mission_setup(analyses)
-    missions = missions_setup(mission) 
-    
-    # Step 5 execute flight profile
-    results = missions.base_mission.evaluate()
-    
-    # Step 6 get payload-range diagram
-    payload_range_diagram(vehicle, mission, 'cruise', reserves=0., plot_diagram=True)
-    
-    # Step 7 plot results 
-    plot_mission(results)
+        # Step 1 design a vehicle
+        vehicle  = vehicle_setup()
+
+        # plot vehicle 
+        #plot_3d_vehicle(vehicle,
+                        #min_x_axis_limit            = -5,
+                        #max_x_axis_limit            = 40,
+                        #min_y_axis_limit            = -20,
+                        #max_y_axis_limit            = 20,
+                        #min_z_axis_limit            = -20,
+                        #max_z_axis_limit            = 20)          
+        
+            
+        
+        # Step 2 create aircraft configuration based on vehicle 
+        configs  = configs_setup(vehicle)
+        
+        # Step 3 set up analysis
+        analyses = analyses_setup(configs)
+        
+        # Step 4 set up a flight mission
+        mission = mission_setup(analyses)
+        missions = missions_setup(mission) 
+        
+        # Step 5 execute flight profile
+        results = missions.base_mission.evaluate()
+        
+        # Step 6 get payload-range diagram
+        payload_range_diagram(vehicle, mission, 'cruise', reserves=0., plot_diagram=True, fuel_name=fuel_names[index])
+        
+        # Step 7 plot results 
+        # plot_mission(results)
     
 
     return
@@ -69,7 +118,8 @@ def main():
 # ----------------------------------------------------------------------
 #   Define V
 # ----------------------------------------------------------------------
-def vehicle_setup(): 
+def vehicle_setup(propellant):
+    
 
     # ------------------------------------------------------------------
     #   Initialize the Vehicle
@@ -603,7 +653,7 @@ def vehicle_setup():
     combustor.alphac                               = 1.0     
     combustor.turbine_inlet_temperature            = 1500
     combustor.pressure_ratio                       = 0.95
-    combustor.fuel_data                            = RCAIDE.Library.Attributes.Propellants.Jet_A1()  
+    combustor.fuel_data                            = propellant
     turbofan.combustor                             = combustor
 
     # core nozzle
@@ -660,7 +710,7 @@ def vehicle_setup():
     fuel_tank.origin                            = wing.origin 
     
     # append fuel 
-    fuel                                        = RCAIDE.Library.Attributes.Propellants.Butanol()   
+    fuel                                        = propellant   
     fuel.mass_properties.mass                   = vehicle.mass_properties.max_takeoff-vehicle.mass_properties.max_fuel
     fuel.origin                                 = vehicle.wings.main_wing.mass_properties.center_of_gravity      
     fuel.mass_properties.center_of_gravity      = vehicle.wings.main_wing.aerodynamic_center

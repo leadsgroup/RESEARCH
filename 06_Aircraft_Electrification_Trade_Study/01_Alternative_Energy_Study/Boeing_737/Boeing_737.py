@@ -23,13 +23,50 @@ import os
 # ----------------------------------------------------------------------
 
 def main():
-    fuels = [Ethane(), Methane(), Propane(), Ethanol(), Butanol(), Propanol()]
-    fuel_names = ["Ethane", "Methane", "Propane", "Ethanol", "Butanol", "Propanol"]
+    methane_propane = Alkane_Mixture()
+    methane_propane.propellant_1 = Methane()
+    methane_propane.propellant_2 = Propane()
+    methane_propane.propellant_1_mass_fraction = 0.75
+    methane_propane.propellant_2_mass_fraction = 0.25
     
-    print(fuel_names[:3])
-    print(fuel_names[3:])
+    ethane_propane = Alkane_Mixture()
+    ethane_propane.propellant_1 = Ethane()
+    ethane_propane.propellant_2 = Propane()
+    ethane_propane.propellant_1_mass_fraction = 0.75
+    ethane_propane.propellant_2_mass_fraction = 0.25
+    
+    methane_ethane = Alkane_Mixture()
+    methane_ethane.propellant_1 = Methane()
+    methane_ethane.propellant_2 = Ethane()
+    methane_ethane.propellant_1_mass_fraction = 0.75
+    methane_ethane.propellant_2_mass_fraction = 0.25
+    
+    propanol_ethanol = Alcohol_Mixture()
+    propanol_ethanol.propellant_1 = Propanol()
+    propanol_ethanol.propellant_2 = Ethanol()
+    propanol_ethanol.propellant_1_mass_fraction = 0.75
+    propanol_ethanol.propellant_2_mass_fraction = 0.25
+    
+    butanol_ethanol = Alcohol_Mixture()
+    butanol_ethanol.propellant_1 = Butanol()
+    butanol_ethanol.propellant_2 = Ethanol()
+    butanol_ethanol.propellant_1_mass_fraction = 0.75
+    butanol_ethanol.propellant_2_mass_fraction = 0.25
+    
+    butanol_propanol = Alcohol_Mixture()
+    butanol_propanol.propellant_1 = Butanol()
+    butanol_propanol.propellant_2 = Propanol()
+    butanol_propanol.propellant_1_mass_fraction = 0.75
+    butanol_propanol.propellant_2_mass_fraction = 0.25
+        
+    fuels = [# Ethane(), Methane(), Propane(), Ethanol(), Butanol(), Propanol(), \
+        methane_propane, ethane_propane, methane_ethane, propanol_ethanol, butanol_ethanol, butanol_propanol]
+    fuel_names = [# "Ethane", "Methane", "Propane", "Ethanol", "Butanol", "Propanol", \
+        "Methane-Propane 75-25", "Ethane-Propane 75-25", "Methane-Ethane 75-25", \
+        "Propanol-Ethanol 75-25", "Butanol-Ethanol 75-25", "Butanol-Propanol 75-25"]
     
     for index, fuel in enumerate(fuels):
+        fuel.compute_all()
         # Step 1 design a vehicle
         vehicle  = vehicle_setup(fuel)    
         
@@ -55,12 +92,7 @@ def main():
     #payload_range_diagram(vehicle,mission,'cruise',reserves=0., plot_diagram = True)
     
     # Step 6 plot results 
-    plot_mission(results)
-    
-    
-    
-
-    return
+    # plot_mission(results)
 
 def vehicle_setup(propellant): 
     
@@ -1109,25 +1141,7 @@ def missions_setup(mission):
 def plot_mission(results):
     """This function plots the results of the mission analysis and saves those results to 
     png files."""
-
-    # Plot Flight Conditions 
-    plot_flight_conditions(results)
-    
-    # Plot Aerodynamic Forces 
-    plot_aerodynamic_forces(results)
-    
-    # Plot Aerodynamic Coefficients 
-    plot_aerodynamic_coefficients(results)     
-    
-    # Drag Components
-    plot_drag_components(results)
-    
-    # Plot Altitude, sfc, vehicle weight 
-    plot_altitude_sfc_weight(results)
-    
-    # Plot Velocities 
-    plot_aircraft_velocities(results)  
-        
+            
     return
 
 if __name__ == '__main__': 
