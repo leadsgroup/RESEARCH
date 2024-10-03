@@ -26,14 +26,14 @@ def main():
     #   Weight Breakdown
     # ------------------------------------------------------------------ 
     settings = None    
-    weight = Common.compute_operating_empty_weight(vehicle, settings = settings, method_type = 'RCAIDE')
+    weight = Common.compute_operating_empty_weight(vehicle, update_fuel_weight= False,settings = settings, method_type = 'RCAIDE')
     print("Operating empty weight estimate for C-5a: "+str(weight))
     
     # ------------------------------------------------------------------
     #   CG Location
     # ------------------------------------------------------------------    
     compute_vehicle_center_of_gravity(vehicle) 
-    CG_location = np.array([[29.5, 0, 0.547]]) #vehicle.mass_properties.center_of_gravity
+    CG_location = np.array([[29.5, 0, 0.547]])  
     print("C-5a CG location: "+str(CG_location))
     
     # ------------------------------------------------------------------

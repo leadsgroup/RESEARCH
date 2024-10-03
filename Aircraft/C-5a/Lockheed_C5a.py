@@ -527,18 +527,18 @@ def vehicle_setup():
     #  Fuel Tank & Fuel
     #------------------------------------------------------------------------------------------------------------------------------------   
     fuel_tank                                   = RCAIDE.Library.Components.Energy.Sources.Fuel_Tanks.Wing_Fuel_Tank()
-    fuel_tank.origin                            = wing.origin 
+    fuel_tank.origin                            = [[20.0,0,3.913]]
+    fuel_tank.center_of_gravity                 = [[25.377562087944629, 0, 3.078852308066547]]
     
     # fuel 
     fuel                                        = RCAIDE.Library.Attributes.Propellants.Jet_A1()   
     fuel.mass_properties.mass                   = vehicle.mass_properties.max_takeoff-vehicle.mass_properties.max_fuel
-    fuel.origin                                 = vehicle.wings.main_wing.mass_properties.center_of_gravity      
-    fuel.mass_properties.center_of_gravity      = vehicle.wings.main_wing.aerodynamic_center
+    fuel.origin                                 = [[20.0,0,3.913]]
+    fuel.mass_properties.center_of_gravity      = [[25.377562087944629, 0, 3.078852308066547]]
     fuel.internal_volume                        = fuel.mass_properties.mass/fuel.density  
     fuel_tank.fuel                              = fuel
-    fuel_line.fuel_tanks.append(fuel_tank) 
+    fuel_line.fuel_tanks.append(fuel_tank)
     
-
     #------------------------------------------------------------------------------------------------------------------------------------  
     #  Propulsor
     #------------------------------------------------------------------------------------------------------------------------------------    
