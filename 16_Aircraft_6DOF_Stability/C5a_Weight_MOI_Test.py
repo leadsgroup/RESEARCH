@@ -18,6 +18,9 @@ import numpy as np
 from copy import deepcopy
 import matplotlib.pyplot as plt  
 import os
+from RCAIDE.Library.Methods.Stability.Moment_of_Inertia import compute_cuboid_moment_of_inertia
+sys.path.append('../../Vehicles')
+from Lockheed_C5a   import vehicle_setup, configs_setup 
 
 def main():
     vehicle = Lockheed_C5a.vehicle_setup()
@@ -26,7 +29,7 @@ def main():
     #   Weight Breakdown
     # ------------------------------------------------------------------ 
     settings = None    
-    weight = Common.compute_operating_empty_weight(vehicle, settings = settings, method_type = 'RCAIDE')
+    weight = Common.compute_operating_empty_weight(vehicle, settings = settings, method_type = 'FLOPS Simple') # 'RCAIDE'
     print("Operating empty weight estimate for C-5a: "+str(weight))
     
     # ------------------------------------------------------------------
@@ -41,10 +44,17 @@ def main():
     # ------------------------------------------------------------------
     #   Aircraft MOI
     # ------------------------------------------------------------------    
-    MOI = calculate_aircraft_MOI(vehicle, CG_location)
-    #MOI += compute_cuboid_moment_of_inertia()
+    MOI, total_mass = calculate_aircraft_MOI(vehicle, CG_location)
+
+    # ------------------------------------------------------------------
+    #   Cargo MOI
+    # ------------------------------------------------------------------    
+    Cargo_MOI, mass = compute_cuboid_moment_of_inertia(CG_location, 99790, 36.0, 3.66, 3, 0, 0, 0, CG_location)
+    MOI += Cargo_MOI
+    total_mass += mass
 
     print(MOI)
+    print("MOI Mass: " + str(total_mass))
     sft2 = 1.355817
     C5a_true = np.array([[27800000 , 0, 2460000], [0, 31800000, 0], [2460000, 0, 56200000]]) * sft2
     error = (MOI - C5a_true) / C5a_true * 100
