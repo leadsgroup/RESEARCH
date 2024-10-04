@@ -28,15 +28,16 @@ def main():
     # ------------------------------------------------------------------
     #   Weight Breakdown
     # ------------------------------------------------------------------ 
-    settings = None    
-    weight = Common.compute_operating_empty_weight(vehicle, settings = settings, method_type = 'FLOPS Simple') # 'RCAIDE'
-    print("Operating empty weight estimate for C-5a: "+str(weight))
+    weight_analysis =  RCAIDE.Framework.Analyses.Weights.Weights_Transport()
+    weight_analysis.vehicle = vehicle
+    weight_analysis.method  = 'RCAIDE' 
+    results =  weight_analysis.evaluate() 
+    print("Operating empty weight estimate for C-5a: "+str(results))
     
     # ------------------------------------------------------------------
     #   CG Location
     # ------------------------------------------------------------------    
-    compute_vehicle_center_of_gravity(vehicle)
-    vehicle.mass_properties.center_of_gravity =  np.array([[29.5, 0, 0]]) 
+    compute_vehicle_center_of_gravity(vehicle) 
     CG_location = vehicle.mass_properties.center_of_gravity
     CG_location_true = np.array([[29.5, 0, 0.547]]) #vehicle.mass_properties.center_of_gravity [[32.4,0,0]]
     print("C-5a CG location: "+str(CG_location))
