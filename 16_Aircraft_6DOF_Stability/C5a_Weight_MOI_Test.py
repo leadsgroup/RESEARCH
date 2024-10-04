@@ -30,7 +30,7 @@ def main():
     # ------------------------------------------------------------------ 
     weight_analysis =  RCAIDE.Framework.Analyses.Weights.Weights_Transport()
     weight_analysis.vehicle = vehicle
-    weight_analysis.method  = 'RCAIDE' 
+    weight_analysis.method  = 'Raymer' 
     results =  weight_analysis.evaluate() 
     print("Operating empty weight estimate for C-5a: "+str(results))
     
