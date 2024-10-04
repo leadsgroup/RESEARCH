@@ -30,19 +30,12 @@ def main():
 
     
     # ------------------------------------------------------------------
-    #   Weight Breakdown
-<<<<<<< HEAD
+    #   Weight Breakdown 
     # ------------------------------------------------------------------  
     weight_analysis =  RCAIDE.Framework.Analyses.Weights.Weights_Transport()
     weight_analysis.vehicle                       = vehicle
     weight_analysis.method                        = 'Raymer'
-    weight_analysis.settings.use_max_fuel_weight  = False 
-=======
-    # ------------------------------------------------------------------ 
-    weight_analysis =  RCAIDE.Framework.Analyses.Weights.Weights_Transport()
-    weight_analysis.vehicle = vehicle
-    weight_analysis.method  = 'Raymer' 
->>>>>>> b1f83f0c5b561091680fd5db4f971b36cf81e4fd
+    weight_analysis.settings.use_max_fuel_weight  = False  
     results =  weight_analysis.evaluate() 
     print("Operating empty weight estimate for C-5a: "+str(results))
     
