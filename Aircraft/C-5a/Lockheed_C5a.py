@@ -61,7 +61,7 @@ def vehicle_setup():
     vehicle.mass_properties.max_fuel                  =   150800 # kg
     vehicle.mass_properties.cargo                     =   99770 # kg
     
-    fuel_percentage = 0.6
+    fuel_percentage = 1.0
 
     # envelope properties
     vehicle.flight_envelope.ultimate_load = 3.5
