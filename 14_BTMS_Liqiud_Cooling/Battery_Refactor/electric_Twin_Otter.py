@@ -827,7 +827,7 @@ def mission_setup(analyses):
     # unpack Segments module
     Segments = RCAIDE.Framework.Mission.Segments  
     base_segment = Segments.Segment()
-    base_segment.temperature_deviation  = 2.5
+    base_segment.temperature_deviation  = 15
     base_segment.state.numerics.number_of_control_points  = 16
   
 
