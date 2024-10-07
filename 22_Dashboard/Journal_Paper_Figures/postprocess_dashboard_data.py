@@ -76,7 +76,7 @@ def generate_saf_results_data(Commercial_SAF,Flight_Ops,feedstocks):
     State_List_4                    = ["Ohio","Oklahoma"] 
     State_List_5                    = [""]         
     aircraft                        = "Boeing 787-8"
-    selected_airpots                = "All Airports" # ["Top 5 Airports","Top 10 Airports","Top 20 Airports", "Top 50 Airports",  "All Airports"]
+    selected_airpots                = "All Airports" 
     percent_adoption                = 100 
     month_no                        = 1
     selected_feedstock              = 'Canola' 
@@ -231,10 +231,7 @@ def generate_saf_results_data(Commercial_SAF,Flight_Ops,feedstocks):
 
 def generate_eletrification_results_data(Flight_Ops):
      
-     
-    aircraft              = "Short-Haul (120 Pax)"
-    airline               = 'All'
-    battery_choice        = Commercial_Batteries['Battery Name'][13] 
+      
     weight_fraction       = 35
     system_voltage        = 800 
     propulsive_efficiency = 90
