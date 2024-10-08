@@ -30,11 +30,11 @@ import matplotlib.pyplot        as plt
 # ----------------------------------------------------------------------
 
 def main():
-
-    BTMS_flag = True
+    
+    file_name = 'twin_otter'   
     
     # vehicle data
-    vehicle  = vehicle_setup(BTMS_flag)
+    vehicle  = vehicle_setup()
     #plot_3d_vehicle(vehicle)
     
     # Set up vehicle configs
@@ -54,10 +54,12 @@ def main():
     
     plot_mission(results)
     
+    save_results(results,file_name)  
+    
     return 
  
     
-def vehicle_setup(BTMS_flag): 
+def vehicle_setup(): 
     
 
     #------------------------------------------------------------------------------------------------------------------------------------
@@ -1298,6 +1300,25 @@ def analyses_setup(configs):
         analyses[tag] = analysis
 
     return analyses
+
+# ----------------------------------------------------------------------
+#   Save Results
+# ----------------------------------------------------------------------
+def save_results(results,filename): 
+    pickle_file  =  filename + '.pkl'
+    with open(pickle_file, 'wb') as file:
+        pickle.dump(results, file) 
+    return   
+
+# ------------------------------------------------------------------
+#   Load Results
+# ------------------------------------------------------------------   
+def load_results(filename):  
+    load_file = filename + '.pkl' 
+    with open(load_file, 'rb') as file:
+        results = pickle.load(file) 
+    return results  
+
 
 
 
