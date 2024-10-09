@@ -118,16 +118,15 @@ def main():
             h_t3                                              = compressor_conditions.outputs.stagnation_enthalpy     
             
             thrust[i,j]                                       = np.linalg.norm(Thrust)
-            propulsive_efficiency[i,j]                        = Turboprop_conditions.eta_P
-            thermal_efficiency[i,j]                           = Turboprop_conditions.eta_T
+            propulsive_efficiency[i,j]                        = Turboprop_conditions.propulsive_efficiency
+            thermal_efficiency[i,j]                           = Turboprop_conditions.thermal_efficiency
             Tt_3[i,j]                                         = compressor_conditions.outputs.stagnation_temperature 
             Pt_3[i,j]                                         = compressor_conditions.outputs.stagnation_pressure
             Tt_4[i,j]                                         = hpt_conditions.inputs.stagnation_temperature 
             Pt_4[i,j]                                         = hpt_conditions.inputs.stagnation_pressure  
             fuel_flow_rate[i,j]                               = Turboprop_conditions.fuel_flow_rate
             m_dot_air_tot[i,j]                                = Turboprop_conditions.core_mass_flow_rate 
-            TSFC[i,j]                                         = Turboprop.TSFC # [N/N-s]
-            
+            TSFC[i,j]                                         = Turboprop_conditions.thrust_specific_fuel_consumption 
             
     print(thrust, propulsive_efficiency, thermal_efficiency, Tt_3, Pt_3, Tt_4, Pt_4, fuel_flow_rate, m_dot_air_tot, TSFC)                  
     #plot_results(altitude,mach_number,thrust,overall_efficiency,thermal_efficiency,Tt_3,Pt_3,Tt_4,Pt_4,m_dot_core,fuel_flow_rate,m_dot_air_tot)
