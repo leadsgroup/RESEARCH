@@ -1,13 +1,13 @@
 # RCAIDE imports 
 import RCAIDE
-from   RCAIDE.Framework.Core                                 import Units , Data   
+from   RCAIDE.Framework.Core                                 import Units, Data   
+from   RCAIDE.Framework.Mission.Common                       import Conditions
 from   RCAIDE.Library.Methods.Propulsors.Turboprop_Propulsor import design_turboprop
-from   RCAIDE.Framework.Mission.Common                       import  Conditions
 
 # Python imports 
-import numpy                                                as np                                             
-import matplotlib.pyplot                                    as plt 
-import matplotlib.cm                                        as cm
+import numpy                                                 as np                                             
+import matplotlib.pyplot                                     as plt 
+import matplotlib.cm                                         as cm
 import pickle    
 import os                                                   
 import time 
@@ -17,7 +17,7 @@ import time
 # Created:  Sep 2024, M. Clarke, M. Guidotti 
 
 # References:
-# [1]: 
+# [1]: Mattingly, Jack D.. “Elements of Gas Turbine Propulsion.” (1996).
 
 # ----------------------------------------------------------------------
 #   Main
@@ -25,33 +25,35 @@ import time
 
 def main():  
     
-    ti                      = time.time()                               # [s]       Define the initial simulation time
-
-    altitude                = np.array([35000])*Units.feet 
-    mach_number             = np.array([0.8]) 
-    
-    thrust                  = np.zeros((len(altitude),len(mach_number)))
-    propulsive_efficiency   = np.zeros((len(altitude),len(mach_number)))
-    thermal_efficiency      = np.zeros((len(altitude),len(mach_number)))
-    Tt_3                    = np.zeros((len(altitude),len(mach_number)))
-    Pt_3                    = np.zeros((len(altitude),len(mach_number)))
-    Tt_4                    = np.zeros((len(altitude),len(mach_number)))
-    Pt_4                    = np.zeros((len(altitude),len(mach_number))) 
-    fuel_flow_rate          = np.zeros((len(altitude),len(mach_number)))
-    m_dot_air_tot           = np.zeros((len(altitude),len(mach_number)))
-    TSFC                    = np.zeros((len(altitude),len(mach_number)))
+    ti                      = time.time()                                 # [s]         Define the initial simulation time
+                                                                                        
+    #altitude                = np.array([35000])*Units.feet                # [m]         Define the flight altitude
+    #mach_number             = np.array([0.8])                             # [-]         Define the flight Mach number
+    altitude            = np.linspace(0,35000,20)*Units.feet
+    mach_number         = np.linspace(0.1,0.8,8)    
+                                                                                        
+    thrust                  = np.zeros((len(altitude),len(mach_number)))  # [N]         Initialize the value of thrust
+    propulsive_efficiency   = np.zeros((len(altitude),len(mach_number)))  # [-]         Initialize the value of propulsive efficiency
+    thermal_efficiency      = np.zeros((len(altitude),len(mach_number)))  # [-]         Initialize the value of thermal efficiency   
+    Tt_3                    = np.zeros((len(altitude),len(mach_number)))  # [K]         Initialize the value of total temperature exiting the compressor                
+    Pt_3                    = np.zeros((len(altitude),len(mach_number)))  # [Pa]        Initialize the value of total pressure exiting the compressor                
+    Tt_4                    = np.zeros((len(altitude),len(mach_number)))  # [K]         Initialize the value of total temperature entering the turbine               
+    Pt_4                    = np.zeros((len(altitude),len(mach_number)))  # [Pa]        Initialize the value of total pressure entering the turbine                    
+    fuel_flow_rate          = np.zeros((len(altitude),len(mach_number)))  # [kg/s]      Initialize the value of fuel flow rate       
+    m_dot_air_tot           = np.zeros((len(altitude),len(mach_number)))  # [kg/s]      Initialize the value of total air mass flow rate        
+    TSFC                    = np.zeros((len(altitude),len(mach_number)))  # [kg/(hr*N)] Initialize the value of Thrust Specific Fuel Consumption               
                             
-    Turboprop               = Turboprop_engine()
+    Turboprop               = Turboprop_engine()                          # [-]         Define the Turboprop engine      
     
     for i in range(len(altitude)): 
         for j in range(len(mach_number)):
             
-            planet                                            = RCAIDE.Library.Attributes.Planets.Earth()
-            atmosphere                                        = RCAIDE.Framework.Analyses.Atmospheric.US_Standard_1976()
-            atmo_data                                         = atmosphere.compute_values(altitude[i])
+            planet                                            = RCAIDE.Library.Attributes.Planets.Earth()                 # [-]         Import Earth
+            atmosphere                                        = RCAIDE.Framework.Analyses.Atmospheric.US_Standard_1976()  # [-]         Import atmospheric conditions
+            atmo_data                                         = atmosphere.compute_values(altitude[i])                    # [-]         Compute atmospheric values at the assigned altitude
                                                               
-            p                                                 = atmo_data.pressure          
-            T                                                 = atmo_data.temperature       
+            p                                                 = atmo_data.pressure                                        
+            T                                                 = atmo_data.temperature         
             rho                                               = atmo_data.density          
             a                                                 = atmo_data.speed_of_sound    
             mu                                                = atmo_data.dynamic_viscosity     
@@ -128,8 +130,8 @@ def main():
             m_dot_air_tot[i,j]                                = Turboprop_conditions.core_mass_flow_rate 
             TSFC[i,j]                                         = Turboprop_conditions.thrust_specific_fuel_consumption 
             
-    print(thrust, propulsive_efficiency, thermal_efficiency, Tt_3, Pt_3, Tt_4, Pt_4, fuel_flow_rate, m_dot_air_tot, TSFC)                  
-    #plot_results(altitude,mach_number,thrust,overall_efficiency,thermal_efficiency,Tt_3,Pt_3,Tt_4,Pt_4,m_dot_core,fuel_flow_rate,m_dot_air_tot)
+    #print(thrust, propulsive_efficiency, thermal_efficiency, Tt_3, Pt_3, Tt_4, Pt_4, fuel_flow_rate, m_dot_air_tot, TSFC)                  
+    plot_results(altitude,mach_number,thrust,propulsive_efficiency,thermal_efficiency,Tt_3,Pt_3,Tt_4,Pt_4,fuel_flow_rate,m_dot_air_tot)
     
     tf                      = time.time()                                           # [s]       Define the final simulation time
     elapsed_time            = round((tf-ti),2)                                      # [s]       Compute the total simulation time
@@ -138,7 +140,7 @@ def main():
     
     return
 
-def plot_results(altitude,mach_number,thrust,overall_efficiency,thermal_efficiency,Tt_3,Pt_3,Tt_4,Pt_4,m_dot_core,fuel_flow_rate,m_dot_air_tot):
+def plot_results(altitude,mach_number,thrust,propulsive_efficiency,thermal_efficiency,Tt_3,Pt_3,Tt_4,Pt_4,fuel_flow_rate,m_dot_air_tot):
     ps =  plot_style(number_of_lines = len(mach_number)) 
     
     fig    =  plt.figure('Thrust')
@@ -164,13 +166,13 @@ def plot_results(altitude,mach_number,thrust,overall_efficiency,thermal_efficien
     axis_2.legend()
     fig_2.tight_layout()
     
-    fig_3    =  plt.figure('Overall Efficiency')
+    fig_3    =  plt.figure('Propulsive Efficiency')
     fig_3.set_size_inches(7, 6)
     axis_3 = fig_3.add_subplot(1,1,1) 
     for i in  range(len(mach_number)):
-        axis_3.plot(overall_efficiency[:,i],altitude/Units.feet, color = ps.color[i], linestyle = ps.line_style[0],
+        axis_3.plot(propulsive_efficiency[:,i],altitude/Units.feet, color = ps.color[i], linestyle = ps.line_style[0],
                     marker = ps.markers[0], linewidth = ps.line_width, label = 'Mach =' + str( round(mach_number[i], 2))) 
-    axis_3.set_xlabel('Overall Efficiency')
+    axis_3.set_xlabel('Propulsive Efficiency')
     axis_3.set_ylabel('Altitude [ft]')
     axis_3.legend()
     fig_3.tight_layout()
@@ -204,7 +206,7 @@ def plot_results(altitude,mach_number,thrust,overall_efficiency,thermal_efficien
     fig_5.set_size_inches(7, 6)
     axis_5 = fig_5.add_subplot(1,1,1) 
     for i in  range(len(mach_number)):
-        axis_5.plot(m_dot_core[:,i],altitude/Units.feet, color = ps.color[i], linestyle = ps.line_style[0],
+        axis_5.plot(m_dot_air_tot[:,i],altitude/Units.feet, color = ps.color[i], linestyle = ps.line_style[0],
                     marker = ps.markers[0], linewidth = ps.line_width, label = 'Mach =' + str( round(mach_number[i], 2))) 
     axis_5.set_xlabel(r'$\dot{m}_{core}$ [kg/s]')
     axis_5.set_ylabel('Altitude [ft]')
@@ -254,16 +256,16 @@ def Turboprop_engine():
         
     Turboprop                                    = RCAIDE.Library.Components.Propulsors.Turboprop()    
     Turboprop.origin                             = [[ 0.0 , 0.0 , 0.0 ]]
-    Turboprop.design_altitude                    = 35006.562*Units.ft       
-    Turboprop.design_mach_number                 = 0.8                     
-    Turboprop.design_thrust                      = 77850 * Units.N       
+    Turboprop.design_altitude                    = 30000*Units.ft                                   # [-]         Design Altitude
+    Turboprop.design_mach_number                 = 0.5                                              # [-]         Design Mach number
+    Turboprop.design_thrust                      = 50000 * Units.N                                  # [-]         Design Thrust
         
     # working fluid                   
     Turboprop.working_fluid                      = RCAIDE.Library.Attributes.Gases.Air() 
     
     # Propeller and Gearbox efficiency               
-    Turboprop.design_propeller_efficiency        = 0.83    
-    Turboprop.design_gearbox_efficiency          = 0.99  
+    Turboprop.design_propeller_efficiency        = 0.83                                             # [-]         Design Propeller Efficiency
+    Turboprop.design_gearbox_efficiency          = 0.99                                             # [-]         Design Gearbox Efficiency
     
     # Ram inlet 
     ram                                          = RCAIDE.Library.Components.Propulsors.Converters.Ram()

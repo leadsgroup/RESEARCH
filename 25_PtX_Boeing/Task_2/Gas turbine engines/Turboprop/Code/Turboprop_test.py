@@ -531,11 +531,6 @@ def turboprop_model_test():
     #  Input values for real turboprop
     # ----------------------------------------------------------------------------------------------------------------------
     
-    # 1) Real engine
-    # 2) Eng library James Aircraft for Validation
-    # 3) Integration into RCAIDE
-    # 4) Get ATR 72 / Otter Engine data
-    
     M0_r                  = 0.8                       # [-]
     T0_r                  = 240                       # [K]
     gamma_c               = 1.4                       # [-]
