@@ -97,10 +97,11 @@ def main():
     
     for index, fuel in enumerate(fuels):
         print("Running simulation for", fuel_names[index])
-        vehicle.mass_properties.max_fuel = max_fuel_weights[fuel_names[index]]
 
         # Step 1 design a vehicle
         vehicle  = vehicle_setup(fuel)
+        
+        vehicle.mass_properties.max_fuel = max_fuel_weights[fuel_names[index]]
         
         # Step 2 create aircraft configuration based on vehicle 
         configs  = configs_setup(vehicle)
