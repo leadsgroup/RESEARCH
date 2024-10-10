@@ -599,9 +599,7 @@ def vehicle_setup():
     port_propulsor.nacelle.origin                   = [[8.941625295,-4.219315295, 1.616135105 ]]
          
     # append propulsor to distribution line 
-    fuel_line.propulsors.append(port_propulsor)
-    
-    net.fuel_lines.append(fuel_line)        
+    fuel_line.propulsors.append(port_propulsor) 
 
     #------------------------------------------------------------------------------------------------------------------------- 
     #  Energy Source: Fuel Tank
@@ -649,26 +647,29 @@ def configs_setup(vehicle):
 def plot_mission(results,line_style='bo-'):
 
     
-    # Plot Flight Conditions 
-    plot_flight_conditions(results, line_style)
+    ## Plot Flight Conditions 
+    #plot_flight_conditions(results, line_style)
     
-    # Plot Aerodynamic Forces 
-    plot_aerodynamic_forces(results, line_style)
+    ## Plot Aerodynamic Forces 
+    #plot_aerodynamic_forces(results, line_style)
     
-    # Plot Aerodynamic Coefficients 
-    plot_aerodynamic_coefficients(results, line_style)
+    ## Plot Aerodynamic Coefficients 
+    #plot_aerodynamic_coefficients(results, line_style)
     
-    # Drag Components
-    plot_drag_components(results, line_style)
+    ## Drag Components
+    #plot_drag_components(results, line_style)
     
-    # Plot Altitude, sfc, vehicle weight 
-    plot_altitude_sfc_weight(results, line_style)
+    ## Plot Altitude, sfc, vehicle weight 
+    #plot_altitude_sfc_weight(results, line_style)
     
-    # Plot Velocities 
-    plot_aircraft_velocities(results, line_style)  
+    ## Plot Velocities 
+    #plot_aircraft_velocities(results, line_style)  
     
-    # Plot Trajectory
-    plot_flight_trajectory(results)
+    ## Plot Trajectory
+    #plot_flight_trajectory(results)
+    
+    # Plot throttles
+    plot_propulsor_throttles(results)
 
     return 
  
