@@ -11,8 +11,7 @@ import os
 import numpy as np           
 import pandas as pd 
 import json
-from pyatmos import coesa76
-import pickle
+import pickle 
  
 def main():
     # ---------------------------------------------------------------------------------------------------------------------------------------------------
@@ -52,11 +51,10 @@ def main():
     US_Temperature_F           = pd.read_csv(temperature_filename)   
     feedstocks                 = pd.read_excel(crops_filename,sheet_name=['Corn','Soybean','Canola','Sunflower','Sorghum','Wheat'])  
 
- 
-    
+  
     generate_saf_results_data(Commercial_SAF,Flight_Ops,feedstocks)
-    generate_eletrification_results_data(Flight_Ops)
-    generate_hydrogen_results_data(Hydrogen,Flight_Ops) 
+    #generate_eletrification_results_data(Flight_Ops)
+    #generate_hydrogen_results_data(Hydrogen,Flight_Ops) 
      
     return
 
@@ -232,413 +230,358 @@ def generate_saf_results_data(Commercial_SAF,Flight_Ops,feedstocks):
 def generate_eletrification_results_data(Flight_Ops):
      
       
-    weight_fraction       = 35
-    system_voltage        = 800 
-    propulsive_efficiency = 90
-    percent_adoption      = 100 
-    month_no              = 1  
-    cost_of_electricity   = 0.3 
-        
-    cell_V,
-    capacity
-    cell_C_max
-    cell_e0
-    cell_Temp    
- 
-        
-    #================================================================================================================================================  
-    # Unit Conversions 
-    #================================================================================================================================================    
-   
-    CO2e_per_mile          = 9.0736                 
-    Wh_per_kg_to_J         = 3600.0
-    Ah_to_C                = 3600.0
-    meters_to_miles        = 0.000621371  
-    V_bat                  = system_voltage*1000
-    joule_to_kWh           = 2.77778e-7
-    JetA_GHG               = 4.36466 # CO2e/kg fuel 
-    gallons_to_Liters      = 3.78541
-    liters_to_cubic_meters = 0.001
-    Jet_A_density          = 800.0  
-    density_JetA           = 820.0  # kg /m3  
-    kg_to_Megaton          = 1E-9
-    eta_0                  = propulsive_efficiency/100 
+    weight_fraction   = np.linspace(10,60,6)
+    cell_e0           = np.linspace(200,1000) 
+    aircraft_range    = np.zeros((5,12,len(weight_fraction),len(cell_e0 ) )) 
+    passenger_volume  = np.zeros((5,12,len(weight_fraction),len(cell_e0 ) )) 
+    CASM_electric     = np.zeros((5,12,len(weight_fraction),len(cell_e0 ) )) 
+    CASM_Jet_A        = np.zeros((5,12,len(weight_fraction),len(cell_e0 ) )) 
+    aircraft_capacity       = np.array([19, 88, 120, 189, 368])
     
-    #================================================================================================================================================  
-    # Compute Feasible Routes 
-    #================================================================================================================================================    
-    # Compute Range  
-    months              = ['January', 'February', 'March', 'April', 'May', 'June', 'July','August', 'September', 'October', 'November', 'December']      
-    month               = months[month_no] 
-    Routes_and_Temp_Mo  = Flight_Ops[Flight_Ops['Month'] == month_no+1 ]    
-    V_cell              = cell_V
-    e_cell              = cell_e0 *Wh_per_kg_to_J
-    q_cell              = capacity * Ah_to_C  # conversion to coulombs
-    i_max               = (capacity*cell_C_max) # amps   
-    Min_Temp            = cell_Temp[0]
-    Max_Temp            = cell_Temp[1]  
+    for i in  range(len(weight_fraction)):
+        for j in range(len(cell_e0)):
+            for ac in  range(len(aircraft_capacity)): 
+                for m_i in  range(12):
+                    system_voltage        = 800 
+                    propulsive_efficiency = 90
+                    percent_adoption      = 100 
+                    cost_of_electricity   = 0.3 
+                        
+                    cell_V       = 4.2         
+                    capacity_Wh  = 4000
+                    capacity     = capacity_Wh /cell_V 
+                    cell_C_max   = 6
+                    cell_Temp    = [-20,50] 
+                        
+                    #================================================================================================================================================  
+                    # Unit Conversions 
+                    #================================================================================================================================================    
+                   
+                    CO2e_per_mile          = 9.0736                 
+                    Wh_per_kg_to_J         = 3600.0
+                    Ah_to_C                = 3600.0
+                    meters_to_miles        = 0.000621371  
+                    V_bat                  = system_voltage*1000
+                    joule_to_kWh           = 2.77778e-7
+                    JetA_GHG               = 4.36466 # CO2e/kg fuel 
+                    gallons_to_Liters      = 3.78541
+                    liters_to_cubic_meters = 0.001
+                    Jet_A_density          = 800.0  
+                    density_JetA           = 820.0  # kg /m3  
+                    kg_to_Megaton          = 1E-9
+                    eta_0                  = propulsive_efficiency/100 
+                    
+                    #================================================================================================================================================  
+                    # Compute Feasible Routes 
+                    #================================================================================================================================================    
+                    # Compute Range  
+                    months              = ['January', 'February', 'March', 'April', 'May', 'June', 'July','August', 'September', 'October', 'November', 'December']      
+                    month               = months[m_i] 
+                    Routes_and_Temp_Mo  = Flight_Ops[Flight_Ops['Month'] == m_i+1 ]    
+                    V_cell              = cell_V
+                    e_cell              = cell_e0[j] *Wh_per_kg_to_J
+                    q_cell              = capacity * Ah_to_C  # conversion to coulombs
+                    i_max               = (capacity*cell_C_max) # amps   
+                    Min_Temp            = cell_Temp[0]
+                    Max_Temp            = cell_Temp[1]  
+                    
+                    # Determine Max power of aircraft fleet
+                    original_Pax_volume  = np.array(Routes_and_Temp_Mo['Passengers'])
+                    est_pax_capacity     = np.array(Routes_and_Temp_Mo['Estimated Aircraft Capacity'])
+                
+                    Max_Power                                 = np.zeros_like(original_Pax_volume)
+                    Lift_to_Drag_ratio                        = np.zeros_like(original_Pax_volume)
+                    Takeoff_Weight                            = np.zeros_like(original_Pax_volume)
+                    Max_Power[est_pax_capacity==19]           = 1158000
+                    Max_Power[est_pax_capacity==88]           = 2050000  
+                    Max_Power[est_pax_capacity==120]          = 13567500
+                    Max_Power[est_pax_capacity==189]          = 15270000
+                    Max_Power[est_pax_capacity==368]          = 68000000
+                    Lift_to_Drag_ratio[est_pax_capacity==19]  = 14 
+                    Lift_to_Drag_ratio[est_pax_capacity==88]  = 15
+                    Lift_to_Drag_ratio[est_pax_capacity==120] = 16 
+                    Lift_to_Drag_ratio[est_pax_capacity==189] = 18
+                    Lift_to_Drag_ratio[est_pax_capacity==368] = 19
+                    Takeoff_Weight[est_pax_capacity==19]      = 6575     
+                    Takeoff_Weight[est_pax_capacity==88]      = 23000  
+                    Takeoff_Weight[est_pax_capacity==120]     = 63100      
+                    Takeoff_Weight[est_pax_capacity==189]     = 79015.8     
+                    Takeoff_Weight[est_pax_capacity==368]     = 227900
+                    
+                    # Determine limiting condition on cell configuration 
+                    I_bat           = Max_Power/V_bat
+                    n_series        = V_bat/V_cell
+                    W_bat           = (weight_fraction[i]/100) * Takeoff_Weight
+                    E_bat           = W_bat * e_cell  
+                    Q_bat           = E_bat/V_bat
+                    n_parallel      = Q_bat/q_cell 
+                    n_parallel_min  = I_bat/i_max 
+                     
+                    # Compute distances between departure and destimation points  
+                    fuel_volume_L                        = Routes_and_Temp_Mo['Fuel Consumed Per Flight (Liters)']  
+                    fuel_volume_m_3                      = fuel_volume_L*0.001  
+                    W_f                                  = Jet_A_density*fuel_volume_m_3
+                    W_residual                           = W_bat-W_f  
+                    weight_per_pass                      = 158.757 # in kg  (250 lb for person, 100 lb for luggage) 
+                    passenger_reductions                 = np.ceil(np.array(W_residual)/weight_per_pass)   
+                    passenger_reductions[passenger_reductions < 0] = 0
+                    remaining_Pax                        = original_Pax_volume - passenger_reductions*np.array(Routes_and_Temp_Mo['No of Flights Per Month'])
+                    remaining_Pax[remaining_Pax<0]       = 0
+                    Routes_and_Temp_Mo['E_Passengers']   = remaining_Pax 
+                    Routes_and_Temp_Mo['Aircraft_Battery_Energy']  = E_bat
+                    
+                    # compute range 
+                    Range_mi = meters_to_miles * (e_cell/9.81) * Lift_to_Drag_ratio * (weight_fraction[i]/100)* eta_0
+                    Range_mi[n_parallel_min  > n_parallel] = 0
+                    
+                    # filter for flights that do not meet range between two airports 
+                    Feasible_Routes_1    = Routes_and_Temp_Mo[Routes_and_Temp_Mo['Distance (miles)'] < Range_mi ] 
+                    Infeasible_Routes_1  = Routes_and_Temp_Mo[Routes_and_Temp_Mo['Distance (miles)'] > Range_mi ]
+                    
+                    # filter for flights based on airline  
+                    Feasible_Routes_2    = Feasible_Routes_1  
+                    Infeasible_Routes_2  = Feasible_Routes_1.head(0)  
+                
+                    # filter for flights based on aircraft type 
+                    Feasible_Routes_3    = Feasible_Routes_2  
+                    Infeasible_Routes_3  = Feasible_Routes_2.head(0)  
+                    
+                    # filter for flights that have no passengers due to too much battery weight 
+                    Feasible_Routes_4    = Feasible_Routes_3[Feasible_Routes_3['E_Passengers'] > 0 ] 
+                    Infeasible_Routes_4  = Feasible_Routes_3[Feasible_Routes_3['E_Passengers'] < 0 ]
+                    
+                    # filter for flights where batteries cannot operate 
+                    Feasible_Routes_5    = Feasible_Routes_4[Feasible_Routes_4['Origin ' + month] > Min_Temp] 
+                    Infeasible_Routes_5  = Feasible_Routes_4[Feasible_Routes_4['Origin ' + month] < Min_Temp] 
+                    Feasible_Routes_6    = Feasible_Routes_5[Feasible_Routes_5['Origin ' + month] < Max_Temp] 
+                    Infeasible_Routes_6  = Feasible_Routes_5[Feasible_Routes_5['Origin ' + month] > Max_Temp]  
+                    Feasible_Routes_7    = Feasible_Routes_6[Feasible_Routes_6['Destination ' + month] > Min_Temp] 
+                    Infeasible_Routes_7  = Feasible_Routes_6[Feasible_Routes_6['Destination ' + month] < Min_Temp] 
+                    Feasible_Routes_8    = Feasible_Routes_7[Feasible_Routes_7['Destination ' + month] < Max_Temp] 
+                    Infeasible_Routes_8  = Feasible_Routes_7[Feasible_Routes_7['Destination ' + month] > Max_Temp] 
+                    Feasible_Routes      = Feasible_Routes_8.head(int(len(Feasible_Routes_8)*percent_adoption/100 )) 
+                    Infeasible_Routes_9  = Feasible_Routes_8.tail(int(len(Feasible_Routes_8)*(100 - percent_adoption)/100 ))
+                    Infeasible_Routes    = pd.concat([Infeasible_Routes_1,Infeasible_Routes_2,Infeasible_Routes_3,
+                                                      Infeasible_Routes_4,Infeasible_Routes_5,Infeasible_Routes_6,
+                                                      Infeasible_Routes_7,Infeasible_Routes_8,Infeasible_Routes_9])
+                    
+                    Routes_and_Temp_Mo_1   = Routes_and_Temp_Mo[Routes_and_Temp_Mo['Estimated Aircraft Capacity'] == aircraft_capacity[ac] ] 
+                     
+                    # COST PER SEAT MILE
+                    # CASM for normal operations without electric aircraft 
+                    ASM_jet_A_1                = np.sum(Routes_and_Temp_Mo_1['Distance (miles)'] * Routes_and_Temp_Mo_1['Passengers']) 
+                    Total_Fuel_Cost_jet_A_1    = np.sum(Routes_and_Temp_Mo_1['Fuel Cost'])   
+                    CASM_wo_E_Aircraft_1       = 100*Total_Fuel_Cost_jet_A_1/ASM_jet_A_1     
+                    
+                    # CASM for when electric aircraft are integrated into fleet
     
-    # Determine Max power of aircraft fleet
-    original_Pax_volume  = np.array(Routes_and_Temp_Mo['Passengers'])
-    est_pax_capacity     = np.array(Routes_and_Temp_Mo['Estimated Aircraft Capacity'])
-
-    Max_Power                                 = np.zeros_like(original_Pax_volume)
-    Lift_to_Drag_ratio                        = np.zeros_like(original_Pax_volume)
-    Takeoff_Weight                            = np.zeros_like(original_Pax_volume)
-    Max_Power[est_pax_capacity==19]           = 1158000
-    Max_Power[est_pax_capacity==88]           = 2050000  
-    Max_Power[est_pax_capacity==120]          = 13567500
-    Max_Power[est_pax_capacity==189]          = 15270000
-    Max_Power[est_pax_capacity==368]          = 68000000
-    Lift_to_Drag_ratio[est_pax_capacity==19]  = 14 
-    Lift_to_Drag_ratio[est_pax_capacity==88]  = 15
-    Lift_to_Drag_ratio[est_pax_capacity==120] = 16 
-    Lift_to_Drag_ratio[est_pax_capacity==189] = 18
-    Lift_to_Drag_ratio[est_pax_capacity==368] = 19
-    Takeoff_Weight[est_pax_capacity==19]      = 6575     
-    Takeoff_Weight[est_pax_capacity==88]      = 23000  
-    Takeoff_Weight[est_pax_capacity==120]     = 63100      
-    Takeoff_Weight[est_pax_capacity==189]     = 79015.8     
-    Takeoff_Weight[est_pax_capacity==368]     = 227900
-    
-    # Determine limiting condition on cell configuration 
-    I_bat           = Max_Power/V_bat
-    n_series        = V_bat/V_cell
-    W_bat           = (weight_fraction/100) * Takeoff_Weight
-    E_bat           = W_bat * e_cell  
-    Q_bat           = E_bat/V_bat
-    n_parallel      = Q_bat/q_cell 
-    n_parallel_min  = I_bat/i_max 
+                    Feasible_Routes_e1   = Feasible_Routes[Feasible_Routes['Estimated Aircraft Capacity'] ==  aircraft_capacity[ac]  ] 
+                    
+                    if len(Feasible_Routes_e1['E_Passengers']) == 0:  
+                        CASM_w_E_Aircraft_1  = 0 
+                    else:  
+                        Electricity_Cost_1   = sum((np.array(Feasible_Routes_e1['Aircraft_Battery_Energy'])*joule_to_kWh*cost_of_electricity) * np.array(Feasible_Routes_e1['No of Flights Per Month'])) 
+                        ASM_electric_1       = sum(Feasible_Routes_e1['Distance (miles)'] *Feasible_Routes_e1['E_Passengers']  )  
+                        CASM_w_E_Aircraft_1 =  100*Electricity_Cost_1/ASM_electric_1  
      
-    # Compute distances between departure and destimation points  
-    fuel_volume_L                        = Routes_and_Temp_Mo['Fuel Consumed Per Flight (Liters)']  
-    fuel_volume_m_3                      = fuel_volume_L*0.001  
-    W_f                                  = Jet_A_density*fuel_volume_m_3
-    W_residual                           = W_bat-W_f  
-    weight_per_pass                      = 158.757 # in kg  (250 lb for person, 100 lb for luggage) 
-    passenger_reductions                 = np.ceil(np.array(W_residual)/weight_per_pass)   
-    passenger_reductions[passenger_reductions < 0] = 0
-    remaining_Pax                        = original_Pax_volume - passenger_reductions*np.array(Routes_and_Temp_Mo['No of Flights Per Month'])
-    remaining_Pax[remaining_Pax<0]       = 0
-    Routes_and_Temp_Mo['E_Passengers']   = remaining_Pax 
+                    # Figyre 1 Data 
+                    aircraft_range[ac,m_i,i, j]  = Range_mi[est_pax_capacity==aircraft_capacity[ac] ][0] 
+                    
+                    # Figure 2 Data
+                    passenger_volume[ac,m_i,i, j]  = sum(Feasible_Routes_e1['E_Passengers']  )   
+                    # Figure 2 Data
+                    CASM_electric[ac,m_i,i, j]  = CASM_w_E_Aircraft_1  
     
-    # compute range 
-    Range_mi = meters_to_miles * (e_cell/9.81) * Lift_to_Drag_ratio * (weight_fraction/100)* eta_0
-    Range_mi[n_parallel_min  > n_parallel] = 0 
-    
-    # filter for flights that do not meet range between two airports 
-    Feasible_Routes_1    = Routes_and_Temp_Mo[Routes_and_Temp_Mo['Distance (miles)'] < Range_mi ] 
-    Infeasible_Routes_1  = Routes_and_Temp_Mo[Routes_and_Temp_Mo['Distance (miles)'] > Range_mi ]
-    
-    # filter for flights based on airline  
-    Feasible_Routes_2    = Feasible_Routes_1  
-    Infeasible_Routes_2  = Feasible_Routes_1.head(0)  
-
-    # filter for flights based on aircraft type 
-    Feasible_Routes_3    = Feasible_Routes_2  
-    Infeasible_Routes_3  = Feasible_Routes_2.head(0)  
-    
-    # filter for flights that have no passengers due to too much battery weight 
-    Feasible_Routes_4    = Feasible_Routes_3[Feasible_Routes_3['E_Passengers'] > 0 ] 
-    Infeasible_Routes_4  = Feasible_Routes_3[Feasible_Routes_3['E_Passengers'] < 0 ]
-    
-    # filter for flights where batteries cannot operate 
-    Feasible_Routes_5    = Feasible_Routes_4[Feasible_Routes_4['Origin ' + month] > Min_Temp] 
-    Infeasible_Routes_5  = Feasible_Routes_4[Feasible_Routes_4['Origin ' + month] < Min_Temp] 
-    Feasible_Routes_6    = Feasible_Routes_5[Feasible_Routes_5['Origin ' + month] < Max_Temp] 
-    Infeasible_Routes_6  = Feasible_Routes_5[Feasible_Routes_5['Origin ' + month] > Max_Temp]  
-    Feasible_Routes_7    = Feasible_Routes_6[Feasible_Routes_6['Destination ' + month] > Min_Temp] 
-    Infeasible_Routes_7  = Feasible_Routes_6[Feasible_Routes_6['Destination ' + month] < Min_Temp] 
-    Feasible_Routes_8    = Feasible_Routes_7[Feasible_Routes_7['Destination ' + month] < Max_Temp] 
-    Infeasible_Routes_8  = Feasible_Routes_7[Feasible_Routes_7['Destination ' + month] > Max_Temp] 
-    Feasible_Routes      = Feasible_Routes_8.head(int(len(Feasible_Routes_8)*percent_adoption/100 )) 
-    Infeasible_Routes_9  = Feasible_Routes_8.tail(int(len(Feasible_Routes_8)*(100 - percent_adoption)/100 ))
-    Infeasible_Routes    = pd.concat([Infeasible_Routes_1,Infeasible_Routes_2,Infeasible_Routes_3,
-                                      Infeasible_Routes_4,Infeasible_Routes_5,Infeasible_Routes_6,
-                                      Infeasible_Routes_7,Infeasible_Routes_8,Infeasible_Routes_9])    
-    #================================================================================================================================================      
-    # Monthly Analysis 
-    #================================================================================================================================================     
-    
-    Emissions_wo_Electric_Aircraft    = np.zeros(12)
-    Emissions_w_Electric_Aircraft     = np.zeros(12) 
-    CASM_wo_E_Aircraft                = np.zeros(12) 
-    CASM_w_E_Aircraft                 = np.zeros(12) 
-
-    for m_i in range(12):  
-        Routes_and_Temp_Mo  = Flight_Ops.loc[Flight_Ops['Month'] == m_i+1 ] 
-        V_cell                  = cell_V
-        e_cell                  = cell_e0 *Wh_per_kg_to_J
-        q_cell                  = capacity * Ah_to_C  # conversion to coulombs
-        i_max                   = (capacity*cell_C_max) # amps   
-        Min_Temp                = cell_Temp[0]
-        Max_Temp                = cell_Temp[1]
-        
-        # Determine Max power of aircraft fleet
-        original_Pax_volume                       = np.array(Routes_and_Temp_Mo['Passengers'])    
-        est_pax_capacity                          = np.array(Routes_and_Temp_Mo['Estimated Aircraft Capacity'])
-        Max_Power                                 = np.zeros_like(original_Pax_volume)
-        Lift_to_Drag_ratio                        = np.zeros_like(original_Pax_volume)
-        Takeoff_Weight                            = np.zeros_like(original_Pax_volume)
-        Max_Power[est_pax_capacity==19]           = 1158000
-        Max_Power[est_pax_capacity==88]           = 2050000  
-        Max_Power[est_pax_capacity==120]          = 13567500
-        Max_Power[est_pax_capacity==189]          = 15270000
-        Max_Power[est_pax_capacity==368]          = 68000000
-        Lift_to_Drag_ratio[est_pax_capacity==19]  = 14 
-        Lift_to_Drag_ratio[est_pax_capacity==88]  = 15
-        Lift_to_Drag_ratio[est_pax_capacity==120] = 16 
-        Lift_to_Drag_ratio[est_pax_capacity==189] = 18
-        Lift_to_Drag_ratio[est_pax_capacity==368] = 19
-        Takeoff_Weight[est_pax_capacity==19]      = 6575     
-        Takeoff_Weight[est_pax_capacity==88]      = 23000  
-        Takeoff_Weight[est_pax_capacity==120]     = 63100      
-        Takeoff_Weight[est_pax_capacity==189]     = 79015.8     
-        Takeoff_Weight[est_pax_capacity==368]     = 227900   
-        
-        # Determine limiting condition on cell configuration 
-        I_bat           = Max_Power/V_bat
-        n_series        = V_bat/V_cell
-        W_bat           = (weight_fraction/100) *Takeoff_Weight
-        E_bat           = W_bat * e_cell  
-        Q_bat           = E_bat/V_bat
-        n_parallel      = Q_bat/q_cell 
-        n_parallel_min  = I_bat/i_max 
-         
-        # Compute distances between departure and destimation points  
-        fuel_volume_L                                  = Routes_and_Temp_Mo['Fuel Consumed Per Flight (Liters)']  
-        fuel_volume_m_3                                = fuel_volume_L*0.001  
-        W_f                                            = Jet_A_density*fuel_volume_m_3
-        W_residual                                     = W_bat-W_f  
-        weight_per_pass                                = 158.757 # in kg  (250 lb for person, 100 lb for luggage) 
-        passenger_reductions                           = np.ceil(np.array(W_residual)/weight_per_pass)   
-        passenger_reductions[passenger_reductions < 0] = 0
-        remaining_Pax                                  = original_Pax_volume - passenger_reductions*np.array(Routes_and_Temp_Mo['No of Flights Per Month'])
-        remaining_Pax[remaining_Pax<0]                 = 0
-        Routes_and_Temp_Mo['E_Passengers']             = remaining_Pax 
-        Routes_and_Temp_Mo['Aircraft_Battery_Energy']  = E_bat
-        
-        # compute range 
-        Range_mi = meters_to_miles * (e_cell/9.81) * Lift_to_Drag_ratio * (weight_fraction/100)* eta_0
-        Range_mi[n_parallel_min  > n_parallel] = 0  
-        
-        # filter for flights that do not meet range between two airports 
-        Feasible_Routes_1    = Routes_and_Temp_Mo[Routes_and_Temp_Mo['Distance (miles)'] < Range_mi ] 
-        Infeasible_Routes_1  = Routes_and_Temp_Mo[Routes_and_Temp_Mo['Distance (miles)'] > Range_mi ]
-        
-        # filter for flights based on airline   
-        Feasible_Routes_2    = Feasible_Routes_1  
-        Infeasible_Routes_2  = Feasible_Routes_1.head(0)  
-    
-        # filter for flights based on aircraft type 
-        Feasible_Routes_3    = Feasible_Routes_2  
-        Infeasible_Routes_3  = Feasible_Routes_2.head(0) 
-        
-        # filter for flights that have no passengers due to too much battery weight 
-        Feasible_Routes_4    = Feasible_Routes_3[Feasible_Routes_3['E_Passengers'] > 0 ] 
-        Infeasible_Routes_4  = Feasible_Routes_3[Feasible_Routes_3['E_Passengers'] < 0 ]
-        
-        # filter for flights where batteries cannot operate 
-        Feasible_Routes_5    = Feasible_Routes_4[Feasible_Routes_4['Origin ' + month] > Min_Temp] 
-        Infeasible_Routes_5  = Feasible_Routes_4[Feasible_Routes_4['Origin ' + month] < Min_Temp] 
-        Feasible_Routes_6    = Feasible_Routes_5[Feasible_Routes_5['Origin ' + month] < Max_Temp] 
-        Infeasible_Routes_6  = Feasible_Routes_5[Feasible_Routes_5['Origin ' + month] > Max_Temp]  
-        Feasible_Routes_7    = Feasible_Routes_6[Feasible_Routes_6['Destination ' + month] > Min_Temp] 
-        Infeasible_Routes_7  = Feasible_Routes_6[Feasible_Routes_6['Destination ' + month] < Min_Temp] 
-        Feasible_Routes_8    = Feasible_Routes_7[Feasible_Routes_7['Destination ' + month] < Max_Temp] 
-        Infeasible_Routes_8  = Feasible_Routes_7[Feasible_Routes_7['Destination ' + month] > Max_Temp] 
-        Feasible_Routes      = Feasible_Routes_8.head(int(len(Feasible_Routes_8)*percent_adoption/100 )) 
-        Infeasible_Routes_9  = Feasible_Routes_8.tail(int(len(Feasible_Routes_8)*(100 - percent_adoption)/100 ))
-        Infeasible_Routes    = pd.concat([Infeasible_Routes_1,Infeasible_Routes_2,Infeasible_Routes_3,
-                                          Infeasible_Routes_4,Infeasible_Routes_5,Infeasible_Routes_6,
-                                          Infeasible_Routes_7,Infeasible_Routes_8,Infeasible_Routes_9])    
-   
-        # EMISSIONS 
-        # Compute emissions when electric aircraft are integrated into fleet  
-        Infeasible_Route_fuel_volume          = np.sum(np.array(Infeasible_Routes['Total Fuel Per Route (Gal)'])) * gallons_to_Liters * liters_to_cubic_meters
-        Emissions_w_Electric_Aircraft[m_i]    = kg_to_Megaton * JetA_GHG * Infeasible_Route_fuel_volume * density_JetA
-        
-        # Compute emissions without electric aircraft   
-        Conventional_Air_Travel_fuel_volume   = np.sum(np.array(Routes_and_Temp_Mo['Total Fuel Per Route (Gal)'])) * gallons_to_Liters * liters_to_cubic_meters
-        Emissions_wo_Electric_Aircraft[m_i]   = kg_to_Megaton * JetA_GHG * Conventional_Air_Travel_fuel_volume * density_JetA 
-    
-        # COST PER SEAT MILE
-        # CASM for normal operations without electric aircraft 
-        ASM_jet_A                = np.sum(Routes_and_Temp_Mo['Distance (miles)'] * Routes_and_Temp_Mo['Passengers'])
-        Total_Fuel_Cost_jet_A    = np.sum(Routes_and_Temp_Mo['Fuel Cost']) 
-        CASM_wo_E_Aircraft[m_i]  = 100*Total_Fuel_Cost_jet_A/ASM_jet_A    
-        
-        # CASM for when electric aircraft are integrated into fleet 
-        if len(Feasible_Routes['E_Passengers']) == 0: 
-            CASM_w_E_Aircraft[m_i]         = 0
-        else:  
-            Electricity_Cost   = sum((np.array(Feasible_Routes['Aircraft_Battery_Energy'])*joule_to_kWh*cost_of_electricity) * np.array(Feasible_Routes['No of Flights Per Month']) )
-            ASM_electric       = sum(Feasible_Routes['Distance (miles)'] *Feasible_Routes['E_Passengers']  )
-            CASM_w_E_Aircraft[m_i] = 100*Electricity_Cost/ASM_electric
-            
-    
+                    CASM_Jet_A[ac,m_i,i, j]  = CASM_wo_E_Aircraft_1 
     return 
      
 def generate_hydrogen_results_data(Hydrogen,Flight_Ops):
-     
+    
+    
+    volume_fraction         = np.linspace(10,60,6)
+    aircraft_capacity       = np.array([19, 88, 120, 189, 368])
+    aircraft_range          = np.zeros((5,12,len(volume_fraction))) 
+    passenger_volume        = np.zeros((5,12,len(volume_fraction)))  
+    CASM_wo_H2_Aircraft     = np.zeros((5,12,len(volume_fraction)))
+    CASM_w_H2_Aircraft      = np.zeros((5,12,len(volume_fraction)))
+    CO2e_w_H2_Aircraft      = np.zeros((5,12,len(volume_fraction)))
+    CO2e_wo_H2_Aircraft     = np.zeros((5,12,len(volume_fraction)))
+       
+    for i in  range(len(volume_fraction)):
+        for ac in  range(len(aircraft_capacity)): 
+            H2_1                  = Hydrogen['H2 Fuel Name'][2]    
+            selected_h2           = [H2_1]      
+            h2_vol_percentage     = volume_fraction[i]
+            h2_airports           = " All Airports"
+            h2_percent_adoption   = 100    
+            h2_cruise_alt         = 35000  # ft 
+            mean_SFC_Imperial     = 0.6   
+            H2_dollars_per_gal    = 8   
+               
+            #================================================================================================================================================  
+            # Unit Conversions 
+            #================================================================================================================================================ 
+            r_e=3959*5280 #miles to feet
+            R=1716.5 #ft2/R-sec
+            g0=32.174 #ft/s**2
+            T0=518.69 #deg R     
+            h=(r_e/(r_e+h2_cruise_alt))*h2_cruise_alt
+             
+            if h  <= 36000:
+                h0=0
+                T0=518.69 #deg R 
+                rho0=2.3769e-3 #slugs/ft3 
+                a1=-3.57/1000 #deg R/ft
+                T = T0 + a1*(h -h0) 
+                rho_Imperial  = rho0*(T/T0)**(-((g0/(R*a1))+1))
+            else:
+                h0=36000
+                rho0=7.103559955456123e-04 #from running code at 36000
+                T=389.99 
+                rho_Imperial = rho0*np.exp((-g0/(R*T))*(h-h0))  
+             
+            rho =  rho_Imperial *  515.378818 # conversion to kg / m3 
+            density_JetA           = 820.0  # kg /m3  
+            density_H2             = 70     # kg /m3  
+            gallons_to_Liters      = 3.78541
+            liters_to_cubic_meters = 0.001
+            JetA_GHG               = 4.36466 # CO2e/kg fuel 
+            imperial_to_SI_SFC     = 2.832545029426566e-05
+            g                      = 9.81
+            mile_to_meters         = 0.000621371 
+            passenger_mass         = 250  # average mass of passenger and their luggage in kg
+            kg_to_Megaton          = 1E-9
+            SFC_H2                 = mean_SFC_Imperial * imperial_to_SI_SFC 
+              
+            #================================================================================================================================================  
+            # Compute Feasible Routes 
+            #================================================================================================================================================
+            # Extract variables from data sheet  
+            original_pax_capacity = np.array(Flight_Ops['Estimated Aircraft Capacity'])
+            
+            # Use regression of passengers, available fuselage volume and weight to  compute h2 volume  
+            aircraft_volume         = 0.0003 * (original_pax_capacity**3) - 0.0893*(original_pax_capacity**2) + 10.1*(original_pax_capacity **1) - 314.21
+            Weight_empty            = (1.2636* (original_pax_capacity**2) + 145.58* (original_pax_capacity)) *g
+            wing_area               = 0.0059* (original_pax_capacity**2)- 0.9942* (original_pax_capacity) + 132.03 
+            CL                      = -6E-06* (original_pax_capacity**2) + 0.0028* (original_pax_capacity)+ 0.2695  
+            CD                      = 8E-07* (original_pax_capacity**2) - 0.0003* (original_pax_capacity) + 0.0615
+            
+            # Normalize volume fraction 
+            volume_fraction         = h2_vol_percentage / 100
+            
+            # Apply volume fraction 
+            H2_volume               = volume_fraction *aircraft_volume
+            Flight_Ops['H2_volume'] = H2_volume 
+             
+            # Compute max range of each aircraft using range equation 
+            Weight_Pass_total    = (1 -  volume_fraction) * passenger_mass *g *  original_pax_capacity 
+            Weight_H2            = H2_volume * density_H2 * g
+            Weight_H2_0          = Weight_empty + Weight_Pass_total  + Weight_H2 
+            Weight_H2_f          = Weight_H2_0 - (Weight_H2*0.95) # only 90% of fuel is used up 
+            Range                = (1 /SFC_H2) *((CL**2)/CD) *np.sqrt(2/(rho*wing_area))*( np.sqrt(Weight_H2_0) -  np.sqrt(Weight_H2_f))
+            Range_mi             = Range * mile_to_meters # conversion to mile 
+            
+            # Compute the percentage of the aircraft with seated passengers
+            percentage_capacity_of_aircraft =  np.array(Flight_Ops['Passengers']) / ( np.array(Flight_Ops['No of Flights Per Month']) * np.array(Flight_Ops['Estimated Aircraft Capacity']))
+            
+            # Determine unused passenger volume 
+            unused_volume_of_aircraft =  np.ones_like(percentage_capacity_of_aircraft) - percentage_capacity_of_aircraft
+            
+            # Subtract unused volume of aircraft from the volume fraction specified
+            additiona_volume_fractionl_required =  unused_volume_of_aircraft -  np.ones_like(percentage_capacity_of_aircraft)*volume_fraction
+            
+            # If required volume is negative, we do not need to remove passengers 
+            additiona_volume_fractionl_required[additiona_volume_fractionl_required>0] =  0
+            
+            # If additiona_volume_fractionl_required is negative, we need to take off more passenger to accomodate H2 volume:
+            # Determine how many additional passengers must be removed from aircraft to meet specified volume fraction
+            Flight_Ops['H2_Passengers']  =   np.array(Flight_Ops['Passengers']) -  (1 + additiona_volume_fractionl_required) * np.array(Flight_Ops['Estimated Aircraft Capacity']) 
+               
+            # Compute the percentages of different types of fuels used 
+            percentage_H2_process_vals  = [0] 
+            percentage_H2_process_vals  += [100]
+            percentage_H2_process       = np.diff(np.array(percentage_H2_process_vals))/100   
+             
+            # Determine the percentage of different H2 production processes 
+            selected_H2_mask      = Hydrogen['H2 Fuel Name'].isin(selected_h2)
+            H2_used               = Hydrogen[selected_H2_mask] 
+              
+            # Filter flight data based on option selected: i.e. top 10, top 20, top 50, all airpots 
+            Airport_Routes     = Flight_Ops[['Passengers','Origin Airport','Destination City Name']]
+            Cumulative_Flights = Airport_Routes.groupby('Origin Airport', as_index=False).sum()[Airport_Routes.columns]
+            if  h2_airports   == " Top 5 Airports":
+                Busiest_H2_Airports   = Cumulative_Flights.sort_values(by=['Passengers'], ascending = False).head(5) 
+            if  h2_airports   == " Top 10 Airports":
+                Busiest_H2_Airports   = Cumulative_Flights.sort_values(by=['Passengers'], ascending = False).head(10) 
+            elif  h2_airports ==" Top 20 Airports":
+                Busiest_H2_Airports   = Cumulative_Flights.sort_values(by=['Passengers'], ascending = False).head(20) 
+            elif  h2_airports == " Top 50 Airports":
+                Busiest_H2_Airports   = Cumulative_Flights.sort_values(by=['Passengers'], ascending = False).head(50) 
+            elif  h2_airports == " All Airports":
+                Busiest_H2_Airports   = Cumulative_Flights.sort_values(by=['Passengers'], ascending = False) 
+            Airport_List = list(Busiest_H2_Airports['Origin Airport'])
+            
+            # Filter airports that will support H2 and those that wont support H2  
+            Feasible_Routes_1      = Flight_Ops[Flight_Ops['Origin Airport'].isin(Airport_List)]
+            Infeasible_Routes_1    = Flight_Ops[~Flight_Ops['Origin Airport'].isin(Airport_List)]
+            
+            # Filter routes that do not meet the range of the aircraft 
+            H2_Airports_Range    = Range_mi[Flight_Ops['Origin Airport'].isin(Airport_List)]   
+            Feasible_Routes_2    = Feasible_Routes_1[Feasible_Routes_1['Distance (miles)'] < H2_Airports_Range ] 
+            Infeasible_Routes_2  = Feasible_Routes_1[Feasible_Routes_1['Distance (miles)'] > H2_Airports_Range ]     
+        
+            # Filter out routes where there are no passengers 
+            Feasible_Routes_3    = Feasible_Routes_2[Feasible_Routes_2['H2_Passengers'] > 0 ] 
+            Infeasible_Routes_3  = Feasible_Routes_2[Feasible_Routes_2['H2_Passengers'] < 0 ]   
+            
+            # Out of H2 supporting airports, use the percent adoption to determine how many flights at that airport will use H2     
+            H2_Flights            = Feasible_Routes_3.sample(frac=(h2_percent_adoption/100))
+            Infeasible_Routes_4   = Feasible_Routes_3[~Feasible_Routes_3.index.isin(H2_Flights.index)] 
+            Non_H2_Flights        = pd.concat([Infeasible_Routes_1,Infeasible_Routes_2,Infeasible_Routes_3,Infeasible_Routes_4])# add list of flights from non supporting airports to non-H2 flights  
+                
+            # Determine Cost per Seat Mile and Emissions 
+            for m_i in range(12):
+    
+                 
+                # Filter out aircraft 
+                H2_Flights                   = H2_Flights[H2_Flights['Estimated Aircraft Capacity'] == aircraft_capacity[ac]]                
+                H2_Flights_Mo                = H2_Flights.loc[H2_Flights['Month'] == m_i+1] 
+                Non_H2_Flights_Mo            = Non_H2_Flights.loc[Non_H2_Flights['Month'] == m_i+1 ]   
+                Non_H2_Flights_JetA_vol_mo   = np.sum(np.array(Non_H2_Flights_Mo['Total Fuel Per Route (Gal)']))   * gallons_to_Liters * liters_to_cubic_meters   
+                H2_volumes_mo                = np.sum(np.array(H2_Flights_Mo['H2_volume']))
+                
+                if len(Non_H2_Flights_Mo ) == 0:
+                    pass
+                else:
+                    ASM_JetA               = np.sum(Non_H2_Flights_Mo['Distance (miles)'] * Non_H2_Flights_Mo['Passengers'])
+                    Total_Fuel_Cost_JetA   = np.sum(Non_H2_Flights_Mo['Fuel Cost']) 
+                    CASM_wo_H2_Aircraft[ac,m_i,i]         = 100*Total_Fuel_Cost_JetA/ASM_JetA # convert to cents/pass-mile
+               
+                if len(H2_Flights_Mo)  == 0:
+                    pass
+                else:    
+                    ASM_H2               = np.sum(H2_Flights_Mo['Distance (miles)'] * H2_Flights_Mo['H2_Passengers']) 
+                    Total_Fuel_Cost_H2   = H2_volumes_mo /liters_to_cubic_meters /gallons_to_Liters  * H2_dollars_per_gal 
+                    CASM_w_H2_Aircraft[ac,m_i,i]         = 100*Total_Fuel_Cost_H2/ASM_H2   # convert to cents/pass-mile
+                
+                # CO2e of the Hydrogen-powered flights in the scenario with flight operations with H2 tech
+                CO2e_H2_aircraft_in_JetAH2_Fleet    = kg_to_Megaton * np.sum(np.array(H2_used['Direct GHG emissions [kg CO2e/kg H2]'])*percentage_H2_process)*H2_volumes_mo
+         
+                # CO2e of the JetA-powered flights in the scenario with flight operations with H2 tech        
+                CO2e_JetA_aircraft_in_JetAH2_Fleet  = kg_to_Megaton * JetA_GHG * Non_H2_Flights_JetA_vol_mo *  density_JetA 
+                
+                # Total CO2e flights in the scenario with flight operations with H2 tech
+                CO2e_w_H2_Aircraft[ac,m_i,i]       =  CO2e_H2_aircraft_in_JetAH2_Fleet +  CO2e_JetA_aircraft_in_JetAH2_Fleet
+         
+                # Total CO2e flights in the scenario with flight operations without H2 tech    
+                Conventional_Air_Travel             = Flight_Ops.loc[Flight_Ops['Month'] == m_i+1]
+                Conventional_Air_Travel_fuel_volume = np.sum(np.array(Conventional_Air_Travel['Total Fuel Per Route (Gal)'])) * gallons_to_Liters * liters_to_cubic_meters
+                CO2e_wo_H2_Aircraft[ac,m_i,i]            = kg_to_Megaton * JetA_GHG * Conventional_Air_Travel_fuel_volume * density_JetA        
+                      
 
-    H2_1                  = Hydrogen['H2 Fuel Name'][2] 
-    H2_2                  = Hydrogen['H2 Fuel Name'][1] 
-    H2_3                  = Hydrogen['H2 Fuel Name'][5] 
-    H2_4                  = Hydrogen['H2 Fuel Name'][10]     
-    selected_h2           = [H2_1,H2_2,H2_3,H2_4]      
-    h2_vol_percentage     = 15  
-    h2_airports           = " Top 10 Airports" # DONE  # [" Top 5 Airports"," Top 10 Airports"," Top 20 Airports", " Top 50 Airports",  "All Airports"]
-    h2_percent_adoption   = 100    
-    h2_cruise_alt         = 35000  # ft 
-    mean_SFC_Imperial     = 0.6   
-    H2_dollars_per_gal    = 8   
-       
-    #================================================================================================================================================  
-    # Unit Conversions 
-    #================================================================================================================================================
-    coesa76_geom           = coesa76([ (h2_cruise_alt / Units.feet) /1000 ]) # conversion to km
-    rho                    = Density_given_height(h2_cruise_alt)  # coesa76_geom.rho
-    density_JetA           = 820.0  # kg /m3  
-    density_H2             = 70     # kg /m3  
-    gallons_to_Liters      = 3.78541
-    liters_to_cubic_meters = 0.001
-    JetA_GHG               = 4.36466 # CO2e/kg fuel 
-    imperial_to_SI_SFC     = 2.832545029426566e-05
-    g                      = 9.81
-    mile_to_meters         = 0.000621371 
-    passenger_mass         = 250  # average mass of passenger and their luggage in kg
-    kg_to_Megaton          = 1E-9
-    SFC_H2                 = mean_SFC_Imperial * imperial_to_SI_SFC 
-      
-    #================================================================================================================================================  
-    # Compute Feasible Routes 
-    #================================================================================================================================================
-    # Extract variables from data sheet  
-    original_pax_capacity = np.array(Flight_Ops['Estimated Aircraft Capacity'])
-    
-    # Use regression of passengers, available fuselage volume and weight to  compute h2 volume  
-    aircraft_volume         = 0.0003 * (original_pax_capacity**3) - 0.0893*(original_pax_capacity**2) + 10.1*(original_pax_capacity **1) - 314.21
-    Weight_empty            = (1.2636* (original_pax_capacity**2) + 145.58* (original_pax_capacity)) *g
-    wing_area               = 0.0059* (original_pax_capacity**2)- 0.9942* (original_pax_capacity) + 132.03 
-    CL                      = -6E-06* (original_pax_capacity**2) + 0.0028* (original_pax_capacity)+ 0.2695  
-    CD                      = 8E-07* (original_pax_capacity**2) - 0.0003* (original_pax_capacity) + 0.0615
-    
-    # Normalize volume fraction 
-    volume_fraction         = h2_vol_percentage / 100
-    
-    # Apply volume fraction 
-    H2_volume               = volume_fraction *aircraft_volume
-    Flight_Ops['H2_volume'] = H2_volume 
-     
-    # Compute max range of each aircraft using range equation 
-    Weight_Pass_total    = (1 -  volume_fraction) * passenger_mass *g *  original_pax_capacity 
-    Weight_H2            = H2_volume * density_H2 * g
-    Weight_H2_0          = Weight_empty + Weight_Pass_total  + Weight_H2 
-    Weight_H2_f          = Weight_H2_0 - (Weight_H2*0.95) # only 90% of fuel is used up 
-    Range                = (1 /SFC_H2) *((CL**2)/CD) *np.sqrt(2/(rho*wing_area))*( np.sqrt(Weight_H2_0) -  np.sqrt(Weight_H2_f))
-    Range_mi             = Range * mile_to_meters # conversion to mile 
-    
-    # Compute the percentage of the aircraft with seated passengers
-    percentage_capacity_of_aircraft =  np.array(Flight_Ops['Passengers']) / ( np.array(Flight_Ops['No of Flights Per Month']) * np.array(Flight_Ops['Estimated Aircraft Capacity']))
-    
-    # Determine unused passenger volume 
-    unused_volume_of_aircraft =  np.ones_like(percentage_capacity_of_aircraft) - percentage_capacity_of_aircraft
-    
-    # Subtract unused volume of aircraft from the volume fraction specified
-    additiona_volume_fractionl_required =  unused_volume_of_aircraft -  np.ones_like(percentage_capacity_of_aircraft)*volume_fraction
-    
-    # If required volume is negative, we do not need to remove passengers 
-    additiona_volume_fractionl_required[additiona_volume_fractionl_required>0] =  0
-    
-    # If additiona_volume_fractionl_required is negative, we need to take off more passenger to accomodate H2 volume:
-    # Determine how many additional passengers must be removed from aircraft to meet specified volume fraction
-    Flight_Ops['H2_Passengers']  =   np.array(Flight_Ops['Passengers']) -  (1 + additiona_volume_fractionl_required) * np.array(Flight_Ops['Estimated Aircraft Capacity']) 
-       
-    # Compute the percentages of different types of fuels used 
-    percentage_H2_process_vals  = [0]
-    percentage_H2_process_vals  += percent_H2_color
-    percentage_H2_process_vals  += [100]
-    percentage_H2_process       = np.diff(np.array(percentage_H2_process_vals))/100   
-     
-    # Determine the percentage of different H2 production processes 
-    selected_H2_mask      = Hydrogen['H2 Fuel Name'].isin(selected_h2)
-    H2_used               = Hydrogen[selected_H2_mask] 
-      
-    # Filter flight data based on option selected: i.e. top 10, top 20, top 50, all airpots 
-    Airport_Routes     = Flight_Ops[['Passengers','Origin Airport','Destination City Name']]
-    Cumulative_Flights = Airport_Routes.groupby('Origin Airport', as_index=False).sum()[Airport_Routes.columns]
-    if  h2_airports   == " Top 5 Airports":
-        Busiest_H2_Airports   = Cumulative_Flights.sort_values(by=['Passengers'], ascending = False).head(5) 
-    if  h2_airports   == " Top 10 Airports":
-        Busiest_H2_Airports   = Cumulative_Flights.sort_values(by=['Passengers'], ascending = False).head(10) 
-    elif  h2_airports ==" Top 20 Airports":
-        Busiest_H2_Airports   = Cumulative_Flights.sort_values(by=['Passengers'], ascending = False).head(20) 
-    elif  h2_airports == " Top 50 Airports":
-        Busiest_H2_Airports   = Cumulative_Flights.sort_values(by=['Passengers'], ascending = False).head(50) 
-    elif  h2_airports == " All Airports":
-        Busiest_H2_Airports   = Cumulative_Flights.sort_values(by=['Passengers'], ascending = False) 
-    Airport_List = list(Busiest_H2_Airports['Origin Airport'])
-    
-    # Filter airports that will support H2 and those that wont support H2  
-    Feasible_Routes_1      = Flight_Ops[Flight_Ops['Origin Airport'].isin(Airport_List)]
-    Infeasible_Routes_1    = Flight_Ops[~Flight_Ops['Origin Airport'].isin(Airport_List)]
-    
-    # Filter routes that do not meet the range of the aircraft 
-    H2_Airports_Range    = Range_mi[Flight_Ops['Origin Airport'].isin(Airport_List)]   
-    Feasible_Routes_2    = Feasible_Routes_1[Feasible_Routes_1['Distance (miles)'] < H2_Airports_Range ] 
-    Infeasible_Routes_2  = Feasible_Routes_1[Feasible_Routes_1['Distance (miles)'] > H2_Airports_Range ]     
+                passenger_volume[ac,m_i,i]   = np.sum(H2_Flights_Mo['H2_Passengers'])
 
-    # Filter out routes where there are no passengers 
-    Feasible_Routes_3    = Feasible_Routes_2[Feasible_Routes_2['H2_Passengers'] > 0 ] 
-    Infeasible_Routes_3  = Feasible_Routes_2[Feasible_Routes_2['H2_Passengers'] < 0 ]   
-    
-    # Out of H2 supporting airports, use the percent adoption to determine how many flights at that airport will use H2     
-    H2_Flights            = Feasible_Routes_3.sample(frac=(h2_percent_adoption/100))
-    Infeasible_Routes_4   = Feasible_Routes_3[~Feasible_Routes_3.index.isin(H2_Flights.index)] 
-    Non_H2_Flights        = pd.concat([Infeasible_Routes_1,Infeasible_Routes_2,Infeasible_Routes_3,Infeasible_Routes_4])# add list of flights from non supporting airports to non-H2 flights  
-        
-    # Determine Cost per Seat Mile and Emissions  
-    CASM_wo_H2_Aircraft     = np.zeros(12) 
-    CASM_w_H2_Aircraft      = np.zeros(12) 
-    CO2e_w_H2_Aircraft      = np.zeros(12) 
-    CO2e_wo_H2_Aircraft     = np.zeros(12) 
-    for m_i in range(12): 
-        H2_Flights_Mo                = H2_Flights.loc[H2_Flights['Month'] == m_i+1] 
-        Non_H2_Flights_Mo            = Non_H2_Flights.loc[Non_H2_Flights['Month'] == m_i+1 ]   
-        Non_H2_Flights_JetA_vol_mo   = np.sum(np.array(Non_H2_Flights_Mo['Total Fuel Per Route (Gal)']))   * gallons_to_Liters * liters_to_cubic_meters   
-        H2_volumes_mo                = np.sum(np.array(H2_Flights_Mo['H2_volume']))
-        
-        if len(Non_H2_Flights_Mo ) == 0:
-            pass
-        else:
-            ASM_JetA               = np.sum(Non_H2_Flights_Mo['Distance (miles)'] * Non_H2_Flights_Mo['Passengers'])
-            Total_Fuel_Cost_JetA   = np.sum(Non_H2_Flights_Mo['Fuel Cost']) 
-            CASM_wo_H2_Aircraft[m_i]         = 100*Total_Fuel_Cost_JetA/ASM_JetA # convert to cents/pass-mile
-       
-        if len(H2_Flights_Mo)  == 0:
-            pass
-        else:    
-            ASM_H2               = np.sum(H2_Flights_Mo['Distance (miles)'] * H2_Flights_Mo['H2_Passengers']) 
-            Total_Fuel_Cost_H2   = H2_volumes_mo /liters_to_cubic_meters /gallons_to_Liters  * H2_dollars_per_gal 
-            CASM_w_H2_Aircraft[m_i]         = 100*Total_Fuel_Cost_H2/ASM_H2   # convert to cents/pass-mile
-        
-        # CO2e of the Hydrogen-powered flights in the scenario with flight operations with H2 tech
-        CO2e_H2_aircraft_in_JetAH2_Fleet    = kg_to_Megaton * np.sum(np.array(H2_used['Direct GHG emissions [kg CO2e/kg H2]'])*percentage_H2_process)*H2_volumes_mo
- 
-        # CO2e of the JetA-powered flights in the scenario with flight operations with H2 tech        
-        CO2e_JetA_aircraft_in_JetAH2_Fleet  = kg_to_Megaton * JetA_GHG * Non_H2_Flights_JetA_vol_mo *  density_JetA 
-        
-        # Total CO2e flights in the scenario with flight operations with H2 tech
-        CO2e_w_H2_Aircraft[m_i]       =  CO2e_H2_aircraft_in_JetAH2_Fleet +  CO2e_JetA_aircraft_in_JetAH2_Fleet
- 
-        # Total CO2e flights in the scenario with flight operations without H2 tech    
-        Conventional_Air_Travel             = Flight_Ops.loc[Flight_Ops['Month'] == m_i+1]
-        Conventional_Air_Travel_fuel_volume = np.sum(np.array(Conventional_Air_Travel['Total Fuel Per Route (Gal)'])) * gallons_to_Liters * liters_to_cubic_meters
-        CO2e_wo_H2_Aircraft[m_i]            = kg_to_Megaton * JetA_GHG * Conventional_Air_Travel_fuel_volume * density_JetA        
-          
-    
-          
+                aircraft_range[ac,m_i,i]     = np.maximum(0, Range_mi[original_pax_capacity==aircraft_capacity[ac] ][0])
         return  
 
  

@@ -176,9 +176,6 @@ def vehicle_setup():
     wing.symmetric               = True  
     wing.dynamic_pressure_ratio  = 1.0 
 
-    # update properties of the wing using segments     
-    wing = segment_properties(wing,update_wet_areas=True,update_ref_areas=True)
-
     # add to vehicle
     vehicle.append_component(wing)
 
@@ -282,6 +279,7 @@ def vehicle_setup():
     fuselage.lengths.total                      = 27.12   
     fuselage.lengths.nose                       = 3.375147531 
     fuselage.lengths.tail                       = 9.2 
+    fuselage.effective_diameter                 = 2.985093814  
     fuselage.lengths.cabin                      = fuselage.lengths.total- (fuselage.lengths.nose + fuselage.lengths.tail  )
     fuselage.width                              = 2.985093814  
     fuselage.heights.maximum                    = 2.755708426  
@@ -456,12 +454,9 @@ def vehicle_setup():
     starboard_propulsor.origin                       = [[ 9.559106394 ,4.219315295, 1.616135105]]
     starboard_propulsor.design_altitude              = 25000*Units.ft                                   # [-]         Design Altitude
     starboard_propulsor.design_mach_number           = 0.5                                              # [-]         Design Mach number
-    starboard_propulsor.design_thrust                = 13000 * Units.N                                  # [-]         Design Thrust
-         
-    # working fluid                    
-    starboard_propulsor.working_fluid                = RCAIDE.Library.Attributes.Gases.Air() 
-     
-    # Propeller and Gearbox efficiency               
+    starboard_propulsor.design_propeller_efficiency  = 0.86
+    starboard_propulsor.design_thrust                = 23000 * Units.N                                  # [-]         Design Thrust 
+    starboard_propulsor.working_fluid                = RCAIDE.Library.Attributes.Gases.Air()            
     starboard_propulsor.design_propeller_efficiency  = 0.83                                             # [-]         Design Propeller Efficiency
     starboard_propulsor.design_gearbox_efficiency    = 0.99                                             # [-]         Design Gearbox Efficiency
     

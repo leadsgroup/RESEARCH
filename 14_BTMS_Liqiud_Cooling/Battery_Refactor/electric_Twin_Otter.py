@@ -792,7 +792,7 @@ def mission_setup(analyses):
     segment.altitude_end                                  = 5
     segment.air_speed_start                               = Vstall *1.2  
     segment.air_speed_end                                 = Vstall *1.25
-    segment.initial_battery_state_of_charge    = 1.0
+    segment.initial_battery_state_of_charge               = 1.0
             
     # define flight dynamics to model 
     segment.flight_dynamics.force_x                       = True  
@@ -837,8 +837,8 @@ def mission_setup(analyses):
     segment.analyses.extend( analyses.base )  
     #segment.analyses.extend( analyses.hex_low_alt_climb_operation )      
     segment.altitude_start                                = 500.0 * Units.feet
-    segment.altitude_end                                  = 2500 * Units.feet  
-    segment.air_speed_end                                 = 120 * Units.kts 
+    segment.altitude_end                                  = 2500 * Units.feet   
+    segment.air_speed_end                                 = 120 * Units.kts  
     segment.climb_rate                                    = 500* Units['ft/min']  
     
     # define flight dynamics to model 

@@ -22,8 +22,8 @@ def main():
    
     separator                  = os.path.sep
     airline                    =  'Top_10_Major_US_Airlines'  
-    H2_filename                = 'Data' + separator + 'Technology' + separator +  'Technology_Data.xlsx'
-    route_temp_filename        = 'Data' + separator +  'Air_Travel' + separator + airline +  '_Flight_Ops_and_Climate.csv'   
+    H2_filename                = '..' + separator +'Data' + separator + 'Technology' + separator +  'Technology_Data.xlsx'
+    route_temp_filename        = '..' + separator +'Data' + separator +  'Air_Travel' + separator + airline +  '_Flight_Ops_and_Climate.csv'   
     SAT_data                   = pd.read_excel(H2_filename,sheet_name=['Hydrogen']) 
     Hydrogen                   = SAT_data['Hydrogen']   
     a                          = Hydrogen['Feedstock']
@@ -39,7 +39,7 @@ def main():
     H2_4                  = Hydrogen['H2 Fuel Name'][10]     
     selected_h2           = [H2_1,H2_2,H2_3,H2_4]      
     h2_vol_percentage     = 15  
-    h2_airports           = " Top 10 Airports" # DONE  # [" Top 5 Airports"," Top 10 Airports"," Top 20 Airports", " Top 50 Airports",  "All Airports"]
+    h2_airports           = " All Airports" # DONE  # [" Top 5 Airports"," Top 10 Airports"," Top 20 Airports", " Top 50 Airports",  " All Airports"]
     h2_percent_adoption   = 100    
     h2_cruise_alt         = 35000  
     mean_SFC_Imperial     = 0.6   
