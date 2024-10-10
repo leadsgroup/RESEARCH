@@ -1,0 +1,130 @@
+
+ ----------------------------------------------------------------------------
+ DFDC  Case:  Bladed rotor + actdisk stator te
+ ----------------------------------------------------------------------------
+ Flow Condition and total Forces                 No blade blockage correction
+
+  Vinf(m/s) :   150.000    Alt.(km)   :   10.000     DeltaT(dgC):   0.0000
+ rho(kg/m3) :     0.4130   Vsound(m/s):  299.000     mu(kg/m-s) : 0.1447E-04
+ Thrust(N)  :        NaN   Power(W)   :        NaN   Efficiency :      NaN
+ Tvisc (N)  :        NaN   Pvisc(W)   :        NaN   Induced Eff:      NaN
+ Tduct(N)   :        NaN   torQue(N-m):        NaN   Ideal Eff  :   2.0000
+
+  Area:    6.84822  Radius:    1.56294 Omega:  174.26663  Reference data
+    Ct:        NaN      Cp:        NaN     J:    1.73015  by(Rho,N,Dia)
+    Tc:        NaN      Pc:        NaN   adv:    0.55072  by(Rho,Vinf,Area)  
+   CT0:        NaN     CP0:        NaN   FOM:    0.00000  by(Rho,R*Omg,Area)
+ ----------------------------------------------------------------------------
+ Disk #  1    Bladed Rotor                  
+ # blades   : 12           RPM        :   1664.124   adv. ratio :   0.5507
+ Thrust(N)  :        NaN   Power(W)   :        NaN   Efficiency :      NaN
+ Tvisc (N)  :        NaN   Pvisc(W)   :        NaN   Induced Eff:      NaN
+ torQue(N-m):        NaN   Qvisc(N-m) :        NaN   Ideal Eff  :   2.0000
+ radius(m)  :   1.5629     hub rad.(m):   0.5128     VAavg (m/s):      NaN
+
+  Area:    6.84822  Radius:    1.56294 Omega:  174.26663  Reference data
+    Ct:        NaN      Cp:        NaN     J:    1.73015  by(Rho,N,Dia)
+    Tc:        NaN      Pc:        NaN   adv:    0.55072  by(Rho,Vinf,Area)  
+   CT0:        NaN     CP0:        NaN                    by(Rho,R*Omg,Area)
+ Sigma:    0.29821 CT0/Sig:        NaN
+ ----------------------------------------------------------------------------
+   i   r/R    c/R     beta deg alfa     CL     CD      RE      Mach    B*Gam
+   1  0.345  0.1011   74.67    NaN      NaN     NaN     NaN     NaN      NaN
+   2  0.378  0.1109   72.05    NaN      NaN     NaN     NaN     NaN      NaN
+   3  0.412  0.1201   69.54    NaN      NaN     NaN     NaN     NaN      NaN
+   4  0.446  0.1278   67.10    NaN      NaN     NaN     NaN     NaN      NaN
+   5  0.479  0.1335   64.73    NaN      NaN     NaN     NaN     NaN      NaN
+   6  0.513  0.1369   62.40    NaN      NaN     NaN     NaN     NaN      NaN
+   7  0.546  0.1376   60.12    NaN      NaN     NaN     NaN     NaN      NaN
+   8  0.580  0.1357   57.89    NaN      NaN     NaN     NaN     NaN      NaN
+   9  0.614  0.1306   55.68    NaN      NaN     NaN     NaN     NaN      NaN
+  10  0.647  0.1222   53.49    NaN      NaN     NaN     NaN     NaN      NaN
+  11  0.681  0.1097   51.27    NaN      NaN     NaN     NaN     NaN      NaN
+  12  0.714  0.0953   49.12    NaN      NaN     NaN     NaN     NaN      NaN
+  13  0.748  0.0791   47.03    NaN      NaN     NaN     NaN     NaN      NaN
+  14  0.782  0.0613   45.01    NaN      NaN     NaN     NaN     NaN      NaN
+  15  0.815  0.0422   43.10    NaN      NaN     NaN     NaN     NaN      NaN
+  16  0.849  0.0219   41.37    NaN      NaN     NaN     NaN     NaN      NaN
+  17  0.882  0.0008   40.05    NaN      NaN     NaN     NaN     NaN      NaN
+  18  0.916  0.0208   22.65    NaN      NaN     NaN     NaN     NaN      NaN
+  19  0.950  0.0419   16.08    NaN      NaN     NaN     NaN     NaN      NaN
+  20  0.983  0.0602    9.75    NaN      NaN     NaN     NaN     NaN      NaN
+ ----------------------------------------------------------------------------
+ Disk #  2    Actuator Disk Stator          
+ # blades   :  5           RPM        :      0.000   adv. ratio :   0.0000
+ Thrust(N)  :        NaN   Power(W)   :        NaN   Efficiency :      NaN
+ Tvisc (N)  :     0.0000   Pvisc(W)   :   0.00       Induced Eff:      NaN
+ torQue(N-m):        NaN   Qvisc(N-m) :        NaN   Ideal Eff  :   2.0000
+ radius(m)  :   1.5783     hub rad.(m):   0.5462     VAavg (m/s):      NaN
+
+  Area:    6.88880  Radius:    1.57834 Omega:    0.00000  Reference data
+    Ct:    0.00000      Cp:    0.00000     J:    0.00000  by(Rho,N,Dia)
+    Tc:        NaN      Pc:        NaN   adv:    0.00000  by(Rho,Vinf,Area)  
+   CT0:    0.00000     CP0:    0.00000                    by(Rho,R*Omg,Area)
+ Sigma:    0.00000 CT0/Sig:    0.00000
+ ----------------------------------------------------------------------------
+   i   r/R    c/R     beta deg alfa     CL     CD      RE      Mach    B*Gam
+   1  0.362                                                     NaN  -10.000
+   2  0.393                                                     NaN  -10.000
+   3  0.425                                                     NaN  -10.000
+   4  0.457                                                     NaN  -10.000
+   5  0.489                                                     NaN  -10.000
+   6  0.521                                                     NaN  -10.000
+   7  0.554                                                     NaN  -10.000
+   8  0.586                                                     NaN  -10.000
+   9  0.619                                                     NaN  -10.000
+  10  0.652                                                     NaN  -10.000
+  11  0.685                                                     NaN  -10.000
+  12  0.718                                                     NaN  -10.000
+  13  0.751                                                     NaN  -10.000
+  14  0.784                                                     NaN  -10.000
+  15  0.817                                                     NaN  -10.000
+  16  0.851                                                     NaN  -10.000
+  17  0.884                                                     NaN  -10.000
+  18  0.917                                                     NaN  -10.000
+  19  0.950                                                     NaN  -10.000
+  20  0.983                                                     NaN  -10.000
+
+
+ Force Summary
+ -----------------------------------------------
+ Bladed rotor + actdisk stator test case           
+
+ Qinf   =   150.00        Rho  =  0.41300    
+ Qref   =   132.93        Mach =   0.0000    
+ q_ref  =   3648.9    
+ -----------------------------------------------
+ Total Forces
+ Fx    =          NaN     Cx    =          NaN
+ Fxinv =          NaN     Cxinv =          NaN
+ Fxvis =   0.0000         Cxvis =   0.0000    
+ -----------------------------------------------
+ Element  1
+ Fx    =          NaN     Cx    =          NaN
+ Fxinv =          NaN     Cxinv =          NaN
+ Fxvis =   0.0000         Cxvis =   0.0000    
+ QnDOF=          NaN
+ -----------------------------------------------
+ Element  2
+ Fx    =          NaN     Cx    =          NaN
+ Fxinv =          NaN     Cxinv =          NaN
+ Fxvis =   0.0000         Cxvis =   0.0000    
+ QnDOF=          NaN
+ -----------------------------------------------
+ Element  3
+ Fx    =          NaN     Cx    =          NaN
+ Fxinv =          NaN     Cxinv =          NaN
+ Fxvis =   0.0000         Cxvis =   0.0000    
+ QnDOF=  -0.0000    
+ -----------------------------------------------
+ Element  4
+ Fx    =          NaN     Cx    =          NaN
+ Fxinv =          NaN     Cxinv =          NaN
+ Fxvis =   0.0000         Cxvis =   0.0000    
+ QnDOF=  -0.0000    
+ -----------------------------------------------
+ Element  5
+ Fx    =          NaN     Cx    =          NaN
+ Fxinv =          NaN     Cxinv =          NaN
+ Fxvis =   0.0000         Cxvis =   0.0000    
+ QnDOF=  -0.0000    

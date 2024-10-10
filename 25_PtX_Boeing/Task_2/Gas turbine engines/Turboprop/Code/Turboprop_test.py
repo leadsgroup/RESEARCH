@@ -531,11 +531,6 @@ def turboprop_model_test():
     #  Input values for real turboprop
     # ----------------------------------------------------------------------------------------------------------------------
     
-    # 1) Real engine
-    # 2) Eng library James Aircraft for Validation
-    # 3) Integration into RCAIDE
-    # 4) Get ATR 72 / Otter Engine data
-    
     M0_r                  = 0.8                       # [-]
     T0_r                  = 240                       # [K]
     gamma_c               = 1.4                       # [-]
@@ -591,27 +586,25 @@ def turboprop_model_test():
     for i in range(len(pi_c)):
         for j in range(len(tau_t)):
             
-            R_c                  = ((gamma_c - 1)/gamma_c)*cp_c
-            R_t                  = ((gamma_t - 1)/gamma_t)*cp_t
-            a0                   = np.sqrt(gamma_c*R_c*T0_r)
-            V0                   = a0*M0_r
-            tau_r                = 1 + ((gamma_c - 1)/2)*M0_r**2
-            pi_r                 = tau_r**(gamma_c/(gamma_c - 1))
-            if M0_r <= 1:
-                eta_r            = 1
-            else:
-                eta_r            = 1 - 0.0075(M0_r - 1)**1.35
+            R_c                  = ((gamma_c - 1)/gamma_c)*cp_c  # computed in the compressor code
+            R_t                  = ((gamma_t - 1)/gamma_t)*cp_t  # computed in the turbine code
+            a0                   = np.sqrt(gamma_c*R_c*T0_r)     # computed in the ram code
+            V0                   = a0*M0_r                       # computed in the compressor code
             tau_lambda           = (cp_t*Tt4)/(cp_c*T0_r)
             tau_c_r[i,j]         = pi_c[i]**((gamma_c - 1)/(gamma_c*e_c))
             eta_c[i,j]           = (pi_c[i]**((gamma_c - 1)/(gamma_c)) - 1)/(tau_c_r[i,j] - 1)
-            f_r[i,j]             = (tau_lambda - tau_r*tau_c_r[i,j])/((eta_b*h_PR)/(cp_c*T0_r) - tau_lambda)
-            tau_tH_r[i,j]        = 1 - ((tau_r*(tau_c_r[i,j] - 1))/(eta_mH*(1 + f_r[i,j])*tau_lambda))
-            pi_tH[i,j]           = tau_tH_r[i,j]**(gamma_t/((gamma_t - 1)*e_tH))
-            eta_tH[i,j]          = (1 - tau_tH_r[i,j])/(1 - tau_tH_r[i,j]**(1/e_tH))
-            tau_tL_r[i,j]        = tau_t[j]/tau_tH_r[i,j]
-            pi_tL[i,j]           = tau_tL_r[i,j]**(gamma_t/((gamma_t - 1)*e_tL))
-            eta_tL[i,j]          = (1 - tau_tL_r[i,j])/(1 - tau_tL_r[i,j]**(1/e_tL))
-            Pt9_P0[i,j]          = pi_r*pi_d*pi_c[i]*pi_b*pi_tH[i,j]*pi_tL[i,j]*pi_n
+            f_r[i,j]             = (tau_lambda - (1 + ((gamma_c - 1)/2)*M0_r**2)*tau_c_r[i,j])/((eta_b*h_PR)/(cp_c*T0_r) - tau_lambda) # computed in the combustor code
+            
+            tau_tH_r[i,j]        = 1 - (((1 + ((gamma_c - 1)/2)*M0_r**2)*(tau_c_r[i,j] - 1))/(eta_mH*(1 + f_r[i,j])*tau_lambda))
+            pi_tH[i,j]           = tau_tH_r[i,j]**(gamma_t/((gamma_t - 1)*e_tH)) # computed in the turbine code
+            eta_tH[i,j]          = (1 - tau_tH_r[i,j])/(1 - tau_tH_r[i,j]**(1/e_tH))  # don't need
+            tau_tL_r[i,j]        = tau_t[j]/tau_tH_r[i,j]# computed in the turbine code
+            
+            pi_tL[i,j]           = tau_tL_r[i,j]**(gamma_t/((gamma_t - 1)*e_tL))  # computed in the turbine code
+            eta_tL[i,j]          = (1 - tau_tL_r[i,j])/(1 - tau_tL_r[i,j]**(1/e_tL)) # computed in the turbine code
+            
+            
+            Pt9_P0[i,j]          = ((1 + ((gamma_c - 1)/2)*M0_r**2)**(gamma_c/(gamma_c - 1)))*pi_d*pi_c[i]*pi_b*pi_tH[i,j]*pi_tL[i,j]*pi_n
             
             if Pt9_P0[i,j] > ((gamma_t + 1)/2)**(gamma_t/(gamma_t - 1)):
                 M9[i,j]          = 1
@@ -621,10 +614,17 @@ def turboprop_model_test():
                 Pt9_P9[i,j]      = Pt9_P0[i,j]
                 M9[i,j]          = np.sqrt((2/(gamma_t - 1))*((Pt9_P0[i,j])**((gamma_t - 1)/gamma_t)) - 1)
                 P0_P9[i,j]       = 1
-            Tt9_T0[i,j]          = (Tt4/T0_r)*tau_tH_r[i,j]*tau_tL_r[i,j]
-            T9_T0[i,j]           = (Tt9_T0[i,j])/((Pt9_P9[i,j])**((gamma_t - 1)/gamma_t))
-            V9_a0_r[i,j]         = np.sqrt(((2*tau_lambda*tau_tH_r[i,j]*tau_tL_r[i,j])/(gamma_c - 1))*(1 - Pt9_P9[i,j]**(-(gamma_t - 1)/(gamma_t))))
-            C_prop_r[i,j]        = eta_prop*eta_g*eta_mL*(1 + f_r[i,j])*tau_lambda*tau_tH_r[i,j]*(1 - tau_tL_r[i,j])
+            
+            # Already done
+            
+            
+            Tt9_T0[i,j]          = (Tt4/T0_r)*tau_tH_r[i,j]*tau_tL_r[i,j] # can be computed easily
+            T9_T0[i,j]           = (Tt9_T0[i,j])/((Pt9_P9[i,j])**((gamma_t - 1)/gamma_t))# can be computed easily
+            
+            V9_a0_r[i,j]         = np.sqrt(((2*tau_lambda*tau_tH_r[i,j]*tau_tL_r[i,j])/(gamma_c - 1))*(1 - Pt9_P9[i,j]**(-(gamma_t - 1)/(gamma_t))))# can be computed easily
+            
+            
+            C_prop_r[i,j]        = eta_prop*eta_g*eta_mL*(1 + f_r[i,j])*(cp_t*Tt4)/(cp_c*T0_r)*tau_tH_r[i,j]*(1 - tau_tL_r[i,j])
             Cc_r[i,j]            = (gamma_c - 1)*M0_r*((1 + f_r[i,j])*V9_a0_r[i,j] - M0_r + (1 + f_r[i,j])*(R_t/R_c)*((T9_T0[i,j])/(V9_a0_r[i,j]))*((1 - (P0_P9[i,j]))/gamma_c))
             C_tot_r[i,j]         = Cc_r[i,j] + C_prop_r[i,j]
             F_mdot0_r[i,j]       = (C_tot_r[i,j]*cp_c*T0_r)/(V0)
