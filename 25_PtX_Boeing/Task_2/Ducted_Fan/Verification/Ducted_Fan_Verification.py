@@ -203,8 +203,8 @@ def define_ducted_fan():
     ducted_fan.cruise.design_reference_velocity  = 0.45*  295.4   
     airfoil                                      = RCAIDE.Library.Components.Airfoils.Airfoil()
     airfoil.tag                                  = 'NACA_4412' 
-    #airfoil.coordinate_file                      =  rel_path + 'Airfoils' + separator + 'NACA_4412.txt'    
-    #ducted_fan.append_duct_airfoil(airfoil)
+    airfoil.coordinate_file                      =  rel_path + 'Airfoils' + separator + 'NACA_63_015.txt'    
+    ducted_fan.append_duct_airfoil(airfoil)
     design_ducted_fan(ducted_fan) 
     
     return ducted_fan 
