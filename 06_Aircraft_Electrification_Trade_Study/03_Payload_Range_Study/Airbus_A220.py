@@ -27,6 +27,22 @@ import os
 # ----------------------------------------------------------------------
 #   Main
 # ----------------------------------------------------------------------
+max_fuel_weights = {
+    'A220 Jet A1': 17621.69,
+    'A220 Ethane': 11958.20,
+    'A220 Methane': 9262.35,
+    'A220 Propane': 12804.22,
+    'A220 Ethanol': 17395.28,
+    'A220 Butanol': 17743.55,
+    'A220 Propanol': 17625.20,
+    'A220 Methane-Propane 75-25': 10147.81,
+    'A220 Ethane-Propane 75-25': 12169.71,
+    'A220 Methane-Ethane 75-25': 9936.31,
+    'A220 Propanol-Ethanol 75-25': 17567.72,
+    'A220 Butanol-Ethanol 75-25': 17656.48,
+    'A220 Butanol-Propanol 75-25': 17713.96
+}
+
 
 def main():
     methane_propane = Alkane_Mixture()
@@ -72,16 +88,17 @@ def main():
     butanol_propanol.compute_all()
     
     # Butanol
-    fuels = [Ethane(), Methane(), Propane(), Ethanol(), Butanol(), Propanol(), \
+    fuels = [Jet_A1() ,Ethane(), Methane(), Propane(), Ethanol(), Butanol(), Propanol(), \
         methane_propane, ethane_propane, methane_ethane, propanol_ethanol, butanol_ethanol, butanol_propanol]
-    fuel_names = ["A220 Ethane", "A220 Methane", "A220 Propane", "A220 Ethanol", "A220 Butanol", "A220 Propanol", \
+    fuel_names = ["A220 Jet A1" ,"A220 Ethane", "A220 Methane", "A220 Propane", "A220 Ethanol", "A220 Butanol", "A220 Propanol", \
         "A220 Methane-Propane 75-25", "A220 Ethane-Propane 75-25", "A220 Methane-Ethane 75-25", \
         "A220 Propanol-Ethanol 75-25", "A220 Butanol-Ethanol 75-25", "A220 Butanol-Propanol 75-25"]
     
     
     for index, fuel in enumerate(fuels):
         print("Running simulation for", fuel_names[index])
-    
+        vehicle.mass_properties.max_fuel = max_fuel_weights[fuel_names[index]]
+
         # Step 1 design a vehicle
         vehicle  = vehicle_setup(fuel)
         
@@ -124,10 +141,12 @@ def vehicle_setup(propellant):
     # ################################################# Vehicle-level Properties ########################################################  
 
     # mass properties
-    vehicle.mass_properties.max_takeoff      = 63100  # kg 
-    vehicle.mass_properties.takeoff          = 63100  # kg 
-    vehicle.mass_properties.max_zero_fuel    = 52200  # kg
-    vehicle.mass_properties.operating_empty  = 35221   # kg(https://aircraft.airbus.com/sites/g/files/jlcbta126/files/2023-11/A220-ACP-Issue001-00-19Oct2023.pdf)
+    vehicle.mass_properties.max_takeoff      = 60781  # kg (CHANGED FROM PREVIOUS VALUE TO AIRBUS VALUE)
+    vehicle.mass_properties.takeoff          = 60781  # kg (CHANGED FROM PREVIOUS VALUE TO AIRBUS VALUE)
+    vehicle.mass_properties.max_zero_fuel    = 50349  # kg (CHANGED FROM PREVIOUS VALUE TO AIRBUS VALUE)
+    vehicle.mass_properties.operating_empty  = 35221  # kg (https://aircraft.airbus.com/sites/g/files/jlcbta126/files/2023-11/A220-ACP-Issue001-00-19Oct2023.pdf)
+    vehicle.mass_properties.max_payload      = 15128  # kg (https://aircraft.airbus.com/sites/g/files/jlcbta126/files/2023-11/A220-ACP-Issue001-00-19Oct2023.pdf)
+    vehicle.mass_properties.cargo            = 0.0    # kg (Should be 0?)
     vehicle.envelope.ultimate_load           = 3.75
     vehicle.envelope.limit_load              = 1.5
     vehicle.reference_area                   = 112.3* Units['meters**2']
