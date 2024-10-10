@@ -810,7 +810,7 @@ def mission_setup(analyses):
     segment.analyses.extend(analyses.base) 
     segment.altitude                                      = 25000   * Units.feet 
     segment.air_speed                                     = 130 * Units.kts
-    segment.distance                                      = 20.   * Units.nautical_mile  
+    segment.distance                                      = 200.   * Units.nautical_mile  
     
     # define flight dynamics to model 
     segment.flight_dynamics.force_x                       = True  
