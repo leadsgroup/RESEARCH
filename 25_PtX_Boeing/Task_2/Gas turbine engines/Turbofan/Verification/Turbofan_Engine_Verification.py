@@ -118,7 +118,9 @@ def main():
             hpt_conditions                                    = turbofan_conditions[high_pressure_turbine.tag]
             lpt_conditions                                    = turbofan_conditions[low_pressure_turbine.tag]
             core_nozzle_conditions                            = turbofan_conditions[core_nozzle.tag]
-            fan_nozzle_conditions                             = turbofan_conditions[fan_nozzle.tag]            
+            fan_nozzle_conditions                             = turbofan_conditions[fan_nozzle.tag]
+            fan_thrust                                        = turbofan_conditions.fan_thrust 
+            core_thrust                                       = turbofan_conditions.core_thrust
             
             # extract properties
             U_e_c                                             = core_nozzle_conditions.outputs.velocity 

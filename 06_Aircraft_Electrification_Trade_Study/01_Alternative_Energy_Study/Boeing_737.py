@@ -572,14 +572,15 @@ def vehicle_setup(propellant):
     # Propulsor: Starboard Propulsor
     #------------------------------------------------------------------------------------------------------------------------------------         
     turbofan                                    = RCAIDE.Library.Components.Propulsors.Turbofan() 
-    turbofan.tag                                = 'starboard_propulsor'
+    turbofan.tag                                = 'CFM56_7B24_starboard_propulsor' # Reg 
     turbofan.active_fuel_tanks                  = ['fuel_tank']   
     turbofan.origin                             = [[13.72, 4.86,-1.1]] 
     turbofan.engine_length                      = 2.71     
-    turbofan.bypass_ratio                       = 5.4    
-    turbofan.design_altitude                    = 35000.0*Units.ft
+    turbofan.bypass_ratio                       = 5.3    
+    turbofan.diameter                           = 1.54  
+    turbofan.design_altitude                    = 10668
     turbofan.design_mach_number                 = 0.78   
-    turbofan.design_thrust                      = 35000.0* Units.N 
+    turbofan.design_thrust                      = 28000.0* Units.N 
              
     # fan                
     fan                                         = RCAIDE.Library.Components.Propulsors.Converters.Fan()   
@@ -636,7 +637,7 @@ def vehicle_setup(propellant):
     combustor.alphac                               = 1.0     
     combustor.turbine_inlet_temperature            = 1500
     combustor.pressure_ratio                       = 0.95
-    combustor.fuel_data                            = propellant
+    combustor.fuel_data                            =  RCAIDE.Library.Attributes.Propellants.Jet_A1() #  propellant
     turbofan.combustor                             = combustor
 
     # core nozzle

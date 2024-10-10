@@ -587,10 +587,10 @@ def vehicle_setup(propellant):
     turbofan.active_fuel_tanks                  = ['fuel_tank'] 
     turbofan.origin                             = [[ 10.150,  5.435, -1.087]] 
     turbofan.engine_length                      = 2.71     
-    turbofan.bypass_ratio                       = 5.4    
+    turbofan.bypass_ratio                       = 8
     turbofan.design_altitude                    = 35000.0*Units.ft
     turbofan.design_mach_number                 = 0.78   
-    turbofan.design_thrust                      = 35000.0* Units.N 
+    turbofan.design_thrust                      = 28000.0* Units.N 
 
     # fan                
     fan                                         = RCAIDE.Library.Components.Propulsors.Converters.Fan()   
@@ -623,7 +623,7 @@ def vehicle_setup(propellant):
     high_pressure_compressor                       = RCAIDE.Library.Components.Propulsors.Converters.Compressor()    
     high_pressure_compressor.tag                   = 'hpc'
     high_pressure_compressor.polytropic_efficiency = 0.91
-    high_pressure_compressor.pressure_ratio        = 10.0    
+    high_pressure_compressor.pressure_ratio        = 7.9566
     turbofan.high_pressure_compressor              = high_pressure_compressor
 
     # low pressure turbine  
@@ -645,9 +645,9 @@ def vehicle_setup(propellant):
     combustor.tag                                  = 'Comb'
     combustor.efficiency                           = 0.99 
     combustor.alphac                               = 1.0     
-    combustor.turbine_inlet_temperature            = 1500
+    combustor.turbine_inlet_temperature            = 1600
     combustor.pressure_ratio                       = 0.95
-    combustor.fuel_data                            = propellant  
+    combustor.fuel_data                            = RCAIDE.Library.Attributes.Propellants.Jet_A1() # propellant  
     turbofan.combustor                             = combustor
 
     # core nozzle
