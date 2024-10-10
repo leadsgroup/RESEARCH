@@ -557,8 +557,8 @@ def vehicle_setup():
     turbofan.origin                                 = [[26.429, 17.6, 0.2]] 
     turbofan.engine_length                          = 7.92    
     turbofan.bypass_ratio                           = 8  
-    turbofan.design_altitude                        = 35000*Units.ft
-    turbofan.design_mach_number                     = 0.77
+    turbofan.design_altitude                        = 0*Units.ft
+    turbofan.design_mach_number                     = 0.01
     turbofan.design_thrust                          = 193000* Units.N 
      
     # Nacelle 
