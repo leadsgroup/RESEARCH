@@ -14,6 +14,8 @@ from RCAIDE.Framework.Mission.Segments.Segment   import Segment
 # python imports  
 import matplotlib.pyplot as plt                                      
 import matplotlib.cm     as cm
+from mpl_toolkits.mplot3d import Axes3D
+from mpl_toolkits.mplot3d.axes3d import get_test_data
 import pickle    
 import os
 import pandas as pd 
@@ -21,17 +23,18 @@ import numpy as  np
 import os                                                   
 import time  
  
-def main():  
+def main(): 
     
     ti                      = time.time()                                           
     
-    altitude            = np.linspace(0,20000,5)*Units.feet
-    mach_number         = np.linspace(0.1,0.5,5)
-    tip_mach            = np.linspace(0.2,0.8,4)
 
-    thrust              = np.zeros((len(altitude),len(mach_number))) 
-    torque              = np.zeros((len(altitude),len(mach_number))) 
-    power               = np.zeros((len(altitude),len(mach_number))) 
+    tip_mach       = np.array([0.2, 0.4, 0.6, 0.8])     
+    mach_number    = np.array([0.01,0.1,0.25,0.5]) 
+    altitude      = np.array([0, 2, 5, 10]) *1000 
+
+    thrust              = np.zeros((len(altitude),len(mach_number),len(tip_mach)))
+    torque              = np.zeros((len(altitude),len(mach_number),len(tip_mach)))
+    power               = np.zeros((len(altitude),len(mach_number),len(tip_mach)))
 
     bus                                                = RCAIDE.Library.Components.Energy.Distributors.Electrical_Bus()
     bus.voltage                                        = 800                         
@@ -62,7 +65,8 @@ def main():
                 conditions.freestream.density                          = atmo_data.density  
                 conditions.freestream.dynamic_viscosity                = atmo_data.dynamic_viscosity
                 conditions.freestream.speed_of_sound                   = atmo_data.speed_of_sound
-                conditions.freestream.temperature                      = atmo_data.temperature        
+                conditions.freestream.temperature                      = atmo_data.temperature
+                conditions.freestream.altitude                         = np.ones((ctrl_pts,1)) *altitude[i]
                 conditions.frames.inertial.velocity_vector             = np.array([[mach_number[j] *atmo_data.speed_of_sound[0,0] , 0. ,0.]]) 
                 conditions.frames.planet.true_course                   = np.zeros((ctrl_pts,3,3)) 
                 conditions.frames.planet.true_course[:,0,0]            = np.cos(true_course),
@@ -100,11 +104,11 @@ def main():
                 ducted_fan_conditions.omega[:,0]  = ((tip_mach[k]*atmo_data.speed_of_sound[0,0]) /DF.tip_radius) 
                 compute_ducted_fan_performance(electric_ducted_fan,segment.state,bus)
                 
-                thrust[i, j, k] = ducted_fan_conditions.thrust 
-                torque[i, j, k] = ducted_fan_conditions.torque 
-                power[i, j, k]  = ducted_fan_conditions.power 
+                thrust[i, j, k] = segment.state.conditions.energy[bus.tag][electric_ducted_fan.tag][electric_ducted_fan.ducted_fan.tag].thrust[0, 0] 
+                torque[i, j, k] = segment.state.conditions.energy[bus.tag][electric_ducted_fan.tag][electric_ducted_fan.ducted_fan.tag].torque[0, 0]
+                power[i, j, k]  = segment.state.conditions.energy[bus.tag][electric_ducted_fan.tag][electric_ducted_fan.ducted_fan.tag].power[0, 0]
         
-    plot_results(altitude,mach_number,thrust,torque,power)
+    plot_results(altitude,mach_number,tip_mach,thrust,torque,power)
     
     tf                      = time.time()                                           # [s]       Define the final simulation time
     elapsed_time            = round((tf-ti),2)                                      # [s]       Compute the total simulation time
@@ -113,23 +117,47 @@ def main():
     
     return
 
-def plot_results(altitude,mach_number,thrust):
-    ps =  plot_style(number_of_lines = len(mach_number)) 
-    
+def plot_results(altitude,mach_number,tip_mach,thrust,torque,power): 
     fig    =  plt.figure('Thrust')
     fig.set_size_inches(7, 6)
-    axis_1 = fig.add_subplot(1,1,1) 
-    for i in  range(len(mach_number)):
-        axis_1.plot(thrust[:,i],altitude, color = ps.color[i], linestyle = ps.line_style[0],
-                    marker = ps.markers[0], linewidth = ps.line_width, label = 'Mach =' + str( round(mach_number[i], 2)))     
-    axis_1.set_xlabel('Thrust [N]')
-    axis_1.set_ylabel('Altitude [m]')
+    axis_1 = fig.add_subplot(2,2,1) 
+    axis_2 = fig.add_subplot(2,2,2) 
+    axis_3 = fig.add_subplot(2,2,3) 
+    axis_4 = fig.add_subplot(2,2,4)
     
-    axis_1.legend()
+    x, y = np.meshgrid(tip_mach, mach_number)
+    
+
+
+    thrust_levels   = np.linspace(np.min(thrust),np.max(thrust),10)
+    
+    thrust_cmap     = plt.get_cmap('turbo') 
+    
+    
+    contour_1 =  axis_1.contourf(x,y, thrust[0, :, :], thrust_levels,cmap = thrust_cmap)   
+    contour_2 =  axis_2.contourf(x,y, thrust[1, :, :], thrust_levels,cmap = thrust_cmap)   
+    contour_3 =  axis_3.contourf(x,y, thrust[2, :, :], thrust_levels,cmap = thrust_cmap)   
+    contour_4 =  axis_4.contourf(x,y, thrust[3, :, :], thrust_levels,cmap = thrust_cmap)   
+    axis_1.set_ylabel('Mach')
+    axis_2.set_ylabel('Mach')
+    axis_3.set_ylabel('Mach')
+    axis_4.set_ylabel('Mach')
+    axis_1.set_xlabel('Tip Mach')
+    axis_2.set_xlabel('Tip Mach')
+    axis_3.set_xlabel('Tip Mach')
+    axis_4.set_xlabel('Tip Mach')  
+    axis_1.set_title('Alt = 0 ft')
+    axis_2.set_title('Alt = 10000 ft')
+    axis_3.set_title('Alt = 20000 ft')
+    axis_4.set_title('Alt = 30000 ft') 
+    
+    cbar  = fig.colorbar(contour_1, ax = axis_1) 
+    cbar  = fig.colorbar(contour_2, ax = axis_2) 
+    cbar  = fig.colorbar(contour_3, ax = axis_3) 
+    cbar  = fig.colorbar(contour_4, ax = axis_4) 
+    cbar.ax.set_ylabel('Thrust', rotation =  90)
+    
     fig.tight_layout()
-    
- 
-    
     return
 
 def plot_style(number_of_lines= 10): 
@@ -182,7 +210,7 @@ def load_results(filename):
 def define_ducted_fan():
     ospath                                = os.path.abspath(__file__)
     separator                             = os.path.sep
-    rel_path                              = ospath.split()[0]  +  '..' + separator + '..' + separator
+    rel_path                              = ospath.split('Ducted_Fan_Verification.py')[0]   
     
     
     ducted_fan                                   = RCAIDE.Library.Components.Propulsors.Converters.Ducted_Fan()
@@ -190,7 +218,7 @@ def define_ducted_fan():
     ducted_fan.number_of_rotor_blades            = 12 #22 
     ducted_fan.number_of_radial_stations         = 20
     ducted_fan.tip_radius                        = 3.124 / 2
-    ducted_fan.hub_radius                        = 3.124 /2 * 0.35
+    ducted_fan.hub_radius                        = 3.124 /2 * 0.25
     ducted_fan.blade_clearance                   = 0.01
     ducted_fan.length                            = 2
     ducted_fan.rotor_percent_x_location          = 0.4
@@ -201,10 +229,12 @@ def define_ducted_fan():
     ducted_fan.cruise.design_angular_velocity    = (ducted_fan.cruise.design_tip_mach *295) /ducted_fan.tip_radius  # 1352 RPM
     ducted_fan.cruise.design_freestream_velocity = 0.45*  295.4  
     ducted_fan.cruise.design_reference_velocity  = 0.45*  295.4   
-    airfoil                                      = RCAIDE.Library.Components.Airfoils.Airfoil()
-    airfoil.tag                                  = 'NACA_4412' 
-    airfoil.coordinate_file                      =  rel_path + 'Airfoils' + separator + 'NACA_63_015.txt'    
-    ducted_fan.append_duct_airfoil(airfoil)
+    airfoil                                      = RCAIDE.Library.Components.Airfoils.NACA_4_Series_Airfoil() 
+    airfoil.NACA_4_Series_code                   = '2208'
+    ducted_fan.append_duct_airfoil(airfoil)  
+    airfoil                                      = RCAIDE.Library.Components.Airfoils.NACA_4_Series_Airfoil()
+    airfoil.NACA_4_Series_code                   = '0021'    
+    ducted_fan.append_hub_airfoil(airfoil)    
     design_ducted_fan(ducted_fan) 
     
     return ducted_fan 
