@@ -16,6 +16,7 @@ import matplotlib.pyplot as plt
 import matplotlib.cm     as cm
 from mpl_toolkits.mplot3d import Axes3D
 from mpl_toolkits.mplot3d.axes3d import get_test_data
+from scipy import interpolate 
 import pickle    
 import os
 import pandas as pd 
@@ -25,19 +26,18 @@ import time
  
 def main(): 
     
-    ti                      = time.time()                                           
-    
+    ti                  = time.time()      
 
-    tip_mach       = np.array([0.2, 0.4, 0.6, 0.8])     
-    mach_number    = np.array([0.01,0.1,0.25,0.5]) 
-    altitude      = np.array([0, 2, 5, 10]) *1000 
+    tip_mach            = np.array([0.2, 0.3, 0.4, 0.5, 0.6 ])     
+    mach_number         = np.array([0.01,0.1, 0.2, 0.3 , 0.4, 0.5]) 
+    altitude            = np.array([0, 5000, 10000, 15000,  20000]) *Units.feet
 
     thrust              = np.zeros((len(altitude),len(mach_number),len(tip_mach)))
     torque              = np.zeros((len(altitude),len(mach_number),len(tip_mach)))
     power               = np.zeros((len(altitude),len(mach_number),len(tip_mach)))
 
     bus                                                = RCAIDE.Library.Components.Energy.Distributors.Electrical_Bus()
-    bus.voltage                                        = 800                         
+    bus.voltage                                        = 1000                         
     electric_ducted_fan                                = RCAIDE.Library.Components.Propulsors.Electric_Ducted_Fan()
     DF =  define_ducted_fan()
     electric_ducted_fan.ducted_fan                     = DF
@@ -89,14 +89,13 @@ def main():
                 segment.state.conditions                               = conditions  
                 segment.state.conditions.energy[bus.tag]               = Conditions() 
                 
-                electric_ducted_fan.append_operating_conditions(segment,bus,electric_ducted_fan)   
+                electric_ducted_fan.append_operating_conditions(segment,bus)     
                 for tag, item in  electric_ducted_fan.items(): 
                     if issubclass(type(item), RCAIDE.Library.Components.Component):
                         item.append_operating_conditions(segment,bus,electric_ducted_fan) 
                 
                 # set throttle
-                segment.state.conditions.energy[bus.tag][electric_ducted_fan.tag].throttle[:,0] = 1  
-                
+                segment.state.conditions.energy[bus.tag][electric_ducted_fan.tag].throttle[:,0] = 1   
             
                 # Run BEMT
                 segment.state.conditions.expand_rows(ctrl_pts)
@@ -129,7 +128,7 @@ def plot_results(altitude,mach_number,tip_mach,thrust,torque,power):
     
 
 
-    thrust_levels   = np.linspace(np.min(thrust),np.max(thrust),10)
+    thrust_levels   = np.linspace(0,np.max(thrust),20)
     
     thrust_cmap     = plt.get_cmap('turbo') 
     
@@ -147,9 +146,9 @@ def plot_results(altitude,mach_number,tip_mach,thrust,torque,power):
     axis_3.set_xlabel('Tip Mach')
     axis_4.set_xlabel('Tip Mach')  
     axis_1.set_title('Alt = 0 ft')
-    axis_2.set_title('Alt = 10000 ft')
-    axis_3.set_title('Alt = 20000 ft')
-    axis_4.set_title('Alt = 30000 ft') 
+    axis_2.set_title('Alt = 5000 ft')
+    axis_3.set_title('Alt = 10000 ft')
+    axis_4.set_title('Alt = 15000 ft') 
     
     cbar  = fig.colorbar(contour_1, ax = axis_1) 
     cbar  = fig.colorbar(contour_2, ax = axis_2) 
@@ -185,7 +184,8 @@ def plot_style(number_of_lines= 10):
 
     return plot_parameters
  
-
+def func(x, y):
+    return x*(1-x)*np.cos(4*np.pi*x) * np.sin(4*np.pi*y**2)**2
  
 
 # ----------------------------------------------------------------------
@@ -223,12 +223,13 @@ def define_ducted_fan():
     ducted_fan.length                            = 2
     ducted_fan.rotor_percent_x_location          = 0.4
     ducted_fan.stator_percent_x_location         = 0.7
-    ducted_fan.cruise.design_thrust              = 10000 # 7700 * Units.N 
-    ducted_fan.cruise.design_altitude            = 0 # 30000 *Units.ft  
-    ducted_fan.cruise.design_tip_mach            = 0.8
-    ducted_fan.cruise.design_angular_velocity    = (ducted_fan.cruise.design_tip_mach *295) /ducted_fan.tip_radius  # 1352 RPM
-    ducted_fan.cruise.design_freestream_velocity = 0.45*  295.4  
-    ducted_fan.cruise.design_reference_velocity  = 0.45*  295.4   
+    ducted_fan.cruise.design_thrust              = 10000  
+    ducted_fan.cruise.design_altitude            = 20000 *Units.ft  
+    ducted_fan.cruise.design_tip_mach            = 0.7
+    speed_of_sound                               =  316.032
+    ducted_fan.cruise.design_angular_velocity    = (ducted_fan.cruise.design_tip_mach *speed_of_sound) /ducted_fan.tip_radius  # 1352 RPM
+    ducted_fan.cruise.design_freestream_velocity = 0.45* speed_of_sound
+    ducted_fan.cruise.design_reference_velocity  = 0.45*  speed_of_sound 
     airfoil                                      = RCAIDE.Library.Components.Airfoils.NACA_4_Series_Airfoil() 
     airfoil.NACA_4_Series_code                   = '2208'
     ducted_fan.append_duct_airfoil(airfoil)  
