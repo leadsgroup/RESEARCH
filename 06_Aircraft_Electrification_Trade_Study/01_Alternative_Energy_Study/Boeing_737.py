@@ -71,6 +71,7 @@ def main():
         "Propanol-Ethanol 75-25", "Butanol-Ethanol 75-25", "Butanol-Propanol 75-25"]
     
     for index, fuel in enumerate(fuels):
+        print("Running simulation for", fuel_names[index])
         # Step 1 design a vehicle
         vehicle  = vehicle_setup(fuel)    
         

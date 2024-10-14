@@ -66,6 +66,13 @@ def main():
     butanol_propanol.propellant_1_mass_fraction = 0.75
     butanol_propanol.propellant_2_mass_fraction = 0.25
     butanol_propanol.compute_all()
+    
+    lng = Alkane_Mixture()
+    lng.propellant_1 = Methane()
+    lng.propellant_2 = Ethane()
+    lng.propellant_1_mass_fraction = 0.95
+    lng.propellant_2_mass_fraction = 0.05
+    lng.compute_all()
         
     fuels = [# Ethane(), Methane(), Propane(), Ethanol(), Butanol(), Propanol(), \
         methane_propane, ethane_propane, methane_ethane, propanol_ethanol, butanol_ethanol, butanol_propanol]
@@ -74,6 +81,7 @@ def main():
         "Propanol-Ethanol 75-25", "Butanol-Ethanol 75-25", "Butanol-Propanol 75-25"]
     
     for index, fuel in enumerate(fuels):
+        print("Running simulation for", fuel_names[index])
         # Step 1 design a vehicle
         vehicle  = vehicle_setup(fuel)    
         
