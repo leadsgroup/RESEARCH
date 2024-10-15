@@ -16,23 +16,21 @@ from RCAIDE.Library.Methods.Weights.Correlation_Buildups.Propulsion            i
 from RCAIDE.Library.Methods.Propulsors.Converters.DC_Motor                     import design_motor
 from RCAIDE.Library.Methods.Propulsors.Converters.Rotor                        import design_prop_rotor ,design_prop_rotor 
 from RCAIDE.Library.Methods.Weights.Physics_Based_Buildups.Electric            import converge_physics_based_weight_buildup 
-from RCAIDE.Library.Plots                                                      import *     
-
- 
- 
+from RCAIDE.Library.Plots                                                      import *      
+# python imports 
 import os
 import numpy as np 
 from copy import deepcopy
-import pickle 
+import pickle
+import  pandas as pd
 import matplotlib.pyplot as plt  
-
 
 # ----------------------------------------------------------------------
 #   Main
 # ----------------------------------------------------------------------
 def main(): 
     # vehicle data
-    new_geometry =  False
+    new_geometry = False
     if new_geometry :
         vehicle  = vehicle_setup()
         save_aircraft_geometry(vehicle , 'Vahana')
@@ -52,7 +50,11 @@ def main():
     results = missions.base_mission.evaluate() 
      
     # plot the results 
-    plot_results(results)    
+    plot_results(results)
+     
+    save_filename = 'Vahana'
+    save_csv      =  True 
+    write_results_to_csv(results, save_filename, save_csv)
 
     return 
 
@@ -159,7 +161,7 @@ def vehicle_setup(new_regression=True):
     
     ospath                                      = os.path.abspath(__file__) 
     separator                                   = os.path.sep
-    rel_path                                    = os.path.dirname(ospath) + separator + '..'    + separator  
+    rel_path                                    = os.path.dirname(ospath) + separator + '..'    + separator   + '..'    + separator  
     airfoil                                     = RCAIDE.Library.Components.Airfoils.Airfoil()
     airfoil.coordinate_file                     = rel_path + 'Airfoils' + separator + 'NACA_63_412.txt'
     
@@ -315,6 +317,9 @@ def vehicle_setup(new_regression=True):
     bat.tag                                                = 'bus_battery'
     bat.electrical_configuration.series                     = 8 
     bat.electrical_configuration.parallel                   = 60
+    bat.cell.maximum_voltage                                = 4.2                                                                          
+    bat.cell.nominal_capacity                               = 3.0                                                                          
+    bat.cell.nominal_voltage                                = 3.6                                                                          
     initialize_from_circuit_configuration(bat)  
    
     bat.geometrtic_configuration.total                      = bat.electrical_configuration.total
@@ -569,7 +574,7 @@ def configs_setup(vehicle):
     # ------------------------------------------------------------------
     config                                            = RCAIDE.Library.Components.Configs.Config(vehicle)
     config.tag                                        = 'approach_transition'   
-    vector_angle                                      = 85.0 * Units.degrees 
+    vector_angle                                      = 0.0 * Units.degrees 
     config.wings.main_wing.twists.root                = vector_angle
     config.wings.main_wing.twists.tip                 = vector_angle
     config.wings.canard_wing.twists.root              = vector_angle
@@ -577,8 +582,8 @@ def configs_setup(vehicle):
     for network in  config.networks: 
         for bus in network.busses: 
             for propulsor in  bus.propulsors:
-                propulsor.rotor.orientation_euler_angles =  [0, vector_angle, 0]
-                propulsor.rotor.pitch_command            = propulsor.rotor.cruise.design_pitch_command    
+                propulsor.rotor.orientation_euler_angles =  [0, vector_angle, 0] 
+                propulsor.rotor.pitch_command   = propulsor.rotor.cruise.design_pitch_command *0.5  
     configs.append(config)
     
     
@@ -822,75 +827,75 @@ def mission_setup(analyses ):
         
     mission.append_segment(segment)     
 
-    # ------------------------------------------------------------------
-    #   Reserve Climb Segment 
-    # ------------------------------------------------------------------ 
-    segment                          = Segments.Climb.Linear_Speed_Constant_Rate(base_segment)
-    segment.tag                      = "Reserve_Climb"   
-    segment.analyses.extend(analyses.cruise) 
-    segment.climb_rate               = 500. * Units['ft/min']
-    segment.air_speed_start          = 100.   * Units['mph'] 
-    segment.air_speed_end            = 120.  * Units['mph']  
-    segment.altitude_start           = 100.0 * Units.ft 
-    segment.altitude_end             = 1000.0 * Units.ft
+    ## ------------------------------------------------------------------
+    ##   Reserve Climb Segment 
+    ## ------------------------------------------------------------------ 
+    #segment                          = Segments.Climb.Linear_Speed_Constant_Rate(base_segment)
+    #segment.tag                      = "Reserve_Climb"   
+    #segment.analyses.extend(analyses.cruise) 
+    #segment.climb_rate               = 500. * Units['ft/min']
+    #segment.air_speed_start          = 100.   * Units['mph'] 
+    #segment.air_speed_end            = 120.  * Units['mph']  
+    #segment.altitude_start           = 100.0 * Units.ft 
+    #segment.altitude_end             = 1000.0 * Units.ft
     
-    # define flight dynamics to model 
-    segment.flight_dynamics.force_x                       = True  
-    segment.flight_dynamics.force_z                       = True     
+    ## define flight dynamics to model 
+    #segment.flight_dynamics.force_x                       = True  
+    #segment.flight_dynamics.force_z                       = True     
     
-    # define flight controls 
-    segment.assigned_control_variables.throttle.active               = True           
-    segment.assigned_control_variables.throttle.assigned_propulsors  = [['lift_rotor_propulsor_1','lift_rotor_propulsor_2','lift_rotor_propulsor_3','lift_rotor_propulsor_4',
-                                                                             'lift_rotor_propulsor_5','lift_rotor_propulsor_6','lift_rotor_propulsor_7','lift_rotor_propulsor_8']]
-    segment.assigned_control_variables.body_angle.active             = True
+    ## define flight controls 
+    #segment.assigned_control_variables.throttle.active               = True           
+    #segment.assigned_control_variables.throttle.assigned_propulsors  = [['lift_rotor_propulsor_1','lift_rotor_propulsor_2','lift_rotor_propulsor_3','lift_rotor_propulsor_4',
+                                                                             #'lift_rotor_propulsor_5','lift_rotor_propulsor_6','lift_rotor_propulsor_7','lift_rotor_propulsor_8']]
+    #segment.assigned_control_variables.body_angle.active             = True
              
-    mission.append_segment(segment)      
+    #mission.append_segment(segment)      
  
-    # ------------------------------------------------------------------
-    #   First Cruise Segment: Constant Acceleration, Constant Altitude
-    # ------------------------------------------------------------------ 
-    segment                          = Segments.Cruise.Constant_Speed_Constant_Altitude(base_segment) 
-    segment.tag                      = "Reserve_Cruise"  
-    segment.analyses.extend(analyses.cruise)  
-    segment.air_speed                = 120.  * Units['mph']  
-    segment.distance                 = 10.*Units.nmi
+    ## ------------------------------------------------------------------
+    ##   First Cruise Segment: Constant Acceleration, Constant Altitude
+    ## ------------------------------------------------------------------ 
+    #segment                          = Segments.Cruise.Constant_Speed_Constant_Altitude(base_segment) 
+    #segment.tag                      = "Reserve_Cruise"  
+    #segment.analyses.extend(analyses.cruise)  
+    #segment.air_speed                = 120.  * Units['mph']  
+    #segment.distance                 = 10.*Units.nmi
 
-    # define flight dynamics to model 
-    segment.flight_dynamics.force_x                       = True  
-    segment.flight_dynamics.force_z                       = True     
+    ## define flight dynamics to model 
+    #segment.flight_dynamics.force_x                       = True  
+    #segment.flight_dynamics.force_z                       = True     
     
-    # define flight controls 
-    segment.assigned_control_variables.throttle.active               = True           
-    segment.assigned_control_variables.throttle.assigned_propulsors  = [['lift_rotor_propulsor_1','lift_rotor_propulsor_2','lift_rotor_propulsor_3','lift_rotor_propulsor_4',
-                                                                             'lift_rotor_propulsor_5','lift_rotor_propulsor_6','lift_rotor_propulsor_7','lift_rotor_propulsor_8']]
-    segment.assigned_control_variables.body_angle.active             = True
+    ## define flight controls 
+    #segment.assigned_control_variables.throttle.active               = True           
+    #segment.assigned_control_variables.throttle.assigned_propulsors  = [['lift_rotor_propulsor_1','lift_rotor_propulsor_2','lift_rotor_propulsor_3','lift_rotor_propulsor_4',
+                                                                             #'lift_rotor_propulsor_5','lift_rotor_propulsor_6','lift_rotor_propulsor_7','lift_rotor_propulsor_8']]
+    #segment.assigned_control_variables.body_angle.active             = True
     
         
-    mission.append_segment(segment)     
+    #mission.append_segment(segment)     
  
-    # ------------------------------------------------------------------
-    #   Reserve Descent Segment: Constant Acceleration, Constant Altitude
-    # ------------------------------------------------------------------ 
-    segment                          = Segments.Descent.Linear_Speed_Constant_Rate(base_segment)
-    segment.tag                      = "Reserve_Descent" 
-    segment.analyses.extend(analyses.cruise)
-    segment.descent_rate             = 300. * Units['ft/min']
-    segment.air_speed_start          = 120.  * Units['mph'] 
-    segment.air_speed_end            = 85.   * Units['mph']
-    segment.altitude_start           = 1000.0 * Units.ft
-    segment.altitude_end             = 100.0 * Units.ft
+    ## ------------------------------------------------------------------
+    ##   Reserve Descent Segment: Constant Acceleration, Constant Altitude
+    ## ------------------------------------------------------------------ 
+    #segment                          = Segments.Descent.Linear_Speed_Constant_Rate(base_segment)
+    #segment.tag                      = "Reserve_Descent" 
+    #segment.analyses.extend(analyses.cruise)
+    #segment.descent_rate             = 300. * Units['ft/min']
+    #segment.air_speed_start          = 120.  * Units['mph'] 
+    #segment.air_speed_end            = 85.   * Units['mph']
+    #segment.altitude_start           = 1000.0 * Units.ft
+    #segment.altitude_end             = 100.0 * Units.ft
 
-    # define flight dynamics to model 
-    segment.flight_dynamics.force_x                       = True  
-    segment.flight_dynamics.force_z                       = True     
+    ## define flight dynamics to model 
+    #segment.flight_dynamics.force_x                       = True  
+    #segment.flight_dynamics.force_z                       = True     
     
-    # define flight controls 
-    segment.assigned_control_variables.throttle.active               = True           
-    segment.assigned_control_variables.throttle.assigned_propulsors  = [['lift_rotor_propulsor_1','lift_rotor_propulsor_2','lift_rotor_propulsor_3','lift_rotor_propulsor_4',
-                                                                             'lift_rotor_propulsor_5','lift_rotor_propulsor_6','lift_rotor_propulsor_7','lift_rotor_propulsor_8']]
-    segment.assigned_control_variables.body_angle.active             = True 
+    ## define flight controls 
+    #segment.assigned_control_variables.throttle.active               = True           
+    #segment.assigned_control_variables.throttle.assigned_propulsors  = [['lift_rotor_propulsor_1','lift_rotor_propulsor_2','lift_rotor_propulsor_3','lift_rotor_propulsor_4',
+                                                                             #'lift_rotor_propulsor_5','lift_rotor_propulsor_6','lift_rotor_propulsor_7','lift_rotor_propulsor_8']]
+    #segment.assigned_control_variables.body_angle.active             = True 
         
-    mission.append_segment(segment)        
+    #mission.append_segment(segment)        
     
     # ------------------------------------------------------------------
     #  Forth Transition Segment
@@ -898,8 +903,8 @@ def mission_setup(analyses ):
     segment                          = Segments.Descent.Linear_Speed_Constant_Rate(base_segment)
     segment.tag                      = "Approach_Transition"   
     segment.analyses.extend(analyses.approach_transition)  
-    segment.descent_rate             = 150. * Units['ft/min'] 
-    segment.air_speed_end            = 55.   * Units['mph']  
+    segment.descent_rate             = 50.  * Units['ft/min'] 
+    segment.air_speed_end            = 200. * Units['ft/min']   #20.   * Units['mph']   
     segment.altitude_end             = 40.0 * Units.ft
 
     # define flight dynamics to model 
@@ -954,30 +959,61 @@ def missions_setup(mission):
 
 def plot_results(results):
     # Plots fligh conditions 
-    plot_flight_conditions(results) 
+    #plot_flight_conditions(results) 
     
     # Plot arcraft trajectory
-    plot_flight_trajectory(results)   
+    #plot_flight_trajectory(results)   
 
     plot_propulsor_throttles(results)
     
     # Plot Aircraft Electronics
-    plot_battery_module_conditions(results) 
-    plot_battery_temperature(results)
+    #plot_battery_module_conditions(results) 
+    #plot_battery_temperature(results)
     plot_battery_cell_conditions(results) 
-    plot_battery_module_C_rates(results)
-    plot_battery_degradation(results) 
+    #plot_battery_module_C_rates(results)
+    #plot_battery_degradation(results) 
     
     # Plot Propeller Conditions 
-    plot_rotor_conditions(results) 
-    plot_disc_and_power_loading(results)
+    #plot_rotor_conditions(results) 
+    #plot_disc_and_power_loading(results)
     
     # Plot Electric Motor and Propeller Efficiencies 
-    plot_electric_propulsor_efficiencies(results)
+    #plot_electric_propulsor_efficiencies(results)
     
       
     return 
 
+
+def write_results_to_csv(results, save_filename, save_csv):
+    time        = []
+    current     = []
+    power       = []
+    voltage     = [] 
+    temperature = [] 
+    
+    for network in results.segments[0].analyses.energy.vehicle.networks: 
+        busses  = network.busses
+        for bus in busses: 
+            for b_i, battery in enumerate(bus.battery_modules):
+                if b_i == 0 or bus.identical_batteries == False: 
+                    for i in range(len(results.segments)):  
+                        battery_conditions   = results.segments[i].conditions.energy[bus.tag].battery_modules[battery.tag]  
+                        time.append(results.segments[i].conditions.frames.inertial.time[:,0])   
+                        power.append(battery_conditions.cell.power[:,0])  
+                        voltage.append(battery_conditions.cell.voltage_under_load[:,0])  
+                        current.append(battery_conditions.cell.current[:,0])
+                        temperature.append(battery_conditions.cell.temperature[:,0]) 
+                    
+    voltage       = np.hstack(voltage)
+    current       = np.hstack(current)
+    time          = np.hstack(time)
+    power         = np.hstack(power)
+    temperature   = np.hstack(temperature)
+    df      = pd.DataFrame({'Time': time, 'Current': current, 'Voltage': voltage, 'Power': power, 'Temperature': temperature}) 
+    if save_csv:
+        df.to_csv(save_filename + '.csv', index=False)                       
+    return
+ 
 def save_aircraft_geometry(geometry,filename): 
     pickle_file  = filename + '.pkl'
     with open(pickle_file, 'wb') as file:
