@@ -28,53 +28,10 @@ import os
 # ----------------------------------------------------------------------
 
 def main():
-    methane_propane = Alkane_Mixture()
-    methane_propane.propellant_1 = Methane()
-    methane_propane.propellant_2 = Propane()
-    methane_propane.propellant_1_mass_fraction = 0.75
-    methane_propane.propellant_2_mass_fraction = 0.25
-    methane_propane.compute_all()
-    
-    ethane_propane = Alkane_Mixture()
-    ethane_propane.propellant_1 = Ethane()
-    ethane_propane.propellant_2 = Propane()
-    ethane_propane.propellant_1_mass_fraction = 0.75
-    ethane_propane.propellant_2_mass_fraction = 0.25
-    ethane_propane.compute_all()
-    
-    methane_ethane = Alkane_Mixture()
-    methane_ethane.propellant_1 = Methane()
-    methane_ethane.propellant_2 = Ethane()
-    methane_ethane.propellant_1_mass_fraction = 0.75
-    methane_ethane.propellant_2_mass_fraction = 0.25
-    methane_ethane.compute_all()
-    
-    propanol_ethanol = Alcohol_Mixture()
-    propanol_ethanol.propellant_1 = Propanol()
-    propanol_ethanol.propellant_2 = Ethanol()
-    propanol_ethanol.propellant_1_mass_fraction = 0.75
-    propanol_ethanol.propellant_2_mass_fraction = 0.25
-    propanol_ethanol.compute_all()
-    
-    butanol_ethanol = Alcohol_Mixture()
-    butanol_ethanol.propellant_1 = Butanol()
-    butanol_ethanol.propellant_2 = Ethanol()
-    butanol_ethanol.propellant_1_mass_fraction = 0.75
-    butanol_ethanol.propellant_2_mass_fraction = 0.25
-    butanol_ethanol.compute_all()
-    
-    butanol_propanol = Alcohol_Mixture()
-    butanol_propanol.propellant_1 = Butanol()
-    butanol_propanol.propellant_2 = Propanol()
-    butanol_propanol.propellant_1_mass_fraction = 0.75
-    butanol_propanol.propellant_2_mass_fraction = 0.25
-    butanol_propanol.compute_all()
-        
-    fuels = [# Ethane(), Methane(), Propane(), Ethanol(), Butanol(), Propanol(), \
-        methane_propane, ethane_propane, methane_ethane, propanol_ethanol, butanol_ethanol, butanol_propanol]
-    fuel_names = [# "Ethane", "Methane", "Propane", "Ethanol", "Butanol", "Propanol", \
-        "Methane-Propane 75-25", "Ethane-Propane 75-25", "Methane-Ethane 75-25", \
-        "Propanol-Ethanol 75-25", "Butanol-Ethanol 75-25", "Butanol-Propanol 75-25"]
+    fuels = [Ethane(), Methane(), Propane(), Ethanol(), Butanol(), Propanol(), \
+        Jet_A1(), Liquid_Natural_Gas(), Liquid_Petroleum_Gas()]
+    fuel_names = ["Ethane", "Methane", "Propane", "Ethanol", "Butanol", "Propanol", \
+        "Jet A1", "Liquid Natural Gas", "Liquid Petroleum Gas"]
     
     for index, fuel in enumerate(fuels):
         print("Running simulation for", fuel_names[index])
@@ -103,10 +60,7 @@ def main():
     #payload_range_diagram(vehicle,mission,'cruise',reserves=0., plot_diagram = True)
     
     # Step 6 plot results 
-    plot_mission(results)
-    
-    
-    
+    # plot_mission(results)
 
     return
 
@@ -586,17 +540,17 @@ def vehicle_setup(propellant):
     turbofan.tag                                = 'starboard_propulsor'
     turbofan.active_fuel_tanks                  = ['fuel_tank'] 
     turbofan.origin                             = [[ 10.150,  5.435, -1.087]] 
-    turbofan.engine_length                      = 2.71     
-    turbofan.bypass_ratio                       = 8
+    turbofan.engine_length                      = 3.184     
+    turbofan.bypass_ratio                       = 12
     turbofan.design_altitude                    = 35000.0*Units.ft
-    turbofan.design_mach_number                 = 0.78   
+    turbofan.design_mach_number                 = 0.8   
     turbofan.design_thrust                      = 28000.0* Units.N 
 
     # fan                
     fan                                         = RCAIDE.Library.Components.Propulsors.Converters.Fan()   
     fan.tag                                     = 'fan'
     fan.polytropic_efficiency                   = 0.93
-    fan.pressure_ratio                          = 1.7   
+    fan.pressure_ratio                          = 1.861   
     turbofan.fan                                = fan        
 
     # working fluid                   
@@ -647,7 +601,7 @@ def vehicle_setup(propellant):
     combustor.alphac                               = 1.0     
     combustor.turbine_inlet_temperature            = 1600
     combustor.pressure_ratio                       = 0.95
-    combustor.fuel_data                            = RCAIDE.Library.Attributes.Propellants.Jet_A1() # propellant  
+    combustor.fuel_data                            = propellant # propellant  
     turbofan.combustor                             = combustor
 
     # core nozzle
