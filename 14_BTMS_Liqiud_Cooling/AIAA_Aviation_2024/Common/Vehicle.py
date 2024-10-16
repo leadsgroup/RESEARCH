@@ -30,15 +30,8 @@ import pickle
 #   Define the Vehicle
 # ----------------------------------------------------------------------   
 def vehicle_setup(resize_aircraft,vehicle_name) :
-    
-    # ------------------------------------------------------------------
-    #   Initialize the Vehicle
-    # ------------------------------------------------------------------  
-    
     if resize_aircraft:
-    
-        
-    
+
         #------------------------------------------------------------------------------------------------------------------------------------
         #   Initialize the Vehicle
         #------------------------------------------------------------------------------------------------------------------------------------
@@ -603,12 +596,8 @@ def vehicle_setup(resize_aircraft,vehicle_name) :
         converge_weight(vehicle) 
         breakdown = compute_weight(vehicle)
         print(breakdown)
-    
-        vehicle.weight_breakdown  = breakdown
-        #compute_component_centers_of_gravity(vehicle)
-        #vehicle.center_of_gravity() 
+
         save_aircraft_geometry(vehicle,vehicle_name)        
-        
     else: 
         vehicle = load_aircraft_geometry(vehicle_name) 
     
