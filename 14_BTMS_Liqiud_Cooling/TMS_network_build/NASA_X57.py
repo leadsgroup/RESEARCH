@@ -639,7 +639,7 @@ def base_analysis(vehicle):
     # ------------------------------------------------------------------
     #  Aerodynamics Analysis
     aerodynamics = RCAIDE.Framework.Analyses.Aerodynamics.Subsonic_VLM() 
-    aerodynamics.geometry = vehicle 
+    aerodynamics.vehicle = vehicle 
     analyses.append(aerodynamics)  
 
     # ------------------------------------------------------------------

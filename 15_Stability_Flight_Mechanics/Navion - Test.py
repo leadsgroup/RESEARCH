@@ -79,7 +79,7 @@ def base_analysis(vehicle,stability_method, run_stability,configs):
     # ------------------------------------------------------------------
     #  Aerodynamics Analysis
     aerodynamics = RCAIDE.Framework.Analyses.Aerodynamics.Vortex_Lattice_Method() 
-    aerodynamics.geometry                            = vehicle
+    aerodynamics.vehicle                            = vehicle
     aerodynamics.settings.number_spanwise_vortices   = 30
     aerodynamics.settings.drag_coefficient_increment = 0.0000
     analyses.append(aerodynamics) 
@@ -107,7 +107,7 @@ def base_analysis(vehicle,stability_method, run_stability,configs):
     # ------------------------------------------------------------------
     #  Energy
     energy= RCAIDE.Framework.Analyses.Energy.Energy()
-    energy.networks = vehicle.networks  
+    energy.vehicle = vehicle  
     analyses.append(energy)
 
     # ------------------------------------------------------------------
