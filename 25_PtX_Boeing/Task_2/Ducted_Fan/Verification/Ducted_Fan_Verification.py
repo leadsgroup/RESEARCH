@@ -117,7 +117,93 @@ def main():
     return
 
 def plot_results(altitude,mach_number,tip_mach,thrust,torque,power): 
-    fig    =  plt.figure('Thrust')
+    #fig    =  plt.figure('Thrust')
+    #fig.set_size_inches(7, 6)
+    #axis_1 = fig.add_subplot(2,2,1) 
+    #axis_2 = fig.add_subplot(2,2,2) 
+    #axis_3 = fig.add_subplot(2,2,3) 
+    #axis_4 = fig.add_subplot(2,2,4)
+    
+    #x, y = np.meshgrid(tip_mach, mach_number)
+    
+
+
+    #thrust_levels   = np.linspace(0,np.max(thrust),20)
+    
+    #thrust_cmap     = plt.get_cmap('turbo') 
+    
+    
+    #contour_1 =  axis_1.contourf(x,y, thrust[0, :, :], thrust_levels,cmap = thrust_cmap)   
+    #contour_2 =  axis_2.contourf(x,y, thrust[1, :, :], thrust_levels,cmap = thrust_cmap)   
+    #contour_3 =  axis_3.contourf(x,y, thrust[2, :, :], thrust_levels,cmap = thrust_cmap)   
+    #contour_4 =  axis_4.contourf(x,y, thrust[3, :, :], thrust_levels,cmap = thrust_cmap)   
+    #axis_1.set_ylabel('Mach')
+    #axis_2.set_ylabel('Mach')
+    #axis_3.set_ylabel('Mach')
+    #axis_4.set_ylabel('Mach')
+    #axis_1.set_xlabel('Tip Mach')
+    #axis_2.set_xlabel('Tip Mach')
+    #axis_3.set_xlabel('Tip Mach')
+    #axis_4.set_xlabel('Tip Mach')  
+    #axis_1.set_title('Alt = 0 ft')
+    #axis_2.set_title('Alt = 5000 ft')
+    #axis_3.set_title('Alt = 10000 ft')
+    #axis_4.set_title('Alt = 15000 ft') 
+    
+    #cbar  = fig.colorbar(contour_1, ax = axis_1) 
+    #cbar  = fig.colorbar(contour_2, ax = axis_2) 
+    #cbar  = fig.colorbar(contour_3, ax = axis_3) 
+    #cbar  = fig.colorbar(contour_4, ax = axis_4) 
+    #cbar.ax.set_ylabel('Thrust', rotation =  90)
+    
+    #fig.tight_layout()
+    
+    # ---------------------------------------------
+    
+    #fig    =  plt.figure('Power')
+    #fig.set_size_inches(7, 6)
+    #axis_1 = fig.add_subplot(2,2,1) 
+    #axis_2 = fig.add_subplot(2,2,2) 
+    #axis_3 = fig.add_subplot(2,2,3) 
+    #axis_4 = fig.add_subplot(2,2,4)
+    
+    #x, y = np.meshgrid(tip_mach, mach_number)
+    
+
+
+    #thrust_levels   = np.linspace(0,np.max(power),20)
+    
+    #thrust_cmap     = plt.get_cmap('turbo') 
+    
+    
+    #contour_1 =  axis_1.contourf(x,y, power[0, :, :], thrust_levels,cmap = thrust_cmap)   
+    #contour_2 =  axis_2.contourf(x,y, power[1, :, :], thrust_levels,cmap = thrust_cmap)   
+    #contour_3 =  axis_3.contourf(x,y, power[2, :, :], thrust_levels,cmap = thrust_cmap)   
+    #contour_4 =  axis_4.contourf(x,y, power[3, :, :], thrust_levels,cmap = thrust_cmap)   
+    #axis_1.set_ylabel('Mach')
+    #axis_2.set_ylabel('Mach')
+    #axis_3.set_ylabel('Mach')
+    #axis_4.set_ylabel('Mach')
+    #axis_1.set_xlabel('Tip Mach')
+    #axis_2.set_xlabel('Tip Mach')
+    #axis_3.set_xlabel('Tip Mach')
+    #axis_4.set_xlabel('Tip Mach')  
+    #axis_1.set_title('Alt = 0 ft')
+    #axis_2.set_title('Alt = 5000 ft')
+    #axis_3.set_title('Alt = 10000 ft')
+    #axis_4.set_title('Alt = 15000 ft') 
+    
+    #cbar  = fig.colorbar(contour_1, ax = axis_1) 
+    #cbar  = fig.colorbar(contour_2, ax = axis_2) 
+    #cbar  = fig.colorbar(contour_3, ax = axis_3) 
+    #cbar  = fig.colorbar(contour_4, ax = axis_4) 
+    #cbar.ax.set_ylabel('Power', rotation =  90)
+    
+    #fig.tight_layout()    
+    
+    # ---------------------------------------------
+    
+    fig    =  plt.figure('Torque')
     fig.set_size_inches(7, 6)
     axis_1 = fig.add_subplot(2,2,1) 
     axis_2 = fig.add_subplot(2,2,2) 
@@ -128,15 +214,15 @@ def plot_results(altitude,mach_number,tip_mach,thrust,torque,power):
     
 
 
-    thrust_levels   = np.linspace(0,np.max(thrust),20)
+    thrust_levels   = np.linspace(0,np.max(torque),20)
     
     thrust_cmap     = plt.get_cmap('turbo') 
     
     
-    contour_1 =  axis_1.contourf(x,y, thrust[0, :, :], thrust_levels,cmap = thrust_cmap)   
-    contour_2 =  axis_2.contourf(x,y, thrust[1, :, :], thrust_levels,cmap = thrust_cmap)   
-    contour_3 =  axis_3.contourf(x,y, thrust[2, :, :], thrust_levels,cmap = thrust_cmap)   
-    contour_4 =  axis_4.contourf(x,y, thrust[3, :, :], thrust_levels,cmap = thrust_cmap)   
+    contour_1 =  axis_1.contourf(x,y, torque[0, :, :], thrust_levels,cmap = thrust_cmap)   
+    contour_2 =  axis_2.contourf(x,y, torque[1, :, :], thrust_levels,cmap = thrust_cmap)   
+    contour_3 =  axis_3.contourf(x,y, torque[2, :, :], thrust_levels,cmap = thrust_cmap)   
+    contour_4 =  axis_4.contourf(x,y, torque[3, :, :], thrust_levels,cmap = thrust_cmap)   
     axis_1.set_ylabel('Mach')
     axis_2.set_ylabel('Mach')
     axis_3.set_ylabel('Mach')
@@ -154,9 +240,9 @@ def plot_results(altitude,mach_number,tip_mach,thrust,torque,power):
     cbar  = fig.colorbar(contour_2, ax = axis_2) 
     cbar  = fig.colorbar(contour_3, ax = axis_3) 
     cbar  = fig.colorbar(contour_4, ax = axis_4) 
-    cbar.ax.set_ylabel('Thrust', rotation =  90)
+    cbar.ax.set_ylabel('Torque', rotation =  90)
     
-    fig.tight_layout()
+    fig.tight_layout()        
     return
 
 def plot_style(number_of_lines= 10): 
