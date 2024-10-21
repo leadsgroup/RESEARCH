@@ -54,7 +54,7 @@ def base(vehicle):
     # ------------------------------------------------------------------
     #  Aerodynamics Analysis
     aerodynamics = RCAIDE.Analyses.Aerodynamics.Vortex_Lattice_Method()
-    aerodynamics.geometry = vehicle
+    aerodynamics.vehicle = vehicle
     aerodynamics.settings.number_spanwise_vortices  = 15
     aerodynamics.settings.number_chordwise_vortices = 5
     aerodynamics.process.compute.lift.inviscid_wings.training.angle_of_attack = np.array([[-10.,-5., 0.0, 5.0, 10.0, 75.]]).T * Units.deg 

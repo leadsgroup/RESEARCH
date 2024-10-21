@@ -312,7 +312,7 @@ def base_analysis(vehicle, N_gm_x, N_gm_y, min_y, max_y, min_x, max_x, aircraft_
     # ------------------------------------------------------------------
     #  Aerodynamics Analysis
     aerodynamics                                = SUAVE.Analyses.Aerodynamics.Fidelity_Zero()
-    aerodynamics.geometry                       = vehicle
+    aerodynamics.vehicle                       = vehicle
     aerodynamics.settings.model_fuselage        = True
     analyses.append(aerodynamics)
 

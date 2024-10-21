@@ -53,7 +53,7 @@ def baseline_mission_setup(analyses,simulated_days = 1,flights_per_day = 1,contr
     base_segment.process.finalize.post_process.stability     = RCAIDE.Methods.skip 
 
     # VSTALL Calculation  
-    vehicle        = analyses.base.aerodynamics.geometry
+    vehicle        = analyses.base.aerodynamics.vehicle
     vehicle_mass   = vehicle.mass_properties.max_takeoff
     reference_area = vehicle.reference_area 
     Vstall         = estimate_stall_speed(vehicle_mass,reference_area,altitude = 0.0,maximum_lift_coefficient = 1.2)         
@@ -248,7 +248,7 @@ def direct_mission_setup_at_1500ft(analyses,simulated_days = 1,flights_per_day =
     base_segment.process.finalize.post_process.stability     = RCAIDE.Methods.skip 
 
     # VSTALL Calculation  
-    vehicle        = analyses.base.aerodynamics.geometry
+    vehicle        = analyses.base.aerodynamics.vehicle
     vehicle_mass   = vehicle.mass_properties.max_takeoff
     reference_area = vehicle.reference_area 
     Vstall         = estimate_stall_speed(vehicle_mass,reference_area,altitude = 0.0,maximum_lift_coefficient = 1.2)         
@@ -444,7 +444,7 @@ def direct_mission_setup_at_2000ft(analyses,simulated_days = 1,flights_per_day =
     base_segment.process.finalize.post_process.stability     = RCAIDE.Methods.skip 
 
     # VSTALL Calculation  
-    vehicle        = analyses.base.aerodynamics.geometry
+    vehicle        = analyses.base.aerodynamics.vehicle
     vehicle_mass   = vehicle.mass_properties.max_takeoff
     reference_area = vehicle.reference_area 
     Vstall         = estimate_stall_speed(vehicle_mass,reference_area,altitude = 0.0,maximum_lift_coefficient = 1.2)         

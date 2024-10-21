@@ -644,26 +644,26 @@ def configs_setup(vehicle):
 # ----------------------------------------------------------------------
 #   Plot Mission
 # ----------------------------------------------------------------------
-def plot_mission(results,line_style='bo-'):
+def plot_mission(results):
 
     
     # Plot Flight Conditions 
-    plot_flight_conditions(results, line_style)
+    plot_flight_conditions(results)
     
     # Plot Aerodynamic Forces 
-    plot_aerodynamic_forces(results, line_style)
+    plot_aerodynamic_forces(results)
     
     # Plot Aerodynamic Coefficients 
-    plot_aerodynamic_coefficients(results, line_style)
+    plot_aerodynamic_coefficients(results)
     
     # Drag Components
-    plot_drag_components(results, line_style)
+    plot_drag_components(results)
     
     # Plot Altitude, sfc, vehicle weight 
-    plot_altitude_sfc_weight(results, line_style)
+    plot_altitude_sfc_weight(results)
     
     # Plot Velocities 
-    plot_aircraft_velocities(results, line_style)  
+    plot_aircraft_velocities(results)  
     
     # Plot Trajectory
     plot_flight_trajectory(results)

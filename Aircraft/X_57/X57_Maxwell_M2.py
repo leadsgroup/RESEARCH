@@ -133,7 +133,7 @@ def base_analysis(vehicle):
     #  Aerodynamics Analysis
     aerodynamics = RCAIDE.Analyses.Aerodynamics.Vortex_Lattice_Method()
     aerodynamics.settings.plot_vortex_distribution  = True     
-    aerodynamics.geometry = vehicle 
+    aerodynamics.vehicle = vehicle 
     aerodynamics.settings.drag_coefficient_increment = 0.0000
     analyses.append(aerodynamics)
 
@@ -141,7 +141,7 @@ def base_analysis(vehicle):
     #aerodynamics.process.compute.lift.inviscid.settings.filenames.avl_bin_name =  '/Users/matthewclarke/Documents/AVL/avl3.35'
     #aerodynamics.settings.print_output = True 
     #aerodynamics.settings.keep_files = True  
-    #aerodynamics.geometry = vehicle
+    #aerodynamics.vehicle = vehicle
     #analyses.append(aerodynamics)
 
 
