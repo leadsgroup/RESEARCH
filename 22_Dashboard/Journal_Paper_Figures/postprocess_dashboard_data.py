@@ -414,7 +414,7 @@ def generate_eletrification_results_data(Flight_Ops):
      
       
     weight_fraction   = np.linspace(5,60,12)
-    cell_e0           = np.linspace(200,1000,9) 
+    cell_e0           = np.linspace(200,2000,9) 
     aircraft_capacity = np.array([19, 88, 120, 189, 368])
     aircraft_range    = np.zeros((len(aircraft_capacity),12,len(weight_fraction),len(cell_e0 ) )) 
     passenger_volume  = np.zeros((len(aircraft_capacity),12,len(weight_fraction),len(cell_e0 ) )) 
@@ -434,7 +434,7 @@ def generate_eletrification_results_data(Flight_Ops):
                     capacity_Wh  = 4000
                     capacity     = capacity_Wh /cell_V 
                     cell_C_max   = 6
-                    cell_Temp    = [-20,50] 
+                    cell_Temp    = [-100,500] 
                         
                     #================================================================================================================================================  
                     # Unit Conversions 
