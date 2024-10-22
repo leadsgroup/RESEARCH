@@ -302,7 +302,7 @@ def mission_setup(analyses,vehicle, radius_Vert1, radius_Vert2, departure_headin
     mission.append_segment(segment)  
   
     # DELETED CHARGE SEGMENT
-    return mission 
+    return mission,  mission_flag
 
 def Route_Distances(x1, y1, x2, y2, radius_Vert1, radius_Vert2, dep_heading, app_heading):
     
