@@ -568,7 +568,7 @@ def mission_setup(analyses):
     segment.altitude                                                            = 8000. * Units.feet
     segment.air_speed                                                           = 120 * Units['mph']
     segment.true_course                                                   = -30.0 * Units.degrees
-    segment.distance                                                            =  100 *  Units.mile
+    segment.distance                                                            =  1 *  Units.mile
    
     # define flight dynamics to model 
     segment.flight_dynamics.force_x                                             = True    
@@ -605,10 +605,10 @@ def mission_setup(analyses):
     segment.analyses.extend( analyses.base )   
     segment.altitude                                                            = 8000. * Units.feet
     segment.air_speed                                                           = 120 * Units['mph']
-    segment.turn_radius                                                              = 100 * Units.mile  
+    segment.turn_radius                                                         = 10 * Units.mile  
     segment.start_true_course                                                   = 30.0 * Units.degrees 
-    segment.turn_angle                                                          = -60.0 * Units.degrees # + indicated right hand turn, negative indicates left-hand turn defaults to straight flight/won't actually turn?
-    
+    segment.turn_angle                                                          = -15.0 * Units.degrees # + indicated right hand turn, negative indicates left-hand turn defaults to straight flight/won't actually turn?
+    segment.bank_angle                                                          = -30 * Units.degrees
     # define flight dynamics to model 
     segment.flight_dynamics.force_x                                             = True    
     segment.flight_dynamics.force_z                                             = True    
