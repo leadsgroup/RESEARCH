@@ -604,7 +604,7 @@ def mission_setup(analyses):
     segment.tag = "curved_cruise" 
     segment.analyses.extend( analyses.base )   
     segment.altitude                                                            = 8000. * Units.feet
-    segment.air_speed                                                           = 120 * Units['mph']
+    segment.air_speed                                                           = 175 * Units['mph']
     segment.turn_radius                                                         = 10 * Units.mile  
     segment.start_true_course                                                   = 0.0 * Units.degrees 
     segment.turn_angle                                                          = -15.0 * Units.degrees # + indicated right hand turn, negative indicates left-hand turn defaults to straight flight/won't actually turn?
