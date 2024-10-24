@@ -53,14 +53,14 @@ def main():
     feedstocks                 = pd.read_excel(crops_filename,sheet_name=['Corn','Soybean','Canola','Sunflower','Sorghum','Wheat'])  
 
   
-    saf_data       =  generate_saf_results_data(Commercial_SAF,Flight_Ops,feedstocks) 
-    save_results(saf_data, 'saf_data.res')
+    #saf_data       =  generate_saf_results_data(Commercial_SAF,Flight_Ops,feedstocks) 
+    #save_results(saf_data, 'saf_data.res')
     
     electric_data  = generate_eletrification_results_data(Flight_Ops)
     save_results(electric_data, 'electric_data.res')
     
-    hydrogen_data  = generate_hydrogen_results_data(Hydrogen,Flight_Ops) 
-    save_results(hydrogen_data, 'hydrogen_data.res')    
+    #hydrogen_data  = generate_hydrogen_results_data(Hydrogen,Flight_Ops) 
+    #save_results(hydrogen_data, 'hydrogen_data.res')    
      
     return  
 
@@ -86,10 +86,10 @@ def generate_saf_results_data(Commercial_SAF,Flight_Ops,feedstocks):
     selected_feedstock_list         = ['Soybean', 'Canola', 'Soybean', 'Canola', 'Corn', 'Wheat']    
     selected_airpots_list           = [" Top 5 Airports"," Top 10 Airports", " Top 20 Airports"," Top 50 Airports"]
     percent_adoption_list           = np.linspace(0, 100, 11)   
-    SAF_dollars_per_gal  =  8
-    land_area                     = np.zeros((len(selected_fuels_list), len(selected_airpots_list), len(percent_adoption_list)))
-    CASM_wo_SAF_Aircraft          = np.zeros((len(selected_fuels_list), len(selected_airpots_list), len(percent_adoption_list),12))
-    CASM_w_SAF_Aircraft           = np.zeros((len(selected_fuels_list), len(selected_airpots_list), len(percent_adoption_list),12))
+    SAF_dollars_per_gal             = 8
+    land_area                       = np.zeros((len(selected_fuels_list), len(selected_airpots_list), len(percent_adoption_list)))
+    CASM_wo_SAF_Aircraft            = np.zeros((len(selected_fuels_list), len(selected_airpots_list), len(percent_adoption_list),12))
+    CASM_w_SAF_Aircraft             = np.zeros((len(selected_fuels_list), len(selected_airpots_list), len(percent_adoption_list),12))
     
     for saf_i1 in  range(len(selected_fuels_list)):
         for saf_i2 in  range(len(selected_airpots_list)):
@@ -414,7 +414,7 @@ def generate_eletrification_results_data(Flight_Ops):
      
       
     weight_fraction   = np.linspace(5,60,12)
-    cell_e0           = np.linspace(200,1000,9) 
+    cell_e0           = np.linspace(200,2000,9)
     aircraft_capacity = np.array([19, 88, 120, 189, 368])
     aircraft_range    = np.zeros((len(aircraft_capacity),12,len(weight_fraction),len(cell_e0 ) )) 
     passenger_volume  = np.zeros((len(aircraft_capacity),12,len(weight_fraction),len(cell_e0 ) )) 
@@ -434,7 +434,7 @@ def generate_eletrification_results_data(Flight_Ops):
                     capacity_Wh  = 4000
                     capacity     = capacity_Wh /cell_V 
                     cell_C_max   = 6
-                    cell_Temp    = [-20,50] 
+                    cell_Temp    = [-100,500] 
                         
                     #================================================================================================================================================  
                     # Unit Conversions 
@@ -591,7 +591,7 @@ def generate_eletrification_results_data(Flight_Ops):
 def generate_hydrogen_results_data(Hydrogen,Flight_Ops):
     
     
-    volume_fraction_list    = np.linspace(5, 60,12)
+    volume_fraction_list    = np.linspace(5, 60,120)
     aircraft_capacity       = np.array([19, 88, 120, 189, 368])
     aircraft_range          = np.zeros((len(aircraft_capacity),12,len(volume_fraction_list))) 
     passenger_volume        = np.zeros((len(aircraft_capacity),12,len(volume_fraction_list)))  

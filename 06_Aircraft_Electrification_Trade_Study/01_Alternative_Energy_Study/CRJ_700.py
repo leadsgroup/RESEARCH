@@ -73,14 +73,16 @@ def vehicle_setup(propellant):
     vehicle.tag = 'Bombardier_CRJ-700'    
     
     # ################################################# Vehicle-level Properties #################################################   
-    vehicle.mass_properties.max_takeoff               = 32999 * Units.kilogram  
+    vehicle.mass_properties.max_takeoff               = 34019 * Units.kilogram  #https://bombardier.com/sites/default/files/2020-08/PreOwnedFactsheet_CRJ700_sn10314_0.pdf
     vehicle.mass_properties.takeoff                   = 30000 * Units.kilogram    
-    vehicle.mass_properties.operating_empty           = 19051 * Units.kilogram  
-    vehicle.mass_properties.max_zero_fuel             = 28259 * Units.kilogram 
+    vehicle.mass_properties.operating_empty           = 19869 * Units.kilogram  #https://bombardier.com/sites/default/files/2020-08/PreOwnedFactsheet_CRJ700_sn10314_0.pdf
+    vehicle.mass_properties.max_zero_fuel             = 28259 * Units.kilogram  #https://bombardier.com/sites/default/files/2020-08/PreOwnedFactsheet_CRJ700_sn10314_0.pdf
     vehicle.mass_properties.cargo                     = 7000  * Units.kilogram 
-    #vehicle.flight_envelope.ultimate_load             = 3.75
-    #vehicle.flight_envelope.limit_load                = 2.5 
-    #vehicle.flight_envelope.design_mach_number        = 0.78 
+    vehicle.mass_properties.max_payload               = 8189  * Units.kilogram  #https://www.globalair.com/aircraft-for-sale/specifications?specid=1679
+    vehicle.mass_properties.max_fuel                  = 8888  * Units.kilogram  #https://www.globalair.com/aircraft-for-sale/specifications?specid=1679
+    vehicle.envelope.ultimate_load             = 3.75
+    vehicle.envelope.limit_load                = 2.5 
+    vehicle.design_mach_number        = 0.78 
     #vehicle.flight_envelope.design_cruise_altitude    = 35000*Units.feet
     #vehicle.flight_envelope.design_range              = 3500 * Units.nmi
     vehicle.reference_area                            = 70.61 * Units['meters**2']   
@@ -849,7 +851,7 @@ def mission_setup(analyses):
   
     Segments = RCAIDE.Framework.Mission.Segments 
     base_segment = Segments.Segment()
-    base_segment.state.numerics.number_of_control_points  = 4
+    base_segment.state.numerics.number_of_control_points  = 3
 
     ## ------------------------------------------------------------------------------------------------------------------------------------ 
     ##   Takeoff Roll
@@ -920,7 +922,7 @@ def mission_setup(analyses):
     segment.analyses.extend( analyses.cruise ) 
     segment.altitude_start = 0.0   * Units.km
     segment.altitude_end = 10.5   * Units.km
-    segment.air_speed    = 150  * Units['m/s'] # 290 kts climb 
+    segment.air_speed    = 230.  * Units['m/s'] # 290 kts climb 
     segment.climb_rate   = 7.5    * Units['m/s'] # 1500 fpm ascent 
     
     # define flight dynamics to model 
@@ -967,7 +969,7 @@ def mission_setup(analyses):
     segment.analyses.extend( analyses.cruise ) 
     segment.altitude_start                                = 10.5 * Units.km 
     segment.altitude_end                                  = 0.0   * Units.km
-    segment.air_speed                                     = 220.0 * Units['m/s'] # 430 kts descent speed
+    segment.air_speed                                     = 230. * Units['m/s'] # 430 kts descent speed
     segment.descent_rate                                  = 5   * Units['m/s'] # 1000 fpm descent rate approximately 
     
     # define flight dynamics to model 
