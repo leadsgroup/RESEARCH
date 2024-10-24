@@ -437,11 +437,11 @@ def generate_electrification_plots(file_type,save_figure,width, height):
         fig_5.savefig(save_filename_5)
         fig_6.savefig(save_filename_6)
         fig_7.savefig(save_filename_7) 
-        fig_8.savefig(save_filename_7) 
-        fig_9.savefig(save_filename_7) 
-        fig_10.savefig(save_filename_7) 
-        fig_11.savefig(save_filename_7) 
-        fig_12.savefig(save_filename_7)        
+        fig_8.savefig(save_filename_8) 
+        fig_9.savefig(save_filename_9) 
+        fig_10.savefig(save_filename_10) 
+        fig_11.savefig(save_filename_11) 
+        fig_12.savefig(save_filename_12)        
     return    
 
 
