@@ -19,6 +19,7 @@ import pandas                as pd
 import json                  
 from   pyatmos               import coesa76
 from   urllib.request        import urlopen
+import matplotlib as mpl
 import matplotlib.pyplot     as plt 
 import matplotlib.cm         as cm
 import matplotlib.colors     as mcolors
@@ -26,6 +27,7 @@ import plotly.io             as pio
 import plotly.express        as px 
 from   plotly.graph_objs     import * 
 from   mpl_toolkits.mplot3d  import Axes3D
+from   scipy.interpolate     import CubicSpline
 
 def main():
     file_type   =  'png'
@@ -115,10 +117,10 @@ def generate_saf_plots(file_type,save_figure,width, height):
          
     
     if show_legend_S == 'Yes':    
-        leg1 =  fig_1.legend(bbox_to_anchor=(0.5, 1.0), loc='upper left')
-        leg2 =  fig_2.legend(bbox_to_anchor=(0.5, 1.0), loc='upper left')
-        leg3 =  fig_3.legend(bbox_to_anchor=(0.5, 1.0), loc='upper left') 
-        leg4 =  fig_4.legend(bbox_to_anchor=(0.5, 1.0), loc='upper left')
+        leg1 =  fig_1.legend(loc='upper left')
+        leg2 =  fig_2.legend(loc='upper left')
+        leg3 =  fig_3.legend(loc='upper left') 
+        leg4 =  fig_4.legend(loc='upper left')
         
     # Adjusting the sub-plots for legend 
     fig_1.tight_layout()    
@@ -136,104 +138,168 @@ def generate_saf_plots(file_type,save_figure,width, height):
 
 def generate_electrification_plots(file_type,save_figure,width, height): 
     
-    electric_data = load_results('electric_data.res')
+    electric_data            = load_results('electric_data.res')
+                             
+    show_legend_E            = 'Yes'
     
-    show_legend_E = 'Yes'
+    aircraft_capacity_E_list = ['Twin Otter', 'ATR 72', 'Embraer 190', 'Boeing 737', 'Boeing 777']
+    month_list               = ['January', 'February', 'March', 'April', 'May', 'June', 'July','August', 'September', 'October', 'November', 'December']  
     
-    aircraft_capacity_E = electric_data.aircraft_capacity
-    weight_fraction_E   = electric_data.weight_fraction  
-    cell_e0_E           = electric_data.cell_e0          
-    aircraft_range_E    = electric_data.aircraft_range   
-    passenger_volume_E  = electric_data.passenger_volume 
-    CASM_electric_E     = electric_data.CASM_electric    
-    CASM_Jet_A_E        = electric_data.CASM_Jet_A       
-        
-    save_filename_1   = "electrification_plot_Range_SpEn_WeightFr"
-    save_filename_2   = "electrification_plot_Pax_WeightFr"
-    save_filename_3   = "electrification_plot_Pax_SpEn"
-    save_filename_4   = "electrification_plot_CASM_SpEn"
+    aircraft_capacity_E      = electric_data.aircraft_capacity
+    weight_fraction_E        = electric_data.weight_fraction  
+    cell_e0_E                = electric_data.cell_e0          
+    aircraft_range_E         = electric_data.aircraft_range   
+    passenger_volume_E       = electric_data.passenger_volume 
+    CASM_electric_E          = electric_data.CASM_electric    
+    CASM_Jet_A_E             = electric_data.CASM_Jet_A       
+                             
+    save_filename_1          = "1_electrification_plot_Range_SpEn_WeightFr"
+    save_filename_2          = "2_electrification_plot_Pax_WeightFr"
+    save_filename_3          = "3_electrification_plot_Pax_SpEn"
+    save_filename_4          = "4_electrification_plot_CASM_SpEn"
     
     # get plotting style 
-    ps                = plot_style()  
-                      
-    parameters        = {'axes.labelsize' : ps.axis_font_size,
-                         'xtick.labelsize': ps.axis_font_size,
-                         'ytick.labelsize': ps.axis_font_size,
-                         'axes.titlesize' : ps.title_font_size}
+    ps                       = plot_style()  
+                             
+    parameters               = {'axes.labelsize' : ps.axis_font_size,
+                                'xtick.labelsize': ps.axis_font_size,
+                                'ytick.labelsize': ps.axis_font_size,
+                                'axes.titlesize' : ps.title_font_size}
     plt.rcParams.update(parameters)
       
-    fig_1             = plt.figure(save_filename_1)
-    fig_2             = plt.figure(save_filename_2)
-    fig_3             = plt.figure(save_filename_3)
-    fig_4             = plt.figure(save_filename_4)
+    fig_1,axis_1             = plt.subplots(1, 5, figsize=(20, 4), sharex=True, sharey=True)
+    fig_2                    = plt.figure(save_filename_2)
+    fig_3                    = plt.figure(save_filename_3)
+    fig_4,axis_4             = plt.subplots(1, 5, figsize=(20, 4), sharex=True)
     
-    fig_1.set_size_inches(width,height)
+    #fig_1.set_size_inches(width,height)
     fig_2.set_size_inches(width,height)
     fig_3.set_size_inches(width,height)
-    fig_4.set_size_inches(width,height)
+    #fig_4.set_size_inches(width,height)
 
-    axis_1 = fig_1.add_subplot(1,1,1, projection='3d') 
-    axis_2 = fig_2.add_subplot(1,1,1)    
-    axis_3 = fig_3.add_subplot(1,1,1)    
-    axis_4 = fig_4.add_subplot(1,1,1)
+    #axis_1                   = plt.subplots(1, 5, figsize=(20, 4), sharex=True, sharey=True)
+    axis_2                   = fig_2.add_subplot(1,1,1)    
+    axis_3                   = fig_3.add_subplot(1,1,1)    
+    #axis_4                   = fig_4.add_subplot(1,1,1)
+    
+    # ------------------------------------------------
          
     cell_e0_3d, weight_fraction_3d = np.meshgrid(cell_e0_E, weight_fraction_E)
     
-    average_over_capacity_E = np.mean(aircraft_range_E, axis=0)
-    average_over_month_E = np.mean(average_over_capacity_E, axis=0)    
-
-    axis_1.plot_surface(cell_e0_3d, weight_fraction_3d, average_over_month_E, cmap='viridis')
-    axis_1.set_xlabel(r'Specific energy density [Wh/kg]')
-    axis_1.set_ylabel(r'Battery weight fraction [%]')  
-    axis_1.set_zlabel(r'Range [mi]')         
-    set_axes(axis_1)  
+    sum_over_month_E         = np.sum(aircraft_range_E, axis=1)    
     
-    average_over_month_E     = np.mean(passenger_volume_E, axis=1)
-    average_over_specen_E    = np.mean(average_over_month_E, axis=2) 
+    vmin = np.min(sum_over_month_E[:5,:,:])
+    vmax = np.max(sum_over_month_E[:5,:,:]) 
+    
+    # Loop over each subplot and plot the contour
+    for i, ax in enumerate(axis_1):  # 'axes' is a list of Axes, not a Figure
+        contour = ax.contourf(cell_e0_3d, weight_fraction_3d, sum_over_month_E[i,:,:], cmap='viridis', vmin=vmin, vmax=vmax)
+        ax.set_xlabel(r'Specific energy density [Wh/kg]')
+        if i == 0:
+            ax.set_ylabel(r'Battery weight fraction [%]')
+        ax.set_title(f"{aircraft_capacity_E_list[i]}")
+        set_axes(ax)  # Assuming this is a function for axis formatting
+    
+    # Add a single colorbar to the right of the subplots
+    cbar = fig_1.colorbar(contour, ax=axis_1, orientation='vertical', fraction=0.02, pad=0.15)
+    cbar.set_label(r'Range [mi]')    
+    
+    # ------------------------------------------------
+    
+    sum_over_month_E         = np.sum(passenger_volume_E, axis=1)   
     line_colors_capacity_E   = cm.inferno(np.linspace(0,0.9,len(aircraft_capacity_E)))     
+    
+    index                    = 3
+    xnew = np.linspace(weight_fraction_E[0], weight_fraction_E[-1], 100)
         
     for i in range(len(aircraft_capacity_E)):
-        axis_2.plot(weight_fraction_E, average_over_specen_E[i,:], color = line_colors_capacity_E[i], marker = ps.markers[0], linewidth = ps.line_width,markersize = ps.marker_size, label = f"Capacity: {aircraft_capacity_E[i]}") 
+        cs = CubicSpline(weight_fraction_E, sum_over_month_E [i,:,index])
+        ynew = cs(xnew)        
+        axis_2.plot(xnew, ynew, color = line_colors_capacity_E[i], marker = ps.markers[0], linewidth = ps.line_width,markersize = ps.marker_size, label = f"{aircraft_capacity_E_list[i]}") 
     axis_2.set_ylabel(r'Passenger volume [-]')
     axis_2.set_xlabel(r'Battery weight fraction [%]')  
+    axis_2.set_title(f"Battery specific energy density: {cell_e0_E[index]} Wh/kg")    
     set_axes(axis_2) 
     
-    average_over_weightfr_E  = np.mean(average_over_month_E, axis=1) 
+    # ------------------------------------------------
+    
+    index                    = 3
+    xnew = np.linspace(cell_e0_E[0], cell_e0_E[-1], 100)
         
     for i in range(len(aircraft_capacity_E)):
-        axis_3.plot(cell_e0_E, average_over_weightfr_E[i,:], color = line_colors_capacity_E[i], marker = ps.markers[0], linewidth = ps.line_width,markersize = ps.marker_size, label = f"Capacity: {aircraft_capacity_E[i]}") 
+        cs = CubicSpline(cell_e0_E, sum_over_month_E[i,index,:])
+        ynew = cs(xnew)                
+        axis_3.plot(xnew, ynew, color = line_colors_capacity_E[i], marker = ps.markers[0], linewidth = ps.line_width,markersize = ps.marker_size, label = f"{aircraft_capacity_E_list[i]}") 
     axis_3.set_xlabel(r'Specific energy density [Wh/kg]')
     axis_3.set_ylabel(r'Passenger volume [-]')
+    axis_3.set_title(f"Battery weight fraction: {weight_fraction_E[index]} %")     
     set_axes(axis_3) 
     
-    average_over_capacity1 = np.mean(CASM_electric_E, axis=0)
-    average_over_month1    = np.mean(average_over_capacity1, axis=0)    
-    
-    average_over_capacity2 = np.mean(CASM_Jet_A_E, axis=0)
-    average_over_month2    = np.mean(average_over_capacity2, axis=0)   
-    
+    # ------------------------------------------------
+    index_month             = 4
     line_colors_capacity1   = cm.inferno(np.linspace(0,0.9,len(weight_fraction_E)))     
-        
-    for i in range(len(weight_fraction_E)):
-        axis_4.plot(cell_e0_E, CASM_electric_E[3,0,i,:], color = line_colors_capacity1[i], marker = ps.markers[0], linewidth = ps.line_width,markersize = ps.marker_size, label = f"Battery weight fraction: {weight_fraction_E[i]}") 
-        #axis_4.plot(cell_e0_E, average_over_month2[i,:], color = line_colors_capacity1[i], marker = ps.markers[0], linewidth = ps.line_width,markersize = ps.marker_size, label = f"Battery weight fraction: {weight_fraction_E[i]}") 
-    axis_4.set_xlabel(r'Specific energy density [Wh/kg]')
-    axis_4.set_ylabel(r'CASM [-]')
-    set_axes(axis_4)     
-         
     
+    sm = mpl.cm.ScalarMappable(cmap=cm.inferno, norm=plt.Normalize(vmin=min(weight_fraction_E), vmax=max(weight_fraction_E)))
+    sm.set_array([])    
+    
+    for i in range(len(aircraft_capacity_E)):
+        axis = axis_4[i]  # Select the subplot for each aircraft capacity
+        for index_weight_fraction in range(len(weight_fraction_E)):
+            non_zero_indices = CASM_electric_E[i, index_month, index_weight_fraction, :] != 0
+            
+            axis.plot(
+                        cell_e0_E[non_zero_indices], 
+                        CASM_electric_E[i, index_month, index_weight_fraction, :][non_zero_indices], 
+                        color=line_colors_capacity1[index_weight_fraction], 
+                        marker=ps.markers[0], 
+                        linewidth=ps.line_width, 
+                        markersize=ps.marker_size, 
+                        label=f"{weight_fraction_E[index_weight_fraction]}%"
+                    ) 
+        axis.set_xlabel(r'Specific energy density [Wh/kg]')
+        if i == 0:
+            axis.set_ylabel(r'CASM [-]')  
+        axis.set_title(f"Capacity: {aircraft_capacity_E_list[i]}, Month: {month_list[index_month]}")
+    
+        # Apply axis formatting
+        set_axes(axis) 
+        
+    cbar = fig_4.colorbar(sm, ax=axis_4, orientation='vertical', fraction=0.02, pad=0.15)
+    cbar.set_label('Weight Fraction [%]')    
+        
+    #cell_e0_3d, weight_fraction_3d = np.meshgrid(cell_e0_E, weight_fraction_E) 
+    
+    #index_month             = 4
+    
+    #vmin = np.min(CASM_electric_E[:5,index_month,:,:])
+    #vmax = np.max(CASM_electric_E[:5,index_month,:,:]) 
+    
+    ## Loop over each subplot and plot the contour
+    #for i, ax in enumerate(axis_4):  # 'axes' is a list of Axes, not a Figure
+        #contour = ax.contourf(cell_e0_3d, weight_fraction_3d, CASM_electric_E[i,index_month,:,:], cmap='viridis', vmin=vmin, vmax=vmax)
+        #ax.set_xlabel(r'Specific energy density [Wh/kg]')
+        #if i == 0:
+            #ax.set_ylabel(r'Battery weight fraction [%]')
+        #ax.set_title(f"{aircraft_capacity_E_list[i]}, Month: {month_list[index_month]}")
+        #set_axes(ax)  # Assuming this is a function for axis formatting
+    
+    ## Add a single colorbar to the right of the subplots
+    #cbar = fig_4.colorbar(contour, ax=axis_4, orientation='vertical', fraction=0.02, pad=0.15)
+    #cbar.set_label(r'CASM_electric_E [-]')  
+    
+    # ------------------------------------------------
+         
     if show_legend_E == 'Yes':    
-        leg1 =  fig_1.legend(bbox_to_anchor=(0.5, 1.0), loc='upper left')
-        leg2 =  fig_2.legend(bbox_to_anchor=(0.5, 1.0), loc='upper left')
-        leg3 =  fig_3.legend(bbox_to_anchor=(0.5, 1.0), loc='upper left') 
-        leg4 =  fig_4.legend(bbox_to_anchor=(0.5, 1.0), loc='upper left')
+        #leg1 =  axis_1.legend(loc='upper right')
+        leg2 =  axis_2.legend(loc='upper right')
+        leg3 =  axis_3.legend(loc='upper left') 
+        #leg4 =  axis_4.legend(loc='upper right')
         
     # Adjusting the sub-plots for legend 
-    fig_1.tight_layout()    
+    fig_1.tight_layout(pad=2.0, rect=[0, 0, 0.875, 1])    
     fig_2.tight_layout()    
     fig_3.tight_layout()    
-    fig_4.tight_layout()
-     
+    fig_4.tight_layout(pad=2.0, rect=[0, 0, 0.875, 1])  
     
     if save_figure:
         fig_1.savefig(save_filename_1)
