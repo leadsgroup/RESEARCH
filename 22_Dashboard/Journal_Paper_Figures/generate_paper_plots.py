@@ -40,7 +40,7 @@ def main():
     return
 
 def generate_saf_plots(file_type,save_figure,width, height): 
-    saf_data =  load_results('saf_data.res')
+    saf_data    =  load_results('saf_data.res')
 
     show_legend_S = 'Yes'
     
@@ -58,10 +58,10 @@ def generate_saf_plots(file_type,save_figure,width, height):
     saf_plot_2_Emissions_w_SAF_Aircraft  = saf_data.saf_plot_2_Emissions_w_SAF_Aircraft
     saf_plot_2_Emissions_wo_SAF_Aircraft = saf_data.saf_plot_2_Emissions_wo_SAF_Aircraft
         
-    save_filename_1   = "saf_plot_Range_SpEn_WeightFr"
-    save_filename_2   = "saf_plot_Pax_WeightFr"
-    save_filename_3   = "saf_plot_Pax_SpEn"
-    save_filename_4   = "saf_plot_CASM_SpEn"
+    save_filename_15  = "15_saf_plot_Land_HEFA"
+    save_filename_16  = "16_saf_plot_Land_ATJ"
+    save_filename_17  = "17_saf_plot_CASM_HEFA"
+    save_filename_18  = "18_saf_plot_CASM_ATJ"
     
     # get plotting style 
     ps                = plot_style()  
@@ -72,67 +72,100 @@ def generate_saf_plots(file_type,save_figure,width, height):
                          'axes.titlesize' : ps.title_font_size}
     plt.rcParams.update(parameters)
       
-    fig_1             = plt.figure(save_filename_1)
-    fig_2             = plt.figure(save_filename_2)
-    fig_3             = plt.figure(save_filename_3)
-    fig_4             = plt.figure(save_filename_4)
+    fig_15            = plt.figure(save_filename_15)
+    fig_16            = plt.figure(save_filename_16)
+    fig_17            = plt.figure(save_filename_17)
+    fig_18            = plt.figure(save_filename_18)
     
-    fig_1.set_size_inches(width,height)
-    fig_2.set_size_inches(width,height)
-    fig_3.set_size_inches(width,height)
-    fig_4.set_size_inches(width,height)
+    fig_15.set_size_inches(width,height)
+    fig_16.set_size_inches(width,height)
+    fig_17.set_size_inches(width,height)
+    fig_18.set_size_inches(width,height)
 
-    axis_1 = fig_1.add_subplot(1,1,1) 
-    axis_2 = fig_2.add_subplot(1,1,1)    
-    axis_3 = fig_3.add_subplot(1,1,1)    
-    axis_4 = fig_4.add_subplot(1,1,1)   
+    axis_15 = fig_15.add_subplot(1,1,1) 
+    axis_16 = fig_16.add_subplot(1,1,1)    
+    axis_17 = fig_17.add_subplot(1,1,1)    
+    axis_18 = fig_18.add_subplot(1,1,1)   
 
-    axis_1.plot(saf_plot_1_percent_adoption_list, saf_plot_1_land_area[0, 1, :], color = 'g', marker = ps.markers[0], linewidth = ps.line_width,markersize = ps.marker_size, label = f"Soybean") 
-    axis_1.plot(saf_plot_1_percent_adoption_list, saf_plot_1_land_area[1, 1, :], color = 'b', marker = ps.markers[0], linewidth = ps.line_width,markersize = ps.marker_size, label = f"Canola") 
-    axis_1.set_ylabel(r'Land area [-]')
-    axis_1.set_xlabel(r'Percent adoption [%]')  
-    axis_1.set_title('HEFA - upper 10 Airports')
-    set_axes(axis_1)
+    axis_15.plot(saf_plot_1_percent_adoption_list, saf_plot_1_land_area[0, 1, :]/1000000, color = 'g', marker = ps.markers[0], linewidth = ps.line_width,markersize = ps.marker_size, label = f"HEFA - upper 10 Airports - Soybean") 
+    axis_15.plot(saf_plot_1_percent_adoption_list, saf_plot_1_land_area[1, 1, :]/1000000, color = 'b', marker = ps.markers[0], linewidth = ps.line_width,markersize = ps.marker_size, label = f"HEFA - upper 10 Airports - Canola") 
+    axis_15.plot(saf_plot_1_percent_adoption_list, saf_plot_1_land_area[0, 3, :]/1000000, color = 'g', marker = ps.markers[1], linewidth = ps.line_width,markersize = ps.marker_size, label = f"HEFA - upper 50 Airports - Soybean") 
+    axis_15.plot(saf_plot_1_percent_adoption_list, saf_plot_1_land_area[1, 3, :]/1000000, color = 'b', marker = ps.markers[1], linewidth = ps.line_width,markersize = ps.marker_size, label = f"HEFA - upper 50 Airports - Canola") 
+    axis_15.set_ylabel(r'Land area in millions [M Acres]')
+    axis_15.set_xlabel(r'Percent adoption [%]')  
+    set_axes(axis_15)    
     
-    axis_2.plot(saf_plot_1_percent_adoption_list, saf_plot_1_land_area[4, 1, :], color = 'g', marker = ps.markers[0], linewidth = ps.line_width,markersize = ps.marker_size, label = f"Corn") 
-    axis_2.plot(saf_plot_1_percent_adoption_list, saf_plot_1_land_area[5, 1, :], color = 'b', marker = ps.markers[0], linewidth = ps.line_width,markersize = ps.marker_size, label = f"Wheat") 
-    axis_2.set_ylabel(r'Land area [-]')
-    axis_2.set_xlabel(r'Percent adoption [%]')  
-    axis_2.set_title('ATJ - upper 10 Airports')
-    set_axes(axis_2)    
+    axis_16.plot(saf_plot_1_percent_adoption_list, saf_plot_1_land_area[4, 1, :]/1000000, color = 'g', marker = ps.markers[0], linewidth = ps.line_width,markersize = ps.marker_size, label = f"ATJ - upper 10 Airports - Corn") 
+    axis_16.plot(saf_plot_1_percent_adoption_list, saf_plot_1_land_area[5, 1, :]/1000000, color = 'b', marker = ps.markers[0], linewidth = ps.line_width,markersize = ps.marker_size, label = f"ATJ - upper 10 Airports - Wheat") 
+    axis_16.plot(saf_plot_1_percent_adoption_list, saf_plot_1_land_area[4, 3, :]/1000000, color = 'g', marker = ps.markers[1], linewidth = ps.line_width,markersize = ps.marker_size, label = f"ATJ - upper 50 Airports - Corn") 
+    axis_16.plot(saf_plot_1_percent_adoption_list, saf_plot_1_land_area[5, 3, :]/1000000, color = 'b', marker = ps.markers[1], linewidth = ps.line_width,markersize = ps.marker_size, label = f"ATJ - upper 50 Airports - Wheat") 
+    axis_16.set_ylabel(r'Land area in millions [M Acres]')
+    axis_16.set_xlabel(r'Percent adoption [%]')  
+    set_axes(axis_16)
     
-    axis_3.plot(saf_plot_1_percent_adoption_list, saf_plot_1_land_area[0, 3, :], color = 'g', marker = ps.markers[0], linewidth = ps.line_width,markersize = ps.marker_size, label = f"Soybean") 
-    axis_3.plot(saf_plot_1_percent_adoption_list, saf_plot_1_land_area[1, 3, :], color = 'b', marker = ps.markers[0], linewidth = ps.line_width,markersize = ps.marker_size, label = f"Canola") 
-    axis_3.set_ylabel(r'Land area [-]')
-    axis_3.set_xlabel(r'Percent adoption [%]')  
-    axis_3.set_title('HEFA - upper 50 Airports')
-    set_axes(axis_3)
+    index_month = 4
     
-    axis_4.plot(saf_plot_1_percent_adoption_list, saf_plot_1_land_area[4, 3, :], color = 'g', marker = ps.markers[0], linewidth = ps.line_width,markersize = ps.marker_size, label = f"Corn") 
-    axis_4.plot(saf_plot_1_percent_adoption_list, saf_plot_1_land_area[5, 3, :], color = 'b', marker = ps.markers[0], linewidth = ps.line_width,markersize = ps.marker_size, label = f"Wheat") 
-    axis_4.set_ylabel(r'Land area [-]')
-    axis_4.set_xlabel(r'Percent adoption [%]')  
-    axis_4.set_title('ATJ - upper 50 Airports')
-    set_axes(axis_4)
-         
+    non_zero_indices_1 = saf_plot_1_CASM_w_SAF_Aircraft[0, 1, :, index_month] != 0
+    non_zero_indices_2 = saf_plot_1_CASM_w_SAF_Aircraft[1, 1, :, index_month] != 0
+    non_zero_indices_3 = saf_plot_1_CASM_w_SAF_Aircraft[0, 3, :, index_month] != 0
+    non_zero_indices_4 = saf_plot_1_CASM_w_SAF_Aircraft[1, 3, :, index_month] != 0 
+    
+    xnew_1 = np.linspace(saf_plot_1_percent_adoption_list[non_zero_indices_1][0], saf_plot_1_percent_adoption_list[non_zero_indices_1][-1], 100)
+    cs_1   = CubicSpline(saf_plot_1_percent_adoption_list[non_zero_indices_1], saf_plot_1_CASM_w_SAF_Aircraft[0, 1, :, index_month][non_zero_indices_1]) 
+    xnew_2 = np.linspace(saf_plot_1_percent_adoption_list[non_zero_indices_2][0], saf_plot_1_percent_adoption_list[non_zero_indices_2][-1], 100)
+    cs_2   = CubicSpline(saf_plot_1_percent_adoption_list[non_zero_indices_2], saf_plot_1_CASM_w_SAF_Aircraft[1, 1, :, index_month][non_zero_indices_2])
+    xnew_3 = np.linspace(saf_plot_1_percent_adoption_list[non_zero_indices_3][0], saf_plot_1_percent_adoption_list[non_zero_indices_3][-1], 100)
+    cs_3   = CubicSpline(saf_plot_1_percent_adoption_list[non_zero_indices_3], saf_plot_1_CASM_w_SAF_Aircraft[0, 3, :, index_month][non_zero_indices_3])
+    xnew_4 = np.linspace(saf_plot_1_percent_adoption_list[non_zero_indices_4][0], saf_plot_1_percent_adoption_list[non_zero_indices_4][-1], 100)
+    cs_4   = CubicSpline(saf_plot_1_percent_adoption_list[non_zero_indices_4], saf_plot_1_CASM_w_SAF_Aircraft[1, 3, :, index_month][non_zero_indices_4])    
+    
+    axis_17.plot(xnew_1, cs_1(xnew_1), color = 'g', marker = ps.markers[0], linewidth = ps.line_width,markersize = ps.marker_size, label = f"HEFA - upper 10 Airports - Corn") 
+    axis_17.plot(xnew_2, cs_2(xnew_2), color = 'b', marker = ps.markers[0], linewidth = ps.line_width,markersize = ps.marker_size, label = f"HEFA - upper 10 Airports - Wheat") 
+    axis_17.plot(xnew_3, cs_3(xnew_3), color = 'g', marker = ps.markers[1], linewidth = ps.line_width,markersize = ps.marker_size, label = f"HEFA - upper 50 Airports - Corn") 
+    axis_17.plot(xnew_4, cs_4(xnew_4), color = 'b', marker = ps.markers[1], linewidth = ps.line_width,markersize = ps.marker_size, label = f"HEFA - upper 50 Airports - Wheat") 
+    axis_17.set_ylabel(r'CASM [-]')
+    axis_17.set_xlabel(r'Percent adoption [%]')  
+    set_axes(axis_17)  
+    
+    non_zero_indices_5 = saf_plot_1_CASM_w_SAF_Aircraft[4, 1, :, index_month] != 0
+    non_zero_indices_6 = saf_plot_1_CASM_w_SAF_Aircraft[5, 1, :, index_month] != 0
+    non_zero_indices_7 = saf_plot_1_CASM_w_SAF_Aircraft[4, 3, :, index_month] != 0
+    non_zero_indices_8 = saf_plot_1_CASM_w_SAF_Aircraft[5, 3, :, index_month] != 0   
+    
+    xnew_5 = np.linspace(saf_plot_1_percent_adoption_list[non_zero_indices_5][0], saf_plot_1_percent_adoption_list[non_zero_indices_5][-1], 100)
+    cs_5   = CubicSpline(saf_plot_1_percent_adoption_list[non_zero_indices_5], saf_plot_1_CASM_w_SAF_Aircraft[4, 1, :, index_month][non_zero_indices_5]) 
+    xnew_6 = np.linspace(saf_plot_1_percent_adoption_list[non_zero_indices_6][0], saf_plot_1_percent_adoption_list[non_zero_indices_6][-1], 100)
+    cs_6   = CubicSpline(saf_plot_1_percent_adoption_list[non_zero_indices_6], saf_plot_1_CASM_w_SAF_Aircraft[5, 1, :, index_month][non_zero_indices_6])
+    xnew_7 = np.linspace(saf_plot_1_percent_adoption_list[non_zero_indices_7][0], saf_plot_1_percent_adoption_list[non_zero_indices_7][-1], 100)
+    cs_7   = CubicSpline(saf_plot_1_percent_adoption_list[non_zero_indices_7], saf_plot_1_CASM_w_SAF_Aircraft[4, 3, :, index_month][non_zero_indices_7])
+    xnew_8 = np.linspace(saf_plot_1_percent_adoption_list[non_zero_indices_8][0], saf_plot_1_percent_adoption_list[non_zero_indices_8][-1], 100)
+    cs_8   = CubicSpline(saf_plot_1_percent_adoption_list[non_zero_indices_8], saf_plot_1_CASM_w_SAF_Aircraft[5, 3, :, index_month][non_zero_indices_8])    
+    
+    axis_18.plot(xnew_5, cs_5(xnew_5), color = 'g', marker = ps.markers[0], linewidth = ps.line_width,markersize = ps.marker_size, label = f"ATJ - upper 10 Airports - Corn") 
+    axis_18.plot(xnew_6, cs_6(xnew_6), color = 'b', marker = ps.markers[0], linewidth = ps.line_width,markersize = ps.marker_size, label = f"ATJ - upper 10 Airports - Wheat") 
+    axis_18.plot(xnew_7, cs_7(xnew_7), color = 'g', marker = ps.markers[1], linewidth = ps.line_width,markersize = ps.marker_size, label = f"ATJ - upper 50 Airports - Corn") 
+    axis_18.plot(xnew_8, cs_8(xnew_8), color = 'b', marker = ps.markers[1], linewidth = ps.line_width,markersize = ps.marker_size, label = f"ATJ - upper 50 Airports - Wheat") 
+    axis_18.set_ylabel(r'CASM [-]')
+    axis_18.set_xlabel(r'Percent adoption [%]')  
+    set_axes(axis_18)      
     
     if show_legend_S == 'Yes':    
-        leg1 =  fig_1.legend(loc='upper left')
-        leg2 =  fig_2.legend(loc='upper left')
-        leg3 =  fig_3.legend(loc='upper left') 
-        leg4 =  fig_4.legend(loc='upper left')
+        leg15 = axis_15.legend(loc='upper left')
+        leg16 = axis_16.legend(loc='upper left')
+        leg17 = axis_17.legend(loc='upper left') 
+        leg18 = axis_18.legend(loc='upper left')
         
     # Adjusting the sub-plots for legend 
-    fig_1.tight_layout()    
-    fig_2.tight_layout()    
-    fig_3.tight_layout()    
-    fig_4.tight_layout()
+    fig_15.tight_layout()    
+    fig_16.tight_layout()    
+    fig_17.tight_layout()    
+    fig_18.tight_layout()
     
     if save_figure:
-        fig_1.savefig(save_filename_1)
-        fig_2.savefig(save_filename_2)
-        fig_3.savefig(save_filename_3)
-        fig_4.savefig(save_filename_4)  
+        fig_15.savefig(save_filename_15)
+        fig_16.savefig(save_filename_16)
+        fig_17.savefig(save_filename_17)
+        fig_18.savefig(save_filename_18)  
         
     return     
 
