@@ -447,8 +447,10 @@ def generate_electrification_plots(file_type,save_figure,width, height):
 
 def generate_hydrogen_plots(file_type,save_figure,width, height): 
     hydrogen_data         =  load_results('hydrogen_data.res')   
+    
+    aircraft_capacity_H_list = ['Twin Otter', 'ATR 72', 'Embraer 190', 'Boeing 737', 'Boeing 777']    
                           
-    show_legend_H         = 'No'
+    show_legend_H         = 'Yes'
                           
     aircraft_capacity_H   = hydrogen_data.aircraft_capacity
     volume_fraction_H     = hydrogen_data.volume_fraction  
@@ -459,8 +461,8 @@ def generate_hydrogen_plots(file_type,save_figure,width, height):
     CASM_w_H2_Aircraft_H  = hydrogen_data.CASM_w_H2_Aircraft    
     CASM_wo_H2_Aircraft_H = hydrogen_data.CASM_wo_H2_Aircraft       
         
-    save_filename_1   = "hydrogen_plot_Pax_VolumeFr"
-    save_filename_2   = "hydrogen_plot_CASM_VolumeFr"
+    save_filename_13   = "13_hydrogen_plot_Pax_VolumeFr"
+    save_filename_14   = "14_hydrogen_plot_CASM_VolumeFr"
     
     # get plotting style 
     ps                = plot_style()  
@@ -471,51 +473,55 @@ def generate_hydrogen_plots(file_type,save_figure,width, height):
                          'axes.titlesize' : ps.title_font_size}
     plt.rcParams.update(parameters)
       
-    fig_1             = plt.figure(save_filename_1)
-    fig_2             = plt.figure(save_filename_2)
+    fig_13             = plt.figure(save_filename_13)
+    fig_14             = plt.figure(save_filename_14)
     
-    fig_1.set_size_inches(width,height)
-    fig_2.set_size_inches(width,height)
+    fig_13.set_size_inches(width,height)
+    fig_14.set_size_inches(width,height)
 
-    axis_1 = fig_1.add_subplot(1,1,1) 
-    axis_2 = fig_2.add_subplot(1,1,1)  
+    axis_13 = fig_13.add_subplot(1,1,1) 
+    axis_14 = fig_14.add_subplot(1,1,1)  
+    
+    # ------------------------------------------------
     
     line_colors_capacity   = cm.inferno(np.linspace(0,0.9,len(aircraft_capacity_H)))
-    average_over_month     = np.mean(passenger_volume_H, axis=1)
-        
-    for i in range(len(aircraft_capacity_H)):
-        axis_1.plot(volume_fraction_H, average_over_month[i,:], color = line_colors_capacity[i], marker = ps.markers[0], linewidth = ps.line_width,markersize = ps.marker_size, label = f"Capacity: {aircraft_capacity_H[i]}") 
-    axis_1.set_xlabel(r'Volume fraction [%]')
-    axis_1.set_ylabel(r'Passenger volume [-]')
-    set_axes(axis_1)    
+    sum_over_month_H       = np.sum(passenger_volume_H, axis=1)
     
+    xnew                   = np.linspace(volume_fraction_H[0], volume_fraction_H[-1], 100)
 
+    for i in range(len(aircraft_capacity_H)):
+        cs                            = CubicSpline(volume_fraction_H, sum_over_month_H[i,:])
+        ynew                          = cs(xnew)        
+        axis_13.plot(xnew, ynew/1000000, color = line_colors_capacity[i], marker = ps.markers[0], linewidth = ps.line_width,markersize = ps.marker_size, label = f"{aircraft_capacity_H_list[i]}") 
+    axis_13.set_xlabel(r'Volume fraction [%]')
+    axis_13.set_ylabel(r'Passenger volume in millions [M]')
+    set_axes(axis_13)    
     
-    #average_over_capacity1 = np.mean(CASM_w_H2_Aircraft_H, axis=0)
-    average_over_month1    = np.mean(CASM_w_H2_Aircraft_H, axis=1)    
+    # ------------------------------------------------
     
-    #average_over_capacity2 = np.mean(CASM_Jet_A, axis=0)
-    #average_over_month2    = np.mean(average_over_capacity2, axis=0)   
+    index_month            = 4
     
-    line_colors_capacity1   = cm.inferno(np.linspace(0,0.9,len(aircraft_capacity_H)))     
+    line_colors_capacity1  = cm.inferno(np.linspace(0,0.9,len(aircraft_capacity_H)))     
         
     for i in range(len(aircraft_capacity_H)):
-        axis_2.plot(volume_fraction_H, average_over_month1[i,:], color = line_colors_capacity1[i], marker = ps.markers[0], linewidth = ps.line_width,markersize = ps.marker_size, label = f"Battery weight fraction: {aircraft_capacity_H[i]}") 
-    axis_2.set_xlabel(r'Volume fraction [%]')
-    axis_2.set_ylabel(r'CASM [-]')
-    set_axes(axis_2)         
+        cs                            = CubicSpline(volume_fraction_H, CASM_w_H2_Aircraft_H[i,index_month,:])
+        ynew                          = cs(xnew)         
+        axis_14.plot(xnew, ynew, color = line_colors_capacity1[i], marker = ps.markers[0], linewidth = ps.line_width,markersize = ps.marker_size, label = f"{aircraft_capacity_H_list[i]}") 
+    axis_14.set_xlabel(r'Volume fraction [%]')
+    axis_14.set_ylabel(r'CASM [-]')
+    set_axes(axis_14)         
     
     if show_legend_H == 'Yes':    
-        leg1 =  fig_1.legend(bbox_to_anchor=(0.5, 1.0), loc='upper left')
-        leg2 =  fig_2.legend(bbox_to_anchor=(0.5, 1.0), loc='upper left')
+        leg13 =  axis_13.legend(loc='upper left')
+        leg14 =  axis_14.legend(loc='upper left')
         
     # Adjusting the sub-plots for legend 
-    fig_1.tight_layout()    
-    fig_2.tight_layout()    
+    fig_13.tight_layout()    
+    fig_14.tight_layout()    
     
     if save_figure:
-        fig_1.savefig(save_filename_1)
-        fig_2.savefig(save_filename_2)  
+        fig_13.savefig(save_filename_13)
+        fig_14.savefig(save_filename_14)  
         
     return  
 

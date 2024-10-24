@@ -31,7 +31,7 @@ def main():
     
     
     #emissions_methods = ['Emission_Index_Correlation_Method', 'Emission_Index_CRN_Method']
-    emissions_methods = ['Emission_Index_Correlation_Method']
+    emissions_methods = ['Emission_Index_CRN_Method']
     for em in  range(1):
         # vehicle data
         vehicle  = vehicle_setup()
