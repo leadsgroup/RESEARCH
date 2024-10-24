@@ -160,11 +160,11 @@ def generate_electrification_plots(file_type,save_figure,width, height):
     save_filename_5          = "5_electrification_plot_Range_Boeing_777"
     save_filename_6          = "6_electrification_plot_Pax_volume_weight_fr" 
     save_filename_7          = "7_electrification_plot_Pax_volume_spec_en"   
-    save_filename_8          = "8_electrification_plot_Pax_volume_spec_en"  
-    save_filename_9          = "9_electrification_plot_Pax_volume_spec_en"  
-    save_filename_10         = "10_electrification_plot_Pax_volume_spec_en"  
-    save_filename_11         = "11_electrification_plot_Pax_volume_spec_en"  
-    save_filename_12         = "12_electrification_plot_Pax_volume_spec_en"   
+    save_filename_8          = "8_electrification_plot_CASM_Twin_Otter" 
+    save_filename_9          = "9_electrification_plot_CASM_ATR_72" 
+    save_filename_10         = "10_electrification_plot_CASM_Embraer_190" 
+    save_filename_11         = "11_electrification_plot_CASM_Boeing_737" 
+    save_filename_12         = "12_electrification_plot_CASM_Boeing_777"  
     
     # get plotting style 
     ps                       = plot_style()  
