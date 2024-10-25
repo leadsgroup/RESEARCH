@@ -22,8 +22,12 @@ def function2(name):
     Notes
     -----
     Additional information that is not strictally necessary for the user, but
-    may be helpful. 
-
+    may be helpful.
+    
+    **Extra modules required**
+    List any additional modules (like Cantera) that are required.
+    Delete this section if there are none.
+    
     **Major Assumptions**
     * Assumption 1
     * Assumption 2
