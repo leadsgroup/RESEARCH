@@ -18,27 +18,23 @@ def function2(name):
         Description of the return.
     return3 : dict
         Description of the return.
-    
-    Major Assumptions
-    -----------------
-    * Assumption 1
-    * Assumption 2
-    
-    Theory
-    ------
-    :math:`math_text_of_choice`.
-
-    .. math::
-        \\int_a^b f(x) dx = \\int_a^b g(x) dx + i\\int_a^b h(x) dx
 
     Notes
     -----
     Additional information that is not strictally necessary for the user, but
     may be helpful. 
 
-    **Bold section header**
+    **Major Assumptions**
+    * Assumption 1
+    * Assumption 2
     
-    [Definitions as necessary]
+    **Theory**
+    :math:`math_text_of_choice`.
+    .. math::
+        \\int_a^b f(x) dx = \\int_a^b g(x) dx + i\\int_a^b h(x) dx
+    
+    
+    **Definitions**
     'term'
         term definition
     
