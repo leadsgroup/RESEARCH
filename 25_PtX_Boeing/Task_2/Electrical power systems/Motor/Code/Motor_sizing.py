@@ -161,6 +161,41 @@ def compute_basic_motor_sizing(B_sign, k_w, I_tot, D, L, omega):
     Br_Rs_0        = ((Br*(p/(p + 1))*(1 - (Rr/Rm)**(p + 1)))/(1 - ((Rr**(2*p))/(Rs))))*(((r/Rs)**(p - 1))*((Rm/Rs)**(p + 1)) + ((Rm/r)**(p + 1)))*np.cos(p*theta)
     B_sign         = (2/np.pi)*Br_Rs_0                          # average airgap field
     
+    # -----------------------------------------------------------------------------------------
+    # Magnet Remnant Flux Density Br
+    # -----------------------------------------------------------------------------------------
+    
+    Br_20C         = 1                                          # remnant flux density at 20 °C
+    T              = 1                                          # temperature in Celsius
+    Br_T           = Br_20C - alpha_mag*(T - 20)*Br_20C         # magnet remnant flux density at temperature
+    alpha_mag      = 1                                          # material property related to the specific magnet grade
+    
+    # -----------------------------------------------------------------------------------------
+    # Magnet Losses
+    # -----------------------------------------------------------------------------------------    
+    
+    k                          = 1                                          # Steinmetz coefficient
+    alpha                      = 1                                          # Steinmetz coefficient
+    beta                       = 1                                          # Steinmetz coefficient
+    B                          = 1                                          # peak magnetic flux density
+    f                          = 1                                          # frequency of the magnetic field
+    P_v_Steinmetz              = k*(f**alpha)*(B**beta)                     # iron loss per volume
+    P_v_Bertotti               = k_h*f*(B**beta) + k_c*(f**2)*(B**2) + k_e*(f**1.5)*(B**1.5) # iron loss per volume
+    B_back                     = (B_sign/t_back)*((2*np.pi*Rs)/(2*p))
+    B_tooth_slots_less_than_2p = (B_sign/w_tooth)*((2*np.pi*Rs)/p)
+    B_tooth_slots_more_than_2p = (B_sign/w_tooth)*((2*np.pi*Rs)/p)*(p/(slots - p))
+    f_tooth                    = f_nom*(Slots/(2*p))
+    P_v_tooth                  = (f_nom/f_tooth)*k*(f_tooth**alpha)*(B**beta)
+    
+    # -----------------------------------------------------------------------------------------
+    # Calculating Current and Resistive Losses
+    # -----------------------------------------------------------------------------------------    
+        
+    I_avg_layer                = I_tot/(Slots*Layers)
+    I_peak_layer               = (np.pi/2)*I_avg_layer
+    I_rms_layer                = (1/np.sqrt(2))*I_peak_layer
+    LOSS_I2R                   = Slots*Layers*rho_copper*(L_layer/(SF*A_layer))*I_rms_layer**2
+    rho_copper_T               = rho_copper_20C*(1 + 0.00393*(T - 20))
     
     return
 
