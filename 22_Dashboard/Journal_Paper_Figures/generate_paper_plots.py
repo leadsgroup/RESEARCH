@@ -28,6 +28,7 @@ import plotly.express        as px
 from   plotly.graph_objs     import * 
 from   mpl_toolkits.mplot3d  import Axes3D
 from   scipy.interpolate     import CubicSpline
+from matplotlib.gridspec     import GridSpec
 
 def main():
     file_type   =  'png'
@@ -62,6 +63,7 @@ def generate_saf_plots(file_type,save_figure,width, height):
     save_filename_16  = "16_saf_plot_Land_ATJ"
     save_filename_17  = "17_saf_plot_CASM_HEFA"
     save_filename_18  = "18_saf_plot_CASM_ATJ"
+    save_filename_19  = "19_saf_plot_Emissions"
     
     # get plotting style 
     ps                = plot_style()  
@@ -76,16 +78,20 @@ def generate_saf_plots(file_type,save_figure,width, height):
     fig_16            = plt.figure(save_filename_16)
     fig_17            = plt.figure(save_filename_17)
     fig_18            = plt.figure(save_filename_18)
+    #fig_19            = plt.figure(save_filename_19)
     
     fig_15.set_size_inches(width,height)
     fig_16.set_size_inches(width,height)
     fig_17.set_size_inches(width,height)
     fig_18.set_size_inches(width,height)
+    #fig_19.set_size_inches(width,height)
 
     axis_15 = fig_15.add_subplot(1,1,1) 
     axis_16 = fig_16.add_subplot(1,1,1)    
     axis_17 = fig_17.add_subplot(1,1,1)    
     axis_18 = fig_18.add_subplot(1,1,1)   
+    #axis_19 = fig_19.add_subplot(1,1,1)  
+    #axis_20 = fig_19.add_subplot(1,1,1)      
 
     axis_15.plot(saf_plot_1_percent_adoption_list, saf_plot_1_land_area[0, 1, :]/1000000, color = 'g', marker = ps.markers[0], linewidth = ps.line_width,markersize = ps.marker_size, label = f"HEFA - upper 10 Airports - Soybean") 
     axis_15.plot(saf_plot_1_percent_adoption_list, saf_plot_1_land_area[1, 1, :]/1000000, color = 'b', marker = ps.markers[0], linewidth = ps.line_width,markersize = ps.marker_size, label = f"HEFA - upper 10 Airports - Canola") 
@@ -149,23 +155,103 @@ def generate_saf_plots(file_type,save_figure,width, height):
     axis_18.set_xlabel(r'Percent adoption [%]')  
     set_axes(axis_18)      
     
+    # Emissions
+
+    fig_19 = plt.figure(save_filename_19)
+    fig_19.set_size_inches(width, height)
+
+    # Define the grid for two vertically stacked plots with custom height ratios
+    gs = GridSpec(2, 1, height_ratios=[1, 1.5], hspace=0)
+    axis_19 = fig_19.add_subplot(gs[0, 0])  # Top plot
+    axis_20 = fig_19.add_subplot(gs[1, 0])  # Bottom plot
+
+    
+    fuel_color = 'grey'
+    bar_width  = 5
+    saf_colors = ['b', 'g', 'c', 'r']
+    
+    for i, adoption in enumerate(saf_plot_2_percent_adoption_list):
+        if adoption == 0:
+            axis_19.bar(adoption, 100, color=fuel_color, edgecolor='black', width=bar_width)
+        else:
+            saf_portion = adoption / 100  
+            fuel_portion = 1 - saf_portion  
+            
+            for j in range(4):  
+                offset = (j - 1.5) * bar_width
+                label = 'Fuel' if i == 1 and j == 0 else None
+                axis_19.bar(adoption + offset, fuel_portion * 100, color=fuel_color, edgecolor='black', width=bar_width, label=label)
+
+                saf_cumulative = fuel_portion
+                blend_fractions = saf_plot_2_percent_fuel_use_list[j] / 100  # Normalized blend fractions
+                blend_fractions_old = 0
+                saf_adjusted_ratios = np.zeros(4)
+   
+                for w in range(len(blend_fractions) + 1):
+                    if w == 0:
+                        saf_adjusted_ratios[w] = (blend_fractions[w] - blend_fractions_old)* saf_portion
+                        blend_fractions_old  = blend_fractions[w]
+                    elif w == 1 or w == 2:
+                        saf_adjusted_ratios[w] = (blend_fractions[w] - blend_fractions_old) * saf_portion
+                        blend_fractions_old = blend_fractions[w]
+                    else:
+                        saf_adjusted_ratios[-1] = (1 - blend_fractions_old) * saf_portion
+                
+                for k, blend_ratio in enumerate(saf_adjusted_ratios):
+                    label = f'SAF {k+1}' if i == 1 and j == 0 else None  
+                    axis_19.bar(adoption + offset, blend_ratio * 100, bottom=saf_cumulative * 100,
+                                color=saf_colors[k], edgecolor='black', width=bar_width, label=label)
+                    saf_cumulative += blend_ratio
+            
+    axis_19.set_xticks(saf_plot_2_percent_adoption_list)
+    axis_19.set_xticklabels(saf_plot_2_percent_adoption_list)
+    axis_19.set_xlabel('SAF adoption [%]')    
+    axis_19.set_ylabel('Blend [%]')
+    axis_19.set_yticklabels([0, 25, 50, 75, 100])
+    axis_19.set_yticks([0, 25, 50, 75, 100])
+    
+    emissions_sum  = np.sum(saf_plot_2_Emissions_w_SAF_Aircraft, axis=3)
+
+    for i, adoption in enumerate(saf_plot_2_percent_adoption_list):
+        if adoption == 0:
+            axis_20.bar(adoption, emissions_sum[:,i, 0], width=bar_width, color='yellow', edgecolor='black')
+        else:
+            for j in range(4):  
+                offset = (j - 1.5) * bar_width
+                emission_value = emissions_sum[:,i, j]
+                axis_20.bar(adoption + offset, emission_value, color='yellow', edgecolor='black', width=bar_width)
+    
+    # Flip the bottom plot upside down
+    axis_20.invert_yaxis()
+    
+    # Formatting bottom plot
+    axis_20.set_xticks(saf_plot_2_percent_adoption_list)
+    axis_20.set_xticklabels(saf_plot_2_percent_adoption_list)
+    axis_20.set_ylabel('Emissions [Mt CO2]')
+    axis_20.set_xlabel('Percent adoption [%]')
+    
+    plt.grid(axis='y')
+    
     if show_legend_S == 'Yes':    
         leg15 = axis_15.legend(loc='upper left')
         leg16 = axis_16.legend(loc='upper left')
         leg17 = axis_17.legend(loc='upper left') 
-        leg18 = axis_18.legend(loc='upper left')
+        leg18 = axis_18.legend(loc='upper left') 
+        leg19 = axis_19.legend(loc='upper right', bbox_to_anchor=(1.35, 1), borderaxespad=0.)
         
     # Adjusting the sub-plots for legend 
     fig_15.tight_layout()    
     fig_16.tight_layout()    
     fig_17.tight_layout()    
-    fig_18.tight_layout()
+    fig_18.tight_layout()    
+    fig_19.tight_layout()
     
     if save_figure:
         fig_15.savefig(save_filename_15)
         fig_16.savefig(save_filename_16)
         fig_17.savefig(save_filename_17)
-        fig_18.savefig(save_filename_18)  
+        fig_18.savefig(save_filename_18)
+        fig_19.savefig(save_filename_19)   
         
     return     
 
