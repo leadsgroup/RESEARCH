@@ -197,6 +197,13 @@ def compute_basic_motor_sizing(B_sign, k_w, I_tot, D, L, omega):
     LOSS_I2R                   = Slots*Layers*rho_copper*(L_layer/(SF*A_layer))*I_rms_layer**2
     rho_copper_T               = rho_copper_20C*(1 + 0.00393*(T - 20))
     
+    # -----------------------------------------------------------------------------------------
+    # AC Winding Loss
+    # -----------------------------------------------------------------------------------------    
+        
+    Rac                        = (Rdc/2)*
+    
+    
     return
 
 if __name__ == '__main__': 

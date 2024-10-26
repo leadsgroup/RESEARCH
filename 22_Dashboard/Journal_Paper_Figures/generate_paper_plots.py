@@ -251,7 +251,8 @@ def generate_electrification_plots(file_type,save_figure,width, height):
          
     cell_e0_3d, weight_fraction_3d = np.meshgrid(cell_e0_E, weight_fraction_E)
     
-    sum_over_month_E         = np.sum(aircraft_range_E, axis=1)    
+    sum_over_month_E         = np.sum(aircraft_range_E,   axis=1)
+    passenger_volume_sum     = np.sum(passenger_volume_E, axis=1)
     
     vmin_1 = np.min(sum_over_month_E[0,:,:]/1000)
     vmax_1 = np.max(sum_over_month_E[0,:,:]/1000) 
@@ -270,8 +271,21 @@ def generate_electrification_plots(file_type,save_figure,width, height):
     axis_1.set_ylabel(r'Battery weight fraction [%]')
     set_axes(axis_1)
     cbar = fig_1.colorbar(contour, ax=axis_1, orientation='vertical', fraction=0.02, pad=0.15)
-    cbar.set_label(r'Range in thousand miles [K mi]')    
+    cbar.set_label(r'Range in thousand miles [K mi]')  
+
+    specific_energy_density = []
+    weight_fraction = []
+    for j in range(passenger_volume_sum.shape[1]):  
+        for k in range(passenger_volume_sum.shape[2]): 
+            if passenger_volume_sum[0, j, k] < passenger_volume_sum[0, j - 1, k]:  
+                specific_energy_density.append(cell_e0_E[k])  
+                weight_fraction.append(weight_fraction_E[j])
+                break
     
+    if len(specific_energy_density) == len(weight_fraction):
+        axis_1.plot(specific_energy_density, weight_fraction, color='white', linestyle = '-', label="Passenger Reduction")
+        axis_1.legend()    
+        
     # ATR 72
     contour = axis_2.contourf(cell_e0_3d, weight_fraction_3d, sum_over_month_E[1,:,:]/1000, cmap='viridis', vmin=vmin_2, vmax=vmax_2)
     axis_2.set_xlabel(r'Specific energy density [Wh/kg]')
@@ -279,6 +293,19 @@ def generate_electrification_plots(file_type,save_figure,width, height):
     set_axes(axis_2)  
     cbar = fig_2.colorbar(contour, ax=axis_2, orientation='vertical', fraction=0.02, pad=0.15)
     cbar.set_label(r'Range in thousand miles [K mi]')  
+    
+    specific_energy_density = []
+    weight_fraction = []
+    for j in range(passenger_volume_sum.shape[1]):  
+        for k in range(passenger_volume_sum.shape[2]): 
+            if passenger_volume_sum[1, j, k] < passenger_volume_sum[1, j - 1, k]:  
+                specific_energy_density.append(cell_e0_E[k])  
+                weight_fraction.append(weight_fraction_E[j])
+                break
+    
+    if len(specific_energy_density) == len(weight_fraction):
+        axis_2.plot(specific_energy_density, weight_fraction, color='white', linestyle = '-', label="Passenger Reduction")
+        axis_2.legend()        
     
     # Embraer 190
     contour = axis_3.contourf(cell_e0_3d, weight_fraction_3d, sum_over_month_E[2,:,:]/1000, cmap='viridis', vmin=vmin_3, vmax=vmax_3)
@@ -288,6 +315,19 @@ def generate_electrification_plots(file_type,save_figure,width, height):
     cbar = fig_3.colorbar(contour, ax=axis_3, orientation='vertical', fraction=0.02, pad=0.15)
     cbar.set_label(r'Range in thousand miles [K mi]')  
     
+    specific_energy_density = []
+    weight_fraction = []
+    for j in range(passenger_volume_sum.shape[1]):  
+        for k in range(passenger_volume_sum.shape[2]): 
+            if passenger_volume_sum[2, j, k] < passenger_volume_sum[2, j - 1, k]:  
+                specific_energy_density.append(cell_e0_E[k])  
+                weight_fraction.append(weight_fraction_E[j])
+                break
+    
+    if len(specific_energy_density) == len(weight_fraction):
+        axis_3.plot(specific_energy_density, weight_fraction, color='white', linestyle = '-', label="Passenger Reduction")
+        axis_3.legend()    
+    
     # Boeing 737
     contour = axis_4.contourf(cell_e0_3d, weight_fraction_3d, sum_over_month_E[3,:,:]/1000, cmap='viridis', vmin=vmin_4, vmax=vmax_4)
     axis_4.set_xlabel(r'Specific energy density [Wh/kg]')
@@ -296,13 +336,39 @@ def generate_electrification_plots(file_type,save_figure,width, height):
     cbar = fig_4.colorbar(contour, ax=axis_4, orientation='vertical', fraction=0.02, pad=0.15)
     cbar.set_label(r'Range in thousand miles [K mi]')   
     
+    specific_energy_density = []
+    weight_fraction = []
+    for j in range(passenger_volume_sum.shape[1]):  
+        for k in range(passenger_volume_sum.shape[2]): 
+            if passenger_volume_sum[3, j, k] < passenger_volume_sum[3, j - 1, k]:  
+                specific_energy_density.append(cell_e0_E[k])  
+                weight_fraction.append(weight_fraction_E[j])
+                break
+    
+    if len(specific_energy_density) == len(weight_fraction):
+        axis_4.plot(specific_energy_density, weight_fraction, color='white', linestyle = '-', label="Passenger Reduction")
+        axis_4.legend()     
+    
     # Boeing 777
     contour = axis_5.contourf(cell_e0_3d, weight_fraction_3d, sum_over_month_E[4,:,:]/1000, cmap='viridis', vmin=vmin_5, vmax=vmax_5)
     axis_5.set_xlabel(r'Specific energy density [Wh/kg]')
     axis_5.set_ylabel(r'Battery weight fraction [%]')
     set_axes(axis_5)
     cbar = fig_5.colorbar(contour, ax=axis_5, orientation='vertical', fraction=0.02, pad=0.15)
-    cbar.set_label(r'Range in thousand miles [K mi]')     
+    cbar.set_label(r'Range in thousand miles [K mi]') 
+    
+    specific_energy_density = []
+    weight_fraction = []
+    for j in range(passenger_volume_sum.shape[1]):  
+        for k in range(passenger_volume_sum.shape[2]): 
+            if passenger_volume_sum[4, j, k] < passenger_volume_sum[4, j - 1, k]:  
+                specific_energy_density.append(cell_e0_E[k])  
+                weight_fraction.append(weight_fraction_E[j])
+                break
+    
+    if len(specific_energy_density) == len(weight_fraction):
+        axis_5.plot(specific_energy_density, weight_fraction, color='white', linestyle = '-', label="Passenger Reduction")
+        axis_5.legend()     
     
     # ------------------------------------------------
     
