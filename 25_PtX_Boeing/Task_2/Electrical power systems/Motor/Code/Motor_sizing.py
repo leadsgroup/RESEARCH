@@ -6,6 +6,8 @@ import numpy             as np
 from   scipy.integrate   import quad
 import matplotlib.pyplot as plt
 
+# References: "Analytical Design and Performance Estimation Methods for Aircraft Permanent Magnet Synchronous Machines" (2023), Thomas F. Tallerico, Aaron D. Anderson, Matthew G. Granger, and Jonathan M. Gutknecht, Glenn Research Center, Cleveland, Ohio
+    
 # ----------------------------------------------------------------------
 #   Main
 # ----------------------------------------------------------------------
@@ -20,87 +22,186 @@ def main():
     L              = 1                                          # motor stack length
     omega          = 1                                          # rotor angular velocity
     
-    compute_basic_motor_sizing(B_sign, k_w, I_tot, D, L, omega)
+    #compute_basic_motor_sizing(B_sign, k_w, I_tot, D, L, omega)
+    example_problem()
     
     return
 
 def compute_basic_motor_sizing(B_sign, k_w, I_tot, D, L, omega):
     
     # -----------------------------------------------------------------------------------------
-    # The Basic Motor Sizing Equation
-    # -----------------------------------------------------------------------------------------       
-    
-    A_sign         = (k_w*I_tot)/(np.pi*D)                      # stator electrical loading    
-    tau            = (np.pi/2)*(B_sign*A_sign)*(D**2)*L         # torque
-    P_version_1    = omega*tau                                  # motor power
-    B_g1           = 4*B_sign/np.pi                             # peak magnetic flux density of the fundamental harmonic produced by the rotor
-    K_s1           = A_sign*np.pi/2                             # peak fundamental value of the linear current density    
-    
-    # -----------------------------------------------------------------------------------------
-    # Power and Torque Density
-    # -----------------------------------------------------------------------------------------    
-    
-    P_version_2    = omega*(np.pi/4)*(B_g1*K_s1)*(D**2)*L       # motor power
-    torque_density = (1/2)*(B_sign*A_sign)*D                    # torque per unit volume
-    power_density  = omega*torque_density                       # power per unit rotor volume 
-    
-    # -----------------------------------------------------------------------------------------
-    # Efficiency and Power Factor
+    # 3 Electromagnetic Motor Sizing
     # -----------------------------------------------------------------------------------------     
     
-    tau_out        = tau - (LOSS_speed/omega)                   # output torque
-    P_out          = omega*tau_out                              # output power
+    # -----------------------------------------------------------------------------------------
+    # 3.1 The Basic Motor Sizing Equation
+    # -----------------------------------------------------------------------------------------       
+    
+    A_sign         = (k_w*I_tot)/(np.pi*D)                      # stator electrical loading (Eq.2)   
+    tau            = (np.pi/2)*(B_sign*A_sign)*(D**2)*L         # torque (Eq.1)
+    P_version_1    = omega*tau                                  # motor power (Eq.1)
+    B_g1           = 4*B_sign/np.pi                             # peak magnetic flux density of the fundamental harmonic produced by the rotor (Eq.4)
+    K_s1           = A_sign*np.pi/2                             # peak fundamental value of the linear current density (Eq.5)  
+    P_version_2    = omega*(np.pi/4)*(B_g1*K_s1)*(D**2)*L       # motor power (Eq.3)
+    
+    # -----------------------------------------------------------------------------------------
+    # 3.1.1 Power and Torque Density
+    # -----------------------------------------------------------------------------------------    
+
+    torque_density = (1/2)*(B_sign*A_sign)*D                    # torque per unit volume (Eq.6)  
+    power_density  = omega*torque_density                       # power per unit rotor volume (Eq.6)  
+    
+    # -----------------------------------------------------------------------------------------
+    # 3.1.2 Efficiency and Power Factor
+    # -----------------------------------------------------------------------------------------     
+    
+    tau_out        = tau - (LOSS_speed/omega)                   # output torque (Eq.7)  
+    P_out          = omega*tau_out                              # output power (Eq.7)  
 
     def f(i, v):
         return i*v
     
-    T              = 2            
-    P              = (1/T)*quad(f, 0, T)                        # real power
+    T              = 2                                          # total time average power is being calculated over
+    P              = (1/T)*quad(f, 0, T)                        # real power (Eq.9)  
     I              = 1                                          # amplitude of applied current
     V              = 1                                          # amplitude of applied voltage
-    S              = I*V                                        # apparent power
-    PZ             = P/S                                        # power factor
-    Q              = np.sqrt(S**2 - P**2)                       # reactive power
+    S              = I*V                                        # apparent power (Eq.10)  
+    PF             = P/S                                        # power factor (Eq.8)  
+    Q              = np.sqrt(S**2 - P**2)                       # reactive power (Eq.11)  
     
     # -----------------------------------------------------------------------------------------
-    # Calculation of the Average Magnitude of the Radial Flux Density Produced by the Rotor, 𝑩
+    # 3.2 Calculation of the Average Magnitude of the Radial Flux Density Produced by the Rotor, 𝑩
     # -----------------------------------------------------------------------------------------
     
     # -----------------------------------------------------------------------------------------
-    # Magnetic Reluctance Networks
+    # 3.2.1 Magnetic Reluctance Networks
     # -----------------------------------------------------------------------------------------
     
     MMF            = 1                                          # magnetomotive force applied to the reluctance path
     R              = 1                                          # magnetic reluctance of the path
-    phi            = MMF/R                                      # magnetic flux through the reluctance path
-    B              = phi/A                                      # magnetic flux density
+    phi            = MMF/R                                      # magnetic flux through the reluctance path (Eq.12)
+    B              = phi/A                                      # magnetic flux density (Eq.13)
     N              = 1                                          # number of turns
     I              = 1                                          # current in each turn       
-    MMF_coil       = N*I                                        # MMF for a coil
+    MMF_coil       = N*I                                        # MMF for a coil (Eq.14)
     Br             = 1                                          # remnant flux density
     mu_0           = 1                                          # permeability of free space
     mu_r           = 1                                          # relative permeability of the magnetic material
     l_m            = 1                                          # thickness of the magnet or the size of the element if multiple elements span a magnet
-    MMF_magnet     = (Br/(mu_0*mu_r))*l_m                       # MMF for a magnet
+    MMF_magnet     = (Br/(mu_0*mu_r))*l_m                       # MMF for a magnet (Eq.15)
     l              = 1                                          # length of the path
     A              = 1                                          # cross-sectional area of the reluctance path perpendicular to length 𝑙
-    R              = l/(A*mu_0*mu_r)                            # reluctance of a given path or given reluctant element
+    R              = l/(A*mu_0*mu_r)                            # reluctance of a given path or given reluctant element (Eq.16)
     
     # -----------------------------------------------------------------------------------------
-    # Simple Example of North South Array
+    # 3.2.1.1 Simple Example of North South Array (see the function "example_problem()")
     # -----------------------------------------------------------------------------------------    
     
     l_g            = 1                                          # airgap size
     A_m            = 1                                          # magnet area
-    R_ag           = l_g/(A_m*mu_0)                             # airgap reluctance
-    R_mag          = l_m/(A_m*mu_0*mu_r)                        # magnet reluctance
-    R              = 2*R_ag + 2*R_mag                           # reluctance of the path
-    MMF            = 2*(Br/(mu_0*mu_r))*l_m                     # magnetomotive force in the circuit
-    phi            = MMF/R                                      # flux in the path
-    B_m            = (Br*l_m)/(l_g*mu_r + l_m)                  # airgap field in the gap produced by the magnets
+    R_ag           = l_g/(A_m*mu_0)                             # airgap reluctance (Eq.17)
+    R_mag          = l_m/(A_m*mu_0*mu_r)                        # magnet reluctance (Eq.17)
+    R              = 2*R_ag + 2*R_mag                           # reluctance of the path (Eq.17)
+    MMF            = 2*(Br/(mu_0*mu_r))*l_m                     # magnetomotive force in the circuit (Eq.18)
+    phi            = MMF/R                                      # flux in the path (Eq.19)
+    B_m            = (Br*l_m)/(l_g*mu_r + l_m)                  # airgap field in the gap produced by the magnets (Eq.20)
     B_sign         = B_m                                        # for rotors where magnets span the full
     alpha_m        = 1                                          # magnet’s pole span angle in electrical degrees
-    B_g1           = (4/np.pi)*B_m*np.sin(alpha_m/2)            # peak flux density magnitude of the fundamental harmonic, for rotors where the magnets do not span the full magnetic pole
+    B_g1           = (4/np.pi)*B_m*np.sin(alpha_m/2)            # peak flux density magnitude of the fundamental harmonic, for rotors where the magnets do not span the full magnetic pole  (Eq.21)
+    
+    # -----------------------------------------------------------------------------------------
+    # 3.2.1.2 Stator Inductance Calculation
+    # -----------------------------------------------------------------------------------------   
+    
+    A_tip          = 1                                          # tooth tip area 
+    l_tip          = 1                                          # tooth tip gap width
+    W_sp           = 1                                          # stator pole width
+    R_tip          = l_tip/(A_tip*mu_0)                         # reluctance of the tip (Eq.22)
+    R_rotor        = (2/3)*(l_m + l_g)/(W_sp*Stack*mu_0)        # reluctance of the rotor (Eq.22)
+    R              = 1/((2/R_tip) + (1/R_rotor))                # reluctance of one coil (Eq.22)
+    N              = 1                                          # number of turns
+    L_m            = N**2/R                                     # self-inductance of a single coil (Eq.23)
+    
+    # -----------------------------------------------------------------------------------------
+    # 3.2.2 Closed Form Field Solutions
+    # ----------------------------------------------------------------------------------------- 
+    
+    p              = 1                                          # pole count
+    Rm             = 1                                          # magnet outer radius
+    Rr             = 1                                          # magnet inner radius
+    Rs             = 1                                          # stator inner radius
+    
+    Br             = ((Br*(p/(p + 1))*(1 - (Rr/Rm)**(p + 1)))/(1 - ((Rr**(2*p))/(Rs))))*(((r/Rs)**(p - 1))*((Rm/Rs)**(p + 1)) + ((Rm/r)**(p + 1)))*np.cos(p*theta) # solution for the radial airgap field from iron cored Halbach machines (Eq.24)
+    
+    r              = Rs
+    theta          = 0
+    Br_Rs_0        = ((Br*(p/(p + 1))*(1 - (Rr/Rm)**(p + 1)))/(1 - ((Rr**(2*p))/(Rs))))*(((r/Rs)**(p - 1))*((Rm/Rs)**(p + 1)) + ((Rm/r)**(p + 1)))*np.cos(p*theta)
+    B_sign         = (2/np.pi)*Br_Rs_0                          # average airgap field (Eq.25)
+    
+    # -----------------------------------------------------------------------------------------
+    # 3.2.3 Magnet Remnant Flux Density Br
+    # -----------------------------------------------------------------------------------------
+    
+    Br_20C         = 1                                          # remnant flux density at 20 °C
+    T              = 1                                          # temperature in Celsius
+    Br_T           = Br_20C - alpha_mag*(T - 20)*Br_20C         # magnet remnant flux density at temperature (Eq.26)
+    alpha_mag      = 1                                          # material property related to the specific magnet grade
+    
+    # -----------------------------------------------------------------------------------------
+    # 3.3 Magnet Losses
+    # -----------------------------------------------------------------------------------------    
+    
+    k                          = 1                              # Steinmetz coefficient
+    alpha                      = 1                              # Steinmetz coefficient
+    beta                       = 1                              # Steinmetz coefficient
+    B                          = 1                              # peak magnetic flux density
+    f                          = 1                              # frequency of the magnetic field
+    P_v_Steinmetz              = k*(f**alpha)*(B**beta)         # iron loss per volume (Eq.27)
+    P_v_Bertotti               = k_h*f*(B**beta) + k_c*(f**2)*(B**2) + k_e*(f**1.5)*(B**1.5) # iron loss per volume (Eq.28)
+    B_back                     = (B_sign/t_back)*((2*np.pi*Rs)/(2*p))                        # peak field in the back iron (Eq.29)
+    B_tooth_slots_less_than_2p = (B_sign/w_tooth)*((2*np.pi*Rs)/p)                           # peak field in the tooth iron (Eq.30)
+    B_tooth_slots_more_than_2p = (B_sign/w_tooth)*((2*np.pi*Rs)/p)*(p/(slots - p))           # peak field in the tooth iron (Eq.30)
+    f_tooth                    = f_nom*(Slots/(2*p))            # effective frequency of magnetization of the tooth (Eq.31)
+    P_v_tooth                  = (f_nom/f_tooth)*k*(f_tooth**alpha)*(B**beta)                # loss in the stator teeth per unit volume (Eq.32)
+    
+    # -----------------------------------------------------------------------------------------
+    # 3.4 Calculating Current and Resistive Losses
+    # -----------------------------------------------------------------------------------------    
+        
+    I_avg_layer                = I_tot/(Slots*Layers)           # average current per slot per winding layer (Eq.33)
+    I_peak_layer               = (np.pi/2)*I_avg_layer          # peak current per winding layer for a 3-phase motor with sinusoidal supply currents (Eq.34)
+    I_rms_layer                = (1/np.sqrt(2))*I_peak_layer    # root mean squared current per layer (Eq.35) 
+    LOSS_I2R                   = Slots*Layers*rho_copper*(L_layer/(SF*A_layer))*I_rms_layer**2 # resistive losses in the motor (Eq.36) 
+    rho_copper_T               = rho_copper_20C*(1 + 0.00393*(T - 20)) # resistivity of copper at a given temperature (Eq.37)
+    
+    # -----------------------------------------------------------------------------------------
+    # 3.4.1 AC Winding Loss
+    # -----------------------------------------------------------------------------------------    
+    
+    d                          = 1                              # diameter of the conductor
+    delta                      = 1                              # skin depth in the material at the frequency current is being applied to the conductor
+    gamma                      = d/(delta*np.sqrt(2))           # (Eq.39)
+    Rac                        = (Rdc/2)-(gamma*(ber_gamma*der_bei_gamma - bei_gamma*der_ber_gamma)/(der_ber_gamma**2 + der_bei_gamma**2)) # AC resistance due to skin effect for round conductors (Eq.38)
+    sigma                      = 1                              # material conductivity
+    H_e                        = 1                              # peak value of the applied external magnetic field
+    P_prox                     = (2*np.pi*gamma/sigma)*((ber_2_gamma*der_ber_gamma + bei_2_gamma*der_ber_gamma)/(ber_gamma**2 + bei_gamma**2))*H_e**2 # proximity loss per unit stack length in a conductor (Eq.40)
+    R_ac                       = (Rdc/2)*gamma*(ber_gamma*der_bei_gamma - bei_gamma*der_ber_gamma)/(der_ber_gamma**2 + der_bei_gamma**2) - 2*np.pi*((2*m - 1)**2)*(ber_2_gamma*der_ber_gamma + bei_2_gamma*der_ber_gamma)/(ber_gamma**2 + bei_gamma**2) # AC resistivity of the mth layer of conductors in the slot (Eq.41)
+    n                          = 1                              # number of strands 
+    Ns                         = 1                              # number of turns 
+    b                          = 1                              # winding width
+    R_ac                       = Rdc*(1 + ((np.pi*n*Ns)**2)*d**6/(192*(delta**4)*b**2)) # AC resistance of the winding with d<𝛿 (Eq.42)
+    P_prox                     = (((np.pi**2)*sigma*d**4)/(32))*(f*B)**2 # proximity loss per unit length generated in a round conductor when d<δ (Eq.43)
+    
+    # -----------------------------------------------------------------------------------------
+    # 3.5 Voltage and Turn Count
+    # ----------------------------------------------------------------------------------------- 
+    
+    
+    
+    return
+
+
+def example_problem():
     
     # -----------------------------------------------------------------------------------------
     # Solution and plot
@@ -131,78 +232,6 @@ def compute_basic_motor_sizing(B_sign, k_w, I_tot, D, L, omega):
     labels         = [line.get_label() for line in lines]
     plt.legend(lines, labels, loc="upper left")
     plt.title("Effect of Magnet Thickness on Gap Magnetic Field")
-    
-    # -----------------------------------------------------------------------------------------
-    # Stator Inductance Calculation
-    # -----------------------------------------------------------------------------------------   
-    
-    A_tip          = 1                                          # tooth tip area 
-    l_tip          = 1                                          # tooth tip gap width
-    W_sp           = 1                                          # stator pole width
-    R_tip          = l_tip/(A_tip*mu_0)                         # reluctance of the tip
-    R_rotor        = (2/3)*(l_m + l_g)/(W_sp*Stack*mu_0)        # reluctance of the rotor
-    R              = 1/((2/R_tip) + (1/R_rotor))                # reluctance of one coil
-    N              = 1                                          # number of turns
-    L_m            = N**2/R                                     # self-inductance of a single coil
-    
-    # -----------------------------------------------------------------------------------------
-    # Closed Form Field Solutions
-    # ----------------------------------------------------------------------------------------- 
-    
-    p              = 1                                          # pole count
-    Rm             = 1                                          # magnet outer radius
-    Rr             = 1                                          # magnet inner radius
-    Rs             = 1                                          # stator inner radius
-    
-    Br             = ((Br*(p/(p + 1))*(1 - (Rr/Rm)**(p + 1)))/(1 - ((Rr**(2*p))/(Rs))))*(((r/Rs)**(p - 1))*((Rm/Rs)**(p + 1)) + ((Rm/r)**(p + 1)))*np.cos(p*theta)
-    
-    r              = Rs
-    theta          = 0
-    Br_Rs_0        = ((Br*(p/(p + 1))*(1 - (Rr/Rm)**(p + 1)))/(1 - ((Rr**(2*p))/(Rs))))*(((r/Rs)**(p - 1))*((Rm/Rs)**(p + 1)) + ((Rm/r)**(p + 1)))*np.cos(p*theta)
-    B_sign         = (2/np.pi)*Br_Rs_0                          # average airgap field
-    
-    # -----------------------------------------------------------------------------------------
-    # Magnet Remnant Flux Density Br
-    # -----------------------------------------------------------------------------------------
-    
-    Br_20C         = 1                                          # remnant flux density at 20 °C
-    T              = 1                                          # temperature in Celsius
-    Br_T           = Br_20C - alpha_mag*(T - 20)*Br_20C         # magnet remnant flux density at temperature
-    alpha_mag      = 1                                          # material property related to the specific magnet grade
-    
-    # -----------------------------------------------------------------------------------------
-    # Magnet Losses
-    # -----------------------------------------------------------------------------------------    
-    
-    k                          = 1                                          # Steinmetz coefficient
-    alpha                      = 1                                          # Steinmetz coefficient
-    beta                       = 1                                          # Steinmetz coefficient
-    B                          = 1                                          # peak magnetic flux density
-    f                          = 1                                          # frequency of the magnetic field
-    P_v_Steinmetz              = k*(f**alpha)*(B**beta)                     # iron loss per volume
-    P_v_Bertotti               = k_h*f*(B**beta) + k_c*(f**2)*(B**2) + k_e*(f**1.5)*(B**1.5) # iron loss per volume
-    B_back                     = (B_sign/t_back)*((2*np.pi*Rs)/(2*p))
-    B_tooth_slots_less_than_2p = (B_sign/w_tooth)*((2*np.pi*Rs)/p)
-    B_tooth_slots_more_than_2p = (B_sign/w_tooth)*((2*np.pi*Rs)/p)*(p/(slots - p))
-    f_tooth                    = f_nom*(Slots/(2*p))
-    P_v_tooth                  = (f_nom/f_tooth)*k*(f_tooth**alpha)*(B**beta)
-    
-    # -----------------------------------------------------------------------------------------
-    # Calculating Current and Resistive Losses
-    # -----------------------------------------------------------------------------------------    
-        
-    I_avg_layer                = I_tot/(Slots*Layers)
-    I_peak_layer               = (np.pi/2)*I_avg_layer
-    I_rms_layer                = (1/np.sqrt(2))*I_peak_layer
-    LOSS_I2R                   = Slots*Layers*rho_copper*(L_layer/(SF*A_layer))*I_rms_layer**2
-    rho_copper_T               = rho_copper_20C*(1 + 0.00393*(T - 20))
-    
-    # -----------------------------------------------------------------------------------------
-    # AC Winding Loss
-    # -----------------------------------------------------------------------------------------    
-        
-    Rac                        = (Rdc/2)*
-    
     
     return
 
