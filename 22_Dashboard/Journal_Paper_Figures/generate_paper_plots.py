@@ -28,6 +28,7 @@ import plotly.express        as px
 from   plotly.graph_objs     import * 
 from   mpl_toolkits.mplot3d  import Axes3D
 from   scipy.interpolate     import CubicSpline
+from matplotlib.gridspec     import GridSpec
 
 def main():
     file_type   =  'png'
@@ -62,6 +63,7 @@ def generate_saf_plots(file_type,save_figure,width, height):
     save_filename_16  = "16_saf_plot_Land_ATJ"
     save_filename_17  = "17_saf_plot_CASM_HEFA"
     save_filename_18  = "18_saf_plot_CASM_ATJ"
+    save_filename_19  = "19_saf_plot_Emissions"
     
     # get plotting style 
     ps                = plot_style()  
@@ -76,16 +78,20 @@ def generate_saf_plots(file_type,save_figure,width, height):
     fig_16            = plt.figure(save_filename_16)
     fig_17            = plt.figure(save_filename_17)
     fig_18            = plt.figure(save_filename_18)
+    #fig_19            = plt.figure(save_filename_19)
     
     fig_15.set_size_inches(width,height)
     fig_16.set_size_inches(width,height)
     fig_17.set_size_inches(width,height)
     fig_18.set_size_inches(width,height)
+    #fig_19.set_size_inches(width,height)
 
     axis_15 = fig_15.add_subplot(1,1,1) 
     axis_16 = fig_16.add_subplot(1,1,1)    
     axis_17 = fig_17.add_subplot(1,1,1)    
     axis_18 = fig_18.add_subplot(1,1,1)   
+    #axis_19 = fig_19.add_subplot(1,1,1)  
+    #axis_20 = fig_19.add_subplot(1,1,1)      
 
     axis_15.plot(saf_plot_1_percent_adoption_list, saf_plot_1_land_area[0, 1, :]/1000000, color = 'g', marker = ps.markers[0], linewidth = ps.line_width,markersize = ps.marker_size, label = f"HEFA - upper 10 Airports - Soybean") 
     axis_15.plot(saf_plot_1_percent_adoption_list, saf_plot_1_land_area[1, 1, :]/1000000, color = 'b', marker = ps.markers[0], linewidth = ps.line_width,markersize = ps.marker_size, label = f"HEFA - upper 10 Airports - Canola") 
@@ -119,10 +125,10 @@ def generate_saf_plots(file_type,save_figure,width, height):
     xnew_4 = np.linspace(saf_plot_1_percent_adoption_list[non_zero_indices_4][0], saf_plot_1_percent_adoption_list[non_zero_indices_4][-1], 100)
     cs_4   = CubicSpline(saf_plot_1_percent_adoption_list[non_zero_indices_4], saf_plot_1_CASM_w_SAF_Aircraft[1, 3, :, index_month][non_zero_indices_4])    
     
-    axis_17.plot(xnew_1, cs_1(xnew_1), color = 'g', marker = ps.markers[0], linewidth = ps.line_width,markersize = ps.marker_size, label = f"HEFA - upper 10 Airports - Corn") 
-    axis_17.plot(xnew_2, cs_2(xnew_2), color = 'b', marker = ps.markers[0], linewidth = ps.line_width,markersize = ps.marker_size, label = f"HEFA - upper 10 Airports - Wheat") 
-    axis_17.plot(xnew_3, cs_3(xnew_3), color = 'g', marker = ps.markers[1], linewidth = ps.line_width,markersize = ps.marker_size, label = f"HEFA - upper 50 Airports - Corn") 
-    axis_17.plot(xnew_4, cs_4(xnew_4), color = 'b', marker = ps.markers[1], linewidth = ps.line_width,markersize = ps.marker_size, label = f"HEFA - upper 50 Airports - Wheat") 
+    axis_17.plot(xnew_1, cs_1(xnew_1), color = 'g', marker = ps.markers[0], linewidth = ps.line_width,markersize = ps.marker_size, label = f"HEFA - upper 10 Airports - Soybean") 
+    axis_17.plot(xnew_2, cs_2(xnew_2), color = 'b', marker = ps.markers[0], linewidth = ps.line_width,markersize = ps.marker_size, label = f"HEFA - upper 10 Airports - Canola")  
+    axis_17.plot(xnew_3, cs_3(xnew_3), color = 'g', marker = ps.markers[1], linewidth = ps.line_width,markersize = ps.marker_size, label = f"HEFA - upper 50 Airports - Soybean") 
+    axis_17.plot(xnew_4, cs_4(xnew_4), color = 'b', marker = ps.markers[1], linewidth = ps.line_width,markersize = ps.marker_size, label = f"HEFA - upper 50 Airports - Canola")  
     axis_17.set_ylabel(r'CASM [-]')
     axis_17.set_xlabel(r'Percent adoption [%]')  
     set_axes(axis_17)  
@@ -149,23 +155,103 @@ def generate_saf_plots(file_type,save_figure,width, height):
     axis_18.set_xlabel(r'Percent adoption [%]')  
     set_axes(axis_18)      
     
+    # Emissions
+
+    fig_19 = plt.figure(save_filename_19)
+    fig_19.set_size_inches(width, height)
+
+    # Define the grid for two vertically stacked plots with custom height ratios
+    gs = GridSpec(2, 1, height_ratios=[1, 1.5], hspace=0)
+    axis_19 = fig_19.add_subplot(gs[0, 0])  # Top plot
+    axis_20 = fig_19.add_subplot(gs[1, 0])  # Bottom plot
+
+    
+    fuel_color = 'grey'
+    bar_width  = 5
+    saf_colors = ['b', 'g', 'c', 'r']
+    
+    for i, adoption in enumerate(saf_plot_2_percent_adoption_list):
+        if adoption == 0:
+            axis_19.bar(adoption, 100, color=fuel_color, edgecolor='black', width=bar_width)
+        else:
+            saf_portion = adoption / 100  
+            fuel_portion = 1 - saf_portion  
+            
+            for j in range(4):  
+                offset = (j - 1.5) * bar_width
+                label = 'Fuel' if i == 1 and j == 0 else None
+                axis_19.bar(adoption + offset, fuel_portion * 100, color=fuel_color, edgecolor='black', width=bar_width, label=label)
+
+                saf_cumulative = fuel_portion
+                blend_fractions = saf_plot_2_percent_fuel_use_list[j] / 100  # Normalized blend fractions
+                blend_fractions_old = 0
+                saf_adjusted_ratios = np.zeros(4)
+   
+                for w in range(len(blend_fractions) + 1):
+                    if w == 0:
+                        saf_adjusted_ratios[w] = (blend_fractions[w] - blend_fractions_old)* saf_portion
+                        blend_fractions_old  = blend_fractions[w]
+                    elif w == 1 or w == 2:
+                        saf_adjusted_ratios[w] = (blend_fractions[w] - blend_fractions_old) * saf_portion
+                        blend_fractions_old = blend_fractions[w]
+                    else:
+                        saf_adjusted_ratios[-1] = (1 - blend_fractions_old) * saf_portion
+                
+                for k, blend_ratio in enumerate(saf_adjusted_ratios):
+                    label = f'SAF {k+1}' if i == 1 and j == 0 else None  
+                    axis_19.bar(adoption + offset, blend_ratio * 100, bottom=saf_cumulative * 100,
+                                color=saf_colors[k], edgecolor='black', width=bar_width, label=label)
+                    saf_cumulative += blend_ratio
+            
+    axis_19.set_xticks(saf_plot_2_percent_adoption_list)
+    axis_19.set_xticklabels(saf_plot_2_percent_adoption_list)
+    axis_19.set_xlabel('SAF adoption [%]')    
+    axis_19.set_ylabel('Blend [%]')
+    axis_19.set_yticklabels([0, 25, 50, 75, 100])
+    axis_19.set_yticks([0, 25, 50, 75, 100])
+    
+    emissions_sum  = np.sum(saf_plot_2_Emissions_w_SAF_Aircraft, axis=3)
+
+    for i, adoption in enumerate(saf_plot_2_percent_adoption_list):
+        if adoption == 0:
+            axis_20.bar(adoption, emissions_sum[:,i, 0], width=bar_width, color='yellow', edgecolor='black')
+        else:
+            for j in range(4):  
+                offset = (j - 1.5) * bar_width
+                emission_value = emissions_sum[:,i, j]
+                axis_20.bar(adoption + offset, emission_value, color='yellow', edgecolor='black', width=bar_width)
+    
+    # Flip the bottom plot upside down
+    axis_20.invert_yaxis()
+    
+    # Formatting bottom plot
+    axis_20.set_xticks(saf_plot_2_percent_adoption_list)
+    axis_20.set_xticklabels(saf_plot_2_percent_adoption_list)
+    axis_20.set_ylabel('Emissions [Mt CO2]')
+    axis_20.set_xlabel('Percent adoption [%]')
+    
+    plt.grid(axis='y')
+    
     if show_legend_S == 'Yes':    
         leg15 = axis_15.legend(loc='upper left')
         leg16 = axis_16.legend(loc='upper left')
         leg17 = axis_17.legend(loc='upper left') 
-        leg18 = axis_18.legend(loc='upper left')
+        leg18 = axis_18.legend(loc='upper left') 
+        leg19 = axis_19.legend(loc='upper right', bbox_to_anchor=(1.35, 1), borderaxespad=0.)
         
     # Adjusting the sub-plots for legend 
     fig_15.tight_layout()    
     fig_16.tight_layout()    
     fig_17.tight_layout()    
-    fig_18.tight_layout()
+    fig_18.tight_layout()    
+    fig_19.tight_layout()
     
     if save_figure:
         fig_15.savefig(save_filename_15)
         fig_16.savefig(save_filename_16)
         fig_17.savefig(save_filename_17)
-        fig_18.savefig(save_filename_18)  
+        fig_18.savefig(save_filename_18)
+        fig_19.savefig(save_filename_19)   
         
     return     
 
@@ -251,7 +337,8 @@ def generate_electrification_plots(file_type,save_figure,width, height):
          
     cell_e0_3d, weight_fraction_3d = np.meshgrid(cell_e0_E, weight_fraction_E)
     
-    sum_over_month_E         = np.sum(aircraft_range_E, axis=1)    
+    sum_over_month_E         = np.sum(aircraft_range_E,   axis=1)
+    passenger_volume_sum     = np.sum(passenger_volume_E, axis=1)
     
     vmin_1 = np.min(sum_over_month_E[0,:,:]/1000)
     vmax_1 = np.max(sum_over_month_E[0,:,:]/1000) 
@@ -270,8 +357,21 @@ def generate_electrification_plots(file_type,save_figure,width, height):
     axis_1.set_ylabel(r'Battery weight fraction [%]')
     set_axes(axis_1)
     cbar = fig_1.colorbar(contour, ax=axis_1, orientation='vertical', fraction=0.02, pad=0.15)
-    cbar.set_label(r'Range in thousand miles [K mi]')    
+    cbar.set_label(r'Range in thousand miles [K mi]')  
+
+    specific_energy_density = []
+    weight_fraction = []
+    for j in range(passenger_volume_sum.shape[1]):  
+        for k in range(passenger_volume_sum.shape[2]): 
+            if passenger_volume_sum[0, j, k] < passenger_volume_sum[0, j - 1, k]:  
+                specific_energy_density.append(cell_e0_E[k])  
+                weight_fraction.append(weight_fraction_E[j])
+                break
     
+    if len(specific_energy_density) == len(weight_fraction):
+        axis_1.plot(specific_energy_density, weight_fraction, color='white', linestyle = '-', label="Passenger Reduction")
+        axis_1.legend()    
+        
     # ATR 72
     contour = axis_2.contourf(cell_e0_3d, weight_fraction_3d, sum_over_month_E[1,:,:]/1000, cmap='viridis', vmin=vmin_2, vmax=vmax_2)
     axis_2.set_xlabel(r'Specific energy density [Wh/kg]')
@@ -279,6 +379,19 @@ def generate_electrification_plots(file_type,save_figure,width, height):
     set_axes(axis_2)  
     cbar = fig_2.colorbar(contour, ax=axis_2, orientation='vertical', fraction=0.02, pad=0.15)
     cbar.set_label(r'Range in thousand miles [K mi]')  
+    
+    specific_energy_density = []
+    weight_fraction = []
+    for j in range(passenger_volume_sum.shape[1]):  
+        for k in range(passenger_volume_sum.shape[2]): 
+            if passenger_volume_sum[1, j, k] < passenger_volume_sum[1, j - 1, k]:  
+                specific_energy_density.append(cell_e0_E[k])  
+                weight_fraction.append(weight_fraction_E[j])
+                break
+    
+    if len(specific_energy_density) == len(weight_fraction):
+        axis_2.plot(specific_energy_density, weight_fraction, color='white', linestyle = '-', label="Passenger Reduction")
+        axis_2.legend()        
     
     # Embraer 190
     contour = axis_3.contourf(cell_e0_3d, weight_fraction_3d, sum_over_month_E[2,:,:]/1000, cmap='viridis', vmin=vmin_3, vmax=vmax_3)
@@ -288,6 +401,19 @@ def generate_electrification_plots(file_type,save_figure,width, height):
     cbar = fig_3.colorbar(contour, ax=axis_3, orientation='vertical', fraction=0.02, pad=0.15)
     cbar.set_label(r'Range in thousand miles [K mi]')  
     
+    specific_energy_density = []
+    weight_fraction = []
+    for j in range(passenger_volume_sum.shape[1]):  
+        for k in range(passenger_volume_sum.shape[2]): 
+            if passenger_volume_sum[2, j, k] < passenger_volume_sum[2, j - 1, k]:  
+                specific_energy_density.append(cell_e0_E[k])  
+                weight_fraction.append(weight_fraction_E[j])
+                break
+    
+    if len(specific_energy_density) == len(weight_fraction):
+        axis_3.plot(specific_energy_density, weight_fraction, color='white', linestyle = '-', label="Passenger Reduction")
+        axis_3.legend()    
+    
     # Boeing 737
     contour = axis_4.contourf(cell_e0_3d, weight_fraction_3d, sum_over_month_E[3,:,:]/1000, cmap='viridis', vmin=vmin_4, vmax=vmax_4)
     axis_4.set_xlabel(r'Specific energy density [Wh/kg]')
@@ -296,13 +422,39 @@ def generate_electrification_plots(file_type,save_figure,width, height):
     cbar = fig_4.colorbar(contour, ax=axis_4, orientation='vertical', fraction=0.02, pad=0.15)
     cbar.set_label(r'Range in thousand miles [K mi]')   
     
+    specific_energy_density = []
+    weight_fraction = []
+    for j in range(passenger_volume_sum.shape[1]):  
+        for k in range(passenger_volume_sum.shape[2]): 
+            if passenger_volume_sum[3, j, k] < passenger_volume_sum[3, j - 1, k]:  
+                specific_energy_density.append(cell_e0_E[k])  
+                weight_fraction.append(weight_fraction_E[j])
+                break
+    
+    if len(specific_energy_density) == len(weight_fraction):
+        axis_4.plot(specific_energy_density, weight_fraction, color='white', linestyle = '-', label="Passenger Reduction")
+        axis_4.legend()     
+    
     # Boeing 777
     contour = axis_5.contourf(cell_e0_3d, weight_fraction_3d, sum_over_month_E[4,:,:]/1000, cmap='viridis', vmin=vmin_5, vmax=vmax_5)
     axis_5.set_xlabel(r'Specific energy density [Wh/kg]')
     axis_5.set_ylabel(r'Battery weight fraction [%]')
     set_axes(axis_5)
     cbar = fig_5.colorbar(contour, ax=axis_5, orientation='vertical', fraction=0.02, pad=0.15)
-    cbar.set_label(r'Range in thousand miles [K mi]')     
+    cbar.set_label(r'Range in thousand miles [K mi]') 
+    
+    specific_energy_density = []
+    weight_fraction = []
+    for j in range(passenger_volume_sum.shape[1]):  
+        for k in range(passenger_volume_sum.shape[2]): 
+            if passenger_volume_sum[4, j, k] < passenger_volume_sum[4, j - 1, k]:  
+                specific_energy_density.append(cell_e0_E[k])  
+                weight_fraction.append(weight_fraction_E[j])
+                break
+    
+    if len(specific_energy_density) == len(weight_fraction):
+        axis_5.plot(specific_energy_density, weight_fraction, color='white', linestyle = '-', label="Passenger Reduction")
+        axis_5.legend()     
     
     # ------------------------------------------------
     

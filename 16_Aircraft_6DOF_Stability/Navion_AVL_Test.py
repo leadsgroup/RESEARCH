@@ -79,16 +79,13 @@ def base_analysis(vehicle, configs):
     # ------------------------------------------------------------------
     #  Aerodynamics Analysis
     # ------------------------------------------------------------------
-    aerodynamics                                     = RCAIDE.Framework.Analyses.Aerodynamics.Vortex_Lattice_Method() 
-    aerodynamics.vehicle                             = vehicle
-    aerodynamics.settings.number_spanwise_vortices   = 30
-    aerodynamics.settings.drag_coefficient_increment = 0.0000
+    aerodynamics                                     = RCAIDE.Framework.Analyses.Aerodynamics.Athena_Vortex_Lattice() 
+    aerodynamics.vehicle                             = vehicle 
+    aerodynamics.settings.filenames.avl_bin_name     = '/Users/matthewclarke/Documents/LEADS/CODES/AVL/avl3.35'
     analyses.append(aerodynamics) 
      
-    stability                                       = RCAIDE.Framework.Analyses.Stability.Vortex_Lattice_Method() 
-    stability.settings.discretize_control_surfaces  = True
-    stability.settings.model_fuselage               = False                
-    stability.settings.model_nacelle                = False  
+    stability                                       = RCAIDE.Framework.Analyses.Stability.Athena_Vortex_Lattice() 
+    stability.settings.filenames.avl_bin_name       =  '/Users/matthewclarke/Documents/LEADS/CODES/AVL/avl3.35'    
     stability.vehicle                               = vehicle
     analyses.append(stability)
 
@@ -116,7 +113,7 @@ def base_analysis(vehicle, configs):
     return analyses 
 
 def vehicle_setup(): 
-       # ------------------------------------------------------------------
+    # ------------------------------------------------------------------
     #   Initialize the Vehicle
     # ------------------------------------------------------------------ 
     vehicle     = RCAIDE.Vehicle()
@@ -199,23 +196,23 @@ def vehicle_setup():
     wing = segment_properties(wing)    
     
                                           
-    # control surfaces ------------------------------------------- 
-    flap                          = RCAIDE.Library.Components.Wings.Control_Surfaces.Flap()
-    flap.tag                      = 'flap'
-    flap.span_fraction_start      = 0.2
-    flap.span_fraction_end        = 0.5
-    flap.deflection               = 0.0 * Units.degrees 
-    flap.chord_fraction           = 0.20
-    wing.append_control_surface(flap)  
+    ## control surfaces ------------------------------------------- 
+    #flap                          = RCAIDE.Library.Components.Wings.Control_Surfaces.Flap()
+    #flap.tag                      = 'flap'
+    #flap.span_fraction_start      = 0.2
+    #flap.span_fraction_end        = 0.5
+    #flap.deflection               = 0.0 * Units.degrees 
+    #flap.chord_fraction           = 0.20
+    #wing.append_control_surface(flap)  
     
 
-    aileron                       = RCAIDE.Library.Components.Wings.Control_Surfaces.Aileron()
-    aileron.tag                   = 'aileron'
-    aileron.span_fraction_start   = 0.7
-    aileron.span_fraction_end     = 0.9 
-    aileron.deflection            = 0.0 * Units.degrees
-    aileron.chord_fraction        = 0.2
-    wing.append_control_surface(aileron)      
+    #aileron                       = RCAIDE.Library.Components.Wings.Control_Surfaces.Aileron()
+    #aileron.tag                   = 'aileron'
+    #aileron.span_fraction_start   = 0.7
+    #aileron.span_fraction_end     = 0.9 
+    #aileron.deflection            = 0.0 * Units.degrees
+    #aileron.chord_fraction        = 0.2
+    #wing.append_control_surface(aileron)      
 
     # add to vehicle
     vehicle.append_component(wing) 
@@ -244,13 +241,13 @@ def vehicle_setup():
     wing.high_lift                        = False 
     wing.dynamic_pressure_ratio           = 0.9  
     
-    elevator                              = RCAIDE.Library.Components.Wings.Control_Surfaces.Elevator()
-    elevator.tag                          = 'elevator'
-    elevator.span_fraction_start          = 0.1
-    elevator.span_fraction_end            = 0.9
-    elevator.deflection                   = 0.0  * Units.deg
-    elevator.chord_fraction               = 0.3
-    wing.append_control_surface(elevator)       
+    #elevator                              = RCAIDE.Library.Components.Wings.Control_Surfaces.Elevator()
+    #elevator.tag                          = 'elevator'
+    #elevator.span_fraction_start          = 0.1
+    #elevator.span_fraction_end            = 0.9
+    #elevator.deflection                   = 0.0  * Units.deg
+    #elevator.chord_fraction               = 0.3
+    #wing.append_control_surface(elevator)       
 
     RCAIDE.Library.Methods.Geometry.Planform.wing_planform(wing)     
 
@@ -283,13 +280,13 @@ def vehicle_setup():
     wing.winglet_fraction                 = 0.0  
     wing.dynamic_pressure_ratio           = 1.0  
     
-    rudder                                = RCAIDE.Library.Components.Wings.Control_Surfaces.Rudder()
-    rudder.tag                            = 'rudder'
-    rudder.span_fraction_start            = 0.2
-    rudder.span_fraction_end              = 0.8
-    rudder.deflection                     = 0.0  * Units.deg
-    rudder.chord_fraction                 = 0.2
-    wing.append_control_surface(rudder) 
+    #rudder                                = RCAIDE.Library.Components.Wings.Control_Surfaces.Rudder()
+    #rudder.tag                            = 'rudder'
+    #rudder.span_fraction_start            = 0.2
+    #rudder.span_fraction_end              = 0.8
+    #rudder.deflection                     = 0.0  * Units.deg
+    #rudder.chord_fraction                 = 0.2
+    #wing.append_control_surface(rudder) 
     
     # add to vehicle
     vehicle.append_component(wing)

@@ -17,66 +17,32 @@ import numpy as np
 from copy import deepcopy
 import matplotlib.pyplot as plt  
 import os   
+import time
+import json
 
 # ----------------------------------------------------------------------
 #   Main
 # ----------------------------------------------------------------------
 
+
 def main():
-    methane_propane = Alkane_Mixture()
-    methane_propane.propellant_1 = Methane()
-    methane_propane.propellant_2 = Propane()
-    methane_propane.propellant_1_mass_fraction = 0.75
-    methane_propane.propellant_2_mass_fraction = 0.25
-    methane_propane.compute_all()
-    
-    ethane_propane = Alkane_Mixture()
-    ethane_propane.propellant_1 = Ethane()
-    ethane_propane.propellant_2 = Propane()
-    ethane_propane.propellant_1_mass_fraction = 0.75
-    ethane_propane.propellant_2_mass_fraction = 0.25
-    ethane_propane.compute_all()
-    
-    methane_ethane = Alkane_Mixture()
-    methane_ethane.propellant_1 = Methane()
-    methane_ethane.propellant_2 = Ethane()
-    methane_ethane.propellant_1_mass_fraction = 0.75
-    methane_ethane.propellant_2_mass_fraction = 0.25
-    methane_ethane.compute_all()
-    
-    propanol_ethanol = Alcohol_Mixture()
-    propanol_ethanol.propellant_1 = Propanol()
-    propanol_ethanol.propellant_2 = Ethanol()
-    propanol_ethanol.propellant_1_mass_fraction = 0.75
-    propanol_ethanol.propellant_2_mass_fraction = 0.25
-    propanol_ethanol.compute_all()
-    
-    butanol_ethanol = Alcohol_Mixture()
-    butanol_ethanol.propellant_1 = Butanol()
-    butanol_ethanol.propellant_2 = Ethanol()
-    butanol_ethanol.propellant_1_mass_fraction = 0.75
-    butanol_ethanol.propellant_2_mass_fraction = 0.25
-    butanol_ethanol.compute_all()
-    
-    butanol_propanol = Alcohol_Mixture()
-    butanol_propanol.propellant_1 = Butanol()
-    butanol_propanol.propellant_2 = Propanol()
-    butanol_propanol.propellant_1_mass_fraction = 0.75
-    butanol_propanol.propellant_2_mass_fraction = 0.25
-    butanol_propanol.compute_all()
-    
     fuels = [Ethane(), Methane(), Propane(), Ethanol(), Butanol(), Propanol(), \
-        methane_propane, ethane_propane, methane_ethane, propanol_ethanol, butanol_ethanol, butanol_propanol]
-    fuel_names = ["737 Ethane", "737 Methane", "737 Propane", "737 Ethanol", "737 Butanol", "737 Propanol", \
-        "737 Methane-Propane 75-25", "737 Ethane-Propane 75-25", "737 Methane-Ethane 75-25", \
-        "737 Propanol-Ethanol 75-25", "737 Butanol-Ethanol 75-25", "737 Butanol-Propanol 75-25"]
-    
+        Jet_A1(), Liquid_Natural_Gas(), Liquid_Petroleum_Gas()]
+    fuel_names = ["Ethane", "Methane", "Propane", "Ethanol", "Butanol", "Propanol", \
+        "Jet A1", "Liquid Natural Gas", "Liquid Petroleum Gas"]
     
     for index, fuel in enumerate(fuels):
         print("Running simulation for", fuel_names[index])
-    
+        start = time.time()
+        fuel_name = fuel_names[index]
+
         # Step 1 design a vehicle
         vehicle  = vehicle_setup(fuel)
+        jet_a1_density = Jet_A1().density
+        fuel_density = fuel.density
+        max_fuel_mass = np.min((fuel_density * 26022 / jet_a1_density, 26022))
+        print("Max Fuel Mass:", max_fuel_mass)
+        vehicle.mass_properties.max_fuel = max_fuel_mass
         
         # Step 2 create aircraft configuration based on vehicle 
         configs  = configs_setup(vehicle)
@@ -86,18 +52,18 @@ def main():
         
         # Step 4 set up a flight mission
         mission = mission_setup(analyses)
-        missions = missions_setup(mission) 
         
-        # Step 5 execute flight profile
-        results = missions.base_mission.evaluate()
+        # Step 5 get payload-range diagram
+        output = payload_range_diagram(vehicle, mission, 'cruise', reserves=0., plot_diagram=True, fuel_name=fuel_name)
         
-        # Step 6 get payload-range diagram
-        payload_range_diagram(vehicle, mission, 'cruise', reserves=0., plot_diagram=True, fuel_name=fuel_names[index])
+        output_filename = "./06_Aircraft_Electrification_Trade_Study/03_Payload_Range_Study/data/B737_" + fuel_name + ".json"
+        with open(output_filename, "w") as ofile:
+            ofile.write(json.dumps(output))
         
-        # Step 7 plot results 
-        # plot_mission(results)
-    
-
+        end = time.time()
+        m, s = divmod(end - start, 60)
+        print("Took", m, "minutes and", round(s), "seconds to generate plot")
+        
     return
 
 def vehicle_setup(propellant): 
@@ -886,6 +852,7 @@ def mission_setup(analyses):
   
     Segments = RCAIDE.Framework.Mission.Segments 
     base_segment = Segments.Segment()
+    base_segment.state.numerics.number_of_control_points = 3
 
     # ------------------------------------------------------------------------------------------------------------------------------------ 
     #   Takeoff Roll
@@ -905,12 +872,12 @@ def mission_setup(analyses):
     # ------------------------------------------------------------------
 
     segment = Segments.Climb.Constant_Speed_Constant_Rate(base_segment)
-    segment.tag = "climb_1" 
+    segment.tag = "climb" 
     segment.analyses.extend( analyses.takeoff ) 
     segment.altitude_start = 0.0   * Units.km
-    segment.altitude_end   = 3.0   * Units.km
-    segment.air_speed      = 125.0 * Units['m/s']
-    segment.climb_rate     = 6.0   * Units['m/s']  
+    segment.altitude_end   = 10.668   * Units.km
+    segment.air_speed      = 226.0 * Units['m/s']
+    segment.climb_rate     = 3.0   * Units['m/s']  
      
     # define flight dynamics to model 
     segment.flight_dynamics.force_x                      = True  
@@ -923,53 +890,6 @@ def mission_setup(analyses):
     
     mission.append_segment(segment)
 
-
-    # ------------------------------------------------------------------
-    #   Second Climb Segment: Constant Speed Constant Rate  
-    # ------------------------------------------------------------------    
-
-    segment = Segments.Climb.Constant_Speed_Constant_Rate(base_segment)
-    segment.tag = "climb_2" 
-    segment.analyses.extend( analyses.cruise ) 
-    segment.altitude_end   = 8.0   * Units.km
-    segment.air_speed      = 190.0 * Units['m/s']
-    segment.climb_rate     = 6.0   * Units['m/s']  
-    
-    # define flight dynamics to model 
-    segment.flight_dynamics.force_x                      = True  
-    segment.flight_dynamics.force_z                      = True     
-    
-    # define flight controls 
-    segment.assigned_control_variables.throttle.active               = True           
-    segment.assigned_control_variables.throttle.assigned_propulsors  = [['starboard_propulsor','port_propulsor']] 
-    segment.assigned_control_variables.body_angle.active             = True                  
-    
-    mission.append_segment(segment)
-
-
-    # ------------------------------------------------------------------
-    #   Third Climb Segment: Constant Speed Constant Rate  
-    # ------------------------------------------------------------------    
-
-    segment = Segments.Climb.Constant_Speed_Constant_Rate(base_segment)
-    segment.tag = "climb_3" 
-    segment.analyses.extend( analyses.cruise ) 
-    segment.altitude_end = 10.5   * Units.km
-    segment.air_speed    = 226.0  * Units['m/s']
-    segment.climb_rate   = 3.0    * Units['m/s']  
-    
-    # define flight dynamics to model 
-    segment.flight_dynamics.force_x                      = True  
-    segment.flight_dynamics.force_z                      = True     
-    
-    # define flight controls 
-    segment.assigned_control_variables.throttle.active               = True           
-    segment.assigned_control_variables.throttle.assigned_propulsors  = [['starboard_propulsor','port_propulsor']] 
-    segment.assigned_control_variables.body_angle.active             = True                
-    
-    mission.append_segment(segment)
-
-
     # ------------------------------------------------------------------    
     #   Cruise Segment: Constant Speed Constant Altitude
     # ------------------------------------------------------------------    
@@ -979,7 +899,7 @@ def mission_setup(analyses):
     segment.analyses.extend( analyses.cruise ) 
     segment.altitude                                      = 10.668 * Units.km  
     segment.air_speed                                     = 230.412 * Units['m/s']
-    segment.distance                                      = 1000 * Units.nmi   
+    segment.distance                                      = 1500 * Units.nmi   
     
     # define flight dynamics to model 
     segment.flight_dynamics.force_x                       = True  
@@ -1001,7 +921,7 @@ def mission_setup(analyses):
     segment.tag = "descent_1" 
     segment.analyses.extend( analyses.cruise ) 
     segment.altitude_start                                = 10.5 * Units.km 
-    segment.altitude_end                                  = 8.0   * Units.km
+    segment.altitude_end                                  = 0.0   * Units.km
     segment.air_speed                                     = 220.0 * Units['m/s']
     segment.descent_rate                                  = 4.5   * Units['m/s']  
     
@@ -1015,100 +935,7 @@ def mission_setup(analyses):
     segment.assigned_control_variables.body_angle.active             = True                
     
     mission.append_segment(segment)
-
-
-    # ------------------------------------------------------------------
-    #   Second Descent Segment: Constant Speed Constant Rate  
-    # ------------------------------------------------------------------
-
-    segment = Segments.Descent.Constant_Speed_Constant_Rate(base_segment)
-    segment.tag  = "descent_2" 
-    segment.analyses.extend( analyses.cruise ) 
-    segment.altitude_end                                  = 6.0   * Units.km
-    segment.air_speed                                     = 195.0 * Units['m/s']
-    segment.descent_rate                                  = 5.0   * Units['m/s']  
-    
-    # define flight dynamics to model 
-    segment.flight_dynamics.force_x                       = True  
-    segment.flight_dynamics.force_z                       = True     
-    
-    # define flight controls 
-    segment.assigned_control_variables.throttle.active               = True           
-    segment.assigned_control_variables.throttle.assigned_propulsors  = [['starboard_propulsor','port_propulsor']] 
-    segment.assigned_control_variables.body_angle.active             = True                
-    
-    mission.append_segment(segment)
-
-
-    # ------------------------------------------------------------------
-    #   Third Descent Segment: Constant Speed Constant Rate  
-    # ------------------------------------------------------------------
-
-    segment = Segments.Descent.Constant_Speed_Constant_Rate(base_segment)
-    segment.tag = "descent_3"  
-    segment.analyses.extend( analyses.cruise ) 
-    segment.altitude_end                                  = 4.0   * Units.km
-    segment.air_speed                                     = 170.0 * Units['m/s']
-    segment.descent_rate                                  = 5.0   * Units['m/s']  
-    
-    # define flight dynamics to model 
-    segment.flight_dynamics.force_x                       = True  
-    segment.flight_dynamics.force_z                       = True     
-    
-    # define flight controls 
-    segment.assigned_control_variables.throttle.active               = True           
-    segment.assigned_control_variables.throttle.assigned_propulsors  = [['starboard_propulsor','port_propulsor']] 
-    segment.assigned_control_variables.body_angle.active             = True                
-    
-    mission.append_segment(segment)
-
-
-    # ------------------------------------------------------------------
-    #   Fourth Descent Segment: Constant Speed Constant Rate  
-    # ------------------------------------------------------------------
-
-    segment = Segments.Descent.Constant_Speed_Constant_Rate(base_segment)
-    segment.tag = "descent_4" 
-    segment.analyses.extend( analyses.cruise ) 
-    segment.altitude_end                                  = 2.0   * Units.km
-    segment.air_speed                                     = 150.0 * Units['m/s']
-    segment.descent_rate                                  = 5.0   * Units['m/s']  
-    
-    # define flight dynamics to model 
-    segment.flight_dynamics.force_x                       = True  
-    segment.flight_dynamics.force_z                       = True     
-    
-    # define flight controls 
-    segment.assigned_control_variables.throttle.active               = True           
-    segment.assigned_control_variables.throttle.assigned_propulsors  = [['starboard_propulsor','port_propulsor']] 
-    segment.assigned_control_variables.body_angle.active             = True                
-    
-    mission.append_segment(segment)
-
-
-
-    # ------------------------------------------------------------------
-    #   Fifth Descent Segment:Constant Speed Constant Rate  
-    # ------------------------------------------------------------------
-
-    segment = Segments.Descent.Constant_Speed_Constant_Rate(base_segment)
-    segment.tag = "descent_5" 
-    segment.analyses.extend( analyses.landing ) 
-    segment.altitude_end                                  = 0.0   * Units.km
-    segment.air_speed                                     = 145.0 * Units['m/s']
-    segment.descent_rate                                  = 3.0   * Units['m/s']  
-    
-    # define flight dynamics to model 
-    segment.flight_dynamics.force_x                       = True  
-    segment.flight_dynamics.force_z                       = True     
-    
-    # define flight controls 
-    segment.assigned_control_variables.throttle.active               = True           
-    segment.assigned_control_variables.throttle.assigned_propulsors  = [['starboard_propulsor','port_propulsor']] 
-    segment.assigned_control_variables.body_angle.active             = True                
-    
-    mission.append_segment(segment)
-    
+   
     # ------------------------------------------------------------------------------------------------------------------------------------ 
     #   Landing Roll
     # ------------------------------------------------------------------------------------------------------------------------------------ 
