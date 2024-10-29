@@ -2,27 +2,20 @@
 #----------------------------------------------------------------------
 #   Imports
 # ---------------------------------------------------------------------
-import RCAIDE
-from RCAIDE.Framework.Core import Units, Data  
-from RCAIDE.Library.Plots        import *  
-
 import pickle
 import time  
-import numpy as np
 import pylab as plt
-import pandas as pd
-import sys
 import os
-import smtplib
-from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
+import sys
 
-sys.path.append('Common')  
+
+
+sys.path.append(os.path.join(sys.path[0], 'Common'))
 import Vehicle
-import Configurations
 import Analyses 
 import Missions
-import Plots  
+import Plots
+import Create_Excel
  
 
 # ----------------------------------------------------------------------
@@ -36,76 +29,91 @@ def main():
     # -------------------------------------------------------------------------------------------    
     # SET UP SIMULATION PARAMETERS   
     # -------------------------------------------------------------------------------------------  
-    simulated_days             = 1               # number of days simulated
-    flights_per_day            = 1               # number of flights per day  
-    recharge_battery           = True            # flag to simulate battery recharge  
-    plot_mission               = True            # plot mission flag  
+    days_per_group             = 1#5               # total number of days simulated
+    flights_per_day            = 1#5               # number of flights per day
+    day_group                  = [2,3]#,3,4,5,6,7,8,9,10,11]
+    plot_mission               = False            # plot mission flag  
     resize_aircraft            = False
    
     if RUN_NEW_MODEL_FLAG:    
-         
-        # -------------------------------------------------------------------------------------------    
-        # SET UP VEHICLE
-        # -------------------------------------------------------------------------------------------  
-        vehicle = Vehicle.vehicle_setup(resize_aircraft,'e_twin_otter_vehicle')
-        configs =  Configurations(vehicle)
-    
-       
-        # -------------------------------------------------------------------------------------------    
-        # SET UP MISSION PROFILE  
-        # -------------------------------------------------------------------------------------------    
-        for day in range(simulated_days):          
+        for g_idx, group  in  enumerate(day_group):
+            print(' ***********  Simulating Group ' + str(group) + ' ***********  ')
+            # -------------------------------------------------------------------------------------------    
+            # SET UP VEHICLE
+            # -------------------------------------------------------------------------------------------  
+            vehicle = Vehicle.vehicle_setup(resize_aircraft,'e_twin_otter_vehicle')
+            configs = Vehicle.configs_setup(vehicle)
+            analyses = Analyses.analyses_setup(configs)
+            charge_throughput = load_charge_throughput()
             
-            print(' *********** '+ str(day) +' ***********  ')        
-            base_mission[day]      = Missions.repeated_flight_operation_setup(vehicle,day,flights_per_day, recharge_battery)
-            missions_analyses = Missions.missions_setup(base_mission[day])
+           
+            # -------------------------------------------------------------------------------------------    
+            # SET UP MISSION PROFILE  
+            # -------------------------------------------------------------------------------------------    
+            base_mission      = Missions.repeated_flight_operation_setup(configs,analyses,day_group,g_idx,group,days_per_group, flights_per_day, charge_throughput)
+            missions_analyses = Missions.missions_setup(base_mission)
        
-    
-        # -------------------------------------------------------------------------------------------    
-        # RUN SIMULATION !!
-        # -------------------------------------------------------------------------------------------
-        results     = missions_analyses.base.evaluate() 
         
-        # -------------------------------------------------------------------------------------------    
-        # SAVE RESULTS
-        # -------------------------------------------------------------------------------------------
-        filename          = 'e_Twin_Otter_'
-        save_results(results,filename)   
-    
-    else:
-        filename          = 'e_Twin_Otter_' 
-        results = load_results(filename) 
-        
-    if plot_mission: 
-        Plots.plot_results(results,save_figure_flag = False)       
-    
-    
+            ## -------------------------------------------------------------------------------------------    
+            # RUN SIMULATION !!
+            # -------------------------------------------------------------------------------------------
+            results     = missions_analyses.base.evaluate()
+            charge_throughput[str(group)] = results.segments[-1].conditions.energy.bus.battery_modules.lithium_ion_nmc.cell.charge_throughput[-1]
+            save_charge_throughput(charge_throughput)
+            
+            # -------------------------------------------------------------------------------------------    
+            # SAVE RESULTS
+            # -------------------------------------------------------------------------------------------
+            filename          = 'e_Twin_Otter_'
+            save_results(results,filename,group)
+            create_excel(filename,group)
+            
+            if plot_mission: 
+                Plots.plot_results(results,save_figure_flag = False)       
+                        
     tf = time.time() 
     print ('time taken: '+ str(round(((tf-ti)/60),3)) + ' mins')
     
     
-    for i in range(len(flight_no)):
-        starting_range =  results.segments[1+(i*14)].conditions.frames.inertial.aircraft_range[-1,0] /Units.nmi
-        final_range = results.segments[12+(i*14)].conditions.frames.inertial.aircraft_range[-1,0]/Units.nmi
-        print(final_range-starting_range)
-    
     return 
+# ----------------------------------------------------------------------
+#   Save Results
+# ----------------------------------------------------------------------
+def create_excel(filename,group):
+    results = load_results(filename,group)
+    Create_Excel.write_data(results,filename,group)
+    return
 
 
 # ----------------------------------------------------------------------
 #   Save Results
 # ----------------------------------------------------------------------
-def save_results(results,filename): 
-    pickle_file  =  filename + '.pkl'
+def save_results(results,filename,group):
+   #  Pickle Backup Files
+    pickle_file = os.path.join("Raw_Data", filename + 'group_number' + str(group) + '.pkl')
     with open(pickle_file, 'wb') as file:
         pickle.dump(results, file) 
-    return   
+    return
+
+# Function to load the existing pickle file, if it exists
+def load_charge_throughput(filename='charge_throughput.pkl'):
+    if os.path.exists(filename):
+        with open(filename, 'rb') as f:
+            return pickle.load(f)
+    else:
+        return {}  # Return an empty dictionary if the file does not exist
+    
+# Function to save the updated dictionary to the pickle file
+def save_charge_throughput(data, filename='charge_throughput.pkl'):
+    with open(filename, 'wb') as f:
+        pickle.dump(data, f)
+
 
 # ------------------------------------------------------------------
 #   Load Results
 # ------------------------------------------------------------------   
-def load_results(filename):  
-    load_file = filename + '.pkl' 
+def load_results(filename, group):  
+    load_file =  os.path.join("Raw_Data", filename + 'group_number' + str(group) + '.pkl')
     with open(load_file, 'rb') as file:
         results = pickle.load(file) 
     return results
@@ -116,42 +124,8 @@ def load_results(filename):
 def show_notification():
     os.system('osascript -e \'display notification "The simulation has completed successfully." with title "Simulation Complete"\'')
 
-def play_sound():
-    # Play a default system sound on macOS
-    os.system('afplay /System/Library/Sounds/Glass.aiff')
-
-def simulation_complete(airport, month):
-    play_sound()
-    show_notification()
-    send_email()
-    
-def send_email():
-    # Outlook credentials
-    yahoo_user = 'sai.sankalp@yahoo.com'
-    yahoo_password = 'zlofcfakwwmutfwl'
-    
-    # Email content
-    msg = MIMEMultipart()
-    msg['From'] = yahoo_user
-    msg['To'] = '4085921097@tmomail.net'  
-    body = 'The simulation is complete.'
-    msg.attach(MIMEText(body, 'plain'))
-
-    try:
-        # Setup the server and send email
-        server = smtplib.SMTP('smtp.mail.yahoo.com', 587)
-        server.starttls()
-        server.login(yahoo_user, yahoo_password)
-        text = msg.as_string()
-        server.sendmail(yahoo_user, msg['To'], text)
-        server.quit()
-        print('Email sent successfully!')
-    except Exception as e:
-        print(f'Failed to send email: {e}')
-
-    
 
 if __name__ == '__main__':
     main()
-    simulation_complete
+    show_notification()
     plt.show()
