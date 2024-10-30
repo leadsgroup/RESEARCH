@@ -571,6 +571,9 @@ def mission_setup(analyses):
     segment.air_speed                                                           = 60# 120 * Units['mph']
     #segment.sideslip_angle =  10 * Units.degrees
     #segment.true_course                                                         = -30.0 * Units.degrees
+    #segment.angle_of_attack                                                     = 1.80633 * Units.degrees
+    
+    #segment.bank_angle                                                          = 30 * Units.degrees
     segment.distance                                                            =  60 *  Units.mile
    
     # define flight dynamics to model 
@@ -585,7 +588,7 @@ def mission_setup(analyses):
     # Longidinal Flight Mechanics
     segment.assigned_control_variables.elevator_deflection.active               = True    
     segment.assigned_control_variables.elevator_deflection.assigned_surfaces    = [['elevator']]
-    segment.assigned_control_variables.elevator_deflection.initial_guess_values = [[-1 * Units.degrees]]    
+    segment.assigned_control_variables.elevator_deflection.initial_guess_values = [[0.0 * Units.degrees]]    
     segment.flight_dynamics.moment_y                                            = True  
    
     # Lateral Flight Mechanics 
@@ -594,10 +597,10 @@ def mission_setup(analyses):
     segment.flight_dynamics.moment_z                                            = True  
     segment.assigned_control_variables.aileron_deflection.active                = True    
     segment.assigned_control_variables.aileron_deflection.assigned_surfaces     = [['aileron']]
-    segment.assigned_control_variables.aileron_deflection.initial_guess_values  = [[0]] 
+    segment.assigned_control_variables.aileron_deflection.initial_guess_values  = [[0.0 * Units.degrees]] 
     segment.assigned_control_variables.rudder_deflection.active                 = True    
     segment.assigned_control_variables.rudder_deflection.assigned_surfaces      = [['rudder']]
-    segment.assigned_control_variables.rudder_deflection.initial_guess_values   = [[0]]
+    segment.assigned_control_variables.rudder_deflection.initial_guess_values   = [[0.0 * Units.degrees]]
     segment.assigned_control_variables.bank_angle.active                        = True    
     segment.assigned_control_variables.bank_angle.initial_guess_values          = [[0]]     
     
