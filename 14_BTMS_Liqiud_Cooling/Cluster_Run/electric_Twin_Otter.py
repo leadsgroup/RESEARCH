@@ -11,10 +11,10 @@ from RCAIDE.Framework.Networks.Electric                 import Electric
 from RCAIDE.Library.Methods.Propulsors.Converters.Rotor      import design_propeller 
 from RCAIDE.Library.Methods.Performance.estimate_stall_speed        import estimate_stall_speed 
 from RCAIDE.Library.Methods.Propulsors.Converters.DC_Motor   import design_motor 
-from RCAIDE.Library.Methods.Weights.Correlation_Buildups.Propulsion import nasa_motor
+from RCAIDE.Library.Methods.Weights.Correlation_Buildups.Propulsion import compute_motor_weight
 from RCAIDE.Library.Methods.Energy.Sources.Batteries.Common           import initialize_from_circuit_configuration
 from RCAIDE.Library.Methods.Geometry.Planform       import wing_segmented_planform 
-from RCAIDE.Library.Methods.Weights.Physics_Based_Buildups.Electric import compute_weight , converge_weight 
+#from RCAIDE.Library.Methods.Weights.Physics_Based_Buildups.Electric import compute_weight , converge_weight 
 from RCAIDE.Library.Plots                                           import *  
 from RCAIDE.Library.Methods.Thermal_Management.Heat_Exchangers.Cross_Flow_Heat_Exchanger        import design_cross_flow_heat_exchanger
 from RCAIDE.Library.Methods.Thermal_Management.Batteries.Liquid_Cooled_Wavy_Channel  import design_wavy_channel    
@@ -583,7 +583,7 @@ def vehicle_setup():
     motor.design_torque                              = propeller.cruise.design_torque 
     motor.angular_velocity                           = propeller.cruise.design_angular_velocity # Horse power of gas engine variant  750 * Units['hp']
     design_motor(motor)  
-    motor.mass_properties.mass                       = nasa_motor(motor.design_torque) 
+    motor.mass_properties.mass                       = compute_motor_weight(motor.design_torque) 
     starboard_propulsor.motor                        = motor 
  
     # append propulsor to distribution line 
@@ -1244,9 +1244,9 @@ def base_analysis(vehicle):
 
     # ------------------------------------------------------------------
     #  Weights
-    weights = RCAIDE.Framework.Analyses.Weights.Weights_eVTOL()
-    weights.vehicle = vehicle
-    analyses.append(weights)
+    #weights = RCAIDE.Framework.Analyses.Weights.Weights_eVTOL()
+    #weights.vehicle = vehicle
+    #analyses.append(weights)
 
     # ------------------------------------------------------------------
     #  Aerodynamics Analysis
