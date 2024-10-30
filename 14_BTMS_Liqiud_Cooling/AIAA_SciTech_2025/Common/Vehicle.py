@@ -431,7 +431,8 @@ def vehicle_setup(resize_aircraft,vehicle_name) :
 
 
          # ########################################################  Energy Network  #########################################################  
-         net                              = RCAIDE.Framework.Networks.Electric()   
+         net                              = RCAIDE.Framework.Networks.Electric()
+         net.charging_power               = 1000 # watts
 
          #------------------------------------------------------------------------------------------------------------------------------------  
          # Bus
@@ -602,6 +603,21 @@ def vehicle_setup(resize_aircraft,vehicle_name) :
 
    return vehicle 
 
+# ---------------------------------------------------------------------
+#   Define the Configurations
+# --------------------------------------------------------------------- 
+def configs_setup(vehicle):#, tms_operation):
+
+   # ------------------------------------------------------------------
+   #   Initialize Configurations
+   # ------------------------------------------------------------------
+
+   configs         = RCAIDE.Library.Components.Configs.Config.Container() 
+   base_config     = RCAIDE.Library.Components.Configs.Config(vehicle)
+   base_config.tag = 'base'  
+   configs.append(base_config)
+
+   return configs
 
 def save_aircraft_geometry(geometry,filename): 
    pickle_file  = filename + '.pkl'

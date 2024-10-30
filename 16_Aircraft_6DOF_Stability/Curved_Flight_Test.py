@@ -568,9 +568,10 @@ def mission_setup(analyses):
     segment.tag = "linear_cruise" 
     segment.analyses.extend( analyses.base )   
     segment.altitude                                                            = 8000. * Units.feet
-    segment.air_speed                                                           = 120 * Units['mph']
-    segment.true_course                                                         = -30.0 * Units.degrees
-    segment.distance                                                            =  100 *  Units.mile
+    segment.air_speed                                                           = 60# 120 * Units['mph']
+    #segment.sideslip_angle =  10 * Units.degrees
+    #segment.true_course                                                         = -30.0 * Units.degrees
+    segment.distance                                                            =  60 *  Units.mile
    
     # define flight dynamics to model 
     segment.flight_dynamics.force_x                                             = True    
@@ -606,10 +607,10 @@ def mission_setup(analyses):
     #segment.tag = "curved_cruise" 
     #segment.analyses.extend( analyses.base )   
     #segment.altitude                                                            = 8000. * Units.feet
-    #segment.air_speed                                                           = 120 * Units['mph']
-    #segment.turn_radius                                                         = 100 * Units.mile  
-    #segment.start_true_course                                                   = 30.0 * Units.degrees 
-    #segment.turn_angle                                                          = -60.0 * Units.degrees # + indicated right hand turn, negative indicates left-hand turn defaults to straight flight/won't actually turn?
+    #segment.air_speed                                                           = 100 # 120 * Units['mph']
+    #segment.turn_radius                                                         = 1000 # 100 * Units.mile  
+    #segment.start_true_course                                                   = 0.0 * Units.degrees 
+    #segment.turn_angle                                                          = 30.0 * Units.degrees # + indicated right hand turn, negative indicates left-hand turn defaults to straight flight/won't actually turn?
     
     ## define flight dynamics to model 
     #segment.flight_dynamics.force_x                                             = True    
