@@ -949,18 +949,18 @@ def mission_setup(analyses):
     mission.append_segment(segment)  
     
     
-    # # ------------------------------------------------------------------
-    # #  Charge Segment: 
-    # # ------------------------------------------------------------------     
-    # # Charge Model 
-    # segment      = Segments.Ground.Battery_Recharge(base_segment)     
-    # segment.tag  = 'Charge_Day'   
-    # segment.analyses.extend( analyses.base) 
-    # segment.initial_battery_state_of_charge               = 0.2
-    # #if f_idx ==  (flights_per_day - 1): 
-    #     #segment.increment_battery_age_by_one_day =  True 
-    #     #segment.increment_battery_cycle_day      =  day
-    # mission.append_segment(segment)             
+    # ------------------------------------------------------------------
+    #  Charge Segment: 
+    # ------------------------------------------------------------------     
+    # Charge Model 
+    segment      = Segments.Ground.Battery_Recharge(base_segment)     
+    segment.tag  = 'Charge_Day'   
+    segment.analyses.extend( analyses.base) 
+    #segment.initial_battery_state_of_charge               = 0.2
+    #if f_idx ==  (flights_per_day - 1): 
+        #segment.increment_battery_age_by_one_day =  True 
+        #segment.increment_battery_cycle_day      =  day
+    mission.append_segment(segment)             
 
     
     
