@@ -568,9 +568,13 @@ def mission_setup(analyses):
     segment.tag = "linear_cruise" 
     segment.analyses.extend( analyses.base )   
     segment.altitude                                                            = 8000. * Units.feet
-    segment.air_speed                                                           = 120 * Units['mph']
-    segment.true_course                                                         = -30.0 * Units.degrees
-    segment.distance                                                            =  100 *  Units.mile
+    segment.air_speed                                                           = 60# 120 * Units['mph']
+    #segment.sideslip_angle =  10 * Units.degrees
+    #segment.true_course                                                         = -30.0 * Units.degrees
+    #segment.angle_of_attack                                                     = 1.80633 * Units.degrees
+    
+    #segment.bank_angle                                                          = 30 * Units.degrees
+    segment.distance                                                            =  60 *  Units.mile
    
     # define flight dynamics to model 
     segment.flight_dynamics.force_x                                             = True    
@@ -584,7 +588,7 @@ def mission_setup(analyses):
     # Longidinal Flight Mechanics
     segment.assigned_control_variables.elevator_deflection.active               = True    
     segment.assigned_control_variables.elevator_deflection.assigned_surfaces    = [['elevator']]
-    segment.assigned_control_variables.elevator_deflection.initial_guess_values = [[-1 * Units.degrees]]    
+    segment.assigned_control_variables.elevator_deflection.initial_guess_values = [[0.0 * Units.degrees]]    
     segment.flight_dynamics.moment_y                                            = True  
    
     # Lateral Flight Mechanics 
@@ -593,10 +597,10 @@ def mission_setup(analyses):
     segment.flight_dynamics.moment_z                                            = True  
     segment.assigned_control_variables.aileron_deflection.active                = True    
     segment.assigned_control_variables.aileron_deflection.assigned_surfaces     = [['aileron']]
-    segment.assigned_control_variables.aileron_deflection.initial_guess_values  = [[0]] 
+    segment.assigned_control_variables.aileron_deflection.initial_guess_values  = [[0.0 * Units.degrees]] 
     segment.assigned_control_variables.rudder_deflection.active                 = True    
     segment.assigned_control_variables.rudder_deflection.assigned_surfaces      = [['rudder']]
-    segment.assigned_control_variables.rudder_deflection.initial_guess_values   = [[0]]
+    segment.assigned_control_variables.rudder_deflection.initial_guess_values   = [[0.0 * Units.degrees]]
     segment.assigned_control_variables.bank_angle.active                        = True    
     segment.assigned_control_variables.bank_angle.initial_guess_values          = [[0]]     
     
@@ -606,10 +610,10 @@ def mission_setup(analyses):
     #segment.tag = "curved_cruise" 
     #segment.analyses.extend( analyses.base )   
     #segment.altitude                                                            = 8000. * Units.feet
-    #segment.air_speed                                                           = 120 * Units['mph']
-    #segment.turn_radius                                                         = 100 * Units.mile  
-    #segment.start_true_course                                                   = 30.0 * Units.degrees 
-    #segment.turn_angle                                                          = -60.0 * Units.degrees # + indicated right hand turn, negative indicates left-hand turn defaults to straight flight/won't actually turn?
+    #segment.air_speed                                                           = 100 # 120 * Units['mph']
+    #segment.turn_radius                                                         = 1000 # 100 * Units.mile  
+    #segment.start_true_course                                                   = 0.0 * Units.degrees 
+    #segment.turn_angle                                                          = 30.0 * Units.degrees # + indicated right hand turn, negative indicates left-hand turn defaults to straight flight/won't actually turn?
     
     ## define flight dynamics to model 
     #segment.flight_dynamics.force_x                                             = True    

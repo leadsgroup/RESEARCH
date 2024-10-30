@@ -196,23 +196,23 @@ def vehicle_setup():
     wing = segment_properties(wing)    
     
                                           
-    ## control surfaces ------------------------------------------- 
-    #flap                          = RCAIDE.Library.Components.Wings.Control_Surfaces.Flap()
-    #flap.tag                      = 'flap'
-    #flap.span_fraction_start      = 0.2
-    #flap.span_fraction_end        = 0.5
-    #flap.deflection               = 0.0 * Units.degrees 
-    #flap.chord_fraction           = 0.20
-    #wing.append_control_surface(flap)  
+    # control surfaces ------------------------------------------- 
+    flap                          = RCAIDE.Library.Components.Wings.Control_Surfaces.Flap()
+    flap.tag                      = 'flap'
+    flap.span_fraction_start      = 0.2
+    flap.span_fraction_end        = 0.5
+    flap.deflection               = 0.0 * Units.degrees 
+    flap.chord_fraction           = 0.20
+    wing.append_control_surface(flap)  
     
 
-    #aileron                       = RCAIDE.Library.Components.Wings.Control_Surfaces.Aileron()
-    #aileron.tag                   = 'aileron'
-    #aileron.span_fraction_start   = 0.7
-    #aileron.span_fraction_end     = 0.9 
-    #aileron.deflection            = 0.0 * Units.degrees
-    #aileron.chord_fraction        = 0.2
-    #wing.append_control_surface(aileron)      
+    aileron                       = RCAIDE.Library.Components.Wings.Control_Surfaces.Aileron()
+    aileron.tag                   = 'aileron'
+    aileron.span_fraction_start   = 0.7
+    aileron.span_fraction_end     = 0.9 
+    aileron.deflection            = 0.0 * Units.degrees
+    aileron.chord_fraction        = 0.2
+    wing.append_control_surface(aileron)      
 
     # add to vehicle
     vehicle.append_component(wing) 
@@ -221,7 +221,7 @@ def vehicle_setup():
     # ------------------------------------------------------------------        
     #  Horizontal Stabilizer
     # ------------------------------------------------------------------       
-    wing                                  = RCAIDE.Library.Components.Wings.Wing()
+    wing                                  = RCAIDE.Library.Components.Wings.Horizontal_Tail()
     wing.tag                              = 'horizontal_stabilizer'  
     wing.sweeps.leading_edge              = 6 * Units.degrees 
     wing.thickness_to_chord               = 0.12
@@ -241,13 +241,13 @@ def vehicle_setup():
     wing.high_lift                        = False 
     wing.dynamic_pressure_ratio           = 0.9  
     
-    #elevator                              = RCAIDE.Library.Components.Wings.Control_Surfaces.Elevator()
-    #elevator.tag                          = 'elevator'
-    #elevator.span_fraction_start          = 0.1
-    #elevator.span_fraction_end            = 0.9
-    #elevator.deflection                   = 0.0  * Units.deg
-    #elevator.chord_fraction               = 0.3
-    #wing.append_control_surface(elevator)       
+    elevator                              = RCAIDE.Library.Components.Wings.Control_Surfaces.Elevator()
+    elevator.tag                          = 'elevator'
+    elevator.span_fraction_start          = 0.1
+    elevator.span_fraction_end            = 0.9
+    elevator.deflection                   = 0.0  * Units.deg
+    elevator.chord_fraction               = 0.3
+    wing.append_control_surface(elevator)       
 
     RCAIDE.Library.Methods.Geometry.Planform.wing_planform(wing)     
 
@@ -258,7 +258,7 @@ def vehicle_setup():
     # ------------------------------------------------------------------
     #   Vertical Stabilizer
     # ------------------------------------------------------------------ 
-    wing                                  = RCAIDE.Library.Components.Wings.Wing()
+    wing                                  = RCAIDE.Library.Components.Wings.Vertical_Tail()
     wing.tag                              = 'vertical_stabilizer'   
     wing.sweeps.leading_edge              = 20 * Units.degrees 
     wing.thickness_to_chord               = 0.125
@@ -280,13 +280,13 @@ def vehicle_setup():
     wing.winglet_fraction                 = 0.0  
     wing.dynamic_pressure_ratio           = 1.0  
     
-    #rudder                                = RCAIDE.Library.Components.Wings.Control_Surfaces.Rudder()
-    #rudder.tag                            = 'rudder'
-    #rudder.span_fraction_start            = 0.2
-    #rudder.span_fraction_end              = 0.8
-    #rudder.deflection                     = 0.0  * Units.deg
-    #rudder.chord_fraction                 = 0.2
-    #wing.append_control_surface(rudder) 
+    rudder                                = RCAIDE.Library.Components.Wings.Control_Surfaces.Rudder()
+    rudder.tag                            = 'rudder'
+    rudder.span_fraction_start            = 0.2
+    rudder.span_fraction_end              = 0.8
+    rudder.deflection                     = 0.0  * Units.deg
+    rudder.chord_fraction                 = 0.2
+    wing.append_control_surface(rudder) 
     
     # add to vehicle
     vehicle.append_component(wing)
@@ -301,7 +301,7 @@ def vehicle_setup():
     fuselage.lengths.total                      = 8.349950916 
     fuselage.width                              = 1.22028016 
     fuselage.heights.maximum                    = 1.634415138  
-    fuselage.areas.wetted                       = 12. # ESTIMATED 
+    fuselage.areas.wetted                       = 12. 
     fuselage.areas.front_projected              = fuselage.width*fuselage.heights.maximum
     fuselage.effective_diameter                 = 1.22028016 
 
