@@ -196,7 +196,46 @@ def compute_basic_motor_sizing(B_sign, k_w, I_tot, D, L, omega):
     # 3.5 Voltage and Turn Count
     # ----------------------------------------------------------------------------------------- 
     
+    EMF_i                      = 1                              # per phase back electromotive force of the motor
+    X_d                        = 1                              # d axis reactance of the motor
+    X_q                        = 1                              # q axis reactance of the motor
+    R_s                        = 1                              # stator resistance
+    I_q                        = 1                              # q axis current
+    I_d                        = 1                              # d axis current   
+    V_q                        = EMF_i + X_d*I_d + R_s*I_q      # q axis voltage of the machine (Eq.45)
+    V_d                        = X_q*I_q + R_s*I_d              # d axis voltage of the machine (Eq.46)
+    V_ph                       = np.sqrt(V_q**2 + V_d**2)       # peak per phase motor voltage (Eq.44)
+    I_d_max_torque             = 0                              # d axis current for max torque      
+    I_s                        = 1                              # motor supply current 
+    V_q_max_torque             = EMF_i + R_s*I_s                # q axis voltage of the machine (Eq.47)
+    V_d_max_torque             = X_q*I_s                        # d axis voltage of the machine (Eq.48)
+    V_ph_max_torque            = np.sqrt((EMF_i + R_s*I_s)**2 + (X_q*I_s)**2) # peak per phase motor voltage (Eq.49)    
+
+    # -----------------------------------------------------------------------------------------
+    # 3.5.1 Back EMF
+    # ----------------------------------------------------------------------------------------- 
     
+    P                          = (3/2)*EMF_i*I_s                # back EMF of the motor (Eq.50)    
+    P                          = (2/np.pi)*omega*D*L*k_w*B_sign*Nt*Np*I_s # back EMF of the motor (Eq.50)    
+    P                          = ((omega*D*L*k_w*B_g1)/2)*Nt*Np*I_s # back EMF of the motor (Eq.50)    
+    EMF_i                      = (4/np.pi)*omega*D*L*k_w*B_sign*Nt # per phase back electromotive force of the motor (Eq.51) 
+    EMF_i                      = omega*D*L*k_w*B_g1*Nt          # per phase back electromotive force of the motor (Eq.51)  
+    E                          = B*l*v                          # flux cutting form of Faraday’s law (Eq.52) 
+    
+    # -----------------------------------------------------------------------------------------
+    # 3.5.2 Reactance
+    # -----------------------------------------------------------------------------------------    
+    
+    X                          = L*2*np.pi*f_elec               # reactance for an inductive load (Eq.53)
+    L_aa                       = 1                              # self inductance
+    L_bb                       = 1                              # self inductance
+    L_cc                       = 1                              # self inductance
+    L_ab                       = 1                              # mutual inductance
+    L_ac                       = 1                              # mutual inductance  
+    L_ba                       = 1                              # mutual inductance
+    L_bc                       = 1                              # mutual inductance 
+    L                          = [[L_aa, L_ab, L_ac],[L_ab, L_bb, L_bc],[L_ac, L_ba, L_cc]] # inductance matrix of a machine (Eq.54)
+    L                          = [[L_l+L_m, -L_m/2, -L_m/2],[-L_m/2, L_l+L_m, -L_m/2],[-L_m/2, -L_m/2, L_l+L_m]] # inductance matrix of a machine (Eq.55)
     
     return
 
