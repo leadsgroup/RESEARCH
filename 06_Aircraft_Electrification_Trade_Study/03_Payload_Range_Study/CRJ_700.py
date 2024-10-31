@@ -59,9 +59,9 @@ def main():
         # Step 5 get payload-range diagram
         output = payload_range_diagram(vehicle, mission, 'cruise', reserves=0., plot_diagram=True, fuel_name=fuel_name)
         
-        output_filename = "./06_Aircraft_Electrification_Trade_Study/03_Payload_Range_Study/data/CRJ700_" + fuel_name + ".json"
-        with open(output_filename, "w") as ofile:
-            ofile.write(json.dumps(output))
+        # output_filename = "./06_Aircraft_Electrification_Trade_Study/03_Payload_Range_Study/data/CRJ700_" + fuel_name + ".json"
+        # with open(output_filename, "w") as ofile:
+        #     ofile.write(json.dumps(output))
         
         end = time.time()
         m, s = divmod(end - start, 60)

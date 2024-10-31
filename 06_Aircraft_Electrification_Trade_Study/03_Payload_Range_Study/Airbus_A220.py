@@ -32,10 +32,13 @@ import json
 
 
 def main():
-    fuels = [Ethane(), Methane(), Propane(), Ethanol(), Butanol(), Propanol(), \
-        Jet_A1(), Liquid_Natural_Gas(), Liquid_Petroleum_Gas()]
-    fuel_names = ["Ethane", "Methane", "Propane", "Ethanol", "Butanol", "Propanol", \
-        "Jet A1", "Liquid Natural Gas", "Liquid Petroleum Gas"]
+    # fuels = [Ethane(), Methane(), Propane(), Ethanol(), Butanol(), Propanol(), \
+    #     Jet_A1(), Liquid_Natural_Gas(), Liquid_Petroleum_Gas()]
+    # fuel_names = ["Ethane", "Methane", "Propane", "Ethanol", "Butanol", "Propanol", \
+    #     "Jet A1", "Liquid Natural Gas", "Liquid Petroleum Gas"]
+    
+    fuels = [Methane(), Liquid_Natural_Gas()]
+    fuel_names = ["Methane", "Liquid Natural Gas"]
     
     for index, fuel in enumerate(fuels):
         print("Running simulation for", fuel_names[index])
@@ -61,10 +64,6 @@ def main():
         
         # Step 5 get payload-range diagram
         output = payload_range_diagram(vehicle, mission, 'cruise', reserves=0., plot_diagram=True, fuel_name=fuel_name)
-        
-        output_filename = "./06_Aircraft_Electrification_Trade_Study/03_Payload_Range_Study/data/A220_" + fuel_name + ".json"
-        with open(output_filename, "w") as ofile:
-            ofile.write(json.dumps(output))
         
         end = time.time()
         m, s = divmod(end - start, 60)
@@ -737,6 +736,7 @@ def base_analysis(vehicle):
     aerodynamics.vehicle = vehicle
     aerodynamics.settings.number_of_spanwise_vortices   = 25
     aerodynamics.settings.number_of_chordwise_vortices  = 5   
+    # aerodynamics.settings.use_surrogate = False
     analyses.append(aerodynamics)
  
     # ------------------------------------------------------------------
@@ -804,14 +804,14 @@ def configs_setup(vehicle):
     #   Cutback Configuration
     # ------------------------------------------------------------------
 
-    config = RCAIDE.Library.Components.Configs.Config(base_config)
-    config.tag = 'cutback'
-    config.wings['main_wing'].control_surfaces.flap.deflection  = 20. * Units.deg
-    config.wings['main_wing'].control_surfaces.slat.deflection  = 20. * Units.deg
-    config.networks.fuel.fuel_lines['fuel_line'].propulsors['starboard_propulsor'].fan.angular_velocity =  2780. * Units.rpm
-    config.networks.fuel.fuel_lines['fuel_line'].propulsors['port_propulsor'].fan.angular_velocity      =  2780. * Units.rpm
-    config.landing_gear.gear_condition                          = 'up'       
-    configs.append(config)   
+    # config = RCAIDE.Library.Components.Configs.Config(base_config)
+    # config.tag = 'cutback'
+    # config.wings['main_wing'].control_surfaces.flap.deflection  = 20. * Units.deg
+    # config.wings['main_wing'].control_surfaces.slat.deflection  = 20. * Units.deg
+    # config.networks.fuel.fuel_lines['fuel_line'].propulsors['starboard_propulsor'].fan.angular_velocity =  2780. * Units.rpm
+    # config.networks.fuel.fuel_lines['fuel_line'].propulsors['port_propulsor'].fan.angular_velocity      =  2780. * Units.rpm
+    # config.landing_gear.gear_condition                          = 'up'       
+    # configs.append(config)   
     
         
     
