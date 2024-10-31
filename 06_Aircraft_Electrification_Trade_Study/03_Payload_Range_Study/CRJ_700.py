@@ -57,11 +57,11 @@ def main():
         mission = mission_setup(analyses)
         
         # Step 5 get payload-range diagram
-        output = payload_range_diagram(vehicle, mission, 'cruise', reserves=0., plot_diagram=True, fuel_name=fuel_name)
+        payload_range_diagram(vehicle, mission, 'cruise', reserves=0., plot_diagram=True, fuel_name=fuel_name)
         
-        # output_filename = "./06_Aircraft_Electrification_Trade_Study/03_Payload_Range_Study/data/CRJ700_" + fuel_name + ".json"
-        # with open(output_filename, "w") as ofile:
-        #     ofile.write(json.dumps(output))
+        #output_filename = "./06_Aircraft_Electrification_Trade_Study/03_Payload_Range_Study/data/CRJ700_" + fuel_name + ".json"
+        #with open(output_filename, "w") as ofile:
+            #ofile.write(json.dumps(output))
         
         end = time.time()
         m, s = divmod(end - start, 60)
@@ -79,14 +79,16 @@ def vehicle_setup(propellant):
     vehicle.tag = 'Bombardier_CRJ-700'    
     
     # ################################################# Vehicle-level Properties #################################################   
-    vehicle.mass_properties.max_takeoff               = 32999 * Units.kilogram  
+    vehicle.mass_properties.max_takeoff               = 34019 * Units.kilogram  #https://bombardier.com/sites/default/files/2020-08/PreOwnedFactsheet_CRJ700_sn10314_0.pdf
     vehicle.mass_properties.takeoff                   = 30000 * Units.kilogram    
-    vehicle.mass_properties.operating_empty           = 19051 * Units.kilogram  
-    vehicle.mass_properties.max_zero_fuel             = 28259 * Units.kilogram 
+    vehicle.mass_properties.operating_empty           = 19869 * Units.kilogram  #https://bombardier.com/sites/default/files/2020-08/PreOwnedFactsheet_CRJ700_sn10314_0.pdf
+    vehicle.mass_properties.max_zero_fuel             = 28259 * Units.kilogram  #https://bombardier.com/sites/default/files/2020-08/PreOwnedFactsheet_CRJ700_sn10314_0.pdf
     vehicle.mass_properties.cargo                     = 7000  * Units.kilogram 
-    #vehicle.flight_envelope.ultimate_load             = 3.75
-    #vehicle.flight_envelope.limit_load                = 2.5 
-    #vehicle.flight_envelope.design_mach_number        = 0.78 
+    vehicle.mass_properties.max_payload               = 8189  * Units.kilogram  #https://www.globalair.com/aircraft-for-sale/specifications?specid=1679
+    vehicle.mass_properties.max_fuel                  = 8888  * Units.kilogram  #https://www.globalair.com/aircraft-for-sale/specifications?specid=1679
+    vehicle.envelope.ultimate_load             = 3.75
+    vehicle.envelope.limit_load                = 2.5 
+    vehicle.design_mach_number        = 0.78 
     #vehicle.flight_envelope.design_cruise_altitude    = 35000*Units.feet
     #vehicle.flight_envelope.design_range              = 3500 * Units.nmi
     vehicle.reference_area                            = 70.61 * Units['meters**2']   
@@ -541,14 +543,14 @@ def vehicle_setup(propellant):
     turbofan.engine_length                      = 3.3     
     turbofan.bypass_ratio                       = 5    
     turbofan.design_altitude                    = 35000.0*Units.ft
-    turbofan.design_mach_number                 = 0.78   
+    turbofan.design_mach_number                 = 0.78  
     turbofan.design_thrust                      = 60000.0* Units.N 
              
     # fan                
     fan                                         = RCAIDE.Library.Components.Propulsors.Converters.Fan()   
     fan.tag                                     = 'fan'
     fan.polytropic_efficiency                   = 0.93
-    fan.pressure_ratio                          = 1.7   
+    fan.pressure_ratio                          = 1.7
     turbofan.fan                                = fan        
                    
     # working fluid                   
@@ -589,7 +591,7 @@ def vehicle_setup(propellant):
     high_pressure_turbine                          = RCAIDE.Library.Components.Propulsors.Converters.Turbine()   
     high_pressure_turbine.tag                      ='hpt'
     high_pressure_turbine.mechanical_efficiency    = 0.99
-    high_pressure_turbine.polytropic_efficiency    = 0.93 
+    high_pressure_turbine.polytropic_efficiency    = 0.93
     turbofan.high_pressure_turbine                 = high_pressure_turbine 
 
     # combustor  
@@ -597,9 +599,9 @@ def vehicle_setup(propellant):
     combustor.tag                                  = 'Comb'
     combustor.efficiency                           = 0.99 
     combustor.alphac                               = 1.0     
-    combustor.turbine_inlet_temperature            = 1760
+    combustor.turbine_inlet_temperature            = 1550
     combustor.pressure_ratio                       = 0.95
-    combustor.fuel_data                            = propellant
+    combustor.fuel_data                            = propellant  
     turbofan.combustor                             = combustor
 
     # core nozzle
@@ -714,19 +716,19 @@ def configs_setup(vehicle):
     configs.append(config)
 
 
-    # ------------------------------------------------------------------
-    #   Takeoff Configuration
-    # ------------------------------------------------------------------
+    ## ------------------------------------------------------------------
+    ##   Takeoff Configuration
+    ## ------------------------------------------------------------------
 
-    config = RCAIDE.Library.Components.Configs.Config(base_config)
-    config.tag = 'takeoff'
-    config.wings['main_wing'].control_surfaces.flap.deflection  = 15. * Units.deg
-    config.wings['main_wing'].control_surfaces.slat.deflection  = 20. * Units.deg 
-    config.networks.fuel.fuel_lines['fuel_line'].propulsors['starboard_propulsor'].fan.angular_velocity =  7400. * Units.rpm
-    config.networks.fuel.fuel_lines['fuel_line'].propulsors['port_propulsor'].fan.angular_velocity      =  7400. * Units.rpm
-    config.landing_gear.gear_condition                          = 'down' 
-    config.V2_VS_ratio = 1.258
-    configs.append(config)
+    #config = RCAIDE.Library.Components.Configs.Config(base_config)
+    #config.tag = 'takeoff'
+    #config.wings['main_wing'].control_surfaces.flap.deflection  = 15. * Units.deg
+    #config.wings['main_wing'].control_surfaces.slat.deflection  = 20. * Units.deg 
+    #config.networks.fuel.fuel_lines['fuel_line'].propulsors['starboard_propulsor'].fan.angular_velocity =  7400. * Units.rpm
+    #config.networks.fuel.fuel_lines['fuel_line'].propulsors['port_propulsor'].fan.angular_velocity      =  7400. * Units.rpm
+    #config.landing_gear.gear_condition                          = 'down' 
+    #config.V2_VS_ratio = 1.258
+    #configs.append(config)
 
     
     # ------------------------------------------------------------------
@@ -744,35 +746,35 @@ def configs_setup(vehicle):
     
         
     
-    # ------------------------------------------------------------------
-    #   Landing Configuration
-    # ------------------------------------------------------------------
+    ## ------------------------------------------------------------------
+    ##   Landing Configuration
+    ## ------------------------------------------------------------------
 
-    config = RCAIDE.Library.Components.Configs.Config(base_config)
-    config.tag = 'landing'
-    config.wings['main_wing'].control_surfaces.flap.deflection  = 30. * Units.deg
-    config.wings['main_wing'].control_surfaces.slat.deflection  = 25. * Units.deg
-    config.networks.fuel.fuel_lines['fuel_line'].propulsors['starboard_propulsor'].fan.angular_velocity =  4440. * Units.rpm
-    config.networks.fuel.fuel_lines['fuel_line'].propulsors['port_propulsor'].fan.angular_velocity      =  4440. * Units.rpm
-    config.landing_gear.gear_condition                          = 'down'   
-    config.Vref_VS_ratio = 1.207
-    configs.append(config)   
+    #config = RCAIDE.Library.Components.Configs.Config(base_config)
+    #config.tag = 'landing'
+    #config.wings['main_wing'].control_surfaces.flap.deflection  = 30. * Units.deg
+    #config.wings['main_wing'].control_surfaces.slat.deflection  = 25. * Units.deg
+    #config.networks.fuel.fuel_lines['fuel_line'].propulsors['starboard_propulsor'].fan.angular_velocity =  4440. * Units.rpm
+    #config.networks.fuel.fuel_lines['fuel_line'].propulsors['port_propulsor'].fan.angular_velocity      =  4440. * Units.rpm
+    #config.landing_gear.gear_condition                          = 'down'   
+    #config.Vref_VS_ratio = 1.207
+    #configs.append(config)   
       
 
-    # ------------------------------------------------------------------
-    #   Landing Configuration
-    # ------------------------------------------------------------------
+    ## ------------------------------------------------------------------
+    ##   Landing Configuration
+    ## ------------------------------------------------------------------
 
-    config = RCAIDE.Library.Components.Configs.Config(base_config)
-    config.tag = 'reverse_thrust'
-    config.wings['main_wing'].control_surfaces.flap.deflection  = 45. * Units.deg
-    config.wings['main_wing'].control_surfaces.slat.deflection  = 25. * Units.deg
-    config.networks.fuel.reverse_thrust =  True 
-    config.networks.fuel.fuel_lines['fuel_line'].propulsors['starboard_propulsor'].fan.angular_velocity =  5550. * Units.rpm
-    config.networks.fuel.fuel_lines['fuel_line'].propulsors['port_propulsor'].fan.angular_velocity      =  5550. * Units.rpm
-    config.landing_gear.gear_condition                          = 'down'   
-    config.Vref_VS_ratio = 1.207
-    configs.append(config)   
+    #config = RCAIDE.Library.Components.Configs.Config(base_config)
+    #config.tag = 'reverse_thrust'
+    #config.wings['main_wing'].control_surfaces.flap.deflection  = 45. * Units.deg
+    #config.wings['main_wing'].control_surfaces.slat.deflection  = 25. * Units.deg
+    #config.networks.fuel.reverse_thrust =  True 
+    #config.networks.fuel.fuel_lines['fuel_line'].propulsors['starboard_propulsor'].fan.angular_velocity =  5550. * Units.rpm
+    #config.networks.fuel.fuel_lines['fuel_line'].propulsors['port_propulsor'].fan.angular_velocity      =  5550. * Units.rpm
+    #config.landing_gear.gear_condition                          = 'down'   
+    #config.Vref_VS_ratio = 1.207
+    #configs.append(config)   
             
     
     return configs
@@ -813,8 +815,8 @@ def base_analysis(vehicle):
     #  Aerodynamics Analysis
     aerodynamics = RCAIDE.Framework.Analyses.Aerodynamics.Vortex_Lattice_Method()
     aerodynamics.vehicle  = vehicle
-    aerodynamics.settings.number_of_spanwise_vortices   = 25
-    aerodynamics.settings.number_of_chordwise_vortices  = 5   
+    aerodynamics.settings.number_of_spanwise_vortices   = 6
+    aerodynamics.settings.number_of_chordwise_vortices  = 2   
     analyses.append(aerodynamics)
  
     # ------------------------------------------------------------------
@@ -855,33 +857,80 @@ def mission_setup(analyses):
   
     Segments = RCAIDE.Framework.Mission.Segments 
     base_segment = Segments.Segment()
-    base_segment.state.numerics.number_of_control_points = 3
+    base_segment.state.numerics.number_of_control_points  = 3
 
-    # ------------------------------------------------------------------------------------------------------------------------------------ 
-    #   Takeoff Roll
-    # ------------------------------------------------------------------------------------------------------------------------------------ 
+    ## ------------------------------------------------------------------------------------------------------------------------------------ 
+    ##   Takeoff Roll
+    ## ------------------------------------------------------------------------------------------------------------------------------------ 
 
-    segment = Segments.Ground.Takeoff(base_segment)
-    segment.tag = "Takeoff" 
-    segment.analyses.extend( analyses.takeoff )
-    segment.velocity_start           = 10.* Units.knots
-    segment.velocity_end             = 75 * Units['m/s'] # takeoff speed of 146 kts
-    segment.friction_coefficient     = 0.04
-    segment.altitude                 = 0.0   
-    mission.append_segment(segment)
+    #segment = Segments.Ground.Takeoff(base_segment)
+    #segment.tag = "Takeoff" 
+    #segment.analyses.extend( analyses.takeoff )
+    #segment.velocity_start           = 10.* Units.knots
+    #segment.velocity_end             = 75 * Units['m/s'] # takeoff speed of 146 kts
+    #segment.friction_coefficient     = 0.04
+    #segment.altitude                 = 0.0   
+    #mission.append_segment(segment)
+
+    ## ------------------------------------------------------------------
+    ##   First Climb Segment: Constant Speed Constant Rate  
+    ## ------------------------------------------------------------------
+
+    #segment = Segments.Climb.Constant_Speed_Constant_Rate(base_segment)
+    #segment.tag = "climb_1" 
+    #segment.analyses.extend( analyses.takeoff ) 
+    #segment.altitude_start = 0.0   * Units.km
+    #segment.altitude_end   = 3.0   * Units.km
+    #segment.air_speed      = 85.0 * Units['m/s'] # 165 kts initial climb speed
+    #segment.climb_rate     = 15   * Units['m/s'] # 3000 fpm initial climb
+     
+    ## define flight dynamics to model 
+    #segment.flight_dynamics.force_x                      = True  
+    #segment.flight_dynamics.force_z                      = True     
+    
+    ## define flight controls 
+    #segment.assigned_control_variables.throttle.active               = True           
+    #segment.assigned_control_variables.throttle.assigned_propulsors  = [['starboard_propulsor','port_propulsor']] 
+    #segment.assigned_control_variables.body_angle.active             = True                 
+    
+    #mission.append_segment(segment)
+
+
+    ## ------------------------------------------------------------------
+    ##   Second Climb Segment: Constant Speed Constant Rate  
+    ## ------------------------------------------------------------------    
+
+    #segment = Segments.Climb.Constant_Speed_Constant_Rate(base_segment)
+    #segment.tag = "climb_2" 
+    #segment.analyses.extend( analyses.cruise ) 
+    #segment.altitude_end   = 8.0   * Units.km
+    #segment.air_speed      = 149.0 * Units['m/s']
+    #segment.climb_rate     = 12.7   * Units['m/s'] # approx 2500fpm
+    
+    ## define flight dynamics to model 
+    #segment.flight_dynamics.force_x                      = True  
+    #segment.flight_dynamics.force_z                      = True     
+    
+    ## define flight controls 
+    #segment.assigned_control_variables.throttle.active               = True           
+    #segment.assigned_control_variables.throttle.assigned_propulsors  = [['starboard_propulsor','port_propulsor']] 
+    #segment.assigned_control_variables.body_angle.active             = True                  
+    
+    #mission.append_segment(segment)
+
 
     # ------------------------------------------------------------------
-    #   First Climb Segment: Constant Speed Constant Rate  
-    # ------------------------------------------------------------------
+    #   Third Climb Segment: Constant Speed Constant Rate  
+    # ------------------------------------------------------------------    
 
     segment = Segments.Climb.Constant_Speed_Constant_Rate(base_segment)
-    segment.tag = "climb_1" 
-    segment.analyses.extend( analyses.takeoff ) 
+    segment.tag = "climb" 
+    segment.analyses.extend( analyses.cruise ) 
     segment.altitude_start = 0.0   * Units.km
-    segment.altitude_end   = 10.668   * Units.km
-    segment.air_speed      = 200.0 * Units['m/s']
-    segment.climb_rate     = 3   * Units['m/s'] 
-     
+    segment.altitude_end = 10.5   * Units.km
+    segment.air_speed    = 230.  * Units['m/s'] # 290 kts climb 
+    segment.climb_rate   = 7.5    * Units['m/s'] # 1500 fpm ascent 
+    
     # define flight dynamics to model 
     segment.flight_dynamics.force_x                      = True  
     segment.flight_dynamics.force_z                      = True     
@@ -889,10 +938,11 @@ def mission_setup(analyses):
     # define flight controls 
     segment.assigned_control_variables.throttle.active               = True           
     segment.assigned_control_variables.throttle.assigned_propulsors  = [['starboard_propulsor','port_propulsor']] 
-    segment.assigned_control_variables.body_angle.active             = True                 
+    segment.assigned_control_variables.body_angle.active             = True                
     
     mission.append_segment(segment)
-    
+
+
     # ------------------------------------------------------------------    
     #   Cruise Segment: Constant Speed Constant Altitude
     # ------------------------------------------------------------------    
@@ -921,11 +971,11 @@ def mission_setup(analyses):
     # ------------------------------------------------------------------
 
     segment = Segments.Descent.Constant_Speed_Constant_Rate(base_segment)
-    segment.tag = "descent_1" 
+    segment.tag = "descent" 
     segment.analyses.extend( analyses.cruise ) 
-    segment.altitude_start                                = 10.668 * Units.km 
+    segment.altitude_start                                = 10.5 * Units.km 
     segment.altitude_end                                  = 0.0   * Units.km
-    segment.air_speed                                     = 220.0 * Units['m/s'] # 430 kts descent speed
+    segment.air_speed                                     = 230. * Units['m/s'] # 430 kts descent speed
     segment.descent_rate                                  = 5   * Units['m/s'] # 1000 fpm descent rate approximately 
     
     # define flight dynamics to model 
@@ -939,22 +989,114 @@ def mission_setup(analyses):
     
     mission.append_segment(segment)
 
+
+    ## ------------------------------------------------------------------
+    ##   Second Descent Segment: Constant Speed Constant Rate  
+    ## ------------------------------------------------------------------
+
+    #segment = Segments.Descent.Constant_Speed_Constant_Rate(base_segment)
+    #segment.tag  = "descent_2" 
+    #segment.analyses.extend( analyses.cruise ) 
+    #segment.altitude_end                                  = 6.0   * Units.km
+    #segment.air_speed                                     = 200 * Units['m/s'] # 390 kts descent speed
+    #segment.descent_rate                                  = 7.50   * Units['m/s']  # 1500 fpm descent rate approximately
     
-    # ------------------------------------------------------------------------------------------------------------------------------------ 
-    #   Landing Roll
-    # ------------------------------------------------------------------------------------------------------------------------------------ 
+    ## define flight dynamics to model 
+    #segment.flight_dynamics.force_x                       = True  
+    #segment.flight_dynamics.force_z                       = True     
+    
+    ## define flight controls 
+    #segment.assigned_control_variables.throttle.active               = True           
+    #segment.assigned_control_variables.throttle.assigned_propulsors  = [['starboard_propulsor','port_propulsor']] 
+    #segment.assigned_control_variables.body_angle.active             = True                
+    
+    #mission.append_segment(segment)
 
-    segment = Segments.Ground.Landing(base_segment)
-    segment.tag = "Landing"
 
-    segment.analyses.extend( analyses.reverse_thrust ) 
-    segment.velocity_start                                = 75.0 * Units['m/s']
-    segment.velocity_end                                  = 10 * Units.knots 
-    segment.friction_coefficient                          = 0.4 
-    segment.altitude                                      = 0.0   
-    segment.assigned_control_variables.elapsed_time.active           = True  
-    segment.assigned_control_variables.elapsed_time.initial_guess_values  = [[30.]]  
-    mission.append_segment(segment)     
+    ## ------------------------------------------------------------------
+    ##   Third Descent Segment: Constant Speed Constant Rate  
+    ## ------------------------------------------------------------------
+
+    #segment = Segments.Descent.Constant_Speed_Constant_Rate(base_segment)
+    #segment.tag = "descent_3"  
+    #segment.analyses.extend( analyses.cruise ) 
+    #segment.altitude_end                                  = 4.0   * Units.km
+    #segment.air_speed                                     = 150.0 * Units['m/s'] # 290 kts descent speed to about fl 130
+    #segment.descent_rate                                  = 10   * Units['m/s']  # 2000 fpm descent rate
+    
+    ## define flight dynamics to model 
+    #segment.flight_dynamics.force_x                       = True  
+    #segment.flight_dynamics.force_z                       = True     
+    
+    ## define flight controls 
+    #segment.assigned_control_variables.throttle.active               = True           
+    #segment.assigned_control_variables.throttle.assigned_propulsors  = [['starboard_propulsor','port_propulsor']] 
+    #segment.assigned_control_variables.body_angle.active             = True                
+    
+    #mission.append_segment(segment)
+
+
+    ## ------------------------------------------------------------------
+    ##   Fourth Descent Segment: Constant Speed Constant Rate  
+    ## ------------------------------------------------------------------
+
+    #segment = Segments.Descent.Constant_Speed_Constant_Rate(base_segment)
+    #segment.tag = "descent_4" 
+    #segment.analyses.extend( analyses.cruise ) 
+    #segment.altitude_end                                  = 2.0   * Units.km
+    #segment.air_speed                                     = 128.0 * Units['m/s'] # 250 kts 
+    #segment.descent_rate                                  = 5   * Units['m/s'] # 1000 fpm descent rate
+    
+    ## define flight dynamics to model 
+    #segment.flight_dynamics.force_x                       = True  
+    #segment.flight_dynamics.force_z                       = True     
+    
+    ## define flight controls 
+    #segment.assigned_control_variables.throttle.active               = True           
+    #segment.assigned_control_variables.throttle.assigned_propulsors  = [['starboard_propulsor','port_propulsor']] 
+    #segment.assigned_control_variables.body_angle.active             = True                
+    
+    #mission.append_segment(segment)
+
+
+
+    ## ------------------------------------------------------------------
+    ##   Fifth Descent Segment:Constant Speed Constant Rate  
+    ## ------------------------------------------------------------------
+
+    #segment = Segments.Descent.Constant_Speed_Constant_Rate(base_segment)
+    #segment.tag = "descent_5" 
+    #segment.analyses.extend( analyses.landing ) 
+    #segment.altitude_end                                  = 0.0   * Units.km
+    #segment.air_speed                                     = 75.0 * Units['m/s'] # Approach speed of 146 kts
+    #segment.descent_rate                                  = 3.0   * Units['m/s']  # 2.3 degree approach angle
+    
+    ## define flight dynamics to model 
+    #segment.flight_dynamics.force_x                       = True  
+    #segment.flight_dynamics.force_z                       = True     
+    
+    ## define flight controls 
+    #segment.assigned_control_variables.throttle.active               = True           
+    #segment.assigned_control_variables.throttle.assigned_propulsors  = [['starboard_propulsor','port_propulsor']] 
+    #segment.assigned_control_variables.body_angle.active             = True                
+    
+    #mission.append_segment(segment)
+    
+    ## ------------------------------------------------------------------------------------------------------------------------------------ 
+    ##   Landing Roll
+    ## ------------------------------------------------------------------------------------------------------------------------------------ 
+
+    #segment = Segments.Ground.Landing(base_segment)
+    #segment.tag = "Landing"
+
+    #segment.analyses.extend( analyses.reverse_thrust ) 
+    #segment.velocity_start                                = 75.0 * Units['m/s']
+    #segment.velocity_end                                  = 10 * Units.knots 
+    #segment.friction_coefficient                          = 0.4 
+    #segment.altitude                                      = 0.0   
+    #segment.assigned_control_variables.elapsed_time.active           = True  
+    #segment.assigned_control_variables.elapsed_time.initial_guess_values  = [[30.]]  
+    #mission.append_segment(segment)     
 
 
     # ------------------------------------------------------------------
