@@ -29,13 +29,14 @@ def main():
     m      = 0
     theta0 =  0
     u0      =  0
+    q = 0
 
 
     num_cases = 4  # two references, RCAIDE-AVL and RCAIDE-VLM
     ALon = np.zeros((num_cases,4,4))                   
 
-    '''TO BE COMPLETED USING Table 6.1State-Space Modeling of the Rigid-Body Dynamics
-   of a Navion Airplane From Flight Data, Using Frequency-Domain Identification Techniquesin and OUR CODE'''
+    '''TO BE COMPLETED USING Table 6.1 State-Space Modeling of the Rigid-Body Dynamics
+   of a Navion Airplane From Flight Data, Using Frequency-Domain Identification Techniques in and OUR CODE'''
 
     Cw         = np.array([0,0,0,0 ]) # Should be four values 
     Xu         = np.array([0,0,0,0 ]) # Should be four values 
