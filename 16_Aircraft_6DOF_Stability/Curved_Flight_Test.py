@@ -588,7 +588,7 @@ def mission_setup(analyses):
     # Longidinal Flight Mechanics
     segment.assigned_control_variables.elevator_deflection.active               = True    
     segment.assigned_control_variables.elevator_deflection.assigned_surfaces    = [['elevator']]
-    segment.assigned_control_variables.elevator_deflection.initial_guess_values = [[0.0 * Units.degrees]]    
+    #segment.assigned_control_variables.elevator_deflection.initial_guess_values = [[1.0 * Units.degrees]]    
     segment.flight_dynamics.moment_y                                            = True  
    
     # Lateral Flight Mechanics 
@@ -597,54 +597,54 @@ def mission_setup(analyses):
     segment.flight_dynamics.moment_z                                            = True  
     segment.assigned_control_variables.aileron_deflection.active                = True    
     segment.assigned_control_variables.aileron_deflection.assigned_surfaces     = [['aileron']]
-    segment.assigned_control_variables.aileron_deflection.initial_guess_values  = [[0.0 * Units.degrees]] 
+    #segment.assigned_control_variables.aileron_deflection.initial_guess_values  = [[1.0 * Units.degrees]] 
     segment.assigned_control_variables.rudder_deflection.active                 = True    
     segment.assigned_control_variables.rudder_deflection.assigned_surfaces      = [['rudder']]
-    segment.assigned_control_variables.rudder_deflection.initial_guess_values   = [[0.0 * Units.degrees]]
+    #segment.assigned_control_variables.rudder_deflection.initial_guess_values   = [[1.0 * Units.degrees]]
     segment.assigned_control_variables.bank_angle.active                        = True    
-    segment.assigned_control_variables.bank_angle.initial_guess_values          = [[0]]     
+    #segment.assigned_control_variables.bank_angle.initial_guess_values          = [[1.0 * Units.degrees]]     
     
     mission.append_segment(segment)     
     
-    #segment     = Segments.Cruise.Curved_Constant_Radius_Constant_Speed_Constant_Altitude(base_segment)
-    #segment.tag = "curved_cruise" 
-    #segment.analyses.extend( analyses.base )   
-    #segment.altitude                                                            = 8000. * Units.feet
-    #segment.air_speed                                                           = 100 # 120 * Units['mph']
-    #segment.turn_radius                                                         = 1000 # 100 * Units.mile  
-    #segment.start_true_course                                                   = 0.0 * Units.degrees 
-    #segment.turn_angle                                                          = 30.0 * Units.degrees # + indicated right hand turn, negative indicates left-hand turn defaults to straight flight/won't actually turn?
+    segment     = Segments.Cruise.Curved_Constant_Radius_Constant_Speed_Constant_Altitude(base_segment)
+    segment.tag = "curved_cruise" 
+    segment.analyses.extend( analyses.base )   
+    segment.altitude                                                            = 8000. * Units.feet
+    segment.air_speed                                                           = 60 # 120 * Units['mph']
+    segment.turn_radius                                                         = 3000 # 100 * Units.mile  
+    segment.start_true_course                                                   = 0.0 * Units.degrees 
+    segment.turn_angle                                                          = 60.0 * Units.degrees # + indicated right hand turn, negative indicates left-hand turn defaults to straight flight/won't actually turn?
     
-    ## define flight dynamics to model 
-    #segment.flight_dynamics.force_x                                             = True    
-    #segment.flight_dynamics.force_z                                             = True    
-    #segment.flight_dynamics.force_y                                             = True     
-    #segment.flight_dynamics.moment_y                                            = True 
-    #segment.flight_dynamics.moment_x                                            = True
-    #segment.flight_dynamics.moment_z                                            = True 
+    # define flight dynamics to model 
+    segment.flight_dynamics.force_x                                             = True    
+    segment.flight_dynamics.force_z                                             = True    
+    segment.flight_dynamics.force_y                                             = True     
+    segment.flight_dynamics.moment_y                                            = True 
+    segment.flight_dynamics.moment_x                                            = True
+    segment.flight_dynamics.moment_z                                            = True 
                 
-    ## define flight controls              
-    #segment.assigned_control_variables.throttle.active                          = True           
-    #segment.assigned_control_variables.throttle.assigned_propulsors             = [['ice_propeller']]    
-    #segment.assigned_control_variables.body_angle.active                        = True   
+    # define flight controls              
+    segment.assigned_control_variables.throttle.active                          = True           
+    segment.assigned_control_variables.throttle.assigned_propulsors             = [['ice_propeller']]    
+    segment.assigned_control_variables.body_angle.active                        = True   
     #segment.assigned_control_variables.body_angle.initial_guess_values          = [[0]]     
     
-    ## Longidinal Flight Mechanics
-    #segment.assigned_control_variables.elevator_deflection.active               = True    
-    #segment.assigned_control_variables.elevator_deflection.assigned_surfaces    = [['elevator']]
+    # Longidinal Flight Mechanics
+    segment.assigned_control_variables.elevator_deflection.active               = True    
+    segment.assigned_control_variables.elevator_deflection.assigned_surfaces    = [['elevator']]
     #segment.assigned_control_variables.elevator_deflection.initial_guess_values = [[0]]     
    
-    ## Lateral Flight Mechanics 
-    #segment.assigned_control_variables.aileron_deflection.active                = True    
-    #segment.assigned_control_variables.aileron_deflection.assigned_surfaces     = [['aileron']]
+    # Lateral Flight Mechanics 
+    segment.assigned_control_variables.aileron_deflection.active                = True    
+    segment.assigned_control_variables.aileron_deflection.assigned_surfaces     = [['aileron']]
     #segment.assigned_control_variables.aileron_deflection.initial_guess_values  = [[0]] 
-    #segment.assigned_control_variables.rudder_deflection.active                 = True    
-    #segment.assigned_control_variables.rudder_deflection.assigned_surfaces      = [['rudder']]
+    segment.assigned_control_variables.rudder_deflection.active                 = True    
+    segment.assigned_control_variables.rudder_deflection.assigned_surfaces      = [['rudder']]
     #segment.assigned_control_variables.rudder_deflection.initial_guess_values   = [[0]]
-    #segment.assigned_control_variables.bank_angle.active                        = True    
+    segment.assigned_control_variables.bank_angle.active                        = True    
     #segment.assigned_control_variables.bank_angle.initial_guess_values          = [[0]]     
     
-    #mission.append_segment(segment) 
+    mission.append_segment(segment) 
     return mission 
 
 def missions_setup(mission): 
