@@ -691,7 +691,7 @@ def vehicle_setup():
     fuel_tank.origin                            = wing.origin 
     
     # append fuel 
-    fuel                                        = RCAIDE.Library.Attributes.Propellants.Liquid_Natural_Gas.py()   
+    fuel                                        = RCAIDE.Library.Attributes.Propellants.Liquid_Natural_Gas()   
     fuel.mass_properties.mass                   = vehicle.mass_properties.max_takeoff-vehicle.mass_properties.max_fuel
     fuel.origin                                 = vehicle.wings.main_wing.mass_properties.center_of_gravity      
     fuel.mass_properties.center_of_gravity      = vehicle.wings.main_wing.aerodynamic_center
