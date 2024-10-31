@@ -2,7 +2,7 @@ def function1(name):
     
     """
     Description of the function
-
+    
     Parameters
     ----------
     input_function : {function, function_type/location}
@@ -35,7 +35,9 @@ def function1(name):
     Notes
     -----
     Additional information that is not strictally necessary for the user, but
-    may be helpful. 
+    may be helpful.
+    
+    **segment.analysis.conditions.angle_of_attack**
 
     **Bold section header**
     

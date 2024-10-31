@@ -19,17 +19,18 @@ import numpy as np
 
 def main():
 
-    b_ref  = 0
-    c_ref  = 0
-    S_ref  = 0 
-    Ixx    = 0
-    Iyy    = 0
-    Izz    = 0
+    b_ref  = 10.166
+    c_ref  = 1.74
+    S_ref  = 17.112
+    Ixx    = 164627
+    Iyy    = 471262
+    Izz    = 554518
     Ixy    = 0
-    m      = 0
+    m      = 1337
     theta0 =  0
-    u0      =  0
+    u0      =  90 * Units['kts']
     q = 0
+    g = 9.81
 
 
     num_cases = 4  # two references, RCAIDE-AVL and RCAIDE-VLM
@@ -37,19 +38,19 @@ def main():
 
     '''TO BE COMPLETED USING Table 6.1 State-Space Modeling of the Rigid-Body Dynamics
    of a Navion Airplane From Flight Data, Using Frequency-Domain Identification Techniques in and OUR CODE'''
-
-    Cw         = np.array([0,0,0,0 ]) # Should be four values 
-    Xu         = np.array([0,0,0,0 ]) # Should be four values 
-    Xw         = np.array([0,0,0,0 ]) # Should be four values 
-    Xq         = np.array([0,0,0,0 ]) # Should be four values 
-    Zu         = np.array([0,0,0,0 ]) # Should be four values 
-    Zw         = np.array([0,0,0,0 ]) # Should be four values 
-    Zq         = np.array([0,0,0,0 ]) # Should be four values 
-    Mu         = np.array([0,0,0,0 ]) # Should be four values 
-    Mw         = np.array([0,0,0,0 ]) # Should be four values 
-    Mq         = np.array([0,0,0,0 ]) # Should be four values 
-    ZwDot      = np.array([0,0,0,0 ]) # Should be four values 
-    MwDot      = np.array([0,0,0,0 ]) # Should be four values 
+    #            Paper estimates, real values, AVL, VLM
+    Cw         = np.array([     0,      0,        0, 0 ]) # Should be four values 
+    Xu         = np.array([-0.092, -0.045, -0.04425, -1.1562e-05 ]) # Should be four values 
+    Xw         = np.array([0.0424, 0.0361, 0.193232, 0.85674405 ]) # Should be four values 
+    Xq         = np.array([     0,      0, -0.40431, -0.001394 ]) # Should be four values 
+    Zu         = np.array([ 10.51,  -0.37, -1.23056, 0.00094187 ]) # Should be four values 
+    Zw         = np.array([-3.066, -2.024, -6.91329, 5.20032213 ]) # Should be four values 
+    Zq         = np.array([ 51.01,      0, -13.0418, 0.19902564 ]) # Should be four values 
+    Mu         = np.array([0.2054, 0.0018, -0.08659, 0.00093559 ]) # Should be four values 
+    Mw         = np.array([-0.056, -0.039, -1.01843, -0.7864394 ]) # Should be four values 
+    Mq         = np.array([-2.114, -2.861, -17.0606, -26.123542 ]) # Should be four values 
+    ZwDot      = np.array([     0,      0,        0, 0 ]) # Should be four values 
+    MwDot      = np.array([     0,      0,        0, 0 ]) # Should be four values 
 
 
     ALon[:,0,0] = (Xu / m).T[0]
@@ -187,6 +188,6 @@ def main():
         return 
 
 
-    if __name__ == '__main__': 
-        main()    
-        plt.show()
+if __name__ == '__main__': 
+    main()    
+    plt.show()
