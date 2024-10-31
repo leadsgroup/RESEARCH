@@ -56,7 +56,7 @@ def main():
     ALon[:,0,0] = (Xu / m).T[0]
     ALon[:,0,1] = (Xw / m).T[0]
     #ALon[:,0,2] =  Xq.T[0] / m 
-    ALon[:,0,3] = (-g * np.cos(theta0)).T[0]
+    ALon[:,0,3] = (-g * np.cos(theta0))
     ALon[:,1,0] = (Zu / (m - ZwDot)).T[0]
     ALon[:,1,1] = (Zw / (m - ZwDot)).T[0]
     ALon[:,1,2] = ((Zq + (m * u0)) / (m - ZwDot) ).T[0]
@@ -73,16 +73,16 @@ def main():
 
     # Look at eigenvalues and eigenvectors
     LonModes                  = np.zeros((num_cases,4), dtype = complex)
-    phugoidFreqHz             = np.zeros((num_cases,1))
-    phugoidDamping            = np.zeros((num_cases,1))
-    phugoidTimeDoubleHalf     = np.zeros((num_cases,1))
-    shortPeriodFreqHz         = np.zeros((num_cases,1))
-    shortPeriodDamping        = np.zeros((num_cases,1))
-    shortPeriodTimeDoubleHalf = np.zeros((num_cases,1))
+    phugoidFreqHz             = np.zeros((num_cases,4))
+    phugoidDamping            = np.zeros((num_cases,4))
+    phugoidTimeDoubleHalf     = np.zeros((num_cases,4))
+    shortPeriodFreqHz         = np.zeros((num_cases,4))
+    shortPeriodDamping        = np.zeros((num_cases,4))
+    shortPeriodTimeDoubleHalf = np.zeros((num_cases,4))
 
     for i in range(num_cases):
         D  , V = np.linalg.eig(ALon) # State order: u, w, q, theta
-        LonModes[i,:] = D
+        LonModes[:,:] = D
 
         # Find phugoid
         phugoidInd               = np.argmax(D)  
