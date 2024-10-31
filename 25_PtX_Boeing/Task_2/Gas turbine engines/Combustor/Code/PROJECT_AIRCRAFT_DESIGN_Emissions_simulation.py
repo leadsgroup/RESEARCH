@@ -22,16 +22,13 @@ import os
 
 def main():
     
-    time = np.zeros((1,4*11))
-    
+    time               = np.zeros((1,4*11))
     emissions_CO2      = np.zeros_like(time)
     emissions_H2O      = np.zeros_like(time)
     emission_index_CO2 = np.zeros_like(time)
     emission_index_H2O = np.zeros_like(time)
+    emissions_methods  = ['Emission_Index_CRN_Method']
     
-    
-    #emissions_methods = ['Emission_Index_Correlation_Method', 'Emission_Index_CRN_Method']
-    emissions_methods = ['Emission_Index_CRN_Method']
     for em in  range(1):
         # vehicle data
         vehicle  = vehicle_setup()
@@ -636,7 +633,7 @@ def vehicle_setup():
     combustor.alphac                               = 1.0     
     combustor.turbine_inlet_temperature            = 1500
     combustor.pressure_ratio                       = 0.95
-    combustor.fuel_data                            = RCAIDE.Library.Attributes.Propellants.Jet_A1()  
+    combustor.fuel_data                            = RCAIDE.Library.Attributes.Propellants.Liquid_Natural_Gas()  
     turbofan.combustor                             = combustor
 
     # core nozzle
@@ -694,7 +691,7 @@ def vehicle_setup():
     fuel_tank.origin                            = wing.origin 
     
     # append fuel 
-    fuel                                        = RCAIDE.Library.Attributes.Propellants.Jet_A1()   
+    fuel                                        = RCAIDE.Library.Attributes.Propellants.Liquid_Natural_Gas.py()   
     fuel.mass_properties.mass                   = vehicle.mass_properties.max_takeoff-vehicle.mass_properties.max_fuel
     fuel.origin                                 = vehicle.wings.main_wing.mass_properties.center_of_gravity      
     fuel.mass_properties.center_of_gravity      = vehicle.wings.main_wing.aerodynamic_center
@@ -848,15 +845,7 @@ def base_analysis(vehicle, emissions_method):
     
     # ------------------------------------------------------------------
     # Emissions
-    if emissions_method == "Emission_Index_Correlation_Method":
-        emissions = RCAIDE.Framework.Analyses.Emissions.Emission_Index_Correlation_Method()
-    elif emissions_method == "Emission_Index_CRN_Method":
-        emissions = RCAIDE.Framework.Analyses.Emissions.Emission_Index_CRN_Method() 
-        emissions.settings.use_surrogate     = False 
-        emissions.training.pressure          = np.linspace(10,30, 1) *1E6
-        emissions.training.temperature       = np.linspace(700, 900, 1) 
-        emissions.training.air_mass_flowrate = np.linspace(10, 60, 1) 
-        emissions.training.fuel_to_air_ratio = np.linspace(0.01, 0.05, 1)             
+    emissions = RCAIDE.Framework.Analyses.Emissions.Emission_Index_CRN_Method()           
     emissions.vehicle = vehicle          
     analyses.append(emissions)    
  
