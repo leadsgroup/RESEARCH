@@ -2,8 +2,9 @@
 # 
 # Created: Dec 2021, M. Clarke
 
-""" setup file for a mission with a Navion
-"""
+#""" 
+#setup file for a mission with a Navion
+#"""
 # ----------------------------------------------------------------------------------------------------------------------
 #  IMPORT
 # ---------------------------------------------------------------------------------------------------------------------- 
@@ -129,7 +130,8 @@ def vehicle_setup():
     # mass properties
     vehicle.mass_properties.max_takeoff               = 2948 * Units.pounds
     vehicle.mass_properties.takeoff                   = 2948 * Units.pounds
-    vehicle.mass_properties.moments_of_inertia.tensor = np.array([[164627.7,0.0,0.0],[0.0,471262.4,0.0],[0.0,0.0,554518.7]])
+    #vehicle.mass_properties.moments_of_inertia.tensor = np.array([[164627.7,0.0,0.0],[0.0,471262.4,0.0],[0.0,0.0,554518.7]])
+    vehicle.mass_properties.moments_of_inertia.tensor = np.array([[1741,0.0,0.0],[0.0,3759,0.0],[0.0,0.0,4386]])
     vehicle.mass_properties.center_of_gravity         = [[2.239696797,0,-0.131189711 ]]
     vehicle.envelope.ultimate_load                    = 5.7
     vehicle.envelope.limit_load                       = 3.8
@@ -568,7 +570,7 @@ def mission_setup(analyses):
     segment.tag = "linear_cruise" 
     segment.analyses.extend( analyses.base )   
     segment.altitude                                                            = 8000. * Units.feet
-    segment.air_speed                                                           = 60# 120 * Units['mph']
+    segment.air_speed                                                           = 90 * Units['kts']
     #segment.sideslip_angle =  10 * Units.degrees
     #segment.true_course                                                         = -30.0 * Units.degrees
     #segment.angle_of_attack                                                     = 1.80633 * Units.degrees
@@ -588,7 +590,7 @@ def mission_setup(analyses):
     # Longidinal Flight Mechanics
     segment.assigned_control_variables.elevator_deflection.active               = True    
     segment.assigned_control_variables.elevator_deflection.assigned_surfaces    = [['elevator']]
-    segment.assigned_control_variables.elevator_deflection.initial_guess_values = [[0.0 * Units.degrees]]    
+    #segment.assigned_control_variables.elevator_deflection.initial_guess_values = [[1.0 * Units.degrees]]    
     segment.flight_dynamics.moment_y                                            = True  
    
     # Lateral Flight Mechanics 
@@ -597,12 +599,12 @@ def mission_setup(analyses):
     segment.flight_dynamics.moment_z                                            = True  
     segment.assigned_control_variables.aileron_deflection.active                = True    
     segment.assigned_control_variables.aileron_deflection.assigned_surfaces     = [['aileron']]
-    segment.assigned_control_variables.aileron_deflection.initial_guess_values  = [[0.0 * Units.degrees]] 
+    #segment.assigned_control_variables.aileron_deflection.initial_guess_values  = [[1.0 * Units.degrees]] 
     segment.assigned_control_variables.rudder_deflection.active                 = True    
     segment.assigned_control_variables.rudder_deflection.assigned_surfaces      = [['rudder']]
-    segment.assigned_control_variables.rudder_deflection.initial_guess_values   = [[0.0 * Units.degrees]]
+    #segment.assigned_control_variables.rudder_deflection.initial_guess_values   = [[1.0 * Units.degrees]]
     segment.assigned_control_variables.bank_angle.active                        = True    
-    segment.assigned_control_variables.bank_angle.initial_guess_values          = [[0]]     
+    #segment.assigned_control_variables.bank_angle.initial_guess_values          = [[1.0 * Units.degrees]]     
     
     mission.append_segment(segment)     
     
@@ -610,10 +612,10 @@ def mission_setup(analyses):
     #segment.tag = "curved_cruise" 
     #segment.analyses.extend( analyses.base )   
     #segment.altitude                                                            = 8000. * Units.feet
-    #segment.air_speed                                                           = 100 # 120 * Units['mph']
-    #segment.turn_radius                                                         = 1000 # 100 * Units.mile  
+    #segment.air_speed                                                           = 60 # 120 * Units['mph']
+    #segment.turn_radius                                                         = 3000 # 100 * Units.mile  
     #segment.start_true_course                                                   = 0.0 * Units.degrees 
-    #segment.turn_angle                                                          = 30.0 * Units.degrees # + indicated right hand turn, negative indicates left-hand turn defaults to straight flight/won't actually turn?
+    #segment.turn_angle                                                          = 60.0 * Units.degrees # + indicated right hand turn, negative indicates left-hand turn defaults to straight flight/won't actually turn?
     
     ## define flight dynamics to model 
     #segment.flight_dynamics.force_x                                             = True    
@@ -627,22 +629,22 @@ def mission_setup(analyses):
     #segment.assigned_control_variables.throttle.active                          = True           
     #segment.assigned_control_variables.throttle.assigned_propulsors             = [['ice_propeller']]    
     #segment.assigned_control_variables.body_angle.active                        = True   
-    #segment.assigned_control_variables.body_angle.initial_guess_values          = [[0]]     
+    ##segment.assigned_control_variables.body_angle.initial_guess_values          = [[0]]     
     
     ## Longidinal Flight Mechanics
     #segment.assigned_control_variables.elevator_deflection.active               = True    
     #segment.assigned_control_variables.elevator_deflection.assigned_surfaces    = [['elevator']]
-    #segment.assigned_control_variables.elevator_deflection.initial_guess_values = [[0]]     
+    ##segment.assigned_control_variables.elevator_deflection.initial_guess_values = [[0]]     
    
     ## Lateral Flight Mechanics 
     #segment.assigned_control_variables.aileron_deflection.active                = True    
     #segment.assigned_control_variables.aileron_deflection.assigned_surfaces     = [['aileron']]
-    #segment.assigned_control_variables.aileron_deflection.initial_guess_values  = [[0]] 
+    ##segment.assigned_control_variables.aileron_deflection.initial_guess_values  = [[0]] 
     #segment.assigned_control_variables.rudder_deflection.active                 = True    
     #segment.assigned_control_variables.rudder_deflection.assigned_surfaces      = [['rudder']]
-    #segment.assigned_control_variables.rudder_deflection.initial_guess_values   = [[0]]
+    ##segment.assigned_control_variables.rudder_deflection.initial_guess_values   = [[0]]
     #segment.assigned_control_variables.bank_angle.active                        = True    
-    #segment.assigned_control_variables.bank_angle.initial_guess_values          = [[0]]     
+    ##segment.assigned_control_variables.bank_angle.initial_guess_values          = [[0]]     
     
     #mission.append_segment(segment) 
     return mission 

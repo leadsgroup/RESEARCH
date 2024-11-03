@@ -30,7 +30,7 @@ class Example_class():
     References
     ----------
 
-    .. [1] 
+    .. [1] example name "citation". Champaign, IL, 2024. www.helloworld.com
     
     """
     

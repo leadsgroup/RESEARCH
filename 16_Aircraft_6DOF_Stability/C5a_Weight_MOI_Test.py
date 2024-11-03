@@ -22,7 +22,7 @@ def main():
     vehicle = Lockheed_C5a.vehicle_setup()
     
     # update fuel weight to 60%
-    vehicle.networks.fuel_network.fuel_lines.fuel_line.fuel_tanks.wing_fuel_tank.fuel.mass_properties.mass = 0.6 * vehicle.networks.fuel_network.fuel_lines.fuel_line.fuel_tanks.wing_fuel_tank.fuel.mass_properties.mass
+    vehicle.networks.fuel.fuel_lines.fuel_line.fuel_tanks.wing_fuel_tank.fuel.mass_properties.mass = 0.6 * vehicle.networks.fuel.fuel_lines.fuel_line.fuel_tanks.wing_fuel_tank.fuel.mass_properties.mass
 
     
     # ------------------------------------------------------------------

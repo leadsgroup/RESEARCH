@@ -1,16 +1,42 @@
 Matthew's to do tasks:
 --------------------------
-Code up moment of intertia for wing 
-Intergrate moment of inertia calculations into code
+Code up moment of intertia for wing - Done(?)
+Intergrate moment of inertia calculations into code - Done(?)
 check to see if control surfaces are connected to the mission
-Figure out a way to mission witn n-dimensional surrogate i.e.  CL vs AoA, Mach, elevator deflection  
+Figure out a way to mission witn n-dimensional surrogate i.e.  CL vs AoA, Mach, elevator deflection  - Done(?)
 Set up pertubation problems 
 
 ==========================
 Matteo's to do tasks:
 --------------------------
-Analytical computation of latero-directional stability coefficients
-VLM code modification
+Analytical computation of latero-directional stability coefficients  - Done(?)
+VLM code modification 
 Modeling latero-directional stability derivatives
 Testing and validation
 Nice-to-have: dynamic latero-directional stability
+
+To-do list for stability paper:
+
+- Building blocks:
+        - Change Stability derives to direct VLM call with no surrogate model
+        - Confirm accuracy of stability derivatives
+        - Confirm curved flight segment works - Aidan
+        - Confirm MOI RCAIDE estimate works for Navion - Aidan
+
+- Aircraft:
+        - Finish eSTOL - Aidan
+        - Fix Navion model - Aidan
+        - Add control surfaces to stopped rotor
+        - Add control surfaces to tilt stopped rotor
+        - Add control surfaces to tilt rotor
+
+- Mission:
+        - Create standardized mission
+        - Verify mission runs
+
+- General:
+        - Create script outline for one aircraft and mission
+        - Create automated script to run all cases
+
+- Post-run:
+        - Check if results make physical sense.

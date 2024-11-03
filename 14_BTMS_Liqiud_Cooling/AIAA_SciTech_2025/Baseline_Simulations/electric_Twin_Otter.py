@@ -551,7 +551,7 @@ def vehicle_setup(BTMS_flag):
     propeller.cruise.design_angular_velocity         = propeller.cruise.design_tip_mach *speed_of_sound/propeller.tip_radius
     propeller.cruise.design_Cl                       = 0.7
     propeller.cruise.design_altitude                 = 8000. * Units.feet 
-    propeller.cruise.design_thrust                   = 20000 #12500  
+    propeller.cruise.design_thrust                   = 20000  
     propeller.clockwise_rotation                     = False
     propeller.variable_pitch                         = True  
     propeller.origin                                 = [[3.5,2.8129,1.22 ]]   
@@ -628,8 +628,12 @@ def vehicle_setup(BTMS_flag):
     net.busses.append(bus)
     
     vehicle.append_energy_network(net)
-
-    weight = compute_operating_empty_weight(vehicle)
+ 
+    
+    weight_analysis          = RCAIDE.Framework.Analyses.Weights.Weights_EVTOL()
+    weight_analysis.vehicle  = vehicle
+    weight_analysis.settings.miscelleneous_weight_factor = 1.0
+    weight                   = weight_analysis.evaluate()
     print(weight)
 
     # ------------------------------------------------------------------
