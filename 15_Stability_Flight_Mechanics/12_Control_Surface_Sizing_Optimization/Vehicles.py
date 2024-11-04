@@ -1,123 +1,41 @@
-# Navion.py
-# 
-# Created: Dec 2021, M. Clarke
+# Vehicle.py 
 
-#""" 
-#setup file for a mission with a Navion
-#"""
-# ----------------------------------------------------------------------------------------------------------------------
-#  IMPORT
-# ---------------------------------------------------------------------------------------------------------------------- 
-import RCAIDE 
+# ----------------------------------------------------------------------        
+#   Imports
+# ----------------------------------------------------------------------     
+
+import RCAIDE
 from RCAIDE.Framework.Core                              import Units   
 from RCAIDE.Library.Methods.Propulsors.Converters.Rotor import design_propeller
 from RCAIDE.Library.Methods.Geometry.Planform           import segment_properties
-from RCAIDE.Library.Plots                               import *  
-
-# python imports 
-import os 
+from RCAIDE.Library.Plots                               import *
 import numpy as np
-import pylab as plt
-import  pickle
-# ----------------------------------------------------------------------
-#   Main
-# ----------------------------------------------------------------------
-
-def main(): 
-  
-    vehicle  = vehicle_setup()
-   
-    # Set up vehicle configs
-    configs           = configs_setup(vehicle)
-
-    # create analyses
-    analyses          = analyses_setup(configs)
-
-    # mission analyses
-    mission           = mission_setup(analyses) 
-
-    # create mission instances (for multiple types of missions)
-    missions          = missions_setup(mission) 
-
-    # mission analysis 
-    results           = missions.base_mission.evaluate()    
-        
-
-    # plt results
-    plot_mission(results)
-
-    return  
+import os
 
 # ----------------------------------------------------------------------
-#   Define the Vehicle Analyses
+#   Define the Vehicle
 # ----------------------------------------------------------------------
+def vehicle_setup():
 
-def analyses_setup(configs):
-
-    analyses = RCAIDE.Framework.Analyses.Analysis.Container()
-
-    # build a base analysis for each config
-    for tag,config in configs.items():
-        analysis = base_analysis(config, configs)
-        analyses[tag] = analysis
-
-    return analyses
-
-def base_analysis(vehicle, configs):
-
+    '''
+    This function defines the base vehicle including 
+    1) center of gravity (either hard coded or use RCAIDE's built in function)
+    2) mass moment of interita (optional)
+    
+    Key Notes:
+    1) The wing that is intended to be the main must be given the tag "main wing". This wing will be used to append 
+       a flap and an aileron 
+    
+    2) If present, the wing that is intended to be the horizontal stabilizer must be given the tag "horizontal_stabilizer" 
+       This wing will be used to append an elevator 
+    
+    3) If present, The wing that is intended to be the  vertical stabilizer must be given the tag "vertical_stabilizer" 
+       This wing will be used to append a rudder (optional)
+    
+    
+    '''
+    
     # ------------------------------------------------------------------
-    #   Initialize the Analyses
-    # ------------------------------------------------------------------     
-    analyses        = RCAIDE.Framework.Analyses.Vehicle() 
-
-    # ------------------------------------------------------------------
-    #  Weights
-    # ------------------------------------------------------------------
-    weights         = RCAIDE.Framework.Analyses.Weights.Weights_Transport()
-    weights.vehicle = vehicle
-    analyses.append(weights)
-
-    # ------------------------------------------------------------------
-    #  Aerodynamics Analysis
-    # ------------------------------------------------------------------
-    aerodynamics                                     = RCAIDE.Framework.Analyses.Aerodynamics.Vortex_Lattice_Method() 
-    aerodynamics.vehicle                             = vehicle
-    aerodynamics.settings.number_spanwise_vortices   = 30
-    aerodynamics.settings.drag_coefficient_increment = 0.0000
-    analyses.append(aerodynamics) 
-     
-    stability                                       = RCAIDE.Framework.Analyses.Stability.Vortex_Lattice_Method() 
-    stability.settings.discretize_control_surfaces  = True
-    stability.settings.model_fuselage               = False                
-    stability.settings.model_nacelle                = False  
-    stability.vehicle                               = vehicle
-    analyses.append(stability)
-
-    # ------------------------------------------------------------------
-    #  Energy
-    # ------------------------------------------------------------------
-    energy     = RCAIDE.Framework.Analyses.Energy.Energy()
-    energy.vehicle = vehicle  
-    analyses.append(energy)
-
-    # ------------------------------------------------------------------
-    #  Planet Analysis
-    # ------------------------------------------------------------------
-    planet     = RCAIDE.Framework.Analyses.Planets.Planet()
-    analyses.append(planet)
-
-    # ------------------------------------------------------------------
-    #  Atmosphere Analysis
-    # ------------------------------------------------------------------
-    atmosphere = RCAIDE.Framework.Analyses.Atmospheric.US_Standard_1976()
-    atmosphere.features.planet = planet.features
-    analyses.append(atmosphere)   
-
-    # done!
-    return analyses 
-
-def vehicle_setup(): 
-       # ------------------------------------------------------------------
     #   Initialize the Vehicle
     # ------------------------------------------------------------------ 
     vehicle     = RCAIDE.Vehicle()
@@ -130,8 +48,7 @@ def vehicle_setup():
     # mass properties
     vehicle.mass_properties.max_takeoff               = 2948 * Units.pounds
     vehicle.mass_properties.takeoff                   = 2948 * Units.pounds
-    #vehicle.mass_properties.moments_of_inertia.tensor = np.array([[164627.7,0.0,0.0],[0.0,471262.4,0.0],[0.0,0.0,554518.7]])
-    vehicle.mass_properties.moments_of_inertia.tensor = np.array([[1741,0.0,0.0],[0.0,3759,0.0],[0.0,0.0,4386]])
+    vehicle.mass_properties.moments_of_inertia.tensor = np.array([[164627.7,0.0,0.0],[0.0,471262.4,0.0],[0.0,0.0,554518.7]])
     vehicle.mass_properties.center_of_gravity         = [[2.239696797,0,-0.131189711 ]]
     vehicle.envelope.ultimate_load                    = 5.7
     vehicle.envelope.limit_load                       = 3.8
@@ -165,7 +82,7 @@ def vehicle_setup():
 
     ospath                                = os.path.abspath(__file__)
     separator                             = os.path.sep
-    rel_path                              = os.path.dirname(ospath) + separator # + '..' + separator
+    rel_path                              = os.path.dirname(ospath) + separator  + '..' + separator
 
     tip_airfoil                           = RCAIDE.Library.Components.Airfoils.NACA_4_Series_Airfoil()
     tip_airfoil.NACA_4_Series_code        = '6410'      
@@ -198,27 +115,8 @@ def vehicle_setup():
     wing.append_segment(segment)     
     
     # Fill out more segment properties automatically
-    wing = segment_properties(wing)    
-    
-                                          
-    # control surfaces ------------------------------------------- 
-    flap                          = RCAIDE.Library.Components.Wings.Control_Surfaces.Flap()
-    flap.tag                      = 'flap'
-    flap.span_fraction_start      = 0.2
-    flap.span_fraction_end        = 0.5
-    flap.deflection               = 0.0 * Units.degrees 
-    flap.chord_fraction           = 0.20
-    wing.append_control_surface(flap)  
-    
-
-    aileron                       = RCAIDE.Library.Components.Wings.Control_Surfaces.Aileron()
-    aileron.tag                   = 'aileron'
-    aileron.span_fraction_start   = 0.7
-    aileron.span_fraction_end     = 0.9 
-    aileron.deflection            = 0.0 * Units.degrees
-    aileron.chord_fraction        = 0.2
-    wing.append_control_surface(aileron)      
-
+    wing = segment_properties(wing)     
+  
     # add to vehicle
     vehicle.append_component(wing) 
     
@@ -244,16 +142,8 @@ def vehicle_setup():
     wing.vertical                         = False 
     wing.symmetric                        = True
     wing.high_lift                        = False 
-    wing.dynamic_pressure_ratio           = 0.9  
+    wing.dynamic_pressure_ratio           = 0.9
     
-    elevator                              = RCAIDE.Library.Components.Wings.Control_Surfaces.Elevator()
-    elevator.tag                          = 'elevator'
-    elevator.span_fraction_start          = 0.1
-    elevator.span_fraction_end            = 0.9
-    elevator.deflection                   = 0.0  * Units.deg
-    elevator.chord_fraction               = 0.3
-    wing.append_control_surface(elevator)       
-
     RCAIDE.Library.Methods.Geometry.Planform.wing_planform(wing)     
 
     # add to vehicle
@@ -267,10 +157,9 @@ def vehicle_setup():
     wing.tag                              = 'vertical_stabilizer'   
     wing.sweeps.leading_edge              = 20 * Units.degrees 
     wing.thickness_to_chord               = 0.125
-    wing.areas.reference                  = 1.163 
-    wing.spans.projected                  = 1.4816
-    wing.chords.root                      = 1.2176
-    wing.chords.tip                       = 1.2176
+    wing.areas.reference                  = 1.163  
+    wing.spans.projected                  = 1.4816  
+    wing.chords.root                      = 1.2176 
     wing.chords.tip                       = 0.5870 
     wing.aspect_ratio                     = 1.8874 
     wing.taper                            = 0.4820 
@@ -283,15 +172,7 @@ def vehicle_setup():
     wing.symmetric                        = False
     wing.t_tail                           = False
     wing.winglet_fraction                 = 0.0  
-    wing.dynamic_pressure_ratio           = 1.0  
-    
-    rudder                                = RCAIDE.Library.Components.Wings.Control_Surfaces.Rudder()
-    rudder.tag                            = 'rudder'
-    rudder.span_fraction_start            = 0.2
-    rudder.span_fraction_end              = 0.8
-    rudder.deflection                     = 0.0  * Units.deg
-    rudder.chord_fraction                 = 0.2
-    wing.append_control_surface(rudder) 
+    wing.dynamic_pressure_ratio           = 1.0   
     
     # add to vehicle
     vehicle.append_component(wing)
@@ -472,193 +353,95 @@ def vehicle_setup():
     Wuav                                        = 2. * Units.lbs
     avionics                                    = RCAIDE.Library.Components.Systems.Avionics()
     avionics.mass_properties.uninstalled        = Wuav
-    vehicle.avionics                            = avionics     
+    vehicle.avionics                            = avionics   
 
-    #------------------------------------------------------------------------------------------------------------------------------------ 
-    #   Vehicle Definition Complete
-    #------------------------------------------------------------------------------------------------------------------------------------ 
-     
-    return vehicle
+    return vehicle 
 
+def stick_fixed_stability_setup(): 
+    vehicle  = vehicle_setup()   
+    configs  = stick_fixed_stability_configs_setup(vehicle) 
+    return configs 
+ 
+ 
+def elevator_sizing_setup(vehicle):   
+    hs_wing                        = vehicle.wings.horizontal_stabilizer 
+    elevator                       = RCAIDE.Library.Components.Wings.Control_Surfaces.Elevator()
+    elevator.tag                   = 'elevator'
+    elevator.span_fraction_start   = 0.1
+    elevator.span_fraction_end     = 0.9
+    elevator.deflection            = 0.0  * Units.deg
+    elevator.chord_fraction        = 0.3
+    hs_wing.append_control_surface(elevator)     
+    configs                        = elevator_sizing_configs_setup(vehicle) 
+    return configs
+
+def aileron_rudder_sizing_setup(vehicle):    
+    mw_wing                       = vehicle.wings.main_wing 
+    aileron                       = RCAIDE.Library.Components.Wings.Control_Surfaces.Aileron()
+    aileron.tag                   = 'aileron'
+    aileron.span_fraction_start   = 0.7
+    aileron.span_fraction_end     = 0.9 
+    aileron.deflection            = 0.0 * Units.degrees
+    aileron.chord_fraction        = 0.2
+    mw_wing.append_control_surface(aileron) 
+    
+    if vehicle.rudder_flag:
+        vs_wing                      = vehicle.wings.vertical_stabilizer 
+        rudder                       = RCAIDE.Library.Components.Wings.Control_Surfaces.Rudder()
+        rudder.tag                   = 'rudder'
+        rudder.span_fraction_start   = 0.2
+        rudder.span_fraction_end     = 0.8
+        rudder.deflection            = 0.0  * Units.deg
+        rudder.chord_fraction        = 0.2
+        vs_wing.append_control_surface(rudder) 
+    
+    configs  = aileron_rudder_sizing_configs_setup(vehicle) 
+    return configs 
+ 
+def flap_sizing_setup(vehicle):   
+    mw_wing                       = vehicle.wings.main_wing
+    flap                          = RCAIDE.Library.Components.Wings.Control_Surfaces.Flap()
+    flap.tag                      = 'flap'
+    flap.span_fraction_start      = 0.2
+    flap.span_fraction_end        = 0.5
+    flap.deflection               = 0.0 * Units.degrees 
+    flap.chord_fraction           = 0.20
+    mw_wing.append_control_surface(flap)   
+    configs                       = flap_sizing_configs_setup(vehicle) 
+    return configs 
 
 # ----------------------------------------------------------------------
 #   Define the Configurations
-# --------------------------------------------------------------------- 
+# ---------------------------------------------------------------------
 
-def configs_setup(vehicle):
-    # ------------------------------------------------------------------
-    #   Initialize Configurations
-    # ------------------------------------------------------------------ 
-    configs                                                    = RCAIDE.Library.Components.Configs.Config.Container() 
-    base_config                                                = RCAIDE.Library.Components.Configs.Config(vehicle) 
-    base_config.tag                                            = 'base'
-    configs.append(base_config)
-    
-    # ------------------------------------------------------------------
-    #   Cruise Configuration
-    # ------------------------------------------------------------------ 
-    config                                                     = RCAIDE.Library.Components.Configs.Config(base_config)
-    config.tag                                                 = 'cruise' 
-    configs.append(config)
-    
-    
-    # ------------------------------------------------------------------
-    #   Takeoff Configuration
-    # ------------------------------------------------------------------ 
-    config                                                     = RCAIDE.Library.Components.Configs.Config(base_config)
-    config.tag                                                 = 'takeoff' 
-    config.wings['main_wing'].control_surfaces.flap.deflection = 20. * Units.deg
-    config.V2_VS_ratio                                         = 1.21
-    config.maximum_lift_coefficient                            = 2.
-    
-    configs.append(config)
-    
-    
-    # ------------------------------------------------------------------
-    #   Landing Configuration
-    # ------------------------------------------------------------------
-
-    config                                                     = RCAIDE.Library.Components.Configs.Config(base_config)
-    config.tag                                                 = 'landing' 
-    config.wings['main_wing'].control_surfaces.flap.deflection = 20. * Units.deg
-    config.Vref_VS_ratio                                       = 1.23
-    config.maximum_lift_coefficient                            = 2.
-                                                               
+def stick_fixed_stability_configs_setup(vehicle): 
+    configs     = RCAIDE.Library.Components.Configs.Config.Container() 
+    base_config = RCAIDE.Library.Components.Configs.Config(vehicle) 
+    config      = RCAIDE.Library.Components.Configs.Config(base_config)
+    config.tag  = 'stick_fixed_cruise'
     configs.append(config) 
-     
+    return configs  
+
+def elevator_sizing_configs_setup(vehicle): 
+    configs     = RCAIDE.Library.Components.Configs.Config.Container() 
+    base_config = RCAIDE.Library.Components.Configs.Config(vehicle) 
+    config      = RCAIDE.Library.Components.Configs.Config(base_config)
+    config.tag  = 'elevator_sizing'   
+    configs.append(config)     
     return configs
 
-# ----------------------------------------------------------------------
-#   Plot Mission
-# ----------------------------------------------------------------------
-def plot_mission(results):
-    
-     # Plot Aircraft Stability 
-    plot_longitudinal_stability(results)  
-    
-    plot_lateral_stability(results) 
-    
-    plot_flight_forces_and_moments(results)
-    
-    #plot_flight_trajectory(results)
-    
-    plot_aerodynamic_coefficients(results)
-      
-    return
- 
-# ----------------------------------------------------------------------
-#   Define the Mission
-# ----------------------------------------------------------------------
-def mission_setup(analyses):
+def aileron_rudder_sizing_configs_setup(vehicle): 
+    configs     = RCAIDE.Library.Components.Configs.Config.Container() 
+    base_config = RCAIDE.Library.Components.Configs.Config(vehicle)  
+    config      = RCAIDE.Library.Components.Configs.Config(base_config)
+    config.tag  = 'aileron_rudder_sizing'   
+    configs.append(config)   
+    return configs  
 
-    # ------------------------------------------------------------------
-    #   Initialize the Mission
-    # ------------------------------------------------------------------
-    mission = RCAIDE.Framework.Mission.Sequential_Segments()
-    mission.tag = 'the_mission'
-
-    # unpack Segments module
-    Segments = RCAIDE.Framework.Mission.Segments
-
-    # base segment
-    base_segment = Segments.Segment() 
- 
-    # ------------------------------------------------------------------    
-    #   Cruise Segment: Constant Speed Constant Altitude
-    # ------------------------------------------------------------------    
-    segment     = Segments.Cruise.Constant_Speed_Constant_Altitude(base_segment)
-    segment.tag = "linear_cruise" 
-    segment.analyses.extend( analyses.base )   
-    segment.altitude                                                            = 8000. * Units.feet
-    segment.air_speed                                                           = 90 * Units['kts']
-    #segment.sideslip_angle =  10 * Units.degrees
-    #segment.true_course                                                         = -30.0 * Units.degrees
-    #segment.angle_of_attack                                                     = 1.80633 * Units.degrees
-    
-    #segment.bank_angle                                                          = 30 * Units.degrees
-    segment.distance                                                            =  60 *  Units.mile
-   
-    # define flight dynamics to model 
-    segment.flight_dynamics.force_x                                             = True    
-    segment.flight_dynamics.force_z                                             = True   
-                
-    # define flight controls              
-    segment.assigned_control_variables.throttle.active                          = True           
-    segment.assigned_control_variables.throttle.assigned_propulsors             = [['ice_propeller']]    
-    segment.assigned_control_variables.body_angle.active                        = True   
-    
-    # Longidinal Flight Mechanics
-    segment.assigned_control_variables.elevator_deflection.active               = True    
-    segment.assigned_control_variables.elevator_deflection.assigned_surfaces    = [['elevator']]
-    #segment.assigned_control_variables.elevator_deflection.initial_guess_values = [[1.0 * Units.degrees]]    
-    segment.flight_dynamics.moment_y                                            = True  
-   
-    # Lateral Flight Mechanics 
-    segment.flight_dynamics.force_y                                             = True     
-    segment.flight_dynamics.moment_x                                            = True
-    segment.flight_dynamics.moment_z                                            = True  
-    segment.assigned_control_variables.aileron_deflection.active                = True    
-    segment.assigned_control_variables.aileron_deflection.assigned_surfaces     = [['aileron']]
-    #segment.assigned_control_variables.aileron_deflection.initial_guess_values  = [[1.0 * Units.degrees]] 
-    segment.assigned_control_variables.rudder_deflection.active                 = True    
-    segment.assigned_control_variables.rudder_deflection.assigned_surfaces      = [['rudder']]
-    #segment.assigned_control_variables.rudder_deflection.initial_guess_values   = [[1.0 * Units.degrees]]
-    segment.assigned_control_variables.bank_angle.active                        = True    
-    #segment.assigned_control_variables.bank_angle.initial_guess_values          = [[1.0 * Units.degrees]]     
-    
-    mission.append_segment(segment)     
-    
-    #segment     = Segments.Cruise.Curved_Constant_Radius_Constant_Speed_Constant_Altitude(base_segment)
-    #segment.tag = "curved_cruise" 
-    #segment.analyses.extend( analyses.base )   
-    #segment.altitude                                                            = 8000. * Units.feet
-    #segment.air_speed                                                           = 60 # 120 * Units['mph']
-    #segment.turn_radius                                                         = 3000 # 100 * Units.mile  
-    #segment.start_true_course                                                   = 0.0 * Units.degrees 
-    #segment.turn_angle                                                          = 60.0 * Units.degrees # + indicated right hand turn, negative indicates left-hand turn defaults to straight flight/won't actually turn?
-    
-    ## define flight dynamics to model 
-    #segment.flight_dynamics.force_x                                             = True    
-    #segment.flight_dynamics.force_z                                             = True    
-    #segment.flight_dynamics.force_y                                             = True     
-    #segment.flight_dynamics.moment_y                                            = True 
-    #segment.flight_dynamics.moment_x                                            = True
-    #segment.flight_dynamics.moment_z                                            = True 
-                
-    ## define flight controls              
-    #segment.assigned_control_variables.throttle.active                          = True           
-    #segment.assigned_control_variables.throttle.assigned_propulsors             = [['ice_propeller']]    
-    #segment.assigned_control_variables.body_angle.active                        = True   
-    ##segment.assigned_control_variables.body_angle.initial_guess_values          = [[0]]     
-    
-    ## Longidinal Flight Mechanics
-    #segment.assigned_control_variables.elevator_deflection.active               = True    
-    #segment.assigned_control_variables.elevator_deflection.assigned_surfaces    = [['elevator']]
-    ##segment.assigned_control_variables.elevator_deflection.initial_guess_values = [[0]]     
-   
-    ## Lateral Flight Mechanics 
-    #segment.assigned_control_variables.aileron_deflection.active                = True    
-    #segment.assigned_control_variables.aileron_deflection.assigned_surfaces     = [['aileron']]
-    ##segment.assigned_control_variables.aileron_deflection.initial_guess_values  = [[0]] 
-    #segment.assigned_control_variables.rudder_deflection.active                 = True    
-    #segment.assigned_control_variables.rudder_deflection.assigned_surfaces      = [['rudder']]
-    ##segment.assigned_control_variables.rudder_deflection.initial_guess_values   = [[0]]
-    #segment.assigned_control_variables.bank_angle.active                        = True    
-    ##segment.assigned_control_variables.bank_angle.initial_guess_values          = [[0]]     
-    
-    #mission.append_segment(segment) 
-    return mission 
-
-def missions_setup(mission): 
- 
-    missions     = RCAIDE.Framework.Mission.Missions()
-    
-    # base mission 
-    mission.tag  = 'base_mission'
-    missions.append(mission)
- 
-    return missions
-
-if __name__ == '__main__': 
-    main()    
-    plt.show()
+def flap_sizing_configs_setup(vehicle): 
+    configs     = RCAIDE.Library.Components.Configs.Config.Container()  
+    base_config = RCAIDE.Library.Components.Configs.Config(vehicle)  
+    config      = RCAIDE.Library.Components.Configs.Config(base_config)
+    config.tag  = 'flap_sizing'   
+    configs.append(config)   
+    return configs
