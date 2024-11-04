@@ -117,7 +117,7 @@ def stick_fixed_stability_and_drag_optimization_setup():
                   #[ 'hs_area'                     , 4.0   , 3.0  , 5.0   , 10.  ,  1*Units.meter**2],   
                   #[ 'hs_root_twist'               , 0.0   , -3.0 , 3.0   , 10.  , 1*Units.degree],
                   #[ 'hs_tip_twist'                , 0.0   , -3.0 , 3.0   , 10.  , 1*Units.degree], 
-                  [ 'c_g_x'                       , 2.239696797  , 1  , 3, 1    ,  1*Units.less],
+                  #[ 'c_g_x'                       , 2.239696797  , 1  , 3, 1    ,  1*Units.less],      # We are changing it, we don't have to optimize
                   
     ],dtype=object)   
 
