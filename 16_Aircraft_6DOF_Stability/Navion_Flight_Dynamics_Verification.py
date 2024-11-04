@@ -38,19 +38,19 @@ def main():
 
     '''TO BE COMPLETED USING Table 6.1 State-Space Modeling of the Rigid-Body Dynamics
    of a Navion Airplane From Flight Data, Using Frequency-Domain Identification Techniques in and OUR CODE'''
-    #            Paper estimates, real values, AVL, VLM
-    Cw         = np.array([     0   ,       0, 0 ]) # Should be four values 
-    Xu         = np.array([-0.092 , -0.04425, -0.044105672 ]) # Should be four values # In VLM want to take off first part and then thte second part is times ten
-    Xw         = np.array([0.0424   ,  0.193232, 0.85674405 ]) # Should be four values 
-    Xq         = np.array([     0   ,   -0.40431, -0.001394 ]) # Should be four values 
-    Zu         = np.array([ 10.51   ,  -1.23056, 0.00094187 ]) # Should be four values 
-    Zw         = np.array([-3.066   ,   -6.91329, 5.20032213 ]) # Should be four values 
-    Zq         = np.array([ 152    ,    -13.0418, 0.19902564 ]) # Should be four values  # paper differs 
-    Mu_MwdotZu = np.array([0.2054   ,  -0.08659, 0.00093559 ]) # Should be four values 
-    Mw_MwdotZw = np.array([-0.05581 ,   -1.01843, -0.7864394 ]) # Should be four values 
-    Mq_Mwdotuo = np.array([-2.114   ,   -17.0606, -26.123542 ]) # Should be four values 
-    ZwDot      = np.array([     0   ,      0, 0 ]) # Should be four values 
-    MwDot      = np.array([     0   ,         0, 0 ]) # Should be four values 
+    #            Paper estimates, real values, VLM, AVL
+    Cw         = np.array([     0   ,       0    , 0 ]) # Should be four values 
+    Xu         = np.array([-0.092   ,  -3.298e-5   , -0.044105672 ]) # Should be four values # In VLM want to take off first part and then thte second part is times ten
+    Xw         = np.array([0.0424   ,  0.24      , 0.85674405 ]) # Should be four values 
+    Xq         = np.array([     0   ,  0   , -0.001394 ]) # Should be four values 
+    Zu         = np.array([ 10.51   ,  0.4    , 0.00094187 ]) # Should be four values 
+    Zw         = np.array([-3.066   ,  -1.43     , 5.20032213 ]) # Should be four values 
+    Zq         = np.array([ 152    ,    46     , 0.19902564 ]) # Should be four values  # paper differs 
+    Mu_MwdotZu = np.array([0.2054   ,   0.00125    , 0.00093559 ]) # Should be four values 
+    Mw_MwdotZw = np.array([-0.05581 ,    -0.032  , -0.7864394 ]) # Should be four values 
+    Mq_Mwdotuo = np.array([-2.114   ,    -2.861  , -26.123542 ]) # Should be four values 
+    ZwDot      = np.array([     0   ,          0 , 0 ]) # Should be four values 
+    MwDot      = np.array([     0   ,         0  , 0 ]) # Should be four values 
 
 
     ALon[:,0,0] = Xu 
