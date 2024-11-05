@@ -7,7 +7,7 @@ import RCAIDE
 from RCAIDE.Framework.Core import Units   
 from RCAIDE.Library.Methods.Propulsors.Converters.Rotor             import design_propeller 
 from RCAIDE.Library.Methods.Propulsors.Converters.DC_Motor          import design_motor 
-from RCAIDE.Library.Methods.Weights.Correlation_Buildups.Propulsion import nasa_motor
+from RCAIDE.Library.Methods.Weights.Correlation_Buildups.Propulsion import compute_motor_weight
 from RCAIDE.Library.Methods.Energy.Sources.Batteries.Common         import initialize_from_circuit_configuration
 from RCAIDE.Library.Methods.Stability.Center_of_Gravity            import compute_component_centers_of_gravity
 from RCAIDE.Library.Methods.Geometry.Planform                      import segment_properties
@@ -438,30 +438,32 @@ def vehicle_setup():
     #------------------------------------------------------------------------------------------------------------------------------------ 
    
     #initialize the electric network
-    net                              = RCAIDE.Framework.Networks.Electric()   
-
-    #------------------------------------------------------------------------------------------------------------------------------------  
+    net                              = RCAIDE.Framework.Networks.Electric()
+    
     # Bus
     #------------------------------------------------------------------------------------------------------------------------------------  
-    bus                              = RCAIDE.Library.Components.Energy.Distributors.Electrical_Bus() 
+    bus                              = RCAIDE.Library.Components.Energy.Distributors.Electrical_Bus()
+
 
     #------------------------------------------------------------------------------------------------------------------------------------           
     # Battery
     #------------------------------------------------------------------------------------------------------------------------------------  
-    bat                                                    = RCAIDE.Library.Components.Energy.Sources.Batteries.Lithium_Ion_NMC()
-    bat.tag                                                = 'li_ion_battery'
-    bat.pack.electrical_configuration.series               = 140  # CHANGE  
-    bat.pack.electrical_configuration.parallel             = 100  # CHANGE
-    initialize_from_circuit_configuration(bat)  
-    bat.module.number_of_modules                           = 14   # CHANGE
-    bat.module.geometrtic_configuration.total              = bat.pack.electrical_configuration.total
-    bat.module.voltage                                     = bat.pack.maximum_voltage/bat.module.number_of_modules # assumes modules are connected in parallel, must be less than max_module_voltage (~50) /safety_factor (~ 1.5)  
-    bat.module.geometrtic_configuration.normal_count       = 24 # CHANGE
-    bat.module.geometrtic_configuration.parallel_count     = 40 # CHANGE
-    bat.thermal_management_system.heat_acquisition_system  = RCAIDE.Library.Components.Thermal_Management.Batteries.Heat_Acquisition_Systems.Direct_Air()    # DO we need this??  
-    bus.voltage                                            = bat.pack.maximum_voltage  
-    bus.batteries.append(bat)            
-    
+    bat_module                                             = RCAIDE.Library.Components.Energy.Sources.Battery_Modules.Lithium_Ion_NMC()
+    bat_module.electrical_configuration.series             = 10
+    bat_module.electrical_configuration.parallel           = 210
+    bat_module.cell.nominal_capacity                       = 3.8
+    initialize_from_circuit_configuration(bat_module,module_weight_factor = 1.25)  
+    bat_module.geometrtic_configuration.total              = bat_module.electrical_configuration.parallel*bat_module.electrical_configuration.series  
+    bat_module.voltage                                     = bat_module.maximum_voltage 
+    bat_module.geometrtic_configuration.normal_count       = 42
+    bat_module.geometrtic_configuration.parallel_count     = 50
+    bat_module.nominal_capacity                            = bat_module.cell.nominal_capacity* bat_module.electrical_configuration.parallel
+
+    for _ in range(14):
+        bat_copy = deepcopy(bat_module)
+        bus.battery_modules.append(bat_copy)
+
+    bus.initialize_bus_electrical_properties()    
 
     #------------------------------------------------------------------------------------------------------------------------------------  
     #  Inner Starboard Cruise Propulsor
@@ -471,25 +473,25 @@ def vehicle_setup():
     starboard_propulsor.active_batteries             = ['li_ion_battery']   
   
     # Electronic Speed Controller       
-    esc                                              = RCAIDE.Library.Components.Energy.Modulators.Electronic_Speed_Controller()
-    esc.tag                                          = 'esc_1'
-    esc.efficiency                                   = 0.95 
-    starboard_propulsor.electronic_speed_controller  = esc   
+    esc1                                              = RCAIDE.Library.Components.Energy.Modulators.Electronic_Speed_Controller()
+    esc1.tag                                          = 'esc1'
+    esc1.efficiency                                   = 0.95 
+    starboard_propulsor.electronic_speed_controller  = esc1   
      
-    # Propeller              
-    propeller                                        = RCAIDE.Library.Components.Propulsors.Converters.Propeller() 
-    propeller.tag                                    = 'propeller_1'  
-    propeller.tip_radius                             = 1.2  * Units.m
-    propeller.number_of_blades                       = 6 
-    propeller.hub_radius                             = 0.2 * Units.m
-    propeller.cruise.design_freestream_velocity      = 175.*Units['mph']   
-    propeller.cruise.design_angular_velocity         = 2700. * Units.rpm # CHANGE
-    propeller.cruise.design_Cl                       = 0.7 # CHANGE???
-    propeller.cruise.design_altitude                 = 2500. * Units.feet 
-    propeller.cruise.design_thrust                   = # CHANGE???   
-    propeller.clockwise_rotation                     = False
-    propeller.variable_pitch                         = True  
-    propeller.origin                                 = [[4.068,2.4,0.64]]   
+    # Propeller. Optimized for cruise performance
+    propeller1                                        = RCAIDE.Library.Components.Propulsors.Converters.Propeller() 
+    propeller1.tag                                    = 'propeller1'  
+    propeller1.tip_radius                             = 1.  * Units.m
+    propeller1.number_of_blades                       = 3 
+    propeller1.hub_radius                             = 0.2 * Units.m
+    propeller1.cruise.design_freestream_velocity      = 180.*Units['mph']   
+    propeller1.cruise.design_angular_velocity         = 3500. * Units.rpm # Verify ?
+    propeller1.cruise.design_Cl                       = 0.7 # CHANGE???
+    propeller1.cruise.design_altitude                 = 2500. * Units.feet 
+    propeller1.cruise.design_thrust                   = 800 # Based on a total 650 kw power system  
+    propeller1.clockwise_rotation                     = False
+    propeller1.variable_pitch                         = True  
+    propeller1.origin                                 = [[3.85,2.4,0.652]]   
     airfoil                                          = RCAIDE.Library.Components.Airfoils.Airfoil()
     airfoil.tag                                      = 'NACA_4412' 
     airfoil.coordinate_file                          =  rel_path + 'Airfoils' + separator + 'NACA_4412.txt'   # absolute path   
@@ -498,51 +500,108 @@ def vehicle_setup():
                                                         rel_path + 'Airfoils' + separator + 'Polars' + separator + 'NACA_4412_polar_Re_200000.txt',
                                                         rel_path + 'Airfoils' + separator + 'Polars' + separator + 'NACA_4412_polar_Re_500000.txt',
                                                         rel_path + 'Airfoils' + separator + 'Polars' + separator + 'NACA_4412_polar_Re_1000000.txt']   
-    propeller.append_airfoil(airfoil)                       
-    propeller.airfoil_polar_stations                 = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0] 
-    design_propeller(propeller)    
-    starboard_propulsor.rotor                        = propeller   
+    propeller1.append_airfoil(airfoil)                       
+    propeller1.airfoil_polar_stations                 = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0] 
+    design_propeller(propeller1)    
+    starboard_propulsor.rotor                        = propeller1   
               
     # DC_Motor       
-    motor                                            = RCAIDE.Library.Components.Propulsors.Converters.DC_Motor()
-    motor.efficiency                                 = 0.98
-    motor.origin                                     = [[4.0,2.4,0.64]]   
-    motor.nominal_voltage                            = bat.pack.maximum_voltage*0.5
-    motor.no_load_current                            = 1
-    motor.rotor_radius                               = propeller.tip_radius
-    motor.design_torque                              = propeller.cruise.design_torque
-    motor.angular_velocity                           = propeller.cruise.design_angular_velocity 
-    design_motor(motor)  
-    motor.mass_properties.mass                       = nasa_motor(motor.design_torque) 
-    starboard_propulsor.motor                        = motor 
+    motor1                                            = RCAIDE.Library.Components.Propulsors.Converters.DC_Motor()
+    motor1.efficiency                                 = 0.98
+    motor1.origin                                     = [[3.95,2.4,0.652]]   
+    motor1.nominal_voltage                            = bus.voltage *0.5
+    motor1.no_load_current                            = 1
+    motor1.rotor_radius                               = propeller1.tip_radius
+    motor1.design_torque                              = propeller1.cruise.design_torque
+    motor1.angular_velocity                           = propeller1.cruise.design_angular_velocity 
+    design_motor(motor1)  
+    motor1.mass_properties.mass                       = compute_motor_weight(motor1.design_torque) 
+    starboard_propulsor.motor                         = motor1
+    
+    nacelle1                    = RCAIDE.Library.Components.Nacelles.Stack_Nacelle()
+    nacelle1.tag                = 'nacelle_1'
+    nacelle1.length             = 2
+    nacelle1.diameter           = 0.4 
+    nacelle1.areas.wetted       = 1.8 * Units['meters**2'] 
+    nacelle1.origin             = [[3.85,2.4,0.652]]
+    nacelle1.flow_through       = False  
+    
+    nac_segment                    = RCAIDE.Library.Components.Nacelles.Segment()
+    nac_segment.tag                = 'segment_1'
+    nac_segment.percent_x_location = 0.0  
+    nac_segment.height             = 0.0
+    nac_segment.width              = 0.0
+    nacelle1.append_segment(nac_segment)   
+    
+    nac_segment                    = RCAIDE.Library.Components.Nacelles.Segment()
+    nac_segment.tag                = 'segment_2'
+    nac_segment.percent_x_location = 0.001 
+    nac_segment.percent_z_location = 0.
+    nac_segment.height             = 0.3 
+    nac_segment.width              = 0.3 
+    nacelle1.append_segment(nac_segment)   
+    
+    nac_segment                    = RCAIDE.Library.Components.Nacelles.Segment()
+    nac_segment.tag                = 'segment_3'
+    nac_segment.percent_x_location = 0.4 
+    nac_segment.percent_z_location = 0
+    nac_segment.height             = 0.4	 
+    nac_segment.width              = 0.4 
+    nacelle1.append_segment(nac_segment)  
+     
+    nac_segment                    = RCAIDE.Library.Components.Nacelles.Segment()
+    nac_segment.tag                = 'segment_4'
+    nac_segment.percent_x_location = 0.6  
+    nac_segment.percent_z_location = 0
+    nac_segment.height             = 0.35	 
+    nac_segment.width              = 0.35 
+    nacelle1.append_segment(nac_segment)  
+    
+    nac_segment                    = RCAIDE.Library.Components.Nacelles.Segment()
+    nac_segment.tag                = 'segment_5'
+    nac_segment.percent_x_location = 0.8  
+    nac_segment.percent_z_location = 0.0
+    nac_segment.height             = 0.2 
+    nac_segment.width              = 0.2
+    nacelle1.append_segment(nac_segment)   
+    
+    nac_segment                    = RCAIDE.Library.Components.Nacelles.Segment()
+    nac_segment.tag                = 'segment_6'
+    nac_segment.percent_x_location = 1.0   
+    nac_segment.percent_z_location = 0
+    nac_segment.height             = 0. 
+    nac_segment.width              = 0. 
+    nacelle1.append_segment(nac_segment)  
+    
+    starboard_propulsor.nacelle = nacelle1      
    
     #------------------------------------------------------------------------------------------------------------------------------------  
     #  Inner Starboard takeoff Propulsor
     #------------------------------------------------------------------------------------------------------------------------------------   
-    starboard_propulsor                              = RCAIDE.Library.Components.Propulsors.Electric_Rotor()  
-    starboard_propulsor.tag                          = 'inner_starboard_takeoff_propulsor'
-    starboard_propulsor.active_batteries             = ['li_ion_battery']   
+    propulsor5                              = RCAIDE.Library.Components.Propulsors.Electric_Rotor()  
+    propulsor5.tag                          = 'inner_starboard_takeoff_propulsor'
+    propulsor5.active_batteries             = ['li_ion_battery']   
   
     # Electronic Speed Controller       
-    esc                                              = RCAIDE.Library.Components.Energy.Modulators.Electronic_Speed_Controller()
-    esc.tag                                          = 'esc_5'
-    esc.efficiency                                   = 0.95 
-    starboard_propulsor.electronic_speed_controller  = esc   
+    esc5                                              = RCAIDE.Library.Components.Energy.Modulators.Electronic_Speed_Controller()
+    esc5.tag                                          = 'esc_5'
+    esc5.efficiency                                   = 0.95 
+    propulsor5.electronic_speed_controller  = esc5 
      
-    # Propeller              
-    propeller                                        = RCAIDE.Library.Components.Propulsors.Converters.Propeller() 
-    propeller.tag                                    = 'propeller_5'  
-    propeller.tip_radius                             = 0.8  * Units.m # CHECK THIS
-    propeller.number_of_blades                       = 6 
-    propeller.hub_radius                             = 0.15 * Units.m
-    propeller.cruise.design_freestream_velocity      = 60.*Units['mph']   # CHANGE?? Cruise speed
-    propeller.cruise.design_angular_velocity         = 2700. * Units.rpm # CHANGE
-    propeller.cruise.design_Cl                       = 0.7 # CHANGE???
-    propeller.cruise.design_altitude                 = 1000. * Units.feet 
-    propeller.cruise.design_thrust                   = # CHANGE???   
-    propeller.clockwise_rotation                     = False
-    propeller.variable_pitch                         = True  
-    propeller.origin                                 = [[4.068,5.87,0.64]]   
+    # Propeller. Optimized for low-speed flight              
+    propeller5                                       = RCAIDE.Library.Components.Propulsors.Converters.Propeller() 
+    propeller5.tag                                   = 'propeller_5'  
+    propeller5.tip_radius                            = 0.6  * Units.m
+    propeller5.number_of_blades                      = 3 
+    propeller5.hub_radius                            = 0.15 * Units.m
+    propeller5.cruise.design_freestream_velocity     = 60.*Units['mph']   # Low speed
+    propeller5.cruise.design_angular_velocity        = 4000. * Units.rpm 
+    propeller5.cruise.design_Cl                      = 0.7 # CHANGE???
+    propeller5.cruise.design_altitude                = 1000. * Units.feet 
+    propeller5.cruise.design_thrust                  = 2400 #    
+    propeller5.clockwise_rotation                    = False
+    propeller5.variable_pitch                        = True  
+    propeller5.origin                                = [[4.07,5.87,0.652]]   
     airfoil                                          = RCAIDE.Library.Components.Airfoils.Airfoil()
     airfoil.tag                                      = 'NACA_4412' 
     airfoil.coordinate_file                          =  rel_path + 'Airfoils' + separator + 'NACA_4412.txt'   # absolute path   
@@ -551,201 +610,200 @@ def vehicle_setup():
                                                         rel_path + 'Airfoils' + separator + 'Polars' + separator + 'NACA_4412_polar_Re_200000.txt',
                                                         rel_path + 'Airfoils' + separator + 'Polars' + separator + 'NACA_4412_polar_Re_500000.txt',
                                                         rel_path + 'Airfoils' + separator + 'Polars' + separator + 'NACA_4412_polar_Re_1000000.txt']   
-    propeller.append_airfoil(airfoil)                       
-    propeller.airfoil_polar_stations                 = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0] 
-    design_propeller(propeller)    
-    starboard_propulsor.rotor                        = propeller   
+    propeller5.append_airfoil(airfoil)                       
+    propeller5.airfoil_polar_stations                 = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0] 
+    design_propeller(propeller5)    
+    propulsor5.rotor                        = propeller5   
               
     # DC_Motor       
-    motor                                            = RCAIDE.Library.Components.Propulsors.Converters.DC_Motor()
-    motor.efficiency                                 = 0.98
-    motor.origin                                     = [[4.0,5.87,0.64]]   
-    motor.nominal_voltage                            = bat.pack.maximum_voltage*0.5
-    motor.no_load_current                            = 1
-    motor.rotor_radius                               = propeller.tip_radius
-    motor.design_torque                              = propeller.cruise.design_torque
-    motor.angular_velocity                           = propeller.cruise.design_angular_velocity 
-    design_motor(motor)  
-    motor.mass_properties.mass                       = nasa_motor(motor.design_torque) 
-    starboard_propulsor.motor                        = motor 
+    motor5                                           = RCAIDE.Library.Components.Propulsors.Converters.DC_Motor()
+    motor5.efficiency                                = 0.98
+    motor5.origin                                    = [[4.2,5.87,0.64]]   
+    motor5.nominal_voltage                           = bus.voltage*0.5
+    motor5.no_load_current                           = 1
+    motor5.rotor_radius                              = propeller5.tip_radius
+    motor5.design_torque                             = propeller5.cruise.design_torque
+    motor5.angular_velocity                          = propeller5.cruise.design_angular_velocity 
+    design_motor(motor5)  
+    motor5.mass_properties.mass                      = compute_motor_weight(motor5.design_torque) 
+    propulsor5.motor                                 = motor5 
    
     #------------------------------------------------------------------------------------------------------------------------------------  
     # Outer Starboard Cruise Propulsor
     #------------------------------------------------------------------------------------------------------------------------------------   
-    port_propulsor                             = RCAIDE.Library.Components.Propulsors.Electric_Rotor() 
-    port_propulsor.tag                         = "port_propulsor"
-    port_propulsor.active_batteries            = ['li_ion_battery']   
+    propulsor2                             = RCAIDE.Library.Components.Propulsors.Electric_Rotor() 
+    propulsor2.tag                         = "outer_starboard_cruise_propulsor"
+    propulsor2.active_batteries            = ['li_ion_battery']   
             
-    esc_2                                      = deepcopy(esc)
-    esc_2.origin                               = [[2., -2.5, 0.95]]      
-    port_propulsor.electronic_speed_controller = esc_2  
+    esc2                                      = deepcopy(esc1)
+    esc2.origin                               = [[4.5, 4.2, 0.652]]      
+    propulsor2.electronic_speed_controller    = esc2  
 
-    propeller_2                                = deepcopy(propeller)
-    propeller_2.tag                            = 'propeller_2' 
-    propeller_2.origin                         = [[2.,-2.5,0.95]]
-    propeller_2.clockwise_rotation             = False        
-    port_propulsor.rotor                       = propeller_2  
+    propeller2                                = deepcopy(propeller1)
+    propeller2.tag                            = 'propeller2' 
+    propeller2.origin                         = [[3.85,4.25,0.652]]
+    propeller2.clockwise_rotation             = False        
+    propulsor2.rotor                          = propeller2  
               
-    motor_2                                    = deepcopy(motor)
-    motor_2.origin                             = [[2., -2.5, 0.95]]      
-    port_propulsor.motor                       = motor_2   
+    motor2                                    = deepcopy(motor1)
+    motor2.origin                             = [[3.95, 4.25, 0.652]]      
+    propulsor2.motor                       = motor2   
 
-    nacelle_2                                  = deepcopy(nacelle)
-    nacelle_2.tag                              = 'nacelle_2'
-    nacelle_2.origin                           = [[2.5,-2.5,1.0]]
-    port_propulsor.nacelle                     = nacelle_2
+    nacelle2                                  = deepcopy(nacelle1)
+    nacelle2.tag                              = 'nacelle2'
+    nacelle2.origin                           = [[3.95,4.25,0.652]]
+    propulsor2.nacelle                        = nacelle2
      
     # append propulsor to distribution line 
-    bus.propulsors.append(port_propulsor)
-    
+    bus.propulsors.append(propulsor2)
+    '''
     #------------------------------------------------------------------------------------------------------------------------------------  
     # Inner Port Cruise Propulsor
     #------------------------------------------------------------------------------------------------------------------------------------   
-    port_propulsor                             = RCAIDE.Library.Components.Propulsors.Electric_Rotor() 
-    port_propulsor.tag                         = "port_propulsor"
-    port_propulsor.active_batteries            = ['li_ion_battery']   
-            
-    esc_2                                      = deepcopy(esc)
-    esc_2.origin                               = [[2., -2.5, 0.95]]      
-    port_propulsor.electronic_speed_controller = esc_2  
+    propulsor3                             = RCAIDE.Library.Components.Propulsors.Electric_Rotor() 
+    propulsor3.tag                         = "inner_port_cruise_propulsor"
+    propulsor3.active_batteries            = ['li_ion_battery']   
+        
+    esc3                                      = deepcopy(esc1)
+    esc3.origin                               = [[4.50, -2.4,0.652]]    
+    propulsor3.electronic_speed_controller = esc3 
 
-    propeller_2                                = deepcopy(propeller)
-    propeller_2.tag                            = 'propeller_2' 
-    propeller_2.origin                         = [[2.,-2.5,0.95]]
-    propeller_2.clockwise_rotation             = False        
-    port_propulsor.rotor                       = propeller_2  
+    propeller3                                = deepcopy(propeller1)
+    propeller3.tag                            = 'propeller3' 
+    propeller3.origin                         = [[3.85, -2.4,0.652]]
+    propeller3.clockwise_rotation             = False        
+    propulsor3.rotor                          = propeller3  
               
-    motor_2                                    = deepcopy(motor)
-    motor_2.origin                             = [[2., -2.5, 0.95]]      
-    port_propulsor.motor                       = motor_2   
+    motor3                                    = deepcopy(motor1)
+    motor3.origin                             = [[3.95, -2.4,0.652]]    
+    propulsor3.motor                          = motor3   
 
-    nacelle_2                                  = deepcopy(nacelle)
-    nacelle_2.tag                              = 'nacelle_2'
-    nacelle_2.origin                           = [[2.5,-2.5,1.0]]
-    port_propulsor.nacelle                     = nacelle_2
+    nacelle3                                  = deepcopy(nacelle1)
+    nacelle3.tag                              = 'nacelle3'
+    nacelle3.origin                           = [[3.95, -2.4,0.652]]
+    propulsor3.nacelle                        = nacelle3
      
     # append propulsor to distribution line 
-    bus.propulsors.append(port_propulsor)
+    bus.propulsors.append(propulsor3)
     
     #------------------------------------------------------------------------------------------------------------------------------------  
     # Outer Port Cruise Propulsor
     #------------------------------------------------------------------------------------------------------------------------------------   
-    port_propulsor                             = RCAIDE.Library.Components.Propulsors.Electric_Rotor() 
-    port_propulsor.tag                         = "port_propulsor"
-    port_propulsor.active_batteries            = ['li_ion_battery']   
+    propulsor4                             = RCAIDE.Library.Components.Propulsors.Electric_Rotor() 
+    propulsor4.tag                         = "outer_port_cruise_propulsor"
+    propulsor4.active_batteries            = ['li_ion_battery']   
             
-    esc_2                                      = deepcopy(esc)
-    esc_2.origin                               = [[2., -2.5, 0.95]]      
-    port_propulsor.electronic_speed_controller = esc_2  
+    esc4                                      = deepcopy(esc1)
+    esc4.origin                               = [[4.5, -4.25,0.652]]     
+    propulsor4.electronic_speed_controller    = esc4 
 
-    propeller_2                                = deepcopy(propeller)
-    propeller_2.tag                            = 'propeller_2' 
-    propeller_2.origin                         = [[2.,-2.5,0.95]]
-    propeller_2.clockwise_rotation             = False        
-    port_propulsor.rotor                       = propeller_2  
+    propeller4                                = deepcopy(propeller1)
+    propeller4.tag                            = 'propeller4' 
+    propeller4.origin                         = [[3.85, -4.25,0.652]]
+    propeller4.clockwise_rotation             = False        
+    propulsor4.rotor                          = propeller4 
               
-    motor_2                                    = deepcopy(motor)
-    motor_2.origin                             = [[2., -2.5, 0.95]]      
-    port_propulsor.motor                       = motor_2   
+    motor4                                    = deepcopy(motor1)
+    motor4.origin                             = [[3.95, -4.25,0.652]]     
+    propulsor4.motor                          = motor4   
 
-    nacelle_2                                  = deepcopy(nacelle)
-    nacelle_2.tag                              = 'nacelle_2'
-    nacelle_2.origin                           = [[2.5,-2.5,1.0]]
-    port_propulsor.nacelle                     = nacelle_2
+    nacelle4                                  = deepcopy(nacelle1)
+    nacelle4.tag                              = 'nacelle4'
+    nacelle4.origin                           = [[3.95, -4.25,0.652]]
+    propulsor4.nacelle                        = nacelle4
      
     # append propulsor to distribution line 
-    bus.propulsors.append(port_propulsor) 
+    bus.propulsors.append(propulsor4) 
     
     #------------------------------------------------------------------------------------------------------------------------------------  
     # Outer Starboard Takeoff Propulsor
     #------------------------------------------------------------------------------------------------------------------------------------   
-    port_propulsor                             = RCAIDE.Library.Components.Propulsors.Electric_Rotor() 
-    port_propulsor.tag                         = "port_propulsor"
-    port_propulsor.active_batteries            = ['li_ion_battery']   
+    propulsor6                             = RCAIDE.Library.Components.Propulsors.Electric_Rotor() 
+    propulsor6.tag                         = "outer_starboard_takeoff_propulsor"
+    propulsor6.active_batteries            = ['li_ion_battery']   
             
-    esc_2                                      = deepcopy(esc)
-    esc_2.origin                               = [[2., -2.5, 0.95]]      
-    port_propulsor.electronic_speed_controller = esc_2  
+    esc6                                      = deepcopy(esc5)
+    esc6.origin                               = [[5.0, 7.4, 0.64]]      
+    propulsor6.electronic_speed_controller = esc6  
 
-    propeller_2                                = deepcopy(propeller)
-    propeller_2.tag                            = 'propeller_2' 
-    propeller_2.origin                         = [[2.,-2.5,0.95]]
-    propeller_2.clockwise_rotation             = False        
-    port_propulsor.rotor                       = propeller_2  
+    propeller6                                = deepcopy(propeller5)
+    propeller6.tag                            = 'propeller6' 
+    propeller6.origin                         = [[4.07,7.4,0.64]]
+    propeller6.clockwise_rotation             = False        
+    propulsor6.rotor                       = propeller6  
               
-    motor_2                                    = deepcopy(motor)
-    motor_2.origin                             = [[2., -2.5, 0.95]]      
-    port_propulsor.motor                       = motor_2   
+    motor6                                    = deepcopy(motor5)
+    motor6.origin                             = [[4.2, 7.4, 0.64]]      
+    propulsor6.motor                       = motor6   
 
-    nacelle_2                                  = deepcopy(nacelle)
-    nacelle_2.tag                              = 'nacelle_2'
-    nacelle_2.origin                           = [[2.5,-2.5,1.0]]
-    port_propulsor.nacelle                     = nacelle_2
+    nacelle6                                  = deepcopy(nacelle1)
+    nacelle6.tag                              = 'nacelle6'
+    nacelle6.origin                           = [[4.2, 7.4,0.64]]
+    propulsor6.nacelle                     = nacelle6
      
     # append propulsor to distribution line 
-    bus.propulsors.append(port_propulsor) 
+    bus.propulsors.append(propulsor6) 
     
     #------------------------------------------------------------------------------------------------------------------------------------  
     # Inner Port Takeoff Propulsor
     #------------------------------------------------------------------------------------------------------------------------------------   
-    port_propulsor                             = RCAIDE.Library.Components.Propulsors.Electric_Rotor() 
-    port_propulsor.tag                         = "port_propulsor"
-    port_propulsor.active_batteries            = ['li_ion_battery']   
+    propulsor7                             = RCAIDE.Library.Components.Propulsors.Electric_Rotor() 
+    propulsor7.tag                         = "inner_port_takeoff_propulsor"
+    propulsor7.active_batteries            = ['li_ion_battery']   
             
-    esc_2                                      = deepcopy(esc)
-    esc_2.origin                               = [[2., -2.5, 0.95]]      
-    port_propulsor.electronic_speed_controller = esc_2  
+    esc7                                      = deepcopy(esc5)
+    esc7.origin                               = [[5.0, -5.87,0.64]]       
+    propulsor7.electronic_speed_controller = esc7  
 
-    propeller_2                                = deepcopy(propeller)
-    propeller_2.tag                            = 'propeller_2' 
-    propeller_2.origin                         = [[2.,-2.5,0.95]]
-    propeller_2.clockwise_rotation             = False        
-    port_propulsor.rotor                       = propeller_2  
+    propeller7                                = deepcopy(propeller5)
+    propeller7.tag                            = 'propeller7' 
+    propeller7.origin                         = [[4.07, -5.87,0.64]] 
+    propeller7.clockwise_rotation             = False        
+    propulsor7.rotor                       = propeller7 
               
-    motor_2                                    = deepcopy(motor)
-    motor_2.origin                             = [[2., -2.5, 0.95]]      
-    port_propulsor.motor                       = motor_2   
+    motor7                                    = deepcopy(motor5)
+    motor7.origin                             = [[4.2, -5.87,0.64]]      
+    propulsor7.motor                       = motor7   
 
-    nacelle_2                                  = deepcopy(nacelle)
-    nacelle_2.tag                              = 'nacelle_2'
-    nacelle_2.origin                           = [[2.5,-2.5,1.0]]
-    port_propulsor.nacelle                     = nacelle_2
+    nacelle7                                  = deepcopy(nacelle1)
+    nacelle7.tag                              = 'nacelle7'
+    nacelle7.origin                           = [[4.2, -5.87,0.64]] 
+    propulsor7.nacelle                     = nacelle7
      
     # append propulsor to distribution line 
-    bus.propulsors.append(port_propulsor) 
+    bus.propulsors.append(propulsor7) 
 
     #------------------------------------------------------------------------------------------------------------------------------------  
     # Outer Port Takeoff Propulsor
     #------------------------------------------------------------------------------------------------------------------------------------   
-    port_propulsor                             = RCAIDE.Library.Components.Propulsors.Electric_Rotor() 
-    port_propulsor.tag                         = "port_propulsor"
-    port_propulsor.active_batteries            = ['li_ion_battery']   
+    propulsor8                             = RCAIDE.Library.Components.Propulsors.Electric_Rotor() 
+    propulsor8.tag                         = "port_propulsor"
+    propulsor8.active_batteries            = ['li_ion_battery']   
             
-    esc_2                                      = deepcopy(esc)
-    esc_2.origin                               = [[2., -2.5, 0.95]]      
-    port_propulsor.electronic_speed_controller = esc_2  
+    esc8                                      = deepcopy(esc5)
+    esc8.origin                               = [[5.0, -7.4, 0.64]]      
+    propulsor8.electronic_speed_controller = esc8  
 
-    propeller_2                                = deepcopy(propeller)
-    propeller_2.tag                            = 'propeller_2' 
-    propeller_2.origin                         = [[2.,-2.5,0.95]]
-    propeller_2.clockwise_rotation             = False        
-    port_propulsor.rotor                       = propeller_2  
+    propeller8                                = deepcopy(propeller5)
+    propeller8.tag                            = 'propeller8' 
+    propeller8.origin                         = [[4.07, -7.4, 0.64]] 
+    propeller8.clockwise_rotation             = False        
+    propulsor8.rotor                       = propeller8  
               
-    motor_2                                    = deepcopy(motor)
-    motor_2.origin                             = [[2., -2.5, 0.95]]      
-    port_propulsor.motor                       = motor_2   
+    motor8                                    = deepcopy(motor5)
+    motor8.origin                             = [[4.20, -7.4, 0.64]]      
+    propulsor8.motor                       = motor8   
 
-    nacelle_2                                  = deepcopy(nacelle)
-    nacelle_2.tag                              = 'nacelle_2'
-    nacelle_2.origin                           = [[2.5,-2.5,1.0]]
-    port_propulsor.nacelle                     = nacelle_2
-     
+    nacelle8                                  = deepcopy(nacelle1)
+    nacelle8.tag                              = 'nacelle8'
+    nacelle8.origin                           = [[4.20, -7.4, 0.64]] 
+    propulsor8.nacelle                     = nacelle8
+    
     # append propulsor to distribution line 
-    bus.propulsors.append(port_propulsor) 
-    
-    
-    
-   
+    bus.propulsors.append(propulsor8) 
+    '''
+    # append bus   
+    net.busses.append(bus)
     # Append energy network to aircraft 
     vehicle.append_energy_network(net)    
     
