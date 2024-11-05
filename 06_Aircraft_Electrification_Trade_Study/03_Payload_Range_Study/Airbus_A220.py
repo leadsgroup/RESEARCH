@@ -32,13 +32,10 @@ import json
 
 
 def main():
-    # fuels = [Ethane(), Methane(), Propane(), Ethanol(), Butanol(), Propanol(), \
-    #     Jet_A1(), Liquid_Natural_Gas(), Liquid_Petroleum_Gas()]
-    # fuel_names = ["Ethane", "Methane", "Propane", "Ethanol", "Butanol", "Propanol", \
-    #     "Jet A1", "Liquid Natural Gas", "Liquid Petroleum Gas"]
-    
-    fuels = [Methane(), Liquid_Natural_Gas()]
-    fuel_names = ["Methane", "Liquid Natural Gas"]
+    fuels = [Ethane(), Methane(), Propane(), Ethanol(), Butanol(), Propanol(), \
+        Jet_A1(), Liquid_Natural_Gas()]
+    fuel_names = ["Ethane", "Methane", "Propane", "Ethanol", "Butanol", "Propanol", \
+        "Jet A1", "Liquid Natural Gas", "Liquid Petroleum Gas"]
     
     for index, fuel in enumerate(fuels):
         print("Running simulation for", fuel_names[index])
@@ -65,6 +62,11 @@ def main():
         # Step 5 get payload-range diagram
         output = payload_range_diagram(vehicle, mission, 'cruise', reserves=0., plot_diagram=True, fuel_name=fuel_name)
         
+        range = output.range.tolist()
+        with open("06_Aircraft_Electrification_Trade_Study/03_Payload_Range_Study/A220_data/" + fuel_name + "_range.json", "w") as out:
+            out.write(json.dumps(range))
+            out.close()
+            
         end = time.time()
         m, s = divmod(end - start, 60)
         print("Took", m, "minutes and", round(s), "seconds to generate plot")
