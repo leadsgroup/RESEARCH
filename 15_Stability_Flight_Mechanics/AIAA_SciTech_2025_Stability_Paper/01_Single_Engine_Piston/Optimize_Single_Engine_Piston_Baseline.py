@@ -9,29 +9,54 @@ from RCAIDE.Framework.Optimization.Packages.scipy import scipy_setup
 from RCAIDE.Framework.Optimization.Common   import Nexus
 
 # python imports 
-import numpy as np
+import numpy  as np
+import pandas as pd
 import time
 
 # local imports 
-import Vehicles
+import Vehicles_Single_Engine_Piston_Baseline
 import Missions
 import Procedure
 import matplotlib.pyplot as plt 
+
 # ----------------------------------------------------------------------        
-#   Run the whole thing
+#  Main function
 # ----------------------------------------------------------------------  
+
 def main(): 
+    
+    # ----------------------------------------------------------------------        
+    # Step 1: Weight and moment of inertia estimation
+    # ----------------------------------------------------------------------    
+    
+    # ----------------------------------------------------------------------        
+    # Step 2-3: Control surface sizing & Stability analysis
+    # ----------------------------------------------------------------------     
+    
+    
     '''
     STICK FIXED (STATIC STABILITY AND DRAG OTIMIZATION
     '''
     ti = time.time()  
     solver_name       = 'SLSQP' 
     planform_optimization_problem = stick_fixed_stability_and_drag_optimization_setup()
-    output = scipy_setup.SciPy_Solve(planform_optimization_problem,solver=solver_name, sense_step = 1E-2, tolerance = 1E-3)  
-    print (output)    
+    output_stick_fixed = scipy_setup.SciPy_Solve(planform_optimization_problem,solver=solver_name, sense_step = 1E-2, tolerance = 1E-3)  
+    print (output_stick_fixed)    
     tf           = time.time()
     elapsed_time = round((tf-ti)/60,2)
-    print('Stick Fixed Stability and Drag Otimization Simulation Time: ' + str(elapsed_time))    
+    print('Stick Fixed Stability and Drag Otimization Simulation Time: ' + str(elapsed_time))  
+    
+    df = pd.DataFrame({
+    'mw_root_twist': [output_stick_fixed[0]], 
+    'mw_tip_twist': [output_stick_fixed[1]], 
+    'mw_dihedral': [output_stick_fixed[2]], 
+    'vt_span': [output_stick_fixed[3]], 
+    'vt_taper': [output_stick_fixed[4]], 
+    'c_g_x': [output_stick_fixed[5]]})
+    
+    df.to_csv('Output_Single_Engine_Piston_Baseline.csv')
+    #np.savetxt(f'{save_filename}.txt', np.column_stack((output)), delimiter=',', header='mw_root_twist,mw_tip_twist,mw_dihedral,vt_span,vt_taper,c_g_x', comments='')  
+        
     
     '''
     ELEVATOR SIZING
@@ -45,8 +70,8 @@ def main():
     ti = time.time()   
     solver_name       = 'SLSQP'  
     elevator_sizing_optimization_problem = elevator_sizing_optimization_setup(optimized_vehicle_v1)
-    output = scipy_setup.SciPy_Solve(elevator_sizing_optimization_problem,solver=solver_name, sense_step = 1E-2, tolerance = 1E-3) 
-    print (output)     
+    output_elevator_sizing = scipy_setup.SciPy_Solve(elevator_sizing_optimization_problem,solver=solver_name, sense_step = 1E-2, tolerance = 1E-3) 
+    print (output_elevator_sizing)     
     tf           = time.time()
     elapsed_time = round((tf-ti)/60,2)
     print('Elevator Sizing Simulation Time: ' + str(elapsed_time))   
@@ -63,8 +88,8 @@ def main():
     ti = time.time()   
     solver_name       = 'SLSQP'  
     aileron_rudder_sizing_optimization_problem = aileron_rudder_sizing_optimization_setup(optimized_vehicle)
-    output = scipy_setup.SciPy_Solve(aileron_rudder_sizing_optimization_problem,solver=solver_name, sense_step = 1E-2, tolerance = 1E-3) 
-    print (output)     
+    output_aileron_and_rudder_sizing = scipy_setup.SciPy_Solve(aileron_rudder_sizing_optimization_problem,solver=solver_name, sense_step = 1E-2, tolerance = 1E-3) 
+    print (output_aileron_and_rudder_sizing)     
     tf           = time.time()
     elapsed_time = round((tf-ti)/60,2)
     print('Aileron and Rudder Sizing Simulation Time: ' + str(elapsed_time))   
@@ -79,8 +104,8 @@ def main():
     ti = time.time()   
     solver_name       = 'SLSQP'  
     flap_sizing_optimization_problem = flap_sizing_optimization_setup(optimized_vehicle_v3)
-    output = scipy_setup.SciPy_Solve(flap_sizing_optimization_problem,solver=solver_name, sense_step = 1E-2, tolerance = 1E-3) 
-    print (output)     
+    output_flap_sizing = scipy_setup.SciPy_Solve(flap_sizing_optimization_problem,solver=solver_name, sense_step = 1E-2, tolerance = 1E-3) 
+    print (output_flap_sizing)     
     tf           = time.time()
     elapsed_time = round((tf-ti)/60,2)
     print('Flap Sizing Simulation Time: ' + str(elapsed_time))   
@@ -90,6 +115,13 @@ def main():
     '''          
     optimized_vehicle_v4  = flap_sizing_optimization_problem.vehicle_configurations.flap_sizing 
     print_vehicle_control_surface_geoemtry(optimized_vehicle_v4)
+    
+    # ----------------------------------------------------------------------        
+    # Step 4: Mission simulation
+    # ----------------------------------------------------------------------     
+    
+    
+    
     
     return
   
@@ -186,7 +218,7 @@ def stick_fixed_stability_and_drag_optimization_setup():
     # -------------------------------------------------------------------
     #  Vehicles
     # -------------------------------------------------------------------
-    nexus.vehicle_configurations = Vehicles.stick_fixed_stability_setup()
+    nexus.vehicle_configurations = Vehicles_Single_Engine_Piston_Baseline.stick_fixed_stability_setup()
     
     # -------------------------------------------------------------------
     #  Analyses
@@ -263,7 +295,7 @@ def elevator_sizing_optimization_setup(vehicle):
     # -------------------------------------------------------------------
     #  Vehicles
     # -------------------------------------------------------------------
-    nexus.vehicle_configurations = Vehicles.elevator_sizing_setup(vehicle)
+    nexus.vehicle_configurations = Vehicles_Single_Engine_Piston_Baselineelevator_sizing_setup(vehicle)
     
     # -------------------------------------------------------------------
     #  Analyses
@@ -374,7 +406,7 @@ def aileron_rudder_sizing_optimization_setup(vehicle):
     # -------------------------------------------------------------------
     #  Vehicles
     # -------------------------------------------------------------------
-    nexus.vehicle_configurations = Vehicles.aileron_rudder_sizing_setup(vehicle)
+    nexus.vehicle_configurations = Vehicles_Single_Engine_Piston_Baseline.aileron_rudder_sizing_setup(vehicle)
     
     # -------------------------------------------------------------------
     #  Analyses
@@ -450,7 +482,7 @@ def flap_sizing_optimization_setup(optimized_vehicle):
     # -------------------------------------------------------------------
     #  Vehicles
     # -------------------------------------------------------------------
-    nexus.vehicle_configurations = Vehicles.flap_sizing_setup(optimized_vehicle)
+    nexus.vehicle_configurations = Vehicles_Single_Engine_Piston_Baseline.flap_sizing_setup(optimized_vehicle)
     
     # -------------------------------------------------------------------
     #  Analyses

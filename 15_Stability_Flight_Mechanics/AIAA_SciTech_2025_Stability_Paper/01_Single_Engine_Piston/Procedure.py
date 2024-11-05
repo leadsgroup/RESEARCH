@@ -125,7 +125,7 @@ def longitudinal_static_stability_and_drag_post_process(nexus):
     run_conditions.static_stability.coefficients.roll[:,0]  =  0.0
     run_conditions.static_stability.coefficients.pitch[:,0] =  0.0
     stability_stick_fixed                                   = RCAIDE.Framework.Analyses.Stability.Athena_Vortex_Lattice() 
-    stability_stick_fixed.settings.filenames.avl_bin_name   = '/Users/matthewclarke/Documents/LEADS/CODES/AVL/avl3.35' # eg. '/Users/matthewclarke/Documents/LEADS/CODES/AVL/avl3.35' 
+    stability_stick_fixed.settings.filenames.avl_bin_name   = 'C://Users//Matteo//Documents//UIUC//avl.exe' # eg. '/Users/matthewclarke/Documents/LEADS/CODES/AVL/avl3.35' 
     stability_stick_fixed.settings.trim_aircraft            = True
     stability_stick_fixed.vehicle                           = nexus.vehicle_configurations.stick_fixed_cruise
     run_AVL_analysis(stability_stick_fixed,run_conditions)
@@ -213,7 +213,7 @@ def elevator_sizing_post_process(nexus):
     CL_push_man  = vehicle.minimum_load_factor*m*g/(S*q) 
                                       
     stability_pull_maneuver                                      = RCAIDE.Framework.Analyses.Stability.Athena_Vortex_Lattice() 
-    stability_pull_maneuver.settings.filenames.avl_bin_name      = '/Users/matthewclarke/Documents/LEADS/CODES/AVL/avl3.35' # eg. '/Users/matthewclarke/Documents/LEADS/CODES/AVL/avl3.35'
+    stability_pull_maneuver.settings.filenames.avl_bin_name      = 'C://Users//Matteo//Documents//UIUC//avl.exe' # eg. '/Users/matthewclarke/Documents/LEADS/CODES/AVL/avl3.35'
     stability_pull_maneuver.settings.trim_aircraft               = True
     run_conditions.aerodynamics.coefficients.lift.total          = CL_pull_man
     run_conditions.freestream.velocity                           = np.array([[V_max]])
@@ -236,7 +236,7 @@ def elevator_sizing_post_process(nexus):
     run_conditions.static_stability.coefficients.roll            = np.array([[0.0]])
     run_conditions.static_stability.coefficients.pitch           = np.array([[0.0 ]])  
     stability_push_maneuver                                      = RCAIDE.Framework.Analyses.Stability.Athena_Vortex_Lattice() 
-    stability_push_maneuver.settings.filenames.avl_bin_name      =  '/Users/matthewclarke/Documents/LEADS/CODES/AVL/avl3.35' # eg. '/Users/matthewclarke/Documents/LEADS/CODES/AVL/avl3.35'
+    stability_push_maneuver.settings.filenames.avl_bin_name      =  'C://Users//Matteo//Documents//UIUC//avl.exe' # eg. '/Users/matthewclarke/Documents/LEADS/CODES/AVL/avl3.35'
     stability_push_maneuver.settings.trim_aircraft               = True 
     run_conditions.aerodynamics.coefficients.lift.total          = CL_push_man
     run_conditions.freestream.velocity                           = V_trim
@@ -296,7 +296,7 @@ def aileron_rudder_sizing_post_process(nexus):
     
     
     stability_roll_maneuver = RCAIDE.Framework.Analyses.Stability.Athena_Vortex_Lattice() 
-    stability_roll_maneuver.settings.filenames.avl_bin_name   = '/Users/matthewclarke/Documents/LEADS/CODES/AVL/avl3.35' # eg. '/Users/matthewclarke/Documents/LEADS/CODES/AVL/avl3.35'
+    stability_roll_maneuver.settings.filenames.avl_bin_name   = 'C://Users//Matteo//Documents//UIUC//avl.exe' # eg. '/Users/matthewclarke/Documents/LEADS/CODES/AVL/avl3.35'
     stability_roll_maneuver.settings.number_of_spanwise_vortices = 40 
     stability_roll_maneuver.settings.trim_aircraft            = True
     run_conditions.aerodynamics.coefficients.lift.total       = CL_trim 
@@ -331,7 +331,7 @@ def aileron_rudder_sizing_post_process(nexus):
     run_conditions.static_stability.coefficients.pitch            = np.array([[0.0]])
     
     stability_cross_wind_maneuver = RCAIDE.Framework.Analyses.Stability.Athena_Vortex_Lattice() 
-    stability_cross_wind_maneuver.settings.filenames.avl_bin_name ='/Users/matthewclarke/Documents/LEADS/CODES/AVL/avl3.35' # eg. '/Users/matthewclarke/Documents/LEADS/CODES/AVL/avl3.35'
+    stability_cross_wind_maneuver.settings.filenames.avl_bin_name ='C://Users//Matteo//Documents//UIUC//avl.exe' # eg. '/Users/matthewclarke/Documents/LEADS/CODES/AVL/avl3.35'
     stability_cross_wind_maneuver.settings.trim_aircraft          =  True
     run_conditions.aerodynamics.coefficients.lift.total           = CL_trim 
     stability_cross_wind_maneuver.vehicle                         = vehicle
@@ -391,7 +391,7 @@ def flap_sizing_post_process(nexus):
     run_conditions.static_stability.coefficients.pitch       = np.array([[0.0]]) 
     
     stability_no_flap = RCAIDE.Framework.Analyses.Stability.Athena_Vortex_Lattice() 
-    stability_no_flap.settings.filenames.avl_bin_name        =  '/Users/matthewclarke/Documents/LEADS/CODES/AVL/avl3.35' # eg. '/Users/matthewclarke/Documents/LEADS/CODES/AVL/avl3.35' 
+    stability_no_flap.settings.filenames.avl_bin_name        =  'C://Users//Matteo//Documents//UIUC//avl.exe' # eg. '/Users/matthewclarke/Documents/LEADS/CODES/AVL/avl3.35' 
     stability_no_flap.settings.number_of_spanwise_vortices   = 40
     stability_no_flap.settings.trim_aircraft                 = False
     vehicle.wings.main_wing.control_surfaces.flap.deflection = 0.0
@@ -401,7 +401,7 @@ def flap_sizing_post_process(nexus):
       
     
     stability_flap = RCAIDE.Framework.Analyses.Stability.Athena_Vortex_Lattice() 
-    stability_flap.settings.filenames.avl_bin_name           = '/Users/matthewclarke/Documents/LEADS/CODES/AVL/avl3.35' # eg. '/Users/matthewclarke/Documents/LEADS/CODES/AVL/avl3.35' 
+    stability_flap.settings.filenames.avl_bin_name           = 'C://Users//Matteo//Documents//UIUC//avl.exe' # eg. '/Users/matthewclarke/Documents/LEADS/CODES/AVL/avl3.35' 
     stability_flap.settings.number_of_spanwise_vortices      = 40
     stability_flap.settings.trim_aircraft                    = False
     vehicle.wings.main_wing.control_surfaces.flap.deflection = max_defl 
