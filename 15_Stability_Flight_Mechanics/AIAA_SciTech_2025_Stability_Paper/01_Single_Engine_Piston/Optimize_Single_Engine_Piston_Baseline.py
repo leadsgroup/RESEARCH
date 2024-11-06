@@ -26,6 +26,7 @@ import matplotlib.pyplot as plt
 # ----------------------------------------------------------------------  
 
 def main(): 
+    '''
     vehicle = Vehicles_Single_Engine_Piston_Baseline.vehicle_setup()
     
     # ----------------------------------------------------------------------        
@@ -47,7 +48,7 @@ def main():
     # ----------------------------------------------------------------------        
     # Step 2-3: Control surface sizing & Stability analysis
     # ----------------------------------------------------------------------     
-    
+    '''
     
     '''
     STICK FIXED (STATIC STABILITY AND DRAG OTIMIZATION
@@ -58,30 +59,8 @@ def main():
     output_stick_fixed = scipy_setup.SciPy_Solve(planform_optimization_problem,solver=solver_name, sense_step = 1E-2, tolerance = 1E-3)  
     print (output_stick_fixed)    
     tf           = time.time()
-    elapsed_time = round((tf-ti)/60,2)
-    print('Stick Fixed Stability and Drag Otimization Simulation Time: ' + str(elapsed_time))  
-    
-    df = pd.DataFrame({
-    'mw_root_twist': [output_stick_fixed[0]], 
-    'mw_tip_twist': [output_stick_fixed[1]], 
-    'mw_dihedral': [output_stick_fixed[2]], 
-    'vt_span': [output_stick_fixed[3]], 
-    'vt_taper': [output_stick_fixed[4]], 
-    'c_g_x': [output_stick_fixed[5]],
-    'CD': [planform_optimization_problem.summary['CD']],
-    'CM_residual': [planform_optimization_problem.summary['CM_residual']],
-    'spiral_criteria': [planform_optimization_problem.summary['spiral_criteria']],
-    'static_margin': [planform_optimization_problem.summary['static_margin']],
-    'CM_alpha': [planform_optimization_problem.summary['CM_alpha']],
-    'phugoid_damping_ratio': [planform_optimization_problem.summary['phugoid_damping_ratio']],
-    'short_period_damping_ratio': [planform_optimization_problem.summary['short_period_damping_ratio']],
-    'dutch_roll_frequency': [planform_optimization_problem.summary['dutch_roll_frequency']],
-    'dutch_roll_damping_ratio': [planform_optimization_problem.summary['dutch_roll_damping_ratio']],
-    'spiral_doubling_time': [planform_optimization_problem.summary['spiral_doubling_time']]}) 
-    
-    df.to_csv('Output_Single_Engine_Piston_Baseline.csv')
-    #np.savetxt(f'{save_filename}.txt', np.column_stack((output)), delimiter=',', header='mw_root_twist,mw_tip_twist,mw_dihedral,vt_span,vt_taper,c_g_x', comments='')  
-        
+    elapsed_time_stick_fixed = round((tf-ti)/60,2)
+    print('Stick Fixed Stability and Drag Otimization Simulation Time: ' + str(elapsed_time_stick_fixed))    
     
     '''
     ELEVATOR SIZING
@@ -98,8 +77,8 @@ def main():
     output_elevator_sizing = scipy_setup.SciPy_Solve(elevator_sizing_optimization_problem,solver=solver_name, sense_step = 1E-2, tolerance = 1E-3) 
     print (output_elevator_sizing)     
     tf           = time.time()
-    elapsed_time = round((tf-ti)/60,2)
-    print('Elevator Sizing Simulation Time: ' + str(elapsed_time))   
+    elapsed_time_elevator = round((tf-ti)/60,2)
+    print('Elevator Sizing Simulation Time: ' + str(elapsed_time_elevator))   
      
     '''
     AILERON AND RUDDER SIZING
@@ -116,8 +95,8 @@ def main():
     output_aileron_and_rudder_sizing = scipy_setup.SciPy_Solve(aileron_rudder_sizing_optimization_problem,solver=solver_name, sense_step = 1E-2, tolerance = 1E-3) 
     print (output_aileron_and_rudder_sizing)     
     tf           = time.time()
-    elapsed_time = round((tf-ti)/60,2)
-    print('Aileron and Rudder Sizing Simulation Time: ' + str(elapsed_time))   
+    elapsed_time_ail_rud = round((tf-ti)/60,2)
+    print('Aileron and Rudder Sizing Simulation Time: ' + str(elapsed_time_ail_rud))   
 
     '''
     FLAP SIZING
@@ -132,14 +111,41 @@ def main():
     output_flap_sizing = scipy_setup.SciPy_Solve(flap_sizing_optimization_problem,solver=solver_name, sense_step = 1E-2, tolerance = 1E-3) 
     print (output_flap_sizing)     
     tf           = time.time()
-    elapsed_time = round((tf-ti)/60,2)
-    print('Flap Sizing Simulation Time: ' + str(elapsed_time))   
+    elapsed_time_flap = round((tf-ti)/60,2)
+    print('Flap Sizing Simulation Time: ' + str(elapsed_time_flap))   
 
     '''
     PRINT VEHICLE CONTROL SURFACES
     '''          
     optimized_vehicle_v4  = flap_sizing_optimization_problem.vehicle_configurations.flap_sizing 
     print_vehicle_control_surface_geoemtry(optimized_vehicle_v4)
+    
+    '''
+    Save Data
+    '''
+    df = pd.DataFrame({
+    'mw_root_twist': [output_stick_fixed[0]], 
+    'mw_tip_twist': [output_stick_fixed[1]], 
+    'mw_dihedral': [output_stick_fixed[2]], 
+    'vt_span': [output_stick_fixed[3]], 
+    'vt_taper': [output_stick_fixed[4]], 
+    'c_g_x': [output_stick_fixed[5]],
+    'CD': [planform_optimization_problem.summary['CD']],
+    'CM_residual': [planform_optimization_problem.summary['CM_residual']],
+    'spiral_criteria': [planform_optimization_problem.summary['spiral_criteria']],
+    'static_margin': [planform_optimization_problem.summary['static_margin']],
+    'CM_alpha': [planform_optimization_problem.summary['CM_alpha']],
+    'phugoid_damping_ratio': [planform_optimization_problem.summary['phugoid_damping_ratio']],
+    'short_period_damping_ratio': [planform_optimization_problem.summary['short_period_damping_ratio']],
+    'dutch_roll_frequency': [planform_optimization_problem.summary['dutch_roll_frequency']],
+    'dutch_roll_damping_ratio': [planform_optimization_problem.summary['dutch_roll_damping_ratio']],
+    'spiral_doubling_time': [planform_optimization_problem.summary['spiral_doubling_time']],
+    'run_time': elapsed_time_stick_fixed,}) 
+    
+    df.to_csv('Output_Single_Engine_Piston_Baseline.csv')
+    #np.savetxt(f'{save_filename}.txt', np.column_stack((output)), delimiter=',', header='mw_root_twist,mw_tip_twist,mw_dihedral,vt_span,vt_taper,c_g_x', comments='')  
+        
+    
     
     # ----------------------------------------------------------------------        
     # Step 4: Mission simulation
