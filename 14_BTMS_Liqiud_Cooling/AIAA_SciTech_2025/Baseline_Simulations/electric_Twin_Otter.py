@@ -516,7 +516,7 @@ def vehicle_setup(BTMS_flag):
     HEX.design_altitude                                    = 1500. * Units.feet 
     HEX.inlet_temperature_of_cold_fluid                    = atmo_data.temperature[0,0]   
     HEX                                                    = design_cross_flow_heat_exchanger(HEX,coolant_line,bat_module)
-    HEX.minimum_air_speed                                  = 135* Units.knots 
+    HEX.minimum_air_speed                                  = 105* Units.knots 
     coolant_line.heat_exchangers.append(HEX)
 
     
