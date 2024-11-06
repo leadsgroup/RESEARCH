@@ -7,6 +7,8 @@ import RCAIDE
 from RCAIDE.Framework.Core import Units, Data 
 from RCAIDE.Framework.Optimization.Packages.scipy import scipy_setup
 from RCAIDE.Framework.Optimization.Common   import Nexus
+from RCAIDE.Library.Methods.Weights.Moment_of_Inertia.compute_aircraft_moment_of_inertia import compute_aircraft_moment_of_inertia
+from RCAIDE.Library.Methods.Weights.Center_of_Gravity     import compute_vehicle_center_of_gravity
 
 # python imports 
 import numpy  as np
@@ -17,17 +19,30 @@ import time
 import Vehicles_Single_Engine_Piston_Baseline
 import Missions
 import Procedure
-import matplotlib.pyplot as plt 
+import matplotlib.pyplot as plt
 
 # ----------------------------------------------------------------------        
 #  Main function
 # ----------------------------------------------------------------------  
 
 def main(): 
+    vehicle = Vehicles_Single_Engine_Piston_Baseline.vehicle_setup()
     
     # ----------------------------------------------------------------------        
     # Step 1: Weight and moment of inertia estimation
     # ----------------------------------------------------------------------    
+    weight_analysis                               = RCAIDE.Framework.Analyses.Weights.Weights_Transport()
+    weight_analysis.vehicle                       = vehicle
+    weight_analysis.method                        = 'Raymer'
+    weight_analysis.settings.use_max_fuel_weight  = True 
+    weight_analysis.evaluate() 
+    
+    # Calculate CG location
+    compute_vehicle_center_of_gravity(vehicle) 
+    CG_location                                   = vehicle.mass_properties.center_of_gravity
+    
+    # Calculate aircraft MOI
+    compute_aircraft_moment_of_inertia(vehicle, CG_location)
     
     # ----------------------------------------------------------------------        
     # Step 2-3: Control surface sizing & Stability analysis

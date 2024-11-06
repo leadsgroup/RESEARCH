@@ -173,14 +173,13 @@ def vehicle_setup():
     vehicle.mass_properties.max_takeoff               = 2948 * Units.pounds
     vehicle.mass_properties.takeoff                   = 2948 * Units.pounds
     vehicle.mass_properties.moments_of_inertia.tensor = np.array([[1420.89,0.0,0.0],[0.0,4067.45,0.0],[0.0,0.0,4786.04]])
-    vehicle.mass_properties.center_of_gravity         = [[2.239696797,0,-0.131189711 ]] 
+    vehicle.mass_properties.center_of_gravity         = [[2.239696797,0,-0.131189711 ]]
+    vehicle.flight_envelope.ultimate_load             = 5.7
+    vehicle.flight_envelope.limit_load                = 3.8
+    vehicle.design_dynamic_pressure                   = 10e04    
     vehicle.reference_area                            = 17.112 
     vehicle.passengers                                = 2 
     
-
-    # envelope properties                       
-    vehicle.envelope.ultimate_load              = 5.7
-    vehicle.envelope.limit_load                 = 3.8
                                                 
     cruise_speed                                = 120 * Units['mph']
     altitude                                    = 12000 * Units['mph']
@@ -190,6 +189,25 @@ def vehicle_setup():
     mach_number                                 = (cruise_speed/freestream.speed_of_sound)[0][0] 
     vehicle.design_dynamic_pressure             = ( .5 *freestream0.density*(cruise_speed*cruise_speed))[0][0]
     vehicle.design_mach_number                  =  mach_number
+
+    
+    
+    # ------------------------------------------------------------------        
+    #   Landing Gear
+    # ------------------------------------------------------------------   
+    
+    landing_gear                          =  RCAIDE.Library.Components.Landing_Gear.Landing_Gear()
+    landing_gear.tag                      = "main_landing_gear"
+    landing_gear.main_tire_diameter       =  0.3* Units.m
+    landing_gear.nose_tire_diameter       =  0.5* Units.m
+    landing_gear.main_strut_length        =  0.80* Units.m
+    landing_gear.nose_strut_length        =  0.80* Units.m
+    landing_gear.main_units               =  2   #number of nose landing gear
+    landing_gear.nose_units               =  1   #number of nose landing gear
+    landing_gear.main_wheels              =  1  #number of wheels on the main landing gear
+    landing_gear.nose_wheels              =  1  #number of wheels on the nose landing gear
+    vehicle.landing_gear                  = landing_gear
+        
     
     # ------------------------------------------------------------------        
     #   Main Wing
@@ -477,7 +495,9 @@ def vehicle_setup():
     # Propulsor
     #------------------------------------------------------------------------------------------------------------------------------------   
     ice_prop                                   = RCAIDE.Library.Components.Propulsors.ICE_Propeller()     
-    ice_prop.active_fuel_tanks                 = ['fuel_tank']   
+    ice_prop.active_fuel_tanks                 = ['fuel_tank']
+    ice_prop.engine_mass                       = 159 * Units.kg
+    ice_prop.origin                            = [[0.25, 0, 0]]    
                                                      
     # Engine                     
     engine                                     = RCAIDE.Library.Components.Propulsors.Converters.Engine()
