@@ -1,55 +1,14 @@
 ...Comp Geom...
-12 Num Comps
-22 Total Num Meshes
-7696 Total Num Tris
+1 Num Comps
+2 Total Num Meshes
+544 Total Num Tris
 
 Theo_Area   Wet_Area   Theo_Vol    Wet_Vol  Name
-   77.095     72.305     36.479     36.479  FuselageGeom   
-   77.697     73.497      5.994      5.994  WingGeom       
-   13.075     10.305      1.073      1.073  WingGeom       
-   24.885     24.756      1.153      1.153  WingGeom       
-    1.812      1.698      0.138      0.138  PodGeom        
-    1.812      1.698      0.138      0.138  PodGeom        
-    1.812      1.745      0.138      0.138  PodGeom        
-    1.812      1.745      0.138      0.138  PodGeom        
-    1.019      1.019      0.058      0.058  PodGeom        
-    1.019      1.019      0.058      0.058  PodGeom        
-    1.019      1.019      0.058      0.058  PodGeom        
-    1.019      1.019      0.058      0.058  PodGeom        
-    1.810      1.747     -2.454   -331.563  Disk           
-    1.810      1.747     -2.454   -331.563  Disk           
-    1.810      1.747     -2.454   -331.563  Disk           
-    1.810      1.747     -2.454   -331.563  Disk           
-    1.018      1.018     -1.381   -193.251  Disk           
-    1.018      1.018     -1.381   -193.251  Disk           
-    1.018      1.018     -1.381   -193.251  Disk           
-    1.018      1.018     -1.381   -193.251  Disk           
+    1.812      1.812      0.138      0.138  PodGeom        
+    1.812      1.812      0.138      0.138  PodGeom        
 -------------------------------------------------
-  215.387    202.884     30.142     29.764  Totals         
+    3.623      3.623      0.275      0.275  Totals         
 
 Tag_Theo_Area   Tag_Wet_Area    Tag_Name
-       77.095         72.305    FuselageGeom_S_Surf0
-       38.848         36.749    WingGeom_S_Surf0
-       38.848         36.749    WingGeom_S_Surf1
-       13.075         10.305    WingGeom_S_Surf0
-       12.443         12.378    WingGeom_S_Surf0
-       12.443         12.378    WingGeom_S_Surf1
-        1.812          1.698    PodGeom_S_Surf0
-        1.812          1.698    PodGeom_S_Surf1
-        1.812          1.745    PodGeom_S_Surf0
-        1.812          1.745    PodGeom_S_Surf1
-        1.019          1.019    PodGeom_S_Surf0
-        1.019          1.019    PodGeom_S_Surf1
-        1.019          1.019    PodGeom_S_Surf0
-        1.019          1.019    PodGeom_S_Surf1
-        1.810          1.747    Disk_S_Surf0   
-        1.810          1.747    Disk_S_Surf1   
-        1.810          1.747    Disk_S_Surf0   
-        1.810          1.747    Disk_S_Surf1   
-        1.018          1.018    Disk_S_Surf0   
-        1.018          1.018    Disk_S_Surf1   
-        1.018          1.018    Disk_S_Surf0   
-        1.018          1.018    Disk_S_Surf1   
-WARNING: 2 open meshes merged
-     Merged: WingGeom
-     Merged: WingGeom
+        1.812          1.812    PodGeom_S_Surf0
+        1.812          1.812    PodGeom_S_Surf1

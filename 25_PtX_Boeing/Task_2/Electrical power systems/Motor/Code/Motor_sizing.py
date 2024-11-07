@@ -14,14 +14,6 @@ import matplotlib.pyplot as plt
 
 def main():
     
-    B_sign         = 1                                          # average magnitude of the radial flux density produced by the rotor
-    D              = 1                                          # stator inner diameter
-    k_w            = 0.95                                       # winding factor
-    I_tot          = 1                                          # total current that passes through the stator in both axial directions
-    D              = 1                                          # stator inner diameter
-    L              = 1                                          # motor stack length
-    omega          = 1                                          # rotor angular velocity
-    
     #compute_basic_motor_sizing(B_sign, k_w, I_tot, D, L, omega)
     example_problem()
     
@@ -35,8 +27,15 @@ def compute_basic_motor_sizing(B_sign, k_w, I_tot, D, L, omega):
     
     # -----------------------------------------------------------------------------------------
     # 3.1 The Basic Motor Sizing Equation
-    # -----------------------------------------------------------------------------------------       
+    # -----------------------------------------------------------------------------------------   
     
+    B_sign         = 1                                          # average magnitude of the radial flux density produced by the rotor
+    D              = 1                                          # stator inner diameter
+    k_w            = 0.95                                       # winding factor
+    I_tot          = 1                                          # total current that passes through the stator in both axial directions
+    D              = 1                                          # stator inner diameter
+    L              = 1                                          # motor stack length
+    omega          = 1                                          # rotor angular velocity    
     A_sign         = (k_w*I_tot)/(np.pi*D)                      # stator electrical loading (Eq.2)   
     tau            = (np.pi/2)*(B_sign*A_sign)*(D**2)*L         # torque (Eq.1)
     P_version_1    = omega*tau                                  # motor power (Eq.1)
@@ -62,9 +61,9 @@ def compute_basic_motor_sizing(B_sign, k_w, I_tot, D, L, omega):
         return i*v
     
     T              = 2                                          # total time average power is being calculated over
-    P              = (1/T)*quad(f, 0, T)                        # real power (Eq.9)  
     I              = 1                                          # amplitude of applied current
-    V              = 1                                          # amplitude of applied voltage
+    V              = 1                                          # amplitude of applied voltage    
+    P              = (1/T)*quad(f, 0, T)                        # real power (Eq.9)  
     S              = I*V                                        # apparent power (Eq.10)  
     PF             = P/S                                        # power factor (Eq.8)  
     Q              = np.sqrt(S**2 - P**2)                       # reactive power (Eq.11)  
@@ -79,18 +78,18 @@ def compute_basic_motor_sizing(B_sign, k_w, I_tot, D, L, omega):
     
     MMF            = 1                                          # magnetomotive force applied to the reluctance path
     R              = 1                                          # magnetic reluctance of the path
-    phi            = MMF/R                                      # magnetic flux through the reluctance path (Eq.12)
-    B              = phi/A                                      # magnetic flux density (Eq.13)
     N              = 1                                          # number of turns
-    I              = 1                                          # current in each turn       
-    MMF_coil       = N*I                                        # MMF for a coil (Eq.14)
+    I              = 1                                          # current in each turn      
     Br             = 1                                          # remnant flux density
     mu_0           = 1                                          # permeability of free space
     mu_r           = 1                                          # relative permeability of the magnetic material
     l_m            = 1                                          # thickness of the magnet or the size of the element if multiple elements span a magnet
-    MMF_magnet     = (Br/(mu_0*mu_r))*l_m                       # MMF for a magnet (Eq.15)
     l              = 1                                          # length of the path
-    A              = 1                                          # cross-sectional area of the reluctance path perpendicular to length 𝑙
+    A              = 1                                          # cross-sectional area of the reluctance path perpendicular to length 𝑙    
+    phi            = MMF/R                                      # magnetic flux through the reluctance path (Eq.12)
+    B              = phi/A                                      # magnetic flux density (Eq.13)    
+    MMF_coil       = N*I                                        # MMF for a coil (Eq.14)    
+    MMF_magnet     = (Br/(mu_0*mu_r))*l_m                       # MMF for a magnet (Eq.15)
     R              = l/(A*mu_0*mu_r)                            # reluctance of a given path or given reluctant element (Eq.16)
     
     # -----------------------------------------------------------------------------------------
@@ -99,6 +98,7 @@ def compute_basic_motor_sizing(B_sign, k_w, I_tot, D, L, omega):
     
     l_g            = 1                                          # airgap size
     A_m            = 1                                          # magnet area
+    alpha_m        = 1                                          # magnet’s pole span angle in electrical degrees
     R_ag           = l_g/(A_m*mu_0)                             # airgap reluctance (Eq.17)
     R_mag          = l_m/(A_m*mu_0*mu_r)                        # magnet reluctance (Eq.17)
     R              = 2*R_ag + 2*R_mag                           # reluctance of the path (Eq.17)
@@ -106,20 +106,19 @@ def compute_basic_motor_sizing(B_sign, k_w, I_tot, D, L, omega):
     phi            = MMF/R                                      # flux in the path (Eq.19)
     B_m            = (Br*l_m)/(l_g*mu_r + l_m)                  # airgap field in the gap produced by the magnets (Eq.20)
     B_sign         = B_m                                        # for rotors where magnets span the full
-    alpha_m        = 1                                          # magnet’s pole span angle in electrical degrees
     B_g1           = (4/np.pi)*B_m*np.sin(alpha_m/2)            # peak flux density magnitude of the fundamental harmonic, for rotors where the magnets do not span the full magnetic pole  (Eq.21)
     
     # -----------------------------------------------------------------------------------------
     # 3.2.1.2 Stator Inductance Calculation
     # -----------------------------------------------------------------------------------------   
-    
+
+    N              = 1                                          # number of turns    
     A_tip          = 1                                          # tooth tip area 
     l_tip          = 1                                          # tooth tip gap width
     W_sp           = 1                                          # stator pole width
     R_tip          = l_tip/(A_tip*mu_0)                         # reluctance of the tip (Eq.22)
     R_rotor        = (2/3)*(l_m + l_g)/(W_sp*Stack*mu_0)        # reluctance of the rotor (Eq.22)
     R              = 1/((2/R_tip) + (1/R_rotor))                # reluctance of one coil (Eq.22)
-    N              = 1                                          # number of turns
     L_m            = N**2/R                                     # self-inductance of a single coil (Eq.23)
     
     # -----------------------------------------------------------------------------------------
@@ -130,11 +129,9 @@ def compute_basic_motor_sizing(B_sign, k_w, I_tot, D, L, omega):
     Rm             = 1                                          # magnet outer radius
     Rr             = 1                                          # magnet inner radius
     Rs             = 1                                          # stator inner radius
-    
-    Br             = ((Br*(p/(p + 1))*(1 - (Rr/Rm)**(p + 1)))/(1 - ((Rr**(2*p))/(Rs))))*(((r/Rs)**(p - 1))*((Rm/Rs)**(p + 1)) + ((Rm/r)**(p + 1)))*np.cos(p*theta) # solution for the radial airgap field from iron cored Halbach machines (Eq.24)
-    
-    r              = Rs
     theta          = 0
+    Br             = ((Br*(p/(p + 1))*(1 - (Rr/Rm)**(p + 1)))/(1 - ((Rr**(2*p))/(Rs))))*(((r/Rs)**(p - 1))*((Rm/Rs)**(p + 1)) + ((Rm/r)**(p + 1)))*np.cos(p*theta) # solution for the radial airgap field from iron cored Halbach machines (Eq.24)
+    r              = Rs
     Br_Rs_0        = ((Br*(p/(p + 1))*(1 - (Rr/Rm)**(p + 1)))/(1 - ((Rr**(2*p))/(Rs))))*(((r/Rs)**(p - 1))*((Rm/Rs)**(p + 1)) + ((Rm/r)**(p + 1)))*np.cos(p*theta)
     B_sign         = (2/np.pi)*Br_Rs_0                          # average airgap field (Eq.25)
     
@@ -144,8 +141,8 @@ def compute_basic_motor_sizing(B_sign, k_w, I_tot, D, L, omega):
     
     Br_20C         = 1                                          # remnant flux density at 20 °C
     T              = 1                                          # temperature in Celsius
-    Br_T           = Br_20C - alpha_mag*(T - 20)*Br_20C         # magnet remnant flux density at temperature (Eq.26)
     alpha_mag      = 1                                          # material property related to the specific magnet grade
+    Br_T           = Br_20C - alpha_mag*(T - 20)*Br_20C         # magnet remnant flux density at temperature (Eq.26)
     
     # -----------------------------------------------------------------------------------------
     # 3.3 Magnet Losses
@@ -181,14 +178,14 @@ def compute_basic_motor_sizing(B_sign, k_w, I_tot, D, L, omega):
     d                          = 1                              # diameter of the conductor
     delta                      = 1                              # skin depth in the material at the frequency current is being applied to the conductor
     gamma                      = d/(delta*np.sqrt(2))           # (Eq.39)
-    Rac                        = (Rdc/2)-(gamma*(ber_gamma*der_bei_gamma - bei_gamma*der_ber_gamma)/(der_ber_gamma**2 + der_bei_gamma**2)) # AC resistance due to skin effect for round conductors (Eq.38)
     sigma                      = 1                              # material conductivity
     H_e                        = 1                              # peak value of the applied external magnetic field
-    P_prox                     = (2*np.pi*gamma/sigma)*((ber_2_gamma*der_ber_gamma + bei_2_gamma*der_ber_gamma)/(ber_gamma**2 + bei_gamma**2))*H_e**2 # proximity loss per unit stack length in a conductor (Eq.40)
-    R_ac                       = (Rdc/2)*gamma*(ber_gamma*der_bei_gamma - bei_gamma*der_ber_gamma)/(der_ber_gamma**2 + der_bei_gamma**2) - 2*np.pi*((2*m - 1)**2)*(ber_2_gamma*der_ber_gamma + bei_2_gamma*der_ber_gamma)/(ber_gamma**2 + bei_gamma**2) # AC resistivity of the mth layer of conductors in the slot (Eq.41)
     n                          = 1                              # number of strands 
     Ns                         = 1                              # number of turns 
     b                          = 1                              # winding width
+    Rac                        = (Rdc/2)-(gamma*(ber_gamma*der_bei_gamma - bei_gamma*der_ber_gamma)/(der_ber_gamma**2 + der_bei_gamma**2)) # AC resistance due to skin effect for round conductors (Eq.38)
+    P_prox                     = (2*np.pi*gamma/sigma)*((ber_2_gamma*der_ber_gamma + bei_2_gamma*der_ber_gamma)/(ber_gamma**2 + bei_gamma**2))*H_e**2 # proximity loss per unit stack length in a conductor (Eq.40)
+    R_ac                       = (Rdc/2)*gamma*(ber_gamma*der_bei_gamma - bei_gamma*der_ber_gamma)/(der_ber_gamma**2 + der_bei_gamma**2) - 2*np.pi*((2*m - 1)**2)*(ber_2_gamma*der_ber_gamma + bei_2_gamma*der_ber_gamma)/(ber_gamma**2 + bei_gamma**2) # AC resistivity of the mth layer of conductors in the slot (Eq.41)
     R_ac                       = Rdc*(1 + ((np.pi*n*Ns)**2)*d**6/(192*(delta**4)*b**2)) # AC resistance of the winding with d<𝛿 (Eq.42)
     P_prox                     = (((np.pi**2)*sigma*d**4)/(32))*(f*B)**2 # proximity loss per unit length generated in a round conductor when d<δ (Eq.43)
     
@@ -201,12 +198,12 @@ def compute_basic_motor_sizing(B_sign, k_w, I_tot, D, L, omega):
     X_q                        = 1                              # q axis reactance of the motor
     R_s                        = 1                              # stator resistance
     I_q                        = 1                              # q axis current
-    I_d                        = 1                              # d axis current   
+    I_d                        = 1                              # d axis current
+    I_d_max_torque             = 0                              # d axis current for max torque      
+    I_s                        = 1                              # motor supply current    
     V_q                        = EMF_i + X_d*I_d + R_s*I_q      # q axis voltage of the machine (Eq.45)
     V_d                        = X_q*I_q + R_s*I_d              # d axis voltage of the machine (Eq.46)
     V_ph                       = np.sqrt(V_q**2 + V_d**2)       # peak per phase motor voltage (Eq.44)
-    I_d_max_torque             = 0                              # d axis current for max torque      
-    I_s                        = 1                              # motor supply current 
     V_q_max_torque             = EMF_i + R_s*I_s                # q axis voltage of the machine (Eq.47)
     V_d_max_torque             = X_q*I_s                        # d axis voltage of the machine (Eq.48)
     V_ph_max_torque            = np.sqrt((EMF_i + R_s*I_s)**2 + (X_q*I_s)**2) # peak per phase motor voltage (Eq.49)    
@@ -226,99 +223,99 @@ def compute_basic_motor_sizing(B_sign, k_w, I_tot, D, L, omega):
     # 3.5.2 Reactance
     # -----------------------------------------------------------------------------------------    
     
-    X                          = L*2*np.pi*f_elec               # reactance for an inductive load (Eq.53)
     L_aa                       = 1                              # self inductance
     L_bb                       = 1                              # self inductance
     L_cc                       = 1                              # self inductance
     L_ab                       = 1                              # mutual inductance
     L_ac                       = 1                              # mutual inductance  
     L_ba                       = 1                              # mutual inductance
-    L_bc                       = 1                              # mutual inductance 
+    L_bc                       = 1                              # mutual inductance     
+    X                          = L*2*np.pi*f_elec               # reactance for an inductive load (Eq.53)
     L                          = [[L_aa, L_ab, L_ac],[L_ab, L_bb, L_bc],[L_ac, L_ba, L_cc]] # inductance matrix of a machine (Eq.54)
     L                          = [[L_l+L_m, -L_m/2, -L_m/2],[-L_m/2, L_l+L_m, -L_m/2],[-L_m/2, -L_m/2, L_l+L_m]] # inductance matrix of a machine (Eq.55)
-    L_d                        = L_l + (3/2)*L_m  
-    N_t                        = (Slots*Layers*N/(2*N_p))
-    L_d                        = ((Slots*Layers)/(2*N_p))*(3/2)*(N**2)*((2*A_tip*mu_0/l_tip + (3/2)*(W_sp*Stack*mu_0)/(l_m + l_g)))
-    L_d                        = ((2*N_p)/(Layers*Slots))*(3/2)*(N_t**2)*(2*A_tip*mu_0/l_tip + (3/2)*(W_sp*Stack*mu_0)/(l_m + l_g))
+    L_d                        = L_l + (3/2)*L_m                # direct axis inductance (Eq.56)
+    N_t                        = (Slots*Layers*N/(2*N_p))       # number of series connected turns per phase (Eq.58)
+    L_d                        = ((Slots*Layers)/(2*N_p))*(3/2)*(N**2)*((2*A_tip*mu_0/l_tip + (3/2)*(W_sp*Stack*mu_0)/(l_m + l_g))) # direct axis inductance (Eq.57)
+    L_d                        = ((2*N_p)/(Layers*Slots))*(3/2)*(N_t**2)*(2*A_tip*mu_0/l_tip + (3/2)*(W_sp*Stack*mu_0)/(l_m + l_g)) # direct axis inductance (Eq.57)
     
     # -----------------------------------------------------------------------------------------
     # 3.5.3 Resistance
     # -----------------------------------------------------------------------------------------    
     
-    R_s                        = rho_copper*(L_Layer*2*N_t/(Fill*A_Layer*Slots*Layers)/(2*N_t*N_p))    
-    A_turn                     = Fill*A_Layer/N
-    A_turn                     = Fill*A_Layer*Slots*Layers/(2*N_t*N_p)
-    R_s                        = rho_copper*(L_turn*N_t)/A_turn
+    R_s                        = rho_copper*(L_Layer*2*N_t/(Fill*A_Layer*Slots*Layers)/(2*N_t*N_p)) # Resistance (Eq.59)    
+    A_turn                     = Fill*A_Layer/N                 # Turn Area (Eq.60)    
+    A_turn                     = Fill*A_Layer*Slots*Layers/(2*N_t*N_p) # Turn Area (Eq.60) 
+    R_s                        = rho_copper*(L_turn*N_t)/A_turn # Resistance (Eq.59)    
     
     # -----------------------------------------------------------------------------------------
     # 3.5.4 Current
     # -----------------------------------------------------------------------------------------    
         
-    I_s                        = I_peak_layer/N
-    I_s                        = Slots*Layers*I_peak_layer/(2*N_p*N_t)
-    I_s                        = (np.pi/2)*I_tot/(2*N_p*N_t)
+    I_s                        = I_peak_layer/N                 # Current (Eq.61)  
+    I_s                        = Slots*Layers*I_peak_layer/(2*N_p*N_t) # Current (Eq.61) 
+    I_s                        = (np.pi/2)*I_tot/(2*N_p*N_t)    # Current (Eq.61) 
     
     # -----------------------------------------------------------------------------------------
     # 3.5.5 Turn Count
     # -----------------------------------------------------------------------------------------    
         
-    V_ph                       = np.sqrt((omega*D*L*k_w*B_g1*N_t + r_copper*((L_Layer*2*N_t)/(Fill*A_Layer))*I_peak_layer)**2 + ((3/2)*N_t*(2*A_tip*mu_0/l_tip + (3/2)*W_sp*Stack*mu_0/(l_m + l_g))*I_peak_layer)**2)
-    P                          = (3/2)*(EMF_i)*I_s
-    P                          = 0.5*(4/np.pi)*omega*D*L*k_w*B_sign*N_t*N_p*I_s
-    P                          = omega*D*L*k_w*B_sign*I_tot/2
-    R_loss                     = (N_p*R_a*I_rms**2)/(I**2)
-    R_loss                     = (1/(I**2))*(N_p*r_copper*L_Layer*4*N_p*N_t**2)/(Slots*Layers*Fill*A_Layer)*(Slots*Layers*I_peak_layer/(2*N_p*N_t*np.sqrt(2)))**2
-    R_loss                     = (1/(I**2))*Slots*Layers*r_copper*(L_Layer/(Fill*A_Layer))*I_rms_layer**2
+    V_ph                       = np.sqrt((omega*D*L*k_w*B_g1*N_t + r_copper*((L_Layer*2*N_t)/(Fill*A_Layer))*I_peak_layer)**2 + ((3/2)*N_t*(2*A_tip*mu_0/l_tip + (3/2)*W_sp*Stack*mu_0/(l_m + l_g))*I_peak_layer)**2) # Peak per phase motor voltage (Eq.62) 
+    P                          = (3/2)*(EMF_i)*I_s              # Output power (Eq.63)
+    P                          = 0.5*(4/np.pi)*omega*D*L*k_w*B_sign*N_t*N_p*I_s # Output power (Eq.63)
+    P                          = omega*D*L*k_w*B_sign*I_tot/2   # Output power (Eq.63) 
+    R_loss                     = (N_p*R_a*I_rms**2)/(I**2)      # Resistive losses (Eq.64)
+    R_loss                     = (1/(I**2))*(N_p*r_copper*L_Layer*4*N_p*N_t**2)/(Slots*Layers*Fill*A_Layer)*(Slots*Layers*I_peak_layer/(2*N_p*N_t*np.sqrt(2)))**2 # Resistive losses (Eq.64)
+    R_loss                     = (1/(I**2))*Slots*Layers*r_copper*(L_Layer/(Fill*A_Layer))*I_rms_layer**2 # Resistive losses (Eq.64)
     
     # -----------------------------------------------------------------------------------------
     # 3.5.6 Power Factor
     # -----------------------------------------------------------------------------------------    
     
-    PF                         = P/S 
-    PF                         = ((3/2)*EMF_i*I_s)/((3/2)*V_ph*I_s)
-    PF                         = EMF_i/V_ph
+    PF                         = P/S                            # Power Factor (Eq.65)
+    PF                         = ((3/2)*EMF_i*I_s)/((3/2)*V_ph*I_s) # Power Factor (Eq.65)
+    PF                         = EMF_i/V_ph                     # Power Factor (Eq.65)
     
     # -----------------------------------------------------------------------------------------
     # 3.5.7 Modulation Index
     # -----------------------------------------------------------------------------------------    
         
-    m_a                        = 2*V_ph/V_bus
+    m_a                        = 2*V_ph/V_bus                   # Modulation index (Eq.66)
     
     # -----------------------------------------------------------------------------------------
     # 4.0 Thermal Considerations
     # -----------------------------------------------------------------------------------------    
 
-    Q                          = Delta_T/R
+    Q                          = Delta_T/R                      # heat through a thermal path (Eq.67)
     
     # -----------------------------------------------------------------------------------------
     # 4.1 Conductive Path Thermal Resistances
     # -----------------------------------------------------------------------------------------    
         
-    R                          = l/(k*A)   
+    R                          = l/(k*A)                        # thermal resistance (Eq.68)  
     
     # -----------------------------------------------------------------------------------------
     # 4.2 Fluid Flow Thermal Resistances
     # -----------------------------------------------------------------------------------------    
             
-    R                          = 1/(h*A) 
-    Nu                         = h*L/(k_f)
-    Nu_laminar                 = 0.453*(Re**0.5)*(Pr**(1/3))
-    Nu_turbulent               = 0.0308*(Re**(4/5))*(Pr**(1/3))
-    Nu_Re_d_less_than_3000     = 1.051*ln(h_fin/w_channel) + 2.89
-    Nu_Re_d_more_than_3000     = ((f/8)*(Re_d - 1000)*Pr)/(1 + 12.7*((f/8)**0.5)*(Pr**(2/3) - 1))
-    f_laminar                  = 64/Re
-    f_turbulent                = (0.79*ln(Re) - 1.64)**(-2)
-    Delta_P_flow               = ((f*rho*v**2)/(2*D_h))*L_channel
-    Loss_cooling               = Delta_P_flow*V_dot
-    Nu_Ta_less_than_41         = 2
-    Nu_41_Ta_100               = 0.202*(Ta**(0.63))*(Pr**0.27)
-    Nu_Ta_more_than_100        = 0.386*(Ta**0.5)*(Pr**0.27)
-    Nu_motor_G_0_01            = 7.46*Re**(0.32)
-    Nu_motor_G_0_02_0_06       = 0.5*(1 + 5.47*(10**-4)*np.exp(112*G))*(Re**0.5)
-    Nu_motor_G_more_than_0_06  = 0.35*(Re**0.5)
-    Nu_rotor_G_0_01            = 0.044*Re**(0.75)
-    Nu_rotor_G_0_02_0_06       = 0.5*(12.57*np.exp(-33.18*G))*(Re**(0.6 + 25*G**(12/7)))
-    Nu_rotor_G_more_than_0_06  = 0.0151*(Re**0.6)    
+    R                          = 1/(h*A)                        # thermal resistance (Eq.69)
+    Nu                         = h*L/(k_f)                      # Nusselt number (Eq.70)
+    Nu_laminar                 = 0.453*(Re**0.5)*(Pr**(1/3))    # Laminar Nusselt number (Eq.71)
+    Nu_turbulent               = 0.0308*(Re**(4/5))*(Pr**(1/3)) # Turbulent Nusselt number (Eq.71)
+    Nu_Re_d_less_than_3000     = 1.051*ln(h_fin/w_channel) + 2.89 # Nusselt number for cooling flow in rectangular ducts and Re_d < 3000 (Eq.72)
+    Nu_Re_d_more_than_3000     = ((f/8)*(Re_d - 1000)*Pr)/(1 + 12.7*((f/8)**0.5)*(Pr**(2/3) - 1)) # Nusselt number for cooling flow in rectangular ducts and Re_d >= 3000 (Eq.72)
+    f_laminar                  = 64/Re                          # Laminar Moody friction factor (Eq.73)
+    f_turbulent                = (0.79*ln(Re) - 1.64)**(-2)     # Turbulent Moody friction factor (Eq.73)
+    Delta_P_flow               = ((f*rho*v**2)/(2*D_h))*L_channel # Flow pressure drop (Eq.74)
+    Loss_cooling               = Delta_P_flow*V_dot             # Flow pressure drop (Eq.75)
+    Nu_Ta_less_than_41         = 2                              # Nusselt number for the airgap convection and Ta < 41 (Eq.76)
+    Nu_41_Ta_100               = 0.202*(Ta**(0.63))*(Pr**0.27)  # Nusselt number for the airgap convection and 41 < Ta < 100 (Eq.76)
+    Nu_Ta_more_than_100        = 0.386*(Ta**0.5)*(Pr**0.27)     # Nusselt number for the airgap convection and 100 < Ta (Eq.76)
+    Nu_laminar_G_0_01          = 7.46*Re**(0.32)                # Nusselt number for laminar flow and G = 0.01 (Eq.77)
+    Nu_laminar_G_0_02_0_06     = 0.5*(1 + 5.47*(10**-4)*np.exp(112*G))*(Re**0.5) # Nusselt number for laminar flow and G = 0.02 - 0.06 (Eq.77)
+    Nu_laminar_G_more_than_0_06 = 0.35*(Re**0.5)                # Nusselt number for laminar flow and G > 0.06 (Eq.77)
+    Nu_turbulent_G_0_01        = 0.044*Re**(0.75)               # Nusselt number for turbulent flow and G = 0.01 (Eq.78)
+    Nu_turbulent_G_0_02_0_06   = 0.5*(12.57*np.exp(-33.18*G))*(Re**(0.6 + 25*G**(12/7))) # Nusselt number for turbulent flow and G = 0.02 - 0.06 (Eq.78)
+    Nu_turbulent_G_more_than_0_06 = 0.0151*(Re**0.6)            # Nusselt number for turbulent flow and G > 0.06 (Eq.78)
     
     # -----------------------------------------------------------------------------------------
     # 5.0 Mechanical Considerations
@@ -328,44 +325,45 @@ def compute_basic_motor_sizing(B_sign, k_w, I_tot, D, L, omega):
     # 5.1 Magnet Retention
     # -----------------------------------------------------------------------------------------    
           
-    sigma                      = P*((R_2**2 + R_1**2)/(R_1**2 - R_2**2)) 
-    sigma                      = P*R_1/t
-    P                          = (omega**2)*R_cg*M_mag/(2*np.pi*R_2*L)
-    sigma                      = ((omega**2)*R_cg*(M_mag + M_iron)/(t*Stack*P))*k_t
+    sigma                      = P*((R_2**2 + R_1**2)/(R_1**2 - R_2**2)) # peak hoop stress (Eq. 79)
+    sigma                      = P*R_1/t                        # thin-walled hoop stress approximation (Eq. 80)
+    P                          = (omega**2)*R_cg*M_mag/(2*np.pi*R_2*L) # pressure(Eq. 81)
+    sigma                      = ((omega**2)*R_cg*(M_mag + M_iron)/(t*Stack*P))*k_t # Tensile stress on the iron dovetails holding the magnets (Eq. 82)
     
     # -----------------------------------------------------------------------------------------
     # 5.2 Windage Losses
     # -----------------------------------------------------------------------------------------    
         
-    Loss_wind                  = k*C_f*np.pi*rho*(omega**3)*(r**4)*Stack
-    Re_ag                      = omega*R*ag/nu
-    C_f_laminar                = 0.515*((ag/R)**0.3)/(Re_ag**0.5)
-    C_f_turbulent              = 0.0325*((ag/R)**0.3)/(Re_ag**0.2)
-    Re_R                       = omega*(R**2)/nu
-    C_f_laminar                = 3.87/(Re_R**0.5)
-    C_f_turbulent              = 0.146/(Re_R**0.2)
+    Loss_wind                  = k*C_f*np.pi*rho*(omega**3)*(r**4)*Stack # windage power loss (Eq. 83)
+    Re_ag                      = omega*R*ag/nu                  # airgap Reynolds number (Eq. 85)            
+    C_f_laminar                = 0.515*((ag/R)**0.3)/(Re_ag**0.5) # Laminar skin friction coefficient (Eq. 84)
+    C_f_turbulent              = 0.0325*((ag/R)**0.3)/(Re_ag**0.2) # Turbulent skin friction coefficient (Eq. 84)
+    Loss_wind                  = 0.5*C_f*rho*(omega**3)*(r_2**5 - r_1**5) # windage power loss (Eq. 86)
+    Re_R                       = omega*(R**2)/nu                # tip speed Reynolds number of the machine (Eq. 88)
+    C_f_laminar                = 3.87/(Re_R**0.5)               # Approximated laminar skin friction coefficient (Eq. 87)
+    C_f_turbulent              = 0.146/(Re_R**0.2)              # Approximated turbulent skin friction coefficient (Eq. 87)
     
     # -----------------------------------------------------------------------------------------
     # 5.3 Bearing Sizing
     # -----------------------------------------------------------------------------------------    
         
-    M_gyro                     = I_gz*omega_motor*omega_aircraft
-    L_10                       = ((10**6)/(60*n))*(C/P)**k
-    M_f                        = mu*R_m*P
+    M_gyro                     = I_gz*omega_motor*omega_aircraft # Gyroscopic moment (Eq. 89)
+    L_10                       = ((10**6)/(60*n))*(C/P)**k      # Bearing life with 90 percent reliability (Eq. 90)
+    M_f                        = mu*R_m*P                       # Friction moment (Eq. 92)
     
     # -----------------------------------------------------------------------------------------
     # 5.4 Rotor Dynamics
     # -----------------------------------------------------------------------------------------    
             
-    N_c                        = (60/(2*np.pi))*np.sqrt((192*EI)/(m*L**3))
-    N_c                        = 60*1.57*(np.sqrt(EI/m))/(L**2)
+    N_c                        = (60/(2*np.pi))*np.sqrt((192*EI)/(m*L**3)) # Shaft critical speed for a disk rotor at the center of the shaft (Eq. 93)
+    N_c                        = 60*1.57*(np.sqrt(EI/m))/(L**2) # Shaft critical speed for a shaft on its own supported at both ends (Eq. 94)
     
     # -----------------------------------------------------------------------------------------
     # 5.5 Coil Thermo-Mechanical Stress
     # -----------------------------------------------------------------------------------------    
       
-    F_shear                    = A_w*E_w*(alpha_w*(T_w - T_0) - alpha_i*(T_i - T_0))  
-    sigma_shear                = F_shear/A_p     
+    F_shear                    = A_w*E_w*(alpha_w*(T_w - T_0) - alpha_i*(T_i - T_0)) # Force generated at the winding to iron interface (Eq. 96)  
+    sigma_shear                = F_shear/A_p                    # shear stress (Eq. 97)  
     
     # -----------------------------------------------------------------------------------------
     # 6.0 Inverter Sizing
@@ -375,40 +373,36 @@ def compute_basic_motor_sizing(B_sign, k_w, I_tot, D, L, omega):
     # 6.1 MOSFET Losses
     # -----------------------------------------------------------------------------------------    
      
-    P_cond                     = 0.5*(l_RMS**2)*R_DS_on
-    P_on                       = f_sw*((((np.sqrt(2))/(np.pi))*I_RMS*V_bus)/(I_DS_test*V_DS_test))*E_on_test
-    P_off                      = f_sw*((((np.sqrt(2))/(np.pi))*I_RMS*V_bus)/(I_DS_test*V_DS_test))*E_off_test
-    P_rr                       = 0.25*Q_rr*V_bus*f_sw
-    P_loss_sw                  = P_cond + P_on + P_off + P_rr
+    P_cond                     = 0.5*(l_RMS**2)*R_DS_on         # Conduction loss for a single switch (Eq. 98)  
+    P_on                       = f_sw*((((np.sqrt(2))/(np.pi))*I_RMS*V_bus)/(I_DS_test*V_DS_test))*E_on_test # turn-on loss (Eq. 99)  
+    P_off                      = f_sw*((((np.sqrt(2))/(np.pi))*I_RMS*V_bus)/(I_DS_test*V_DS_test))*E_off_test # turn-off loss (Eq. 100)
+    P_rr                       = 0.25*Q_rr*V_bus*f_sw           # Reverse recovery loss (Eq. 101)
+    P_loss_sw                  = P_cond + P_on + P_off + P_rr   # Sum of all losses for a single switching device (Eq. 102)
     
     # -----------------------------------------------------------------------------------------
     # 6.2 Ripple Current
     # -----------------------------------------------------------------------------------------    
     
-    I_ripple                   = (V_bus/2)*(m_a/(2*np.sqrt(3)*L))*(1/f_sw)
-    W_a                        = 2*L*I_0*A_w/(B_max * Fill * A_c)
-    N                          = I_0*L/(B_max*A_c)
-    N                          = I_0*L/phi
-    l_path                     = 2*(np.pi**0.5)*(W_a**0.5)
-    L                          = A_c*mu*N/l_path
-    Loss_I2R                   = N*r_copper*(l_w/A_w)*(I_0**2)/2
+    I_ripple                   = (V_bus/2)*(m_a/(2*np.sqrt(3)*L))*(1/f_sw) # Ripple current at the output of the inverter (Eq. 103)  
+    W_a                        = 2*L*I_0*A_w/(B_max * Fill * A_c) # Minimum winding area within a core (Eq. 104)     
+    N                          = I_0*L/(B_max*A_c)              # Number of turns (Eq. 105)    
+    N                          = I_0*L/phi                      # Number of turns (Eq. 105)
+    l_path                     = 2*(np.pi**0.5)*(W_a**0.5)      # Length of the flux path in the iron (Eq. 107)
+    L                          = A_c*mu*N/l_path                # Inductor flux path length (Eq. 106)
+    Loss_I2R                   = N*r_copper*(l_w/A_w)*(I_0**2)/2 # Resistive loss per inductor in the winding (Eq. 108)
     
     # -----------------------------------------------------------------------------------------
     # 6.3 DC Link Capacitor
     # -----------------------------------------------------------------------------------------    
      
-    I_c_rms                    = np.sqrt(I_In_rms**2 - I_In_avg**2) 
-    I_In_rms                   = I_ph_rms*np.sqrt(2*(np.sqrt(3)/np.pi)*m_a*(PF**2 + 0.25)) 
-    I_In_avg                   = (3/4)*I_0*m_a*PF
-    C                          = I_c_rms/(dV*f_sw)
-    R_cap_f                    = np.tan(delta)/(2*np.pi*f*C)
-    Loss_cap                   = R_cap*I_c_rms**2
-    
-    
-    
-            
+    I_c_rms                    = np.sqrt(I_In_rms**2 - I_In_avg**2) # Current in the DC link capacitor (Eq. 109)
+    I_In_rms                   = I_ph_rms*np.sqrt(2*(np.sqrt(3)/np.pi)*m_a*(PF**2 + 0.25)) # Root mean squared inverter input current (Eq. 110) 
+    I_In_avg                   = (3/4)*I_0*m_a*PF               # Average inverter current (Eq. 111) 
+    C                          = I_c_rms/(dV*f_sw)              # Needed capacitance to limit voltage ripple on the supply side to a desired value (Eq. 112) 
+    R_cap_f                    = np.tan(delta)/(2*np.pi*f*C)    # Equivalent series resistance of the capacitor (Eq. 114) 
+    Loss_cap                   = R_cap*I_c_rms**2               # Losses in the capacitor due to the current ripple (Eq. 113) 
+           
     return
-
 
 def example_problem():
     
