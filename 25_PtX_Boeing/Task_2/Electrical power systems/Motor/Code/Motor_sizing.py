@@ -61,9 +61,9 @@ def compute_basic_motor_sizing(B_sign, k_w, I_tot, D, L, omega):
         return i*v
     
     T              = 2                                          # total time average power is being calculated over
-    P              = (1/T)*quad(f, 0, T)                        # real power (Eq.9)  
     I              = 1                                          # amplitude of applied current
-    V              = 1                                          # amplitude of applied voltage
+    V              = 1                                          # amplitude of applied voltage    
+    P              = (1/T)*quad(f, 0, T)                        # real power (Eq.9)  
     S              = I*V                                        # apparent power (Eq.10)  
     PF             = P/S                                        # power factor (Eq.8)  
     Q              = np.sqrt(S**2 - P**2)                       # reactive power (Eq.11)  
@@ -78,18 +78,18 @@ def compute_basic_motor_sizing(B_sign, k_w, I_tot, D, L, omega):
     
     MMF            = 1                                          # magnetomotive force applied to the reluctance path
     R              = 1                                          # magnetic reluctance of the path
-    phi            = MMF/R                                      # magnetic flux through the reluctance path (Eq.12)
-    B              = phi/A                                      # magnetic flux density (Eq.13)
     N              = 1                                          # number of turns
-    I              = 1                                          # current in each turn       
-    MMF_coil       = N*I                                        # MMF for a coil (Eq.14)
+    I              = 1                                          # current in each turn      
     Br             = 1                                          # remnant flux density
     mu_0           = 1                                          # permeability of free space
     mu_r           = 1                                          # relative permeability of the magnetic material
     l_m            = 1                                          # thickness of the magnet or the size of the element if multiple elements span a magnet
-    MMF_magnet     = (Br/(mu_0*mu_r))*l_m                       # MMF for a magnet (Eq.15)
     l              = 1                                          # length of the path
-    A              = 1                                          # cross-sectional area of the reluctance path perpendicular to length 𝑙
+    A              = 1                                          # cross-sectional area of the reluctance path perpendicular to length 𝑙    
+    phi            = MMF/R                                      # magnetic flux through the reluctance path (Eq.12)
+    B              = phi/A                                      # magnetic flux density (Eq.13)    
+    MMF_coil       = N*I                                        # MMF for a coil (Eq.14)    
+    MMF_magnet     = (Br/(mu_0*mu_r))*l_m                       # MMF for a magnet (Eq.15)
     R              = l/(A*mu_0*mu_r)                            # reluctance of a given path or given reluctant element (Eq.16)
     
     # -----------------------------------------------------------------------------------------
@@ -98,6 +98,7 @@ def compute_basic_motor_sizing(B_sign, k_w, I_tot, D, L, omega):
     
     l_g            = 1                                          # airgap size
     A_m            = 1                                          # magnet area
+    alpha_m        = 1                                          # magnet’s pole span angle in electrical degrees
     R_ag           = l_g/(A_m*mu_0)                             # airgap reluctance (Eq.17)
     R_mag          = l_m/(A_m*mu_0*mu_r)                        # magnet reluctance (Eq.17)
     R              = 2*R_ag + 2*R_mag                           # reluctance of the path (Eq.17)
@@ -105,20 +106,19 @@ def compute_basic_motor_sizing(B_sign, k_w, I_tot, D, L, omega):
     phi            = MMF/R                                      # flux in the path (Eq.19)
     B_m            = (Br*l_m)/(l_g*mu_r + l_m)                  # airgap field in the gap produced by the magnets (Eq.20)
     B_sign         = B_m                                        # for rotors where magnets span the full
-    alpha_m        = 1                                          # magnet’s pole span angle in electrical degrees
     B_g1           = (4/np.pi)*B_m*np.sin(alpha_m/2)            # peak flux density magnitude of the fundamental harmonic, for rotors where the magnets do not span the full magnetic pole  (Eq.21)
     
     # -----------------------------------------------------------------------------------------
     # 3.2.1.2 Stator Inductance Calculation
     # -----------------------------------------------------------------------------------------   
-    
+
+    N              = 1                                          # number of turns    
     A_tip          = 1                                          # tooth tip area 
     l_tip          = 1                                          # tooth tip gap width
     W_sp           = 1                                          # stator pole width
     R_tip          = l_tip/(A_tip*mu_0)                         # reluctance of the tip (Eq.22)
     R_rotor        = (2/3)*(l_m + l_g)/(W_sp*Stack*mu_0)        # reluctance of the rotor (Eq.22)
     R              = 1/((2/R_tip) + (1/R_rotor))                # reluctance of one coil (Eq.22)
-    N              = 1                                          # number of turns
     L_m            = N**2/R                                     # self-inductance of a single coil (Eq.23)
     
     # -----------------------------------------------------------------------------------------
@@ -129,11 +129,9 @@ def compute_basic_motor_sizing(B_sign, k_w, I_tot, D, L, omega):
     Rm             = 1                                          # magnet outer radius
     Rr             = 1                                          # magnet inner radius
     Rs             = 1                                          # stator inner radius
-    
-    Br             = ((Br*(p/(p + 1))*(1 - (Rr/Rm)**(p + 1)))/(1 - ((Rr**(2*p))/(Rs))))*(((r/Rs)**(p - 1))*((Rm/Rs)**(p + 1)) + ((Rm/r)**(p + 1)))*np.cos(p*theta) # solution for the radial airgap field from iron cored Halbach machines (Eq.24)
-    
-    r              = Rs
     theta          = 0
+    Br             = ((Br*(p/(p + 1))*(1 - (Rr/Rm)**(p + 1)))/(1 - ((Rr**(2*p))/(Rs))))*(((r/Rs)**(p - 1))*((Rm/Rs)**(p + 1)) + ((Rm/r)**(p + 1)))*np.cos(p*theta) # solution for the radial airgap field from iron cored Halbach machines (Eq.24)
+    r              = Rs
     Br_Rs_0        = ((Br*(p/(p + 1))*(1 - (Rr/Rm)**(p + 1)))/(1 - ((Rr**(2*p))/(Rs))))*(((r/Rs)**(p - 1))*((Rm/Rs)**(p + 1)) + ((Rm/r)**(p + 1)))*np.cos(p*theta)
     B_sign         = (2/np.pi)*Br_Rs_0                          # average airgap field (Eq.25)
     
@@ -143,8 +141,8 @@ def compute_basic_motor_sizing(B_sign, k_w, I_tot, D, L, omega):
     
     Br_20C         = 1                                          # remnant flux density at 20 °C
     T              = 1                                          # temperature in Celsius
-    Br_T           = Br_20C - alpha_mag*(T - 20)*Br_20C         # magnet remnant flux density at temperature (Eq.26)
     alpha_mag      = 1                                          # material property related to the specific magnet grade
+    Br_T           = Br_20C - alpha_mag*(T - 20)*Br_20C         # magnet remnant flux density at temperature (Eq.26)
     
     # -----------------------------------------------------------------------------------------
     # 3.3 Magnet Losses
@@ -180,14 +178,14 @@ def compute_basic_motor_sizing(B_sign, k_w, I_tot, D, L, omega):
     d                          = 1                              # diameter of the conductor
     delta                      = 1                              # skin depth in the material at the frequency current is being applied to the conductor
     gamma                      = d/(delta*np.sqrt(2))           # (Eq.39)
-    Rac                        = (Rdc/2)-(gamma*(ber_gamma*der_bei_gamma - bei_gamma*der_ber_gamma)/(der_ber_gamma**2 + der_bei_gamma**2)) # AC resistance due to skin effect for round conductors (Eq.38)
     sigma                      = 1                              # material conductivity
     H_e                        = 1                              # peak value of the applied external magnetic field
-    P_prox                     = (2*np.pi*gamma/sigma)*((ber_2_gamma*der_ber_gamma + bei_2_gamma*der_ber_gamma)/(ber_gamma**2 + bei_gamma**2))*H_e**2 # proximity loss per unit stack length in a conductor (Eq.40)
-    R_ac                       = (Rdc/2)*gamma*(ber_gamma*der_bei_gamma - bei_gamma*der_ber_gamma)/(der_ber_gamma**2 + der_bei_gamma**2) - 2*np.pi*((2*m - 1)**2)*(ber_2_gamma*der_ber_gamma + bei_2_gamma*der_ber_gamma)/(ber_gamma**2 + bei_gamma**2) # AC resistivity of the mth layer of conductors in the slot (Eq.41)
     n                          = 1                              # number of strands 
     Ns                         = 1                              # number of turns 
     b                          = 1                              # winding width
+    Rac                        = (Rdc/2)-(gamma*(ber_gamma*der_bei_gamma - bei_gamma*der_ber_gamma)/(der_ber_gamma**2 + der_bei_gamma**2)) # AC resistance due to skin effect for round conductors (Eq.38)
+    P_prox                     = (2*np.pi*gamma/sigma)*((ber_2_gamma*der_ber_gamma + bei_2_gamma*der_ber_gamma)/(ber_gamma**2 + bei_gamma**2))*H_e**2 # proximity loss per unit stack length in a conductor (Eq.40)
+    R_ac                       = (Rdc/2)*gamma*(ber_gamma*der_bei_gamma - bei_gamma*der_ber_gamma)/(der_ber_gamma**2 + der_bei_gamma**2) - 2*np.pi*((2*m - 1)**2)*(ber_2_gamma*der_ber_gamma + bei_2_gamma*der_ber_gamma)/(ber_gamma**2 + bei_gamma**2) # AC resistivity of the mth layer of conductors in the slot (Eq.41)
     R_ac                       = Rdc*(1 + ((np.pi*n*Ns)**2)*d**6/(192*(delta**4)*b**2)) # AC resistance of the winding with d<𝛿 (Eq.42)
     P_prox                     = (((np.pi**2)*sigma*d**4)/(32))*(f*B)**2 # proximity loss per unit length generated in a round conductor when d<δ (Eq.43)
     
@@ -200,12 +198,12 @@ def compute_basic_motor_sizing(B_sign, k_w, I_tot, D, L, omega):
     X_q                        = 1                              # q axis reactance of the motor
     R_s                        = 1                              # stator resistance
     I_q                        = 1                              # q axis current
-    I_d                        = 1                              # d axis current   
+    I_d                        = 1                              # d axis current
+    I_d_max_torque             = 0                              # d axis current for max torque      
+    I_s                        = 1                              # motor supply current    
     V_q                        = EMF_i + X_d*I_d + R_s*I_q      # q axis voltage of the machine (Eq.45)
     V_d                        = X_q*I_q + R_s*I_d              # d axis voltage of the machine (Eq.46)
     V_ph                       = np.sqrt(V_q**2 + V_d**2)       # peak per phase motor voltage (Eq.44)
-    I_d_max_torque             = 0                              # d axis current for max torque      
-    I_s                        = 1                              # motor supply current 
     V_q_max_torque             = EMF_i + R_s*I_s                # q axis voltage of the machine (Eq.47)
     V_d_max_torque             = X_q*I_s                        # d axis voltage of the machine (Eq.48)
     V_ph_max_torque            = np.sqrt((EMF_i + R_s*I_s)**2 + (X_q*I_s)**2) # peak per phase motor voltage (Eq.49)    
@@ -225,14 +223,14 @@ def compute_basic_motor_sizing(B_sign, k_w, I_tot, D, L, omega):
     # 3.5.2 Reactance
     # -----------------------------------------------------------------------------------------    
     
-    X                          = L*2*np.pi*f_elec               # reactance for an inductive load (Eq.53)
     L_aa                       = 1                              # self inductance
     L_bb                       = 1                              # self inductance
     L_cc                       = 1                              # self inductance
     L_ab                       = 1                              # mutual inductance
     L_ac                       = 1                              # mutual inductance  
     L_ba                       = 1                              # mutual inductance
-    L_bc                       = 1                              # mutual inductance 
+    L_bc                       = 1                              # mutual inductance     
+    X                          = L*2*np.pi*f_elec               # reactance for an inductive load (Eq.53)
     L                          = [[L_aa, L_ab, L_ac],[L_ab, L_bb, L_bc],[L_ac, L_ba, L_cc]] # inductance matrix of a machine (Eq.54)
     L                          = [[L_l+L_m, -L_m/2, -L_m/2],[-L_m/2, L_l+L_m, -L_m/2],[-L_m/2, -L_m/2, L_l+L_m]] # inductance matrix of a machine (Eq.55)
     L_d                        = L_l + (3/2)*L_m                # direct axis inductance (Eq.56)
