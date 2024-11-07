@@ -5,97 +5,74 @@
 # RCAIDE imports 
 import RCAIDE
 from RCAIDE.Framework.Core import Units   
-from RCAIDE.Library.Methods.Propulsors.Turbofan_Propulsor          import design_turbofan
-from RCAIDE.Library.Methods.Stability.Center_of_Gravity            import compute_component_centers_of_gravity
+from RCAIDE.Library.Methods.Propulsors.Turbofan_Propulsor          import design_turbofan 
 from RCAIDE.Library.Methods.Geometry.Planform                      import segment_properties
 from RCAIDE.Library.Plots                                          import *     
-from RCAIDE.Library.Attributes.Propellants                         import Jet_A1
 
-# python imports 
+# python imports
+import  pickle
 import numpy as np  
 from copy import deepcopy
 import matplotlib.pyplot as plt  
-import os   
+import os
+import  pandas as pd
 
 # ----------------------------------------------------------------------
 #   Main
 # ----------------------------------------------------------------------
 
 def main():
+    num_control_points =  3 
+    num_segments       =  5  
+    propellants = ['Jet_A'] # , 'Ethane']
+
+
+    last_CO2 = 0 
+    last_H2O = 0
     
-    time = np.zeros((1,2*11))
+    #emissions_methods = ['Emission_Index_Correlation_Method', 'Emission_Index_CRN_Method'] 
+    for p_i in  range(len(propellants)):
+        
     
-    emissions_CO2      = np.zeros_like(time)
-    emissions_H2O      = np.zeros_like(time)
-    emission_index_CO2 = np.zeros_like(time)
-    emission_index_H2O = np.zeros_like(time)
-    
-    
-    #emissions_methods = ['Emission_Index_Correlation_Method', 'Emission_Index_CRN_Method']
-    emissions_methods = ['Emission_Index_CRN_Method']
-    for em in  range(1):
+        time               = np.zeros(num_control_points*num_segments)
+        emissions_CO2      = np.zeros_like(time)
+        emissions_H2O      = np.zeros_like(time)
+        emission_index_CO2 = np.zeros_like(time)
+        emission_index_H2O = np.zeros_like(time)
+        
         # vehicle data
-        vehicle  = vehicle_setup(Jet_A1)
+        vehicle  = vehicle_setup(propellants[p_i])
         
         # Set up vehicle configs
         configs  = configs_setup(vehicle)
     
         # create analyses
-        analyses = analyses_setup(configs,emissions_methods[em])
+        analyses = analyses_setup(configs)
     
         # mission analyses 
-        mission = mission_setup(analyses)
+        mission = mission_setup(analyses,num_control_points)
         
         # create mission instances (for multiple types of missions)
         missions = missions_setup(mission) 
          
         # mission analysis 
         results = missions.base_mission.evaluate()
-        
-        last_CO2 = 0
-        last_H2O = 0        
-        
+         
         for i in range(len(results.segments)): 
-            time[em,i*2:((i+1)*2)]                = results.segments[i].conditions.frames.inertial.time[:, 0] / Units.min 
-            emissions_CO2[em,i*2:((i+1)*2)]       = last_CO2 + results.segments[i].conditions.emissions.total.CO2[:, 0]  
-            emissions_H2O[em,i*2:((i+1)*2)]       = last_H2O + results.segments[i].conditions.emissions.total.H2O[:, 0]
-            last_CO2 = emissions_CO2[em, (i + 1) * 2 - 1]  # Get the last CO2 value for the next segment
-            last_H2O = emissions_H2O[em, (i + 1) * 2 - 1]  # Get the last H2O value for the next segment          
-            if em == 0 and i == range(len(results.segments)):
-                last_CO2 = 0 
-                last_H2O = 0  
-            emission_index_CO2[em,i*2:((i+1)*2)]  = results.segments[i].conditions.emissions.index.CO2[:, 0]  
-            emission_index_H2O[em,i*2:((i+1)*2)]  = results.segments[i].conditions.emissions.index.H2O[:, 0] 
+            time[i*num_control_points:((i+1)*num_control_points)]                = results.segments[i].conditions.frames.inertial.time[:, 0] / Units.min 
+            emissions_CO2[i*num_control_points:((i+1)*num_control_points)]       = last_CO2 + results.segments[i].conditions.emissions.total.CO2[:, 0]  
+            emissions_H2O[i*num_control_points:((i+1)*num_control_points)]       = last_H2O + results.segments[i].conditions.emissions.total.H2O[:, 0]
+            last_CO2                                                                 = emissions_CO2[ (i + 1) * num_control_points - 1]  # Get the last CO2 value for the next segment
+            last_H2O                                                                 = emissions_H2O[ (i + 1) * num_control_points - 1]  # Get the last H2O value for the next segment   
+            emission_index_CO2[i*num_control_points:((i+1)*num_control_points)]  = results.segments[i].conditions.emissions.index.CO2[:, 0]  
+            emission_index_H2O[i*num_control_points:((i+1)*num_control_points)]  = results.segments[i].conditions.emissions.index.H2O[:, 0] 
             
-            
-            
-    # fig1, axs1 = plt.subplots(2)
-    # axs1[0].plot(time[0,:], emissions_CO2[0,:], color='b', label='Correlation method')
-    # axs1[0].plot(time[0,:], emissions_CO2[1,:], color='r', label='Cantera')
-    # axs1[0].set_xlabel(r"$time$ [min]") 
-    # axs1[0].set_ylabel(r'$CO_2$ [kg]')
-    # axs1[0].grid()
-    # axs1[0].legend()
-    # axs1[1].plot(time[0,:], emissions_H2O[0,:], color='b', label='Correlation method')
-    # axs1[1].plot(time[0,:], emissions_H2O[1,:], color='r', label='Cantera')
-    # axs1[1].set_xlabel(r"$time$ [min]") 
-    # axs1[1].set_ylabel(r'$H_2O$ [kg]')
-    # axs1[1].grid()
-    # axs1[1].legend()      
-    
-    # fig2, axs2 = plt.subplots(2)
-    # axs2[0].plot(time[0,:], emission_index_CO2[0,:], color='b', label='Correlation method')
-    # axs2[0].plot(time[0,:], emission_index_CO2[1,:], color='r', label='Cantera')
-    # axs2[0].set_xlabel(r"$time$ [min]") 
-    # axs2[0].set_ylabel(r'$EI\:CO_2$ [-]')
-    # axs2[0].grid()
-    # axs2[0].legend()
-    # axs2[1].plot(time[0,:], emission_index_H2O[0,:], color='b', label='Correlation method')
-    # axs2[1].plot(time[0,:], emission_index_H2O[1,:], color='r', label='Cantera')
-    # axs2[1].set_xlabel(r"$time$ [min]") 
-    # axs2[1].set_ylabel(r'$EI\:H_2O$ [-]')
-    # axs2[1].grid()
-    # axs2[1].legend()     
+        # save data in pandas
+        # time,emissions_CO2,emissions_H2O,emission_index_CO2,emission_index_H2O 
+        df      = pd.DataFrame({'Time': time, 'emissions_CO2': emissions_CO2, 'emissions_H2O': emissions_H2O, 'Power': emission_index_CO2, 'emission_index_H2O': emission_index_H2O}) 
+
+        df.to_csv(propellants[p_i] + '_Emissions.csv', index=False)       
+     
     
     return
 
@@ -638,7 +615,11 @@ def vehicle_setup(propellant):
     combustor.alphac                               = 1.0     
     combustor.turbine_inlet_temperature            = 1500
     combustor.pressure_ratio                       = 0.95
-    combustor.fuel_data                            = propellant
+    
+    if propellant == 'Jet_A': 
+        combustor.fuel_data                        = RCAIDE.Library.Attributes.Propellants.Jet_A()
+    elif propellant == 'Ethane': 
+        combustor.fuel_data                        = RCAIDE.Library.Attributes.Propellants.Ethane()        
     turbofan.combustor                             = combustor
 
     # core nozzle
@@ -696,7 +677,10 @@ def vehicle_setup(propellant):
     fuel_tank.origin                            = wing.origin 
     
     # append fuel 
-    fuel                                        = propellant
+    if propellant == 'Jet_A': 
+        fuel                        = RCAIDE.Library.Attributes.Propellants.Jet_A()
+    elif propellant == 'Ethane': 
+        fuel                        = RCAIDE.Library.Attributes.Propellants.Ethane() 
     fuel.mass_properties.mass                   = vehicle.mass_properties.max_takeoff-vehicle.mass_properties.max_fuel
     fuel.origin                                 = vehicle.wings.main_wing.mass_properties.center_of_gravity      
     fuel.mass_properties.center_of_gravity      = vehicle.wings.main_wing.aerodynamic_center
@@ -711,18 +695,7 @@ def vehicle_setup(propellant):
 
     # Append energy network to aircraft 
     vehicle.append_energy_network(net)    
-    
-    #------------------------------------------------------------------------------------------------------------------------- 
-    # Compute Center of Gravity of aircraft (Optional)
-    #------------------------------------------------------------------------------------------------------------------------- 
-   
-    vehicle.center_of_gravity()    
-    compute_component_centers_of_gravity(vehicle)
-    
-    #------------------------------------------------------------------------------------------------------------------------- 
-    # Done ! 
-    #------------------------------------------------------------------------------------------------------------------------- 
-      
+     
     return vehicle
 
  
@@ -812,7 +785,7 @@ def configs_setup(vehicle):
 #   Define the Configurations
 # ---------------------------------------------------------------------
 
-def analyses_setup(configs, emissions_method):
+def analyses_setup(configs):
     """Set up analyses for each of the different configurations."""
 
     analyses = RCAIDE.Framework.Analyses.Analysis.Container()
@@ -820,12 +793,12 @@ def analyses_setup(configs, emissions_method):
     # Build a base analysis for each configuration. Here the base analysis is always used, but
     # this can be modified if desired for other cases.
     for tag,config in configs.items():
-        analysis = base_analysis(config, emissions_method)
+        analysis = base_analysis(config)
         analyses[tag] = analysis
 
     return analyses
 
-def base_analysis(vehicle, emissions_method):
+def base_analysis(vehicle):
     """This is the baseline set of analyses to be used with this vehicle. Of these, the most
     commonly changed are the weights and aerodynamics methods."""
 
@@ -849,16 +822,14 @@ def base_analysis(vehicle, emissions_method):
     analyses.append(aerodynamics)
     
     # ------------------------------------------------------------------
-    # Emissions
-    if emissions_method == "Emission_Index_Correlation_Method":
-        emissions = RCAIDE.Framework.Analyses.Emissions.Emission_Index_Correlation_Method()
-    elif emissions_method == "Emission_Index_CRN_Method":
-        emissions = RCAIDE.Framework.Analyses.Emissions.Emission_Index_CRN_Method() 
-        emissions.settings.use_surrogate     = False 
-        emissions.training.pressure          = np.linspace(10,30, 1) *1E6
-        emissions.training.temperature       = np.linspace(700, 900, 1) 
-        emissions.training.air_mass_flowrate = np.linspace(10, 60, 1) 
-        emissions.training.fuel_to_air_ratio = np.linspace(0.01, 0.05, 1)             
+    # Emissions 
+    emissions = RCAIDE.Framework.Analyses.Emissions.Emission_Index_Correlation_Method() 
+    #emissions = RCAIDE.Framework.Analyses.Emissions.Emission_Index_CRN_Method() 
+    #emissions.settings.use_surrogate     = False 
+    #emissions.training.pressure          = np.linspace(10,30, 1) *1E6
+    #emissions.training.temperature       = np.linspace(700, 900, 1) 
+    #emissions.training.air_mass_flowrate = np.linspace(10, 60, 1) 
+    #emissions.training.fuel_to_air_ratio = np.linspace(0.01, 0.05, 1)             
     emissions.vehicle = vehicle          
     analyses.append(emissions)    
  
@@ -886,7 +857,7 @@ def base_analysis(vehicle, emissions_method):
 #   Define the Mission
 # ----------------------------------------------------------------------
 
-def mission_setup(analyses):
+def mission_setup(analyses,num_control_points):
     """This function defines the baseline mission that will be flown by the aircraft in order
     to compute performance."""
 
@@ -899,7 +870,7 @@ def mission_setup(analyses):
   
     Segments = RCAIDE.Framework.Mission.Segments 
     base_segment = Segments.Segment()
-    base_segment.state.numerics.number_of_control_points = 2
+    base_segment.state.numerics.number_of_control_points = num_control_points
 
     # ------------------------------------------------------------------------------------------------------------------------------------ 
     #   Takeoff Roll
