@@ -748,7 +748,7 @@ def mission_setup(analyses,vehicle):
     base_segment = Segments.Segment()
     ones_row     = base_segment.state.ones_row
     base_segment.process.initialize.initialize_battery       = RCAIDE.Methods.Missions.Segments.Common.Energy.initialize_battery  
-    base_segment.state.numerics.number_control_points        = 4 
+    base_segment.state.numerics.number_of_control_points        = 4 
     base_segment.battery_age_in_days                         = 1 # optional but added for regression
     base_segment.temperature_deviation                       = 1 # Kelvin #  optional but added for regression
     

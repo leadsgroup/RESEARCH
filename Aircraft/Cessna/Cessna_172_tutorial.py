@@ -408,7 +408,7 @@ def mission_setup(analyses,vehicle):
     segment.distance  = 100 * Units.nautical_mile
     
     ones_row                                        = segment.state.ones_row   
-    segment.state.numerics.number_control_points    = 16
+    segment.state.numerics.number_of_control_points    = 16
     segment.state.unknowns.throttle                 = 1.0 * ones_row(1)
     segment = vehicle.networks.internal_combustion.add_unknowns_and_residuals_to_segment(segment,rpm=2600)
     

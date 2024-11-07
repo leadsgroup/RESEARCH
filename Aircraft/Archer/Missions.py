@@ -68,7 +68,7 @@ def range_mission(analyses,configs):
     # base segment
     base_segment = Segments.Segment()
     ones_row                                                 = base_segment.state.ones_row    
-    base_segment.state.numerics.number_control_points        = 16
+    base_segment.state.numerics.number_of_control_points        = 16
     base_segment.process.iterate.conditions.stability        = RCAIDE.Methods.skip
     base_segment.process.finalize.post_process.stability     = RCAIDE.Methods.skip    
     base_segment.process.iterate.conditions.planet_position  = RCAIDE.Methods.skip    
@@ -123,7 +123,7 @@ def hover(analyses,configs):
 
     # base segment
     base_segment = Segments.Segment()
-    base_segment.state.numerics.number_control_points    = 4
+    base_segment.state.numerics.number_of_control_points    = 4
     base_segment.process.initialize.initialize_battery   = RCAIDE.Methods.Missions.Segments.Common.Energy.initialize_battery
     
     base_segment.process.iterate.conditions.stability    = RCAIDE.Methods.skip
@@ -171,7 +171,7 @@ def base(analyses,configs):
 
     # base segment
     base_segment = Segments.Segment()
-    base_segment.state.numerics.number_control_points    = 4
+    base_segment.state.numerics.number_of_control_points    = 4
     base_segment.process.initialize.initialize_battery   = RCAIDE.Methods.Missions.Segments.Common.Energy.initialize_battery
     
     base_segment.process.iterate.conditions.stability    = RCAIDE.Methods.skip

@@ -682,7 +682,7 @@ def mission_setup(analyses,geospacial_data):
     mission.tag   = 'mission' 
     Segments      = RCAIDE.Framework.Mission.Segments  
     base_segment  = Segments.Segment()   
-    base_segment.state.numerics.number_control_points  = 16  
+    base_segment.state.numerics.number_of_control_points  = 16  
     base_segment.state.numerics.discretization_method  = RCAIDE.Library.Methods.Utilities.Chebyshev.linear_data 
     
     # ------------------------------------------------------------------

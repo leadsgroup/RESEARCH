@@ -43,7 +43,7 @@ def baseline_mission_setup(analyses,vehicle,simulated_days = 1,flights_per_day =
     # base segment           
     base_segment                                             = Segments.Segment() 
     base_segment.battery_discharge                           = True  
-    base_segment.state.numerics.number_control_points        = control_points 
+    base_segment.state.numerics.number_of_control_points        = control_points 
     base_segment.process.initialize.initialize_battery       = RCAIDE.Methods.Missions.Segments.Common.Energy.initialize_battery
     base_segment.process.finalize.post_process.update_battery_state_of_health = RCAIDE.Methods.Missions.Segments.Common.Energy.update_battery_state_of_health  
     base_segment.process.finalize.post_process.stability     = RCAIDE.Methods.skip 
@@ -256,7 +256,7 @@ def repeated_flight_operation_setup(analyses,vehicle,simulated_days = 1,flights_
     # base segment           
     base_segment                                             = Segments.Segment() 
     base_segment.battery_discharge                           = True  
-    base_segment.state.numerics.number_control_points        = control_points 
+    base_segment.state.numerics.number_of_control_points        = control_points 
     base_segment.process.initialize.initialize_battery       = RCAIDE.Methods.Missions.Segments.Common.Energy.initialize_battery
     base_segment.process.finalize.post_process.update_battery_state_of_health = RCAIDE.Methods.Missions.Segments.Common.Energy.update_battery_state_of_health  
     base_segment.process.finalize.post_process.stability     = RCAIDE.Methods.skip 
@@ -496,7 +496,7 @@ def constant_elevation_in_cruise_mission_setup(analyses,vehicle,simulated_days =
     # base segment           
     base_segment                                             = Segments.Segment() 
     base_segment.battery_discharge                           = True  
-    base_segment.state.numerics.number_control_points        = control_points
+    base_segment.state.numerics.number_of_control_points        = control_points
     ones_row                                                 = base_segment.state.ones_row
     base_segment.process.initialize.initialize_battery       = RCAIDE.Methods.Missions.Segments.Common.Energy.initialize_battery
     base_segment.process.finalize.post_process.update_battery_state_of_health = RCAIDE.Methods.Missions.Segments.Common.Energy.update_battery_state_of_health  
@@ -716,7 +716,7 @@ def approach_departure_mission_setup(analyses,vehicle,simulated_days = 1,flights
     # base segment           
     base_segment                                                              = Segments.Segment() 
     base_segment.battery_discharge                                            = True  
-    base_segment.state.numerics.number_control_points                         = control_points
+    base_segment.state.numerics.number_of_control_points                         = control_points
     ones_row                                                                  = base_segment.state.ones_row
     base_segment.process.initialize.initialize_battery                        = RCAIDE.Methods.Missions.Segments.Common.Energy.initialize_battery
     base_segment.process.finalize.post_process.update_battery_state_of_health = RCAIDE.Methods.Missions.Segments.Common.Energy.update_battery_state_of_health  
@@ -866,7 +866,7 @@ def range_mission_setup(analyses,vehicle,simulated_days = 1,flights_per_day = 1,
     # base segment
     base_segment = Segments.Segment()
     ones_row                                                 = base_segment.state.ones_row    
-    base_segment.state.numerics.number_control_points        = 4
+    base_segment.state.numerics.number_of_control_points        = 4
     base_segment.process.iterate.conditions.stability        = RCAIDE.Methods.skip
     base_segment.process.finalize.post_process.stability     = RCAIDE.Methods.skip    
     base_segment.process.iterate.conditions.planet_position  = RCAIDE.Methods.skip    
@@ -906,7 +906,7 @@ def hover_mission_setup(analyses,vehicle,simulated_days = 1,flights_per_day = 1,
 
     # base segment
     base_segment = Segments.Segment()
-    base_segment.state.numerics.number_control_points    = 4
+    base_segment.state.numerics.number_of_control_points    = 4
     base_segment.process.initialize.initialize_battery   = RCAIDE.Methods.Missions.Segments.Common.Energy.initialize_battery
     
     base_segment.process.iterate.conditions.stability    = RCAIDE.Methods.skip
@@ -954,7 +954,7 @@ def uber_mission_setup(analyse,vehicle,simulated_days = 1,flights_per_day = 1,co
 
     # base segment
     base_segment = Segments.Segment()
-    base_segment.state.numerics.number_control_points    = 4
+    base_segment.state.numerics.number_of_control_points    = 4
     base_segment.process.initialize.initialize_battery   = RCAIDE.Methods.Missions.Segments.Common.Energy.initialize_battery
     
     base_segment.process.iterate.conditions.stability    = RCAIDE.Methods.skip
