@@ -6,15 +6,15 @@ import RCAIDE
 from RCAIDE.Framework.Core import Units
 from RCAIDE.Library.Plots                 import *     
 from RCAIDE.Library.Methods.Weights.Correlation_Buildups import Common
-from RCAIDE.Library.Methods.Stability.Moment_of_Inertia.calculate_aircraft_MOI import calculate_aircraft_MOI
-from RCAIDE.Library.Methods.Stability.Center_of_Gravity     import compute_vehicle_center_of_gravity
+from RCAIDE.Library.Methods.Weights.Moment_of_Inertia.compute_aircraft_moment_of_inertia import compute_aircraft_moment_of_inertia
+from RCAIDE.Library.Methods.Weights.Center_of_Gravity     import compute_vehicle_center_of_gravity
 
 
 # python imports 
 import numpy as np  
 import matplotlib.pyplot as plt  
 import sys
-from RCAIDE.Library.Methods.Stability.Moment_of_Inertia import compute_cuboid_moment_of_inertia
+from RCAIDE.Library.Methods.Weights.Moment_of_Inertia import compute_cuboid_moment_of_inertia
 sys.path.append('../Aircraft/C-5a')
 import Lockheed_C5a
 
@@ -46,7 +46,7 @@ def main():
     # ------------------------------------------------------------------
     #   Operating Aircraft MOI
     # ------------------------------------------------------------------    
-    MOI, total_mass = calculate_aircraft_MOI(vehicle, CG_location)
+    MOI, total_mass = compute_aircraft_moment_of_inertia(vehicle, CG_location)
 
     # ------------------------------------------------------------------
     #   Payload MOI

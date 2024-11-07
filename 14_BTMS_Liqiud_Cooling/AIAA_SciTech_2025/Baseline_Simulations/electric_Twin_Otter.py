@@ -516,7 +516,7 @@ def vehicle_setup(BTMS_flag):
     HEX.design_altitude                                    = 1500. * Units.feet 
     HEX.inlet_temperature_of_cold_fluid                    = atmo_data.temperature[0,0]   
     HEX                                                    = design_cross_flow_heat_exchanger(HEX,coolant_line,bat_module)
-    HEX.minimum_air_speed                                  = 135* Units.knots 
+    HEX.minimum_air_speed                                  = 105* Units.knots 
     coolant_line.heat_exchangers.append(HEX)
 
     
@@ -960,7 +960,8 @@ def mission_setup(analyses):
     segment      = Segments.Ground.Battery_Recharge(base_segment)     
     segment.tag  = 'Charge_Day'   
     segment.analyses.extend( analyses.base) 
-    #segment.initial_battery_state_of_charge               = 0.2
+    segment.cooling_time = 30 * Units.minutes
+    segment.state.numerics.number_of_control_points = 32
     #if f_idx ==  (flights_per_day - 1): 
         #segment.increment_battery_age_by_one_day =  True 
         #segment.increment_battery_cycle_day      =  day

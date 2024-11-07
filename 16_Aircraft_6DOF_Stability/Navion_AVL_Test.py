@@ -81,11 +81,11 @@ def base_analysis(vehicle, configs):
     # ------------------------------------------------------------------
     aerodynamics                                     = RCAIDE.Framework.Analyses.Aerodynamics.Athena_Vortex_Lattice() 
     aerodynamics.vehicle                             = vehicle 
-    aerodynamics.settings.filenames.avl_bin_name     = '/Users/matthewclarke/Documents/LEADS/CODES/AVL/avl3.35'
+    aerodynamics.settings.filenames.avl_bin_name     = '/Users/aidanmolloy/Documents/LEADS/Codes/AVL/avl3.35'#'/Users/matthewclarke/Documents/LEADS/CODES/AVL/avl3.35'
     analyses.append(aerodynamics) 
      
     stability                                       = RCAIDE.Framework.Analyses.Stability.Athena_Vortex_Lattice() 
-    stability.settings.filenames.avl_bin_name       =  '/Users/matthewclarke/Documents/LEADS/CODES/AVL/avl3.35'    
+    stability.settings.filenames.avl_bin_name       = '/Users/aidanmolloy/Documents/LEADS/Codes/AVL/avl3.35'# '/Users/matthewclarke/Documents/LEADS/CODES/AVL/avl3.35'    
     stability.vehicle                               = vehicle
     analyses.append(stability)
 
@@ -126,7 +126,7 @@ def vehicle_setup():
     # mass properties
     vehicle.mass_properties.max_takeoff               = 2948 * Units.pounds
     vehicle.mass_properties.takeoff                   = 2948 * Units.pounds
-    vehicle.mass_properties.moments_of_inertia.tensor = np.array([[164627.7,0.0,0.0],[0.0,471262.4,0.0],[0.0,0.0,554518.7]])
+    vehicle.mass_properties.moments_of_inertia.tensor = np.array([[1740,0.0,0.0],[0.0,3760,0.0],[0.0,0.0,4386.1]])
     vehicle.mass_properties.center_of_gravity         = [[2.239696797,0,-0.131189711 ]]
     vehicle.envelope.ultimate_load                    = 5.7
     vehicle.envelope.limit_load                       = 3.8
@@ -565,7 +565,7 @@ def mission_setup(analyses):
     segment.tag = "linear_cruise" 
     segment.analyses.extend( analyses.base )   
     segment.altitude                                                            = 8000. * Units.feet
-    segment.air_speed                                                           = 120 * Units['mph']
+    segment.air_speed                                                           = 90 * Units['kts']
     segment.true_course                                                         = -30.0 * Units.degrees
     segment.distance                                                            =  100 *  Units.mile
    

@@ -29,11 +29,11 @@ import json
 
 
 def main():
-    fuels = [Ethane(), Methane(), Propane(), Ethanol(), Butanol(), Propanol(), \
-        Jet_A1(), Liquid_Natural_Gas(), Liquid_Petroleum_Gas()]
-    fuel_names = ["Ethane", "Methane", "Propane", "Ethanol", "Butanol", "Propanol", \
-        "Jet A1", "Liquid Natural Gas", "Liquid Petroleum Gas"]
-    
+    fuels = [Jet_A1(), Ethane(), Methane(), Propane(), Ethanol(), Propanol(), Butanol(), Liquid_Hydrogen(), Liquid_Natural_Gas(), Liquid_Petroleum_Gas()]
+    fuel_names = ["Jet_A1", "Ethane", "Methane", "Propane", "Ethanol", "Propanol", "Butanol", "Liquid Hydrogen", "Liquid Natural Gas", "Liquid Petroleum Gas"]
+    range_data = {}
+    payload_data = {}
+
     for index, fuel in enumerate(fuels):
         print("Running simulation for", fuel_names[index])
         start = time.time()
@@ -56,17 +56,31 @@ def main():
         # Step 4 set up a flight mission
         mission = mission_setup(analyses)
         
-        # Step 5 get payload-range diagram
-        payload_range_diagram(vehicle, mission, 'cruise', reserves=0., plot_diagram=True, fuel_name=fuel_name)
+        # Step 5 get payload-range data
+        results = payload_range_diagram(vehicle, mission, 'cruise', reserves=0., plot_diagram=False, fuel_name=fuel_name)
+        range_data[fuel_name] = results['range'] * 0.0005399568    # conversion from meters to nmi
+        payload_data[fuel_name] = results['payload']     
         
-        #output_filename = "./06_Aircraft_Electrification_Trade_Study/03_Payload_Range_Study/data/CRJ700_" + fuel_name + ".json"
-        #with open(output_filename, "w") as ofile:
-            #ofile.write(json.dumps(output))
+        # output_filename = "./06_Aircraft_Electrification_Trade_Study/03_Payload_Range_Study/data/CRJ700_" + fuel_name + ".json"
+        # with open(output_filename, "w") as ofile:
+        #     ofile.write(json.dumps(output))      
         
         end = time.time()
         m, s = divmod(end - start, 60)
         print("Took", m, "minutes and", round(s), "seconds to generate plot")
         
+    # Step 6: Plot overlayed payload-range diagram
+    plt.figure(figsize=(10, 6))
+    for fuel_name in fuel_names:
+        plt.plot(range_data[fuel_name], payload_data[fuel_name], label=fuel_name)
+        
+    plt.xlabel("Range (nautical miles)")
+    plt.ylabel("Payload (kg)")
+    plt.title("CRJ-700 Payload-Range Diagram for Different Fuels")
+    plt.legend()
+    plt.grid(True)
+    plt.show()
+    
     return
 
 def vehicle_setup(propellant): 
