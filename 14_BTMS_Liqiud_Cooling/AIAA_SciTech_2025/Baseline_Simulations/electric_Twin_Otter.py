@@ -12,7 +12,6 @@ from RCAIDE.Library.Methods.Propulsors.Converters.Rotor      import design_prope
 from RCAIDE.Library.Methods.Performance.estimate_stall_speed        import estimate_stall_speed 
 from RCAIDE.Library.Methods.Propulsors.Converters.DC_Motor   import design_motor 
 from RCAIDE.Library.Methods.Weights.Correlation_Buildups.Propulsion import compute_motor_weight
-from RCAIDE.Library.Methods.Energy.Sources.Batteries.Common           import initialize_from_circuit_configuration
 from RCAIDE.Library.Methods.Geometry.Planform       import wing_segmented_planform 
 from RCAIDE.Library.Methods.Weights.Physics_Based_Buildups.Electric import converge_physics_based_weight_buildup , compute_operating_empty_weight 
 from RCAIDE.Library.Plots                                           import *  
@@ -480,8 +479,7 @@ def vehicle_setup(BTMS_flag):
     bat_module                                             = RCAIDE.Library.Components.Energy.Sources.Battery_Modules.Lithium_Ion_NMC()
     bat_module.electrical_configuration.series             = 10
     bat_module.electrical_configuration.parallel           = 210
-    bat_module.cell.nominal_capacity                       = 3.8
-    initialize_from_circuit_configuration(bat_module,module_weight_factor = 1.25)  
+    bat_module.cell.nominal_capacity                       = 3.8 
     bat_module.geometrtic_configuration.total              = bat_module.electrical_configuration.parallel*bat_module.electrical_configuration.series  
     bat_module.voltage                                     = bat_module.maximum_voltage 
     bat_module.geometrtic_configuration.normal_count       = 42
