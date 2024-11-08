@@ -20,8 +20,7 @@ import os
 sys.path.append(os.path.join( os.path.split(os.path.split(sys.path[0])[0])[0], 'Vehicles' + os.path.sep + 'Rotors')) 
 # the analysis functions
 
-from F8745_D4_Propeller  import F8745_D4_Propeller
-from APC_11x4_Propeller  import APC_11x4_Propeller 
+from F8745_D4_Propeller  import F8745_D4_Propeller 
 # ----------------------------------------------------------------------
 #   Main
 # ---------------------------------------------------------------------- 
