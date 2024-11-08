@@ -10,11 +10,11 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 import RCAIDE
-from RCAIDE.Core import Units
+from RCAIDE.Framework.Core import Units
 
-from RCAIDE.Methods.Propulsion import propeller_design
-from RCAIDE.Methods.Geometry.Two_Dimensional.Planform import segment_properties
-from RCAIDE.Plots.Performance import *
+from RCAIDE.Library.Methods.Propulsors.Converters.Rotor import design_propeller
+from RCAIDE.Library.Methods.Geometry.Two_Dimensional.Planform import segment_properties
+from RCAIDE.Library.Plots.Performance import *
 
 #from RCAIDE.Input_Output.OpenVSP import write
 
@@ -338,7 +338,7 @@ def vehicle_setup():
                                      './Airfoils/Polars/NACA_4412_polar_Re_1000000.txt' ]]
 
     prop.airfoil_polar_stations  = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]      
-    prop                         = propeller_design(prop)   
+    prop                         = design_propeller(prop)   
     
     net.rotors.append(prop)
      
