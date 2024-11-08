@@ -62,8 +62,8 @@ def main():
             time[i*num_control_points:((i+1)*num_control_points)]                = results.segments[i].conditions.frames.inertial.time[:, 0] / Units.min 
             emissions_CO2[i*num_control_points:((i+1)*num_control_points)]       = last_CO2 + results.segments[i].conditions.emissions.total.CO2[:, 0]  
             emissions_H2O[i*num_control_points:((i+1)*num_control_points)]       = last_H2O + results.segments[i].conditions.emissions.total.H2O[:, 0]
-            last_CO2                                                                 = emissions_CO2[ (i + 1) * num_control_points - 1]  # Get the last CO2 value for the next segment
-            last_H2O                                                                 = emissions_H2O[ (i + 1) * num_control_points - 1]  # Get the last H2O value for the next segment   
+            last_CO2                                                             = emissions_CO2[ (i + 1) * num_control_points - 1]  # Get the last CO2 value for the next segment
+            last_H2O                                                             = emissions_H2O[ (i + 1) * num_control_points - 1]  # Get the last H2O value for the next segment   
             emission_index_CO2[i*num_control_points:((i+1)*num_control_points)]  = results.segments[i].conditions.emissions.index.CO2[:, 0]  
             emission_index_H2O[i*num_control_points:((i+1)*num_control_points)]  = results.segments[i].conditions.emissions.index.H2O[:, 0] 
             
