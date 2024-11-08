@@ -602,7 +602,7 @@ def base_analysis(vehicle):
 
     # ------------------------------------------------------------------
     #  Aerodynamics Analysis
-    aerodynamics          = RCAIDE.Framework.Analyses.Aerodynamics.Vortex_Lattice_Method() 
+    aerodynamics          = RCAIDE.Framework.Analyses.Aerodynamics.Athena_Vortex_Lattice() 
     aerodynamics.vehicle = vehicle 
     analyses.append(aerodynamics)
 
