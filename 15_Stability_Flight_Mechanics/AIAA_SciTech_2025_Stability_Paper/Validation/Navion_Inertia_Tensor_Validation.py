@@ -21,6 +21,7 @@ from RCAIDE.Framework.Core import Units
 from RCAIDE.Library.Plots                 import *     
 from RCAIDE.Library.Methods.Weights.Correlation_Buildups import Common
 from RCAIDE.Library.Methods.Weights.Moment_of_Inertia.compute_aircraft_moment_of_inertia import compute_aircraft_moment_of_inertia
+from RCAIDE.Library.Methods.Weights.Moment_of_Inertia.compute_aircraft_moment_of_inertia import compute_cuboid_moment_of_inertia
 from RCAIDE.Library.Methods.Weights.Center_of_Gravity     import compute_vehicle_center_of_gravity
 
 
@@ -46,19 +47,29 @@ def main():
     #   CG Location
     # ------------------------------------------------------------------    
     compute_vehicle_center_of_gravity(vehicle) 
-    CG_location      = vehicle.mass_properties.center_of_gravity
+    #CG_location      = vehicle.mass_properties.center_of_gravity
+    CG_location      =  [[2.55, 0, -0.1667]]
     print("Navion CG location: " + str(CG_location))
     
     # ------------------------------------------------------------------
     #   Operating Aircraft MOI
     # ------------------------------------------------------------------    
-    MOI = compute_aircraft_moment_of_inertia(vehicle, CG_location)
+    MOI, mass = compute_aircraft_moment_of_inertia(vehicle, CG_location)
 
+    # ------------------------------------------------------------------
+    #   Landing Gear MOI
+    # ------------------------------------------------------------------    
+    #Landing_MOI = compute_cuboid_moment_of_inertia([[(0.762+ vehicle.landing_gear.nose_strut_length / 2), 0.,-0.6006666]], results['structural_breakdown']['nose_landing_gear'], vehicle.landing_gear.nose_strut_length, 0, 0, 0, 0, 0, CG_location)[0]
+   # Landing_MOI += compute_cuboid_moment_of_inertia([[2.65, (1.32 - vehicle.landing_gear.main_strut_length / 2),-0.6006666]], results['structural_breakdown']['main_landing_gear']/2, 0, vehicle.landing_gear.main_strut_length, 0, 0, 0, 0, CG_location)[0]
+   # Landing_MOI += compute_cuboid_moment_of_inertia([[2.65, (-1.32 + vehicle.landing_gear.main_strut_length / 2),-0.6006666]], results['structural_breakdown']['main_landing_gear']/2, 0, vehicle.landing_gear.main_strut_length, 0, 0, 0, 0, CG_location)[0]
+    
+   # MOI += Landing_MOI
     print(MOI)
     sft2     = 1.355817 # 1 slug*ft^2 to 1.355817 kg*m^2
     Navion_true = np.array([[1048.0 , 0, 0], [0, 3000.0, 0], [0, 0, 3530.0]]) * sft2
     error    = (MOI - Navion_true) / Navion_true * 100
     print(error)
+    print("Percent of empty mass used for inertia tensor calcs: "+str((mass)/results['empty']*100)+"%")
 
 # ----------------------------------------------------------------------
 #   Define the Vehicle

@@ -29,4 +29,18 @@ def  Optimization_Data_2_CSV(outputs, ):
     
     df.to_csv('Output_Single_Engine_Piston_Baseline.csv')
     
+    planform_optimization_problem
+    output_stick_fixed
+    
+    elevator_sizing_optimization_problem
+    output_elevator_sizing
+    
+    aileron_rudder_sizing_optimization_problem
+    output_aileron_and_rudder_sizing
+    
+    flap_sizing_optimization_problem
+    output_flap_sizing
+    
+    control surface sizes
+    
     return
