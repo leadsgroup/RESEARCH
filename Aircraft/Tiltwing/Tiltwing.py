@@ -16,6 +16,8 @@ from RCAIDE.Library.Methods.Propulsors.Converters.DC_Motor                     i
 from RCAIDE.Library.Methods.Geometry.Planform                                  import wing_planform
 from RCAIDE.Library.Methods.Propulsors.Converters.Rotor                        import design_prop_rotor  
 from RCAIDE.Library.Methods.Weights.Physics_Based_Buildups.Electric            import converge_physics_based_weight_buildup 
+from RCAIDE.Library.Methods.Weights.Moment_of_Inertia.compute_aircraft_moment_of_inertia import compute_aircraft_moment_of_inertia
+from RCAIDE.Library.Methods.Weights.Center_of_Gravity                        import compute_vehicle_center_of_gravity
 from RCAIDE.Library.Plots                                                      import * 
 from RCAIDE import  load 
 from RCAIDE import  save
@@ -279,10 +281,11 @@ def vehicle_setup(redesign_rotors=True):
     # Bus Battery
     #------------------------------------------------------------------------------------------------------------------------------------ 
     battery_module                                                    = RCAIDE.Library.Components.Energy.Sources.Battery_Modules.Lithium_Ion_NMC()
-    number_of_modules                                      = 1 
+    number_of_modules                                                 = 1 
     battery_module.tag                                                = 'bus_battery'
     battery_module.electrical_configuration.series                    = 140
     battery_module.electrical_configuration.parallel                  = 80
+    battery_module.origin                                             = [[ 0.5*fuselage.lengths.total, 0.0  ,  1.323 ]] 
     battery_module.cell.maximum_voltage                               = 4.2                                                                          
     battery_module.cell.nominal_capacity                              = 3.0                                                                          
     battery_module.cell.nominal_voltage                               = 3.6                                                                          
@@ -428,6 +431,26 @@ def vehicle_setup(redesign_rotors=True):
     #------------------------------------------------------------------------------------------------------------------------------------   
     converged_vehicle, breakdown = converge_physics_based_weight_buildup(vehicle)  
     print(breakdown) 
+    
+    # ------------------------------------------------------------------
+    #   Weight Breakdown 
+    # ------------------------------------------------------------------  
+    weight_analysis                               = RCAIDE.Framework.Analyses.Weights.Weights_EVTOL()
+    weight_analysis.vehicle                       = vehicle
+    weight_analysis.method                        = 'Raymer'
+    weight_analysis.settings.use_max_fuel_weight  = False  
+    results                                       = weight_analysis.evaluate() 
+    
+    # ------------------------------------------------------------------
+    #   CG Location
+    # ------------------------------------------------------------------    
+    compute_vehicle_center_of_gravity( weight_analysis.vehicle) 
+    CG_location      =  weight_analysis.vehicle.mass_properties.center_of_gravity
+    
+    # ------------------------------------------------------------------
+    #   Operating Aircraft MOI
+    # ------------------------------------------------------------------    
+    MOI, total_mass = compute_aircraft_moment_of_inertia(weight_analysis.vehicle, CG_location) 
 
     return converged_vehicle
 
@@ -569,6 +592,7 @@ def configs_setup(vehicle):
                 propulsor.rotor.orientation_euler_angles =  [0, vector_angle, 0]
     configs.append(config)
 
+
     return configs 
     
 
@@ -603,6 +627,7 @@ def base_analysis(vehicle):
     # ------------------------------------------------------------------
     #  Aerodynamics Analysis
     aerodynamics          = RCAIDE.Framework.Analyses.Aerodynamics.Athena_Vortex_Lattice() 
+    aerodynamics.settings.filenames.avl_bin_name = 'C://Users//Matteo//Documents//UIUC//avl.exe'
     aerodynamics.vehicle = vehicle 
     analyses.append(aerodynamics)
 
