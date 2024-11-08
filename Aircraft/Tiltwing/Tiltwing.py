@@ -10,7 +10,6 @@
 # ---------------------------------------------------------------------
 import RCAIDE 
 from RCAIDE.Framework.Core import Units, Data    
-from RCAIDE.Library.Methods.Energy.Sources.Batteries.Common                    import initialize_from_circuit_configuration 
 from RCAIDE.Library.Methods.Weights.Correlation_Buildups.Propulsion            import compute_motor_weight
 from RCAIDE.Library.Methods.Propulsors.Converters.DC_Motor                     import design_motor
 from RCAIDE.Library.Methods.Geometry.Planform                                  import wing_planform
@@ -288,8 +287,7 @@ def vehicle_setup(redesign_rotors=True):
     battery_module.origin                                             = [[ 0.5*fuselage.lengths.total, 0.0  ,  1.323 ]] 
     battery_module.cell.maximum_voltage                               = 4.2                                                                          
     battery_module.cell.nominal_capacity                              = 3.0                                                                          
-    battery_module.cell.nominal_voltage                               = 3.6                                                                          
-    initialize_from_circuit_configuration(battery_module)  
+    battery_module.cell.nominal_voltage                               = 3.6          
    
     battery_module.geometrtic_configuration.total                      = battery_module.electrical_configuration.total
     battery_module.voltage                                             = battery_module.maximum_voltage 

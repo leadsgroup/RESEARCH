@@ -3,8 +3,7 @@
 # ---------------------------------------------------------------------
 import RCAIDE
 from RCAIDE.Framework.Core import Units 
-from RCAIDE.Library.Methods.Geometry.Planform                                  import segment_properties,wing_segmented_planform    
-from RCAIDE.Library.Methods.Energy.Sources.Batteries.Common                    import initialize_from_circuit_configuration 
+from RCAIDE.Library.Methods.Geometry.Planform                                  import segment_properties,wing_segmented_planform  
 from RCAIDE.Library.Methods.Weights.Correlation_Buildups.Propulsion            import compute_motor_weight
 from RCAIDE.Library.Methods.Propulsors.Converters.DC_Motor                     import design_motor
 from RCAIDE.Library.Methods.Performance                                        import estimate_stall_speed
@@ -434,7 +433,6 @@ def vehicle_setup(redesign_rotors=True) :
     battery_module.tag                                                = 'cruise_bus_battery'
     battery_module.electrical_configuration.series                     = 140  
     battery_module.electrical_configuration.parallel                   = 60
-    initialize_from_circuit_configuration(battery_module)  
    
     battery_module.geometrtic_configuration.total                      = battery_module.electrical_configuration.total
     battery_module.voltage                                             = battery_module.maximum_voltage 
@@ -630,7 +628,6 @@ def vehicle_setup(redesign_rotors=True) :
     battery_module.tag                                                = 'lift_bus_battery'
     battery_module.electrical_configuration.series                    = 140   
     battery_module.electrical_configuration.parallel                  = 20
-    initialize_from_circuit_configuration(battery_module)  
     battery_module.geometrtic_configuration.total                      = battery_module.electrical_configuration.total
     battery_module.voltage                                             = battery_module.maximum_voltage 
     battery_module.geometrtic_configuration.normal_count               = 25

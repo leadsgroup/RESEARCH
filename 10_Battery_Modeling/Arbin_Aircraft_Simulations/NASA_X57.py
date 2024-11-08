@@ -9,7 +9,6 @@ from RCAIDE.Framework.Core import Units
 from RCAIDE.Library.Methods.Propulsors.Converters.Rotor             import design_propeller 
 from RCAIDE.Library.Methods.Propulsors.Converters.DC_Motor          import design_motor 
 from RCAIDE.Library.Methods.Weights.Correlation_Buildups.Propulsion import compute_motor_weight
-from RCAIDE.Library.Methods.Energy.Sources.Batteries.Common         import initialize_from_circuit_configuration
 from RCAIDE.Library.Methods.Geometry.Planform                       import wing_segmented_planform 
 from RCAIDE.Library.Plots                                           import *     
 
@@ -387,8 +386,6 @@ def vehicle_setup():
     bat.cell.maximum_voltage                               = 4.2                                                                          
     bat.cell.nominal_capacity                              = 3.0                                                                          
     bat.cell.nominal_voltage                               = 3.6   
-    initialize_from_circuit_configuration(bat)  
-   
     bat.geometrtic_configuration.total                      = bat.electrical_configuration.total
     bat.voltage                                             = bat.maximum_voltage 
     bat.geometrtic_configuration.normal_count               = 20
