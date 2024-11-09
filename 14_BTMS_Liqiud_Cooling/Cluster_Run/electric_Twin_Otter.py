@@ -12,7 +12,6 @@ from RCAIDE.Library.Methods.Propulsors.Converters.Rotor      import design_prope
 from RCAIDE.Library.Methods.Performance.estimate_stall_speed        import estimate_stall_speed 
 from RCAIDE.Library.Methods.Propulsors.Converters.DC_Motor   import design_motor 
 from RCAIDE.Library.Methods.Weights.Correlation_Buildups.Propulsion import compute_motor_weight
-from RCAIDE.Library.Methods.Energy.Sources.Batteries.Common           import initialize_from_circuit_configuration
 from RCAIDE.Library.Methods.Geometry.Planform       import wing_segmented_planform 
 #from RCAIDE.Library.Methods.Weights.Physics_Based_Buildups.Electric import compute_weight , converge_weight 
 from RCAIDE.Library.Plots                                           import *  
@@ -482,7 +481,6 @@ def vehicle_setup():
     bat_module.electrical_configuration.series               = 10
     bat_module.electrical_configuration.parallel             = 210
     bat_module.cell.nominal_capacity                              = 3.8
-    initialize_from_circuit_configuration(bat_module,module_weight_factor = 1.25)  
    
     #bat_module.module.power_split_ratio                               = 0.5
     bat_module.geometrtic_configuration.total              = bat_module.electrical_configuration.parallel*bat_module.electrical_configuration.series   #bat_module.pack.electrical_configuration.total

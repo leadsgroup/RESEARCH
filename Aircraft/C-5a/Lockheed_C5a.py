@@ -11,7 +11,9 @@ import RCAIDE
 from RCAIDE.Framework.Core import Units      
 from RCAIDE.Library.Methods.Propulsors.Turbofan_Propulsor   import design_turbofan
 from RCAIDE.Library.Methods.Geometry.Planform               import wing_planform, segment_properties
-from RCAIDE.Library.Plots                 import *     
+from RCAIDE.Library.Plots                 import *
+from RCAIDE.Library.Methods.Weights.Moment_of_Inertia.compute_aircraft_moment_of_inertia import compute_aircraft_moment_of_inertia
+from RCAIDE.Library.Methods.Weights.Center_of_Gravity                        import compute_vehicle_center_of_gravity
 
 # python imports 
 import numpy as np  
@@ -170,19 +172,19 @@ def vehicle_setup():
     flap                       = RCAIDE.Library.Components.Wings.Control_Surfaces.Flap() 
     flap.tag                   = 'flap' 
     flap.span_fraction_start   = 0.108
-    flap.span_fraction_end     = 0.73
+    flap.span_fraction_end     = 0.63
     flap.deflection            = 0.0 * Units.deg 
     flap.chord_fraction        = 0.18    
     flap.configuration_type    = 'single_slotted'
     wing.append_control_surface(flap)   
         
-    slat                       = RCAIDE.Library.Components.Wings.Control_Surfaces.Slat()
-    slat.tag                   = 'slat' 
-    slat.span_fraction_start   = 0.12 
-    slat.span_fraction_end     = 0.93     
-    slat.deflection            = 0.0 * Units.deg 
-    slat.chord_fraction        = 0.13   
-    wing.append_control_surface(slat)
+    #slat                       = RCAIDE.Library.Components.Wings.Control_Surfaces.Slat()
+    #slat.tag                   = 'slat' 
+    #slat.span_fraction_start   = 0.12 
+    #slat.span_fraction_end     = 0.93     
+    #slat.deflection            = 0.0 * Units.deg 
+    #slat.chord_fraction        = 0.13   
+    #wing.append_control_surface(slat)
     
     aileron                       = RCAIDE.Library.Components.Wings.Control_Surfaces.Aileron()
     aileron.tag                   = 'aileron'
@@ -723,7 +725,28 @@ def vehicle_setup():
     net.fuel_lines.append(fuel_line)        
     
     # Append energy network to aircraft 
-    vehicle.append_energy_network(net)     
+    vehicle.append_energy_network(net)
+    
+    # ------------------------------------------------------------------
+    #   Weight Breakdown 
+    # ------------------------------------------------------------------  
+    weight_analysis                               = RCAIDE.Framework.Analyses.Weights.Weights_Transport()
+    weight_analysis.vehicle                       = vehicle
+    weight_analysis.method                        = 'Raymer'
+    weight_analysis.settings.use_max_fuel_weight  = False  
+    results                                       = weight_analysis.evaluate() 
+    
+    # ------------------------------------------------------------------
+    #   CG Location
+    # ------------------------------------------------------------------    
+    compute_vehicle_center_of_gravity( weight_analysis.vehicle) 
+    CG_location      =  weight_analysis.vehicle.mass_properties.center_of_gravity
+    
+    # ------------------------------------------------------------------
+    #   Operating Aircraft MOI
+    # ------------------------------------------------------------------    
+    MOI, total_mass = compute_aircraft_moment_of_inertia(weight_analysis.vehicle, CG_location)
+    
         
     return vehicle
 
@@ -760,7 +783,7 @@ def configs_setup(vehicle):
     config = RCAIDE.Library.Components.Configs.Config(base_config)
     config.tag = 'takeoff'
     config.wings['main_wing'].control_surfaces.flap.deflection  =  16 * Units.deg
-    config.wings['main_wing'].control_surfaces.slat.deflection  =  16 * Units.deg 
+    #config.wings['main_wing'].control_surfaces.slat.deflection  =  16 * Units.deg 
     config.networks.fuel.fuel_lines['fuel_line'].propulsors['outer_starboard_propulsor'].fan.angular_velocity =   3860* Units.rpm
     config.networks.fuel.fuel_lines['fuel_line'].propulsors['outer_port_propulsor'].fan.angular_velocity      =   3860* Units.rpm
     config.landing_gear.gear_condition                          = 'up'
@@ -777,7 +800,7 @@ def configs_setup(vehicle):
     config = RCAIDE.Library.Components.Configs.Config(base_config)
     config.tag = 'cutback'
     config.wings['main_wing'].control_surfaces.flap.deflection  =  0* Units.deg
-    config.wings['main_wing'].control_surfaces.slat.deflection  =  0* Units.deg
+    #config.wings['main_wing'].control_surfaces.slat.deflection  =  0* Units.deg
     config.networks.fuel.fuel_lines['fuel_line'].propulsors['outer_starboard_propulsor'].fan.angular_velocity =   3474* Units.rpm
     config.networks.fuel.fuel_lines['fuel_line'].propulsors['outer_port_propulsor'].fan.angular_velocity      =   3474* Units.rpm
     config.networks.fuel.fuel_lines['fuel_line'].propulsors['inner_starboard_propulsor'].fan.angular_velocity =   3474* Units.rpm
@@ -794,7 +817,7 @@ def configs_setup(vehicle):
     config = RCAIDE.Library.Components.Configs.Config(base_config)
     config.tag = 'landing'
     config.wings['main_wing'].control_surfaces.flap.deflection  =  40* Units.deg
-    config.wings['main_wing'].control_surfaces.slat.deflection  =  40* Units.deg
+    #config.wings['main_wing'].control_surfaces.slat.deflection  =  40* Units.deg
     config.networks.fuel.fuel_lines['fuel_line'].propulsors['outer_starboard_propulsor'].fan.angular_velocity =  2316 * Units.rpm
     config.networks.fuel.fuel_lines['fuel_line'].propulsors['outer_port_propulsor'].fan.angular_velocity      =  2316 * Units.rpm
     config.networks.fuel.fuel_lines['fuel_line'].propulsors['inner_starboard_propulsor'].fan.angular_velocity =  2316 * Units.rpm
@@ -810,7 +833,7 @@ def configs_setup(vehicle):
     config = RCAIDE.Library.Components.Configs.Config(base_config)
     config.tag = 'short_field_takeoff'    
     config.wings['main_wing'].control_surfaces.flap.deflection  =  16* Units.deg
-    config.wings['main_wing'].control_surfaces.slat.deflection  =  16* Units.deg
+    #config.wings['main_wing'].control_surfaces.slat.deflection  =  16* Units.deg
     config.networks.fuel.fuel_lines['fuel_line'].propulsors['outer_starboard_propulsor'].fan.angular_velocity =   4091* Units.rpm
     config.networks.fuel.fuel_lines['fuel_line'].propulsors['outer_port_propulsor'].fan.angular_velocity      =   4091* Units.rpm
     config.networks.fuel.fuel_lines['fuel_line'].propulsors['inner_starboard_propulsor'].fan.angular_velocity =   4091* Units.rpm
@@ -856,9 +879,10 @@ def base_analysis(vehicle):
 
     # ------------------------------------------------------------------
     #  Aerodynamics Analysis
-    aerodynamics = RCAIDE.Framework.Analyses.Aerodynamics.Vortex_Lattice_Method()
+    aerodynamics = RCAIDE.Framework.Analyses.Aerodynamics.Athena_Vortex_Lattice()
+    aerodynamics.settings.filenames.avl_bin_name   =  '/Users/aidanmolloy/Documents/LEADS/Codes/AVL/avl3.35'
     aerodynamics.vehicle = vehicle
-    aerodynamics.settings.number_of_spanwise_vortices   = 30
+    aerodynamics.settings.number_of_spanwise_vortices   = 60
     aerodynamics.settings.number_of_chordwise_vortices  = 5   
     analyses.append(aerodynamics)
  
@@ -877,7 +901,7 @@ def base_analysis(vehicle):
     #  Atmosphere Analysis
     atmosphere = RCAIDE.Framework.Analyses.Atmospheric.US_Standard_1976()
     atmosphere.features.planet = planet.features
-    analyses.append(atmosphere)   
+    analyses.append(atmosphere)
 
     return analyses    
     
@@ -905,14 +929,14 @@ def mission_setup(analyses):
     #   Takeoff Roll
     # ------------------------------------------------------------------------------------------------------------------------------------ 
 
-    segment = Segments.Ground.Takeoff(base_segment)
-    segment.tag = "Takeoff" 
-    segment.analyses.extend( analyses.takeoff )
-    segment.velocity_start           = 10.* Units.knots
-    segment.velocity_end             = 125.0 * Units['m/s']
-    segment.friction_coefficient     = 0.04
-    segment.altitude                 = 0.0   
-    mission.append_segment(segment)
+    #segment = Segments.Ground.Takeoff(base_segment)
+    #segment.tag = "Takeoff" 
+    #segment.analyses.extend( analyses.takeoff )
+    #segment.velocity_start           = 10.* Units.knots
+    #segment.velocity_end             = 125.0 * Units['m/s']
+    #segment.friction_coefficient     = 0.04
+    #segment.altitude                 = 0.0   
+    #mission.append_segment(segment)
 
     ## ------------------------------------------------------------------
     ##   First Climb Segment: Constant Speed Constant Rate  
@@ -1183,8 +1207,3 @@ def plot_mission(results):
 if __name__ == '__main__': 
     main()
     plt.show()
-    
-if __name__ == '__main__': 
-    main()
-    plt.show()
-
