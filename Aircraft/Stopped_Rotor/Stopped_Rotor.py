@@ -433,8 +433,7 @@ def vehicle_setup(redesign_rotors=True) :
     number_of_modules                                      = 1
     battery_module.tag                                                = 'cruise_bus_battery'
     battery_module.electrical_configuration.series                     = 140  
-    battery_module.electrical_configuration.parallel                   = 60
-    initialize_from_circuit_configuration(battery_module)  
+    battery_module.electrical_configuration.parallel                   = 60 
    
     battery_module.geometrtic_configuration.total                      = battery_module.electrical_configuration.total
     battery_module.voltage                                             = battery_module.maximum_voltage 
@@ -630,11 +629,11 @@ def vehicle_setup(redesign_rotors=True) :
     battery_module.tag                                                = 'lift_bus_battery'
     battery_module.electrical_configuration.series                    = 140   
     battery_module.electrical_configuration.parallel                  = 20
-    initialize_from_circuit_configuration(battery_module)  
     battery_module.geometrtic_configuration.total                      = battery_module.electrical_configuration.total
     battery_module.voltage                                             = battery_module.maximum_voltage 
     battery_module.geometrtic_configuration.normal_count               = 25
-    battery_module.geometrtic_configuration.parallel_count             = 40 
+    battery_module.geometrtic_configuration.parallel_count             = 40
+    
 
     for _ in range(number_of_modules):
         lift_bus.battery_modules.append(deepcopy(battery_module))

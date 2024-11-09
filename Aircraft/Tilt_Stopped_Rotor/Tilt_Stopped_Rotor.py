@@ -670,8 +670,7 @@ def vehicle_setup(redesign_rotors=True) :
     number_of_modules                                                 = 1 
     battery_module.tag                                                = 'lift_bus_battery'
     battery_module.electrical_configuration.series                    = 140   
-    battery_module.electrical_configuration.parallel                  = 20
-    initialize_from_circuit_configuration(battery_module)  
+    battery_module.electrical_configuration.parallel                  = 20 
     battery_module.geometrtic_configuration.total                      = battery_module.electrical_configuration.total
     battery_module.voltage                                             = battery_module.maximum_voltage 
     battery_module.geometrtic_configuration.normal_count               = 25
