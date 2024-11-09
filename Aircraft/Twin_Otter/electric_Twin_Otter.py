@@ -410,8 +410,7 @@ def vehicle_setup(BTMS_flag):
     #bat1                                                    = RCAIDE.Library.Components.Energy.Sources.Batteries.Lithium_Ion_LFP()
     #bat1.pack.electrical_configuration.series               = 120  
     #bat1.pack.electrical_configuration.parallel             = 210   #250
-    #bat1.cell.nominal_capacity                              = 3.8  
-    #initialize_from_circuit_configuration(bat1,module_weight_factor = 1.25)  
+    #bat1.cell.nominal_capacity                              = 3.8   
     #bat1.pack.number_of_modules                           = 12
     #bat1.module.geometrtic_configuration.total              = bat1.pack.electrical_configuration.total
     #bat1.module.voltage                                     = bat1.pack.maximum_voltage/bat1.pack.number_of_modules # assumes modules are connected in parallel, must be less than max_module_voltage (~50) /safety_factor (~ 1.5)  
