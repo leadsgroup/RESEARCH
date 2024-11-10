@@ -146,7 +146,16 @@ def vehicle_setup():
     segment.sweeps.quarter_chord          = 0.
     segment.thickness_to_chord            = 0.12
     segment.append_airfoil(airfoil)
-    wing.append_segment(segment)    
+    wing.append_segment(segment)
+    
+    aileron                       = RCAIDE.Library.Components.Wings.Control_Surfaces.Aileron()
+    aileron.tag                   = 'aileron'
+    aileron.span_fraction_start   = 0.7
+    aileron.span_fraction_end     = 0.963
+    aileron.deflection            = 0.0 * Units.degrees
+    aileron.chord_fraction        = 0.16
+    wing.append_control_surface(aileron)
+    
     
     # Fill out more segment properties automatically
     wing = wing_segmented_planform(wing)           
@@ -180,6 +189,15 @@ def vehicle_setup():
     wing.high_lift                        = False 
     wing.dynamic_pressure_ratio           = 0.9
 
+    # control surfaces -------------------------------------------
+    elevator                       = RCAIDE.Library.Components.Wings.Control_Surfaces.Elevator()
+    elevator.tag                   = 'elevator'
+    elevator.span_fraction_start   = 0.09
+    elevator.span_fraction_end     = 0.92
+    elevator.deflection            = 0.0  * Units.deg
+    elevator.chord_fraction        = 0.3
+    wing.append_control_surface(elevator)
+    
     # add to vehicle
     vehicle.append_component(wing)
 
@@ -208,6 +226,16 @@ def vehicle_setup():
     wing.t_tail                           = False
     wing.winglet_fraction                 = 0.0  
     wing.dynamic_pressure_ratio           = 1.0
+    
+
+    rudder                       = RCAIDE.Library.Components.Wings.Control_Surfaces.Rudder()
+    rudder.tag                   = 'rudder'
+    rudder.span_fraction_start   = 0.1
+    rudder.span_fraction_end     = 0.963
+    rudder.deflection            = 0.0 * Units.degrees
+    rudder.chord_fraction        = 0.3
+    
+    wing.append_control_surface(rudder)    
 
     # add to vehicle
     vehicle.append_component(wing)
@@ -598,9 +626,7 @@ def configs_setup(vehicle):
     return configs
 
 
-# ----------------------------------------------------------------------
-#   Define the Mission
-# ----------------------------------------------------------------------
+
 def analyses_setup(configs):
     """Set up analyses for each of the different configurations."""
 
@@ -631,17 +657,17 @@ def base_analysis(vehicle):
 
     # ------------------------------------------------------------------
     #  Aerodynamics Analysis
-
-    aerodynamics = RCAIDE.Framework.Analyses.Aerodynamics.Vortex_Lattice_Method()
+    aerodynamics = RCAIDE.Framework.Analyses.Aerodynamics.Athena_Vortex_Lattice()
+    aerodynamics.settings.filenames.avl_bin_name   =  '/Users/aidanmolloy/Documents/LEADS/Codes/AVL/avl3.35'
     aerodynamics.vehicle = vehicle
-    aerodynamics.settings.number_of_spanwise_vortices   = 25
+    aerodynamics.settings.number_of_spanwise_vortices   = 70
     aerodynamics.settings.number_of_chordwise_vortices  = 5   
     analyses.append(aerodynamics)
  
     # ------------------------------------------------------------------
     #  Energy
     energy = RCAIDE.Framework.Analyses.Energy.Energy()
-    energy.vehicle = vehicle 
+    energy.vehicle = vehicle
     analyses.append(energy)
 
     # ------------------------------------------------------------------
@@ -653,9 +679,10 @@ def base_analysis(vehicle):
     #  Atmosphere Analysis
     atmosphere = RCAIDE.Framework.Analyses.Atmospheric.US_Standard_1976()
     atmosphere.features.planet = planet.features
-    analyses.append(atmosphere)   
+    analyses.append(atmosphere)
 
     return analyses    
+    
     
 
 # ----------------------------------------------------------------------
@@ -764,11 +791,11 @@ def mission_setup(analyses):
     # ------------------------------------------------------------------    
 
     segment = Segments.Cruise.Constant_Speed_Constant_Altitude(base_segment)
-    segment.tag = "base" 
+    segment.tag = "cruise" 
     segment.analyses.extend( analyses.base ) 
-    segment.altitude                                      = 1 * Units.km  
+    segment.altitude                                      = 1.0 * Units.km  
     segment.air_speed                                     = 77 * Units['m/s']
-    segment.distance                                      = 100 * Units.nmi   
+    segment.distance                                      = 1000 * Units.nmi   
     
     # define flight dynamics to model 
     segment.flight_dynamics.force_x                       = True  
@@ -954,7 +981,6 @@ def plot_mission(results):
     plot_aircraft_velocities(results)  
         
     return
-
 
 if __name__ == '__main__': 
     main()
