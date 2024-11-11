@@ -3,7 +3,8 @@
 # ---------------------------------------------------------------------
 import RCAIDE
 from RCAIDE.Framework.Core import Units 
-from RCAIDE.Library.Methods.Geometry.Planform                                  import segment_properties,wing_segmented_planform  
+from RCAIDE.Library.Methods.Geometry.Planform                                  import segment_properties,wing_segmented_planform    
+from RCAIDE.Library.Methods.Energy.Sources.Batteries.Common                    import initialize_from_circuit_configuration 
 from RCAIDE.Library.Methods.Weights.Correlation_Buildups.Propulsion            import compute_motor_weight
 from RCAIDE.Library.Methods.Propulsors.Converters.DC_Motor                     import design_motor
 from RCAIDE.Library.Methods.Performance                                        import estimate_stall_speed
@@ -432,7 +433,7 @@ def vehicle_setup(redesign_rotors=True) :
     number_of_modules                                      = 1
     battery_module.tag                                                = 'cruise_bus_battery'
     battery_module.electrical_configuration.series                     = 140  
-    battery_module.electrical_configuration.parallel                   = 60
+    battery_module.electrical_configuration.parallel                   = 60 
    
     battery_module.geometrtic_configuration.total                      = battery_module.electrical_configuration.total
     battery_module.voltage                                             = battery_module.maximum_voltage 
@@ -631,7 +632,8 @@ def vehicle_setup(redesign_rotors=True) :
     battery_module.geometrtic_configuration.total                      = battery_module.electrical_configuration.total
     battery_module.voltage                                             = battery_module.maximum_voltage 
     battery_module.geometrtic_configuration.normal_count               = 25
-    battery_module.geometrtic_configuration.parallel_count             = 40 
+    battery_module.geometrtic_configuration.parallel_count             = 40
+    
 
     for _ in range(number_of_modules):
         lift_bus.battery_modules.append(deepcopy(battery_module))
