@@ -114,7 +114,6 @@ def stick_fixed_stability_and_drag_optimization_setup(vehicle,cruise_velocity,cr
                   [ 'vt_AR'                       , 17.11 , 15.0 , 19.0  , 100. ,  1*Units.meter**2],    
                   [ 'ht_span'                     , 4.0   , 3.0  , 5.0   , 10.  ,  1*Units.less], 
                   [ 'ht_AR'                       , 4.0   , 3.0  , 5.0   , 10.  ,  1*Units.meter**2], 
-                  [ 'c_g_x'                       , 2.23   , 1    , 3, 1    ,  1*Units.less],
                   [ 'AoA'                         , 5      , -10  , 10, 1 ,  1*Units.degree],  
                   
     ],dtype=object)   
@@ -173,7 +172,6 @@ def stick_fixed_stability_and_drag_optimization_setup(vehicle,cruise_velocity,cr
         [ 'vt_AR'                             , 'vehicle_configurations.*.wings.vertical_tail.aspect_ratio'],         
         [ 'ht_AR'                             , 'vehicle_configurations.*.wings.horizontal_tail.aspect_ratio'],     
         [ 'ht_span'                           , 'vehicle_configurations.*.wings.horizontal_tail.spans.projected'], 
-        [ 'c_g_x'                             , 'vehicle_configurations.*.mass_properties.center_of_gravity[0][0]'  ], 
         [ 'AoA'                               , 'missions.stick_fixed_cruise.segments.cruise.state.conditions.aerodynamics.angles.alpha[0][0]' ], 
     ]      
     

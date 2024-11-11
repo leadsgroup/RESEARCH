@@ -25,7 +25,7 @@ import  pickle
 def main():           
          
     # vehicle data
-    new_geometry    =  True 
+    new_geometry    =  False 
     redesign_rotors =  True 
     if new_geometry :
         vehicle  = vehicle_setup(redesign_rotors)
@@ -49,15 +49,15 @@ def main():
     plot_results(results)    
 
     ## plot vehicle 
-    #plot_3d_vehicle(vehicle, 
-                    #min_x_axis_limit            = -5,
-                    #max_x_axis_limit            = 15,
-                    #min_y_axis_limit            = -10,
-                    #max_y_axis_limit            = 10,
-                    #min_z_axis_limit            = -10,
-                    #max_z_axis_limit            = 10,
-                    #show_figure                 = False 
-                    #)               
+    plot_3d_vehicle(vehicle, 
+                    min_x_axis_limit            = -5,
+                    max_x_axis_limit            = 15,
+                    min_y_axis_limit            = -10,
+                    max_y_axis_limit            = 10,
+                    min_z_axis_limit            = -10,
+                    max_z_axis_limit            = 10,
+                    show_figure                 = True
+                    )               
           
     return
 

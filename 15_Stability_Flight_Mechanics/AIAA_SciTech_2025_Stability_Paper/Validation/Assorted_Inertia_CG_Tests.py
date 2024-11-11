@@ -35,23 +35,31 @@ from Boeing_737_800 import vehicle_setup as  B738_setup
 from Lockheed_C5a import vehicle_setup as C5a_setup
 from Joby import  vehicle_setup as  Joby_setup
 from Stopped_Rotor import vehicle_setup as stopped_rotor_setup
+from Boeing_777_200 import  vehicle_setup as  B777_setup
+from  ATR_72 import  vehicle_setup as  ATR72_setup
+from  CRJ_700_Mission_Simulation import  vehicle_setup as  CRJ7_setup
 
 def main():
-    '''
-    print("\n ############################\n")
-    C172_Analysis()
-    print("\n ############################\n")
-    Twin_Otter_Analysis()
-    print("\n ############################\n")
-    B738_Analysis()
-    print("\n ############################\n")    
-    C5a_Analysis()
+
+    #print("\n ############################\n")
+    #C172_Analysis()
+    #print("\n ############################\n")
+    #Twin_Otter_Analysis()
+    #print("\n ############################\n")
+    #B738_Analysis()
+    #print("\n ############################\n")    
+    #C5a_Analysis()
     print("\n ############################\n")
     Joby_Analysis()
-    print("\n ############################\n")
-    '''
-    Stop_Rotor_Analysis()
-    print("\n ############################\n")      
+    #print("\n ############################\n")
+    #Stop_Rotor_Analysis()
+    #print("\n ############################\n")
+    #B777_Analysis()
+    #print("\n ############################\n")
+    #ATR72_Analysis()
+    #print("\n ############################\n")
+    #CRJ7_Analysis()
+    print("\n ############################\n")    
     
     return
     
@@ -243,6 +251,45 @@ def Stop_Rotor_Analysis():
     #error    = (MOI - Cessna_true) / Cessna_true * 100
     #print(error)
     print("Percent of empty mass used for stop rotor inertia tensor calcs: "+str((mass)/results['empty']*100)+"%")
+
+def B777_Analysis():
+    vehicle = B777_setup()
+    
+    # ------------------------------------------------------------------
+    #   Weight Breakdown 
+    # ------------------------------------------------------------------  
+    weight_analysis                               = RCAIDE.Framework.Analyses.Weights.Weights_Transport()
+    weight_analysis.vehicle                       = vehicle
+    results                                       = weight_analysis.evaluate() 
+    print("Empty weight estimate for B777-200: " + str(results["empty"]))
+    print("Operating empty weight estimate for B777-200: " + str(results["operating_empty"]))
+    print("Max takeoff weight estimate for B777-200: " + str(results["max_takeoff"]))
+
+def ATR72_Analysis():
+    vehicle = ATR72_setup()
+    
+    # ------------------------------------------------------------------
+    #   Weight Breakdown 
+    # ------------------------------------------------------------------  
+    weight_analysis                               = RCAIDE.Framework.Analyses.Weights.Weights_Transport()
+    weight_analysis.vehicle                       = vehicle
+    results                                       = weight_analysis.evaluate() 
+    print("Empty weight estimate for ATR72: " + str(results["empty"]))
+    print("Operating empty weight estimate for ATR72: " + str(results["operating_empty"]))
+    print("Max takeoff weight estimate for ATR72: " + str(results["max_takeoff"]))
+
+def CRJ7_Analysis():
+    vehicle = CRJ7_setup()
+    
+    # ------------------------------------------------------------------
+    #   Weight Breakdown 
+    # ------------------------------------------------------------------  
+    weight_analysis                               = RCAIDE.Framework.Analyses.Weights.Weights_Transport()
+    weight_analysis.vehicle                       = vehicle
+    results                                       = weight_analysis.evaluate() 
+    print("Empty weight estimate for CRJ-700: " + str(results["empty"]))
+    print("Operating empty weight estimate for CRJ-700: " + str(results["operating_empty"]))
+    print("Max takeoff weight estimate for CRJ-700: " + str(results["max_takeoff"]))
 
 
 if __name__ == '__main__': 
