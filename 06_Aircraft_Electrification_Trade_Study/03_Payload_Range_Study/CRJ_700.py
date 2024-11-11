@@ -9,7 +9,7 @@ Bombardier/Mitsubishi CRJ-700 series aircraft. twin turbofan regional jet with t
 import RCAIDE
 from RCAIDE.Framework.Core import Units   
 from RCAIDE.Library.Methods.Propulsors.Turbofan_Propulsor          import design_turbofan
-from RCAIDE.Library.Methods.Stability.Center_of_Gravity            import compute_component_centers_of_gravity
+#from RCAIDE.Library.Methods.Stability.Center_of_Gravity            import compute_component_centers_of_gravity
 from RCAIDE.Library.Methods.Geometry.Planform                      import segment_properties
 from RCAIDE.Library.Plots                                          import *     
 from RCAIDE.Library.Methods.Performance.payload_range_diagram      import payload_range_diagram
@@ -29,8 +29,8 @@ import json
 
 
 def main():
-    fuels = [Jet_A1(), Ethane(), Methane(), Propane(), Ethanol(), Propanol(), Butanol(), Liquid_Hydrogen(), Liquid_Natural_Gas(), Liquid_Petroleum_Gas()]
-    fuel_names = ["Jet_A1", "Ethane", "Methane", "Propane", "Ethanol", "Propanol", "Butanol", "Liquid Hydrogen", "Liquid Natural Gas", "Liquid Petroleum Gas"]
+    fuels = [Jet_A1()]
+    fuel_names = ["Jet_A1"]
     range_data = {}
     payload_data = {}
 
@@ -613,7 +613,7 @@ def vehicle_setup(propellant):
     combustor.tag                                  = 'Comb'
     combustor.efficiency                           = 0.99 
     combustor.alphac                               = 1.0     
-    combustor.turbine_inlet_temperature            = 1550
+    combustor.turbine_inlet_temperature            = 1760         #1550
     combustor.pressure_ratio                       = 0.95
     combustor.fuel_data                            = propellant  
     turbofan.combustor                             = combustor
@@ -694,7 +694,7 @@ def vehicle_setup(propellant):
     #------------------------------------------------------------------------------------------------------------------------- 
    
     vehicle.center_of_gravity()    
-    compute_component_centers_of_gravity(vehicle)
+    #compute_component_centers_of_gravity(vehicle)
     
     #------------------------------------------------------------------------------------------------------------------------- 
     # Done ! 
