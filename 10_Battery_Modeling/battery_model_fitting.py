@@ -30,5 +30,3 @@ def main():
     
     return
 
-
-def NMC_raw_data
