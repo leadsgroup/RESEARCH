@@ -9,7 +9,6 @@ from RCAIDE.Framework.Core                                                      
 from RCAIDE.Library.Methods.Propulsors.Converters.Rotor                                  import design_propeller 
 from RCAIDE.Library.Methods.Propulsors.Converters.DC_Motor                               import design_motor 
 from RCAIDE.Library.Methods.Weights.Correlation_Buildups.Propulsion                      import compute_motor_weight
-from RCAIDE.Library.Methods.Energy.Sources.Batteries.Common                              import initialize_from_circuit_configuration
 from RCAIDE.Library.Methods.Geometry.Planform                                            import wing_segmented_planform 
 from RCAIDE.Library.Plots                                                                import *  
 from RCAIDE.Library.Methods.Thermal_Management.Heat_Exchangers.Cross_Flow_Heat_Exchanger import design_cross_flow_heat_exchanger
@@ -447,7 +446,6 @@ def vehicle_setup(resize_aircraft,vehicle_name) :
       bat_module.electrical_configuration.series             = 10
       bat_module.electrical_configuration.parallel           = 210
       bat_module.cell.nominal_capacity                       = 3.8
-      initialize_from_circuit_configuration(bat_module,module_weight_factor = 1.25)  
       bat_module.geometrtic_configuration.total              = bat_module.electrical_configuration.parallel*bat_module.electrical_configuration.series  
       bat_module.voltage                                     = bat_module.maximum_voltage 
       bat_module.geometrtic_configuration.normal_count       = 42

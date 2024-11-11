@@ -1,0 +1,23 @@
+ ---------------------------------------------------------------
+ Surface Forces (referred to Sref,Cref,Bref about Xref,Yref,Zref)
+ Standard axis orientation,  X fwd, Z down         
+
+     Sref =   124.9       Cref =    4.2350   Bref =   34.3200
+     Xref =      0.0000   Yref =    0.0000   Zref =    0.0000
+
+ n      Area      CL      CD      Cm      CY      Cn      Cl     CDi     CDv
+ 1    63.960  0.5932  0.0341 -2.6786 -0.0333 -0.0045 -0.1181  0.0341  0.0000   main_wing
+ 2    63.960  0.5932  0.0341 -2.6786  0.0333  0.0045  0.1181  0.0341  0.0000   main_wing (YDUP)
+ 3    20.745  0.0675  0.0078 -0.5761 -0.0113  0.0111 -0.0068  0.0078  0.0000   horizontal_stabilizer
+ 4    20.745  0.0675  0.0078 -0.5761  0.0113 -0.0111  0.0068  0.0078  0.0000   horizontal_stabilizer (YDUP)
+ 5    34.896  0.0000 -0.0000 -0.0000  0.0000 -0.0000  0.0000 -0.0000  0.0000   vertical_stabilizer
+
+ Surface Forces (referred to Ssurf, Cave about root LE on hinge axis)
+
+   n     Ssurf      Cave       cl       cd      cdv    cm_LE
+   1    63.960     3.715   1.1598   0.0666   0.0000   0.0000  main_wing
+   2    63.960     3.715   1.1598   0.0666   0.0000   0.0000  main_wing (YDUP)
+   3    20.745     2.849   0.4118   0.0472   0.0000   0.0000  horizontal_stabilizer
+   4    20.745     2.849   0.4118   0.0472   0.0000   0.0000  horizontal_stabilizer (YDUP)
+   5    34.896     4.189  -0.0000  -0.0000   0.0000   0.0000  vertical_stabilizer
+ ---------------------------------------------------------------

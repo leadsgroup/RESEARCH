@@ -67,7 +67,7 @@ def base_mission_setup(vehicle,max_speed_multiplier):
     # base segment
     base_segment = Segments.Segment()
     ones_row     = base_segment.state.ones_row
-    base_segment.state.numerics.number_control_points    = 3
+    base_segment.state.numerics.number_of_control_points    = 3
  
     #   Cruise Segment: constant Speed, constant altitude 
     segment                           = Segments.Cruise.Constant_Speed_Constant_Altitude(base_segment)

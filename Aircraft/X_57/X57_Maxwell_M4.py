@@ -655,7 +655,7 @@ def mission_setup(analyses,vehicle):
     #base_segment.use_Jacobian                                = False  
     base_segment.process.initialize.initialize_battery = RCAIDE.Methods.Missions.Segments.Common.Energy.initialize_battery
     base_segment.process.iterate.conditions.planet_position  = RCAIDE.Methods.skip
-    base_segment.state.numerics.number_control_points        = 4
+    base_segment.state.numerics.number_of_control_points        = 4
     base_segment.process.iterate.unknowns.network            = vehicle.propulsors.battery_electric_rotor.unpack_unknowns_high_lift
     base_segment.process.iterate.residuals.network           = vehicle.propulsors.battery_electric_rotor.residuals_high_lift
     base_segment.state.unknowns.propeller_power_coefficient  = 0.005 * ones_row(1) 
