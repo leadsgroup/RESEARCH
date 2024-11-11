@@ -500,7 +500,7 @@ def vehicle_setup():
         
     bus.battery_module_electric_configuration = 'Series'
     bus.charging_c_rate                       = 1
-    bus.initialize_bus_electrical_properties()
+    bus.initialize_bus_properties()
    
    
    

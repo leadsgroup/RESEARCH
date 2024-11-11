@@ -21,14 +21,14 @@ import matplotlib.pyplot as plt
 # ----------------------------------------------------------------------        
 #   Run the whole thing
 # ----------------------------------------------------------------------  
-def main(): 
+def size_control_surfaces(vehicle, cruise_velocity = 120 * Units['mph'], cruise_altitude= 5000*Units.feet): 
     '''
     STICK FIXED (STATIC STABILITY AND DRAG OTIMIZATION
     '''
     ti_0 = time.time()
     ti   = time.time()  
     solver_name       = 'SLSQP' 
-    planform_optimization_problem = stick_fixed_stability_and_drag_optimization_setup()
+    planform_optimization_problem = stick_fixed_stability_and_drag_optimization_setup(vehicle,cruise_velocity,cruise_altitude)
     output = scipy_setup.SciPy_Solve(planform_optimization_problem,solver=solver_name, sense_step = 1E-2, tolerance = 1E-2)  
     print (output)    
     tf           = time.time()
@@ -45,7 +45,7 @@ def main():
     
     ti = time.time()   
     solver_name       = 'SLSQP'  
-    elevator_sizing_optimization_problem = elevator_sizing_optimization_setup(optimized_vehicle_v1)
+    elevator_sizing_optimization_problem = elevator_sizing_optimization_setup(optimized_vehicle_v1,cruise_velocity,cruise_altitude)
     output = scipy_setup.SciPy_Solve(elevator_sizing_optimization_problem,solver=solver_name, sense_step = 1E-2, tolerance = 1E-2) 
     print (output)     
     tf           = time.time()
@@ -62,7 +62,7 @@ def main():
     
     ti = time.time()   
     solver_name       = 'SLSQP'  
-    aileron_rudder_sizing_optimization_problem = aileron_rudder_sizing_optimization_setup(optimized_vehicle)
+    aileron_rudder_sizing_optimization_problem = aileron_rudder_sizing_optimization_setup(optimized_vehicle,cruise_velocity,cruise_altitude)
     output = scipy_setup.SciPy_Solve(aileron_rudder_sizing_optimization_problem,solver=solver_name, sense_step = 1E-1, tolerance = 1E-1) 
     print (output)     
     tf           = time.time()
@@ -77,7 +77,7 @@ def main():
     
     ti = time.time()   
     solver_name       = 'SLSQP'  
-    flap_sizing_optimization_problem = flap_sizing_optimization_setup(optimized_vehicle_v3)
+    flap_sizing_optimization_problem = flap_sizing_optimization_setup(optimized_vehicle_v3,cruise_velocity,cruise_altitude)
     output = scipy_setup.SciPy_Solve(flap_sizing_optimization_problem,solver=solver_name, sense_step = 1E-4, tolerance = 1E-4) 
     print (output)     
     tf           = time.time()
@@ -95,7 +95,7 @@ def main():
     print('Total Control Surface Sizing Time: ' + str(total_elapsed_time))
     return
   
-def stick_fixed_stability_and_drag_optimization_setup(): 
+def stick_fixed_stability_and_drag_optimization_setup(vehicle,cruise_velocity,cruise_altitude): 
     nexus = Nexus()
     problem = Data()
     nexus.optimization_problem = problem
@@ -106,19 +106,14 @@ def stick_fixed_stability_and_drag_optimization_setup():
 
     #                 [ tag                       , initial,  (lb , ub) , scaling , units ]  
     problem.inputs = np.array([       
-                  #[ 'mw_taper'                    , 0.54  , 0.4  , 0.8   , 1.0  ,  1*Units.less],    
-                  #[ 'mw_area'                     , 17.11 , 15.0 , 19.0  , 100. ,  1*Units.meter**2],    
-                  #[ 'mw_AR'                       , 6.04  , 5.0  , 8.0   , 100  ,  1*Units.less],         
+                  [ 'mw_span'                    , 0.54  , 0.4  , 0.8   , 1.0  ,  1*Units.less],    
+                  [ 'mw_AR'                      , 17.11 , 15.0 , 19.0  , 100. ,  1*Units.meter**2],        
                   [ 'mw_root_twist'               , 3.0   , 0.0  , 5.0   , 1. ,  1*Units.degree], 
-                  [ 'mw_tip_twist'                , -1.0  , -4.0 , 0.0   , 1.  ,  1*Units.degree],
-                  [ 'mw_dihedral'                 , 7.5   , 0.0  , 8.0   , 1.  ,  1*Units.degree], 
-                  [ 'vt_span'                     , 1.4816, 1.0  , 2     , 1.  ,  1*Units.meter],
-                  [ 'vt_taper'                    , 0.4820, 0.2  , 0.8   , 1.  ,  1*Units.meter],  
-                  #[ 'mw_sweep'                    , 15  , 0.0  , 20   , 1.  ,  1*Units.degree], 
-                  #[ 'hs_AR'                       , 4.0   , 3.0  , 5.0   , 10.  ,  1*Units.less], 
-                  #[ 'hs_area'                     , 4.0   , 3.0  , 5.0   , 10.  ,  1*Units.meter**2],   
-                  #[ 'hs_root_twist'               , 0.0   , -3.0 , 3.0   , 10.  , 1*Units.degree],
-                  #[ 'hs_tip_twist'                , 0.0   , -3.0 , 3.0   , 10.  , 1*Units.degree], 
+                  [ 'mw_tip_twist'                , -1.0  , -4.0 , 0.0   , 1.  ,  1*Units.degree], 
+                  [ 'vt_span'                     , 1.4816, 1.0  , 2     , 1.  ,  1*Units.meter],  
+                  [ 'vt_AR'                       , 17.11 , 15.0 , 19.0  , 100. ,  1*Units.meter**2],    
+                  [ 'ht_span'                     , 4.0   , 3.0  , 5.0   , 10.  ,  1*Units.less], 
+                  [ 'ht_AR'                       , 4.0   , 3.0  , 5.0   , 10.  ,  1*Units.meter**2], 
                   [ 'c_g_x'                       , 2.23   , 1    , 3, 1    ,  1*Units.less],
                   [ 'AoA'                         , 5      , -10  , 10, 1 ,  1*Units.degree],  
                   
@@ -169,22 +164,15 @@ def stick_fixed_stability_and_drag_optimization_setup():
         [ 'dutch_roll_frequency'              , 'summary.dutch_roll_frequency' ],  
         [ 'dutch_roll_damping_ratio'          , 'summary.dutch_roll_damping_ratio' ],  
         [ 'spiral_doubling_time'              , 'summary.spiral_doubling_time' ],   
-        [ 'spiral_criteria'                   , 'summary.spiral_criteria' ],      
-        #[ 'mw_area'                           , 'vehicle_configurations.*.wings.main_wing.areas.reference'],
-        #[ 'mw_taper'                          , 'vehicle_configurations.*.wings.main_wing.taper'],
-        #[ 'mw_AR'                             , 'vehicle_configurations.*.wings.main_wing.aspect_ratio'],         
+        [ 'spiral_criteria'                   , 'summary.spiral_criteria' ],       
+        [ 'mw_span'                           , 'vehicle_configurations.*.wings.main_wing.spans.projected'],
+        [ 'mw_AR'                             , 'vehicle_configurations.*.wings.main_wing.aspect_ratio'],         
         [ 'mw_root_twist'                     , 'vehicle_configurations.*.wings.main_wing.twists.root' ], 
         [ 'mw_tip_twist'                      , 'vehicle_configurations.*.wings.main_wing.twists.tip'  ],     
-        [ 'mw_dihedral'                       , 'vehicle_configurations.*.wings.main_wing.dihedral'  ],     
-        [ 'vt_span'                            , 'vehicle_configurations.*.wings.vertical_stabilizer.spans.projected'],
-        [ 'vt_taper'                           , 'vehicle_configurations.*.wings.vertical_stabilizer.taper'],
-        #[ 'mw_sweep'                          , 'vehicle_configurations.*.wings.main_wing.sweeps.quarter_chord'  ],         
-        #[ 'hs_AR'                             , 'vehicle_configurations.*.wings.horizontal_stabilizer.aspect_ratio'],     
-        #[ 'hs_area'                           , 'vehicle_configurations.*.wings.horizontal_stabilizer.areas.reference'],
-        #[ 'hs_taper'                          , 'vehicle_configurations.*.wings.horizontal_stabilizer.taper'],  
-        #[ 'hs_root_twist'                     , 'vehicle_configurations.*.wings.horizontal_stabilizer.twists.root' ], 
-        #[ 'hs_tip_twist'                      , 'vehicle_configurations.*.wings.horizontal_stabilizer.twists.tip'  ], 
-        #[ 'hs_dihedral'                       , 'vehicle_configurations.*.wings.horizontal_stabilizer.dihedral'  ],
+        [ 'vt_span'                            , 'vehicle_configurations.*.wings.vertical_tail.spans.projected'],
+        [ 'vt_AR'                             , 'vehicle_configurations.*.wings.vertical_tail.aspect_ratio'],         
+        [ 'ht_AR'                             , 'vehicle_configurations.*.wings.horizontal_tail.aspect_ratio'],     
+        [ 'ht_span'                           , 'vehicle_configurations.*.wings.horizontal_tail.spans.projected'], 
         [ 'c_g_x'                             , 'vehicle_configurations.*.mass_properties.center_of_gravity[0][0]'  ], 
         [ 'AoA'                               , 'missions.stick_fixed_cruise.segments.cruise.state.conditions.aerodynamics.angles.alpha[0][0]' ], 
     ]      
@@ -192,7 +180,7 @@ def stick_fixed_stability_and_drag_optimization_setup():
     # -------------------------------------------------------------------
     #  Vehicles
     # -------------------------------------------------------------------
-    nexus.vehicle_configurations = Vehicles.stick_fixed_stability_setup()
+    nexus.vehicle_configurations = Vehicles.stick_fixed_stability_setup(vehicle)
     
     # -------------------------------------------------------------------
     #  Analyses
@@ -202,7 +190,7 @@ def stick_fixed_stability_and_drag_optimization_setup():
     # -------------------------------------------------------------------
     #  Missions
     # -------------------------------------------------------------------
-    nexus.missions = Missions.stick_fixed_stability_setup(nexus.analyses,nexus.vehicle_configurations.stick_fixed_cruise)
+    nexus.missions = Missions.stick_fixed_stability_setup(nexus.analyses,nexus.vehicle_configurations.stick_fixed_cruise,cruise_velocity,cruise_altitude)
     
     # -------------------------------------------------------------------
     #  Procedure
@@ -215,7 +203,7 @@ def stick_fixed_stability_and_drag_optimization_setup():
     nexus.summary = Data()     
     return nexus 
 
-def elevator_sizing_optimization_setup(vehicle):
+def elevator_sizing_optimization_setup(vehicle,cruise_velocity,cruise_altitude):
 
     nexus = Nexus()
     problem = Data()
@@ -227,9 +215,9 @@ def elevator_sizing_optimization_setup(vehicle):
 
     #   [ tag                   , initial,         (lb , ub)        , scaling , units ]  
     problem.inputs = np.array([            
-                  [ 'hs_elevator_chord_fraction' , 0.2    , 0.15 , 0.3   ,  1.0  ,  1*Units.less],
-                  [ 'hs_elevator_span_frac_start', 0.25   , 0.05 , 0.5   ,  1.0 ,  1*Units.less], 
-                  [ 'hs_elevator_span_frac_end'  , 0.75   , 0.6  , 0.95  ,  1.0  ,  1*Units.less],     
+                  [ 'ht_elevator_chord_fraction' , 0.2    , 0.15 , 0.3   ,  1.0  ,  1*Units.less],
+                  [ 'ht_elevator_span_frac_start', 0.25   , 0.05 , 0.5   ,  1.0 ,  1*Units.less], 
+                  [ 'ht_elevator_span_frac_end'  , 0.75   , 0.6  , 0.95  ,  1.0  ,  1*Units.less],     
                   
     ],dtype=object)   
 
@@ -261,9 +249,9 @@ def elevator_sizing_optimization_setup(vehicle):
         [ 'elevator_surface_area'             , 'summary.elevator_surface_area' ], 
         [ 'elevator_push_deflection'          , 'summary.elevator_push_deflection' ],   
         [ 'elevator_pull_deflection'          , 'summary.elevator_pull_deflection' ],     
-        [ 'hs_elevator_chord_fraction'        , 'vehicle_configurations.*.wings.horizontal_stabilizer.control_surfaces.elevator.chord_fraction'],    
-        [ 'hs_elevator_span_frac_start'       , 'vehicle_configurations.*.wings.horizontal_stabilizer.control_surfaces.elevator.span_fraction_start'],    
-        [ 'hs_elevator_span_frac_end'         , 'vehicle_configurations.*.wings.horizontal_stabilizer.control_surfaces.elevator.span_fraction_end'],  
+        [ 'ht_elevator_chord_fraction'        , 'vehicle_configurations.*.wings.horizontal_stabilizer.control_surfaces.elevator.chord_fraction'],    
+        [ 'ht_elevator_span_frac_start'       , 'vehicle_configurations.*.wings.horizontal_stabilizer.control_surfaces.elevator.span_fraction_start'],    
+        [ 'ht_elevator_span_frac_end'         , 'vehicle_configurations.*.wings.horizontal_stabilizer.control_surfaces.elevator.span_fraction_end'],  
     ]      
     
     # -------------------------------------------------------------------
@@ -279,7 +267,7 @@ def elevator_sizing_optimization_setup(vehicle):
     # -------------------------------------------------------------------
     #  Missions
     # -------------------------------------------------------------------
-    nexus.missions = Missions.elevator_sizing_setup(nexus.analyses,nexus.vehicle_configurations.elevator_sizing)
+    nexus.missions = Missions.elevator_sizing_setup(nexus.analyses,nexus.vehicle_configurations.elevator_sizing,cruise_velocity,cruise_altitude)
     
     # -------------------------------------------------------------------
     #  Procedure
@@ -295,7 +283,7 @@ def elevator_sizing_optimization_setup(vehicle):
 
  
  
-def aileron_rudder_sizing_optimization_setup(vehicle):
+def aileron_rudder_sizing_optimization_setup(vehicle,cruise_velocity,cruise_altitude):
 
     nexus = Nexus()
     problem = Data()
@@ -390,7 +378,7 @@ def aileron_rudder_sizing_optimization_setup(vehicle):
     # -------------------------------------------------------------------
     #  Missions
     # -------------------------------------------------------------------
-    nexus.missions = Missions.aileron_rudder_sizing_setup(nexus.analyses,nexus.vehicle_configurations.aileron_rudder_sizing)
+    nexus.missions = Missions.aileron_rudder_sizing_setup(nexus.analyses,nexus.vehicle_configurations.aileron_rudder_sizing,cruise_velocity,cruise_altitude)
     
     # -------------------------------------------------------------------
     #  Procedure
@@ -404,7 +392,7 @@ def aileron_rudder_sizing_optimization_setup(vehicle):
     return nexus  
 
 
-def flap_sizing_optimization_setup(optimized_vehicle):
+def flap_sizing_optimization_setup(optimized_vehicle,cruise_velocity,cruise_altitude):
 
     nexus = Nexus()
     problem = Data()
@@ -466,7 +454,7 @@ def flap_sizing_optimization_setup(optimized_vehicle):
     # -------------------------------------------------------------------
     #  Missions
     # -------------------------------------------------------------------
-    nexus.missions = Missions.flap_sizing_setup(nexus.analyses,nexus.vehicle_configurations.flap_sizing)
+    nexus.missions = Missions.flap_sizing_setup(nexus.analyses,nexus.vehicle_configurations.flap_sizing,cruise_velocity,cruise_altitude)
     
     # -------------------------------------------------------------------
     #  Procedure

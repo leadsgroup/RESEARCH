@@ -16,6 +16,8 @@ from RCAIDE.Library.Methods.Propulsors.Converters.DC_Motor                     i
 from RCAIDE.Library.Methods.Performance                                        import estimate_stall_speed
 from RCAIDE.Library.Methods.Propulsors.Converters.Rotor                        import design_prop_rotor  
 from RCAIDE.Library.Methods.Weights.Physics_Based_Buildups.Electric            import converge_physics_based_weight_buildup 
+from RCAIDE.Library.Methods.Weights.Moment_of_Inertia                          import compute_aircraft_moment_of_inertia
+from RCAIDE.Library.Methods.Weights.Center_of_Gravity                          import compute_vehicle_center_of_gravity
 from RCAIDE.Library.Plots                                                      import * 
 from RCAIDE import  load 
 from RCAIDE import  save  
@@ -213,23 +215,40 @@ def vehicle_setup(redesign_rotors=True) :
     segment.dihedral_outboard                 = 0.  * Units.degrees 
     segment.sweeps.quarter_chord              = 0.  * Units.degrees 
     segment.thickness_to_chord                = 0.12
-    wing.Segments.append(segment)             
-    
-
+    wing.Segments.append(segment)   
 
     # compute reference properties 
     wing_segmented_planform(wing, overwrite_reference = True ) 
     wing = segment_properties(wing)
     vehicle.reference_area        = wing.areas.reference  
     wing.areas.wetted             = wing.areas.reference  * 2 
-    wing.areas.exposed            = wing.areas.reference  * 2  
+    wing.areas.exposed            = wing.areas.reference  * 2 
+
+    # control surfaces ------------------------------------------- 
+    flap                          = RCAIDE.Library.Components.Wings.Control_Surfaces.Flap()
+    flap.tag                      = 'flap'
+    flap.span_fraction_start      = 0.2
+    flap.span_fraction_end        = 0.5
+    flap.deflection               = 0.0 * Units.degrees 
+    flap.chord_fraction           = 0.20
+    wing.append_control_surface(flap)  
+    
+
+    aileron                       = RCAIDE.Library.Components.Wings.Control_Surfaces.Aileron()
+    aileron.tag                   = 'aileron'
+    aileron.span_fraction_start   = 0.7
+    aileron.span_fraction_end     = 0.9 
+    aileron.deflection            = 0.0 * Units.degrees
+    aileron.chord_fraction        = 0.2
+    wing.append_control_surface(aileron)     
+    
         
     # add to vehicle 
     vehicle.append_component(wing)  
                   
                                               
     # WING PROPERTIES                         
-    wing                                      = RCAIDE.Library.Components.Wings.Wing()
+    wing                                      = RCAIDE.Library.Components.Wings.Horizontal_Tail()
     wing.tag                                  = 'v_tail'  
     wing.aspect_ratio                         = 4.27172 
     wing.sweeps.quarter_chord                 = 22.46  * Units.degrees 
@@ -250,6 +269,23 @@ def vehicle_setup(redesign_rotors=True) :
     wing.aerodynamic_center                   = [  5.267,  0., 0.470  ]  
     wing.winglet_fraction                     = 0.0 
     wing.symmetric                            = True    
+
+    elevator                              = RCAIDE.Library.Components.Wings.Control_Surfaces.Elevator()
+    elevator.tag                          = 'elevator'
+    elevator.span_fraction_start          = 0.6
+    elevator.span_fraction_end            = 0.9
+    elevator.deflection                   = 0.0  * Units.deg
+    elevator.chord_fraction               = 0.4
+    wing.append_control_surface(elevator)       
+    
+
+    rudder                                = RCAIDE.Library.Components.Wings.Control_Surfaces.Rudder()
+    rudder.tag                            = 'rudder'
+    rudder.span_fraction_start            = 0.1
+    rudder.span_fraction_end              = 0.5
+    rudder.deflection                     = 0.0  * Units.deg
+    rudder.chord_fraction                 = 0.4
+    wing.append_control_surface(rudder) 
 
     # add to vehicle
     vehicle.append_component(wing)    
@@ -373,34 +409,25 @@ def vehicle_setup(redesign_rotors=True) :
     #==================================================================================================================================== 
     # Tilt Rotor Bus 
     #====================================================================================================================================          
-    bus                                                    = RCAIDE.Library.Components.Energy.Distributors.Electrical_Bus()
-    bus.tag                                                = 'bus' 
+    bus                           = RCAIDE.Library.Components.Energy.Distributors.Electrical_Bus()
+    bus.tag                       = 'bus' 
+    bus.number_of_battery_modules =  14
 
     #------------------------------------------------------------------------------------------------------------------------------------  
     # Bus Battery
     #------------------------------------------------------------------------------------------------------------------------------------ 
-    battery_module                                                    = RCAIDE.Library.Components.Energy.Sources.Battery_Modules.Lithium_Ion_NMC()
-    number_of_modules                                                 = 14 
+    battery_module                                                    = RCAIDE.Library.Components.Energy.Sources.Battery_Modules.Lithium_Ion_NMC() 
     battery_module.tag                                                = 'bus_battery'
     battery_module.electrical_configuration.series                    = 10 
     battery_module.electrical_configuration.parallel                  = 100
     battery_module.cell.maximum_voltage                               = 4.2                                                                          
     battery_module.cell.nominal_capacity                              = 3.0                                                                          
-    battery_module.cell.nominal_voltage                               = 3.6                                                                          
-    initialize_from_circuit_configuration(battery_module)  
-   
-    battery_module.geometrtic_configuration.total                      = battery_module.electrical_configuration.total
-    battery_module.voltage                                             = battery_module.maximum_voltage 
+    battery_module.cell.nominal_voltage                               = 3.6                    
     battery_module.geometrtic_configuration.normal_count               = 25
-    battery_module.geometrtic_configuration.parallel_count             = 40  
-    
-    for _ in range(number_of_modules):
-        bus.battery_modules.append(deepcopy(battery_module))  
-    
-    for battery_module in  bus.battery_modules:
-        bus.voltage  +=   battery_module.voltage 
-    
-    bus.initialize_bus_electrical_properties()            
+    battery_module.geometrtic_configuration.parallel_count             = 40 
+    for _ in range( bus.number_of_battery_modules):
+        bus.battery_modules.append(deepcopy(battery_module))        
+    bus.initialize_bus_properties()            
     #------------------------------------------------------------------------------------------------------------------------------------  
     # Lift Propulsors 
     #------------------------------------------------------------------------------------------------------------------------------------    
@@ -475,7 +502,7 @@ def vehicle_setup(redesign_rotors=True) :
     prop_rotor_motor.design_torque           = (prop_rotor.hover.design_thrust * np.sqrt(prop_rotor.hover.design_thrust/(2*1.2*np.pi*(prop_rotor.tip_radius**2)))) /prop_rotor.hover.design_angular_velocity 
     prop_rotor_motor.angular_velocity        = prop_rotor.hover.design_angular_velocity/prop_rotor_motor.gear_ratio  
     design_motor(prop_rotor_motor) 
-    prop_rotor_motor.mass_properties.mass    = compute_motor_weight(prop_rotor_motor.design_torque)     
+    prop_rotor_motor.mass_properties.mass    = compute_motor_weight(prop_rotor_motor)     
     propulsor.motor                          = prop_rotor_motor
      
 
@@ -532,7 +559,18 @@ def vehicle_setup(redesign_rotors=True) :
     # ##################################   Determine Vehicle Mass Properties Using Physic Based Methods  ################################ 
     #------------------------------------------------------------------------------------------------------------------------------------   
     converged_vehicle, breakdown = converge_physics_based_weight_buildup(vehicle)  
-    print(breakdown) 
+    print(breakdown)
+
+    # ------------------------------------------------------------------
+    #   CG Location
+    # ------------------------------------------------------------------    
+    _ , _ =  compute_vehicle_center_of_gravity(converged_vehicle) 
+    CG_location  = converged_vehicle.mass_properties.center_of_gravity
+    
+    # ------------------------------------------------------------------
+    #   Operating Aircraft MOI
+    # ------------------------------------------------------------------    
+    _, _ = compute_aircraft_moment_of_inertia(converged_vehicle, CG_location)    
 
     return converged_vehicle 
              
@@ -1009,24 +1047,24 @@ def plot_results(results):
     # Plots fligh conditions 
     plot_flight_conditions(results) 
     
-    ## Plot arcraft trajectory
-    #plot_flight_trajectory(results)
+    # Plot arcraft trajectory
+    plot_flight_trajectory(results)
     
     # Plot Aerodynamic Coefficients
     plot_aerodynamic_coefficients(results)  
      
-    ## Plot Aircraft Stability
-    #plot_longitudinal_stability(results) 
+    # Plot Aircraft Stability
+    plot_longitudinal_stability(results) 
     
-    ## Plot Aircraft Electronics 
-    #plot_battery_temperature(results)
-    #plot_battery_cell_conditions(results) 
-    #plot_battery_degradation(results) 
-    #plot_electric_propulsor_efficiencies(results) 
+    # Plot Aircraft Electronics 
+    plot_battery_temperature(results)
+    plot_battery_cell_conditions(results) 
+    plot_battery_degradation(results) 
+    plot_electric_propulsor_efficiencies(results) 
     
-    ## Plot Propeller Conditions 
-    #plot_rotor_conditions(results) 
-    #plot_disc_and_power_loading(results)  
+    # Plot Propeller Conditions 
+    plot_rotor_conditions(results) 
+    plot_disc_and_power_loading(results)  
     return
 
 def save_aircraft_geometry(geometry,filename): 
@@ -1049,8 +1087,7 @@ def load_rotor(filename):
 
 def save_rotor(rotor, filename):
     save(rotor, filename)
-    return 
-
+    return
 
 if __name__ == '__main__': 
     main()    

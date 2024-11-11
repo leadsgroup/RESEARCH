@@ -10,6 +10,8 @@ from RCAIDE.Library.Methods.Propulsors.Converters.DC_Motor                     i
 from RCAIDE.Library.Methods.Propulsors.Converters.Rotor                        import design_lift_rotor  
 from RCAIDE.Library.Methods.Weights.Physics_Based_Buildups.Electric            import converge_physics_based_weight_buildup 
 from RCAIDE.Library.Plots                                                      import * 
+from RCAIDE.Library.Methods.Weights.Moment_of_Inertia                          import compute_aircraft_moment_of_inertia
+from RCAIDE.Library.Methods.Weights.Center_of_Gravity                          import compute_vehicle_center_of_gravity
 from RCAIDE import  load 
 from RCAIDE import  save
 
@@ -20,7 +22,7 @@ from copy import deepcopy
 import pickle
 import  pandas as pd
 import matplotlib.pyplot as plt  
- 
+  
 # ----------------------------------------------------------------------------------------------------------------------
 #  Main 
 # ----------------------------------------------------------------------------------------------------------------------  
@@ -202,29 +204,25 @@ def vehicle_setup(redesign_rotors) :
     # define network
     network                                                = RCAIDE.Framework.Networks.Electric() 
     network.charging_power                                 = 1000
+    
     #==================================================================================================================================== 
     # Lift Bus 
     #====================================================================================================================================          
-    bus                                                    = RCAIDE.Library.Components.Energy.Distributors.Electrical_Bus()
-    bus.tag                                                = 'bus'
+    bus                           = RCAIDE.Library.Components.Energy.Distributors.Electrical_Bus()
+    bus.tag                       = 'bus'
+    bus.number_of_battery_modules =  10 
     
     #------------------------------------------------------------------------------------------------------------------------------------  
     # Bus Battery
     #------------------------------------------------------------------------------------------------------------------------------------ 
-    battery_module                                                    = RCAIDE.Library.Components.Energy.Sources.Battery_Modules.Lithium_Ion_NMC()
-    number_of_modules                                                 = 10 
+    battery_module                                                    = RCAIDE.Library.Components.Energy.Sources.Battery_Modules.Lithium_Ion_NMC() 
     battery_module.electrical_configuration.series                    = 15   
-    battery_module.electrical_configuration.parallel                  = 270
-    initialize_from_circuit_configuration(battery_module)  
-    battery_module.geometrtic_configuration.total                      = battery_module.electrical_configuration.total
-    battery_module.voltage                                             = battery_module.maximum_voltage 
-    battery_module.geometrtic_configuration.normal_count               = 50
+    battery_module.electrical_configuration.parallel                  = 270  
+    battery_module.geometrtic_configuration.normal_count               = 50 
     battery_module.geometrtic_configuration.parallel_count             = 81 
-
-    for _ in range(number_of_modules):
-        bus.battery_modules.append(deepcopy(battery_module))
-        
-    bus.initialize_bus_electrical_properties()
+    for _ in range( bus.number_of_battery_modules):
+        bus.battery_modules.append(deepcopy(battery_module))    
+    bus.initialize_bus_properties()
 
     #------------------------------------------------------------------------------------------------------------------------------------  
     # Lift Propulsors 
@@ -295,7 +293,7 @@ def vehicle_setup(redesign_rotors) :
     lift_rotor_motor.design_torque                         = lift_rotor.hover.design_torque
     lift_rotor_motor.angular_velocity                      = lift_rotor.hover.design_angular_velocity/lift_rotor_motor.gear_ratio  
     design_motor(lift_rotor_motor)
-    lift_rotor_motor.mass_properties.mass                  = compute_motor_weight(lift_rotor_motor.design_torque)     
+    lift_rotor_motor.mass_properties.mass                  = compute_motor_weight(lift_rotor_motor)     
     propulsor.motor                                        = lift_rotor_motor
      
     #------------------------------------------------------------------------------------------------------------------------------------               
@@ -353,7 +351,17 @@ def vehicle_setup(redesign_rotors) :
     #------------------------------------------------------------------------------------------------------------------------------------   
     converged_vehicle, breakdown = converge_physics_based_weight_buildup(vehicle)  
     print(breakdown) 
+
+    # ------------------------------------------------------------------
+    #   CG Location
+    # ------------------------------------------------------------------    
+    _ , _ =  compute_vehicle_center_of_gravity(converged_vehicle) 
+    CG_location  = converged_vehicle.mass_properties.center_of_gravity
     
+    # ------------------------------------------------------------------
+    #   Operating Aircraft MOI
+    # ------------------------------------------------------------------    
+    _, _ = compute_aircraft_moment_of_inertia(converged_vehicle, CG_location)      
     return converged_vehicle 
   
 # ----------------------------------------------------------------------
