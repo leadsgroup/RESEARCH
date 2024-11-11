@@ -170,16 +170,16 @@
  AVL   c>  
 
  Run cases read  ...
-    1: case_0005_0001                          
-    2: case_0005_0002                          
-    3: case_0005_0003                          
-    4: case_0005_0004                          
-    5: case_0005_0005                          
-    6: case_0005_0006                          
+    1: case_0001_0001                          
+    2: case_0001_0002                          
+    3: case_0001_0003                          
+    4: case_0001_0004                          
+    5: case_0001_0005                          
+    6: case_0001_0006                          
 
 
  AVL   c>  
- Operation of run case 1/6:  case_0005_0001                          
+ Operation of run case 1/6:  case_0001_0001                          
  ==========================================================
 
   variable          constraint              
@@ -217,7 +217,7 @@
                                VM  strip shear,moment    
 
  .OPER (case 1/6)   c>  
- Operation of run case 1/6:  case_0005_0001                          
+ Operation of run case 1/6:  case_0001_0001                          
  ==========================================================
 
   variable          constraint              
@@ -275,7 +275,7 @@
       Select new  constraint,value  for flap           c>  
  Enter specified flap        :   0.000    
 
- Operation of run case 1/6:  case_0005_0001                          
+ Operation of run case 1/6:  case_0001_0001                          
  ==========================================================
 
   variable          constraint              
@@ -333,7 +333,7 @@
       Select new  constraint,value  for aileron        c>  
  Enter specified aileron     :   0.000    
 
- Operation of run case 1/6:  case_0005_0001                          
+ Operation of run case 1/6:  case_0001_0001                          
  ==========================================================
 
   variable          constraint              
@@ -391,7 +391,7 @@
       Select new  constraint,value  for elevator       c>  
  Enter specified elevator    :   0.000    
 
- Operation of run case 1/6:  case_0005_0001                          
+ Operation of run case 1/6:  case_0001_0001                          
  ==========================================================
 
   variable          constraint              
@@ -449,7 +449,7 @@
       Select new  constraint,value  for rudder         c>  
  Enter specified rudder      :   0.000    
 
- Operation of run case 1/6:  case_0005_0001                          
+ Operation of run case 1/6:  case_0001_0001                          
  ==========================================================
 
   variable          constraint              
@@ -507,21 +507,21 @@
 
  Standard axis orientation,  X fwd, Z down         
 
- Run case: case_0005_0001                          
+ Run case: case_0001_0001                          
 
   Alpha =  -2.00000     pb/2V =   0.00000     p'b/2V =   0.00000
   Beta  =   0.00000     qc/2V =   0.00000
-  Mach  =     0.650     rb/2V =   0.00000     r'b/2V =   0.00000
+  Mach  =     0.050     rb/2V =   0.00000     r'b/2V =   0.00000
 
-  CXtot =   0.00640     Cltot =   0.00000     Cl'tot =   0.00000
-  CYtot =   0.00000     Cmtot =  -0.34832
-  CZtot =   0.26674     Cntot =   0.00000     Cn'tot =   0.00000
+  CXtot =   0.00613     Cltot =   0.00000     Cl'tot =   0.00000
+  CYtot =  -0.00000     Cmtot =  -0.30528
+  CZtot =   0.23504     Cntot =  -0.00000     Cn'tot =  -0.00000
 
-  CLtot =  -0.26680
-  CDtot =   0.00292
-  CDvis =   0.00000     CDind =   0.00292
-  CLff  =  -0.26691     CDff  =   0.00306    | Trefftz
-  CYff  =   0.00000         e =    0.9134    | Plane  
+  CLtot =  -0.23511
+  CDtot =   0.00208
+  CDvis =   0.00000     CDind =   0.00208
+  CLff  =  -0.23527     CDff  =   0.00238    | Trefftz
+  CYff  =  -0.00000         e =    0.9103    | Plane  
  
    flap            =   0.00000
    aileron         =   0.00000
@@ -530,7 +530,7 @@
  
  ---------------------------------------------------------------
 
- Operation of run case 1/6:  case_0005_0001                          
+ Operation of run case 1/6:  case_0001_0001                          
  ==========================================================
 
   variable          constraint              
@@ -569,7 +569,7 @@
 
  .OPER (case 1/6)   c>  
 Enter filename, or <return> for screen output   s>  
- Operation of run case 1/6:  case_0005_0001                          
+ Operation of run case 1/6:  case_0001_0001                          
  ==========================================================
 
   variable          constraint              
@@ -608,7 +608,7 @@ Enter filename, or <return> for screen output   s>
 
  .OPER (case 1/6)   c>  
 Enter filename, or <return> for screen output   s>  
- Operation of run case 1/6:  case_0005_0001                          
+ Operation of run case 1/6:  case_0001_0001                          
  ==========================================================
 
   variable          constraint              
@@ -647,7 +647,7 @@ Enter filename, or <return> for screen output   s>
 
  .OPER (case 1/6)   c>  
 Enter filename, or <return> for screen output   s>  
- Operation of run case 1/6:  case_0005_0001                          
+ Operation of run case 1/6:  case_0001_0001                          
  ==========================================================
 
   variable          constraint              
@@ -686,7 +686,7 @@ Enter filename, or <return> for screen output   s>
 
  .OPER (case 1/6)   c>  
 Enter filename, or <return> for screen output   s>  
- Operation of run case 1/6:  case_0005_0001                          
+ Operation of run case 1/6:  case_0001_0001                          
  ==========================================================
 
   variable          constraint              
@@ -724,7 +724,7 @@ Enter filename, or <return> for screen output   s>
                                VM  strip shear,moment    
 
  .OPER (case 1/6)   c>  
- Operation of run case 2/6:  case_0005_0002                          
+ Operation of run case 2/6:  case_0001_0002                          
  ==========================================================
 
   variable          constraint              
@@ -782,7 +782,7 @@ Enter filename, or <return> for screen output   s>
       Select new  constraint,value  for flap           c>  
  Enter specified flap        :   0.000    
 
- Operation of run case 2/6:  case_0005_0002                          
+ Operation of run case 2/6:  case_0001_0002                          
  ==========================================================
 
   variable          constraint              
@@ -840,7 +840,7 @@ Enter filename, or <return> for screen output   s>
       Select new  constraint,value  for aileron        c>  
  Enter specified aileron     :   0.000    
 
- Operation of run case 2/6:  case_0005_0002                          
+ Operation of run case 2/6:  case_0001_0002                          
  ==========================================================
 
   variable          constraint              
@@ -898,7 +898,7 @@ Enter filename, or <return> for screen output   s>
       Select new  constraint,value  for elevator       c>  
  Enter specified elevator    :   0.000    
 
- Operation of run case 2/6:  case_0005_0002                          
+ Operation of run case 2/6:  case_0001_0002                          
  ==========================================================
 
   variable          constraint              
@@ -956,7 +956,7 @@ Enter filename, or <return> for screen output   s>
       Select new  constraint,value  for rudder         c>  
  Enter specified rudder      :   0.000    
 
- Operation of run case 2/6:  case_0005_0002                          
+ Operation of run case 2/6:  case_0001_0002                          
  ==========================================================
 
   variable          constraint              
@@ -1009,11 +1009,11 @@ Enter filename, or <return> for screen output   s>
 
  Standard axis orientation,  X fwd, Z down         
 
- Run case: case_0005_0002                          
+ Run case: case_0001_0002                          
 
   Alpha =   0.00000     pb/2V =   0.00000     p'b/2V =   0.00000
   Beta  =   0.00000     qc/2V =   0.00000
-  Mach  =     0.650     rb/2V =   0.00000     r'b/2V =   0.00000
+  Mach  =     0.050     rb/2V =   0.00000     r'b/2V =   0.00000
 
   CXtot =   0.00000     Cltot =   0.00000     Cl'tot =   0.00000
   CYtot =   0.00000     Cmtot =   0.00000
@@ -1032,7 +1032,7 @@ Enter filename, or <return> for screen output   s>
  
  ---------------------------------------------------------------
 
- Operation of run case 2/6:  case_0005_0002                          
+ Operation of run case 2/6:  case_0001_0002                          
  ==========================================================
 
   variable          constraint              
@@ -1071,7 +1071,7 @@ Enter filename, or <return> for screen output   s>
 
  .OPER (case 2/6)   c>  
 Enter filename, or <return> for screen output   s>  
- Operation of run case 2/6:  case_0005_0002                          
+ Operation of run case 2/6:  case_0001_0002                          
  ==========================================================
 
   variable          constraint              
@@ -1110,7 +1110,7 @@ Enter filename, or <return> for screen output   s>
 
  .OPER (case 2/6)   c>  
 Enter filename, or <return> for screen output   s>  
- Operation of run case 2/6:  case_0005_0002                          
+ Operation of run case 2/6:  case_0001_0002                          
  ==========================================================
 
   variable          constraint              
@@ -1149,7 +1149,7 @@ Enter filename, or <return> for screen output   s>
 
  .OPER (case 2/6)   c>  
 Enter filename, or <return> for screen output   s>  
- Operation of run case 2/6:  case_0005_0002                          
+ Operation of run case 2/6:  case_0001_0002                          
  ==========================================================
 
   variable          constraint              
@@ -1188,7 +1188,7 @@ Enter filename, or <return> for screen output   s>
 
  .OPER (case 2/6)   c>  
 Enter filename, or <return> for screen output   s>  
- Operation of run case 2/6:  case_0005_0002                          
+ Operation of run case 2/6:  case_0001_0002                          
  ==========================================================
 
   variable          constraint              
@@ -1226,7 +1226,7 @@ Enter filename, or <return> for screen output   s>
                                VM  strip shear,moment    
 
  .OPER (case 2/6)   c>  
- Operation of run case 3/6:  case_0005_0003                          
+ Operation of run case 3/6:  case_0001_0003                          
  ==========================================================
 
   variable          constraint              
@@ -1284,7 +1284,7 @@ Enter filename, or <return> for screen output   s>
       Select new  constraint,value  for flap           c>  
  Enter specified flap        :   0.000    
 
- Operation of run case 3/6:  case_0005_0003                          
+ Operation of run case 3/6:  case_0001_0003                          
  ==========================================================
 
   variable          constraint              
@@ -1342,7 +1342,7 @@ Enter filename, or <return> for screen output   s>
       Select new  constraint,value  for aileron        c>  
  Enter specified aileron     :   0.000    
 
- Operation of run case 3/6:  case_0005_0003                          
+ Operation of run case 3/6:  case_0001_0003                          
  ==========================================================
 
   variable          constraint              
@@ -1400,7 +1400,7 @@ Enter filename, or <return> for screen output   s>
       Select new  constraint,value  for elevator       c>  
  Enter specified elevator    :   0.000    
 
- Operation of run case 3/6:  case_0005_0003                          
+ Operation of run case 3/6:  case_0001_0003                          
  ==========================================================
 
   variable          constraint              
@@ -1458,7 +1458,7 @@ Enter filename, or <return> for screen output   s>
       Select new  constraint,value  for rudder         c>  
  Enter specified rudder      :   0.000    
 
- Operation of run case 3/6:  case_0005_0003                          
+ Operation of run case 3/6:  case_0001_0003                          
  ==========================================================
 
   variable          constraint              
@@ -1511,21 +1511,21 @@ Enter filename, or <return> for screen output   s>
 
  Standard axis orientation,  X fwd, Z down         
 
- Run case: case_0005_0003                          
+ Run case: case_0001_0003                          
 
   Alpha =   2.00000     pb/2V =   0.00000     p'b/2V =   0.00000
   Beta  =   0.00000     qc/2V =   0.00000
-  Mach  =     0.650     rb/2V =   0.00000     r'b/2V =   0.00000
+  Mach  =     0.050     rb/2V =   0.00000     r'b/2V =   0.00000
 
-  CXtot =   0.00640     Cltot =   0.00000     Cl'tot =   0.00000
-  CYtot =  -0.00000     Cmtot =   0.34560
-  CZtot =  -0.26675     Cntot =   0.00000     Cn'tot =   0.00000
+  CXtot =   0.00613     Cltot =  -0.00000     Cl'tot =  -0.00000
+  CYtot =  -0.00000     Cmtot =   0.30266
+  CZtot =  -0.23521     Cntot =  -0.00000     Cn'tot =  -0.00000
 
-  CLtot =   0.26681
-  CDtot =   0.00292
-  CDvis =   0.00000     CDind =   0.00292
-  CLff  =   0.26691     CDff  =   0.00306    | Trefftz
-  CYff  =  -0.00000         e =    0.9134    | Plane  
+  CLtot =   0.23528
+  CDtot =   0.00209
+  CDvis =   0.00000     CDind =   0.00209
+  CLff  =   0.23527     CDff  =   0.00238    | Trefftz
+  CYff  =   0.00000         e =    0.9103    | Plane  
  
    flap            =   0.00000
    aileron         =   0.00000
@@ -1534,7 +1534,7 @@ Enter filename, or <return> for screen output   s>
  
  ---------------------------------------------------------------
 
- Operation of run case 3/6:  case_0005_0003                          
+ Operation of run case 3/6:  case_0001_0003                          
  ==========================================================
 
   variable          constraint              
@@ -1573,7 +1573,7 @@ Enter filename, or <return> for screen output   s>
 
  .OPER (case 3/6)   c>  
 Enter filename, or <return> for screen output   s>  
- Operation of run case 3/6:  case_0005_0003                          
+ Operation of run case 3/6:  case_0001_0003                          
  ==========================================================
 
   variable          constraint              
@@ -1612,7 +1612,7 @@ Enter filename, or <return> for screen output   s>
 
  .OPER (case 3/6)   c>  
 Enter filename, or <return> for screen output   s>  
- Operation of run case 3/6:  case_0005_0003                          
+ Operation of run case 3/6:  case_0001_0003                          
  ==========================================================
 
   variable          constraint              
@@ -1651,7 +1651,7 @@ Enter filename, or <return> for screen output   s>
 
  .OPER (case 3/6)   c>  
 Enter filename, or <return> for screen output   s>  
- Operation of run case 3/6:  case_0005_0003                          
+ Operation of run case 3/6:  case_0001_0003                          
  ==========================================================
 
   variable          constraint              
@@ -1690,7 +1690,7 @@ Enter filename, or <return> for screen output   s>
 
  .OPER (case 3/6)   c>  
 Enter filename, or <return> for screen output   s>  
- Operation of run case 3/6:  case_0005_0003                          
+ Operation of run case 3/6:  case_0001_0003                          
  ==========================================================
 
   variable          constraint              
@@ -1728,7 +1728,7 @@ Enter filename, or <return> for screen output   s>
                                VM  strip shear,moment    
 
  .OPER (case 3/6)   c>  
- Operation of run case 4/6:  case_0005_0004                          
+ Operation of run case 4/6:  case_0001_0004                          
  ==========================================================
 
   variable          constraint              
@@ -1786,7 +1786,7 @@ Enter filename, or <return> for screen output   s>
       Select new  constraint,value  for flap           c>  
  Enter specified flap        :   0.000    
 
- Operation of run case 4/6:  case_0005_0004                          
+ Operation of run case 4/6:  case_0001_0004                          
  ==========================================================
 
   variable          constraint              
@@ -1844,7 +1844,7 @@ Enter filename, or <return> for screen output   s>
       Select new  constraint,value  for aileron        c>  
  Enter specified aileron     :   0.000    
 
- Operation of run case 4/6:  case_0005_0004                          
+ Operation of run case 4/6:  case_0001_0004                          
  ==========================================================
 
   variable          constraint              
@@ -1902,7 +1902,7 @@ Enter filename, or <return> for screen output   s>
       Select new  constraint,value  for elevator       c>  
  Enter specified elevator    :   0.000    
 
- Operation of run case 4/6:  case_0005_0004                          
+ Operation of run case 4/6:  case_0001_0004                          
  ==========================================================
 
   variable          constraint              
@@ -1960,7 +1960,7 @@ Enter filename, or <return> for screen output   s>
       Select new  constraint,value  for rudder         c>  
  Enter specified rudder      :   0.000    
 
- Operation of run case 4/6:  case_0005_0004                          
+ Operation of run case 4/6:  case_0001_0004                          
  ==========================================================
 
   variable          constraint              
@@ -2013,21 +2013,21 @@ Enter filename, or <return> for screen output   s>
 
  Standard axis orientation,  X fwd, Z down         
 
- Run case: case_0005_0004                          
+ Run case: case_0001_0004                          
 
   Alpha =   5.00000     pb/2V =   0.00000     p'b/2V =   0.00000
   Beta  =   0.00000     qc/2V =   0.00000
-  Mach  =     0.650     rb/2V =   0.00000     r'b/2V =   0.00000
+  Mach  =     0.050     rb/2V =   0.00000     r'b/2V =   0.00000
 
-  CXtot =   0.03990     Cltot =   0.00000     Cl'tot =   0.00000
-  CYtot =  -0.00000     Cmtot =   0.85522
-  CZtot =  -0.66403     Cntot =   0.00000     Cn'tot =   0.00000
+  CXtot =   0.03821     Cltot =  -0.00000     Cl'tot =  -0.00000
+  CYtot =  -0.00000     Cmtot =   0.74852
+  CZtot =  -0.58582     Cntot =  -0.00000     Cn'tot =  -0.00000
 
-  CLtot =   0.66498
-  CDtot =   0.01812
-  CDvis =   0.00000     CDind =   0.01812
-  CLff  =   0.66655     CDff  =   0.01906    | Trefftz
-  CYff  =  -0.00000         e =    0.9134    | Plane  
+  CLtot =   0.58692
+  CDtot =   0.01299
+  CDvis =   0.00000     CDind =   0.01299
+  CLff  =   0.58754     CDff  =   0.01486    | Trefftz
+  CYff  =  -0.00000         e =    0.9103    | Plane  
  
    flap            =   0.00000
    aileron         =   0.00000
@@ -2036,7 +2036,7 @@ Enter filename, or <return> for screen output   s>
  
  ---------------------------------------------------------------
 
- Operation of run case 4/6:  case_0005_0004                          
+ Operation of run case 4/6:  case_0001_0004                          
  ==========================================================
 
   variable          constraint              
@@ -2075,7 +2075,7 @@ Enter filename, or <return> for screen output   s>
 
  .OPER (case 4/6)   c>  
 Enter filename, or <return> for screen output   s>  
- Operation of run case 4/6:  case_0005_0004                          
+ Operation of run case 4/6:  case_0001_0004                          
  ==========================================================
 
   variable          constraint              
@@ -2114,7 +2114,7 @@ Enter filename, or <return> for screen output   s>
 
  .OPER (case 4/6)   c>  
 Enter filename, or <return> for screen output   s>  
- Operation of run case 4/6:  case_0005_0004                          
+ Operation of run case 4/6:  case_0001_0004                          
  ==========================================================
 
   variable          constraint              
@@ -2153,7 +2153,7 @@ Enter filename, or <return> for screen output   s>
 
  .OPER (case 4/6)   c>  
 Enter filename, or <return> for screen output   s>  
- Operation of run case 4/6:  case_0005_0004                          
+ Operation of run case 4/6:  case_0001_0004                          
  ==========================================================
 
   variable          constraint              
@@ -2192,7 +2192,7 @@ Enter filename, or <return> for screen output   s>
 
  .OPER (case 4/6)   c>  
 Enter filename, or <return> for screen output   s>  
- Operation of run case 4/6:  case_0005_0004                          
+ Operation of run case 4/6:  case_0001_0004                          
  ==========================================================
 
   variable          constraint              
@@ -2230,7 +2230,7 @@ Enter filename, or <return> for screen output   s>
                                VM  strip shear,moment    
 
  .OPER (case 4/6)   c>  
- Operation of run case 5/6:  case_0005_0005                          
+ Operation of run case 5/6:  case_0001_0005                          
  ==========================================================
 
   variable          constraint              
@@ -2288,7 +2288,7 @@ Enter filename, or <return> for screen output   s>
       Select new  constraint,value  for flap           c>  
  Enter specified flap        :   0.000    
 
- Operation of run case 5/6:  case_0005_0005                          
+ Operation of run case 5/6:  case_0001_0005                          
  ==========================================================
 
   variable          constraint              
@@ -2346,7 +2346,7 @@ Enter filename, or <return> for screen output   s>
       Select new  constraint,value  for aileron        c>  
  Enter specified aileron     :   0.000    
 
- Operation of run case 5/6:  case_0005_0005                          
+ Operation of run case 5/6:  case_0001_0005                          
  ==========================================================
 
   variable          constraint              
@@ -2404,7 +2404,7 @@ Enter filename, or <return> for screen output   s>
       Select new  constraint,value  for elevator       c>  
  Enter specified elevator    :   0.000    
 
- Operation of run case 5/6:  case_0005_0005                          
+ Operation of run case 5/6:  case_0001_0005                          
  ==========================================================
 
   variable          constraint              
@@ -2462,7 +2462,7 @@ Enter filename, or <return> for screen output   s>
       Select new  constraint,value  for rudder         c>  
  Enter specified rudder      :   0.000    
 
- Operation of run case 5/6:  case_0005_0005                          
+ Operation of run case 5/6:  case_0001_0005                          
  ==========================================================
 
   variable          constraint              
@@ -2515,21 +2515,21 @@ Enter filename, or <return> for screen output   s>
 
  Standard axis orientation,  X fwd, Z down         
 
- Run case: case_0005_0005                          
+ Run case: case_0001_0005                          
 
   Alpha =   7.00000     pb/2V =   0.00000     p'b/2V =   0.00000
   Beta  =   0.00000     qc/2V =   0.00000
-  Mach  =     0.650     rb/2V =   0.00000     r'b/2V =   0.00000
+  Mach  =     0.050     rb/2V =   0.00000     r'b/2V =   0.00000
 
-  CXtot =   0.07802     Cltot =  -0.00000     Cl'tot =  -0.00000
-  CYtot =   0.00000     Cmtot =   1.18671
-  CZtot =  -0.92511     Cntot =   0.00000     Cn'tot =   0.00000
+  CXtot =   0.07471     Cltot =  -0.00000     Cl'tot =  -0.00000
+  CYtot =  -0.00000     Cmtot =   1.03822
+  CZtot =  -0.81644     Cntot =  -0.00000     Cn'tot =  -0.00000
 
-  CLtot =   0.92773
-  CDtot =   0.03531
-  CDvis =   0.00000     CDind =   0.03531
-  CLff  =   0.93204     CDff  =   0.03727    | Trefftz
-  CYff  =  -0.00000         e =    0.9134    | Plane  
+  CLtot =   0.81946
+  CDtot =   0.02535
+  CDvis =   0.00000     CDind =   0.02535
+  CLff  =   0.82155     CDff  =   0.02906    | Trefftz
+  CYff  =  -0.00000         e =    0.9103    | Plane  
  
    flap            =   0.00000
    aileron         =   0.00000
@@ -2538,7 +2538,7 @@ Enter filename, or <return> for screen output   s>
  
  ---------------------------------------------------------------
 
- Operation of run case 5/6:  case_0005_0005                          
+ Operation of run case 5/6:  case_0001_0005                          
  ==========================================================
 
   variable          constraint              
@@ -2577,7 +2577,7 @@ Enter filename, or <return> for screen output   s>
 
  .OPER (case 5/6)   c>  
 Enter filename, or <return> for screen output   s>  
- Operation of run case 5/6:  case_0005_0005                          
+ Operation of run case 5/6:  case_0001_0005                          
  ==========================================================
 
   variable          constraint              
@@ -2616,7 +2616,7 @@ Enter filename, or <return> for screen output   s>
 
  .OPER (case 5/6)   c>  
 Enter filename, or <return> for screen output   s>  
- Operation of run case 5/6:  case_0005_0005                          
+ Operation of run case 5/6:  case_0001_0005                          
  ==========================================================
 
   variable          constraint              
@@ -2655,7 +2655,7 @@ Enter filename, or <return> for screen output   s>
 
  .OPER (case 5/6)   c>  
 Enter filename, or <return> for screen output   s>  
- Operation of run case 5/6:  case_0005_0005                          
+ Operation of run case 5/6:  case_0001_0005                          
  ==========================================================
 
   variable          constraint              
@@ -2694,7 +2694,7 @@ Enter filename, or <return> for screen output   s>
 
  .OPER (case 5/6)   c>  
 Enter filename, or <return> for screen output   s>  
- Operation of run case 5/6:  case_0005_0005                          
+ Operation of run case 5/6:  case_0001_0005                          
  ==========================================================
 
   variable          constraint              
@@ -2732,7 +2732,7 @@ Enter filename, or <return> for screen output   s>
                                VM  strip shear,moment    
 
  .OPER (case 5/6)   c>  
- Operation of run case 6/6:  case_0005_0006                          
+ Operation of run case 6/6:  case_0001_0006                          
  ==========================================================
 
   variable          constraint              
@@ -2790,7 +2790,7 @@ Enter filename, or <return> for screen output   s>
       Select new  constraint,value  for flap           c>  
  Enter specified flap        :   0.000    
 
- Operation of run case 6/6:  case_0005_0006                          
+ Operation of run case 6/6:  case_0001_0006                          
  ==========================================================
 
   variable          constraint              
@@ -2848,7 +2848,7 @@ Enter filename, or <return> for screen output   s>
       Select new  constraint,value  for aileron        c>  
  Enter specified aileron     :   0.000    
 
- Operation of run case 6/6:  case_0005_0006                          
+ Operation of run case 6/6:  case_0001_0006                          
  ==========================================================
 
   variable          constraint              
@@ -2906,7 +2906,7 @@ Enter filename, or <return> for screen output   s>
       Select new  constraint,value  for elevator       c>  
  Enter specified elevator    :   0.000    
 
- Operation of run case 6/6:  case_0005_0006                          
+ Operation of run case 6/6:  case_0001_0006                          
  ==========================================================
 
   variable          constraint              
@@ -2964,7 +2964,7 @@ Enter filename, or <return> for screen output   s>
       Select new  constraint,value  for rudder         c>  
  Enter specified rudder      :   0.000    
 
- Operation of run case 6/6:  case_0005_0006                          
+ Operation of run case 6/6:  case_0001_0006                          
  ==========================================================
 
   variable          constraint              
@@ -3017,21 +3017,21 @@ Enter filename, or <return> for screen output   s>
 
  Standard axis orientation,  X fwd, Z down         
 
- Run case: case_0005_0006                          
+ Run case: case_0001_0006                          
 
   Alpha =  10.00000     pb/2V =   0.00000     p'b/2V =   0.00000
   Beta  =   0.00000     qc/2V =   0.00000
-  Mach  =     0.650     rb/2V =   0.00000     r'b/2V =   0.00000
+  Mach  =     0.050     rb/2V =   0.00000     r'b/2V =   0.00000
 
-  CXtot =   0.15840     Cltot =  -0.00000     Cl'tot =  -0.00000
-  CYtot =   0.00000     Cmtot =   1.66750
-  CZtot =  -1.30791     Cntot =   0.00000     Cn'tot =   0.00000
+  CXtot =   0.15168     Cltot =  -0.00000     Cl'tot =  -0.00000
+  CYtot =  -0.00000     Cmtot =   1.45794
+  CZtot =  -1.15488     Cntot =  -0.00000     Cn'tot =  -0.00000
 
-  CLtot =   1.31554
-  CDtot =   0.07113
-  CDvis =   0.00000     CDind =   0.07113
-  CLff  =   1.32803     CDff  =   0.07567    | Trefftz
-  CYff  =  -0.00000         e =    0.9134    | Plane  
+  CLtot =   1.16367
+  CDtot =   0.05117
+  CDvis =   0.00000     CDind =   0.05117
+  CLff  =   1.17060     CDff  =   0.05900    | Trefftz
+  CYff  =  -0.00000         e =    0.9103    | Plane  
  
    flap            =   0.00000
    aileron         =   0.00000
@@ -3040,7 +3040,7 @@ Enter filename, or <return> for screen output   s>
  
  ---------------------------------------------------------------
 
- Operation of run case 6/6:  case_0005_0006                          
+ Operation of run case 6/6:  case_0001_0006                          
  ==========================================================
 
   variable          constraint              
@@ -3079,7 +3079,7 @@ Enter filename, or <return> for screen output   s>
 
  .OPER (case 6/6)   c>  
 Enter filename, or <return> for screen output   s>  
- Operation of run case 6/6:  case_0005_0006                          
+ Operation of run case 6/6:  case_0001_0006                          
  ==========================================================
 
   variable          constraint              
@@ -3118,7 +3118,7 @@ Enter filename, or <return> for screen output   s>
 
  .OPER (case 6/6)   c>  
 Enter filename, or <return> for screen output   s>  
- Operation of run case 6/6:  case_0005_0006                          
+ Operation of run case 6/6:  case_0001_0006                          
  ==========================================================
 
   variable          constraint              
@@ -3157,7 +3157,7 @@ Enter filename, or <return> for screen output   s>
 
  .OPER (case 6/6)   c>  
 Enter filename, or <return> for screen output   s>  
- Operation of run case 6/6:  case_0005_0006                          
+ Operation of run case 6/6:  case_0001_0006                          
  ==========================================================
 
   variable          constraint              
@@ -3196,7 +3196,7 @@ Enter filename, or <return> for screen output   s>
 
  .OPER (case 6/6)   c>  
 Enter filename, or <return> for screen output   s>  
- Operation of run case 6/6:  case_0005_0006                          
+ Operation of run case 6/6:  case_0001_0006                          
  ==========================================================
 
   variable          constraint              
