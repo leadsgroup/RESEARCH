@@ -15,8 +15,8 @@ from RCAIDE.Library.Methods.Propulsors.Converters.DC_Motor                     i
 from RCAIDE.Library.Methods.Geometry.Planform                                  import wing_planform
 from RCAIDE.Library.Methods.Propulsors.Converters.Rotor                        import design_prop_rotor  
 from RCAIDE.Library.Methods.Weights.Physics_Based_Buildups.Electric            import converge_physics_based_weight_buildup 
-from RCAIDE.Library.Methods.Weights.Moment_of_Inertia.compute_aircraft_moment_of_inertia import compute_aircraft_moment_of_inertia
-from RCAIDE.Library.Methods.Weights.Center_of_Gravity                        import compute_vehicle_center_of_gravity
+from RCAIDE.Library.Methods.Weights.Moment_of_Inertia                          import compute_aircraft_moment_of_inertia
+from RCAIDE.Library.Methods.Weights.Center_of_Gravity                          import compute_vehicle_center_of_gravity
 from RCAIDE.Library.Plots                                                      import * 
 from RCAIDE import  load 
 from RCAIDE import  save
@@ -100,19 +100,17 @@ def vehicle_setup(redesign_rotors=True):
     #------------------------------------------------------------------------------------------------------------------------------------
     #  Main Wing 
     #------------------------------------------------------------------------------------------------------------------------------------   
-    wing                                        = RCAIDE.Library.Components.Wings.Main_Wing()
+    wing                                        = RCAIDE.Library.Components.Wings.Wing()
     wing.tag                                    = 'canard_wing'  
     wing.aspect_ratio                           = 8.51507 
     wing.sweeps.quarter_chord                   = 0.0
     wing.thickness_to_chord                     = 0.16 
-    wing.taper                                  = 1.  
-    span                                        = 12
-    wing.spans.projected                        = span 
-    chord                                       = 0.85
-    wing.chords.root                            = chord
-    wing.total_length                           = chord
-    wing.chords.tip                             = chord
-    wing.chords.mean_aerodynamic                = chord
+    wing.taper                                  = 1.   
+    wing.spans.projected                        = 12 
+    wing.chords.root                            = 0.85
+    wing.total_length                           = 0.85
+    wing.chords.tip                             = 0.85
+    wing.chords.mean_aerodynamic                = 0.85
     wing.dihedral                               = 0.0  
     wing.areas.reference                        = wing.chords.root*wing.spans.projected 
     wing.areas.wetted                           = 2*wing.chords.root*wing.spans.projected*0.95  
@@ -138,13 +136,13 @@ def vehicle_setup(redesign_rotors=True):
     wing.aspect_ratio                           = 8.51507 
     wing.sweeps.quarter_chord                   = 0.0
     wing.thickness_to_chord                     = 0.16 
-    wing.taper                                  = 1.  
-    wing.spans.projected                        = span 
-    wing.chords.root                            = chord
-    wing.total_length                           = chord 
-    wing.chords.tip                             = chord
-    wing.chords.mean_aerodynamic                = chord
-    wing.dihedral                               = 0.0  
+    wing.taper                                  = 1.   
+    wing.spans.projected                        = 12 
+    wing.chords.root                            = 0.85
+    wing.total_length                           = 0.85
+    wing.chords.tip                             = 0.85
+    wing.chords.mean_aerodynamic                = 0.85
+    wing.dihedral                               = 0.0      
     wing.areas.reference                        = wing.chords.root*wing.spans.projected 
     wing.areas.wetted                           = 2*wing.chords.root*wing.spans.projected*0.95  
     wing.areas.exposed                          = 2*wing.chords.root*wing.spans.projected*0.95 
@@ -273,34 +271,26 @@ def vehicle_setup(redesign_rotors=True):
     #==================================================================================================================================== 
     # Lift Bus 
     #====================================================================================================================================          
-    bus                                                    = RCAIDE.Library.Components.Energy.Distributors.Electrical_Bus()
-    bus.tag                                                = 'bus' 
+    bus                           = RCAIDE.Library.Components.Energy.Distributors.Electrical_Bus()
+    bus.tag                       = 'bus'
+    bus.number_of_battery_modules =  1
 
     #------------------------------------------------------------------------------------------------------------------------------------  
     # Bus Battery
     #------------------------------------------------------------------------------------------------------------------------------------ 
-    battery_module                                                    = RCAIDE.Library.Components.Energy.Sources.Battery_Modules.Lithium_Ion_NMC()
-    number_of_modules                                                 = 1 
+    battery_module                                                    = RCAIDE.Library.Components.Energy.Sources.Battery_Modules.Lithium_Ion_NMC() 
     battery_module.tag                                                = 'bus_battery'
     battery_module.electrical_configuration.series                    = 140
     battery_module.electrical_configuration.parallel                  = 80
     battery_module.origin                                             = [[ 0.5*fuselage.lengths.total, 0.0  ,  1.323 ]] 
     battery_module.cell.maximum_voltage                               = 4.2                                                                          
     battery_module.cell.nominal_capacity                              = 3.0                                                                          
-    battery_module.cell.nominal_voltage                               = 3.6          
-   
-    battery_module.geometrtic_configuration.total                      = battery_module.electrical_configuration.total
-    battery_module.voltage                                             = battery_module.maximum_voltage 
-    battery_module.geometrtic_configuration.normal_count               = 25
-    battery_module.geometrtic_configuration.parallel_count             = 40  
-    
-    for _ in range(number_of_modules):
-        bus.battery_modules.append(deepcopy(battery_module))  
-    
-    for battery_module in  bus.battery_modules:
-        bus.voltage  +=   battery_module.voltage
-    
-    bus.initialize_bus_electrical_properties()        
+    battery_module.cell.nominal_voltage                               = 3.6           
+    battery_module.geometrtic_configuration.normal_count              = 140
+    battery_module.geometrtic_configuration.parallel_count            = 80
+    for _ in range(bus.number_of_battery_modules):
+        bus.battery_modules.append(deepcopy(battery_module))   
+    bus.initialize_bus_properties()        
     
     #------------------------------------------------------------------------------------------------------------------------------------  
     # Lift Propulsors 
@@ -375,7 +365,7 @@ def vehicle_setup(redesign_rotors=True):
     prop_rotor_motor.design_torque           = prop_rotor.hover.design_torque
     prop_rotor_motor.angular_velocity        = prop_rotor.hover.design_angular_velocity/prop_rotor_motor.gear_ratio  
     design_motor(prop_rotor_motor)
-    prop_rotor_motor.mass_properties.mass    = compute_motor_weight(prop_rotor_motor.design_torque)     
+    prop_rotor_motor.mass_properties.mass    = compute_motor_weight(prop_rotor_motor)     
     propulsor.motor                          = prop_rotor_motor
      
 
@@ -431,24 +421,15 @@ def vehicle_setup(redesign_rotors=True):
     print(breakdown) 
     
     # ------------------------------------------------------------------
-    #   Weight Breakdown 
-    # ------------------------------------------------------------------  
-    weight_analysis                               = RCAIDE.Framework.Analyses.Weights.Weights_EVTOL()
-    weight_analysis.vehicle                       = vehicle
-    weight_analysis.method                        = 'Raymer'
-    weight_analysis.settings.use_max_fuel_weight  = False  
-    results                                       = weight_analysis.evaluate() 
-    
-    # ------------------------------------------------------------------
     #   CG Location
     # ------------------------------------------------------------------    
-    compute_vehicle_center_of_gravity( weight_analysis.vehicle) 
-    CG_location      =  weight_analysis.vehicle.mass_properties.center_of_gravity
+    _ , _ =  compute_vehicle_center_of_gravity(converged_vehicle) 
+    CG_location  = converged_vehicle.mass_properties.center_of_gravity
     
     # ------------------------------------------------------------------
     #   Operating Aircraft MOI
     # ------------------------------------------------------------------    
-    MOI, total_mass = compute_aircraft_moment_of_inertia(weight_analysis.vehicle, CG_location) 
+    _, _ = compute_aircraft_moment_of_inertia(converged_vehicle, CG_location)
 
     return converged_vehicle
 
@@ -561,7 +542,7 @@ def configs_setup(vehicle):
     # ------------------------------------------------------------------
     config                                            = RCAIDE.Library.Components.Configs.Config(vehicle)
     config.tag                                        = 'approach_transition'   
-    vector_angle                                      = 0.0 * Units.degrees 
+    vector_angle                                      = 80.0 * Units.degrees 
     config.wings.main_wing.twists.root                = vector_angle
     config.wings.main_wing.twists.tip                 = vector_angle
     config.wings.canard_wing.twists.root              = vector_angle
@@ -570,7 +551,7 @@ def configs_setup(vehicle):
         for bus in network.busses: 
             for propulsor in  bus.propulsors:
                 propulsor.rotor.orientation_euler_angles =  [0, vector_angle, 0] 
-                propulsor.rotor.pitch_command   = propulsor.rotor.cruise.design_pitch_command *0.5  
+                #propulsor.rotor.pitch_command   = propulsor.rotor.cruise.design_pitch_command *0.5  
     configs.append(config)
     
     
@@ -624,8 +605,7 @@ def base_analysis(vehicle):
 
     # ------------------------------------------------------------------
     #  Aerodynamics Analysis
-    aerodynamics          = RCAIDE.Framework.Analyses.Aerodynamics.Athena_Vortex_Lattice() 
-    aerodynamics.settings.filenames.avl_bin_name = 'C://Users//Matteo//Documents//UIUC//avl.exe'
+    aerodynamics          = RCAIDE.Framework.Analyses.Aerodynamics.Vortex_Lattice_Method()  
     aerodynamics.vehicle = vehicle 
     analyses.append(aerodynamics)
 
@@ -670,7 +650,16 @@ def mission_setup(analyses ):
     Segments = RCAIDE.Framework.Mission.Segments  
     base_segment = Segments.Segment()
     
-
+ 
+    # ------------------------------------------------------------------
+    #   First Climb Segment: Constant Speed, Constant Rate
+    # ------------------------------------------------------------------  
+    segment                                 = Segments.Ground.Battery_Recharge(base_segment)      
+    segment.analyses.extend(analyses.base) 
+    segment.cutoff_SOC                      = 1.0  
+    segment.initial_battery_state_of_charge = 0.999
+    segment.tag                             = 'Recharge' 
+    mission.append_segment(segment) 
  
     # ------------------------------------------------------------------
     #   First Climb Segment: Constant Speed, Constant Rate

@@ -458,7 +458,7 @@ def vehicle_setup(resize_aircraft,vehicle_name) :
          bat_copy = deepcopy(bat_module)
          bus.battery_modules.append(bat_copy)
 
-      bus.initialize_bus_electrical_properties()
+      bus.initialize_bus_properties()
 
       ##------------------------------------------------------------------------------------------------------------------------------------  
       # Coolant Line

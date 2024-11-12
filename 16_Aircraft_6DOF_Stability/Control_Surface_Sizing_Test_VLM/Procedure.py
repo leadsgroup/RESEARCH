@@ -4,6 +4,7 @@
 # ----------------------------------------------------------------------     
 import RCAIDE
 from RCAIDE.Framework.Core import Units, Data
+from RCAIDE.Library.Methods.Geometry.Planform              import wing_segmented_planform   
 from RCAIDE.Framework.Analyses.Process                     import Process    
 from RCAIDE.Framework.Mission.Common                       import Results, State 
 from RCAIDE.Library.Methods.Stability.Common               import compute_dynamic_flight_modes   
@@ -54,11 +55,30 @@ def modify_stick_fixed_vehicle(nexus):
     This function takes the updated design variables and modifies the aircraft 
     '''
     # Pull out the vehicles
-    vehicle = nexus.vehicle_configurations.stick_fixed_cruise  
+    vehicle = nexus.vehicle_configurations.stick_fixed_cruise   
         
     # Update Wing    
-    for wing in vehicle.wings: 
-        update_chords(wing)   
+    for wing in vehicle.wings:
+        if type(wing) ==  RCAIDE.Library.Components.Wings.Main_Wing: 
+            vehicle.reference_area        = wing.areas.reference            
+        Sref                     = wing.areas.reference      # fixed 
+        span                     = wing.spans.projected      # optimization input
+        taper                    = wing.taper                # optimization input
+        croot                    = 2*Sref/((taper+1)*span)   # set by Sref and current design point
+        ctip                     = taper * croot             # set by Sref and current design point 
+        wing.chords.root         = croot
+        wing.chords.tip          = ctip 
+        
+        # Wing Segments
+        if 'Segments' in wing:
+            for seg in wing.Segments:
+                seg.twist = (wing.twists.tip-wing.twists.root)*seg.percent_span_location  + wing.twists.root
+                
+        # update remaning wing properties  
+        wing_segmented_planform(wing, overwrite_reference = False )  
+        wing.areas.wetted             = wing.areas.reference  * 2 
+        wing.areas.exposed            = wing.areas.reference  * 2  
+                
       
     # Update MOI 
     weight_analysis                               = RCAIDE.Framework.Analyses.Weights.Weights_General_Aviation()
@@ -80,26 +100,7 @@ def modify_stick_fixed_vehicle(nexus):
     vehicle.store_diff() 
     
     return nexus   
- 
-def update_chords(wing):
-    '''
-    Updates the wing planform each iteration
-    '''
-    Sref  = wing.areas.reference      # fixed 
-    span  = wing.spans.projected      # optimization input
-    taper = wing.taper                # optimization input
-    croot = 2*Sref/((taper+1)*span)   # set by Sref and current design point
-    ctip  = taper * croot             # set by Sref and current design point 
-    wing.chords.root = croot
-    wing.chords.tip  = ctip 
-    
-    # Wing Segments
-    if 'Segments' in wing:
-        for seg in wing.Segments:
-            seg.twist = (wing.twists.tip-wing.twists.root)*seg.percent_span_location  + wing.twists.root
-    
-    return wing          
-
+  
 def longitudinal_static_stability_and_drag_post_process(nexus): 
     '''
     This function analyses and post processes the aircraft at cruise conditions. 

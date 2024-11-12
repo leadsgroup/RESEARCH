@@ -3,13 +3,14 @@
 # ---------------------------------------------------------------------
 import RCAIDE
 from RCAIDE.Framework.Core import Units 
-from RCAIDE.Library.Methods.Geometry.Planform                                  import segment_properties,wing_segmented_planform    
-from RCAIDE.Library.Methods.Energy.Sources.Batteries.Common                    import initialize_from_circuit_configuration 
+from RCAIDE.Library.Methods.Geometry.Planform                                  import wing_segmented_planform   
 from RCAIDE.Library.Methods.Weights.Correlation_Buildups.Propulsion            import compute_motor_weight
 from RCAIDE.Library.Methods.Propulsors.Converters.DC_Motor                     import design_motor
 from RCAIDE.Library.Methods.Performance                                        import estimate_stall_speed
 from RCAIDE.Library.Methods.Propulsors.Converters.Rotor                        import design_propeller ,design_lift_rotor 
-from RCAIDE.Library.Methods.Weights.Physics_Based_Buildups.Electric            import converge_physics_based_weight_buildup 
+from RCAIDE.Library.Methods.Weights.Physics_Based_Buildups.Electric            import converge_physics_based_weight_buildup
+from RCAIDE.Library.Methods.Weights.Moment_of_Inertia                          import compute_aircraft_moment_of_inertia
+from RCAIDE.Library.Methods.Weights.Center_of_Gravity                          import compute_vehicle_center_of_gravity 
 from RCAIDE.Library.Plots                                                      import * 
 from RCAIDE import  load 
 from RCAIDE import  save  
@@ -27,7 +28,7 @@ def main():
          
     # vehicle data
     new_geometry    =  True 
-    redesign_rotors =  True 
+    redesign_rotors =  False 
     if new_geometry :
         vehicle  = vehicle_setup(redesign_rotors)
         save_aircraft_geometry(vehicle , 'Stopped_Rotor')
@@ -106,7 +107,7 @@ def vehicle_setup(redesign_rotors=True) :
     wing.chords.root              = 1.75
     wing.total_length             = 1.75
     wing.chords.tip               = 1.0
-    wing.chords.mean_aerodynamic  = 0.8
+    wing.chords.mean_aerodynamic  = 1.5
     wing.dihedral                 = 0.0  
     wing.areas.reference          = 15.629
     wing.twists.root              = 4. * Units.degrees
@@ -181,11 +182,30 @@ def vehicle_setup(redesign_rotors=True) :
     
     
     # compute reference properties 
-    wing_segmented_planform(wing, overwrite_reference = True ) 
-    wing = segment_properties(wing)
+    wing_segmented_planform(wing, overwrite_reference = True )  
     vehicle.reference_area        = wing.areas.reference  
     wing.areas.wetted             = wing.areas.reference  * 2 
     wing.areas.exposed            = wing.areas.reference  * 2  
+
+                                          
+    # control surfaces ------------------------------------------- 
+    flap                          = RCAIDE.Library.Components.Wings.Control_Surfaces.Flap()
+    flap.tag                      = 'flap'
+    flap.span_fraction_start      = 0.2
+    flap.span_fraction_end        = 0.5
+    flap.deflection               = 0.0 * Units.degrees 
+    flap.chord_fraction           = 0.20
+    wing.append_control_surface(flap)  
+    
+
+    aileron                       = RCAIDE.Library.Components.Wings.Control_Surfaces.Aileron()
+    aileron.tag                   = 'aileron'
+    aileron.span_fraction_start   = 0.7
+    aileron.span_fraction_end     = 0.9 
+    aileron.deflection            = 0.0 * Units.degrees
+    aileron.chord_fraction        = 0.2
+    wing.append_control_surface(aileron)      
+
         
     # add to vehicle 
     vehicle.append_component(wing)   
@@ -194,7 +214,7 @@ def vehicle_setup(redesign_rotors=True) :
     #------------------------------------------------------------------------------------------------------------------------------------  
     #   Horizontal Tail
     #------------------------------------------------------------------------------------------------------------------------------------
-    wing                          = RCAIDE.Library.Components.Wings.Wing()
+    wing                          = RCAIDE.Library.Components.Wings.Horizontal_Tail()
     wing.tag                      = 'horizontal_tail'  
     wing.aspect_ratio             = 3.04444
     wing.sweeps.quarter_chord     = 17. * Units.degrees
@@ -214,8 +234,27 @@ def vehicle_setup(redesign_rotors=True) :
     wing.origin                   = [[  5.374 ,0.0 ,  0.596]]
     wing.aerodynamic_center       = [   5.374, 0.0,   0.596] 
     wing.winglet_fraction         = 0.0 
-    wing.symmetric                = True    
+    wing.symmetric                = True
     
+
+    elevator                              = RCAIDE.Library.Components.Wings.Control_Surfaces.Elevator()
+    elevator.tag                          = 'elevator'
+    elevator.span_fraction_start          = 0.6
+    elevator.span_fraction_end            = 0.9
+    elevator.deflection                   = 0.0  * Units.deg
+    elevator.chord_fraction               = 0.4
+    wing.append_control_surface(elevator)       
+    
+
+    rudder                                = RCAIDE.Library.Components.Wings.Control_Surfaces.Rudder()
+    rudder.tag                            = 'rudder'
+    rudder.span_fraction_start            = 0.1
+    rudder.span_fraction_end              = 0.5
+    rudder.deflection                     = 0.0  * Units.deg
+    rudder.chord_fraction                 = 0.4
+    wing.append_control_surface(rudder) 
+    
+        
     # add to vehicle 
     vehicle.append_component(wing)     
       
@@ -423,27 +462,22 @@ def vehicle_setup(redesign_rotors=True) :
     #==================================================================================================================================== 
     # Forward Bus
     #====================================================================================================================================  
-    cruise_bus                                             = RCAIDE.Library.Components.Energy.Distributors.Electrical_Bus() 
-    cruise_bus.tag                                         = 'cruise_bus'
+    cruise_bus                           = RCAIDE.Library.Components.Energy.Distributors.Electrical_Bus() 
+    cruise_bus.tag                       = 'cruise_bus' 
+    cruise_bus.number_of_battery_modules =  1     
      
     #------------------------------------------------------------------------------------------------------------------------------------  
     # Bus Battery
     #------------------------------------------------------------------------------------------------------------------------------------ 
-    battery_module                                                    = RCAIDE.Library.Components.Energy.Sources.Battery_Modules.Lithium_Ion_NMC()
-    number_of_modules                                      = 1
+    battery_module                                                    = RCAIDE.Library.Components.Energy.Sources.Battery_Modules.Lithium_Ion_NMC() 
     battery_module.tag                                                = 'cruise_bus_battery'
     battery_module.electrical_configuration.series                     = 140  
-    battery_module.electrical_configuration.parallel                   = 60 
-   
-    battery_module.geometrtic_configuration.total                      = battery_module.electrical_configuration.total
-    battery_module.voltage                                             = battery_module.maximum_voltage 
-    battery_module.geometrtic_configuration.normal_count               = 25
-    battery_module.geometrtic_configuration.parallel_count             = 40 
-     
-    for _ in range(number_of_modules):
-        cruise_bus.battery_modules.append(deepcopy(battery_module))       
-    
-    cruise_bus.initialize_bus_electrical_properties()
+    battery_module.electrical_configuration.parallel                   = 60  
+    battery_module.geometrtic_configuration.normal_count               = 140  
+    battery_module.geometrtic_configuration.parallel_count             = 60  
+    for _ in range( cruise_bus.number_of_battery_modules):
+        cruise_bus.battery_modules.append(deepcopy(battery_module))    
+    cruise_bus.initialize_bus_properties()
     
     #------------------------------------------------------------------------------------------------------------------------------------  
     # Forward Bus Propulsors  
@@ -499,16 +533,14 @@ def vehicle_setup(redesign_rotors=True) :
     propeller_motor.efficiency                             = 0.95
     propeller_motor.tag                                    = 'propeller_motor_1'  
     propeller_motor.origin                                 = [[6.583, 1.300,  1.092 ]] 
-    propeller_motor.nominal_voltage                        = cruise_bus.voltage 
-    propeller_motor.origin                                 = propeller.origin
-    propeller_motor.propeller_radius                       = propeller.tip_radius 
+    propeller_motor.nominal_voltage                        = cruise_bus.voltage  
     propeller_motor.no_load_current                        = 0.001
     propeller_motor.wing_tag                               = 'horizontal_tail'
     propeller_motor.rotor_radius                           = propeller.tip_radius
     propeller_motor.design_torque                          = propeller.cruise.design_torque
     propeller_motor.angular_velocity                       = propeller.cruise.design_angular_velocity/propeller_motor.gear_ratio  
     design_motor(propeller_motor)  
-    propeller_motor.mass_properties.mass                   = compute_motor_weight(propeller_motor.design_torque)  
+    propeller_motor.mass_properties.mass                   = compute_motor_weight(propeller_motor)  
     cruise_propulsor_1.motor                               = propeller_motor 
       
     # rear propeller nacelle 
@@ -620,25 +652,20 @@ def vehicle_setup(redesign_rotors=True) :
     #====================================================================================================================================          
     lift_bus                                               = RCAIDE.Library.Components.Energy.Distributors.Electrical_Bus()
     lift_bus.tag                                           = 'lift_bus' 
+    lift_bus.number_of_battery_modules =  1     
 
     #------------------------------------------------------------------------------------------------------------------------------------  
     # Bus Battery
     #------------------------------------------------------------------------------------------------------------------------------------ 
-    battery_module                                                    = RCAIDE.Library.Components.Energy.Sources.Battery_Modules.Lithium_Ion_NMC()
-    number_of_modules                                                 = 1 
+    battery_module                                                    = RCAIDE.Library.Components.Energy.Sources.Battery_Modules.Lithium_Ion_NMC() 
     battery_module.tag                                                = 'lift_bus_battery'
     battery_module.electrical_configuration.series                    = 140   
-    battery_module.electrical_configuration.parallel                  = 20
-    battery_module.geometrtic_configuration.total                      = battery_module.electrical_configuration.total
-    battery_module.voltage                                             = battery_module.maximum_voltage 
-    battery_module.geometrtic_configuration.normal_count               = 25
-    battery_module.geometrtic_configuration.parallel_count             = 40
-    
-
-    for _ in range(number_of_modules):
+    battery_module.electrical_configuration.parallel                  = 20 
+    battery_module.geometrtic_configuration.normal_count              = 140   
+    battery_module.geometrtic_configuration.parallel_count            = 20 
+    for _ in range( lift_bus.number_of_battery_modules):
         lift_bus.battery_modules.append(deepcopy(battery_module))
-        
-    lift_bus.initialize_bus_electrical_properties()
+    lift_bus.initialize_bus_properties()
 
     #------------------------------------------------------------------------------------------------------------------------------------  
     # Lift Propulsors 
@@ -703,7 +730,7 @@ def vehicle_setup(redesign_rotors=True) :
     lift_rotor_motor.design_torque                         = lift_rotor.hover.design_torque
     lift_rotor_motor.angular_velocity                      = lift_rotor.hover.design_angular_velocity/lift_rotor_motor.gear_ratio  
     design_motor(lift_rotor_motor)
-    lift_rotor_motor.mass_properties.mass                  = compute_motor_weight(lift_rotor_motor.design_torque)     
+    lift_rotor_motor.mass_properties.mass                  = compute_motor_weight(lift_rotor_motor)     
     lift_propulsor_1.motor                                 = lift_rotor_motor
     
 
@@ -723,14 +750,14 @@ def vehicle_setup(redesign_rotors=True) :
     # Front Rotors Locations 
     origins = [[  -0.073,  1.950, 1.2], [-0.073  , -1.950  , 1.2],[ 4.440 ,  1.950 , 1.2], [ 4.440  , -1.950  , 1.2],
                [ 0.219 ,  4.891 , 1.2], [ 0.219  , - 4.891 , 1.2], [ 4.196 ,  4.891 , 1.2], [ 4.196  , - 4.891 , 1.2]]
-    orientation_euler_angles = [[10.0*Units.degrees,np.pi/2.,0.],[-10.0* Units.degrees,np.pi/2.,0.], [10.0* Units.degrees,np.pi/2.,0.], [-10.0* Units.degrees,np.pi/2.,0.]
+    orientation_euler_angles = [[10.0*Units.degrees,np.pi/2.,0.],[-10.0* Units.degrees,np.pi/2.,0.], [10.0* Units.degrees,np.pi/2.,0.], [-10.0* Units.degrees,np.pi/2.,0.], 
                                 [10.0* Units.degrees,np.pi/2.,0.], [-10.0* Units.degrees,np.pi/2.,0.], [10.0* Units.degrees,np.pi/2.,0.], [-10.0* Units.degrees,np.pi/2.,0.]] # vector of angles defining default orientation of rotor
     
     
     
     for i in range(len(origins)): 
         propulsor_i                                       = deepcopy(lift_propulsor_1)
-        propulsor_i.tag                                   = 'lift_rotor_propulsor_' + str(i + 1)
+        propulsor_i.tag                                   = 'lift_propulsor_' + str(i + 1)
         propulsor_i.rotor.tag                             = 'lift_rotor_' + str(i + 1) 
         propulsor_i.rotor.origin                          = [origins[i]] 
         propulsor_i.rotor.orientation_euler_angle         = orientation_euler_angles[i]
@@ -767,7 +794,18 @@ def vehicle_setup(redesign_rotors=True) :
     # ##################################   Determine Vehicle Mass Properties Using Physic Based Methods  ################################ 
     #------------------------------------------------------------------------------------------------------------------------------------   
     converged_vehicle, breakdown = converge_physics_based_weight_buildup(vehicle)  
-    print(breakdown) 
+    print(breakdown)
+
+    # ------------------------------------------------------------------
+    #   CG Location
+    # ------------------------------------------------------------------    
+    _ , _ =  compute_vehicle_center_of_gravity(converged_vehicle) 
+    CG_location  = converged_vehicle.mass_properties.center_of_gravity
+    
+    # ------------------------------------------------------------------
+    #   Operating Aircraft MOI
+    # ------------------------------------------------------------------    
+    _, _ = compute_aircraft_moment_of_inertia(converged_vehicle, CG_location)    
 
     return converged_vehicle
 
@@ -1003,7 +1041,7 @@ def mission_setup(analyses):
     segment.analyses.extend( analyses.forward_flight )                  
     segment.altitude                                      = 1500.0 * Units.ft  
     segment.air_speed                                     = 110.  * Units['mph']  
-    segment.distance                                      = 50 *Units.nmi    
+    segment.distance                                      = 40 *Units.nmi    
             
     # define flight dynamics to model 
     segment.flight_dynamics.force_x                       = True  
@@ -1050,8 +1088,8 @@ def mission_setup(analyses):
     segment.altitude_end                                  = 300.0 * Units.ft   
     segment.climb_angle                                   = 3 * Units.degrees
     segment.acceleration                                  = -0.25 * Units['m/s/s']    
-    segment.pitch_initial                                 = 4.3  * Units.degrees  
-    segment.pitch_final                                   = 7. * Units.degrees     
+    segment.pitch_initial                                 = 10  * Units.degrees    
+    segment.pitch_final                                   = 5. * Units.degrees      
 
     # define flight dynamics to model 
     segment.flight_dynamics.force_x                       = True  
@@ -1075,8 +1113,8 @@ def mission_setup(analyses):
     segment.air_speed_start                               = 36.5 * Units['mph'] 
     segment.air_speed_end                                 = 300. * Units['ft/min'] 
     segment.acceleration                                  = -0.25 * Units['m/s/s']    
-    segment.pitch_initial                                 = 7.  * Units.degrees  
-    segment.pitch_final                                   = 7. * Units.degrees     
+    segment.pitch_initial                                 = 5.  * Units.degrees  
+    segment.pitch_final                                   = 2. * Units.degrees     
     
     # define flight dynamics to model 
     segment.flight_dynamics.force_x                       = True  

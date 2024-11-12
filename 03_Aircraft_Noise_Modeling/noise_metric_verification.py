@@ -407,7 +407,7 @@ def vehicle_setup():
         bus.battery_modules.append(deepcopy(bat))    
     
     bus.battery_module_electric_configuration = 'Series' 
-    bus.initialize_bus_electrical_properties()      
+    bus.initialize_bus_properties()      
     #------------------------------------------------------------------------------------------------------------------------------------  
     #  Starboard Propulsor
     #------------------------------------------------------------------------------------------------------------------------------------   

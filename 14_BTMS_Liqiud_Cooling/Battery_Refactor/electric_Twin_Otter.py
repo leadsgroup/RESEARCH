@@ -488,7 +488,7 @@ def vehicle_setup(BTMS_flag):
         bus.battery_modules.append(bat_copy)
 
     bus.battery_module_electric_configuration = 'Series' 
-    bus.initialize_bus_electrical_properties()
+    bus.initialize_bus_properties()
 
     ##------------------------------------------------------------------------------------------------------------------------------------  
     # Coolant Line
