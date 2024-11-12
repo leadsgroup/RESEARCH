@@ -99,7 +99,10 @@ def stick_fixed_stability_and_drag_optimization_setup(vehicle,cruise_velocity,cr
     nexus = Nexus()
     problem = Data()
     nexus.optimization_problem = problem
-
+    
+    nexus.cruise_velocity = cruise_velocity
+    nexus.cruise_altitude = cruise_altitude
+    
     # -------------------------------------------------------------------
     # Inputs
     # -------------------------------------------------------------------
@@ -207,6 +210,9 @@ def elevator_sizing_optimization_setup(vehicle,cruise_velocity,cruise_altitude):
     problem = Data()
     nexus.optimization_problem = problem
 
+    nexus.cruise_velocity = cruise_velocity
+    nexus.cruise_altitude = cruise_altitude
+
     # -------------------------------------------------------------------
     # Inputs
     # -------------------------------------------------------------------
@@ -286,7 +292,10 @@ def aileron_rudder_sizing_optimization_setup(vehicle,cruise_velocity,cruise_alti
     nexus = Nexus()
     problem = Data()
     nexus.optimization_problem = problem
-
+    
+    nexus.cruise_velocity = cruise_velocity
+    nexus.cruise_altitude = cruise_altitude    
+    
     # -------------------------------------------------------------------
     # Inputs
     # -------------------------------------------------------------------
@@ -395,6 +404,9 @@ def flap_sizing_optimization_setup(optimized_vehicle,cruise_velocity,cruise_alti
     nexus = Nexus()
     problem = Data()
     nexus.optimization_problem = problem
+
+    nexus.cruise_velocity = cruise_velocity
+    nexus.cruise_altitude = cruise_altitude
 
     # -------------------------------------------------------------------
     # Inputs

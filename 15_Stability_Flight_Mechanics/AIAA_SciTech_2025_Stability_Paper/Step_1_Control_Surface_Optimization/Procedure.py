@@ -75,17 +75,17 @@ def modify_stick_fixed_vehicle(nexus):
                 seg.twist = (wing.twists.tip-wing.twists.root)*seg.percent_span_location  + wing.twists.root
                 
         # update remaning wing properties  
-        wing_segmented_planform(wing, overwrite_reference = False )  
+        wing_segmented_planform(wing)  
         wing.areas.wetted             = wing.areas.reference  * 2 
         wing.areas.exposed            = wing.areas.reference  * 2  
                 
       
     # Update MOI 
-    weight_analysis                               = RCAIDE.Framework.Analyses.Weights.Weights_General_Aviation()
+    weight_analysis                               = RCAIDE.Framework.Analyses.Weights.Weights_EVTOL()
     weight_analysis.vehicle                       = vehicle 
     results                                       = weight_analysis.evaluate()
 
-    compute_vehicle_center_of_gravity(weight_analysis.vehicle, update_CG=False)     
+    compute_vehicle_center_of_gravity(weight_analysis.vehicle)     
     CG_location      = vehicle.mass_properties.center_of_gravity 
     compute_aircraft_moment_of_inertia(weight_analysis.vehicle, CG_location)
     

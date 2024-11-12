@@ -34,7 +34,7 @@ def size_control_surfaces(vehicle, cruise_velocity = 120 * Units['mph'], cruise_
     print (output_stick_fixed)    
     tf           = time.time()
     elapsed_time_stick_fixed = round((tf-ti)/60,2)
-    print('Stick Fixed Stability and Drag Otimization Simulation Time: ' + str(elapsed_time))    
+    print('Stick Fixed Stability and Drag Otimization Simulation Time: ' + str(elapsed_time_stick_fixed))    
     
     '''
     ELEVATOR SIZING
@@ -51,7 +51,7 @@ def size_control_surfaces(vehicle, cruise_velocity = 120 * Units['mph'], cruise_
     print (output_elevator_sizing)     
     tf           = time.time()
     elapsed_time_elevator_sizing = round((tf-ti)/60,2)
-    print('Elevator Sizing Simulation Time: ' + str(elapsed_time))   
+    print('Elevator Sizing Simulation Time: ' + str(elapsed_time_elevator_sizing))   
      
     '''
     AILERON AND RUDDER SIZING
@@ -68,7 +68,7 @@ def size_control_surfaces(vehicle, cruise_velocity = 120 * Units['mph'], cruise_
     print (output_aileron_and_rudder_sizing)     
     tf           = time.time()
     elapsed_time_aileron_and_rudder_sizing = round((tf-ti)/60,2)
-    print('Aileron and Rudder Sizing Simulation Time: ' + str(elapsed_time))   
+    print('Aileron and Rudder Sizing Simulation Time: ' + str(elapsed_time_aileron_and_rudder_sizing))   
     
     '''
     FLAP SIZING
@@ -83,7 +83,7 @@ def size_control_surfaces(vehicle, cruise_velocity = 120 * Units['mph'], cruise_
     print (output_flap_sizing)     
     tf           = time.time()
     elapsed_time_flap_sizing = round((tf-ti)/60,2)
-    print('Flap Sizing Simulation Time: ' + str(elapsed_time))   
+    print('Flap Sizing Simulation Time: ' + str(elapsed_time_flap_sizing))   
     
     '''
     PRINT VEHICLE CONTROL SURFACES
