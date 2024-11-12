@@ -1,5 +1,5 @@
 import numpy as np
-from scipy.interpolate import LinearNDInterpolator
+from scipy.interpolate import LinearNDInterpolator, NearestNDInterpolator
 import RCAIDE
 import matplotlib.pyplot as plt
 import os
@@ -8,7 +8,7 @@ from mpl_toolkits.mplot3d import Axes3D
 
 def main():
     # Load raw data and create the interpolant once
-    interpolant = create_interpolant()
+    interpolantnd, interpolantlin = create_interpolant()
 
     # Input parameters for voltage retrieval
     C_rate_input = 1.5          # Desired C-rate
@@ -16,14 +16,16 @@ def main():
     discharge_capacity_input = 0  # Desired discharge capacity
 
     # Get the interpolated voltage
-    voltage_output = get_voltage(interpolant, C_rate_input, temperature_input, discharge_capacity_input)
-    print(f"Interpolated Voltage: {voltage_output}")
+    voltagend,voltagelin = get_voltage(interpolantnd, interpolantlin, C_rate_input, temperature_input, discharge_capacity_input)
+    print(f"Interpolated Voltage Nearest : {voltagend}")
+    print(f"Interpolated Voltage Linear : {voltagelin}")
 
 
     discharge_capacities = np.linspace(0, 2.6, 50)  # Replace with your actual data range
     temperatures = np.linspace(-20, 60, 20)       # Replace with your actual data range
     c_rates =  np.linspace(0.1,20, 200)         # Replace with your actual C-rates
-    plot_voltage_surface(interpolant, discharge_capacities, temperatures, c_rates)
+    plot_voltage_surface(interpolantnd, discharge_capacities, temperatures, c_rates)
+    plot_voltage_surface(interpolantlin, discharge_capacities, temperatures, c_rates)
     
     return
 
@@ -60,13 +62,15 @@ def create_interpolant():
     values = np.array(voltages)
 
     # Create the interpolant
-    interpolant = LinearNDInterpolator(points, values)
-    return interpolant
+    interpolantnd = NearestNDInterpolator(points, values)
+    interpolantlin = LinearNDInterpolator(points,values)
+    return interpolantnd, interpolantlin
 
 # Define a function to get voltage using the created interpolant
-def get_voltage(interpolant, C_rate, temperature, discharge_capacity):
-    voltage = interpolant(C_rate, temperature, discharge_capacity)
-    return voltage
+def get_voltage(interpolantnd, interpolantlin, C_rate, temperature, discharge_capacity):
+    voltagend = interpolantnd(C_rate, temperature, discharge_capacity)
+    voltagelin = interpolantlin(C_rate, temperature, discharge_capacity)
+    return voltagend,voltagelin
 
 def plot_voltage_surface(interpolant, discharge_capacities, temperatures, c_rates):
     fig = plt.figure()
@@ -77,14 +81,19 @@ def plot_voltage_surface(interpolant, discharge_capacities, temperatures, c_rate
     voltage_plot = interpolant(c_rate_plot, temp_plot, discharge_plot)
 
     # Plot slices through different C-rates for visualization clarity
-    for c_rate in [0.1, 1, 2, 5]:  # Slice through selected C-rates
+    for c_rate in [0.1, 1, 2, 5,6]:  # Slice through selected C-rates
         voltage_slice = interpolant(c_rate, temp_plot[:, :, 0], discharge_plot[:, :, 0])
-        ax.plot_surface(discharge_plot[:, :, 0], temp_plot[:, :, 0], voltage_slice, alpha=0.7, label=f'C-rate={c_rate}')
+        # Add label to the surface for the legend
+        surf = ax.plot_surface(discharge_plot[:, :, 0], temp_plot[:, :, 0], voltage_slice, alpha=0.7)
+        # Set the label for the legend
+        surf.set_label(f'C-rate={c_rate}')
 
     ax.set_xlabel('Discharge Capacity')
     ax.set_ylabel('Initial Temperature')
     ax.set_zlabel('Voltage')
     ax.set_title('Voltage Surface Plot Across Discharge Capacity, Temperature, and C-rate')
+    ax.legend()  # This will now work correctly
+    
     return
 
 

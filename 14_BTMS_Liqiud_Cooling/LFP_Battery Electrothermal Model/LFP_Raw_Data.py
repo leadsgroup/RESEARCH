@@ -37,9 +37,6 @@ def main():
   
     # List of CSV files
     csv_files = [
-    'Battery_Simulation_C_rate_0_0001.csv',
-    'Battery_Simulation_C_rate_0_001.csv',
-    'Battery_Simulation_C_rate_0_01.csv',
     'Battery_Simulation_C_rate_0_1.csv',
     'Battery_Simulation_C_rate_0_5.csv',
     'Battery_Simulation_C_rate_1.csv',
