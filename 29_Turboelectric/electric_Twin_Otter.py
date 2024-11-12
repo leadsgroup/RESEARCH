@@ -463,8 +463,46 @@ def vehicle_setup(BTMS_flag):
     #add to vehicle                             
     vehicle.landing_gear                        = landing_gear
 
- 
-    # ########################################################  Energy Network  #########################################################  
+    # # ########################################################  Fuel Energy Network  #########################################################  
+    # net0                              = RCAIDE.Framework.Networks.Fuel()   
+
+    # #------------------------------------------------------------------------------------------------------------------------- 
+    # # Fuel Distrubition Line 
+    # #------------------------------------------------------------------------------------------------------------------------- 
+    # fuel_line                                   = RCAIDE.Library.Components.Energy.Distributors.Fuel_Line()  
+
+
+
+
+
+
+    # # add turboshaft
+
+
+    # #------------------------------------------------------------------------------------------------------------------------- 
+    # #  Energy Source: Fuel Tank
+    # #------------------------------------------------------------------------------------------------------------------------- 
+    # # fuel tank
+    # fuel_tank                                        = RCAIDE.Library.Components.Energy.Sources.Fuel_Tanks.Fuel_Tank()
+    # fuel_tank.origin                                 = vehicle.wings.main_wing.origin  
+    # fuel_tank.fuel                                   = RCAIDE.Library.Attributes.Propellants.Jet_A1()   
+    # fuel_tank.fuel.mass_properties.mass              = vehicle.mass_properties.max_takeoff-vehicle.mass_properties.max_fuel
+    # fuel_tank.fuel.origin                            = vehicle.wings.main_wing.mass_properties.center_of_gravity      
+    # fuel_tank.fuel.mass_properties.center_of_gravity = vehicle.wings.main_wing.aerodynamic_center
+    # fuel_tank.volume                                 = fuel_tank.fuel.mass_properties.mass/fuel_tank.fuel.density   
+    
+    # # apend fuel tank to dataclass of fuel tanks on fuel line 
+    # fuel_line.fuel_tanks.append(fuel_tank) 
+
+    # # Append fuel line to Network      
+    # net0.fuel_lines.append(fuel_line)   
+
+    # # Append energy network to aircraft 
+    # vehicle.append_energy_network(net0)    
+
+
+
+    # ########################################################  Electric Energy Network  #########################################################  
     net                              = RCAIDE.Framework.Networks.Electric()   
 
     #------------------------------------------------------------------------------------------------------------------------------------  
@@ -503,7 +541,7 @@ def vehicle_setup(BTMS_flag):
     atmo_data                                              = atmosphere.compute_values(altitude = HAS.design_altitude)     
     HAS.coolant_inlet_temperature                          = atmo_data.temperature[0,0]  
     HAS.design_battery_operating_temperature               = 313
-    HAS.design_heat_removed                                = 150000 /len(bus.battery_modules) 
+    HAS.design_heat_removed                                = 150000 /bus.number_of_battery_modules) 
     HAS                                                    = design_wavy_channel(HAS,bat_module) 
     
     for battery_module in bus.battery_modules:
