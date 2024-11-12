@@ -36,30 +36,40 @@ def main():
     flight_data     = pd.read_excel(routes_filepath,sheet_name=['Los_Angeles'])  
     
     
-    operation_flight_times = np.array(['06:00:00','06:05:00','06:10:00','06:15:00',
-                             '06:20:00','06:25:00','06:30:00','06:35:00',
-                             '06:40:00','06:45:00','06:50:00','06:55:00',
-                             '07:00:00','07:05:00','07:10:00','07:15:00',
-                             '07:20:00','07:25:00','07:30:00','07:35:00',
-                             '07:40:00','07:45:00','07:50:00','07:55:00', 
-                             '08:00:00'])
-    operation_period  = ['06:00:00','09:00:00']
+    operation_flight_times = np.array(['06:00:00','06:15:00','06:30:00','06:45:00',
+                                       '07:00:00','07:15:00','07:30:00','07:45:00',
+                                       '08:00:00','08:15:00','08:30:00','08:45:00',
+                                       '09:00:00','09:15:00','09:30:00','09:45:00',
+                                       '10:00:00','10:15:00','10:30:00','10:45:00',
+                                       '11:00:00','11:15:00','11:30:00','11:45:00', 
+                                       '12:00:00','12:15:00','12:30:00','12:45:00',
+                                       '13:00:00','13:15:00','13:30:00','13:45:00',
+                                       '14:00:00','14:15:00','14:30:00','14:45:00',
+                                       '15:00:00','15:15:00','15:30:00','15:45:00',
+                                       '16:00:00','16:15:00','16:30:00','16:45:00',
+                                       '17:00:00','17:15:00','17:30:00','17:45:00',
+                                       '18:00:00','18:15:00','18:30:00','18:45:00',
+                                       '19:00:00','19:15:00','19:30:00','19:45:00',
+                                       '20:00:00','20:15:00','20:30:00','20:45:00',
+                                       '21:00:00', ])
+    operation_period  = ['06:00:00','22:00:00']
          
 
-    mic_x_res        = 800  
-    mic_y_res        = 1200 
-    noise_timesteps  = 50  
-    mic_stencil      = 25
-    aircraft_code    = 'SR'
-    city_code        = 'LA' 
-    cruise_altitude  = 1500*Units.feet
-
-    radius_Vert1 = 1 * Units.km # circular pattern radius around vertiport 1
-    radius_Vert2 = 1 * Units.km # circular pattern radius around vertiport 2
-    dep_heading  = 200 # Heading [degrees] of the departure from vertiport 1
-    app_heading  = 90  # Heading [degrees] of the approach to vertiport 2
+    mic_x_res                 = 1200
+    mic_y_res                 = 1600 
+    noise_timesteps           = 225  
+    mic_stencil               = 100
+    aircraft_code             = 'SR'
+    city_code                 = 'LA' 
+    cruise_altitude           = 1500*Units.feet
+    high_speed_climb_distance = 1000 # NEEDS BE UPDATED BASED ON AIRCRAFT 
+    high_speed_descent_distance  = 1000 # NEEDS BE UPDATED BASED ON AIRCRAFT  
+    radius_Vert1              = 3600*Units.feet # circular pattern radius around vertiport 1
+    radius_Vert2              = 3600*Units.feet # circular pattern radius around vertiport 2
+    dep_heading               = 200 *Units.degree # Heading [degrees] of the departure from vertiport 1
+    app_heading               = 90  *Units.degree# Heading [degrees] of the approach to vertiport 2
     
-    Max_Cruise_Distance =  30 * Units.mile
+    max_cruise_distance =  30 * Units.mile
     
     for i in  range(flight_data):
         # Extract Data
@@ -89,7 +99,7 @@ def main():
         # -------------------------------------
         #   Calculate Distance
         # -------------------------------------
-        total_cruise_distance, path_heading, dep_sector, app_sector = compute_route_distances(x1, y1, x2, y2, radius_Vert1, radius_Vert2, dep_heading, app_heading)
+        total_cruise_distance, path_heading, dep_sector, app_sector = compute_route_distances(x1, y1, x2, y2, radius_Vert1, radius_Vert2, dep_heading, app_heading,high_speed_climb_distance,high_speed_descent_distance)
         
         vehicle  = vehicle_setup() 
         
@@ -103,7 +113,7 @@ def main():
         mission = mission_setup(analyses, radius_Vert1, radius_Vert2, dep_heading, app_heading, dep_sector, app_sector, path_heading, total_cruise_distance,cruise_altitude)        
         missions = missions_setup(mission) 
          
-        if Max_Cruise_Distance < distance:
+        if max_cruise_distance < total_cruise_distance:
             results = missions.base_mission.evaluate() 
             
             # post process noise 
@@ -114,8 +124,7 @@ def main():
           
             # save data
             filename =  aircraft_code + '_' + city_code + '_' + origin_code + '_' +  destination_code  + '_' + cruise_altitude    # Aircraft_City_Frequency_Origin_Destination_Altitude
-            save(noise_data, filename + '.res')
-        
+            save(noise_data, filename + '.res') 
         
     return  
 
@@ -215,13 +224,13 @@ def mission_setup(analyses, radius_Vert1, radius_Vert2, dep_heading, app_heading
     #   First Climb Segment: Constant Speed, Constant Rate
     # ------------------------------------------------------------------ 
 
-    segment                                            = Segments.Vertical_Flight.Climb(base_segment)
-    segment.tag                                        = "Vertical_Climb" 
-    segment.analyses.extend( analyses.vertical_flight) 
-    segment.altitude_start                             = 0.0  * Units.ft 
-    segment.altitude_end                               = 200.  * Units.ft  
-    segment.climb_rate                                 = 300. * Units['ft/min']   
-    segment.initial_battery_state_of_charge            = 1.0
+    segment                                                = Segments.Vertical_Flight.Climb(base_segment)
+    segment.tag                                            = "Vertical_Climb" 
+    segment.analyses.extend( analyses.vertical_flight)     
+    segment.altitude_start                                 = 0.0  * Units.ft 
+    segment.altitude_end                                   = 200.  * Units.ft  
+    segment.climb_rate                                     = 300. * Units['ft/min']   
+    segment.initial_battery_state_of_charge                = 1.0
     
     # define flight dynamics to model  
     segment.flight_dynamics.force_z                        = True 
