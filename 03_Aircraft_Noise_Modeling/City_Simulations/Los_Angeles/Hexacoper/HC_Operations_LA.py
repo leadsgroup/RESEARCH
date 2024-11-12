@@ -11,67 +11,95 @@ from RCAIDE import  save
 # python imports 
 import os 
 import pickle
-import  pandas as pd 
+import sys 
+import pandas as pd
+import numpy as  np 
 
-sys.path.append(os.path.join( os.path.split(os.path.split(sys.path[0])[0])[0], 'Aircraft' + os.sep + 'Hexacopter'))
-from Hexacopter    import vehicle_setup, configs_setup
-from compute_route_distances import  compute_route_distances
+local_path_1 =  os.path.split(os.path.split(os.path.split(sys.path[0])[0])[0])[0]
+local_path_2 =  os.path.split(os.path.split(os.path.split(os.path.split(sys.path[0])[0])[0])[0])[0]
+
+sys.path.append( os.path.join(local_path_1, 'Flight_Path'))
+sys.path.append(os.path.join(local_path_2, 'Aircraft' + os.path.sep + 'Hexacopter'))
+from Hexacopter              import vehicle_setup, configs_setup
+from compute_route_distances import compute_route_distances
+from compute_terrain_points  import compute_terrain_points
 # ----------------------------------------------------------------------------------------------------------------------
 #  Main 
 # ----------------------------------------------------------------------------------------------------------------------  
 def main():           
+           
+    ospath          = os.path.abspath(__file__)
+    separator       = os.path.sep
+    relative_path   = os.path.dirname(ospath) + separator 
+    routes_filepath = relative_path +  '..' + separator +  '..' + separator + 'UAM_City_Routes.xlsx'
+    topography_file = relative_path +  '..' + separator +  '..' + separator + 'LA_Metropolitan_Area.txt'
+    flight_data     = pd.read_excel(routes_filepath,sheet_name=['Los_Angeles'])  
+    
+    
+    operation_flight_times = np.array(['06:00:00','06:15:00','06:30:00','06:45:00',
+                                       '07:00:00','07:15:00','07:30:00','07:45:00',
+                                       '08:00:00','08:15:00','08:30:00','08:45:00',
+                                       '09:00:00','09:15:00','09:30:00','09:45:00',
+                                       '10:00:00','10:15:00','10:30:00','10:45:00',
+                                       '11:00:00','11:15:00','11:30:00','11:45:00', 
+                                       '12:00:00','12:15:00','12:30:00','12:45:00',
+                                       '13:00:00','13:15:00','13:30:00','13:45:00',
+                                       '14:00:00','14:15:00','14:30:00','14:45:00',
+                                       '15:00:00','15:15:00','15:30:00','15:45:00',
+                                       '16:00:00','16:15:00','16:30:00','16:45:00',
+                                       '17:00:00','17:15:00','17:30:00','17:45:00',
+                                       '18:00:00','18:15:00','18:30:00','18:45:00',
+                                       '19:00:00','19:15:00','19:30:00','19:45:00',
+                                       '20:00:00','20:15:00','20:30:00','20:45:00',
+                                       '21:00:00', ])
+    operation_period  = ['06:00:00','22:00:00']
          
 
-    separator            = os.path.sep  
-    technology_filename  = 'Data' + separator + 'Technology' + separator + 'Technology_Data.xlsx'
-    flight_data          = pd.read_excel(technology_filename,sheet_name=['Los_Angeles'])  
+    mic_x_res                 = 1200
+    mic_y_res                 = 1600 
+    noise_timesteps           = 225  
+    mic_stencil               = 100
+    aircraft_code             = 'SR'
+    city_code                 = 'LA' 
+    cruise_altitude           = 1500*Units.feet
+    high_speed_climb_distance = 1000 # NEEDS BE UPDATED BASED ON AIRCRAFT 
+    high_speed_descent_distance  = 1000 # NEEDS BE UPDATED BASED ON AIRCRAFT  
+    radius_Vert1              = 3600*Units.feet # circular pattern radius around vertiport 1
+    radius_Vert2              = 3600*Units.feet # circular pattern radius around vertiport 2
+    dep_heading               = 200 *Units.degree # Heading [degrees] of the departure from vertiport 1
+    app_heading               = 90  *Units.degree# Heading [degrees] of the approach to vertiport 2
     
-    
-    operation_flight_times = np.array(['06:00:00','06:05:00','06:10:00','06:15:00',
-                             '06:20:00','06:25:00','06:30:00','06:35:00',
-                             '06:40:00','06:45:00','06:50:00','06:55:00',
-                             '07:00:00','07:05:00','07:10:00','07:15:00',
-                             '07:20:00','07:25:00','07:30:00','07:35:00',
-                             '07:40:00','07:45:00','07:50:00','07:55:00', 
-                             '08:00:00'])
-    operation_period  = ['06:00:00','09:00:00']
-        
-    # Read in Excel Sheet
-    flight_data =
-    
-    Hexacopter_Max_Cruise_Distance =  30 * Units.mile
+    max_cruise_distance =  30 * Units.mile
     
     for i in  range(flight_data):
         # Extract Data
-        departure_vertiport_code =
-        origin_vertiport_code    =
-        departure_coords         =  
-        origin_coords            =    
-        distance                 = 
-         
-       
-        # -------------------------------------
-        #   Inputs
-        # -------------------------------------
-        vert_Loc1 = np.array([33.932868, -118.380858]) # Lat, Long coordinates of vertiport 1
-        vert_Loc2 = np.array([34.057759, -118.221603]) # Lat, Long coordinates of vertiport 2
-        radius_Vert1 = 1 * Units.km # circular pattern radius around vertiport 1
-        radius_Vert2 = 1 * Units.km # circular pattern radius around vertiport 2
-        dep_heading = 200 # Heading [degrees] of the departure from vertiport 1
-        app_heading = 90 # Heading [degrees] of the approach to vertiport 2
+        origin_code       = flight_data[''][i]   
+        destination_code  = flight_data[''][i] 
+        origin_coord      = [flight_data[''][i], flight_data[''][i]]
+        destination_coord = [flight_data[''][i], flight_data[''][i]]
+        
+
+        terrain_data =  compute_terrain_points(topography_file, 
+                               number_of_latitudinal_points  = 100,
+                               number_of_longitudinal_points = 100) 
+    
+        x0_coord               = terrain_data 
+        bottom_left_map_coords = terrain_data 
+        y0_coord               = terrain_data 
+        bottom_left_map_coords = terrain_data  
         
         # -------------------------------------
         #   Lat-lon to X-Y. Assume that vertiport 1 is at 0,0 and then calcualte vertiport two lcoation. We'll calcualte everything in this frame, find the distnaces and then the program when it converts the mission profile back will handle it on that side. 
         # -------------------------------------
-        x1 = 0 #Calculate_Distance(x0_coord,bottom_left_map_coords) * Units.kilometers
-        y1 = 0 #Calculate_Distance(y0_coord,bottom_left_map_coords) * Units.kilometers
-        x2 = Calculate_Distance([vert_Loc1[0], vert_Loc2[1]],vert_Loc1) * Units.kilometers # Double check
-        y2 = Calculate_Distance([vert_Loc1[0], vert_Loc2[1]],vert_Loc2) * Units.kilometers # Double check
+        x1 = Calculate_Distance(x0_coord,bottom_left_map_coords) * Units.kilometers
+        y1 = Calculate_Distance(y0_coord,bottom_left_map_coords) * Units.kilometers
+        x2 = Calculate_Distance([origin_coord[0], destination_coord[1]],origin_coord) * Units.kilometers # Double check
+        y2 = Calculate_Distance([destination_coord[0], destination_coord[1]],destination_coord) * Units.kilometers # Double check
+        
         # -------------------------------------
         #   Calculate Distance
         # -------------------------------------
-        total_cruise_distance, path_heading, dep_sector, app_sector = compute_route_distances(x1, y1, x2, y2, radius_Vert1, radius_Vert2, dep_heading, app_heading)
-       
+        total_cruise_distance, path_heading, dep_sector, app_sector = compute_route_distances(x1, y1, x2, y2, radius_Vert1, radius_Vert2, dep_heading, app_heading,high_speed_climb_distance,high_speed_descent_distance)
         
         vehicle  = vehicle_setup() 
         
@@ -79,13 +107,13 @@ def main():
         configs  = configs_setup(vehicle)
         
         # vehicle analyses
-        analyses = analyses_setup(configs)
+        analyses = analyses_setup(configs, origin_coord,destination_coord ,mic_x_res, mic_y_res ,noise_timesteps ,mic_stencil)
         
         # mission analyses 
-        mission = mission_setup(analyses, radius_Vert1, radius_Vert2, dep_heading, app_heading, dep_sector, app_sector, path_heading, total_cruise_distance)        
+        mission = mission_setup(analyses, radius_Vert1, radius_Vert2, dep_heading, app_heading, dep_sector, app_sector, path_heading, total_cruise_distance,cruise_altitude)        
         missions = missions_setup(mission) 
          
-        if Hexacopter_Max_Cruise_Distance < distance:
+        if max_cruise_distance < total_cruise_distance:
             results = missions.base_mission.evaluate() 
             
             # post process noise 
@@ -95,19 +123,18 @@ def main():
                                                    evalaute_noise_metrics = False)  
           
             # save data
-            filename = ''   # Aircraft_City_Frequency_Origin_Destination_Altitude
-            save(noise_data, filename + '.res')
-        
+            filename =  aircraft_code + '_' + city_code + '_' + origin_code + '_' +  destination_code  + '_' + cruise_altitude    # Aircraft_City_Frequency_Origin_Destination_Altitude
+            save(noise_data, filename + '.res') 
         
     return  
 
-def analyses_setup(configs):
+def analyses_setup(configs, origin_coord,destination_coord ,mic_x_res, mic_y_res ,noise_timesteps ,mic_stencil):
 
     analyses = RCAIDE.Framework.Analyses.Analysis.Container()
 
     # build a base analysis for each config
     for tag,config in configs.items():
-        analysis = base_analysis(config)
+        analysis = base_analysis(config, origin_coord,destination_coord ,mic_x_res, mic_y_res ,noise_timesteps ,mic_stencil)
         analyses[tag] = analysis
 
     return analyses
@@ -115,8 +142,9 @@ def analyses_setup(configs):
 # ------------------------------------------------------------------
 # Base Analysis
 # ------------------------------------------------------------------
-def base_analysis(vehicle):
+def base_analysis(vehicle, origin_coord,destination_coord ,mic_x_res, mic_y_res ,noise_timesteps ,mic_stencil):
 
+    
     # ------------------------------------------------------------------
     #   Initialize the Analyses
     # ------------------------------------------------------------------     
@@ -140,6 +168,19 @@ def base_analysis(vehicle):
     stability.vehicle = vehicle 
     analyses.append(stability)    
 
+    #  Noise Analysis   
+    noise = RCAIDE.Framework.Analyses.Noise.Frequency_Domain_Buildup()   
+    noise.vehicle = vehicle
+    noise.settings.mean_sea_level_altitude          = False         
+    noise.settings.aircraft_origin_coordinates      = origin_coord  
+    noise.settings.aircraft_destination_coordinates = destination_coord  
+    noise.settings.microphone_x_resolution          = mic_x_res       
+    noise.settings.microphone_y_resolution          = mic_y_res        
+    noise.settings.noise_times_steps                = noise_timesteps 
+    noise.settings.number_of_microphone_in_stencil  = mic_stencil     
+    noise.settings.topography_file                  = 'LA_Metropolitan_Area.txt' 
+    analyses.append(noise)
+ 
     # ------------------------------------------------------------------
     #  Energy
     energy          = RCAIDE.Framework.Analyses.Energy.Energy()
@@ -165,7 +206,7 @@ def base_analysis(vehicle):
 # ------------------------------------------------------------------
 #   Baseline Mission Setup
 # ------------------------------------------------------------------
-def mission_setup(analyses): 
+def mission_setup(analyses, radius_Vert1, radius_Vert2, dep_heading, app_heading, dep_sector, app_sector, path_heading, total_cruise_distance,cruise_altitude): 
     
     # ------------------------------------------------------------------
     #   Initialize the Mission
@@ -183,13 +224,13 @@ def mission_setup(analyses):
     #   First Climb Segment: Constant Speed, Constant Rate
     # ------------------------------------------------------------------ 
 
-    segment                                            = Segments.Vertical_Flight.Climb(base_segment)
-    segment.tag                                        = "Vertical_Climb" 
-    segment.analyses.extend( analyses.vertical_flight) 
-    segment.altitude_start                             = 0.0  * Units.ft 
-    segment.altitude_end                               = 200.  * Units.ft  
-    segment.climb_rate                                 = 300. * Units['ft/min']   
-    segment.initial_battery_state_of_charge            = 1.0
+    segment                                                = Segments.Vertical_Flight.Climb(base_segment)
+    segment.tag                                            = "Vertical_Climb" 
+    segment.analyses.extend( analyses.vertical_flight)     
+    segment.altitude_start                                 = 0.0  * Units.ft 
+    segment.altitude_end                                   = 200.  * Units.ft  
+    segment.climb_rate                                     = 300. * Units['ft/min']   
+    segment.initial_battery_state_of_charge                = 1.0
     
     # define flight dynamics to model  
     segment.flight_dynamics.force_z                        = True 
