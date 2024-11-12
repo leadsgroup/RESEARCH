@@ -126,15 +126,15 @@ def stick_fixed_stability_and_drag_optimization_setup(vehicle,cruise_velocity,cr
 
     #                 [ tag                       , initial,  (lb , ub) , scaling , units ]  
     problem.inputs = np.array([       
-                  [ 'mw_span'                     , 0.54  , 0.4  , 0.8   , 1.0  ,  1*Units.less],    
-                  [ 'mw_AR'                       , 17.11 , 15.0 , 19.0  , 100. ,  1*Units.meter**2],        
-                  [ 'mw_root_twist'               , 3.0   , 0.0  , 5.0   , 1. ,  1*Units.degree], 
-                  [ 'mw_tip_twist'                , -1.0  , -4.0 , 0.0   , 1.  ,  1*Units.degree], 
-                  [ 'vt_span'                     , 1.4816, 1.0  , 2     , 1.  ,  1*Units.meter],  
-                  [ 'vt_AR'                       , 17.11 , 15.0 , 19.0  , 100. ,  1*Units.meter**2],    
+                  [ 'mw_span'                     , 11.82855  , 10  , 13   , 1.0  ,  1*Units.less],    
+                  [ 'mw_AR'                       , 8.95198 , 7 , 10  , 10. ,  1*Units.meter**2],        
+                  [ 'mw_root_twist'               , 4   , 3.0  , 5.0   , 1.   ,  1*Units.degree], 
+                  [ 'mw_tip_twist'                , 0  , -1.0 , 1.0   , 1.   ,  1*Units.degree], 
+                  [ 'vt_span'                     , 1.4816, 1.0  , 2     , 1.   ,  1*Units.meter],  
+                  [ 'vt_AR'                       , 1.8874 , 1 , 2  , 100. ,  1*Units.meter**2],    
                   [ 'ht_span'                     , 4.0   , 3.0  , 5.0   , 10.  ,  1*Units.less], 
-                  [ 'ht_AR'                       , 4.0   , 3.0  , 5.0   , 10.  ,  1*Units.meter**2], 
-                  [ 'AoA'                         , 5      , -10  , 10, 1 ,  1*Units.degree],  
+                  [ 'ht_AR'                       , 5.3333   , 3.0  , 6.0   , 10.  ,  1*Units.meter**2], 
+                  [ 'AoA'                         , 5     , -10  , 10    , 1    ,  1*Units.degree],  
                   
     ],dtype=object)   
 
@@ -236,9 +236,9 @@ def elevator_sizing_optimization_setup(vehicle,cruise_velocity,cruise_altitude):
 
     #   [ tag                   , initial,         (lb , ub)        , scaling , units ]  
     problem.inputs = np.array([            
-                  [ 'ht_elevator_chord_fraction' , 0.2    , 0.15 , 0.3   ,  1.0  ,  1*Units.less],
-                  [ 'ht_elevator_span_frac_start', 0.25   , 0.05 , 0.5   ,  1.0 ,  1*Units.less], 
-                  [ 'ht_elevator_span_frac_end'  , 0.75   , 0.6  , 0.95  ,  1.0  ,  1*Units.less],     
+                  [ 'ht_elevator_chord_fraction' , 0.35    , 0.15 , 0.45   ,  1.0  ,  1*Units.less],
+                  [ 'ht_elevator_span_frac_start', 0.1   , 0.05 , 0.5   ,  1.0 ,  1*Units.less], 
+                  [ 'ht_elevator_span_frac_end'  , 0.9   , 0.6  , 0.95  ,  1.0  ,  1*Units.less],     
                   
     ],dtype=object)   
 
@@ -321,15 +321,15 @@ def aileron_rudder_sizing_optimization_setup(vehicle,cruise_velocity,cruise_alti
     if vehicle.rudder_flag:
         problem.inputs = np.array([             
                       [ 'mw_aileron_chord_fraction'  , 0.2    , 0.15 , 0.3  ,  1.0 ,  1*Units.less],
-                      [ 'mw_aileron_span_frac_start' , 0.75   , 0.55 , 0.8  ,  1.0 ,  1*Units.less],
+                      [ 'mw_aileron_span_frac_start' , 0.7   , 0.55 , 0.8  ,  1.0 ,  1*Units.less],
                       [ 'mw_aileron_span_frac_end'   , 0.9    , 0.85 , 0.95 ,  1.0 ,  1*Units.less],  
-                      [ 'vs_rudder_chord_fraction'   , 0.2    , 0.15 , 0.3  ,  1.0 ,  1*Units.less],
-                      [ 'vs_rudder_span_frac_start'  , 0.25   , 0.05 , 0.35 ,  1.0 ,  1*Units.less],
-                      [ 'vs_rudder_span_frac_end'    , 0.75   , 0.5  , 0.95 ,  1.0 ,  1*Units.less] ],dtype=object)   
+                      [ 'vs_rudder_chord_fraction'   , 0.4    , 0.15 , 0.5  ,  1.0 ,  1*Units.less],
+                      [ 'vs_rudder_span_frac_start'  , 0.1   , 0.05 , 0.35 ,  1.0 ,  1*Units.less],
+                      [ 'vs_rudder_span_frac_end'    , 0.9   , 0.5  , 0.95 ,  1.0 ,  1*Units.less] ],dtype=object)   
     else:
         problem.inputs = np.array([             
                       [ 'mw_aileron_chord_fraction'  , 0.2    , 0.15 , 0.3  ,  1.0 ,  1*Units.less],
-                      [ 'mw_aileron_span_frac_start' , 0.75   , 0.55 , 0.8  ,  1.0 ,  1*Units.less],
+                      [ 'mw_aileron_span_frac_start' , 0.7   , 0.55 , 0.8  ,  1.0 ,  1*Units.less],
                       [ 'mw_aileron_span_frac_end'   , 0.9    , 0.85 , 0.95 ,  1.0 ,  1*Units.less],   
                       
         ],dtype=object)      
@@ -433,7 +433,7 @@ def flap_sizing_optimization_setup(optimized_vehicle,cruise_velocity,cruise_alti
     problem.inputs = np.array([           
                   [ 'mw_flap_chord_fraction'     , 0.2    , 0.15 , 0.4  ,  1.0 ,  1*Units.less],
                   [ 'mw_flap_span_frac_start'    , 0.2    , 0.05 , 0.25 ,  1.0 ,  1*Units.less],
-                  [ 'mw_flap_span_frac_end'      , 0.4    , 0.3  , 0.5  ,  1.0 ,  1*Units.less],   
+                  [ 'mw_flap_span_frac_end'      , 0.5    , 0.3  , 0.6  ,  1.0 ,  1*Units.less],   
                   
     ],dtype=object)   
 
