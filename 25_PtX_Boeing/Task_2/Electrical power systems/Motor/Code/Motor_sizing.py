@@ -16,6 +16,11 @@ def main():
     
     #compute_basic_motor_sizing(B_sign, k_w, I_tot, D, L, omega)
     example_problem()
+    emrax_348()
+    
+    return
+
+def emrax_348():
     
     return
 

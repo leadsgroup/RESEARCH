@@ -971,6 +971,7 @@ def mission_setup(analyses):
     segment                                               = Segments.Transition.Constant_Acceleration_Constant_Angle_Linear_Climb(base_segment)
     segment.tag                                           = "High_Speed_Climbing_Transition" 
     segment.analyses.extend( analyses.transition_flight)    
+    segment.true_course                                   = 0 * Units.degree
     segment.altitude_start                                = 200.0 * Units.ft   
     segment.altitude_end                                  = 500.0 * Units.ft 
     segment.climb_angle                                   = 3     * Units.degrees   
@@ -989,6 +990,29 @@ def mission_setup(analyses):
                                                             'lift_propulsor_5','lift_propulsor_6','lift_propulsor_7','lift_propulsor_8']]
     mission.append_segment(segment) 
   
+
+    #------------------------------------------------------------------------------------------------------------------------------------ 
+    # Circular departure pattern 
+    #------------------------------------------------------------------------------------------------------------------------------------ 
+    segment                                               = Segments.Cruise.Curved_Constant_Radius_Constant_Speed_Constant_Altitude(base_segment)
+    segment.tag                                           = "Departure_pattern_curve"   
+    segment.air_speed   = 90 * Units.kts 
+    segment.turn_radius = 3600 * Units.feet  
+    segment.true_course = 0 * Units.degree # this is the true couse of the starting value     
+    segment.turn_angle  = 90 * Units.kts   
+    
+    # define flight dynamics to model 
+    segment.flight_dynamics.force_x                       = True  
+    segment.flight_dynamics.force_z                       = True     
+    
+    # define flight controls 
+    segment.assigned_control_variables.throttle.active               = True           
+    segment.assigned_control_variables.throttle.assigned_propulsors  = [['cruise_propulsor_1','cruise_propulsor_2'],
+                                                             ['lift_propulsor_1','lift_propulsor_2','lift_propulsor_3','lift_propulsor_4',
+                                                            'lift_propulsor_5','lift_propulsor_6','lift_propulsor_7','lift_propulsor_8']]
+    mission.append_segment(segment) 
+ 
+   
     #------------------------------------------------------------------------------------------------------------------------------------  
     #   First Climb
     #------------------------------------------------------------------------------------------------------------------------------------  

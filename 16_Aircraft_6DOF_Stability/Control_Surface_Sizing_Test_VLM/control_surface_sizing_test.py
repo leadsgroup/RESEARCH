@@ -40,8 +40,10 @@ def main():
         vehicle =  HC_vehicle_setup()
     if aircraft_model == 'SR':
         vehicle =  TSR_vehicle_setup()
-        
-    size_control_surfaces(vehicle)
+    for i in  range(origin_batt):
+        mod_vehicle = deepcopy(vehicle)
+        mod_vehicle.change things
+        size_control_surfaces(mod_vehicle)
     
     return 
 

@@ -11,10 +11,11 @@ import os
 import pickle
 import  pandas as pd 
 
-sys.path.append(os.path.join( os.path.split(os.path.split(sys.path[0])[0])[0], 'Aircraft' + os.sep + 'Stopped_Rotor'))
-from Stopped_Rotor  import vehicle_setup, configs_setup,analyses_setup , mission_setup, missions_setup, plot_results
- 
 
+local_path_1 =  os.path.split(sys.path[0])[0]   
+sys.path.append(os.path.join(local_path_1, 'Aircraft' + os.path.sep + 'Hexacopter'))
+
+ 
 def main():
      
     # vehicle data

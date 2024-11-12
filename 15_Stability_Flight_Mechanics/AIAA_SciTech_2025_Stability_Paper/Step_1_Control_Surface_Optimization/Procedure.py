@@ -75,17 +75,17 @@ def modify_stick_fixed_vehicle(nexus):
                 seg.twist = (wing.twists.tip-wing.twists.root)*seg.percent_span_location  + wing.twists.root
                 
         # update remaning wing properties  
-        wing_segmented_planform(wing, overwrite_reference = False )  
+        wing_segmented_planform(wing)  
         wing.areas.wetted             = wing.areas.reference  * 2 
         wing.areas.exposed            = wing.areas.reference  * 2  
                 
       
     # Update MOI 
-    weight_analysis                               = RCAIDE.Framework.Analyses.Weights.Weights_General_Aviation()
+    weight_analysis                               = RCAIDE.Framework.Analyses.Weights.Weights_EVTOL()
     weight_analysis.vehicle                       = vehicle 
     results                                       = weight_analysis.evaluate()
 
-    compute_vehicle_center_of_gravity(weight_analysis.vehicle, update_CG=False)     
+    compute_vehicle_center_of_gravity(weight_analysis.vehicle)     
     CG_location      = vehicle.mass_properties.center_of_gravity 
     compute_aircraft_moment_of_inertia(weight_analysis.vehicle, CG_location)
     
@@ -94,7 +94,7 @@ def modify_stick_fixed_vehicle(nexus):
     vehicle.mass_properties.moments_of_inertia.tensor[2, 0] = 0
 
     # Update Mission  
-    nexus.missions = Missions.stick_fixed_stability_setup(nexus.analyses,vehicle)      
+    nexus.missions = Missions.stick_fixed_stability_setup(nexus.analyses,weight_analysis.vehicle,nexus.cruise_velocity, nexus.cruise_altitude)      
     
     # diff the new data
     vehicle.store_diff() 
@@ -125,7 +125,9 @@ def longitudinal_static_stability_and_drag_post_process(nexus):
     stick_fixed_conditions.freestream.gravity[:,0]                     = g          
     stick_fixed_conditions.freestream.speed_of_sound[:,0]              = atmo_data.speed_of_sound[0,0] 
     stick_fixed_conditions.freestream.dynamic_viscosity[:,0]           = atmo_data.dynamic_viscosity[0,0] 
-    stick_fixed_conditions.freestream.temperature                      = atmo_data.temperature[0,0] 
+    stick_fixed_conditions.freestream.temperature[:,0]                 = atmo_data.temperature[0,0] 
+    stick_fixed_conditions.freestream.pressure[:,0]                    = atmo_data.pressure[0,0]   
+    stick_fixed_conditions.freestream.altitude[:,0]                    = nexus.missions['stick_fixed_cruise'].segments['cruise'].altitude     
     stick_fixed_conditions.freestream.velocity[:,0]                    = nexus.missions['stick_fixed_cruise'].segments['cruise'].air_speed 
     stick_fixed_conditions.frames.inertial.velocity_vector[:,0]        = nexus.missions['stick_fixed_cruise'].segments['cruise'].air_speed 
     stick_fixed_conditions.freestream.mach_number                      = stick_fixed_conditions.freestream.velocity/stick_fixed_conditions.freestream.speed_of_sound
@@ -135,7 +137,9 @@ def longitudinal_static_stability_and_drag_post_process(nexus):
     # ------------------------------------------------------------------------------------------------------------------------  
     # initialize analyses                                      
     stability_stick_fixed                                      = RCAIDE.Framework.Analyses.Stability.Vortex_Lattice_Method()   
-    stability_stick_fixed.settings.number_of_spanwise_vortices = 40
+    stability_stick_fixed.settings.number_of_spanwise_vortices = 20
+    stability_stick_fixed.settings.number_of_chordwise_vortices = 4
+    stability_stick_fixed.settings.discretize_control_surfaces = False
     stability_stick_fixed.vehicle                              = vehicle 
     stability_stick_fixed.settings.use_surrogate = False 
     stability_stick_fixed.initialize()
