@@ -116,6 +116,9 @@ def stick_fixed_stability_and_drag_optimization_setup(vehicle,cruise_velocity,cr
     nexus = Nexus()
     problem = Data()
     nexus.optimization_problem = problem
+    
+    nexus.cruise_velocity = cruise_velocity
+    nexus.cruise_altitude = cruise_altitude    
 
     # -------------------------------------------------------------------
     # Inputs
@@ -123,8 +126,8 @@ def stick_fixed_stability_and_drag_optimization_setup(vehicle,cruise_velocity,cr
 
     #                 [ tag                       , initial,  (lb , ub) , scaling , units ]  
     problem.inputs = np.array([       
-                  [ 'mw_span'                    , 0.54  , 0.4  , 0.8   , 1.0  ,  1*Units.less],    
-                  [ 'mw_AR'                      , 17.11 , 15.0 , 19.0  , 100. ,  1*Units.meter**2],        
+                  [ 'mw_span'                     , 0.54  , 0.4  , 0.8   , 1.0  ,  1*Units.less],    
+                  [ 'mw_AR'                       , 17.11 , 15.0 , 19.0  , 100. ,  1*Units.meter**2],        
                   [ 'mw_root_twist'               , 3.0   , 0.0  , 5.0   , 1. ,  1*Units.degree], 
                   [ 'mw_tip_twist'                , -1.0  , -4.0 , 0.0   , 1.  ,  1*Units.degree], 
                   [ 'vt_span'                     , 1.4816, 1.0  , 2     , 1.  ,  1*Units.meter],  
@@ -205,7 +208,7 @@ def stick_fixed_stability_and_drag_optimization_setup(vehicle,cruise_velocity,cr
     # -------------------------------------------------------------------
     #  Missions
     # -------------------------------------------------------------------
-    nexus.missions = Missions.stick_fixed_stability_setup(nexus.analyses,nexus.vehicle_configurations.stick_fixed_cruise,cruise_velocity,cruise_altitude)
+    nexus.missions = Missions.stick_fixed_stability_setup(nexus.analyses,nexus.vehicle_configurations.stick_fixed_cruise,nexus.cruise_velocity,nexus.cruise_altitude)
     
     # -------------------------------------------------------------------
     #  Procedure
@@ -223,6 +226,9 @@ def elevator_sizing_optimization_setup(vehicle,cruise_velocity,cruise_altitude):
     nexus = Nexus()
     problem = Data()
     nexus.optimization_problem = problem
+    
+    nexus.cruise_velocity = cruise_velocity
+    nexus.cruise_altitude = cruise_altitude    
 
     # -------------------------------------------------------------------
     # Inputs
@@ -282,7 +288,7 @@ def elevator_sizing_optimization_setup(vehicle,cruise_velocity,cruise_altitude):
     # -------------------------------------------------------------------
     #  Missions
     # -------------------------------------------------------------------
-    nexus.missions = Missions.elevator_sizing_setup(nexus.analyses,nexus.vehicle_configurations.elevator_sizing,cruise_velocity,cruise_altitude)
+    nexus.missions = Missions.elevator_sizing_setup(nexus.analyses,nexus.vehicle_configurations.elevator_sizing,nexus.cruise_velocity,nexus.cruise_altitude)
     
     # -------------------------------------------------------------------
     #  Procedure
@@ -303,6 +309,9 @@ def aileron_rudder_sizing_optimization_setup(vehicle,cruise_velocity,cruise_alti
     nexus = Nexus()
     problem = Data()
     nexus.optimization_problem = problem
+    
+    nexus.cruise_velocity = cruise_velocity
+    nexus.cruise_altitude = cruise_altitude    
 
     # -------------------------------------------------------------------
     # Inputs
@@ -393,7 +402,7 @@ def aileron_rudder_sizing_optimization_setup(vehicle,cruise_velocity,cruise_alti
     # -------------------------------------------------------------------
     #  Missions
     # -------------------------------------------------------------------
-    nexus.missions = Missions.aileron_rudder_sizing_setup(nexus.analyses,nexus.vehicle_configurations.aileron_rudder_sizing,cruise_velocity,cruise_altitude)
+    nexus.missions = Missions.aileron_rudder_sizing_setup(nexus.analyses,nexus.vehicle_configurations.aileron_rudder_sizing,nexus.cruise_velocity,nexus.cruise_altitude)
     
     # -------------------------------------------------------------------
     #  Procedure
@@ -412,6 +421,9 @@ def flap_sizing_optimization_setup(optimized_vehicle,cruise_velocity,cruise_alti
     nexus = Nexus()
     problem = Data()
     nexus.optimization_problem = problem
+    
+    nexus.cruise_velocity = cruise_velocity
+    nexus.cruise_altitude = cruise_altitude    
 
     # -------------------------------------------------------------------
     # Inputs
@@ -469,7 +481,7 @@ def flap_sizing_optimization_setup(optimized_vehicle,cruise_velocity,cruise_alti
     # -------------------------------------------------------------------
     #  Missions
     # -------------------------------------------------------------------
-    nexus.missions = Missions.flap_sizing_setup(nexus.analyses,nexus.vehicle_configurations.flap_sizing,cruise_velocity,cruise_altitude)
+    nexus.missions = Missions.flap_sizing_setup(nexus.analyses,nexus.vehicle_configurations.flap_sizing,nexus.cruise_velocity,nexus.cruise_altitude)
     
     # -------------------------------------------------------------------
     #  Procedure

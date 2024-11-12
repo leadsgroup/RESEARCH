@@ -94,7 +94,7 @@ def modify_stick_fixed_vehicle(nexus):
     vehicle.mass_properties.moments_of_inertia.tensor[2, 0] = 0
 
     # Update Mission  
-    nexus.missions = Missions.stick_fixed_stability_setup(nexus.analyses,vehicle)      
+    nexus.missions = Missions.stick_fixed_stability_setup(nexus.analyses,vehicle,nexus.cruise_velocity, nexus.cruise_altitude)      
     
     # diff the new data
     vehicle.store_diff() 
