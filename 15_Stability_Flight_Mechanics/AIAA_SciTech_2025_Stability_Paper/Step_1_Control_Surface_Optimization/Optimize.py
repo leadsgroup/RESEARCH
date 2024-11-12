@@ -4,9 +4,10 @@
 #   Imports
 # ----------------------------------------------------------------------  
 import RCAIDE
-from RCAIDE.Framework.Core import Units, Data 
-from RCAIDE.Framework.Optimization.Packages.scipy import scipy_setup
-from RCAIDE.Framework.Optimization.Common   import Nexus
+from   RCAIDE.Framework.Core                        import Units, Data 
+from   RCAIDE.Framework.Optimization.Packages.scipy import scipy_setup
+from   RCAIDE.Framework.Optimization.Common         import Nexus
+from   Optimization_Data_2_CSV                      import Optimization_Data_2_CSV
 
 # python imports 
 import numpy as np
@@ -29,10 +30,10 @@ def size_control_surfaces(vehicle, cruise_velocity = 120 * Units['mph'], cruise_
     ti   = time.time()  
     solver_name       = 'SLSQP' 
     planform_optimization_problem = stick_fixed_stability_and_drag_optimization_setup(vehicle,cruise_velocity,cruise_altitude)
-    output = scipy_setup.SciPy_Solve(planform_optimization_problem,solver=solver_name, sense_step = 1E-2, tolerance = 1E-2)  
-    print (output)    
+    output_stick_fixed = scipy_setup.SciPy_Solve(planform_optimization_problem,solver=solver_name, sense_step = 1E-2, tolerance = 1E-2)  
+    print (output_stick_fixed)    
     tf           = time.time()
-    elapsed_time = round((tf-ti)/60,2)
+    elapsed_time_stick_fixed = round((tf-ti)/60,2)
     print('Stick Fixed Stability and Drag Otimization Simulation Time: ' + str(elapsed_time))    
     
     '''
@@ -46,10 +47,10 @@ def size_control_surfaces(vehicle, cruise_velocity = 120 * Units['mph'], cruise_
     ti = time.time()   
     solver_name       = 'SLSQP'  
     elevator_sizing_optimization_problem = elevator_sizing_optimization_setup(optimized_vehicle_v1,cruise_velocity,cruise_altitude)
-    output = scipy_setup.SciPy_Solve(elevator_sizing_optimization_problem,solver=solver_name, sense_step = 1E-2, tolerance = 1E-2) 
-    print (output)     
+    output_elevator_sizing = scipy_setup.SciPy_Solve(elevator_sizing_optimization_problem,solver=solver_name, sense_step = 1E-2, tolerance = 1E-2) 
+    print (output_elevator_sizing)     
     tf           = time.time()
-    elapsed_time = round((tf-ti)/60,2)
+    elapsed_time_elevator_sizing = round((tf-ti)/60,2)
     print('Elevator Sizing Simulation Time: ' + str(elapsed_time))   
      
     '''
@@ -63,10 +64,10 @@ def size_control_surfaces(vehicle, cruise_velocity = 120 * Units['mph'], cruise_
     ti = time.time()   
     solver_name       = 'SLSQP'  
     aileron_rudder_sizing_optimization_problem = aileron_rudder_sizing_optimization_setup(optimized_vehicle,cruise_velocity,cruise_altitude)
-    output = scipy_setup.SciPy_Solve(aileron_rudder_sizing_optimization_problem,solver=solver_name, sense_step = 1E-1, tolerance = 1E-1) 
-    print (output)     
+    output_aileron_and_rudder_sizing = scipy_setup.SciPy_Solve(aileron_rudder_sizing_optimization_problem,solver=solver_name, sense_step = 1E-1, tolerance = 1E-1) 
+    print (output_aileron_and_rudder_sizing)     
     tf           = time.time()
-    elapsed_time = round((tf-ti)/60,2)
+    elapsed_time_aileron_and_rudder_sizing = round((tf-ti)/60,2)
     print('Aileron and Rudder Sizing Simulation Time: ' + str(elapsed_time))   
     
     '''
@@ -78,10 +79,10 @@ def size_control_surfaces(vehicle, cruise_velocity = 120 * Units['mph'], cruise_
     ti = time.time()   
     solver_name       = 'SLSQP'  
     flap_sizing_optimization_problem = flap_sizing_optimization_setup(optimized_vehicle_v3,cruise_velocity,cruise_altitude)
-    output = scipy_setup.SciPy_Solve(flap_sizing_optimization_problem,solver=solver_name, sense_step = 1E-4, tolerance = 1E-4) 
-    print (output)     
+    output_flap_sizing = scipy_setup.SciPy_Solve(flap_sizing_optimization_problem,solver=solver_name, sense_step = 1E-4, tolerance = 1E-4) 
+    print (output_flap_sizing)     
     tf           = time.time()
-    elapsed_time = round((tf-ti)/60,2)
+    elapsed_time_flap_sizing = round((tf-ti)/60,2)
     print('Flap Sizing Simulation Time: ' + str(elapsed_time))   
     
     '''
@@ -93,6 +94,22 @@ def size_control_surfaces(vehicle, cruise_velocity = 120 * Units['mph'], cruise_
     tf_0           = time.time()
     total_elapsed_time = round((tf_0-ti_0)/60,2)    
     print('Total Control Surface Sizing Time: ' + str(total_elapsed_time))
+    
+    Optimization_Data_2_CSV(output_stick_fixed, 
+                            output_elevator_sizing, 
+                            output_aileron_and_rudder_sizing, 
+                            output_flap_sizing, 
+                            planform_optimization_problem, 
+                            elevator_sizing_optimization_problem, 
+                            aileron_rudder_sizing_optimization_problem, 
+                            flap_sizing_optimization_problem,
+                            elapsed_time_stick_fixed,
+                            elapsed_time_elevator_sizing,
+                            elapsed_time_aileron_and_rudder_sizing,
+                            elapsed_time_flap_sizing)
+    
+    # Save Vehicle!!!
+    
     return
   
 def stick_fixed_stability_and_drag_optimization_setup(vehicle,cruise_velocity,cruise_altitude): 
