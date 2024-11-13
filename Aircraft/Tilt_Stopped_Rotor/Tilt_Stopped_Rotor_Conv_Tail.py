@@ -1022,14 +1022,14 @@ def mission_setup(analyses):
     #   Initialize the Mission
     # ------------------------------------------------------------------
 
-    mission     = RCAIDE.Framework.Mission.Sequential_Segments()
-    mission.tag = 'baseline_mission' 
+    mission        = RCAIDE.Framework.Mission.Sequential_Segments()
+    mission.tag    = 'baseline_mission' 
     
     # unpack Segments module
-    Segments = RCAIDE.Framework.Mission.Segments
+    Segments       = RCAIDE.Framework.Mission.Segments
 
     # base segment           
-    base_segment  = Segments.Segment()
+    base_segment   = Segments.Segment()
     
     # VSTALL Calculation  
     vehicle_mass   = analyses.base.aerodynamics.vehicle.mass_properties.max_takeoff
@@ -1039,13 +1039,14 @@ def mission_setup(analyses):
     #------------------------------------------------------------------------------------------------------------------------------------  
     # Vertical Climb 
     #------------------------------------------------------------------------------------------------------------------------------------  
-    segment     = Segments.Vertical_Flight.Climb(base_segment)
-    segment.tag = "Vertical_Climb"   
+    segment        = Segments.Vertical_Flight.Climb(base_segment)
+    segment.tag    = "Vertical_Climb"   
     segment.analyses.extend( analyses.vertical_flight )  
     segment.altitude_start                                = 0.0  * Units.ft  
     segment.altitude_end                                  = 200.  * Units.ft   
     segment.initial_battery_state_of_charge               = 1.0 
     segment.climb_rate                                    = 500. * Units['ft/min']   
+    segment.true_course                                   = 30 * Units.degree
             
     # define flight dynamics to model  
     segment.flight_dynamics.force_z                        = True   
@@ -1069,6 +1070,7 @@ def mission_setup(analyses):
     segment.analyses.extend( analyses.vertical_transition)   
     segment.air_speed_end                                 = 35 * Units['mph']     
     segment.acceleration                                  = 0.5
+    segment.true_course                                   = 30 * Units.degree
 
     # define flight dynamics to model 
     segment.flight_dynamics.force_x                        = True  
@@ -1092,7 +1094,8 @@ def mission_setup(analyses):
     segment.analyses.extend( analyses.high_speed_climb_transition )   
     segment.altitude_end                                  = 1000. * Units.ft   
     segment.climb_rate                                    = 500.  * Units['ft/min']  
-    segment.air_speed_end                                 = 90 *  Units.kts 
+    segment.air_speed_end                                 = 90 *  Units.kts
+    segment.true_course                                   = 30 * Units.degree
             
     # define flight dynamics to model 
     segment.flight_dynamics.force_x                       = True  
@@ -1115,10 +1118,11 @@ def mission_setup(analyses):
     #------------------------------------------------------------------------------------------------------------------------------------ 
     segment                                               = Segments.Cruise.Curved_Constant_Radius_Constant_Speed_Constant_Altitude(base_segment)
     segment.tag                                           = "Departure_Pattern_Curve"    
-    segment.analyses.extend( analyses.forward_flight )    
+    segment.analyses.extend( analyses.forward_flight ) 
+    segment.altitude    = 1000. * Units.ft
     segment.air_speed   = 90 * Units.kts 
     segment.turn_radius = 3600 * Units.feet  
-    segment.true_course = 0 * Units.degree # this is the true couse of the starting value     
+    segment.true_course = 30 * Units.degree # this is the true couse of the starting value     
     segment.turn_angle  = 90 * Units.degree
     
     # define flight dynamics to model 
@@ -1156,6 +1160,7 @@ def mission_setup(analyses):
     segment.altitude_end                                  = 1500. * Units.ft   
     segment.climb_rate                                    = 300.  * Units['ft/min'] 
     segment.air_speed_end                                 = 110.  * Units['mph']  
+    segment.true_course                                   = 30 * Units.degree
               
     # define flight dynamics to model   
     segment.flight_dynamics.force_x                       = True  
@@ -1172,16 +1177,17 @@ def mission_setup(analyses):
     #------------------------------------------------------------------------------------------------------------------------------------  
     # Cruise 
     #------------------------------------------------------------------------------------------------------------------------------------  
-    segment                                               = Segments.Cruise.Constant_Speed_Constant_Altitude(base_segment)
-    segment.tag                                           = "Cruise"  
-    segment.analyses.extend( analyses.forward_flight )                  
-    segment.altitude                                      = 1500.0 * Units.ft  
-    segment.air_speed                                     = 110.  * Units['mph']  
-    segment.distance                                      = 40 *Units.nmi    
-            
-    # define flight dynamics to model 
-    segment.flight_dynamics.force_x                       = True  
-    segment.flight_dynamics.force_z                       = True     
+    segment                                                          = Segments.Cruise.Constant_Speed_Constant_Altitude(base_segment)
+    segment.tag                                                      = "Cruise"  
+    segment.analyses.extend( analyses.forward_flight )                             
+    segment.altitude                                                 = 1500.0 * Units.ft  
+    segment.air_speed                                                = 110.  * Units['mph']  
+    segment.distance                                                 = 40 *Units.nmi 
+    segment.true_course                                              = 30 * Units.degree
+                                                                     
+    # define flight dynamics to model                                
+    segment.flight_dynamics.force_x                                  = True  
+    segment.flight_dynamics.force_z                                  = True     
     
     # define flight controls 
     segment.assigned_control_variables.throttle.active               = True           
@@ -1201,7 +1207,8 @@ def mission_setup(analyses):
     segment.altitude_end                                  = 500. * Units.ft  
     segment.climb_rate                                    = -500.  * Units['ft/min']
     segment.air_speed_start                               =  90 * Units.kts 
-    segment.air_speed_end                                 = Vstall          
+    segment.air_speed_end                                 = Vstall        
+    segment.true_course                                   = 30 * Units.degree
             
     # define flight dynamics to model 
     segment.flight_dynamics.force_x                       = True  
@@ -1217,14 +1224,15 @@ def mission_setup(analyses):
      
 
     #------------------------------------------------------------------------------------------------------------------------------------ 
-    # Circular departure pattern 
+    # Circular approach pattern 
     #------------------------------------------------------------------------------------------------------------------------------------ 
     segment                                               = Segments.Cruise.Curved_Constant_Radius_Constant_Speed_Constant_Altitude(base_segment)
     segment.tag                                           = "Approach_Pattern_Curve"      
-    segment.analyses.extend( analyses.forward_flight )     
+    segment.analyses.extend( analyses.forward_flight )   
+    segment.altitude    = 500. * Units.ft
     segment.air_speed   = 90 * Units.kts 
     segment.turn_radius = 3600 * Units.feet  
-    segment.true_course = 0 * Units.degree # this is the true couse of the starting value     
+    segment.true_course = 30 * Units.degree # this is the true couse of the starting value     
     segment.turn_angle  = 90 * Units.degree
     
     # define flight dynamics to model 
@@ -1264,6 +1272,7 @@ def mission_setup(analyses):
     segment.acceleration                                  = -0.25 * Units['m/s/s']    
     segment.pitch_initial                                 = 4.3  * Units.degrees  
     segment.pitch_final                                   = 7. * Units.degrees     
+    segment.true_course                                   = 30 * Units.degree
 
     # define flight dynamics to model 
     segment.flight_dynamics.force_x                        = True  
@@ -1288,7 +1297,8 @@ def mission_setup(analyses):
     segment.tag                                           = "Low_Speed_Approach_Transition"  
     segment.analyses.extend( analyses.vertical_transition)   
     segment.air_speed_end                                 = 50. * Units['ft/min'] 
-    segment.acceleration                                  =  -0.25 * Units['m/s/s']   
+    segment.acceleration                                  =  -0.25 * Units['m/s/s']
+    segment.true_course                                   = 30 * Units.degree
 
     # define flight dynamics to model 
     segment.flight_dynamics.force_x                        = True  
@@ -1313,7 +1323,8 @@ def mission_setup(analyses):
     segment.analyses.extend( analyses.vertical_flight)     
     segment.altitude_start                                = 50.0 * Units.ft   
     segment.altitude_end                                  = 0.   * Units.ft  
-    segment.descent_rate                                  = 300. * Units['ft/min']  
+    segment.descent_rate                                  = 300. * Units['ft/min']
+    segment.true_course                                   = 30 * Units.degree
     
     # define flight dynamics to model  
     segment.flight_dynamics.force_z                        = True   

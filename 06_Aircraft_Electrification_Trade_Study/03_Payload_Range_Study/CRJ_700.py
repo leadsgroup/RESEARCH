@@ -556,7 +556,7 @@ def vehicle_setup(propellant):
     turbofan.origin                             = [[21.5, -2.2,1.45]]  
     turbofan.engine_length                      = 3.3     
     turbofan.bypass_ratio                       = 5    
-    turbofan.design_altitude                    = 35000.0*Units.ft
+    turbofan.design_altitude                    = 38000.0*Units.ft
     turbofan.design_mach_number                 = 0.78  
     turbofan.design_thrust                      = 60000.0* Units.N 
              
@@ -564,7 +564,7 @@ def vehicle_setup(propellant):
     fan                                         = RCAIDE.Library.Components.Propulsors.Converters.Fan()   
     fan.tag                                     = 'fan'
     fan.polytropic_efficiency                   = 0.93
-    fan.pressure_ratio                          = 1.7
+    fan.pressure_ratio                          = 1.73
     turbofan.fan                                = fan        
                    
     # working fluid                   
@@ -591,29 +591,29 @@ def vehicle_setup(propellant):
     high_pressure_compressor                       = RCAIDE.Library.Components.Propulsors.Converters.Compressor()    
     high_pressure_compressor.tag                   = 'hpc'
     high_pressure_compressor.polytropic_efficiency = 0.91
-    high_pressure_compressor.pressure_ratio        = 10.0    
+    high_pressure_compressor.pressure_ratio        = 10.1    
     turbofan.high_pressure_compressor              = high_pressure_compressor
 
     # low pressure turbine  
     low_pressure_turbine                           = RCAIDE.Library.Components.Propulsors.Converters.Turbine()   
     low_pressure_turbine.tag                       ='lpt'
     low_pressure_turbine.mechanical_efficiency     = 0.99
-    low_pressure_turbine.polytropic_efficiency     = 0.93 
+    low_pressure_turbine.polytropic_efficiency     = 0.99 
     turbofan.low_pressure_turbine                  = low_pressure_turbine
    
     # high pressure turbine     
     high_pressure_turbine                          = RCAIDE.Library.Components.Propulsors.Converters.Turbine()   
     high_pressure_turbine.tag                      ='hpt'
     high_pressure_turbine.mechanical_efficiency    = 0.99
-    high_pressure_turbine.polytropic_efficiency    = 0.93
+    high_pressure_turbine.polytropic_efficiency    = 0.99
     turbofan.high_pressure_turbine                 = high_pressure_turbine 
 
     # combustor  
     combustor                                      = RCAIDE.Library.Components.Propulsors.Converters.Combustor()   
     combustor.tag                                  = 'Comb'
-    combustor.efficiency                           = 0.99 
+    combustor.efficiency                           = 0.995  # 0.99 
     combustor.alphac                               = 1.0     
-    combustor.turbine_inlet_temperature            = 1760         #1550
+    combustor.turbine_inlet_temperature            = 1760   # 1550
     combustor.pressure_ratio                       = 0.95
     combustor.fuel_data                            = propellant  
     turbofan.combustor                             = combustor
