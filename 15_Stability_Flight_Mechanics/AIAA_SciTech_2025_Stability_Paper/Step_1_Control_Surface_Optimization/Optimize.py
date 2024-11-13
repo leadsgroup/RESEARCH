@@ -12,6 +12,7 @@ from   Optimization_Data_2_CSV                      import Optimization_Data_2_C
 # python imports 
 import numpy as np
 import time
+import  pickle
 
 # local imports 
 import Vehicles
@@ -40,7 +41,14 @@ def size_control_surfaces(vehicle, cruise_velocity = 120 * Units['mph'], cruise_
     ELEVATOR SIZING
     '''      
     # define vehicle for elevator sizing 
-    optimized_vehicle_v1                             = planform_optimization_problem.vehicle_configurations.stick_fixed_cruise  
+    
+    with  open('optimized_vehicle_1.pkl', 'wb') as file:
+        pickle.dump(planform_optimization_problem, file)
+    results = planform_optimization_problem
+    #with open('optimized_vehicle_1.pkl', 'rb') as file:
+    #    results = pickle.load(file)
+        
+    optimized_vehicle_v1                             = results.vehicle_configurations.stick_fixed_cruise
     optimized_vehicle_v1.maxiumum_load_factor        = 3.0
     optimized_vehicle_v1.minimum_load_factor         = -1
     
@@ -126,8 +134,8 @@ def stick_fixed_stability_and_drag_optimization_setup(vehicle,cruise_velocity,cr
 
     #                 [ tag                       , initial,  (lb , ub) , scaling , units ]  
     problem.inputs = np.array([       
-                  [ 'mw_span'                     , 11.82855  , 10  , 13   , 1.0  ,  1*Units.less],    
-                  [ 'mw_AR'                       , 8.95198 , 7 , 10  , 10. ,  1*Units.meter**2],        
+                  #[ 'mw_span'                     , 11.82855  , 10  , 13   , 1.0  ,  1*Units.less],    
+                  #[ 'mw_AR'                       , 8.95198 , 7 , 10  , 10. ,  1*Units.meter**2],        
                   [ 'mw_root_twist'               , 4   , 3.0  , 5.0   , 1.   ,  1*Units.degree], 
                   [ 'mw_tip_twist'                , 0  , -1.0 , 1.0   , 1.   ,  1*Units.degree], 
                   [ 'vt_span'                     , 1.4816, 1.0  , 2     , 1.   ,  1*Units.meter],  
@@ -188,10 +196,10 @@ def stick_fixed_stability_and_drag_optimization_setup(vehicle,cruise_velocity,cr
         [ 'mw_AR'                             , 'vehicle_configurations.*.wings.main_wing.aspect_ratio'],         
         [ 'mw_root_twist'                     , 'vehicle_configurations.*.wings.main_wing.twists.root' ], 
         [ 'mw_tip_twist'                      , 'vehicle_configurations.*.wings.main_wing.twists.tip'  ],     
-        [ 'vt_span'                            , 'vehicle_configurations.*.wings.vertical_tail.spans.projected'],
-        [ 'vt_AR'                             , 'vehicle_configurations.*.wings.vertical_tail.aspect_ratio'],         
-        [ 'ht_AR'                             , 'vehicle_configurations.*.wings.horizontal_tail.aspect_ratio'],     
-        [ 'ht_span'                           , 'vehicle_configurations.*.wings.horizontal_tail.spans.projected'], 
+        [ 'vt_span'                            , 'vehicle_configurations.*.wings.vertical_stabilizer.spans.projected'],
+        [ 'vt_AR'                             , 'vehicle_configurations.*.wings.vertical_stabilizer.aspect_ratio'],         
+        [ 'ht_AR'                             , 'vehicle_configurations.*.wings.horizontal_stabilizer.aspect_ratio'],     
+        [ 'ht_span'                           , 'vehicle_configurations.*.wings.horizontal_stabilizer.spans.projected'], 
         [ 'AoA'                               , 'missions.stick_fixed_cruise.segments.cruise.state.conditions.aerodynamics.angles.alpha[0][0]' ], 
     ]      
     

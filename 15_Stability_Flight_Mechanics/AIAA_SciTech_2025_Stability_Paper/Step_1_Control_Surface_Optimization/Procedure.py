@@ -200,7 +200,7 @@ def longitudinal_static_stability_and_drag_post_process(nexus):
         print("CM alpla                 : " + str(summary.CM_alpha))    
         print("Spiral Criteria          : " + str(summary.spiral_criteria))
         print("\n\n")    
-        
+    
     return nexus  
     
 def elevator_sizing_post_process(nexus): 
@@ -215,7 +215,7 @@ def elevator_sizing_post_process(nexus):
     vehicle     = nexus.vehicle_configurations.elevator_sizing 
     m           = vehicle.mass_properties.max_takeoff
     S           = vehicle.reference_area 
-    V_trim      = vehicle.trim_airspeed   
+    V_trim      = nexus.cruise_velocity   
     V_max       = nexus.missions['elevator_sizing'].segments['cruise'].air_speed 
     atmosphere  = RCAIDE.Framework.Analyses.Atmospheric.US_Standard_1976()
     atmo_data   = atmosphere.compute_values(altitude = nexus.missions['elevator_sizing'].segments['cruise'].altitude )
@@ -332,7 +332,7 @@ def aileron_rudder_sizing_post_process(nexus):
     m            = vehicle.mass_properties.max_takeoff
     S            = vehicle.reference_area 
     vehicle      = nexus.vehicle_configurations.aileron_rudder_sizing 
-    CL_trim      = vehicle.trim_cl 
+    #CL_trim      = vehicle.trim_cl 
     V_crosswind  = vehicle.crosswind_velocity 
     atmosphere   = RCAIDE.Framework.Analyses.Atmospheric.US_Standard_1976()
     atmo_data    = atmosphere.compute_values(altitude = nexus.missions['aileron_sizing'].segments['cruise'].altitude )
