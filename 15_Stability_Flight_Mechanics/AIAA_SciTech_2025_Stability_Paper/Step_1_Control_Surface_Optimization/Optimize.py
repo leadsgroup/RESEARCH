@@ -128,7 +128,7 @@ def stick_fixed_stability_and_drag_optimization_setup(vehicle,cruise_velocity,cr
     nexus.cruise_velocity = cruise_velocity
     nexus.cruise_altitude = cruise_altitude    
     
-    scale_factor = 0.05
+    scaling_factor = 0.05
 
     # -------------------------------------------------------------------
     # Inputs
