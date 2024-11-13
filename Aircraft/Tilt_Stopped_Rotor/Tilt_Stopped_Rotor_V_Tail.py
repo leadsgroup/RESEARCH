@@ -534,10 +534,16 @@ def vehicle_setup(redesign_rotors=True) :
     #==================================================================================================================================== 
     # Tilt Rotor Bus 
     #====================================================================================================================================          
-    prop_rotor_bus                                                    = RCAIDE.Library.Components.Energy.Distributors.Electrical_Bus()
-    prop_rotor_bus.tag                                                = 'prop_rotor_bus'
+    prop_rotor_bus                           = RCAIDE.Library.Components.Energy.Distributors.Electrical_Bus()
+    prop_rotor_bus.tag                       = 'prop_rotor_bus'
     prop_rotor_bus.origin                    =  [[2.43775609, 0 , 1.2]] 
-    prop_rotor_bus.number_of_battery_modules =  1    
+    prop_rotor_bus.number_of_battery_modules =  2    
+
+    for m_i in range(prop_rotor_bus.number_of_battery_modules):
+        module.tag = 'nmc_module_' + str(m_i+1) 
+        module =  deepcopy(battery_module)
+        module.origin = [[2.0, 0.0, 0.0]] 
+        prop_rotor_bus.battery_modules.append(module)     
 
     #------------------------------------------------------------------------------------------------------------------------------------  
     # Bus Battery
@@ -681,19 +687,22 @@ def vehicle_setup(redesign_rotors=True) :
     lift_rotor_bus                           = RCAIDE.Library.Components.Energy.Distributors.Electrical_Bus()
     lift_rotor_bus.tag                       = 'lift_rotor_bus' 
     lift_rotor_bus.origin                    =  [[2.43775609, 0 , 1.2]] 
-    lift_rotor_bus.number_of_battery_modules =  1
+    lift_rotor_bus.number_of_battery_modules =  2
     #------------------------------------------------------------------------------------------------------------------------------------  
     # Bus Battery
     #------------------------------------------------------------------------------------------------------------------------------------ 
     battery_module                                                    = RCAIDE.Library.Components.Energy.Sources.Battery_Modules.Lithium_Ion_NMC() 
     battery_module.tag                                                = 'lift_bus_battery'
     battery_module.electrical_configuration.series                    = 140   
-    battery_module.electrical_configuration.parallel                  = 20  
+    battery_module.electrical_configuration.parallel                  = 10  
     battery_module.geometrtic_configuration.normal_count              = 140 
-    battery_module.geometrtic_configuration.parallel_count            = 20
-    for _ in range(lift_rotor_bus.number_of_battery_modules):
-        lift_rotor_bus.battery_modules.append(deepcopy(battery_module)) 
-    lift_rotor_bus.initialize_bus_properties()
+    battery_module.geometrtic_configuration.parallel_count            = 10
+
+    for m_i in range(lift_rotor_bus.number_of_battery_modules):
+        module.tag = 'nmc_module_' + str(m_i+1) 
+        module =  deepcopy(battery_module)
+        module.origin = [[2.0, 0.0, 0.0]] 
+        lift_rotor_bus.battery_modules.append(module) 
 
     #------------------------------------------------------------------------------------------------------------------------------------  
     # Lift Propulsors 
