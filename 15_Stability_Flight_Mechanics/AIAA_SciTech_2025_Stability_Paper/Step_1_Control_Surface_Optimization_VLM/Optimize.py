@@ -193,10 +193,10 @@ def stick_fixed_stability_and_drag_optimization_setup(vehicle,cruise_velocity,cr
         #[ 'mw_AR'                             , 'vehicle_configurations.*.wings.main_wing.aspect_ratio'],         
         [ 'mw_root_twist'                     , 'vehicle_configurations.*.wings.main_wing.twists.root' ], 
         [ 'mw_tip_twist'                      , 'vehicle_configurations.*.wings.main_wing.twists.tip'  ],     
-        [ 'vt_span'                           , 'vehicle_configurations.*.wings.vertical_stabilizer.spans.projected'],
-        [ 'vt_AR'                             , 'vehicle_configurations.*.wings.vertical_stabilizer.aspect_ratio'],         
-        [ 'ht_AR'                             , 'vehicle_configurations.*.wings.horizontal_stabilizer.aspect_ratio'],     
-        [ 'ht_span'                           , 'vehicle_configurations.*.wings.horizontal_stabilizer.spans.projected'], 
+        [ 'vt_span'                           , 'vehicle_configurations.*.wings.vertical_tail.spans.projected'],
+        [ 'vt_AR'                             , 'vehicle_configurations.*.wings.vertical_tail.aspect_ratio'],         
+        [ 'ht_AR'                             , 'vehicle_configurations.*.wings.horizontal_tail.aspect_ratio'],     
+        [ 'ht_span'                           , 'vehicle_configurations.*.wings.horizontal_tail.spans.projected'], 
         [ 'AoA'                               , 'missions.stick_fixed_cruise.segments.cruise.state.conditions.aerodynamics.angles.alpha[0][0]' ], 
     ]      
     
@@ -275,9 +275,9 @@ def elevator_sizing_optimization_setup(vehicle,cruise_velocity,cruise_altitude):
         [ 'elevator_surface_area'             , 'summary.elevator_surface_area' ], 
         [ 'elevator_push_deflection'          , 'summary.elevator_push_deflection' ],   
         [ 'elevator_pull_deflection'          , 'summary.elevator_pull_deflection' ],     
-        [ 'ht_elevator_chord_fraction'        , 'vehicle_configurations.*.wings.horizontal_stabilizer.control_surfaces.elevator.chord_fraction'],    
-        [ 'ht_elevator_span_frac_start'       , 'vehicle_configurations.*.wings.horizontal_stabilizer.control_surfaces.elevator.span_fraction_start'],    
-        [ 'ht_elevator_span_frac_end'         , 'vehicle_configurations.*.wings.horizontal_stabilizer.control_surfaces.elevator.span_fraction_end'],  
+        [ 'ht_elevator_chord_fraction'        , 'vehicle_configurations.*.wings.horizontal_tail.control_surfaces.elevator.chord_fraction'],    
+        [ 'ht_elevator_span_frac_start'       , 'vehicle_configurations.*.wings.horizontal_tail.control_surfaces.elevator.span_fraction_start'],    
+        [ 'ht_elevator_span_frac_end'         , 'vehicle_configurations.*.wings.horizontal_tail.control_surfaces.elevator.span_fraction_end'],  
     ]      
     
     # -------------------------------------------------------------------
@@ -382,9 +382,9 @@ def aileron_rudder_sizing_optimization_setup(vehicle,cruise_velocity,cruise_alti
             [ 'mw_aileron_chord_fraction'              , 'vehicle_configurations.*.wings.main_wing.control_surfaces.aileron.chord_fraction'],  
             [ 'mw_aileron_span_frac_start'             , 'vehicle_configurations.*.wings.main_wing.control_surfaces.aileron.span_fraction_start'],    
             [ 'mw_aileron_span_frac_end'               , 'vehicle_configurations.*.wings.main_wing.control_surfaces.aileron.span_fraction_end'],     
-            [ 'vs_rudder_chord_fraction'               , 'vehicle_configurations.*.wings.vertical_stabilizer.control_surfaces.rudder.chord_fraction'],    
-            [ 'vs_rudder_span_frac_start'              , 'vehicle_configurations.*.wings.vertical_stabilizer.control_surfaces.rudder.span_fraction_start'],    
-            [ 'vs_rudder_span_frac_end'                , 'vehicle_configurations.*.wings.vertical_stabilizer.control_surfaces.rudder.span_fraction_end']]      
+            [ 'vs_rudder_chord_fraction'               , 'vehicle_configurations.*.wings.vertical_tail.control_surfaces.rudder.chord_fraction'],    
+            [ 'vs_rudder_span_frac_start'              , 'vehicle_configurations.*.wings.vertical_tail.control_surfaces.rudder.span_fraction_start'],    
+            [ 'vs_rudder_span_frac_end'                , 'vehicle_configurations.*.wings.vertical_tail.control_surfaces.rudder.span_fraction_end']]      
     else:
         problem.aliases = [ 
             [ 'aileron_rudder_surface_area'            , 'summary.aileron_rudder_surface_area' ],  

@@ -614,8 +614,8 @@ def vehicle_setup(redesign_rotors=True) :
     battery_module.geometrtic_configuration.parallel_count            = 30 
 
     for m_i in range(prop_rotor_bus.number_of_battery_modules):
+        module =  deepcopy(battery_module)
         module.tag = 'nmc_module_' + str(m_i+1) 
-        module =  deepcopy(module)
         module.origin = [[2.0, 0.0, 0.0]] 
         prop_rotor_bus.battery_modules.append(module) 
         
@@ -759,8 +759,8 @@ def vehicle_setup(redesign_rotors=True) :
     battery_module.geometrtic_configuration.parallel_count            = 10 
      
     for m_i in range(lift_rotor_bus.number_of_battery_modules):
+        module =  deepcopy(battery_module)
         module.tag = 'nmc_module_' + str(m_i+1) 
-        module =  deepcopy(module)
         module.origin = [[2.0, 0.0, 0.0]] 
         lift_rotor_bus.battery_modules.append(module) 
     lift_rotor_bus.initialize_bus_properties()
