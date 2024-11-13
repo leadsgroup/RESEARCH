@@ -127,21 +127,23 @@ def stick_fixed_stability_and_drag_optimization_setup(vehicle,cruise_velocity,cr
     
     nexus.cruise_velocity = cruise_velocity
     nexus.cruise_altitude = cruise_altitude    
+    
+    scale_factor = 0.05
 
     # -------------------------------------------------------------------
     # Inputs
     # -------------------------------------------------------------------
 
-    #                 [ tag                       , initial,  (lb , ub) , scaling , units ]  
+    #             [ tag,                          initial,                                       (lb , ub) , scaling , units ]  
     problem.inputs = np.array([       
                   #[ 'mw_span'                     , 11.82855  , 10  , 13   , 1.0  ,  1*Units.less],    
-                  #[ 'mw_AR'                       , 8.95198 , 7 , 10  , 10. ,  1*Units.meter**2],        
-                  [ 'mw_root_twist'               , 4   , 3.0  , 5.0   , 1.   ,  1*Units.degree], 
-                  [ 'mw_tip_twist'                , 0  , -1.0 , 1.0   , 1.   ,  1*Units.degree], 
-                  [ 'vt_span'                     , 1.4816, 1.0  , 2     , 1.   ,  1*Units.meter],  
-                  [ 'vt_AR'                       , 1.8874 , 1 , 2  , 100. ,  1*Units.meter**2],    
-                  [ 'ht_span'                     , 4.0   , 3.0  , 5.0   , 10.  ,  1*Units.less], 
-                  [ 'ht_AR'                       , 5.3333   , 3.0  , 6.0   , 10.  ,  1*Units.meter**2], 
+                  #[ 'mw_AR'                       , 8.95198 , 7 , 10  , 10. ,  1*Units.meter**2],                                                                                                         
+                  [ 'mw_root_twist'               , vehicle.wings.main_wing.twists.root,          vehicle.wings.main_wing.twists.root*(1 - scalingfactor),          vehicle.wings.main_wing.twists.root*(1 + scalingfactor),           1.,   1*Units.degree], 
+                  [ 'mw_tip_twist'                , vehicle.wings.main_wing.twists.tip,           vehicle.wings.main_wing.twists.tip*(1 - scalingfactor),           vehicle.wings.main_wing.twists.tip*(1 + scalingfactor),            1.,   1*Units.degree], 
+                  [ 'vt_span'                     , vehicle.wings.vertical_tail.spans.projected,  vehicle.wings.vertical_tail.spans.projected*(1 - scalingfactor),  vehicle.wings.vertical_tail.spans.projected*(1 + scalingfactor),   1.,   1*Units.meter],  
+                  [ 'vt_AR'                       , vehicle.wings.vertical_tail.aspect_ratio,     vehicle.wings.vertical_tail.aspect_ratio*(1 - scalingfactor),     vehicle.wings.vertical_tail.aspect_ratio*(1 + scalingfactor),      100., 1*Units.meter**2],    
+                  [ 'ht_span'                     , vehicle.wings.horizontal_tail.spans.projected,vehicle.wings.horizontal_tail.spans.projected*(1 - scalingfactor),vehicle.wings.horizontal_tail.spans.projected*(1 + scalingfactor), 10.,  1*Units.less], 
+                  [ 'ht_AR'                       , vehicle.wings.horizontal_tail.aspect_ratio,   vehicle.wings.horizontal_tail*(1 - scalingfactor),                vehicle.wings.horizontal_tail*(1 + scalingfactor),                 10.,  1*Units.meter**2], 
                   [ 'AoA'                         , 5     , -10  , 10    , 1    ,  1*Units.degree],  
                   
     ],dtype=object)   
