@@ -198,7 +198,7 @@ def stick_fixed_stability_and_drag_optimization_setup(vehicle,cruise_velocity,cr
         [ 'mw_AR'                             , 'vehicle_configurations.*.wings.main_wing.aspect_ratio'],         
         [ 'mw_root_twist'                     , 'vehicle_configurations.*.wings.main_wing.twists.root' ], 
         [ 'mw_tip_twist'                      , 'vehicle_configurations.*.wings.main_wing.twists.tip'  ],     
-        [ 'vt_span'                            , 'vehicle_configurations.*.wings.vertical_stabilizer.spans.projected'],
+        [ 'vt_span'                           , 'vehicle_configurations.*.wings.vertical_stabilizer.spans.projected'],
         [ 'vt_AR'                             , 'vehicle_configurations.*.wings.vertical_stabilizer.aspect_ratio'],         
         [ 'ht_AR'                             , 'vehicle_configurations.*.wings.horizontal_stabilizer.aspect_ratio'],     
         [ 'ht_span'                           , 'vehicle_configurations.*.wings.horizontal_stabilizer.spans.projected'], 
