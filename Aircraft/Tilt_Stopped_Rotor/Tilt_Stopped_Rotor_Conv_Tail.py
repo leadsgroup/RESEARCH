@@ -1015,8 +1015,10 @@ def mission_setup(analyses):
     
     # define flight controls 
     segment.assigned_control_variables.throttle.active               = True           
-    segment.assigned_control_variables.throttle.assigned_propulsors  = [['prop_rotor_propulsor_1','prop_rotor_propulsor_2','prop_rotor_propulsor_3','prop_rotor_propulsor_4','prop_rotor_propulsor_5','prop_rotor_propulsor_6'],
-                                                                        ['lift_rotor_propulsor_1','lift_rotor_propulsor_2','lift_rotor_propulsor_3','lift_rotor_propulsor_4', 'lift_rotor_propulsor_5', 'lift_rotor_propulsor_6']]
+    segment.assigned_control_variables.throttle.assigned_propulsors  = [['prop_rotor_propulsor_1','prop_rotor_propulsor_2','prop_rotor_propulsor_3',
+                                                                         'prop_rotor_propulsor_4','prop_rotor_propulsor_5','prop_rotor_propulsor_6'],
+                                                                        ['lift_rotor_propulsor_1','lift_rotor_propulsor_2','lift_rotor_propulsor_3',
+                                                                         'lift_rotor_propulsor_4', 'lift_rotor_propulsor_5', 'lift_rotor_propulsor_6']]
        
     mission.append_segment(segment)
     
@@ -1038,8 +1040,10 @@ def mission_setup(analyses):
     # define flight controls
     segment.assigned_control_variables.body_angle.active             = True
     segment.assigned_control_variables.throttle.active               = True           
-    segment.assigned_control_variables.throttle.assigned_propulsors  = [['prop_rotor_propulsor_1','prop_rotor_propulsor_2','prop_rotor_propulsor_3','prop_rotor_propulsor_4','prop_rotor_propulsor_5','prop_rotor_propulsor_6'],
-                                                                        ['lift_rotor_propulsor_1','lift_rotor_propulsor_2','lift_rotor_propulsor_3','lift_rotor_propulsor_4', 'lift_rotor_propulsor_5', 'lift_rotor_propulsor_6']]
+    segment.assigned_control_variables.throttle.assigned_propulsors  = [['prop_rotor_propulsor_1','prop_rotor_propulsor_2','prop_rotor_propulsor_3',
+                                                                         'prop_rotor_propulsor_4','prop_rotor_propulsor_5','prop_rotor_propulsor_6'],
+                                                                        ['lift_rotor_propulsor_1','lift_rotor_propulsor_2','lift_rotor_propulsor_3',
+                                                                         'lift_rotor_propulsor_4', 'lift_rotor_propulsor_5', 'lift_rotor_propulsor_6']]
     mission.append_segment(segment) 
      
     #------------------------------------------------------------------------------------------------------------------------------------  
@@ -1050,7 +1054,7 @@ def mission_setup(analyses):
     segment.analyses.extend( analyses.high_speed_climb_transition )   
     segment.altitude_end                                  = 1000. * Units.ft   
     segment.climb_rate                                    = 500.  * Units['ft/min']  
-    segment.air_speed_end                                 = 105.  * Units['mph'] 
+    segment.air_speed_end                                 = 90 *  Units.kts 
             
     # define flight dynamics to model 
     segment.flight_dynamics.force_x                       = True  
@@ -1060,11 +1064,50 @@ def mission_setup(analyses):
     # define flight controls 
     segment.assigned_control_variables.body_angle.active             = True
     segment.assigned_control_variables.throttle.active               = True           
-    segment.assigned_control_variables.throttle.assigned_propulsors  = [['prop_rotor_propulsor_1','prop_rotor_propulsor_2','prop_rotor_propulsor_3','prop_rotor_propulsor_4','prop_rotor_propulsor_5','prop_rotor_propulsor_6'],
-                                                                        ['lift_rotor_propulsor_1','lift_rotor_propulsor_2','lift_rotor_propulsor_3','lift_rotor_propulsor_4', 'lift_rotor_propulsor_5', 'lift_rotor_propulsor_6']]
+    segment.assigned_control_variables.throttle.assigned_propulsors  = [['prop_rotor_propulsor_1','prop_rotor_propulsor_2','prop_rotor_propulsor_3',
+                                                                         'prop_rotor_propulsor_4','prop_rotor_propulsor_5','prop_rotor_propulsor_6'],
+                                                                        ['lift_rotor_propulsor_1','lift_rotor_propulsor_2','lift_rotor_propulsor_3',
+                                                                         'lift_rotor_propulsor_4', 'lift_rotor_propulsor_5', 'lift_rotor_propulsor_6']]
                 
     mission.append_segment(segment)   
   
+
+    #------------------------------------------------------------------------------------------------------------------------------------ 
+    # Circular departure pattern 
+    #------------------------------------------------------------------------------------------------------------------------------------ 
+    segment                                               = Segments.Cruise.Curved_Constant_Radius_Constant_Speed_Constant_Altitude(base_segment)
+    segment.tag                                           = "Departure_Pattern_Curve"    
+    segment.analyses.extend( analyses.forward_flight )    
+    segment.air_speed   = 90 * Units.kts 
+    segment.turn_radius = 3600 * Units.feet  
+    segment.true_course = 0 * Units.degree # this is the true couse of the starting value     
+    segment.turn_angle  = 90 * Units.degree
+    
+    # define flight dynamics to model 
+    segment.flight_dynamics.force_x                                             = True    
+    segment.flight_dynamics.force_z                                             = True    
+    segment.flight_dynamics.force_y                                             = True     
+    segment.flight_dynamics.moment_y                                            = True 
+    segment.flight_dynamics.moment_x                                            = True
+    segment.flight_dynamics.moment_z                                            = True 
+
+    # define flight controls              
+    segment.assigned_control_variables.throttle.active                          = True           
+    segment.assigned_control_variables.throttle.assigned_propulsors             = [['prop_rotor_propulsor_1','prop_rotor_propulsor_2','prop_rotor_propulsor_3',
+                                                                                    'prop_rotor_propulsor_4','prop_rotor_propulsor_5','prop_rotor_propulsor_6'] ] 
+    segment.assigned_control_variables.body_angle.active                        = True    
+    segment.assigned_control_variables.elevator_deflection.active               = True    
+    segment.assigned_control_variables.elevator_deflection.assigned_surfaces    = [['elevator']]   
+    segment.assigned_control_variables.aileron_deflection.active                = True    
+    segment.assigned_control_variables.aileron_deflection.assigned_surfaces     = [['aileron']] 
+    segment.assigned_control_variables.rudder_deflection.active                 = True    
+    segment.assigned_control_variables.rudder_deflection.assigned_surfaces      = [['rudder']] 
+    segment.assigned_control_variables.bank_angle.active                        = True    
+    segment.assigned_control_variables.bank_angle.initial_guess_values          = [[20.0 * Units.degree]]
+    
+    mission.append_segment(segment)  
+  
+    
     #------------------------------------------------------------------------------------------------------------------------------------  
     #  Second Climb
     #------------------------------------------------------------------------------------------------------------------------------------  
@@ -1082,7 +1125,8 @@ def mission_setup(analyses):
     
     # define flight controls 
     segment.assigned_control_variables.throttle.active               = True           
-    segment.assigned_control_variables.throttle.assigned_propulsors  = [['prop_rotor_propulsor_1','prop_rotor_propulsor_2','prop_rotor_propulsor_3','prop_rotor_propulsor_4','prop_rotor_propulsor_5','prop_rotor_propulsor_6'] ] 
+    segment.assigned_control_variables.throttle.assigned_propulsors  = [['prop_rotor_propulsor_1','prop_rotor_propulsor_2','prop_rotor_propulsor_3',
+                                                                         'prop_rotor_propulsor_4','prop_rotor_propulsor_5','prop_rotor_propulsor_6'] ] 
     segment.assigned_control_variables.body_angle.active             = True                
                  
     mission.append_segment(segment)  
@@ -1103,7 +1147,8 @@ def mission_setup(analyses):
     
     # define flight controls 
     segment.assigned_control_variables.throttle.active               = True           
-    segment.assigned_control_variables.throttle.assigned_propulsors  = [['prop_rotor_propulsor_1','prop_rotor_propulsor_2','prop_rotor_propulsor_3','prop_rotor_propulsor_4','prop_rotor_propulsor_5','prop_rotor_propulsor_6'] ] 
+    segment.assigned_control_variables.throttle.assigned_propulsors  = [['prop_rotor_propulsor_1','prop_rotor_propulsor_2','prop_rotor_propulsor_3',
+                                                                         'prop_rotor_propulsor_4','prop_rotor_propulsor_5','prop_rotor_propulsor_6'] ] 
     segment.assigned_control_variables.body_angle.active             = True                
          
     mission.append_segment(segment)   
@@ -1115,9 +1160,9 @@ def mission_setup(analyses):
     segment.tag                                           = "Descent"  
     segment.analyses.extend(analyses.forward_flight)  
     segment.altitude_start                                = 1500.0 * Units.ft  
-    segment.altitude_end                                  = 1000. * Units.ft  
+    segment.altitude_end                                  = 500. * Units.ft  
     segment.climb_rate                                    = -500.  * Units['ft/min']
-    segment.air_speed_start                               = 110.  * Units['mph']  
+    segment.air_speed_start                               =  90 * Units.kts 
     segment.air_speed_end                                 = Vstall          
             
     # define flight dynamics to model 
@@ -1126,20 +1171,57 @@ def mission_setup(analyses):
     
     # define flight controls 
     segment.assigned_control_variables.throttle.active               = True           
-    segment.assigned_control_variables.throttle.assigned_propulsors  = [['prop_rotor_propulsor_1','prop_rotor_propulsor_2','prop_rotor_propulsor_3','prop_rotor_propulsor_4','prop_rotor_propulsor_5','prop_rotor_propulsor_6'] ] 
+    segment.assigned_control_variables.throttle.assigned_propulsors  = [['prop_rotor_propulsor_1','prop_rotor_propulsor_2','prop_rotor_propulsor_3',
+                                                                         'prop_rotor_propulsor_4','prop_rotor_propulsor_5','prop_rotor_propulsor_6'] ] 
     segment.assigned_control_variables.body_angle.active             = True                
        
     mission.append_segment(segment)  
      
-            
+
+    #------------------------------------------------------------------------------------------------------------------------------------ 
+    # Circular departure pattern 
+    #------------------------------------------------------------------------------------------------------------------------------------ 
+    segment                                               = Segments.Cruise.Curved_Constant_Radius_Constant_Speed_Constant_Altitude(base_segment)
+    segment.tag                                           = "Approach_Pattern_Curve"      
+    segment.analyses.extend( analyses.forward_flight )     
+    segment.air_speed   = 90 * Units.kts 
+    segment.turn_radius = 3600 * Units.feet  
+    segment.true_course = 0 * Units.degree # this is the true couse of the starting value     
+    segment.turn_angle  = 90 * Units.degree
+    
+    # define flight dynamics to model 
+    segment.flight_dynamics.force_x                                             = True    
+    segment.flight_dynamics.force_z                                             = True    
+    segment.flight_dynamics.force_y                                             = True     
+    segment.flight_dynamics.moment_y                                            = True 
+    segment.flight_dynamics.moment_x                                            = True
+    segment.flight_dynamics.moment_z                                            = True 
+
+    # define flight controls              
+    segment.assigned_control_variables.throttle.active                          = True           
+    segment.assigned_control_variables.throttle.assigned_propulsors             = [['prop_rotor_propulsor_1','prop_rotor_propulsor_2','prop_rotor_propulsor_3',
+                                                                                    'prop_rotor_propulsor_4','prop_rotor_propulsor_5','prop_rotor_propulsor_6'] ] 
+    segment.assigned_control_variables.body_angle.active                        = True    
+    segment.assigned_control_variables.elevator_deflection.active               = True    
+    segment.assigned_control_variables.elevator_deflection.assigned_surfaces    = [['elevator']]   
+    segment.assigned_control_variables.aileron_deflection.active                = True    
+    segment.assigned_control_variables.aileron_deflection.assigned_surfaces     = [['aileron']] 
+    segment.assigned_control_variables.rudder_deflection.active                 = True    
+    segment.assigned_control_variables.rudder_deflection.assigned_surfaces      = [['rudder']] 
+    segment.assigned_control_variables.bank_angle.active                        = True    
+    segment.assigned_control_variables.bank_angle.initial_guess_values          = [[20.0 * Units.degree]]
+    
+    mission.append_segment(segment)  
+      
+                  
     #------------------------------------------------------------------------------------------------------------------------------------ 
     # High-Speed Descending Transition
     #------------------------------------------------------------------------------------------------------------------------------------ 
     segment                                               = Segments.Transition.Constant_Acceleration_Constant_Angle_Linear_Climb(base_segment)
     segment.tag                                           = "High_Speed_Descending_Transition"  
     segment.analyses.extend( analyses.high_speed_climb_transition ) 
-    segment.altitude_start                                = 1000.0 * Units.ft   
-    segment.altitude_end                                  = 300.0 * Units.ft   
+    segment.altitude_start                                = 500.0 * Units.ft   
+    segment.altitude_end                                  = 50.0 * Units.ft   
     segment.climb_angle                                   = 3 * Units.degrees
     segment.acceleration                                  = -0.25 * Units['m/s/s']    
     segment.pitch_initial                                 = 4.3  * Units.degrees  
@@ -1153,8 +1235,10 @@ def mission_setup(analyses):
     # define flight controls
     segment.assigned_control_variables.body_angle.active             = True
     segment.assigned_control_variables.throttle.active               = True           
-    segment.assigned_control_variables.throttle.assigned_propulsors  = [['prop_rotor_propulsor_1','prop_rotor_propulsor_2','prop_rotor_propulsor_3','prop_rotor_propulsor_4','prop_rotor_propulsor_5','prop_rotor_propulsor_6'],
-                                                                        ['lift_rotor_propulsor_1','lift_rotor_propulsor_2','lift_rotor_propulsor_3','lift_rotor_propulsor_4', 'lift_rotor_propulsor_5', 'lift_rotor_propulsor_6']]
+    segment.assigned_control_variables.throttle.assigned_propulsors  = [['prop_rotor_propulsor_1','prop_rotor_propulsor_2','prop_rotor_propulsor_3',
+                                                                         'prop_rotor_propulsor_4','prop_rotor_propulsor_5','prop_rotor_propulsor_6'],
+                                                                        ['lift_rotor_propulsor_1','lift_rotor_propulsor_2','lift_rotor_propulsor_3',
+                                                                         'lift_rotor_propulsor_4', 'lift_rotor_propulsor_5', 'lift_rotor_propulsor_6']]
     mission.append_segment(segment)   
     
 
@@ -1165,7 +1249,7 @@ def mission_setup(analyses):
     segment                                               = Segments.Cruise.Constant_Acceleration_Constant_Altitude(base_segment)
     segment.tag                                           = "Low_Speed_Approach_Transition"  
     segment.analyses.extend( analyses.vertical_transition)   
-    segment.air_speed_end                                 = 300. * Units['ft/min'] 
+    segment.air_speed_end                                 = 50. * Units['ft/min'] 
     segment.acceleration                                  =  -0.25 * Units['m/s/s']   
 
     # define flight dynamics to model 
@@ -1176,8 +1260,10 @@ def mission_setup(analyses):
     # define flight controls
     segment.assigned_control_variables.body_angle.active             = True
     segment.assigned_control_variables.throttle.active               = True           
-    segment.assigned_control_variables.throttle.assigned_propulsors  = [['prop_rotor_propulsor_1','prop_rotor_propulsor_2','prop_rotor_propulsor_3','prop_rotor_propulsor_4','prop_rotor_propulsor_5','prop_rotor_propulsor_6'],
-                                                                        ['lift_rotor_propulsor_1','lift_rotor_propulsor_2','lift_rotor_propulsor_3','lift_rotor_propulsor_4', 'lift_rotor_propulsor_5', 'lift_rotor_propulsor_6']]
+    segment.assigned_control_variables.throttle.assigned_propulsors  = [['prop_rotor_propulsor_1','prop_rotor_propulsor_2','prop_rotor_propulsor_3',
+                                                                         'prop_rotor_propulsor_4','prop_rotor_propulsor_5','prop_rotor_propulsor_6'],
+                                                                        ['lift_rotor_propulsor_1','lift_rotor_propulsor_2','lift_rotor_propulsor_3',
+                                                                         'lift_rotor_propulsor_4', 'lift_rotor_propulsor_5', 'lift_rotor_propulsor_6']]
     mission.append_segment(segment) 
     
         
@@ -1187,7 +1273,7 @@ def mission_setup(analyses):
     segment                                               = Segments.Vertical_Flight.Descent(base_segment)
     segment.tag                                           = "Vertical_Descent" 
     segment.analyses.extend( analyses.vertical_flight)     
-    segment.altitude_start                                = 300.0 * Units.ft   
+    segment.altitude_start                                = 50.0 * Units.ft   
     segment.altitude_end                                  = 0.   * Units.ft  
     segment.descent_rate                                  = 300. * Units['ft/min']  
     
@@ -1197,8 +1283,10 @@ def mission_setup(analyses):
     
     # define flight controls 
     segment.assigned_control_variables.throttle.active               = True           
-    segment.assigned_control_variables.throttle.assigned_propulsors  = [['prop_rotor_propulsor_1','prop_rotor_propulsor_2','prop_rotor_propulsor_3','prop_rotor_propulsor_4','prop_rotor_propulsor_5','prop_rotor_propulsor_6'],
-                                                                        ['lift_rotor_propulsor_1','lift_rotor_propulsor_2','lift_rotor_propulsor_3','lift_rotor_propulsor_4', 'lift_rotor_propulsor_5', 'lift_rotor_propulsor_6']]
+    segment.assigned_control_variables.throttle.assigned_propulsors  = [['prop_rotor_propulsor_1','prop_rotor_propulsor_2','prop_rotor_propulsor_3',
+                                                                         'prop_rotor_propulsor_4','prop_rotor_propulsor_5','prop_rotor_propulsor_6'],
+                                                                        ['lift_rotor_propulsor_1','lift_rotor_propulsor_2','lift_rotor_propulsor_3',
+                                                                         'lift_rotor_propulsor_4', 'lift_rotor_propulsor_5', 'lift_rotor_propulsor_6']]
        
     mission.append_segment(segment)  
    
