@@ -541,7 +541,7 @@ def vehicle_setup(redesign_rotors=True) :
 
     for m_i in range(prop_rotor_bus.number_of_battery_modules):
         module.tag = 'nmc_module_' + str(m_i+1) 
-        module =  deepcopy(battery_module)
+        module =  deepcopy(module)
         module.origin = [[2.0, 0.0, 0.0]] 
         prop_rotor_bus.battery_modules.append(module)     
 
@@ -700,7 +700,7 @@ def vehicle_setup(redesign_rotors=True) :
 
     for m_i in range(lift_rotor_bus.number_of_battery_modules):
         module.tag = 'nmc_module_' + str(m_i+1) 
-        module =  deepcopy(battery_module)
+        module =  deepcopy(module)
         module.origin = [[2.0, 0.0, 0.0]] 
         lift_rotor_bus.battery_modules.append(module) 
 
