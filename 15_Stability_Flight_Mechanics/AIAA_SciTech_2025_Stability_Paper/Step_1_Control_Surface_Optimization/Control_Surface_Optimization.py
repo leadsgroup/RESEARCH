@@ -26,7 +26,7 @@ from   Stopped_Rotor.Stopped_Rotor                                        import
 from   Tiltrotor.Tiltrotor                                                import vehicle_setup as TR_vehicle_setup   
 from   Tiltwing.Tiltwing                                                  import vehicle_setup as TW_vehicle_setup   
 from   Hexacopter.Hexacopter                                              import vehicle_setup as HC_vehicle_setup   
-from   Tilt_Stopped_Rotor.Tilt_Stopped_Rotor_Conv_Tail import vehicle_setup as TSR_vehicle_setup   
+from   Tilt_Stopped_Rotor.Tilt_Stopped_Rotor_Conv_Tail                    import vehicle_setup as TSR_vehicle_setup   
 # ----------------------------------------------------------------------
 #   Main
 # ----------------------------------------------------------------------
@@ -47,7 +47,7 @@ def main():
         vehicle =  TSR_vehicle_setup(redesign_rotors=False)
     
     #                                     CG: X,    Y,  Z,  rx  ry  rz 
-    configuration_CGbatt_MOIbatt = np.array([[2.6,    0., 0., 0.,   0., 0.],
+    configuration_CGbatt_MOIbatt = np.array([[2.6,  0., 0., 0.,   0., 0.],
                                              [2.7,  0., 0., 0.,   0., 0.],
                                              [2.8,  0., 0., 0.,   0., 0.],
                                              [2.9,  0., 0., 0.,   0., 0.],

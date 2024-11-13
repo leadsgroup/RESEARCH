@@ -5,6 +5,7 @@
 import numpy             as np
 from   scipy.integrate   import quad
 import matplotlib.pyplot as plt
+from scipy.special import kelvin
 
 # References: "Analytical Design and Performance Estimation Methods for Aircraft Permanent Magnet Synchronous Machines" (2023), Thomas F. Tallerico, Aaron D. Anderson, Matthew G. Granger, and Jonathan M. Gutknecht, Glenn Research Center, Cleveland, Ohio
     
@@ -33,21 +34,22 @@ def emrax_348():
     omega          = 2500* (2 * np.pi / 60)                                # [RPM -> rad/s]    max rotor angular velocity 
     D_in           = 0.16                                                  # [m]        stator inner diameter
     D_out          = 0.348                                                 # [m]        stator outer diameter
-    B_sign         = 1.2                                                   #-[V*s/m**2] average magnitude of the radial flux density produced by the rotor
+    B_sign         = 1.2*35                                               #-[V*s/m**2] average magnitude of the radial flux density produced by the rotor
     k_w            = 0.9                                                   #-[-]        winding factor
     n_phases       = 3                                                     # [-]        number of phases
     I_tot          = 375*n_phases                                          # [A]        total current that passes through the stator in both axial directions
     L              = 0.112                                                 # [m]        motor stack length 
     A_sign         = (k_w*I_tot)/(np.pi*D_in)                              # [-]        stator electrical loading   
     tau            = (np.pi/2)*(B_sign*A_sign)*(D_in**2)*L                 # [Nm]       torque  
-    P              = ((omega)*tau)//1000                              # [kW]       power
+    P              = ((omega)*tau)//1000                                   # [kW]       power
                                                                            
     B_g1           = 4*B_sign/np.pi                                        # [V*s/m**2] peak magnetic flux density of the fundamental harmonic produced by the rotor (Eq.4)
     K_s1           = A_sign*np.pi/2                                        # [V*s/m**2] peak fundamental value of the linear current density (Eq.5)      
-    P_lipo         = ((omega)*(np.pi/4)*(B_g1*K_s1)*(D_in**2)*L)/1000 # [kW]       power
+    P_lipo         = ((omega)*(np.pi/4)*(B_g1*K_s1)*(D_in**2)*L)/1000      # [kW]       power
     
     print("EMRAX 348:") 
     print("Power =", "%0.3f" % P, "[kW]") 
+    print("Torque =", "%0.3f" % tau, "[Nm]")
     print("Power with Lipo's formula =", "%0.3f" % P_lipo, "[kW]")
          
     # -----------------------------------------------------------------------------------------
@@ -57,7 +59,8 @@ def emrax_348():
     torque_density = (1/2)*(B_sign*A_sign)*D_in                            # [N/m]     torque per unit volume (Eq.6)  
     power_density  = (omega*torque_density)/1000                           # [kW/m**3] power per unit rotor volume (Eq.6)   
     
-    print("Power density =", "%0.3f" % power_density, "[kW/m**3]") 
+    print("Torque density =", "%0.3f" % torque_density, "[N/m]") 
+    print("Power density =", "%0.3f" % power_density, "[kW/m**3]")   
     
     # -----------------------------------------------------------------------------------------
     # 3.1.2 Efficiency and Power Factor
@@ -65,29 +68,29 @@ def emrax_348():
     
     LOSS_speed     = 0.05*P
     tau_out        = tau - (LOSS_speed/(omega/9.55))                       # [N*m] output torque (Eq.7)  
-    P_out          = ((omega)*tau_out)/1000                           # [W]   output power (Eq.7)  
+    P_out          = ((omega)*tau_out)/1000                                # [W]   output power (Eq.7)  
     
     print("Output power =", "%0.3f" % P_out, "[kW]") 
     
     def i(t):
-        I = 375*3                                                        # [A]   current
+        I = 375*3                                                          # [A]   current
         return I * np.sin(2 * np.pi * t)
     
     def v(t):
-        V = 830                                                        # [V]   voltage
+        V = 830                                                            # [V]   voltage
         return V * np.sin(2 * np.pi * t)
     
     def f(t):
         return i(t) * v(t)
     
-    T              = 10                                                # [s]   total time average power is being calculated over
-    P_time, _      = quad(f, 0, T)                                     # [W*s] Real power over the time interval
-    P_time         = (P / T)                                      # [kW]  Real power
-    I              = 375*3                                               # [A]   current
-    V              = 830                                               # [V]   voltage
-    S              = (I*V)/1000                                        # [kW]  apparent power (Eq.10)  
-    PF             = P_time/S                                          # [-]   power factor (Eq.8)  
-    Q              = np.sqrt(S**2 - P_time**2)                         # [kW]  reactive power (Eq.11)   
+    T              = 10                                                    # [s]   total time average power is being calculated over
+    P_time, _      = quad(f, 0, T)                                         # [W*s] Real power over the time interval
+    P_time         = (P / T)                                               # [kW]  Real power
+    I              = 375*3                                                 # [A]   current
+    V              = 830                                                   # [V]   voltage
+    S              = (I*V)/1000                                            # [kW]  apparent power (Eq.10)  
+    PF             = P_time/S                                              # [-]   power factor (Eq.8)  
+    Q              = np.sqrt(S**2 - P_time**2)                             # [kW]  reactive power (Eq.11)   
     
     print("Real power =", "%0.3f" % P_time, "[kW]")
     print("Apparent power =", "%0.3f" % S, "[kW]")
@@ -97,23 +100,279 @@ def emrax_348():
     # 3.2.1 Magnetic Reluctance Networks
     # -----------------------------------------------------------------------------------------
     
-    N              = 100                                        # number of turns   
+    N              = 100                                                   # number of turns   
+    Br             = 1.2                                                   # remnant flux density
+    mu_0           = 1.256637061e-6                                        # permeability of free space
+    mu_r           = 1.05                                                  # relative permeability of the magnetic material
+    l_m            = 0.002                                                 # [m] thickness of the magnet or the size of the element if multiple elements span a magnet
+    l              = 0.02                                                  # [m] length of the path
+    A              = np.pi * ((D_out**2 - D_in**2) / 4)                    # cross-sectional area of the reluctance path perpendicular to length 𝑙    
+    MMF_coil       = N*I                                                   # magnetomotive force applied to the reluctance path for a coil (Eq.14)    
+    MMF_magnet     = (Br/(mu_0*mu_r))*l_m                                  # MMF for a magnet (Eq.15)
+    R              = l/(A*mu_0*mu_r)                                       # reluctance of a given path or given reluctant element (Eq.16) 
+    phi            = MMF_coil/R                                            # magnetic flux through the reluctance path (Eq.12)
+    B              = phi/A                                                 # magnetic flux density (Eq.13)   
+    
+    print("Magnetic flux density =", "%0.3f" % B, "[]")
+
+    # -----------------------------------------------------------------------------------------
+    # 3.2.1.1 Simple Example of North South Array 
+    # -----------------------------------------------------------------------------------------    
+    
+    l_g            = 0.001                                      # airgap size
     Br             = 1.2                                        # remnant flux density
-    mu_0           = 1.256637061e-6                             # permeability of free space
-    mu_r           = 1.05                                       # relative permeability of the magnetic material
-    l_m            = 0.008                                      # [m] thickness of the magnet or the size of the element if multiple elements span a magnet
-    l              = 0.05                                       # [m] length of the path
-    A              = np.pi * ((D_out**2 - D_in**2) / 4)         # cross-sectional area of the reluctance path perpendicular to length 𝑙    
-    MMF_coil       = N*I                                        # magnetomotive force applied to the reluctance path for a coil (Eq.14)    
-    MMF_magnet     = (Br/(mu_0*mu_r))*l_m                       # MMF for a magnet (Eq.15)
-    R              = l/(A*mu_0*mu_r)                            # reluctance of a given path or given reluctant element (Eq.16) 
-    phi            = MMF_coil/R                                 # magnetic flux through the reluctance path (Eq.12)
-    B              = phi/A                                      # magnetic flux density (Eq.13)        
+    mu_r           = 1.05         
+    A_m            = A                                          # magnet area
+    alpha_m        = 180                                        # magnet’s pole span angle in electrical degrees
+    R_ag           = l_g/(A_m*mu_0)                             # airgap reluctance (Eq.17)
+    R_mag          = l_m/(A_m*mu_0*mu_r)                        # magnet reluctance (Eq.17)
+    R              = 2*R_ag + 2*R_mag                           # reluctance of the path (Eq.17)
+    MMF            = 2*(Br/(mu_0*mu_r))*l_m                     # magnetomotive force in the circuit (Eq.18)
+    phi            = MMF/R                                      # flux in the path (Eq.19)
+    B_m            = (Br*l_m)/(l_g*mu_r + l_m)                  # airgap field in the gap produced by the magnets (Eq.20)
+    B_sign         = B_m                                        # for rotors where magnets span the full
+    B_g1           = (4/np.pi)*B_m*np.sin(alpha_m/2)            # peak flux density magnitude of the fundamental harmonic, for rotors where the magnets do not span the full magnetic pole  (Eq.21)    
+     
+    print("Airgap field in the gap produced by the magnets =", "%0.3f" % B_m, "[]")
+    print("Airgap field for rotors where magnets span the full =", "%0.3f" % B_sign, "[]")
+    print("Airgap field peak flux density magnitude of the fundamental harmonic, for rotors where the magnets do not span the full magnetic pole =", "%0.3f" % B_g1, "[]")
     
-    print("Real power =", "%0.3f" % P_time, "[kW]")
+    # -----------------------------------------------------------------------------------------
+    # 3.2.1.2 Stator Inductance Calculation
+    # -----------------------------------------------------------------------------------------   
     
+    A_tip          = 0.000114                                   # tooth tip area 
+    l_tip          = 0.005                                      # tooth tip gap width
+    W_sp           = 0.018                                      # stator pole width
+    Stack          = 0.095                                      # [m]
+    R_tip          = l_tip/(A_tip*mu_0)                         # reluctance of the tip (Eq.22)
+    R_rotor        = (2/3)*(l_m + l_g)/(W_sp*Stack*mu_0)        # reluctance of the rotor (Eq.22)
+    R              = 1/((2/R_tip) + (1/R_rotor))                # reluctance of one coil (Eq.22)
+    L_m            = N**2/R                                     # self-inductance of a single coil (Eq.23)
+    
+    print("Self-inductance of a single coil  =", "%0.3f" % L_m, "[]")
+    
+    # -----------------------------------------------------------------------------------------
+    # 3.2.2 Closed Form Field Solutions
+    # ----------------------------------------------------------------------------------------- 
+    
+    p              = 20                                         # pole count
+    Rm             = 0.169                                      # magnet outer radius
+    Rr             = 0.101                                      # magnet inner radius
+    Rs             = 0.090                                      # stator inner radius
+    theta          = 0
+    r              = Rs
+    
+    def B_r(r, theta, Br, p, Rr, Rm, Rs):
+        
+        B_r_value = ((Br * (p / (p + 1)) * (1 - (Rr / Rm)**(p + 1))) / (1 - ((Rr**(2*p))/(Rs)))) * (((r / Rs)**(p - 1)) * ((Rm / Rs)**(p + 1)) + ((Rm / r)**(p + 1))) * np.cos(p * theta)
+        return B_r_value  
+    
+    Br_result      = B_r(r, theta, Br, p, Rr, Rm, Rs)
+    B_sign         = (2/np.pi)*Br_result                         # average airgap field (Eq.25)    
+    
+    print("Average airgap field  =", "%0.3f" % B_sign, "[]")
+    
+    # -----------------------------------------------------------------------------------------
+    # 3.2.3 Magnet Remnant Flux Density Br
+    # -----------------------------------------------------------------------------------------
+    
+    Br_20C         = Br                                         # remnant flux density at 20 °C
+    T              = 30                                         # temperature in Celsius
+    alpha_mag      = 0.001                                      # material property related to the specific magnet grade
+    Br_T           = Br_20C - alpha_mag*(T - 20)*Br_20C         # magnet remnant flux density at temperature (Eq.26)    
+        
+    print("Magnet remnant flux density at temperature =", "%0.3f" % Br_T, "[]")    
+    
+    # -----------------------------------------------------------------------------------------
+    # 3.3 Magnet Losses
+    # -----------------------------------------------------------------------------------------    
+    
+    k                          = 0.02                                                        # Steinmetz coefficient
+    alpha                      = 1.5                                                         # Steinmetz coefficient
+    beta                       = 2.0                                                         # Steinmetz coefficient
+    B                          = 1.2                                                         # peak magnetic flux density
+    f                          = 400                                                         # frequency of the magnetic field
+    k_h                        = 0.01             
+    k_c                        = 0.0001          
+    k_e                        = 0.001          
+    B_sign                     = 1.2          
+    t_back                     = 0.005       
+    w_tooth                    = 0.01        
+    Rs                         = 0.17            
+    p                          = 10               
+    slots                      = 24     
+    P_v_Steinmetz              = k*(f**alpha)*(B**beta)                                      # iron loss per volume (Eq.27)                                                          
+    P_v_Bertotti               = k_h*f*(B**beta) + k_c*(f**2)*(B**2) + k_e*(f**1.5)*(B**1.5) # iron loss per volume (Eq.28)
+    B_back                     = (B_sign/t_back)*((2*np.pi*Rs)/(2*p))                        # peak field in the back iron (Eq.29)
+    
+    if slots > 2*p:
+        B_tooth_slots = (B_sign/w_tooth)*((2*np.pi*Rs)/p)*(p/(slots - p))           # peak field in the tooth iron (Eq.30)
+    else:
+        B_tooth_slots = (B_sign/w_tooth)*((2*np.pi*Rs)/p)                           # peak field in the tooth iron (Eq.30)
+        
+    f_tooth                    = f*(slots/(2*p))                                             # effective frequency of magnetization of the tooth (Eq.31)
+    P_v_tooth                  = (f/f_tooth)*k*(f_tooth**alpha)*(B**beta)                    # loss in the stator teeth per unit volume (Eq.32)
+        
+    print("Iron loss per volume with Steinmetz' formulation =", "%0.3f" % P_v_Steinmetz, "[]") 
+    print("Iron loss per volume with Bertotti's formulation =", "%0.3f" % P_v_Bertotti , "[]") 
+    print("Peak field in the back iron =", "%0.3f" % B_back , "[]")       
+    print("Peak field in the tooth iron =", "%0.3f" % B_tooth_slots , "[]") 
+    print("loss in the stator teeth per unit volume =", "%0.3f" % P_v_tooth , "[]")   
+    
+    # -----------------------------------------------------------------------------------------
+    # 3.4 Calculating Current and Resistive Losses
+    # -----------------------------------------------------------------------------------------    
+    
+    Layers                     = 2                                                             # number of winding layers per slot    
+    rho_copper                 = 1.68e-8                                                       
+    L_layer                    = 0.9                                                           
+    A_layer                    = 1.57e-5    
+    SF                         = 0.4
+    I_avg_layer                = I_tot/(slots*Layers)                                          # average current per slot per winding layer (Eq.33)
+    I_peak_layer               = (np.pi/2)*I_avg_layer                                         # peak current per winding layer for a 3-phase motor with sinusoidal supply currents (Eq.34)
+    I_rms_layer                = (1/np.sqrt(2))*I_peak_layer                                   # root mean squared current per layer (Eq.35) 
+    LOSS_I2R                   = slots*Layers*rho_copper*(L_layer/(SF*A_layer))*I_rms_layer**2 # resistive losses in the motor (Eq.36) 
+    rho_copper_T               = rho_copper*(1 + 0.00393*(T - 20))                             # resistivity of copper at a given temperature (Eq.37)
+    
+    print("Resistive losses in the motor =", "%0.3f" % LOSS_I2R , "[]")  
+    print("Resistivity of copper at a given temperature =", "%0.10f" % rho_copper_T , "[]") 
+    
+    # -----------------------------------------------------------------------------------------
+    # 3.4.1 AC Winding Loss
+    # -----------------------------------------------------------------------------------------    
+    
+    d                          = 0.001                          # diameter of the conductor
+    delta                      = 0.0001                         # skin depth in the material at the frequency current is being applied to the conductor
+    gamma                      = d/(delta*np.sqrt(2))           # (Eq.39)
+    sigma                      = 5.8e7                          # material conductivity
+    H_e                        = 1000                           # peak value of the applied external magnetic field
+    n                          = 1                              # number of strands 
+    Ns                         = N                              # number of turns 
+    b                          = 0.02                           # winding width
+    Rdc                        = 0.1                            # DC resistance 
+    m                          = 1                              # layer of conductors in the slot
+    
+    ber_gamma, bei_gamma, der_ber_gamma, der_bei_gamma          = kelvin(gamma)
+    ber_2_gamma, bei_2_gamma, _, _                              = kelvin(2 * gamma)
+    
+    Rac                        = np.real((Rdc/2)-(gamma*(ber_gamma*der_bei_gamma - bei_gamma*der_ber_gamma)/(der_ber_gamma**2 + der_bei_gamma**2))) # AC resistance due to skin effect for round conductors (Eq.38)
+    P_prox                     = np.real((2*np.pi*gamma/sigma)*((ber_2_gamma*der_ber_gamma + bei_2_gamma*der_ber_gamma)/(ber_gamma**2 + bei_gamma**2))*H_e**2) # proximity loss per unit stack length in a conductor (Eq.40)
+    R_ac_layer                 = -np.real((Rdc/2)*gamma*(ber_gamma*der_bei_gamma - bei_gamma*der_ber_gamma)/(der_ber_gamma**2 + der_bei_gamma**2) - 2*np.pi*((2*m - 1)**2)*(ber_2_gamma*der_ber_gamma + bei_2_gamma*der_ber_gamma)/(ber_gamma**2 + bei_gamma**2)) # AC resistivity of the mth layer of conductors in the slot (Eq.41)
+    R_ac_d_less_than_delta     = np.real(Rdc*(1 + ((np.pi*n*Ns)**2)*d**6/(192*(delta**4)*b**2))) # AC resistance of the winding with d<𝛿 (Eq.42)
+    P_prox_d_less_than_delta   = np.real((((np.pi**2)*sigma*d**4)/(32))*(f*B)**2) # proximity loss per unit length generated in a round conductor when d<δ (Eq.43)    
+    
+    print("AC resistance due to skin effect for round conductors =", "%0.3f" % Rac , "[]")  
+    print("Proximity loss per unit stack length in a conductor =", "%0.3f" % P_prox , "[]")  
+    print("AC resistivity of the mth layer of conductors in the slot =", "%0.3f" % R_ac_layer , "[]")  
+    print("AC resistance of the winding with d<𝛿 =", "%0.3f" % R_ac_d_less_than_delta , "[]")  
+    print("Proximity loss per unit length generated in a round conductor when d<δ =", "%0.3f" % P_prox_d_less_than_delta , "[]")  
+    
+    # -----------------------------------------------------------------------------------------
+    # 3.5 Voltage and Turn Count
+    # ----------------------------------------------------------------------------------------- 
+    
+    EMF_i                      = 900                            # per phase back electromotive force of the motor
+    X_d                        = 0.18                           # d axis reactance of the motor
+    X_q                        = 0.1                            # q axis reactance of the motor
+    R_s                        = 0.03                           # stator resistance
+    I_q                        = 375                            # q axis current
+    I_d                        = 375                            # d axis current    
+    I_s                        = 375                            # motor supply current    
+    V_q                        = EMF_i + X_d*I_d + R_s*I_q      # q axis voltage of the machine (Eq.45)
+    V_d                        = X_q*I_q + R_s*I_d              # d axis voltage of the machine (Eq.46)
+    V_ph                       = np.sqrt(V_q**2 + V_d**2)       # voltage of a machine (Eq.44)
+    V_q_max_torque             = EMF_i + R_s*I_s                # q axis voltage of the machine (Eq.47)
+    V_d_max_torque             = X_q*I_s                        # d axis voltage of the machine (Eq.48)
+    V_ph_max_torque            = np.sqrt((EMF_i + R_s*I_s)**2 + (X_q*I_s)**2) # peak per phase motor voltage (Eq.49)   
+    
+    print("Voltage of the machine =",        "%0.3f" % V_ph , "[]")  
+    print("Peak per phase motor voltage  =", "%0.3f" % V_ph_max_torque , "[]")   
+    
+    # -----------------------------------------------------------------------------------------
+    # 3.5.1 Back EMF
+    # ----------------------------------------------------------------------------------------- 
+    
+    D                          = D_in
+    vel                        = omega*D_in/2
+    Nt                         = 10
+    leng                       = 2*L*Nt    
+    Np                         = 3
+    P1                         = (3/2)*EMF_i*I_s                          # back EMF of the motor (Eq.50)    
+    P2                         = (2/np.pi)*omega*D*L*k_w*B_sign*Nt*Np*I_s # back EMF of the motor (Eq.50)    
+    P3                         = ((omega*D*L*k_w*B_g1)/2)*Nt*Np*I_s       # back EMF of the motor (Eq.50)    
+    EMF_i                      = (4/np.pi)*omega*D*L*k_w*B_sign*Nt        # per phase back electromotive force of the motor (Eq.51) 
+    EMF_i1                     = omega*D*L*k_w*B_g1*Nt                    # per phase back electromotive force of the motor (Eq.51)  
+    E                          = B*leng*vel                               # flux cutting form of Faraday’s law (Eq.52) 
+
+    print("Back EMF of the motor  =", "%0.3f" % P3 , "[]")   
+    print("Per phase back electromotive force of the motor  =", "%0.3f" % EMF_i1 , "[]")  
+    print("flux cutting form of Faraday’s law  =", "%0.3f" % E , "[]")   
+    
+    ## -----------------------------------------------------------------------------------------
+    ## 3.5.2 Reactance
+    ## -----------------------------------------------------------------------------------------    
+    
+    #L_aa                       = 1                              # self inductance
+    #L_bb                       = 1                              # self inductance
+    #L_cc                       = 1                              # self inductance
+    #L_ab                       = 1                              # mutual inductance
+    #L_ac                       = 1                              # mutual inductance  
+    #L_ba                       = 1                              # mutual inductance
+    #L_bc                       = 1                              # mutual inductance     
+    #X                          = L*2*np.pi*f_elec               # reactance for an inductive load (Eq.53)
+    #L                          = [[L_aa, L_ab, L_ac],[L_ab, L_bb, L_bc],[L_ac, L_ba, L_cc]] # inductance matrix of a machine (Eq.54)
+    #L                          = [[L_l+L_m, -L_m/2, -L_m/2],[-L_m/2, L_l+L_m, -L_m/2],[-L_m/2, -L_m/2, L_l+L_m]] # inductance matrix of a machine (Eq.55)
+    #L_d                        = L_l + (3/2)*L_m                # direct axis inductance (Eq.56)
+    #N_t                        = (Slots*Layers*N/(2*N_p))       # number of series connected turns per phase (Eq.58)
+    #L_d                        = ((Slots*Layers)/(2*N_p))*(3/2)*(N**2)*((2*A_tip*mu_0/l_tip + (3/2)*(W_sp*Stack*mu_0)/(l_m + l_g))) # direct axis inductance (Eq.57)
+    #L_d                        = ((2*N_p)/(Layers*Slots))*(3/2)*(N_t**2)*(2*A_tip*mu_0/l_tip + (3/2)*(W_sp*Stack*mu_0)/(l_m + l_g)) # direct axis inductance (Eq.57)
+    
+    ## -----------------------------------------------------------------------------------------
+    ## 3.5.3 Resistance
+    ## -----------------------------------------------------------------------------------------    
+    
+    #R_s                        = rho_copper*(L_Layer*2*N_t/(Fill*A_Layer*Slots*Layers)/(2*N_t*N_p)) # Resistance (Eq.59)    
+    #A_turn                     = Fill*A_Layer/N                 # Turn Area (Eq.60)    
+    #A_turn                     = Fill*A_Layer*Slots*Layers/(2*N_t*N_p) # Turn Area (Eq.60) 
+    #R_s                        = rho_copper*(L_turn*N_t)/A_turn # Resistance (Eq.59)    
+    
+    ## -----------------------------------------------------------------------------------------
+    ## 3.5.4 Current
+    ## -----------------------------------------------------------------------------------------    
+        
+    #I_s                        = I_peak_layer/N                 # Current (Eq.61)  
+    #I_s                        = Slots*Layers*I_peak_layer/(2*N_p*N_t) # Current (Eq.61) 
+    #I_s                        = (np.pi/2)*I_tot/(2*N_p*N_t)    # Current (Eq.61) 
+    
+    ## -----------------------------------------------------------------------------------------
+    ## 3.5.5 Turn Count
+    ## -----------------------------------------------------------------------------------------    
+        
+    #V_ph                       = np.sqrt((omega*D*L*k_w*B_g1*N_t + r_copper*((L_Layer*2*N_t)/(Fill*A_Layer))*I_peak_layer)**2 + ((3/2)*N_t*(2*A_tip*mu_0/l_tip + (3/2)*W_sp*Stack*mu_0/(l_m + l_g))*I_peak_layer)**2) # Peak per phase motor voltage (Eq.62) 
+    #P                          = (3/2)*(EMF_i)*I_s              # Output power (Eq.63)
+    #P                          = 0.5*(4/np.pi)*omega*D*L*k_w*B_sign*N_t*N_p*I_s # Output power (Eq.63)
+    #P                          = omega*D*L*k_w*B_sign*I_tot/2   # Output power (Eq.63) 
+    #R_loss                     = (N_p*R_a*I_rms**2)/(I**2)      # Resistive losses (Eq.64)
+    #R_loss                     = (1/(I**2))*(N_p*r_copper*L_Layer*4*N_p*N_t**2)/(Slots*Layers*Fill*A_Layer)*(Slots*Layers*I_peak_layer/(2*N_p*N_t*np.sqrt(2)))**2 # Resistive losses (Eq.64)
+    #R_loss                     = (1/(I**2))*Slots*Layers*r_copper*(L_Layer/(Fill*A_Layer))*I_rms_layer**2 # Resistive losses (Eq.64)
+    
+    ## -----------------------------------------------------------------------------------------
+    ## 3.5.6 Power Factor
+    ## -----------------------------------------------------------------------------------------    
+    
+    #PF                         = P/S                            # Power Factor (Eq.65)
+    #PF                         = ((3/2)*EMF_i*I_s)/((3/2)*V_ph*I_s) # Power Factor (Eq.65)
+    #PF                         = EMF_i/V_ph                     # Power Factor (Eq.65)
+    
+    ## -----------------------------------------------------------------------------------------
+    ## 3.5.7 Modulation Index
+    ## -----------------------------------------------------------------------------------------    
+        
+    #m_a                        = 2*V_ph/V_bus                   # Modulation index (Eq.66)    
     
     return
+    
 
 def compute_basic_motor_sizing(B_sign, k_w, I_tot, D, L, omega):
     
