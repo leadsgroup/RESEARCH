@@ -26,9 +26,9 @@ def main():
         save_aircraft_geometry(vehicle , 'Stopped_Rotor')
     else: 
         vehicle = load_aircraft_geometry('Stopped_Rotor') 
-
+# Remove the entire batt module, for network and  pop the bat module. -> Generic.
     # Set up configs
-    configs  = configs_setup(vehicle)
+    configs  = configs_setup(vehicle) 
 
     # vehicle analyses
     analyses = analyses_setup(configs)

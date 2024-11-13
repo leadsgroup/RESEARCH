@@ -505,7 +505,7 @@ def vehicle_setup(BTMS_flag):
     # atmo_data                                              = atmosphere.compute_values(altitude = HAS.design_altitude)     
     # HAS.coolant_inlet_temperature                          = atmo_data.temperature[0,0]  
     # HAS.design_battery_operating_temperature               = 313
-    # HAS.design_heat_removed                                = 150000 /len(bus.battery_modules) 
+    # HAS.design_heat_removed                                = 150000 /bus.number_of_battery_modules) 
     # HAS                                                    = design_wavy_channel(HAS,bat_module) 
     
     # for battery_module in bus.battery_modules:
@@ -953,19 +953,20 @@ def mission_setup(analyses):
     mission.append_segment(segment)  
     
     
-    # # ------------------------------------------------------------------
-    # #  Charge Segment: 
-    # # ------------------------------------------------------------------     
-    # # Charge Model 
-    # segment      = Segments.Ground.Battery_Recharge(base_segment)     
-    # segment.tag  = 'Charge_Day'   
-    # segment.analyses.extend( analyses.base) 
-    # segment.cooling_time = 30 * Units.minutes
-    # segment.state.numerics.number_of_control_points = 32
-    # #if f_idx ==  (flights_per_day - 1): 
-    #     #segment.increment_battery_age_by_one_day =  True 
-    #     #segment.increment_battery_cycle_day      =  day
-    # mission.append_segment(segment)             
+    # ------------------------------------------------------------------
+    #  Charge Segment: 
+    # ------------------------------------------------------------------     
+    # Charge Model 
+    segment      = Segments.Ground.Battery_Recharge(base_segment)     
+    segment.tag  = 'Charge_Day'   
+    segment.analyses.extend( analyses.base) 
+    segment.cooling_time = 30 * Units.minutes
+    segment.state.numerics.number_of_control_points = 32
+    segment.increment_battery_age_by_one_day =  True 
+    #if f_idx ==  (flights_per_day - 1): 
+        #segment.increment_battery_age_by_one_day =  True 
+        #segment.increment_battery_cycle_day      =  day
+    mission.append_segment(segment)             
 
     
     

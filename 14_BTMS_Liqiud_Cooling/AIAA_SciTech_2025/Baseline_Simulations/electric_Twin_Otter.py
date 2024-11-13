@@ -471,6 +471,7 @@ def vehicle_setup(BTMS_flag):
     # Bus
     #------------------------------------------------------------------------------------------------------------------------------------  
     bus                              = RCAIDE.Library.Components.Energy.Distributors.Electrical_Bus()
+    bus.number_of_battery_modules    = 12.
     
 
     #------------------------------------------------------------------------------------------------------------------------------------           
@@ -486,7 +487,7 @@ def vehicle_setup(BTMS_flag):
     bat_module.geometrtic_configuration.parallel_count     = 50
     bat_module.nominal_capacity                            = bat_module.cell.nominal_capacity* bat_module.electrical_configuration.parallel
 
-    for _ in range(12):
+    for _ in range(int(bus.number_of_battery_modules)):
         bat_copy = deepcopy(bat_module)
         bus.battery_modules.append(bat_copy)
 
@@ -503,7 +504,7 @@ def vehicle_setup(BTMS_flag):
     atmo_data                                              = atmosphere.compute_values(altitude = HAS.design_altitude)     
     HAS.coolant_inlet_temperature                          = atmo_data.temperature[0,0]  
     HAS.design_battery_operating_temperature               = 313
-    HAS.design_heat_removed                                = 150000 /len(bus.battery_modules) 
+    HAS.design_heat_removed                                = 150000 /bus.number_of_battery_modules 
     HAS                                                    = design_wavy_channel(HAS,bat_module) 
     
     for battery_module in bus.battery_modules:
@@ -576,7 +577,7 @@ def vehicle_setup(BTMS_flag):
     motor.design_torque                              = propeller.cruise.design_torque 
     motor.angular_velocity                           = propeller.cruise.design_angular_velocity # Horse power of gas engine variant  750 * Units['hp']
     design_motor(motor)  
-    motor.mass_properties.mass                       = compute_motor_weight(motor.design_torque) 
+    motor.mass_properties.mass                       = compute_motor_weight(motor) 
     starboard_propulsor.motor                        = motor 
  
     # append propulsor to distribution line 
@@ -960,6 +961,7 @@ def mission_setup(analyses):
     segment.analyses.extend( analyses.base) 
     segment.cooling_time = 30 * Units.minutes
     segment.state.numerics.number_of_control_points = 32
+    #segment.initial_battery_state_of_charge = 0.2
     #if f_idx ==  (flights_per_day - 1): 
         #segment.increment_battery_age_by_one_day =  True 
         #segment.increment_battery_cycle_day      =  day

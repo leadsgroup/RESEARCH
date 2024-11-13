@@ -36,35 +36,35 @@ def main():
     aircraft_model =  'TSR' 
     
     if aircraft_model == 'SR':
-        vehicle =  SR_vehicle_setup()
+        vehicle =  SR_vehicle_setup(redesign_rotors=False)
     if aircraft_model == 'TR':
-        vehicle =  TR_vehicle_setup()
+        vehicle =  TR_vehicle_setup(redesign_rotors=False)
     if aircraft_model == 'TW':
-        vehicle =  TW_vehicle_setup()
+        vehicle =  TW_vehicle_setup(redesign_rotors=False)
     if aircraft_model == 'HC':
-        vehicle =  HC_vehicle_setup()
+        vehicle =  HC_vehicle_setup(redesign_rotors=False)
     if aircraft_model == 'TSR':
-        vehicle =  TSR_vehicle_setup()
+        vehicle =  TSR_vehicle_setup(redesign_rotors=False)
     
     #                                     CG: X,  Y,  Z,  rx  ry  rz 
-    configuration_CGbatt_MOIbatt = np.array([[0., 0., 0., 0., 0., 0.],
-                                             [1., 0., 0., 0., 0., 0.],
-                                             [2., 0., 0., 0., 0., 0.],
-                                             [3., 0., 0., 0., 0., 0.],
-                                             [4., 0., 0., 0., 0., 0.],
-                                             [0., 0., 0., 1., 0., 0.],
-                                             [1., 0., 0., 1., 0., 0.],
-                                             [2., 0., 0., 1., 0., 0.],
-                                             [3., 0., 0., 1., 0., 0.],
-                                             [4., 0., 0., 1., 0., 0.],
-                                             [0., 0., 0., 2., 0., 0.],
-                                             [1., 0., 0., 2., 0., 0.],
-                                             [2., 0., 0., 2., 0., 0.],
-                                             [3., 0., 0., 2., 0., 0.],
-                                             [4., 0., 0., 2., 0., 0.],
-                                             [0., 0., 0., 0., 1., 0.],
-                                             [0., 0., 0., 0., 2., 0.],
-                                             [0., 0., 0., 0., 3., 0.]])
+    configuration_CGbatt_MOIbatt = np.array([[5, 0., 0., 0., 0., 0.],
+                                             [2.7 , 0., 0., 0., 0., 0.],
+                                             [2.8, 0., 0., 0., 0., 0.],
+                                             [2.9 , 0., 0., 0., 0., 0.],
+                                             [3.0, 0., 0., 0., 0., 0.],
+                                             [2.6, 0., 0., 0.25, 0., 0.],
+                                             [2.7, 0., 0., 0.25, 0., 0.],
+                                             [2.8, 0., 0., 0.25, 0., 0.],
+                                             [2.9, 0., 0., 0.25, 0., 0.],
+                                             [3.0, 0., 0., 0.25, 0., 0.],
+                                             [2.6, 0., 0., 0.5, 0., 0.],
+                                             [2.7, 0., 0., 0.5, 0., 0.],
+                                             [2.8, 0., 0., 0.5, 0., 0.],
+                                             [2.9, 0., 0., 0.5, 0., 0.],
+                                             [3.0, 0., 0., 0.5, 0., 0.],
+                                             [2.88, 0., 0., 0., 1., 0.],
+                                             [2.88, 0., 0., 0., 2., 0.],
+                                             [2.88, 0., 0., 0., 3., 0.]])
                
     for i in range(len(configuration_CGbatt_MOIbatt)):
         
