@@ -390,7 +390,7 @@ def stick_fixed_stability_setup(vehicle):
  
  
 def elevator_sizing_setup(vehicle):   
-    hs_wing                        = vehicle.wings.horizontal_stabilizer 
+    hs_wing                        = vehicle.wings.horizontal_tail 
     elevator                       = RCAIDE.Library.Components.Wings.Control_Surfaces.Elevator()
     elevator.tag                   = 'elevator'
     elevator.span_fraction_start   = 0.1
@@ -412,7 +412,7 @@ def aileron_rudder_sizing_setup(vehicle):
     mw_wing.append_control_surface(aileron) 
     
     if vehicle.rudder_flag:
-        vs_wing                      = vehicle.wings.vertical_stabilizer 
+        vs_wing                      = vehicle.wings.vertical_tail
         rudder                       = RCAIDE.Library.Components.Wings.Control_Surfaces.Rudder()
         rudder.tag                   = 'rudder'
         rudder.span_fraction_start   = 0.2

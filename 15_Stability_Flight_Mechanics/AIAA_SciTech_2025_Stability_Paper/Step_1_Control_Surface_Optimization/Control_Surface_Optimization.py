@@ -26,7 +26,7 @@ from   Stopped_Rotor.Stopped_Rotor                                        import
 from   Tiltrotor.Tiltrotor                                                import vehicle_setup as TR_vehicle_setup   
 from   Tiltwing.Tiltwing                                                  import vehicle_setup as TW_vehicle_setup   
 from   Hexacopter.Hexacopter                                              import vehicle_setup as HC_vehicle_setup   
-from   Tilt_Stopped_Rotor.Tilt_Stopped_Rotor_Conv_Tail_Stability_Analysis import vehicle_setup as TSR_vehicle_setup   
+from   Tilt_Stopped_Rotor.Tilt_Stopped_Rotor_Conv_Tail import vehicle_setup as TSR_vehicle_setup   
 # ----------------------------------------------------------------------
 #   Main
 # ----------------------------------------------------------------------

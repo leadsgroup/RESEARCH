@@ -30,7 +30,7 @@ def fit_and_plot_sinh_curves(raw_data):
     
     # Initialize a dictionary to store mean errors for each current and temperature combination
     mean_errors = {}
-    fit_params = {'a': {}, 'b': {}, 'c': {}}
+    fit_params = {'a': {}, 'b': {}, 'c': {}, 'd': {}, 'e': {}, 'f': {}, 'g': {}}
 
     # Iterate through each current level
     for amp_key, temp_dict in raw_data['Current'].items():
@@ -41,26 +41,36 @@ def fit_and_plot_sinh_curves(raw_data):
         fit_params['a'][amp_key] = []
         fit_params['b'][amp_key] = []
         fit_params['c'][amp_key] = []
+        fit_params['d'][amp_key] = []
+        fit_params['e'][amp_key] = []
+        fit_params['f'][amp_key] = []
+        fit_params['g'][amp_key] = []
+
         # Iterate through each temperature level for the given current
         for i, (temp_key, data) in enumerate(temp_dict.items()):
             curve_data = data['curve']
-            discharge_capacity = np.array([point[0] for point in curve_data])
+            discharge_capacity = np.array([point[0] for point in curve_data])/3300
             voltage = np.array([point[1] for point in curve_data])
             
-            # Provide initial guesses and bounds for a, b, c
-            initial_guess = [1, 0.001, 3]
-            params, covariance = curve_fit(sinh_model, discharge_capacity, voltage, p0=initial_guess)
-            a, b, c = params
+
+            initial_guess = [7.2533586, 1.88260754, -4.5058183, 1.37190552,  3.86687984,  0.2072,  9.35559597]
+            params, covariance = curve_fit(sinh_model, discharge_capacity, voltage, p0=initial_guess,maxfev=1000000,xtol=1e-16, gtol=1e-16)
+            a, b, c,d,e,f,g = params
             fit_params['a'][amp_key].append(a)
             fit_params['b'][amp_key].append(b)
             fit_params['c'][amp_key].append(c)
+            fit_params['d'][amp_key].append(d)
+            fit_params['e'][amp_key].append(e)
+            fit_params['f'][amp_key].append(f)
+            fit_params['g'][amp_key].append(g)
+
             
             # Generate model predictions
             x_fit = np.linspace(min(discharge_capacity), max(discharge_capacity), 200)
-            y_fit = sinh_model(x_fit, a, b, c)
+            y_fit = sinh_model(x_fit, a, b, c,d,e,f,g)
             
             # Calculate the mean error
-            y_pred = sinh_model(discharge_capacity, a, b, c)
+            y_pred = sinh_model(discharge_capacity, a, b, c,d,e,f,g)
             mean_error = np.mean(np.abs(voltage - y_pred))
             mean_errors[f"{amp_key}_{temp_key}"] = mean_error
             
@@ -70,15 +80,15 @@ def fit_and_plot_sinh_curves(raw_data):
             else:
                 ax = axs[i]
             ax.scatter(discharge_capacity, voltage, label='Data')
-            ax.plot(x_fit, y_fit, label=f'Fit: y = {a:.3f} * sinh({b:.6f} * x) + {c:.3f}', color='red')
-            ax.set_xlabel('Discharge Capacity (Ah)')
+            ax.plot(x_fit, y_fit,label=rf'Fit: $y = {f:.4f} \left( \frac{{{b:.4f} - \sinh({g:.4f} \cdot x - {a:.4f})}}{{{d:.4f}}} + {c:.4f} \cdot x \right) + {e:.4f}$', color='red')
+            ax.set_xlabel('State of Charge')
             ax.set_ylabel('Voltage (V)')
             ax.set_title(f'Temperature: {temp_key}, Mean Error: {mean_error:.3f}')
             ax.legend()
 
     return fit_params   
-def sinh_model(x, a, b, c):
-    return a * np.sinh(b * x) + c
+def sinh_model(x, a, b, c,d,e,f,g):
+    return f*((b-np.sinh(g*x-a))/d+c*x)+e
 
 
 
