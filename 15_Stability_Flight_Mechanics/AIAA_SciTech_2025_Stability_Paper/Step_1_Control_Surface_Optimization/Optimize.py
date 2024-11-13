@@ -143,7 +143,7 @@ def stick_fixed_stability_and_drag_optimization_setup(vehicle,cruise_velocity,cr
                   [ 'vt_span'                     , vehicle.wings.vertical_tail.spans.projected,  vehicle.wings.vertical_tail.spans.projected*(1 - scaling_factor),  vehicle.wings.vertical_tail.spans.projected*(1 + scaling_factor),   1.,   1*Units.meter],  
                   [ 'vt_AR'                       , vehicle.wings.vertical_tail.aspect_ratio,     vehicle.wings.vertical_tail.aspect_ratio*(1 - scaling_factor),     vehicle.wings.vertical_tail.aspect_ratio*(1 + scaling_factor),      100., 1*Units.meter**2],    
                   [ 'ht_span'                     , vehicle.wings.horizontal_tail.spans.projected,vehicle.wings.horizontal_tail.spans.projected*(1 - scaling_factor),vehicle.wings.horizontal_tail.spans.projected*(1 + scaling_factor), 10.,  1*Units.less], 
-                  [ 'ht_AR'                       , vehicle.wings.horizontal_tail.aspect_ratio,   vehicle.wings.horizontal_tail*(1 - scaling_factor),                vehicle.wings.horizontal_tail*(1 + scaling_factor),                 10.,  1*Units.meter**2], 
+                  [ 'ht_AR'                       , vehicle.wings.horizontal_tail.aspect_ratio,   vehicle.wings.horizontal_tail.aspect_ratio*(1 - scaling_factor),   vehicle.wings.horizontal_tail.aspect_ratio*(1 + scaling_factor),    10.,  1*Units.meter**2], 
                   [ 'AoA'                         , 5     , -10  , 10    , 1    ,  1*Units.degree],  
                   
     ],dtype=object)   
