@@ -390,7 +390,7 @@ def stick_fixed_stability_setup(vehicle):
  
  
 def elevator_sizing_setup(vehicle):   
-    hs_wing                        = vehicle.wings.horizontal_tail 
+    hs_wing                        = vehicle.wings.horizontal_stabilizer
     elevator                       = RCAIDE.Library.Components.Wings.Control_Surfaces.Elevator()
     elevator.tag                   = 'elevator'
     elevator.span_fraction_start   = 0.1
