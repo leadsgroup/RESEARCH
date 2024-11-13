@@ -1,16 +1,19 @@
-
 import numpy as np
 import matplotlib.pyplot as plt
 import RCAIDE
 from scipy.optimize import curve_fit
 import os
+import pandas as pd
 
 def main():
     full_path = os.path.join(os.path.dirname(__file__), 'nmc_structured_raw_data.res')
 
     raw_data = RCAIDE.load(full_path)
     plot_voltage_data(raw_data)
-    fit_and_plot_sinh_curves(raw_data)
+    fit_parameters = fit_and_plot_sinh_curves(raw_data)
+    RCAIDE.save(fit_parameters, os.path.join(os.path.dirname(__file__), 'nmc_fit_parameters_data.res'))
+    
+    return
 
 
 def fit_and_plot_sinh_curves(raw_data):
@@ -27,14 +30,17 @@ def fit_and_plot_sinh_curves(raw_data):
     
     # Initialize a dictionary to store mean errors for each current and temperature combination
     mean_errors = {}
-    
+    fit_params = {'a': {}, 'b': {}, 'c': {}}
+
     # Iterate through each current level
     for amp_key, temp_dict in raw_data['Current'].items():
         # Set up a subplot for each temperature level
         n_temps = len(temp_dict)
         fig, axs = plt.subplots(n_temps, 1, figsize=(10, 6 * n_temps), constrained_layout=True)
         fig.suptitle(f'Sinh Curve Fitting for Current Level: {amp_key}', fontsize=16)
-        
+        fit_params['a'][amp_key] = []
+        fit_params['b'][amp_key] = []
+        fit_params['c'][amp_key] = []
         # Iterate through each temperature level for the given current
         for i, (temp_key, data) in enumerate(temp_dict.items()):
             curve_data = data['curve']
@@ -45,6 +51,9 @@ def fit_and_plot_sinh_curves(raw_data):
             initial_guess = [1, 0.001, 3]
             params, covariance = curve_fit(sinh_model, discharge_capacity, voltage, p0=initial_guess)
             a, b, c = params
+            fit_params['a'][amp_key].append(a)
+            fit_params['b'][amp_key].append(b)
+            fit_params['c'][amp_key].append(c)
             
             # Generate model predictions
             x_fit = np.linspace(min(discharge_capacity), max(discharge_capacity), 200)
@@ -67,10 +76,11 @@ def fit_and_plot_sinh_curves(raw_data):
             ax.set_title(f'Temperature: {temp_key}, Mean Error: {mean_error:.3f}')
             ax.legend()
 
-    return
-
+    return fit_params   
 def sinh_model(x, a, b, c):
     return a * np.sinh(b * x) + c
+
+
 
 def plot_voltage_data(raw_data):
     # Plotting each current and temperature curve
