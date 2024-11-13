@@ -479,13 +479,9 @@ def vehicle_setup(BTMS_flag):
     #------------------------------------------------------------------------------------------------------------------------------------  
     bat_module                                             = RCAIDE.Library.Components.Energy.Sources.Battery_Modules.Lithium_Ion_NMC()
     bat_module.electrical_configuration.series             = 10
-    bat_module.electrical_configuration.parallel           = 210
-    bat_module.cell.nominal_capacity                       = 3.8 
-    bat_module.geometrtic_configuration.total              = bat_module.electrical_configuration.parallel*bat_module.electrical_configuration.series  
-    bat_module.voltage                                     = bat_module.maximum_voltage 
+    bat_module.electrical_configuration.parallel           = 210 
     bat_module.geometrtic_configuration.normal_count       = 42
-    bat_module.geometrtic_configuration.parallel_count     = 50
-    bat_module.nominal_capacity                            = bat_module.cell.nominal_capacity* bat_module.electrical_configuration.parallel
+    bat_module.geometrtic_configuration.parallel_count     = 50 
 
     for _ in range(int(bus.number_of_battery_modules)):
         bat_copy = deepcopy(bat_module)

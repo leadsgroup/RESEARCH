@@ -471,21 +471,18 @@ def vehicle_setup(BTMS_flag):
     # Bus
     #------------------------------------------------------------------------------------------------------------------------------------  
     bus                              = RCAIDE.Library.Components.Energy.Distributors.Electrical_Bus()
-    
+    bus.number_of_battery_modules    = 12.
 
     #------------------------------------------------------------------------------------------------------------------------------------           
     # Battery
     #------------------------------------------------------------------------------------------------------------------------------------  
     bat_module                                             = RCAIDE.Library.Components.Energy.Sources.Battery_Modules.Lithium_Ion_LFP()
     bat_module.electrical_configuration.series             = 10
-    bat_module.electrical_configuration.parallel           = 210
-    bat_module.geometrtic_configuration.total              = bat_module.electrical_configuration.parallel*bat_module.electrical_configuration.series  
-    bat_module.voltage                                     = bat_module.maximum_voltage 
+    bat_module.electrical_configuration.parallel           = 210 
     bat_module.geometrtic_configuration.normal_count       = 42
-    bat_module.geometrtic_configuration.parallel_count     = 50
-    bat_module.nominal_capacity                            = bat_module.cell.nominal_capacity* bat_module.electrical_configuration.parallel
+    bat_module.geometrtic_configuration.parallel_count     = 50 
 
-    for _ in range(12):
+    for _ in range(int(bus.number_of_battery_modules)):
         bat_copy = deepcopy(bat_module)
         bus.battery_modules.append(bat_copy)
 
@@ -949,7 +946,6 @@ def mission_setup(analyses):
     segment.assigned_control_variables.body_angle.active             = True                      
     mission.append_segment(segment)  
     
-    
     # ------------------------------------------------------------------
     #  Charge Segment: 
     # ------------------------------------------------------------------     
@@ -959,7 +955,7 @@ def mission_setup(analyses):
     segment.analyses.extend( analyses.base) 
     segment.cooling_time = 30 * Units.minutes
     segment.state.numerics.number_of_control_points = 32
-    segment.increment_battery_age_by_one_day =  True 
+    #segment.initial_battery_state_of_charge = 0.2
     #if f_idx ==  (flights_per_day - 1): 
         #segment.increment_battery_age_by_one_day =  True 
         #segment.increment_battery_cycle_day      =  day
