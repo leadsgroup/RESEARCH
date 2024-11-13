@@ -977,6 +977,7 @@ def mission_setup(analyses):
     segment.altitude_end                                  = 200.  * Units.ft   
     segment.initial_battery_state_of_charge               = 1.0 
     segment.climb_rate                                    = 500. * Units['ft/min']   
+    segment.true_course                                   = 30 * Units.degree # this is the true couse of the starting value     
             
     # define flight dynamics to model  
     segment.flight_dynamics.force_z                        = True   
@@ -1000,6 +1001,7 @@ def mission_setup(analyses):
     segment.analyses.extend( analyses.vertical_transition)   
     segment.air_speed_end                                 = 35 * Units['mph']     
     segment.acceleration                                  = 0.5
+    segment.true_course                                   = 30 * Units.degree # this is the true couse of the starting value
 
     # define flight dynamics to model 
     segment.flight_dynamics.force_x                        = True  
@@ -1024,6 +1026,7 @@ def mission_setup(analyses):
     segment.altitude_end                                  = 1000. * Units.ft   
     segment.climb_rate                                    = 500.  * Units['ft/min']  
     segment.air_speed_end                                 =  90 * Units.kts 
+    segment.true_course                                   = 30 * Units.degree # this is the true couse of the starting value
             
     # define flight dynamics to model 
     segment.flight_dynamics.force_x                       = True  
@@ -1048,8 +1051,9 @@ def mission_setup(analyses):
     segment.tag                                           = "Departure_Pattern_Curve"   
     segment.analyses.extend( analyses.forward_flight )         
     segment.air_speed   = 90 * Units.kts 
+    segment.altitude    = 1000. * Units.ft
     segment.turn_radius = 3600 * Units.feet  
-    segment.true_course = 0 * Units.degree # this is the true couse of the starting value     
+    segment.true_course = 30 * Units.degree # this is the true couse of the starting value     
     segment.turn_angle  = 90 * Units.degree
     
     # define flight dynamics to model 
@@ -1086,7 +1090,8 @@ def mission_setup(analyses):
     segment.altitude_start                                = 1000.0 * Units.ft   
     segment.altitude_end                                  = 1500. * Units.ft   
     segment.climb_rate                                    = 300.  * Units['ft/min'] 
-    segment.air_speed_end                                 = 110.  * Units['mph']  
+    segment.air_speed_end                                 = 110.  * Units['mph'] 
+    segment.true_course                                   = 30 * Units.degree # this is the true couse of the starting value
               
     # define flight dynamics to model   
     segment.flight_dynamics.force_x                       = True  
@@ -1108,7 +1113,8 @@ def mission_setup(analyses):
     segment.analyses.extend( analyses.forward_flight )                  
     segment.altitude                                      = 1500.0 * Units.ft  
     segment.air_speed                                     = 110.  * Units['mph']  
-    segment.distance                                      = 40 *Units.nmi    
+    segment.distance                                      = 40 *Units.nmi  
+    segment.true_course                                   = 30 * Units.degree # this is the true couse of the starting value
             
     # define flight dynamics to model 
     segment.flight_dynamics.force_x                       = True  
@@ -1132,7 +1138,8 @@ def mission_setup(analyses):
     segment.altitude_end                                  = 500. * Units.ft  
     segment.climb_rate                                    = -500.  * Units['ft/min']
     segment.air_speed_start                               = 110.  * Units['mph']  
-    segment.air_speed_end                                 = 90 * Units.kts     
+    segment.air_speed_end                                 = 90 * Units.kts  
+    segment.true_course                                   = 30 * Units.degree # this is the true couse of the starting value
             
     # define flight dynamics to model 
     segment.flight_dynamics.force_x                       = True  
@@ -1155,8 +1162,9 @@ def mission_setup(analyses):
     segment.analyses.extend( analyses.forward_flight )        
     segment.air_speed   = 90 * Units.kts 
     segment.turn_radius = 3600 * Units.feet  
-    segment.true_course = 0 * Units.degree # this is the true couse of the starting value     
+    segment.true_course = 30 * Units.degree # this is the true couse of the starting value     
     segment.turn_angle  = 90 * Units.degree
+    segment.altitude    = 500.0 * Units.ft
     
     # define flight dynamics to model 
     segment.flight_dynamics.force_x                                             = True    
@@ -1194,7 +1202,8 @@ def mission_setup(analyses):
     segment.climb_angle                                   = 3 * Units.degrees
     segment.acceleration                                  = -0.25 * Units['m/s/s']    
     segment.pitch_initial                                 = 4.3  * Units.degrees  
-    segment.pitch_final                                   = 7. * Units.degrees     
+    segment.pitch_final                                   = 7. * Units.degrees
+    segment.true_course                                   = 30 * Units.degree # this is the true couse of the starting value
 
     # define flight dynamics to model 
     segment.flight_dynamics.force_x                        = True  
@@ -1219,7 +1228,8 @@ def mission_setup(analyses):
     segment.tag                                           = "Low_Speed_Approach_Transition"  
     segment.analyses.extend( analyses.vertical_transition)   
     segment.air_speed_end                                 = 50. * Units['ft/min'] 
-    segment.acceleration                                  =  -0.25 * Units['m/s/s']   
+    segment.acceleration                                  =  -0.25 * Units['m/s/s'] 
+    segment.true_course                                   = 30 * Units.degree # this is the true couse of the starting value
 
     # define flight dynamics to model 
     segment.flight_dynamics.force_x                        = True  
@@ -1244,7 +1254,8 @@ def mission_setup(analyses):
     segment.analyses.extend( analyses.vertical_flight)     
     segment.altitude_start                                = 50.0 * Units.ft   
     segment.altitude_end                                  = 0.   * Units.ft  
-    segment.descent_rate                                  = 300. * Units['ft/min']  
+    segment.descent_rate                                  = 300. * Units['ft/min']
+    segment.true_course                                   = 30 * Units.degree # this is the true couse of the starting value
     
     # define flight dynamics to model  
     segment.flight_dynamics.force_z                        = True   
