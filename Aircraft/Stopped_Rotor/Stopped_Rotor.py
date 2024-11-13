@@ -214,8 +214,7 @@ def vehicle_setup(redesign_rotors=True) :
     #------------------------------------------------------------------------------------------------------------------------------------  
     #   Horizontal Tail
     #------------------------------------------------------------------------------------------------------------------------------------
-    wing                          = RCAIDE.Library.Components.Wings.Horizontal_Tail()
-    wing.tag                      = 'horizontal_tail'  
+    wing                          = RCAIDE.Library.Components.Wings.Horizontal_Tail() 
     wing.aspect_ratio             = 3.04444
     wing.sweeps.quarter_chord     = 17. * Units.degrees
     wing.thickness_to_chord       = 0.12 
