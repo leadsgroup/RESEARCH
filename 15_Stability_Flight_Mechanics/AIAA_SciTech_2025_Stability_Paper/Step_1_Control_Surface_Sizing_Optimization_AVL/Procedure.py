@@ -53,18 +53,37 @@ def modify_stick_fixed_vehicle(nexus):
     This function takes the updated design variables and modifies the aircraft 
     '''
     # Pull out the vehicles
-    vehicle = nexus.vehicle_configurations.stick_fixed_cruise  
+    vehicle = nexus.vehicle_configurations.stick_fixed_cruise   
         
     # Update Wing    
-    for wing in vehicle.wings: 
-        update_chords(wing)   
-    
+    for wing in vehicle.wings:
+        if type(wing) ==  RCAIDE.Library.Components.Wings.Main_Wing: 
+            vehicle.reference_area        = wing.areas.reference            
+        Sref                     = wing.areas.reference      # fixed 
+        span                     = wing.spans.projected      # optimization input
+        taper                    = wing.taper                # optimization input
+        croot                    = 2*Sref/((taper+1)*span)   # set by Sref and current design point
+        ctip                     = taper * croot             # set by Sref and current design point 
+        wing.chords.root         = croot
+        wing.chords.tip          = ctip 
+        
+        # Wing Segments
+        if 'Segments' in wing:
+            for seg in wing.Segments:
+                seg.twist = (wing.twists.tip-wing.twists.root)*seg.percent_span_location  + wing.twists.root
+                
+        # update remaning wing properties  
+        wing_segmented_planform(wing)  
+        wing.areas.wetted             = wing.areas.reference  * 2 
+        wing.areas.exposed            = wing.areas.reference  * 2  
+                
+      
     # Update MOI 
-    weight_analysis                               = RCAIDE.Framework.Analyses.Weights.Weights_General_Aviation()
+    weight_analysis                               = RCAIDE.Framework.Analyses.Weights.Weights_EVTOL()
     weight_analysis.vehicle                       = vehicle 
     results                                       = weight_analysis.evaluate()
 
-    compute_vehicle_center_of_gravity(weight_analysis.vehicle, update_CG=False)     
+    compute_vehicle_center_of_gravity(weight_analysis.vehicle)     
     CG_location      = vehicle.mass_properties.center_of_gravity 
     compute_aircraft_moment_of_inertia(weight_analysis.vehicle, CG_location)
     
@@ -73,12 +92,13 @@ def modify_stick_fixed_vehicle(nexus):
     vehicle.mass_properties.moments_of_inertia.tensor[2, 0] = 0
 
     # Update Mission  
-    nexus.missions = Missions.stick_fixed_stability_setup(nexus.analyses,vehicle)    
+    nexus.missions = Missions.stick_fixed_stability_setup(nexus.analyses,weight_analysis.vehicle,nexus.cruise_velocity, nexus.cruise_altitude)      
     
     # diff the new data
     vehicle.store_diff() 
     
     return nexus   
+
  
 def longitudinal_static_stability_and_drag_post_process(nexus): 
     '''
