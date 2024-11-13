@@ -90,8 +90,12 @@ def modify_stick_fixed_vehicle(nexus):
     compute_aircraft_moment_of_inertia(weight_analysis.vehicle, CG_location)
     
     # moment of intertia matrix cannot be negative so set to 0
+    vehicle.mass_properties.moments_of_inertia.tensor[0, 1] = 0
     vehicle.mass_properties.moments_of_inertia.tensor[0, 2] = 0
+    vehicle.mass_properties.moments_of_inertia.tensor[1, 0] = 0
+    vehicle.mass_properties.moments_of_inertia.tensor[1, 2] = 0
     vehicle.mass_properties.moments_of_inertia.tensor[2, 0] = 0
+    vehicle.mass_properties.moments_of_inertia.tensor[2, 1] = 0    
 
     # Update Mission  
     nexus.missions = Missions.stick_fixed_stability_setup(nexus.analyses,weight_analysis.vehicle,nexus.cruise_velocity, nexus.cruise_altitude)      
