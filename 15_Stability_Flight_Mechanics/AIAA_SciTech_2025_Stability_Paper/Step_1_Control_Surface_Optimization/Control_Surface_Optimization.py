@@ -47,7 +47,7 @@ def main():
         vehicle =  TSR_vehicle_setup(redesign_rotors=False)
     
     #                                     CG: X,    Y,  Z,  rx  ry  rz 
-    configuration_CGbatt_MOIbatt = np.array([[5,    0., 0., 0.,   0., 0.],
+    configuration_CGbatt_MOIbatt = np.array([[2.6,    0., 0., 0.,   0., 0.],
                                              [2.7,  0., 0., 0.,   0., 0.],
                                              [2.8,  0., 0., 0.,   0., 0.],
                                              [2.9,  0., 0., 0.,   0., 0.],
