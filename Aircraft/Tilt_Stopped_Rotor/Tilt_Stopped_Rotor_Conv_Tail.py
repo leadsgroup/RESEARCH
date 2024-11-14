@@ -98,7 +98,15 @@ def base_analysis(vehicle):
     aerodynamics         = RCAIDE.Framework.Analyses.Aerodynamics.Vortex_Lattice_Method() 
     aerodynamics.vehicle = vehicle
     aerodynamics.settings.drag_coefficient_increment = 0.0000
-    analyses.append(aerodynamics)   
+    analyses.append(aerodynamics)
+
+
+    # ------------------------------------------------------------------
+    #  Aerodynamics Analysis
+    stability         = RCAIDE.Framework.Analyses.Stability.Vortex_Lattice_Method() 
+    stability.vehicle = vehicle
+    stability.settings.drag_coefficient_increment = 0.0000
+    analyses.append(stability)    
 
     # ------------------------------------------------------------------
     #  Energy
@@ -610,14 +618,16 @@ def vehicle_setup(redesign_rotors=True) :
     battery_module.tag                                                = 'bus_battery'
     battery_module.electrical_configuration.series                    = 140  
     battery_module.electrical_configuration.parallel                  = 30  
-    battery_module.geometrtic_configuration.normal_count              = 140  
-    battery_module.geometrtic_configuration.parallel_count            = 30 
-
+    battery_module.geometrtic_configuration.normal_count              = 168
+    battery_module.geometrtic_configuration.parallel_count            = 25
+     
+    modules_origins = [[2.0 - 1.88/2 , 0.0, 0.0],[2.0 - 1.88/2 , 0.0, 0.0]]  # large prop-rotor modules are beneath floor
     for m_i in range(prop_rotor_bus.number_of_battery_modules):
         module =  deepcopy(battery_module)
         module.tag = 'nmc_module_' + str(m_i+1) 
-        module.origin = [[2.0, 0.0, 0.0]] 
+        module.origin = [modules_origins[m_i]]
         prop_rotor_bus.battery_modules.append(module) 
+    prop_rotor_bus.initialize_bus_properties()
         
     #------------------------------------------------------------------------------------------------------------------------------------  
     # Front Propulsors 
@@ -746,8 +756,7 @@ def vehicle_setup(redesign_rotors=True) :
     # Rear Bus 
     #====================================================================================================================================          
     lift_rotor_bus                           = RCAIDE.Library.Components.Energy.Distributors.Electrical_Bus()
-    lift_rotor_bus.tag                       = 'lift_rotor_bus' 
-    lift_rotor_bus.origin                    =  [[2.43775609, 0 ,1.2]]
+    lift_rotor_bus.tag                       = 'lift_rotor_bus'  
     lift_rotor_bus.number_of_battery_modules =  2
     #------------------------------------------------------------------------------------------------------------------------------------  
     # Bus Battery
@@ -755,13 +764,14 @@ def vehicle_setup(redesign_rotors=True) :
     battery_module                                                    = RCAIDE.Library.Components.Energy.Sources.Battery_Modules.Lithium_Ion_NMC()  
     battery_module.electrical_configuration.series                    = 140   
     battery_module.electrical_configuration.parallel                  = 10  
-    battery_module.geometrtic_configuration.normal_count              = 140 
-    battery_module.geometrtic_configuration.parallel_count            = 10 
+    battery_module.geometrtic_configuration.normal_count              = 56 
+    battery_module.geometrtic_configuration.parallel_count            = 25 
      
+    modules_origins = [[4, 0.0, 0.0],[4, 0.0, 0.2 ]]  # rear modules are stacked inside cabin
     for m_i in range(lift_rotor_bus.number_of_battery_modules):
         module =  deepcopy(battery_module)
         module.tag = 'nmc_module_' + str(m_i+1) 
-        module.origin = [[2.0, 0.0, 0.0]] 
+        module.origin = [modules_origins[m_i]]
         lift_rotor_bus.battery_modules.append(module) 
     lift_rotor_bus.initialize_bus_properties()
 
@@ -866,13 +876,13 @@ def vehicle_setup(redesign_rotors=True) :
     payload                                                 = RCAIDE.Library.Components.Systems.Avionics()
     payload.power_draw                                      = 10. # Watts 
     payload.mass_properties.mass                            = 1.0 * Units.kg
-    lift_rotor_bus.payload                                        = payload 
+    lift_rotor_bus.payload                                  = payload 
                              
     # Avionics                            
     avionics                                                = RCAIDE.Library.Components.Systems.Avionics()
     avionics.power_draw                                     = 10. # Watts  
     avionics.mass_properties.mass                           = 1.0 * Units.kg
-    lift_rotor_bus.avionics                                       = avionics    
+    lift_rotor_bus.avionics                                 = avionics    
 
    
     network.busses.append(lift_rotor_bus)       
@@ -890,13 +900,13 @@ def vehicle_setup(redesign_rotors=True) :
     # ------------------------------------------------------------------
     #   CG Location
     # ------------------------------------------------------------------    
-    _ , _ =  compute_vehicle_center_of_gravity(converged_vehicle) 
+    CG , _ =  compute_vehicle_center_of_gravity(converged_vehicle) 
     CG_location  = converged_vehicle.mass_properties.center_of_gravity
     
     # ------------------------------------------------------------------
     #   Operating Aircraft MOI
     # ------------------------------------------------------------------    
-    _, _ = compute_aircraft_moment_of_inertia(converged_vehicle, CG_location) 
+    MOI, _ = compute_aircraft_moment_of_inertia(converged_vehicle, CG_location) 
 
     return converged_vehicle
   
