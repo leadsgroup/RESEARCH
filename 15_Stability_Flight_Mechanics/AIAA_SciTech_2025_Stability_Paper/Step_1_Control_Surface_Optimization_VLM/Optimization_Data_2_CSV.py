@@ -25,16 +25,16 @@ def Optimization_Data_2_CSV(configuration_CGbatt_MOIbatt,
                                      'ht_AR'                     : [output_stick_fixed[5]],                            
                                      'AoA'                       : [output_stick_fixed[6]],           
                                      'CD'                        : [planform_optimization_problem.summary['CD'                        ]],
-                                     'CL_residual'               : [planform_optimization_problem.summary['CL_residual'               ]],
                                      'CM_residual'               : [planform_optimization_problem.summary['CM_residual'               ]],
+                                     'spiral_criteria'           : [planform_optimization_problem.summary['spiral_criteria'           ]],
                                      'static_margin'             : [planform_optimization_problem.summary['static_margin'             ]],
                                      'CM_alpha'                  : [planform_optimization_problem.summary['CM_alpha'                  ]],
+                                     'CL_stick_fixed_residual'   : [planform_optimization_problem.summary['CL_stick_fixed_residual'   ]],
                                      'phugoid_damping_ratio'     : [planform_optimization_problem.summary['phugoid_damping_ratio'     ]],
                                      'short_period_damping_ratio': [planform_optimization_problem.summary['short_period_damping_ratio']],
                                      'dutch_roll_frequency'      : [planform_optimization_problem.summary['dutch_roll_frequency'      ]],
                                      'dutch_roll_damping_ratio'  : [planform_optimization_problem.summary['dutch_roll_damping_ratio'  ]],
                                      'spiral_doubling_time'      : [planform_optimization_problem.summary['spiral_doubling_time'      ]],
-                                     'spiral_criteria'           : [planform_optimization_problem.summary['spiral_criteria'           ]],
                                      'run_time'                  : [elapsed_time_stick_fixed]
                                     }) 
     
