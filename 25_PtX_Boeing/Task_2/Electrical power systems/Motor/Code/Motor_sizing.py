@@ -5,9 +5,12 @@
 import numpy             as np
 from   scipy.integrate   import quad
 import matplotlib.pyplot as plt
-from scipy.special import kelvin
+from   scipy.special     import kelvin
 
-# References: "Analytical Design and Performance Estimation Methods for Aircraft Permanent Magnet Synchronous Machines" (2023), Thomas F. Tallerico, Aaron D. Anderson, Matthew G. Granger, and Jonathan M. Gutknecht, Glenn Research Center, Cleveland, Ohio
+# References: "Analytical Design and Performance Estimation Methods for 
+#              Aircraft Permanent Magnet Synchronous Machines" (2023), 
+#              Tallerico, T. F. et al., Glenn Research Center, 
+#              Cleveland, Ohio
     
 # ----------------------------------------------------------------------
 #   Main
@@ -23,29 +26,29 @@ def main():
 
 def emrax_348():
     
+    correction_factor = 100                                                #o[-]            correction factor
+    
     # -----------------------------------------------------------------------------------------
     # 3.1 The Basic Motor Sizing Equation
     # -----------------------------------------------------------------------------------------   
     
-    omega_max      = 4000* (2 * np.pi / 60)                                # [RPM -> rad/s]      max rotor angular velocity    
-    tau_max        = 1000                                                  # [Nm]       max torque  
-    P_max          = omega_max*tau_max                                     # [W]        max power
-                                                                           
-    omega          = 2500* (2 * np.pi / 60)                                # [RPM -> rad/s]    max rotor angular velocity 
-    D_in           = 0.16                                                  # [m]        stator inner diameter
-    D_out          = 0.348                                                 # [m]        stator outer diameter
-    B_sign         = 1.2*35                                               #-[V*s/m**2] average magnitude of the radial flux density produced by the rotor
-    k_w            = 0.9                                                   #-[-]        winding factor
-    n_phases       = 3                                                     # [-]        number of phases
-    I_tot          = 375*n_phases                                          # [A]        total current that passes through the stator in both axial directions
-    L              = 0.112                                                 # [m]        motor stack length 
-    A_sign         = (k_w*I_tot)/(np.pi*D_in)                              # [-]        stator electrical loading   
-    tau            = (np.pi/2)*(B_sign*A_sign)*(D_in**2)*L                 # [Nm]       torque  
-    P              = ((omega)*tau)//1000                                   # [kW]       power
-                                                                           
-    B_g1           = 4*B_sign/np.pi                                        # [V*s/m**2] peak magnetic flux density of the fundamental harmonic produced by the rotor (Eq.4)
-    K_s1           = A_sign*np.pi/2                                        # [V*s/m**2] peak fundamental value of the linear current density (Eq.5)      
-    P_lipo         = ((omega)*(np.pi/4)*(B_g1*K_s1)*(D_in**2)*L)/1000      # [kW]       power
+    omega_max      = 4000* (2 * np.pi / 60)                                # [RPM -> rad/s] max rotor angular velocity    
+    tau_max        = 1000                                                  # [Nm]           max torque                                                                
+    omega          = 2500* (2 * np.pi / 60)                                # [RPM -> rad/s] rotor angular velocity 
+    D_in           = 0.16                                                  # [m]            stator inner diameter
+    D_out          = 0.348                                                 # [m]            stator outer diameter
+    k_w            = 0.95                                                  #o[-]            winding factor
+    I_tot          = 375                                                   # [A]            total current that passes through the stator in both axial directions
+    L              = 0.112                                                 # [m]            motor stack length 
+    
+    P_max          = omega_max*tau_max                                     # [W]            max power
+    B_sign         = 1.2*correction_factor                                 #o[V*s/m**2]     average magnitude of the radial flux density produced by the rotor
+    A_sign         = (k_w*I_tot)/(np.pi*D_in)                              # [-]            stator electrical loading (Eq.2)    
+    tau            = (np.pi/2)*(B_sign*A_sign)*(D_in**2)*L                 # [Nm]           torque (Eq.1) 
+    P              = ((omega)*tau)/1000                                    # [kW]           power (Eq.1)                                                
+    B_g1           = 4*B_sign/np.pi                                        # [V*s/m**2]     peak magnetic flux density of the fundamental harmonic produced by the rotor (Eq.4)
+    K_s1           = A_sign*np.pi/2                                        # [V*s/m**2]     peak fundamental value of the linear current density (Eq.5)      
+    P_lipo         = ((omega)*(np.pi/4)*(B_g1*K_s1)*(D_in**2)*L)/1000      # [kW]           power (Eq.3)
     
     print("EMRAX 348:") 
     print("Power =", "%0.3f" % P, "[kW]") 
@@ -56,86 +59,89 @@ def emrax_348():
     # 3.1.1 Power and Torque Density
     # -----------------------------------------------------------------------------------------    
 
-    torque_density = (1/2)*(B_sign*A_sign)*D_in                            # [N/m]     torque per unit volume (Eq.6)  
-    power_density  = (omega*torque_density)/1000                           # [kW/m**3] power per unit rotor volume (Eq.6)   
+    torque_density = (1/2)*(B_sign*A_sign)*D_in                            # [N/m**2]       torque per unit volume (Eq.6)  
+    power_density  = (omega*torque_density)/1000                           # [kW/m**3]      power per unit rotor volume (Eq.6)   
     
-    print("Torque density =", "%0.3f" % torque_density, "[N/m]") 
+    print("Torque density =", "%0.3f" % torque_density, "[N/m**2]") 
     print("Power density =", "%0.3f" % power_density, "[kW/m**3]")   
     
     # -----------------------------------------------------------------------------------------
     # 3.1.2 Efficiency and Power Factor
     # -----------------------------------------------------------------------------------------     
     
-    LOSS_speed     = 0.05*P
-    tau_out        = tau - (LOSS_speed/(omega/9.55))                       # [N*m] output torque (Eq.7)  
-    P_out          = ((omega)*tau_out)/1000                                # [W]   output power (Eq.7)  
+    T              = 10                                                    # [s]            total time average power is being calculated over
+    I              = 375                                                   # [A]            current
+    V              = 830                                                   # [V]            voltage    
+    LOSS_speed     = 0.05*P                                                # [kW]           sum of the magnetic and mechanical power losses at the rotational speed 𝜔
+    
+    tau_out        = tau - (LOSS_speed/(omega))                            # [N*m]          output torque (Eq.7)  
+    P_out          = ((omega)*tau_out)/1000                                # [W]            output power (Eq.7)  
+      
+    def i(t):
+        I = 375                                                            # [A]            current
+        return I * np.sin(2 * np.pi * t)                                                    
+                                                                                            
+    def v(t):                                                                               
+        V = 830                                                            # [V]            voltage
+        return V * np.sin(2 * np.pi * t)                                                    
+                                                                                            
+    def f(t):                                                                               
+        return i(t) * v(t)                                                                  
+                                                                                            
+    P_time, _      = quad(f, 0, T)                                         # [W*s]          Real power over the time interval
+    P_time         = (P_time / T)/1000                                     # [kW]           Real power
+    S              = (I*V)/1000                                            # [kW]           apparent power (Eq.10)  
+    PF             = P_time/S                                              # [-]            power factor (Eq.8)  
+    Q              = np.sqrt(S**2 - P_time**2)                             # [kW]           reactive power (Eq.11)   
     
     print("Output power =", "%0.3f" % P_out, "[kW]") 
-    
-    def i(t):
-        I = 375*3                                                          # [A]   current
-        return I * np.sin(2 * np.pi * t)
-    
-    def v(t):
-        V = 830                                                            # [V]   voltage
-        return V * np.sin(2 * np.pi * t)
-    
-    def f(t):
-        return i(t) * v(t)
-    
-    T              = 10                                                    # [s]   total time average power is being calculated over
-    P_time, _      = quad(f, 0, T)                                         # [W*s] Real power over the time interval
-    P_time         = (P / T)                                               # [kW]  Real power
-    I              = 375*3                                                 # [A]   current
-    V              = 830                                                   # [V]   voltage
-    S              = (I*V)/1000                                            # [kW]  apparent power (Eq.10)  
-    PF             = P_time/S                                              # [-]   power factor (Eq.8)  
-    Q              = np.sqrt(S**2 - P_time**2)                             # [kW]  reactive power (Eq.11)   
-    
     print("Real power =", "%0.3f" % P_time, "[kW]")
     print("Apparent power =", "%0.3f" % S, "[kW]")
     print("Reactive power =", "%0.3f" % Q, "[kW]")
+    print("Power Factor =", "%0.3f" % PF, "[-]")    
     
     # -----------------------------------------------------------------------------------------
     # 3.2.1 Magnetic Reluctance Networks
     # -----------------------------------------------------------------------------------------
     
-    N              = 100                                                   # number of turns   
-    Br             = 1.2                                                   # remnant flux density
-    mu_0           = 1.256637061e-6                                        # permeability of free space
-    mu_r           = 1.05                                                  # relative permeability of the magnetic material
-    l_m            = 0.002                                                 # [m] thickness of the magnet or the size of the element if multiple elements span a magnet
-    l              = 0.02                                                  # [m] length of the path
-    A              = np.pi * ((D_out**2 - D_in**2) / 4)                    # cross-sectional area of the reluctance path perpendicular to length 𝑙    
-    MMF_coil       = N*I                                                   # magnetomotive force applied to the reluctance path for a coil (Eq.14)    
-    MMF_magnet     = (Br/(mu_0*mu_r))*l_m                                  # MMF for a magnet (Eq.15)
-    R              = l/(A*mu_0*mu_r)                                       # reluctance of a given path or given reluctant element (Eq.16) 
-    phi            = MMF_coil/R                                            # magnetic flux through the reluctance path (Eq.12)
-    B              = phi/A                                                 # magnetic flux density (Eq.13)   
+    N              = 100                                                   # [-]            number of turns   
+    Br             = 1.2                                                   # [Wb/m**2]      remnant flux density
+    mu_0           = 1.256637061e-6                                        # [N/A**2]       permeability of free space
+    mu_r           = 1005                                                  # [N/A**2]       relative permeability of the magnetic material
+    l_m            = 0.002                                                 # [m]            thickness of the magnet or the size of the element if multiple elements span a magnet
+    l              = 0.02                                                  # [m]            length of the path
     
-    print("Magnetic flux density =", "%0.3f" % B, "[]")
+    A              = np.pi * ((D_out**2 - D_in**2) / 4)                    # [m**2]         cross-sectional area of the reluctance path perpendicular to length 𝑙    
+    MMF_coil       = N*I                                                   # [A*turns]      magnetomotive force applied to the reluctance path for a coil (Eq.14)    
+    MMF_magnet     = (Br/(mu_0*mu_r))*l_m                                  # [A*turns]      MMF for a magnet (Eq.15)
+    R              = l/(A*mu_0*mu_r)                                       # [A*turn/Wb]    reluctance of a given path or given reluctant element (Eq.16) 
+    phi            = MMF_coil/R                                            # [Wb]           magnetic flux through the reluctance path (Eq.12)
+    B              = phi/A                                                 # [Wb/m**2]      magnetic flux density (Eq.13)   
+    
+    print("Magnetic flux density =", "%0.3f" % B, "[Wb/m**2]")
 
     # -----------------------------------------------------------------------------------------
     # 3.2.1.1 Simple Example of North South Array 
     # -----------------------------------------------------------------------------------------    
     
-    l_g            = 0.001                                      # airgap size
-    Br             = 1.2                                        # remnant flux density
-    mu_r           = 1.05         
-    A_m            = A                                          # magnet area
-    alpha_m        = 180                                        # magnet’s pole span angle in electrical degrees
-    R_ag           = l_g/(A_m*mu_0)                             # airgap reluctance (Eq.17)
-    R_mag          = l_m/(A_m*mu_0*mu_r)                        # magnet reluctance (Eq.17)
-    R              = 2*R_ag + 2*R_mag                           # reluctance of the path (Eq.17)
-    MMF            = 2*(Br/(mu_0*mu_r))*l_m                     # magnetomotive force in the circuit (Eq.18)
-    phi            = MMF/R                                      # flux in the path (Eq.19)
-    B_m            = (Br*l_m)/(l_g*mu_r + l_m)                  # airgap field in the gap produced by the magnets (Eq.20)
-    B_sign         = B_m                                        # for rotors where magnets span the full
-    B_g1           = (4/np.pi)*B_m*np.sin(alpha_m/2)            # peak flux density magnitude of the fundamental harmonic, for rotors where the magnets do not span the full magnetic pole  (Eq.21)    
+    l_g            = 0.001                                                 # [m]            airgap size
+    Br             = 1.2                                                   # [Wb/m**2]      remnant flux density
+    A_m            = A                                                     # [m**2]         magnet area
+    alpha_m        = 180*(np.pi/180)                                       # [deg -> rad]   magnet’s pole span angle in electrical degrees
+    mu_r           = 1.05                                                  # [N/A**2]       relative permeability of the magnetic material
+        
+    R_ag           = l_g/(A_m*mu_0)                                        # [A*turn/Wb]    airgap reluctance (Eq.17)
+    R_mag          = l_m/(A_m*mu_0*mu_r)                                   # [A*turn/Wb]    magnet reluctance (Eq.17)
+    R              = 2*R_ag + 2*R_mag                                      # [A*turn/Wb]    reluctance of the path (Eq.17)
+    MMF            = 2*(Br/(mu_0*mu_r))*l_m                                # [A*turns]      magnetomotive force in the circuit (Eq.18)
+    phi            = MMF/R                                                 # [Wb]           flux in the path (Eq.19)
+    B_m            = (Br*l_m)/(l_g*mu_r + l_m)                             # [Wb/m**2]      airgap field in the gap produced by the magnets (Eq.20)
+    B_sign         = B_m                                                   # [Wb/m**2]      for rotors where magnets span the full
+    B_g1           = (4/np.pi)*B_m*np.sin(alpha_m/2)                       # [Wb/m**2]      peak flux density magnitude of the fundamental harmonic, for rotors where the magnets do not span the full magnetic pole  (Eq.21)    
      
-    print("Airgap field in the gap produced by the magnets =", "%0.3f" % B_m, "[]")
-    print("Airgap field for rotors where magnets span the full =", "%0.3f" % B_sign, "[]")
-    print("Airgap field peak flux density magnitude of the fundamental harmonic, for rotors where the magnets do not span the full magnetic pole =", "%0.3f" % B_g1, "[]")
+    print("Airgap field in the gap produced by the magnets =", "%0.3f" % B_m, "[Wb/m**2]")
+    print("Airgap field for rotors where magnets span the full =", "%0.3f" % B_sign, "[Wb/m**2]")
+    print("Airgap field peak flux density magnitude of the fundamental harmonic, for rotors where the magnets do not span the full magnetic pole =", "%0.3f" % B_g1, "[Wb/m**2]")
     
     # -----------------------------------------------------------------------------------------
     # 3.2.1.2 Stator Inductance Calculation
@@ -388,7 +394,6 @@ def compute_basic_motor_sizing(B_sign, k_w, I_tot, D, L, omega):
     D              = 1                                          # stator inner diameter
     k_w            = 0.95                                       # winding factor
     I_tot          = 1                                          # total current that passes through the stator in both axial directions
-    D              = 1                                          # stator inner diameter
     L              = 1                                          # motor stack length
     omega          = 1                                          # rotor angular velocity    
     A_sign         = (k_w*I_tot)/(np.pi*D)                      # stator electrical loading (Eq.2)   
