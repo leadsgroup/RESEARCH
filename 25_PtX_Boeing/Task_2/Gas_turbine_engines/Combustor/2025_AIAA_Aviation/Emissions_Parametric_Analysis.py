@@ -27,12 +27,12 @@ def main():
     return    
 
 def parametric_analyses():
-    comb_lengths      = np.linspace(0.05, 0.14, 1)
-    comb_areas        = np.linspace(0.15, 0.30, 1)
-    temperatures      = np.linspace(700,  800,  1)
-    pressures         = np.linspace(20e6, 30e6, 1)
-    mdots             = np.linspace(1,    10,   1) 
-    FARs              = np.linspace(0.06, 0.07, 1)
+    comb_lengths      = np.linspace(0.08,  0.14,  5)
+    comb_areas        = np.linspace(0.15,  0.30,  5)
+    temperatures      = np.linspace(825,   875,   5)
+    pressures         = np.linspace(2.8e6, 3.2e6, 5)
+    mdots             = np.linspace(75,    85,    5) 
+    FARs              = np.linspace(0.015, 0.07,  5)
 
     EI_CO2            = np.zeros((len(comb_lengths), len(comb_areas), len(temperatures), len(pressures), len(mdots), len(FARs)))
     EI_CO             = np.zeros_like(EI_CO2)  
