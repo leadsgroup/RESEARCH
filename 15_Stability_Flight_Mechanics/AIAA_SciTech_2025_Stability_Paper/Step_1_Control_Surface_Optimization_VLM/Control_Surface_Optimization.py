@@ -76,10 +76,10 @@ def main():
         case_vehicle.networks.electric.busses.lift_rotor_bus.battery_modules.nmc_module_1.origin = np.array([[configuration_CGbatt_MOIbatt[i,0] + configuration_CGbatt_MOIbatt[i,3], 
                                                                                                               configuration_CGbatt_MOIbatt[i,1] + configuration_CGbatt_MOIbatt[i,4], 
                                                                                                               configuration_CGbatt_MOIbatt[i,2] + configuration_CGbatt_MOIbatt[i,5]]])
-        case_vehicle.networks.electric.busses.lift_rotor_bus.battery_modules.nmc_module_2.origin = np.array([[configuration_CGbatt_MOIbatt[i,0] - configuration_CGbatt_MOIbatt[i,3], 
+        case_vehicle.networks.electric.busses.prop_rotor_bus.battery_modules.nmc_module_2.origin = np.array([[configuration_CGbatt_MOIbatt[i,0] - configuration_CGbatt_MOIbatt[i,3], 
                                                                                                               configuration_CGbatt_MOIbatt[i,1] - configuration_CGbatt_MOIbatt[i,4], 
                                                                                                               configuration_CGbatt_MOIbatt[i,2] - configuration_CGbatt_MOIbatt[i,5]]])
-        case_vehicle.networks.electric.busses.prop_rotor_bus.battery_modules.nmc_module_2.origin = np.array([[configuration_CGbatt_MOIbatt[i,0] - configuration_CGbatt_MOIbatt[i,3], 
+        case_vehicle.networks.electric.busses.lift_rotor_bus.battery_modules.nmc_module_2.origin = np.array([[configuration_CGbatt_MOIbatt[i,0] - configuration_CGbatt_MOIbatt[i,3], 
                                                                                                               configuration_CGbatt_MOIbatt[i,1] - configuration_CGbatt_MOIbatt[i,4], 
                                                                                                               configuration_CGbatt_MOIbatt[i,2] - configuration_CGbatt_MOIbatt[i,5]]])
                    
