@@ -7,7 +7,6 @@ import RCAIDE
 from   RCAIDE.Framework.Core                                                             import Units   
 from   RCAIDE.Library.Methods.Emissions.Chemical_Reactor_Network_Method.evaluate_cantera import evaluate_cantera 
 from   RCAIDE.Library.Plots                                                              import *     
-from   RCAIDE.Library.Components.Propulsors.Converters.Combustor                         import Combustor
 
 # python imports 
 import numpy             as np  
@@ -20,14 +19,12 @@ import os
 
 def main():
     
-    # Parameters under investigation
-    #fuel_types        = ['Jet_A1', 'Methane']
-    comb_lengths      = np.array([0.08, 0.1, 0.11])
-    comb_areas        = np.array([0.15, 0.3])
-    temperatures      = np.array([700, 725, 750, 775, 800])
-    pressures         = np.array([20000000, 30000000])
-    mdots             = np.array([1, 5, 10])
-    FARs              = np.array([0.06, 0.07])     
+    comb_lengths      = np.linspace(0.05, 0.14, 10)
+    comb_areas        = np.linspace(0.15, 0.30, 10)
+    temperatures      = np.linspace(700,  800,  10)
+    pressures         = np.linspace(20e6, 30e6, 10)
+    mdots             = np.linspace(1,    10,   10) 
+    FARs              = np.linspace(0.06, 0.07, 10)
     
     EI_CO2            = np.zeros((len(comb_lengths), len(comb_areas), len(temperatures), len(pressures), len(mdots), len(FARs)))
     EI_CO             = np.zeros_like(EI_CO2)  
@@ -62,6 +59,8 @@ def main():
                             EI_H2O[l,a,t,p,m,far] = results.EI_H2O
                             EI_NO[l,a,t,p,m,far]  = results.EI_NO 
                             EI_NO2[l,a,t,p,m,far] = results.EI_NO2
+                            
+                            
     
     return    
 
