@@ -11,7 +11,7 @@
 import RCAIDE
 from RCAIDE.Framework.Core import Units   
 from RCAIDE.Library.Methods.Propulsors.Turbofan_Propulsor          import design_turbofan
-from RCAIDE.Library.Methods.Stability.Center_of_Gravity            import compute_component_centers_of_gravity
+#from RCAIDE.Library.Methods.Stability.Center_of_Gravity            import compute_component_centers_of_gravity
 from RCAIDE.Library.Methods.Geometry.Planform                      import segment_properties
 from RCAIDE.Library.Plots                                          import *  
 from RCAIDE.Library.Methods.Performance.payload_range_diagram      import payload_range_diagram
@@ -32,10 +32,8 @@ import json
 
 
 def main():
-    fuels = [Ethane(), Methane(), Propane(), Ethanol(), Butanol(), Propanol(), \
-        Jet_A1(), Liquid_Natural_Gas()]
-    fuel_names = ["Ethane", "Methane", "Propane", "Ethanol", "Butanol", "Propanol", \
-        "Jet A1", "Liquid Natural Gas", "Liquid Petroleum Gas"]
+    fuels = [Jet_A1()]
+    fuel_names = ["Jet A1"]
     
     for index, fuel in enumerate(fuels):
         print("Running simulation for", fuel_names[index])
@@ -60,12 +58,12 @@ def main():
         mission = mission_setup(analyses)
         
         # Step 5 get payload-range diagram
-        output = payload_range_diagram(vehicle, mission, 'cruise', reserves=0., plot_diagram=True, fuel_name=fuel_name)
+        payload_range_diagram(vehicle, mission, 'cruise', reserves=0., plot_diagram=True, fuel_name=fuel_name)
         
-        range = output.range.tolist()
-        with open("06_Aircraft_Electrification_Trade_Study/03_Payload_Range_Study/A220_data/" + fuel_name + "_range.json", "w") as out:
-            out.write(json.dumps(range))
-            out.close()
+        #range = output.range.tolist()
+        #with open("06_Aircraft_Electrification_Trade_Study/03_Payload_Range_Study/A220_data/" + fuel_name + "_range.json", "w") as out:
+            #out.write(json.dumps(range))
+            #out.close()
             
         end = time.time()
         m, s = divmod(end - start, 60)
@@ -90,14 +88,14 @@ def vehicle_setup(propellant):
     # ################################################# Vehicle-level Properties ########################################################  
 
     # mass properties
-    vehicle.mass_properties.max_takeoff      = 60781  # kg (CHANGED FROM PREVIOUS VALUE TO AIRBUS VALUE)
-    vehicle.mass_properties.takeoff          = 60781  # kg (CHANGED FROM PREVIOUS VALUE TO AIRBUS VALUE)
-    vehicle.mass_properties.max_zero_fuel    = 50349  # kg (CHANGED FROM PREVIOUS VALUE TO AIRBUS VALUE)
+    vehicle.mass_properties.max_takeoff      = 63100  # kg (CHANGED FROM PREVIOUS VALUE TO AIRBUS VALUE)
+    vehicle.mass_properties.takeoff          = 60000  # kg (CHANGED FROM PREVIOUS VALUE TO AIRBUS VALUE)
+    vehicle.mass_properties.max_zero_fuel    = 52200  # kg (CHANGED FROM PREVIOUS VALUE TO AIRBUS VALUE)
     vehicle.mass_properties.operating_empty  = 35221  # kg (https://aircraft.airbus.com/sites/g/files/jlcbta126/files/2023-11/A220-ACP-Issue001-00-19Oct2023.pdf)
     vehicle.mass_properties.max_payload      = 15128  # kg (https://aircraft.airbus.com/sites/g/files/jlcbta126/files/2023-11/A220-ACP-Issue001-00-19Oct2023.pdf)
-    vehicle.mass_properties.cargo            = 0.0    # kg (Should be 0?)
+    vehicle.mass_properties.cargo            = 2500   # kg
     vehicle.envelope.ultimate_load           = 3.75
-    vehicle.envelope.limit_load              = 1.5
+    vehicle.envelope.limit_load              = 2.5
     vehicle.reference_area                   = 112.3* Units['meters**2']
     vehicle.passengers                       = 135
     vehicle.systems.control                  = "fully powered"
@@ -554,16 +552,16 @@ def vehicle_setup(propellant):
     turbofan.active_fuel_tanks                  = ['fuel_tank'] 
     turbofan.origin                             = [[ 10.150,  5.435, -1.087]] 
     turbofan.engine_length                      = 2.71     
-    turbofan.bypass_ratio                       = 5.4    
-    turbofan.design_altitude                    = 35000.0*Units.ft
+    turbofan.bypass_ratio                       = 12.0    
+    turbofan.design_altitude                    = 38000.0*Units.ft
     turbofan.design_mach_number                 = 0.78   
-    turbofan.design_thrust                      = 35000.0* Units.N 
+    turbofan.design_thrust                      = 50000.0* Units.N 
 
     # fan                
     fan                                         = RCAIDE.Library.Components.Propulsors.Converters.Fan()   
     fan.tag                                     = 'fan'
     fan.polytropic_efficiency                   = 0.93
-    fan.pressure_ratio                          = 1.7   
+    fan.pressure_ratio                          = 1.4  # 1.7   
     turbofan.fan                                = fan        
 
     # working fluid                   
@@ -583,14 +581,14 @@ def vehicle_setup(propellant):
     low_pressure_compressor                       = RCAIDE.Library.Components.Propulsors.Converters.Compressor()    
     low_pressure_compressor.tag                   = 'lpc'
     low_pressure_compressor.polytropic_efficiency = 0.91
-    low_pressure_compressor.pressure_ratio        = 1.9   
+    low_pressure_compressor.pressure_ratio        = 3.0   # 1.9
     turbofan.low_pressure_compressor              = low_pressure_compressor
 
     # high pressure compressor  
     high_pressure_compressor                       = RCAIDE.Library.Components.Propulsors.Converters.Compressor()    
     high_pressure_compressor.tag                   = 'hpc'
     high_pressure_compressor.polytropic_efficiency = 0.91
-    high_pressure_compressor.pressure_ratio        = 10.0    
+    high_pressure_compressor.pressure_ratio        = 9.5       # 10.0 
     turbofan.high_pressure_compressor              = high_pressure_compressor
 
     # low pressure turbine  
@@ -610,9 +608,9 @@ def vehicle_setup(propellant):
     # combustor  
     combustor                                      = RCAIDE.Library.Components.Propulsors.Converters.Combustor()   
     combustor.tag                                  = 'Comb'
-    combustor.efficiency                           = 0.99 
+    combustor.efficiency                           = 0.995 
     combustor.alphac                               = 1.0     
-    combustor.turbine_inlet_temperature            = 1500
+    combustor.turbine_inlet_temperature            = 1500     # 1500
     combustor.pressure_ratio                       = 0.95
     combustor.fuel_data                            = propellant
     turbofan.combustor                             = combustor
@@ -620,14 +618,14 @@ def vehicle_setup(propellant):
     # core nozzle
     core_nozzle                                    = RCAIDE.Library.Components.Propulsors.Converters.Expansion_Nozzle()   
     core_nozzle.tag                                = 'core nozzle'
-    core_nozzle.polytropic_efficiency              = 0.95
+    core_nozzle.polytropic_efficiency              = 0.93        # 0.95
     core_nozzle.pressure_ratio                     = 0.99  
     turbofan.core_nozzle                           = core_nozzle
 
     # fan nozzle             
     fan_nozzle                                     = RCAIDE.Library.Components.Propulsors.Converters.Expansion_Nozzle()   
     fan_nozzle.tag                                 = 'fan nozzle'
-    fan_nozzle.polytropic_efficiency               = 0.95
+    fan_nozzle.polytropic_efficiency               = 0.93       # 0.95
     fan_nozzle.pressure_ratio                      = 0.99 
     turbofan.fan_nozzle                            = fan_nozzle 
 
@@ -640,7 +638,7 @@ def vehicle_setup(propellant):
     nacelle.diameter                            = 1.918
     nacelle.length                              = 3.258
     nacelle.tag                                 = 'nacelle_1'
-    nacelle.inlet_diameter                      = 1.5 #?????
+    nacelle.inlet_diameter                      = 1.85 #?????, orig 1.5
     nacelle.origin                              = [[ 10.150, 5.435, -1.087]] 
     nacelle.areas.wetted                        = 1.1*np.pi*nacelle.diameter*nacelle.length
     nacelle_airfoil                             = RCAIDE.Library.Components.Airfoils.NACA_4_Series_Airfoil()
@@ -692,7 +690,7 @@ def vehicle_setup(propellant):
     #------------------------------------------------------------------------------------------------------------------------- 
    
     vehicle.center_of_gravity()    
-    compute_component_centers_of_gravity(vehicle)
+    #compute_component_centers_of_gravity(vehicle)
     
     #------------------------------------------------------------------------------------------------------------------------- 
     # Done ! 
@@ -736,8 +734,8 @@ def base_analysis(vehicle):
     #  Aerodynamics Analysis
     aerodynamics = RCAIDE.Framework.Analyses.Aerodynamics.Vortex_Lattice_Method()
     aerodynamics.vehicle = vehicle
-    aerodynamics.settings.number_of_spanwise_vortices   = 25
-    aerodynamics.settings.number_of_chordwise_vortices  = 5   
+    aerodynamics.settings.number_of_spanwise_vortices   = 6
+    aerodynamics.settings.number_of_chordwise_vortices  = 2   
     # aerodynamics.settings.use_surrogate = False
     analyses.append(aerodynamics)
  
