@@ -20,20 +20,52 @@ import pickle
 
 def main():
     
-    parametric_analyses()
-    #read_results('emissions_L_A')
-    #read_results('emissions_T_P')
-    #read_results('emissions_M_F')
+    comb_lengths      = np.linspace(0.05,  0.6,   5)
+    comb_areas        = np.linspace(0.05,  0.2,   5)
+    temperatures      = np.linspace(750,   900,   5)
+    pressures         = np.linspace(3e6,   8e6,   5)
+    mdots             = np.linspace(60,     90,   5) 
+    FARs              = np.linspace(0.05,  0.7,   5)    
+    
+    parametric_analyses(comb_lengths, comb_areas, temperatures, pressures, mdots, FARs)         
+    
+    #emissions_L_A = read_results('emissions_L_A')
+    #emissions_T_P = read_results('emissions_T_P')
+    #emissions_M_F = read_results('emissions_M_F')
+
+
+    #comb_diameters    = 2 * np.sqrt(comb_areas / np.pi)
+    #X, Y              = np.meshgrid(comb_lengths, comb_diameters)
+    
+    #plt.figure(1)
+    #contour = plt.contourf(X, Y, emissions_L_A['EI_CO2'], levels=20, cmap='viridis')
+    #color_bar = plt.colorbar(contour, label='EI_CO2')
+    #color_bar.formatter.useOffset = False
+    #color_bar.update_ticks()   
+    #plt.xlabel('Diameter [m]')
+    #plt.ylabel('Length [m]')
+    
+    #plt.figure(2)
+    #contour = plt.contourf(X, Y, emissions_L_A['EI_CO'], levels=20, cmap='viridis')
+    #color_bar = plt.colorbar(contour, label='EI_CO')
+    #color_bar.formatter.useOffset = False
+    #color_bar.update_ticks()   
+    #plt.xlabel('Diameter [m]')
+    #plt.ylabel('Length [m]')
+    
+    #plt.figure(3)
+    #contour = plt.contourf(X, Y, emissions_L_A['EI_H2O'], levels=20, cmap='viridis')
+    #color_bar = plt.colorbar(contour, label='EI_H2O')
+    #color_bar.formatter.useOffset = False
+    #color_bar.update_ticks()   
+    #plt.xlabel('Diameter [m]')
+    #plt.ylabel('Length [m]')    
+    
+    #plt.show()    
  
     return    
 
-def parametric_analyses():
-    comb_lengths      = np.linspace(0.05,  1,     5)
-    comb_areas        = np.linspace(0.05,  1,     5)
-    temperatures      = np.linspace(700,   9000,  5)
-    pressures         = np.linspace(2e6,   10e6,  5)
-    mdots             = np.linspace(25,    100,   5) 
-    FARs              = np.linspace(0.01,  0.1,   5)
+def parametric_analyses(comb_lengths, comb_areas, temperatures, pressures, mdots, FARs):
 
     EI_CO2_L_A        = np.zeros((len(comb_lengths), len(comb_areas)))
     EI_CO_L_A         = np.zeros_like(EI_CO2_L_A)  
@@ -145,7 +177,7 @@ def parametric_analyses():
 def read_results(file_name):
     emissions = load_results(file_name)
     print(emissions)
-    return  
+    return emissions 
 
 
 # ----------------------------------------------------------------------
