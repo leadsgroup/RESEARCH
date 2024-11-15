@@ -1,7 +1,8 @@
 import  pandas as  pd
 
 
-def Optimization_Data_2_CSV(configuration_CGbatt_MOIbatt,
+def Optimization_Data_2_CSV(CG_bat_1, 
+                            CG_bat_2,
                             vehicle_tag, 
                             output_stick_fixed, 
                             output_elevator_sizing, 
@@ -70,14 +71,14 @@ def Optimization_Data_2_CSV(configuration_CGbatt_MOIbatt,
                                     })    
     
     
-    cg_x   =  str(configuration_CGbatt_MOIbatt[0]).replace('.', "_")
-    cg_y   =  str(configuration_CGbatt_MOIbatt[1]).replace('.', "_")
-    cg_z   =  str(configuration_CGbatt_MOIbatt[2]).replace('.', "_")
-    d_x    =  str(configuration_CGbatt_MOIbatt[3]).replace('.', "_")
-    d_y    =  str(configuration_CGbatt_MOIbatt[4]).replace('.', "_")
-    d_z    =  str(configuration_CGbatt_MOIbatt[5]).replace('.', "_")
+    cg_x1   =  str(CG_bat_1[0]).replace('.', "_")
+    cg_y1   =  str(CG_bat_1[1]).replace('.', "_")
+    cg_z1   =  str(CG_bat_1[2]).replace('.', "_")
+    cg_x2   =  str(CG_bat_2[0]).replace('.', "_")
+    cg_y2   =  str(CG_bat_2[1]).replace('.', "_")
+    cg_z2   =  str(CG_bat_2[2]).replace('.', "_")
 
-    excel_file_name =  cg_x + '' +  cg_y +'' +  cg_z +'' + d_x +'' +  d_y + '' + d_z  +  '_Baseline+' + vehicle_tag+  '_Opt_Results.xlsx'
+    excel_file_name =  cg_x1 + '' +  cg_y1 +'' +  cg_z1 +'' + cg_x2 + '' +  cg_y2 +'' +  cg_z2  +  '_Baseline+' + vehicle_tag+  '_Opt_Results.xlsx'
     with pd.ExcelWriter(excel_file_name, mode='a', engine='openpyxl') as writer:
         data_stick_fixed.to_excel(writer, sheet_name='Stick_Fixed', index=False)
         data_elevator_sizing.to_excel(writer, sheet_name='Elevator_Sizing', index=False)

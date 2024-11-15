@@ -77,7 +77,6 @@ def main():
     #X, Y              = np.meshgrid(comb_lengths[:-1], comb_diameters[:-1])
     
     #plt.figure(4)
-    ##contour = plt.contourf(X, Y, emissions_T_P['EI_CO2'], levels=20, cmap='viridis')
     #contour = plt.contourf(X, Y, data, levels=50, cmap='viridis')
     #color_bar = plt.colorbar(contour, label='EI_CO2')
     #color_bar.formatter.useOffset = False
@@ -88,7 +87,6 @@ def main():
     #data = emissions_T_P['EI_CO']
     
     #plt.figure(5)
-    ##contour = plt.contourf(X, Y, emissions_T_P['EI_CO'], levels=20, cmap='viridis')
     #contour = plt.contourf(X, Y, data, levels=50, cmap='viridis')
     #color_bar = plt.colorbar(contour, label='EI_CO')
     #color_bar.formatter.useOffset = False
@@ -99,7 +97,6 @@ def main():
     #data = emissions_T_P['EI_H2O']
     
     #plt.figure(6)
-    ##contour = plt.contourf(X, Y, emissions_T_P['EI_H2O'], levels=20, cmap='viridis')
     #contour = plt.contourf(X, Y, data, levels=50, cmap='viridis')
     #color_bar = plt.colorbar(contour, label='EI_H2O')
     #color_bar.formatter.useOffset = False
@@ -118,7 +115,7 @@ def main():
     #color_bar = plt.colorbar(contour, label='EI_CO2')
     #color_bar.formatter.useOffset = False
     #color_bar.update_ticks()   
-    #plt.xlabel('air mass flow rate [kg/s]')
+    #plt.xlabel('Air mass flow rate [kg/s]')
     #plt.ylabel('Fuel to Air ratio [-]')
     
     #data = emissions_M_F['EI_CO']
@@ -128,7 +125,7 @@ def main():
     #color_bar = plt.colorbar(contour, label='EI_CO')
     #color_bar.formatter.useOffset = False
     #color_bar.update_ticks()   
-    #plt.xlabel('air mass flow rate [kg/s]')
+    #plt.xlabel('Air mass flow rate [kg/s]')
     #plt.ylabel('Fuel to Air ratio [-]')
     
     #data = emissions_M_F['EI_H2O']
@@ -138,7 +135,7 @@ def main():
     #color_bar = plt.colorbar(contour, label='EI_H2O')
     #color_bar.formatter.useOffset = False
     #color_bar.update_ticks()   
-    #plt.xlabel('air mass flow rate [kg/s]')
+    #plt.xlabel('Air mass flow rate [kg/s]')
     #plt.ylabel('Fuel to Air ratio [-]')       
     
     return    
