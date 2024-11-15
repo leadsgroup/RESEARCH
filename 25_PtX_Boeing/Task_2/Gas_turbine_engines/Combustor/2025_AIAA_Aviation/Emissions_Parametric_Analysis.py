@@ -50,16 +50,16 @@ def main():
     #color_bar = plt.colorbar(contour, label='EI_CO')
     #color_bar.formatter.useOffset = False
     #color_bar.update_ticks()   
-    #plt.xlabel('Diameter [m]')
-    #plt.ylabel('Length [m]')
+    #plt.xlabel('Length [m]')
+    #plt.ylabel('Diameter [m]')
     
     #plt.figure(3)
     #contour = plt.contourf(X, Y, emissions_L_A['EI_H2O'], levels=20, cmap='viridis')
     #color_bar = plt.colorbar(contour, label='EI_H2O')
     #color_bar.formatter.useOffset = False
     #color_bar.update_ticks()   
-    #plt.xlabel('Diameter [m]')
-    #plt.ylabel('Length [m]')    
+    #plt.xlabel('Length [m]')
+    #plt.ylabel('Diameter [m]')    
     
     #plt.show()    
  
