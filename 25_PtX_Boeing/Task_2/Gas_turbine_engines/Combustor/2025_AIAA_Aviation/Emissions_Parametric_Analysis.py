@@ -42,8 +42,8 @@ def main():
     #color_bar = plt.colorbar(contour, label='EI_CO2')
     #color_bar.formatter.useOffset = False
     #color_bar.update_ticks()   
-    #plt.xlabel('Diameter [m]')
-    #plt.ylabel('Length [m]')
+    #plt.xlabel('Length [m]')
+    #plt.ylabel('Diameter [m]')
     
     #plt.figure(2)
     #contour = plt.contourf(X, Y, emissions_L_A['EI_CO'], levels=20, cmap='viridis')
