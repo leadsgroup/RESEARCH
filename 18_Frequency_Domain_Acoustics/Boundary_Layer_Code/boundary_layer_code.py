@@ -12,7 +12,7 @@ from solve_thwaites_BL_new import solve_thwaites_BL_new
 def main():
      
     l          = 5             # characteristic length of 1
-    Re_L       = 10**(7)
+    Re_L       = 10**(6)
     n_points   = 1000        # Discretizing domain 
     x          = np.linspace(0,l,n_points)
     eps        = 10**(-12)     # First node location
@@ -181,13 +181,13 @@ def main():
     axis5.plot(x,Re_x_old, 'b-')  
     axis6.plot(x,H_old, 'b-')
     
-    axis1.plot(x,delta_old_n, 'r-', label='new')  
-    axis2.plot(x,delta_star_old_n, 'r-')  
-    axis3.plot(x,theta_old_n, 'r-')  
-    axis4.plot(x,cf_old_n, 'r-')  
-    axis5.plot(x,Re_x_old_n, 'r-')  
-    axis6.plot(x,H_old_n, 'r-')
-    axis1.legend(loc='upper right')
+    # axis1.plot(x,delta_old_n, 'r-', label='new')  
+    # axis2.plot(x,delta_star_old_n, 'r-')  
+    # axis3.plot(x,theta_old_n, 'r-')  
+    # axis4.plot(x,cf_old_n, 'r-')  
+    # axis5.plot(x,Re_x_old_n, 'r-')  
+    # axis6.plot(x,H_old_n, 'r-')
+    # axis1.legend(loc='upper right')
 
     # axis1.plot(x,delta_new, 'r-')  
     # axis2.plot(x,delta_star_new, 'r-')  
