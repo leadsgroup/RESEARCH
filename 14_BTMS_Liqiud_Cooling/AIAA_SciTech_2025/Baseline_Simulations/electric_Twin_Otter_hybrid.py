@@ -470,21 +470,21 @@ def vehicle_setup(BTMS_flag):
     #------------------------------------------------------------------------------------------------------------------------------------  
     bus                              = RCAIDE.Library.Components.Energy.Distributors.Electrical_Bus()
     bus.tag                          = 'cruise_bus'
-    bus.number_of_battery_modules    = 12
+    bus.number_of_battery_modules    = 7
     
      #------------------------------------------------------------------------------------------------------------------------------------  
     # Bus
     #------------------------------------------------------------------------------------------------------------------------------------  
     power_bus                            = RCAIDE.Library.Components.Energy.Distributors.Electrical_Bus()
     power_bus.tag                              = 'power_bus'
-    power_bus.number_of_battery_modules  = 4
+    power_bus.number_of_battery_modules  = 7
     
     #------------------------------------------------------------------------------------------------------------------------------------           
     # Battery
     #------------------------------------------------------------------------------------------------------------------------------------  
     bat_module                                             = RCAIDE.Library.Components.Energy.Sources.Battery_Modules.Lithium_Ion_NMC()
-    bat_module.electrical_configuration.series             = 10
-    bat_module.electrical_configuration.parallel           = 210
+    bat_module.electrical_configuration.series             = 20
+    bat_module.electrical_configuration.parallel           = 105
     bat_module.cell.nominal_capacity                       = 3.8 
     bat_module.geometrtic_configuration.total              = bat_module.electrical_configuration.parallel*bat_module.electrical_configuration.series  
     bat_module.voltage                                     = bat_module.maximum_voltage 
@@ -502,12 +502,12 @@ def vehicle_setup(BTMS_flag):
     # Battery
     #------------------------------------------------------------------------------------------------------------------------------------  
     bat_module                                             = RCAIDE.Library.Components.Energy.Sources.Battery_Modules.Lithium_Ion_LFP()
-    bat_module.electrical_configuration.series             = 30
-    bat_module.electrical_configuration.parallel           = 70
+    bat_module.electrical_configuration.series             = 25
+    bat_module.electrical_configuration.parallel           = 120
     bat_module.geometrtic_configuration.total              = bat_module.electrical_configuration.parallel*bat_module.electrical_configuration.series  
     bat_module.voltage                                     = bat_module.maximum_voltage 
-    bat_module.geometrtic_configuration.normal_count       = 42
-    bat_module.geometrtic_configuration.parallel_count     = 50
+    bat_module.geometrtic_configuration.normal_count       = 40
+    bat_module.geometrtic_configuration.parallel_count     = 70
     bat_module.nominal_capacity                            = bat_module.cell.nominal_capacity* bat_module.electrical_configuration.parallel
 
     for _ in range(power_bus.number_of_battery_modules):
@@ -630,6 +630,7 @@ def vehicle_setup(BTMS_flag):
     
     # append propulsor to distribution line 
     bus.propulsors.append(port_propulsor) 
+    #port_propulsor.
     power_bus.propulsors.append(port_propulsor) 
 
     #------------------------------------------------------------------------------------------------------------------------------------           
@@ -807,7 +808,7 @@ def mission_setup(analyses):
     segment = Segments.Climb.Linear_Speed_Constant_Rate(base_segment)
     segment.tag = "Climb_2"
     #segment.analyses.extend( analyses.base )  
-    segment.analyses.extend( analyses.lfp_operation)
+    segment.analyses.extend( analyses.nmc_operation)
     segment.altitude_start                                = 2500.0  * Units.feet
     segment.altitude_end                                  = 5000   * Units.feet  
     segment.air_speed_end                                 = 130 * Units.kts 

@@ -281,15 +281,12 @@ def vehicle_setup(redesign_rotors=True):
     battery_module                                                    = RCAIDE.Library.Components.Energy.Sources.Battery_Modules.Lithium_Ion_NMC() 
     battery_module.tag                                                = 'bus_battery'
     battery_module.electrical_configuration.series                    = 140
-    battery_module.electrical_configuration.parallel                  = 80
-    battery_module.origin                                             = [[ 0.5*fuselage.lengths.total, 0.0  ,  1.323 ]] 
-    battery_module.cell.maximum_voltage                               = 4.2                                                                          
-    battery_module.cell.nominal_capacity                              = 3.0                                                                          
-    battery_module.cell.nominal_voltage                               = 3.6           
-    battery_module.geometrtic_configuration.normal_count              = 140
-    battery_module.geometrtic_configuration.parallel_count            = 80
-    for _ in range(bus.number_of_battery_modules):
-        bus.battery_modules.append(deepcopy(battery_module))   
+    battery_module.electrical_configuration.parallel                  = 100                
+    battery_module.geometrtic_configuration.normal_count              = 560
+    battery_module.geometrtic_configuration.parallel_count            = 25
+    battery_module.geometrtic_configuration.stacking_rows             = 5
+    battery_module.origin = [[0.5, 0, 0]]
+    bus.battery_modules.append(battery_module)            
     bus.initialize_bus_properties()        
     
     #------------------------------------------------------------------------------------------------------------------------------------  
@@ -733,7 +730,7 @@ def mission_setup(analyses ):
     # Circular departure pattern 
     #------------------------------------------------------------------------------------------------------------------------------------ 
     segment                                               = Segments.Cruise.Curved_Constant_Radius_Constant_Speed_Constant_Altitude(base_segment)
-    segment.tag                                           = "Approach_Pattern_Curve"  
+    segment.tag                                           = "Departure_Pattern_Curve"  
     segment.analyses.extend(analyses.climb_transition)  
     segment.air_speed   = 90 * Units.kts 
     segment.turn_radius = 3600 * Units.feet  
@@ -795,7 +792,7 @@ def mission_setup(analyses ):
     segment.climb_rate                = 500. * Units['ft/min']
     segment.air_speed_start           = 125.   * Units['mph']
     segment.air_speed_end             = 130.  * Units['mph']  
-    segment.altitude_start            = 100.0 * Units.ft   
+    segment.altitude_start            = 500.0 * Units.ft   
     segment.altitude_end              = 2500.0 * Units.ft 
     segment.true_course               = 30 * Units.degree # this is the true couse of the starting value 
     
@@ -907,8 +904,8 @@ def mission_setup(analyses ):
     segment.climb_rate               = -300. * Units['ft/min']
     segment.air_speed_start          = 130.  * Units['mph'] 
     segment.air_speed_end            = 100.   * Units['mph'] 
-    segment.altitude_start           = 2500.0 * Units.ft
-    segment.altitude_end             = 500.0 * Units.ft
+    segment.altitude_start           = 500.0 * Units.ft
+    segment.altitude_end             = 50.0 * Units.ft
     segment.true_course              = 30 * Units.degree # this is the true couse of the starting value 
 
     # define flight dynamics to model 
