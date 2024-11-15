@@ -646,16 +646,16 @@ def vehicle_setup(BTMS_flag):
     avionics                     = RCAIDE.Library.Components.Systems.Avionics()
     avionics.power_draw          = 20. # Watts
     bus.avionics                 = avionics   
-    power_bus.avionics                 = avionics   
+    power_bus.avionics           = avionics   
 
 
     # append bus   
     net.busses.append(bus)
     net.busses.append(power_bus)
-    net.propulsor.append(starboard_propulsor) 
-    net.append_propulsor(port_propulsor) 
-    
-    vehicle.append_energy_network(net)
+    net.propulsors.append(starboard_propulsor) 
+    net.propulsors.append(port_propulsor) 
+    net.initalize_network_properties()
+    vehicle.append_energy_network(net)       
  
     
     weight_analysis          = RCAIDE.Framework.Analyses.Weights.Weights_EVTOL()
@@ -726,7 +726,7 @@ def mission_setup(analyses):
   
 
     # VSTALL Calculation  
-    vehicle        = analyses.base.aerodynamics.vehicle
+    vehicle        = analyses.recharge_config.aerodynamics.vehicle
     vehicle_mass   = vehicle.mass_properties.max_takeoff
     reference_area = vehicle.reference_area 
     Vstall         = estimate_stall_speed(vehicle_mass,reference_area,altitude = 0.0,maximum_lift_coefficient = 1.2)
