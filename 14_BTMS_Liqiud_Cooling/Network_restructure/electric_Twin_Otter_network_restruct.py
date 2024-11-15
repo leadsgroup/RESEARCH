@@ -646,7 +646,7 @@ def vehicle_setup(BTMS_flag):
     avionics                     = RCAIDE.Library.Components.Systems.Avionics()
     avionics.power_draw          = 20. # Watts
     bus.avionics                 = avionics   
-    power_bus.avionics           = avionics   
+    power_bus.avionics                 = avionics   
 
 
     # append bus   
@@ -654,8 +654,8 @@ def vehicle_setup(BTMS_flag):
     net.busses.append(power_bus)
     net.propulsors.append(starboard_propulsor) 
     net.propulsors.append(port_propulsor) 
-    net.initalize_network_properties()
-    vehicle.append_energy_network(net)       
+    
+    vehicle.append_energy_network(net)
  
     
     weight_analysis          = RCAIDE.Framework.Analyses.Weights.Weights_EVTOL()
@@ -680,9 +680,9 @@ def configs_setup(vehicle):
     # ------------------------------------------------------------------
 
     configs             = RCAIDE.Library.Components.Configs.Config.Container() 
-    recharge_config     = RCAIDE.Library.Components.Configs.Config(vehicle)
-    recharge_config.tag = 'recharge_config'  
-    configs.append(recharge_config)
+    base_config     = RCAIDE.Library.Components.Configs.Config(vehicle)
+    base_config.tag = 'base'  
+    configs.append(base_config)
 
     
     config                     = RCAIDE.Library.Components.Configs.Config(vehicle) 
@@ -726,7 +726,7 @@ def mission_setup(analyses):
   
 
     # VSTALL Calculation  
-    vehicle        = analyses.recharge_config.aerodynamics.vehicle
+    vehicle        = analyses.base.aerodynamics.vehicle
     vehicle_mass   = vehicle.mass_properties.max_takeoff
     reference_area = vehicle.reference_area 
     Vstall         = estimate_stall_speed(vehicle_mass,reference_area,altitude = 0.0,maximum_lift_coefficient = 1.2)
@@ -929,20 +929,20 @@ def mission_setup(analyses):
     mission.append_segment(segment)  
     
     
-    # # ------------------------------------------------------------------
-    # #  Charge Segment: 
-    # # ------------------------------------------------------------------     
-    # # Charge Model 
-    # segment      = Segments.Ground.Battery_Recharge(base_segment)     
-    # segment.tag  = 'Charge_Day'   
-    # segment.analyses.extend( analyses.recharge_config) 
-    # segment.cooling_time = 30 * Units.minutes
-    # segment.state.numerics.number_of_control_points = 32
-    # #segment.initial_battery_state_of_charge = 0.2
-    # #if f_idx ==  (flights_per_day - 1): 
-    #     #segment.increment_battery_age_by_one_day =  True 
-    #     #segment.increment_battery_cycle_day      =  day
-    # mission.append_segment(segment)             
+    # ------------------------------------------------------------------
+    #  Charge Segment: 
+    # ------------------------------------------------------------------     
+    # Charge Model 
+    segment      = Segments.Ground.Battery_Recharge(base_segment)     
+    segment.tag  = 'Charge_Day'   
+    segment.analyses.extend( analyses.base) 
+    segment.cooling_time = 30 * Units.minutes
+    segment.state.numerics.number_of_control_points = 32
+    #segment.initial_battery_state_of_charge = 0.2
+    #if f_idx ==  (flights_per_day - 1): 
+        #segment.increment_battery_age_by_one_day =  True 
+        #segment.increment_battery_cycle_day      =  day
+    mission.append_segment(segment)             
 
     
     
