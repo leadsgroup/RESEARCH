@@ -108,7 +108,6 @@ def plot_voltage_data(raw_data):
         plt.legend(title='Temperature')
 
 
-
 if __name__ == '__main__': 
     main()    
     plt.show()
