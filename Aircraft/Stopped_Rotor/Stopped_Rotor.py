@@ -948,7 +948,7 @@ def mission_setup(analyses):
     segment                                               = Segments.Transition.Constant_Acceleration_Constant_Pitchrate_Constant_Altitude(base_segment)
     segment.tag                                           = "Low_Speed_Transition"  
     segment.analyses.extend( analyses.transition_flight )   
-    segment.altitude                                      = 200.  * Units.ft           
+    segment.altitude                                      = 50.  * Units.ft           
     segment.air_speed_start                               = 500. * Units['ft/min']
     segment.air_speed_end                                 = 0.75 * Vstall
     segment.acceleration                                  = 1.5
@@ -974,7 +974,7 @@ def mission_setup(analyses):
     segment.tag                                           = "High_Speed_Climbing_Transition" 
     segment.analyses.extend( analyses.transition_flight)    
     segment.true_course                                   = 0 * Units.degree
-    segment.altitude_start                                = 200.0 * Units.ft   
+    segment.altitude_start                                = 50.0 * Units.ft   
     segment.altitude_end                                  = 500.0 * Units.ft 
     segment.climb_angle                                   = 3     * Units.degrees   
     segment.acceleration                                  = 0.25  * Units['m/s/s'] 
@@ -1028,41 +1028,18 @@ def mission_setup(analyses):
     segment.assigned_control_variables.bank_angle.initial_guess_values          = [[20.0 * Units.degree]]
     
     mission.append_segment(segment) 
- 
-   
-    #------------------------------------------------------------------------------------------------------------------------------------  
-    #   First Climb
-    #------------------------------------------------------------------------------------------------------------------------------------  
-    segment                                               = Segments.Climb.Linear_Speed_Constant_Rate(base_segment)
-    segment.tag                                           = "Low_Altitude_Climb"   
-    segment.analyses.extend( analyses.forward_flight ) 
-    segment.altitude_start                                = 500.0 * Units.ft   
-    segment.altitude_end                                  = 1000. * Units.ft   
-    segment.climb_rate                                    = 500.  * Units['ft/min']  
-    segment.air_speed_end                                 = 105.  * Units['mph'] 
-    segment.true_course                                   = 90    * Units.degree 
-            
-    # define flight dynamics to model 
-    segment.flight_dynamics.force_x                       = True  
-    segment.flight_dynamics.force_z                       = True     
-    
-    # define flight controls 
-    segment.assigned_control_variables.throttle.active               = True           
-    segment.assigned_control_variables.throttle.assigned_propulsors  = [['cruise_propulsor_1','cruise_propulsor_2']] 
-    segment.assigned_control_variables.body_angle.active             = True                
-                
-    mission.append_segment(segment)  
+  
 
     #------------------------------------------------------------------------------------------------------------------------------------  
     #  Second Climb
     #------------------------------------------------------------------------------------------------------------------------------------  
     segment                                               = Segments.Climb.Linear_Speed_Constant_Rate(base_segment)
-    segment.tag                                           = "High_Altitude_Climb"  
+    segment.tag                                           = "Climb"  
     segment.analyses.extend( analyses.forward_flight)   
     segment.altitude_start                                = 1000.0 * Units.ft   
     segment.altitude_end                                  = 1500. * Units.ft   
     segment.climb_rate                                    = 300.  * Units['ft/min'] 
-    segment.air_speed_end                                 = 110.  * Units['mph'] 
+    segment.air_speed_end                                 = 90   * Units.degree
     segment.true_course                                   = 90    * Units.degree 
               
     # define flight dynamics to model   
@@ -1163,7 +1140,7 @@ def mission_setup(analyses):
     # High-Speed Descending Transition
     #------------------------------------------------------------------------------------------------------------------------------------ 
     segment                                               = Segments.Transition.Constant_Acceleration_Constant_Angle_Linear_Climb(base_segment)
-    segment.tag                                           = "High_Speed_Descending_Transition"  
+    segment.tag                                           = "Descending_Transition"  
     segment.analyses.extend( analyses.transition_flight ) 
     segment.altitude_start                                = 500.0 * Units.ft   
     segment.altitude_end                                  = 50.0 * Units.ft   
@@ -1191,7 +1168,7 @@ def mission_setup(analyses):
     segment                                               = Segments.Transition.Constant_Acceleration_Constant_Pitchrate_Constant_Altitude(base_segment)
     segment.tag                                           = "Low_Speed_Approach_Transition"   
     segment.analyses.extend( analyses.transition_flight ) 
-    segment.altitude                                      = 300.  * Units.ft     
+    segment.altitude                                      = 50.  * Units.ft     
     segment.air_speed_start                               = 36.5 * Units['mph'] 
     segment.air_speed_end                                 = 50. * Units['ft/min'] 
     segment.acceleration                                  = -0.25 * Units['m/s/s']    
