@@ -21,17 +21,19 @@ import pickle
 def main():
     
     parametric_analyses()
-    #read_results('Emissions')
+    #read_results('emissions_L_A')
+    #read_results('emissions_T_P')
+    #read_results('emissions_M_F')
  
     return    
 
 def parametric_analyses():
-    comb_lengths      = np.linspace(0.08,  0.1,   5)
-    comb_areas        = np.linspace(0.12,  0.18,  5)
-    temperatures      = np.linspace(825,   875,   5)
-    pressures         = np.linspace(2.8e6, 3.2e6, 5)
-    mdots             = np.linspace(75,    85,    5) 
-    FARs              = np.linspace(0.015, 0.03,  5)
+    comb_lengths      = np.linspace(0.05,  1,     5)
+    comb_areas        = np.linspace(0.05,  1,     5)
+    temperatures      = np.linspace(700,   9000,  5)
+    pressures         = np.linspace(2e6,   10e6,  5)
+    mdots             = np.linspace(25,    100,   5) 
+    FARs              = np.linspace(0.01,  0.1,   5)
 
     EI_CO2_L_A        = np.zeros((len(comb_lengths), len(comb_areas)))
     EI_CO_L_A         = np.zeros_like(EI_CO2_L_A)  
@@ -72,7 +74,7 @@ def parametric_analyses():
             "EI_CO": EI_CO_L_A,
             "EI_H2O": EI_H2O_L_A}
         
-            filename = '=emissions_L_A'
+            filename = 'emissions_L_A'
             save_results(emission_indices_L_A, filename)
       
 
@@ -102,7 +104,7 @@ def parametric_analyses():
             "EI_CO": EI_CO_T_P,
             "EI_H2O": EI_H2O_T_P}
         
-            filename = '=emissions_T_P'
+            filename = 'emissions_T_P'
             save_results(emission_indices_T_P, filename)
     
     
@@ -132,7 +134,7 @@ def parametric_analyses():
             "EI_CO": EI_CO_M_F,
             "EI_H2O": EI_H2O_M_F}
         
-            filename = '=emissions_M_F'
+            filename = 'emissions_M_F'
             save_results(emission_indices_M_F, filename)
 
     return  
