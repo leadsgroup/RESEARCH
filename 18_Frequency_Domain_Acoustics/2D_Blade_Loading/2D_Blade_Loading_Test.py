@@ -3,7 +3,6 @@
 import RCAIDE 
 from RCAIDE.Framework.Core import Units, Data 
 from RCAIDE.Library.Methods.Propulsors.Converters.Rotor         import design_propeller  
-from RCAIDE.Framework.Networks.All_Electric_Network                    import All_Electric_Network
 from RCAIDE.Library.Methods.Propulsors.Converters.Rotor         import design_propeller   
 from RCAIDE.Library.Methods.Aerodynamics.Common.Lift.compute_wing_wake import compute_wing_wake
 from RCAIDE.Library.Methods.Aerodynamics.Common.Lift.compute_propeller_nonuniform_freestream import compute_propeller_nonuniform_freestream  

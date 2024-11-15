@@ -32,8 +32,9 @@ def main():
     separator       = os.path.sep
     relative_path   = os.path.dirname(ospath) + separator 
     routes_filepath = relative_path +  '..' + separator +  '..' + separator + 'UAM_City_Routes.xlsx'
-    topography_file = relative_path +  '..' + separator +  '..' + separator + 'LA_Metropolitan_Area.txt'
-    flight_data     = pd.read_excel(routes_filepath,sheet_name=['Los_Angeles'])  
+    topography_file = relative_path +  '..' + separator +  'Topography' + separator + 'LA_Metropolitan_Area.txt'
+    flight_data     = pd.read_excel(routes_filepath,sheet_name=['Los_Angeles'])
+    LA_flight_data         =  flight_data['Los_Angeles']
     
     
     operation_flight_times = np.array(['06:00:00','06:15:00','06:30:00','06:45:00',
@@ -59,7 +60,7 @@ def main():
     mic_y_res                 = 1600 
     noise_timesteps           = 225  
     mic_stencil               = 100
-    aircraft_code             = 'SR'
+    aircraft_code             = 'HC'
     city_code                 = 'LA' 
     cruise_altitude           = 1500*Units.feet
     high_speed_climb_distance = 1000 # NEEDS BE UPDATED BASED ON AIRCRAFT 
@@ -71,37 +72,36 @@ def main():
     
     max_cruise_distance =  30 * Units.mile
     
-    for i in  range(flight_data):
+    for i in  range(len(LA_flight_data)):
         # Extract Data
-        origin_code       = flight_data[''][i]   
-        destination_code  = flight_data[''][i] 
-        origin_coord      = [flight_data[''][i], flight_data[''][i]]
-        destination_coord = [flight_data[''][i], flight_data[''][i]]
+        origin_code       = LA_flight_data['Origin Code'][i]   
+        destination_code  = LA_flight_data['Destination Code'][i] 
+        origin_coord      = [LA_flight_data['Origin Latitude'][i], LA_flight_data['Origin Longitude'][i]]
+        destination_coord = [LA_flight_data['Destination Latitude'][i], LA_flight_data['Destination Longitude'][i]]
         
 
         terrain_data =  compute_terrain_points(topography_file, 
                                number_of_latitudinal_points  = 100,
                                number_of_longitudinal_points = 100) 
     
-        x0_coord               = terrain_data 
-        bottom_left_map_coords = terrain_data 
-        y0_coord               = terrain_data 
-        bottom_left_map_coords = terrain_data  
+        y0_coord               = np.array([origin_coord[0], terrain_data['bottom_left_map_coordinates'][1]]) # verify this
+        bottom_left_map_coords = terrain_data['bottom_left_map_coordinates']
+        x0_coord               = np.array([terrain_data['bottom_left_map_coordinates'][0], origin_coord[1]])
         
         # -------------------------------------
         #   Lat-lon to X-Y. Assume that vertiport 1 is at 0,0 and then calcualte vertiport two lcoation. We'll calcualte everything in this frame, find the distnaces and then the program when it converts the mission profile back will handle it on that side. 
         # -------------------------------------
-        x1 = Calculate_Distance(x0_coord,bottom_left_map_coords) * Units.kilometers
-        y1 = Calculate_Distance(y0_coord,bottom_left_map_coords) * Units.kilometers
-        x2 = Calculate_Distance([origin_coord[0], destination_coord[1]],origin_coord) * Units.kilometers # Double check
-        y2 = Calculate_Distance([destination_coord[0], destination_coord[1]],destination_coord) * Units.kilometers # Double check
+        x1 = Calculate_Distance(x0_coord,bottom_left_map_coords) * Units.kilometers # Correct
+        y1 = Calculate_Distance(y0_coord,bottom_left_map_coords) * Units.kilometers # Correct
+        x2 = Calculate_Distance([bottom_left_map_coords[0], destination_coord[1]],bottom_left_map_coords) * Units.kilometers # Double check
+        y2 = Calculate_Distance([destination_coord[0], bottom_left_map_coords[1]],bottom_left_map_coords) * Units.kilometers # Double check
         
         # -------------------------------------
         #   Calculate Distance
         # -------------------------------------
         total_cruise_distance, path_heading, dep_sector, app_sector = compute_route_distances(x1, y1, x2, y2, radius_Vert1, radius_Vert2, dep_heading, app_heading,high_speed_climb_distance,high_speed_descent_distance)
         
-        vehicle  = vehicle_setup() 
+        vehicle  = vehicle_setup(redesign_rotors= False) 
         
         # Set up configs
         configs  = configs_setup(vehicle)
@@ -113,7 +113,7 @@ def main():
         mission = mission_setup(analyses, radius_Vert1, radius_Vert2, dep_heading, app_heading, dep_sector, app_sector, path_heading, total_cruise_distance,cruise_altitude)        
         missions = missions_setup(mission) 
          
-        if max_cruise_distance < total_cruise_distance:
+        if max_cruise_distance > total_cruise_distance:
             results = missions.base_mission.evaluate() 
             
             # post process noise 
@@ -143,7 +143,10 @@ def analyses_setup(configs, origin_coord,destination_coord ,mic_x_res, mic_y_res
 # Base Analysis
 # ------------------------------------------------------------------
 def base_analysis(vehicle, origin_coord,destination_coord ,mic_x_res, mic_y_res ,noise_timesteps ,mic_stencil):
-
+    ospath          = os.path.abspath(__file__)
+    separator       = os.path.sep
+    relative_path   = os.path.dirname(ospath) + separator 
+    topography_file = relative_path +  '..' + separator +  'Topography' + separator + 'LA_Metropolitan_Area.txt'    
     
     # ------------------------------------------------------------------
     #   Initialize the Analyses
@@ -178,7 +181,7 @@ def base_analysis(vehicle, origin_coord,destination_coord ,mic_x_res, mic_y_res 
     noise.settings.microphone_y_resolution          = mic_y_res        
     noise.settings.noise_times_steps                = noise_timesteps 
     noise.settings.number_of_microphone_in_stencil  = mic_stencil     
-    noise.settings.topography_file                  = 'LA_Metropolitan_Area.txt' 
+    noise.settings.topography_file                  = topography_file
     analyses.append(noise)
  
     # ------------------------------------------------------------------

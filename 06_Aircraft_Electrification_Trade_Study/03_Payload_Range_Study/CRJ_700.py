@@ -32,7 +32,7 @@ def main():
     fuels = [Jet_A1()]
     fuel_names = ["Jet_A1"]
     range_data = {}
-    payload_data = {}
+    payload_data = {}   
 
     for index, fuel in enumerate(fuels):
         print("Running simulation for", fuel_names[index])
@@ -68,7 +68,7 @@ def main():
         end = time.time()
         m, s = divmod(end - start, 60)
         print("Took", m, "minutes and", round(s), "seconds to generate plot")
-        
+         
     # Step 6: Plot overlayed payload-range diagram
     plt.figure(figsize=(10, 6))
     for fuel_name in fuel_names:
@@ -94,17 +94,17 @@ def vehicle_setup(propellant):
     
     # ################################################# Vehicle-level Properties #################################################   
     vehicle.mass_properties.max_takeoff               = 34019 * Units.kilogram  #https://bombardier.com/sites/default/files/2020-08/PreOwnedFactsheet_CRJ700_sn10314_0.pdf
-    vehicle.mass_properties.takeoff                   = 30000 * Units.kilogram    
+    vehicle.mass_properties.takeoff                   = 30000 * Units.kilogram
     vehicle.mass_properties.operating_empty           = 19869 * Units.kilogram  #https://bombardier.com/sites/default/files/2020-08/PreOwnedFactsheet_CRJ700_sn10314_0.pdf
     vehicle.mass_properties.max_zero_fuel             = 28259 * Units.kilogram  #https://bombardier.com/sites/default/files/2020-08/PreOwnedFactsheet_CRJ700_sn10314_0.pdf
     vehicle.mass_properties.cargo                     = 7000  * Units.kilogram 
     vehicle.mass_properties.max_payload               = 8189  * Units.kilogram  #https://www.globalair.com/aircraft-for-sale/specifications?specid=1679
     vehicle.mass_properties.max_fuel                  = 8888  * Units.kilogram  #https://www.globalair.com/aircraft-for-sale/specifications?specid=1679
-    vehicle.envelope.ultimate_load             = 3.75
-    vehicle.envelope.limit_load                = 2.5 
-    vehicle.design_mach_number        = 0.78 
-    #vehicle.flight_envelope.design_cruise_altitude    = 35000*Units.feet
-    #vehicle.flight_envelope.design_range              = 3500 * Units.nmi
+    vehicle.envelope.ultimate_load                    = 3.75
+    vehicle.envelope.limit_load                       = 2.5 
+    vehicle.design_mach_number                        = 0.78 
+    #vehicle.flight_envelope.design_cruise_altitude   = 35000*Units.feet
+    #vehicle.flight_envelope.design_range             = 3500 * Units.nmi
     vehicle.reference_area                            = 70.61 * Units['meters**2']   
     vehicle.passengers                                = 70
     vehicle.systems.control                           = "fully powered" 
@@ -143,7 +143,7 @@ def vehicle_setup(propellant):
     wing.chords.mean_aerodynamic          = 3.036 * Units.meter 
     wing.areas.reference                  = 70.61
     wing.areas.wetted                     = 148.281 
-    wing.twists.root                      = 1.5 * Units.degrees # guess based on autocad
+    wing.twists.root                      = 4.0 * Units.degrees # guess based on autocad -- 1.5
     wing.twists.tip                       = 0.0 * Units.degrees 
     wing.origin                           = [[13.38,0,-0.5]] 
     wing.aerodynamic_center               = [0,0,0] 
@@ -162,7 +162,7 @@ def vehicle_setup(propellant):
     segment                               = RCAIDE.Library.Components.Wings.Segment()
     segment.tag                           = 'Root'
     segment.percent_span_location         = 0.0
-    segment.twist                         = 1.5 * Units.deg 
+    segment.twist                         = 4.0 * Units.deg   # 1.5
     segment.root_chord_percent            = 1.
     segment.thickness_to_chord            = 0.11 # adjust
     segment.dihedral_outboard             = 2 * Units.degrees
@@ -175,7 +175,7 @@ def vehicle_setup(propellant):
     segment                               = RCAIDE.Library.Components.Wings.Segment()
     segment.tag                           = 'Yehudi'
     segment.percent_span_location         = 0.4
-    segment.twist                         = wing.twists.root * (1 - segment.percent_span_location) * Units.deg
+    segment.twist                         = 0.047193 * Units.deg
     segment.root_chord_percent            = 0.5
     segment.thickness_to_chord            = 0.11
     segment.dihedral_outboard             = 2 * Units.degrees
@@ -188,11 +188,11 @@ def vehicle_setup(propellant):
     segment                               = RCAIDE.Library.Components.Wings.Segment()
     segment.tag                           = 'Tip'
     segment.percent_span_location         = 0.99
-    segment.twist                         = wing.twists.root *  (1 - segment.percent_span_location) * Units.deg
+    segment.twist                         = 0.00258 * Units.deg
     segment.root_chord_percent            = 0.304
     segment.thickness_to_chord            = 0.11
-    segment.dihedral_outboard             = 85 * Units.degrees
-    segment.sweeps.quarter_chord          = -60 * Units.degrees ## change 
+    segment.dihedral_outboard             = 2 * Units.degrees
+    segment.sweeps.quarter_chord          = 60 * Units.degrees ## change (-60 to 60)
     segment.append_airfoil(mid_airfoil)
     wing.append_segment(segment)
 
@@ -260,8 +260,8 @@ def vehicle_setup(propellant):
     wing.areas.reference         = 16.01
     wing.areas.exposed           = 15.91    # Exposed area of the horizontal tail
     wing.areas.wetted            = 33.2     # Wetted area of the horizontal tail
-    wing.twists.root             = -1.0 * Units.degrees # check
-    wing.twists.tip              = -1.0 * Units.degrees # check 
+    wing.twists.root             = 3.0 * Units.degrees # check
+    wing.twists.tip              = 3.0 * Units.degrees # check 
     wing.origin                  = [[28.5,0,4.37]]
     wing.aerodynamic_center      = [0,0,0] 
     wing.vertical                = False
@@ -273,17 +273,17 @@ def vehicle_setup(propellant):
     segment                        = RCAIDE.Library.Components.Wings.Segment()
     segment.tag                    = 'root_segment'
     segment.percent_span_location  = 0.0
-    segment.twist                  = 1.0 * Units.deg
+    segment.twist                  = 0.0 * Units.deg
     segment.root_chord_percent     = 1.0
-    segment.dihedral_outboard      = -3.25 * Units.degrees
-    segment.sweeps.quarter_chord   = -30 * Units.degrees 
+    segment.dihedral_outboard      = 3.25 * Units.degrees
+    segment.sweeps.quarter_chord   = 30 * Units.degrees 
     segment.thickness_to_chord     = .11
     wing.append_segment(segment)
 
     segment                        = RCAIDE.Library.Components.Wings.Segment()
     segment.tag                    = 'tip_segment'
     segment.percent_span_location  = 1.
-    segment.twist                  = 1. * Units.deg
+    segment.twist                  = 0.0 * Units.deg
     segment.root_chord_percent     = 0.5               
     segment.dihedral_outboard      = 0 * Units.degrees
     segment.sweeps.quarter_chord   = 0 * Units.degrees  
@@ -555,16 +555,16 @@ def vehicle_setup(propellant):
     turbofan.active_fuel_tanks                  = ['fuel_tank']   
     turbofan.origin                             = [[21.5, -2.2,1.45]]  
     turbofan.engine_length                      = 3.3     
-    turbofan.bypass_ratio                       = 5    
-    turbofan.design_altitude                    = 35000.0*Units.ft
+    turbofan.bypass_ratio                       = 5.0    
+    turbofan.design_altitude                    = 38000.0*Units.ft
     turbofan.design_mach_number                 = 0.78  
-    turbofan.design_thrust                      = 60000.0* Units.N 
+    turbofan.design_thrust                      = 15325.0* Units.N   # 60,000
              
     # fan                
     fan                                         = RCAIDE.Library.Components.Propulsors.Converters.Fan()   
     fan.tag                                     = 'fan'
     fan.polytropic_efficiency                   = 0.93
-    fan.pressure_ratio                          = 1.7
+    fan.pressure_ratio                          = 1.8  # 1.7
     turbofan.fan                                = fan        
                    
     # working fluid                   
@@ -583,15 +583,15 @@ def vehicle_setup(propellant):
     # low pressure compressor    
     low_pressure_compressor                       = RCAIDE.Library.Components.Propulsors.Converters.Compressor()    
     low_pressure_compressor.tag                   = 'lpc'
-    low_pressure_compressor.polytropic_efficiency = 0.91
-    low_pressure_compressor.pressure_ratio        = 1.65   
+    low_pressure_compressor.polytropic_efficiency = 0.92    # 0.91
+    low_pressure_compressor.pressure_ratio        = 2.00    # 1.65  
     turbofan.low_pressure_compressor              = low_pressure_compressor
 
     # high pressure compressor  
     high_pressure_compressor                       = RCAIDE.Library.Components.Propulsors.Converters.Compressor()    
     high_pressure_compressor.tag                   = 'hpc'
-    high_pressure_compressor.polytropic_efficiency = 0.91
-    high_pressure_compressor.pressure_ratio        = 10.0    
+    high_pressure_compressor.polytropic_efficiency = 0.92   # 0.91
+    high_pressure_compressor.pressure_ratio        = 12.5   # 10.0
     turbofan.high_pressure_compressor              = high_pressure_compressor
 
     # low pressure turbine  
@@ -611,9 +611,9 @@ def vehicle_setup(propellant):
     # combustor  
     combustor                                      = RCAIDE.Library.Components.Propulsors.Converters.Combustor()   
     combustor.tag                                  = 'Comb'
-    combustor.efficiency                           = 0.99 
-    combustor.alphac                               = 1.0     
-    combustor.turbine_inlet_temperature            = 1760         #1550
+    combustor.efficiency                           = 0.995 
+    combustor.alphac                               = 1.     
+    combustor.turbine_inlet_temperature            = 1605  # 1760, 1605 now
     combustor.pressure_ratio                       = 0.95
     combustor.fuel_data                            = propellant  
     turbofan.combustor                             = combustor
