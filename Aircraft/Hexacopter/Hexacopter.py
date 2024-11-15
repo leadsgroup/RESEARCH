@@ -656,7 +656,7 @@ def mission_setup(analyses):
     segment.analyses.extend(analyses.forward_flight)  
     segment.altitude                         = 1000.0 * Units.ft      
     segment.air_speed                        = 75. * Units['mph']      
-    segment.distance                         = 65*Units.nmi
+    segment.distance                         = 55*Units.nmi
     segment.true_course                      = 90 * Units.degree  
 
     # define flight dynamics to model 
