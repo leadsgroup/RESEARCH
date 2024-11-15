@@ -652,8 +652,8 @@ def vehicle_setup(BTMS_flag):
     # append bus   
     net.busses.append(bus)
     net.busses.append(power_bus)
-    net.propulsor.append(starboard_propulsor) 
-    net.append_propulsor(port_propulsor) 
+    net.propulsors.append(starboard_propulsor) 
+    net.propulsors.append(port_propulsor) 
     
     vehicle.append_energy_network(net)
  
@@ -680,9 +680,9 @@ def configs_setup(vehicle):
     # ------------------------------------------------------------------
 
     configs             = RCAIDE.Library.Components.Configs.Config.Container() 
-    recharge_config     = RCAIDE.Library.Components.Configs.Config(vehicle)
-    recharge_config.tag = 'recharge_config'  
-    configs.append(recharge_config)
+    base_config     = RCAIDE.Library.Components.Configs.Config(vehicle)
+    base_config.tag = 'base'  
+    configs.append(base_config)
 
     
     config                     = RCAIDE.Library.Components.Configs.Config(vehicle) 
@@ -929,20 +929,20 @@ def mission_setup(analyses):
     mission.append_segment(segment)  
     
     
-    # # ------------------------------------------------------------------
-    # #  Charge Segment: 
-    # # ------------------------------------------------------------------     
-    # # Charge Model 
-    # segment      = Segments.Ground.Battery_Recharge(base_segment)     
-    # segment.tag  = 'Charge_Day'   
-    # segment.analyses.extend( analyses.recharge_config) 
-    # segment.cooling_time = 30 * Units.minutes
-    # segment.state.numerics.number_of_control_points = 32
-    # #segment.initial_battery_state_of_charge = 0.2
-    # #if f_idx ==  (flights_per_day - 1): 
-    #     #segment.increment_battery_age_by_one_day =  True 
-    #     #segment.increment_battery_cycle_day      =  day
-    # mission.append_segment(segment)             
+    # ------------------------------------------------------------------
+    #  Charge Segment: 
+    # ------------------------------------------------------------------     
+    # Charge Model 
+    segment      = Segments.Ground.Battery_Recharge(base_segment)     
+    segment.tag  = 'Charge_Day'   
+    segment.analyses.extend( analyses.base) 
+    segment.cooling_time = 30 * Units.minutes
+    segment.state.numerics.number_of_control_points = 32
+    #segment.initial_battery_state_of_charge = 0.2
+    #if f_idx ==  (flights_per_day - 1): 
+        #segment.increment_battery_age_by_one_day =  True 
+        #segment.increment_battery_cycle_day      =  day
+    mission.append_segment(segment)             
 
     
     
