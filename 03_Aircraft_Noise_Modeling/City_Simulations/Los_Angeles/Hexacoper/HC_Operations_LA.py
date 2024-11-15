@@ -7,6 +7,7 @@ from  RCAIDE.Framework.Analyses.Geodesics.Geodesics import Calculate_Distance
 from RCAIDE.Library.Plots import *       
 from RCAIDE import  load 
 from RCAIDE import  save
+import  pickle
 
 # python imports 
 import os 
@@ -114,8 +115,14 @@ def main():
         missions = missions_setup(mission) 
          
         if max_cruise_distance > total_cruise_distance:
-            results = missions.base_mission.evaluate() 
+            #with  open('results_data.pkl', 'rb') as  file:
+                #results = pickle.load(file)            
+            results = missions.base_mission.evaluate()
             
+            filename =  aircraft_code +'_mission' + '_' + city_code + '_' + origin_code + '_' +  destination_code  + '_' + str(cruise_altitude)    # Aircraft_City_Frequency_Origin_Destination_Altitude            
+            with  open((filename + '.pkl'), 'wb') as  file:
+                pickle.dump(results, file)
+            '''
             # post process noise 
             noise_data   = post_process_noise_data(results,
                                                    flight_times = operation_flight_times,  
@@ -123,8 +130,9 @@ def main():
                                                    evalaute_noise_metrics = False)  
           
             # save data
-            filename =  aircraft_code + '_' + city_code + '_' + origin_code + '_' +  destination_code  + '_' + cruise_altitude    # Aircraft_City_Frequency_Origin_Destination_Altitude
-            save(noise_data, filename + '.res') 
+            filename =  aircraft_code + '_' + city_code + '_' + origin_code + '_' +  destination_code  + '_' + str(cruise_altitude)    # Aircraft_City_Frequency_Origin_Destination_Altitude
+            save(noise_data, filename + '.res')
+            '''
         
     return  
 

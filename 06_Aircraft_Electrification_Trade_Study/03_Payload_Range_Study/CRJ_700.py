@@ -59,7 +59,9 @@ def main():
         # Step 5 get payload-range data
         results = payload_range_diagram(vehicle, mission, 'cruise', reserves=0., plot_diagram=False, fuel_name=fuel_name)
         range_data[fuel_name] = results['range'] * 0.0005399568    # conversion from meters to nmi
-        payload_data[fuel_name] = results['payload']     
+        payload_data[fuel_name] = results['payload']  
+        
+        print(f"Last range for {fuel_name}: {range_data[fuel_name][-1]} nmi")
         
         # output_filename = "./06_Aircraft_Electrification_Trade_Study/03_Payload_Range_Study/data/CRJ700_" + fuel_name + ".json"
         # with open(output_filename, "w") as ofile:
@@ -68,7 +70,7 @@ def main():
         end = time.time()
         m, s = divmod(end - start, 60)
         print("Took", m, "minutes and", round(s), "seconds to generate plot")
-         
+    
     # Step 6: Plot overlayed payload-range diagram
     plt.figure(figsize=(10, 6))
     for fuel_name in fuel_names:
@@ -104,9 +106,9 @@ def vehicle_setup(propellant):
     vehicle.envelope.limit_load                       = 2.5 
     vehicle.design_mach_number                        = 0.78 
     #vehicle.flight_envelope.design_cruise_altitude   = 35000*Units.feet
-    #vehicle.flight_envelope.design_range             = 3500 * Units.nmi
+    #vehicle.flight_envelope.design_range              = 1685 * Units.nmi
     vehicle.reference_area                            = 70.61 * Units['meters**2']   
-    vehicle.passengers                                = 70
+    vehicle.passengers                                = 78
     vehicle.systems.control                           = "fully powered" 
     vehicle.systems.accessories                       = "medium range"
     
@@ -338,7 +340,7 @@ def vehicle_setup(propellant):
     wing.symmetric               = False
     wing.t_tail                  = False
 
-    wing.dynamic_pressure_ratio  = 1.0
+    wing.dynamic_pressure_ratio  = 0.95
 
 
     # Wing Segments
@@ -393,7 +395,7 @@ def vehicle_setup(propellant):
     fuselage                                    = RCAIDE.Library.Components.Fuselages.Tube_Fuselage() 
     fuselage.number_coach_seats                 = vehicle.passengers 
     fuselage.seats_abreast                      = 4
-    fuselage.seat_pitch                         = 0.85     * Units.meter 
+    fuselage.seat_pitch                         = 0.7747     * Units.meter 
     fuselage.fineness.nose                      = 1.6
     fuselage.fineness.tail                      = 2. 
     fuselage.lengths.nose                       = 4.23   * Units.meter
@@ -555,7 +557,7 @@ def vehicle_setup(propellant):
     turbofan.active_fuel_tanks                  = ['fuel_tank']   
     turbofan.origin                             = [[21.5, -2.2,1.45]]  
     turbofan.engine_length                      = 3.3     
-    turbofan.bypass_ratio                       = 5.0    
+    turbofan.bypass_ratio                       = 4.9  # 5.0  
     turbofan.design_altitude                    = 38000.0*Units.ft
     turbofan.design_mach_number                 = 0.78  
     turbofan.design_thrust                      = 15325.0* Units.N   # 60,000
@@ -564,7 +566,7 @@ def vehicle_setup(propellant):
     fan                                         = RCAIDE.Library.Components.Propulsors.Converters.Fan()   
     fan.tag                                     = 'fan'
     fan.polytropic_efficiency                   = 0.93
-    fan.pressure_ratio                          = 1.8  # 1.7
+    fan.pressure_ratio                          = 1.73  # 1.7
     turbofan.fan                                = fan        
                    
     # working fluid                   
@@ -583,15 +585,15 @@ def vehicle_setup(propellant):
     # low pressure compressor    
     low_pressure_compressor                       = RCAIDE.Library.Components.Propulsors.Converters.Compressor()    
     low_pressure_compressor.tag                   = 'lpc'
-    low_pressure_compressor.polytropic_efficiency = 0.92    # 0.91
-    low_pressure_compressor.pressure_ratio        = 2.00    # 1.65  
+    low_pressure_compressor.polytropic_efficiency = 0.93    # 0.91, now 0.93
+    low_pressure_compressor.pressure_ratio        = 2.00    # 1.65, now 2.00  
     turbofan.low_pressure_compressor              = low_pressure_compressor
 
     # high pressure compressor  
     high_pressure_compressor                       = RCAIDE.Library.Components.Propulsors.Converters.Compressor()    
     high_pressure_compressor.tag                   = 'hpc'
-    high_pressure_compressor.polytropic_efficiency = 0.92   # 0.91
-    high_pressure_compressor.pressure_ratio        = 12.5   # 10.0
+    high_pressure_compressor.polytropic_efficiency = 0.93   # 0.91, now 0.93
+    high_pressure_compressor.pressure_ratio        = 12.5   # 10.0, now 12.5
     turbofan.high_pressure_compressor              = high_pressure_compressor
 
     # low pressure turbine  
@@ -611,10 +613,10 @@ def vehicle_setup(propellant):
     # combustor  
     combustor                                      = RCAIDE.Library.Components.Propulsors.Converters.Combustor()   
     combustor.tag                                  = 'Comb'
-    combustor.efficiency                           = 0.995 
+    combustor.efficiency                           = 0.995   # 0.99, now 0.995
     combustor.alphac                               = 1.     
-    combustor.turbine_inlet_temperature            = 1605  # 1760, 1605 now
-    combustor.pressure_ratio                       = 0.95
+    combustor.turbine_inlet_temperature            = 1725  # 1760, (1591 for TSFC-matching) (1725 for range-matching)
+    combustor.pressure_ratio                       = 0.95   # 0.95
     combustor.fuel_data                            = propellant  
     turbofan.combustor                             = combustor
 
@@ -622,14 +624,14 @@ def vehicle_setup(propellant):
     core_nozzle                                    = RCAIDE.Library.Components.Propulsors.Converters.Expansion_Nozzle()   
     core_nozzle.tag                                = 'core nozzle'
     core_nozzle.polytropic_efficiency              = 0.95
-    core_nozzle.pressure_ratio                     = 0.99  
+    core_nozzle.pressure_ratio                     = 0.99  #0.99  
     turbofan.core_nozzle                           = core_nozzle
              
     # fan nozzle             
     fan_nozzle                                     = RCAIDE.Library.Components.Propulsors.Converters.Expansion_Nozzle()   
     fan_nozzle.tag                                 = 'fan nozzle'
     fan_nozzle.polytropic_efficiency               = 0.95
-    fan_nozzle.pressure_ratio                      = 0.99 
+    fan_nozzle.pressure_ratio                      = 0.99   # 0.99
     turbofan.fan_nozzle                            = fan_nozzle 
     
     # design turbofan
@@ -941,9 +943,9 @@ def mission_setup(analyses):
     segment.tag = "climb" 
     segment.analyses.extend( analyses.cruise ) 
     segment.altitude_start = 0.0   * Units.km
-    segment.altitude_end = 10.5   * Units.km
-    segment.air_speed    = 230.  * Units['m/s'] # 290 kts climb 
-    segment.climb_rate   = 7.5    * Units['m/s'] # 1500 fpm ascent 
+    segment.altitude_end = 10.668   * Units.km
+    segment.air_speed    = 230.  * Units['m/s'] # 290 kts climb
+    segment.climb_rate   = 7.5    * Units['m/s'] # 1500 fpm ascent
     
     # define flight dynamics to model 
     segment.flight_dynamics.force_x                      = True  
@@ -988,7 +990,7 @@ def mission_setup(analyses):
     segment.tag = "descent" 
     segment.analyses.extend( analyses.cruise ) 
     segment.altitude_start                                = 10.5 * Units.km 
-    segment.altitude_end                                  = 0.0   * Units.km
+    segment.altitude_end                                  = 0.0   * Units.km    # 6.0
     segment.air_speed                                     = 230. * Units['m/s'] # 430 kts descent speed
     segment.descent_rate                                  = 5   * Units['m/s'] # 1000 fpm descent rate approximately 
     

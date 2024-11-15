@@ -6,7 +6,7 @@
 import RCAIDE
 from RCAIDE.Framework.Core import Units   
 from RCAIDE.Library.Methods.Propulsors.Turbofan_Propulsor          import design_turbofan
-from RCAIDE.Library.Methods.Stability.Center_of_Gravity            import compute_component_centers_of_gravity
+#from RCAIDE.Library.Methods.Stability.Center_of_Gravity            import compute_component_centers_of_gravity
 from RCAIDE.Library.Methods.Geometry.Planform                      import segment_properties
 from RCAIDE.Library.Plots                                          import *
 from RCAIDE.Library.Methods.Performance.payload_range_diagram      import payload_range_diagram
@@ -26,10 +26,8 @@ import json
 
 
 def main():
-    fuels = [Ethane(), Methane(), Propane(), Ethanol(), Butanol(), Propanol(), \
-        Jet_A1(), Liquid_Natural_Gas(), Liquid_Petroleum_Gas()]
-    fuel_names = ["Ethane", "Methane", "Propane", "Ethanol", "Butanol", "Propanol", \
-        "Jet A1", "Liquid Natural Gas", "Liquid Petroleum Gas"]
+    fuels = [Jet_A1()]
+    fuel_names = ["Jet A1"]
     
     for index, fuel in enumerate(fuels):
         print("Running simulation for", fuel_names[index])
@@ -54,11 +52,11 @@ def main():
         mission = mission_setup(analyses)
         
         # Step 5 get payload-range diagram
-        output = payload_range_diagram(vehicle, mission, 'cruise', reserves=0., plot_diagram=True, fuel_name=fuel_name)
+        payload_range_diagram(vehicle, mission, 'cruise', reserves=0., plot_diagram=True, fuel_name=fuel_name)
         
-        output_filename = "./06_Aircraft_Electrification_Trade_Study/03_Payload_Range_Study/data/B737_" + fuel_name + ".json"
-        with open(output_filename, "w") as ofile:
-            ofile.write(json.dumps(output))
+        #output_filename = "./06_Aircraft_Electrification_Trade_Study/03_Payload_Range_Study/data/B737_" + fuel_name + ".json"
+        #with open(output_filename, "w") as ofile:
+            #ofile.write(json.dumps(output))
         
         end = time.time()
         m, s = divmod(end - start, 60)
@@ -683,7 +681,7 @@ def vehicle_setup(propellant):
     #------------------------------------------------------------------------------------------------------------------------- 
    
     vehicle.center_of_gravity()    
-    compute_component_centers_of_gravity(vehicle)
+    #compute_component_centers_of_gravity(vehicle)
     
     #------------------------------------------------------------------------------------------------------------------------- 
     # Done ! 

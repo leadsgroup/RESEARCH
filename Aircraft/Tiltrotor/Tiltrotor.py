@@ -899,7 +899,7 @@ def mission_setup(analyses ):
     segment.climb_rate               = -300. * Units['ft/min']
     segment.air_speed_start          = 130.  * Units['mph'] 
     segment.air_speed_end            = 90 * Units.kts 
-    segment.altitude_start           = 2500.0 * Units.ft
+    segment.altitude_start           = 1900.0 * Units.ft
     segment.altitude_end             = 500.0 * Units.ft
     segment.true_course              = 90 * Units.degree  
 
