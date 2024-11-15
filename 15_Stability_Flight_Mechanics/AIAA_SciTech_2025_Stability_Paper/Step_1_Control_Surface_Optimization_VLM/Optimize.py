@@ -23,7 +23,7 @@ import matplotlib.pyplot as plt
 # ----------------------------------------------------------------------        
 #   Run the whole thing
 # ----------------------------------------------------------------------  
-def size_control_surfaces(configuration_CGbatt_MOIbatt,vehicle, cruise_velocity = 120 * Units['mph'], cruise_altitude= 5000*Units.feet): 
+def size_control_surfaces(CG_bat_1, CG_bat_2, vehicle, cruise_velocity = 120 * Units['mph'], cruise_altitude= 5000*Units.feet): 
     '''
     STICK FIXED (STATIC STABILITY AND DRAG OTIMIZATION
     '''
@@ -96,7 +96,8 @@ def size_control_surfaces(configuration_CGbatt_MOIbatt,vehicle, cruise_velocity 
     total_elapsed_time = round((tf_0-ti_0)/60,2)    
     print('Total Control Surface Sizing Time: ' + str(total_elapsed_time))
     
-    Optimization_Data_2_CSV(configuration_CGbatt_MOIbatt,
+    Optimization_Data_2_CSV(CG_bat_1, 
+                            CG_bat_2,
                             optimized_vehicle_v4.tag, 
                             output_stick_fixed, 
                             output_elevator_sizing, 
