@@ -1,10 +1,11 @@
 import geopandas as gpd
 import matplotlib.pyplot as plt
+from shapely.geometry import Polygon
 import pandas as pd
 import os
 import numpy as np
 # Read the census data
-gdf_census = gpd.read_file('combined_tracts_data_all.geojson')
+gdf_census = gpd.read_file('TRcombined_tracts_data_all.geojson')
 
 
 # Define the folder path for saving plots
@@ -17,6 +18,20 @@ if not os.path.isdir(folder_path):
 # Columns to plot
 column_names = ['L_Amax', 'L_AeqT', 'L_AeqT_24hr', 'SEL', 'L_dn', 'L_Aeq_jetliner']
 
+# # Define the bounding box coordinates
+min_lon, max_lon = -119, -117.3
+min_lat, max_lat = 33.6, 34.4
+
+# Create a Polygon object for the bounding box
+bbox = Polygon([(min_lon, min_lat), 
+                (max_lon, min_lat), 
+                (max_lon, max_lat), 
+                (min_lon, max_lat), 
+                (min_lon, min_lat)])
+
+# filter the GeoDataFrame based on bounds
+gdf_census = gdf_census[gdf_census.geometry.intersects(bbox)] #can change form within to intersects
+
 # Plot choropleth maps for each data column
 for data_column in column_names:
     plt.figure(figsize=(12, 12))
@@ -26,7 +41,7 @@ for data_column in column_names:
         'axes.labelsize': 16,
         'xtick.labelsize': 14,
         'ytick.labelsize': 14,
-        'axes.titlesize': 16,
+        'axes.titlesize': 0,
         'xtick.major.pad': 1,
         'ytick.major.pad': 0,
     }
@@ -41,7 +56,7 @@ for data_column in column_names:
         alpha=0.75,
         legend=True,
         legend_kwds={
-            "label": f'{data_column} (dB)',  # Dynamic label for the legend
+            "label": '(dB)',  # label for the legend
             "orientation": "vertical",
             "shrink": 0.75,  # Adjust the color bar size
             "ticks": np.linspace(45, 90, num=6)  # Specify fewer bins
@@ -52,9 +67,9 @@ for data_column in column_names:
     )
 
     # Set map limits and labels
-    ax.set_ylim(33.6, 34.4)
-    ax.set_xlim(-119, -117)
-    plt.title(f'{data_column}')
+    ax.set_ylim(33.5, 34.5)
+    ax.set_xlim(-119,-117)
+    ax.set_aspect('auto')
     plt.ylabel('Latitude ($\degree$)')
     plt.xlabel('Longitude ($\degree$)')
 

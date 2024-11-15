@@ -36,14 +36,13 @@ def noise_preprocess(file_list, census_tracts_file):
 
             # Add a new column for the calculated mean noise levels to the census tracts GeoDataFrame
             census_tracts[column] = census_tracts.index.map(mean_noise).fillna(threshold_values[column])
-
     # Save the updated GeoDataFrame back to a GeoJSON file
-    census_tracts.to_file(census_tracts_file, driver="GeoJSON")
+    census_tracts.to_file(f'{file[0:2]}'+census_tracts_file, driver="GeoJSON")
 
 
 def sensitive_area_preprocess(file_list, census_tracts_file):
     # Load the existing census tracts GeoDataFrame
-    demo_per_tract = gpd.read_file(census_tracts_file)
+    demo_per_tract = gpd.read_file('Raw_Data/'+census_tracts_file)
 
     for file in file_list:
         # Read each CSV file
