@@ -315,6 +315,57 @@ def emrax_348():
     print("Per phase back electromotive force of the motor  =", "%0.3f" % EMF_i1 , "[]")  
     print("flux cutting form of Faraday’s law  =", "%0.3f" % E , "[]")   
     
+    # Input Parameters
+    L_aa = 0.12  # [H] self-inductance for phase A
+    L_bb = 0.12  # [H] self-inductance for phase B
+    L_cc = 0.12  # [H] self-inductance for phase C
+    L_ab = 0.06  # [H] mutual inductance between phases A and B
+    L_ac = 0.06  # [H] mutual inductance between phases A and C
+    L_ba = L_ab  # [H] mutual inductance between phases B and A (symmetry)
+    L_bc = 0.06  # [H] mutual inductance between phases B and C
+    f_elec = 400  # [Hz] electrical frequency
+    L_l = 0.01  # [H] leakage inductance
+    L_m = 0.04  # [H] mutual inductance
+    N = 100  # Number of turns
+    Slots = 24  # Number of slots
+    Layers = 2  # Winding layers
+    N_p = 10  # Pole pairs
+    A_tip = 0.000114  # [m^2] tooth tip area
+    l_tip = 0.005  # [m] tooth tip gap width
+    W_sp = 0.018  # [m] stator pole width
+    Stack = 0.095  # [m] stack length
+    l_m = 0.002  # [m] magnet thickness
+    l_g = 0.001  # [m] air gap length
+    mu_0 = 1.256637061e-6  # [N/A^2] permeability of free space
+
+    # Inductance Matrices
+    L_general = [
+        [L_aa, L_ab, L_ac],
+        [L_ba, L_bb, L_bc],
+        [L_ac, L_bc, L_cc]
+    ]  # General inductance matrix (Eq.54)
+
+    L_simplified = [
+        [L_l + L_m, -L_m / 2, -L_m / 2],
+        [-L_m / 2, L_l + L_m, -L_m / 2],
+        [-L_m / 2, -L_m / 2, L_l + L_m]
+    ]  # Simplified inductance matrix for balanced machines (Eq.55)
+
+    # Direct Axis Inductance (L_d)
+    L_d = ((Slots * Layers) / (2 * N_p)) * (3 / 2) * (N ** 2) * (
+        (2 * A_tip * mu_0 / l_tip) + (3 / 2) * (W_sp * Stack * mu_0) / (l_m + l_g)
+    )  # Direct axis inductance (Eq.57)
+
+    # Reactance Calculation
+    X_d = L_d * 2 * np.pi * f_elec  # [Ω] reactance for an inductive load (Eq.53)
+
+    # Results
+    print("Reactance Section Results:")
+    print(f"General Inductance Matrix: {np.array(L_general)}")
+    print(f"Simplified Inductance Matrix: {np.array(L_simplified)}")
+    print(f"Direct Axis Inductance (L_d): {L_d:.6f} [H]")
+    print(f"Direct Axis Reactance (X_d): {X_d:.6f} [Ω]")    
+    
     ## -----------------------------------------------------------------------------------------
     ## 3.5.2 Reactance
     ## -----------------------------------------------------------------------------------------    

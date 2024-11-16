@@ -27,116 +27,115 @@ def main():
     mdots             = np.linspace(40,     80,   5) 
     FARs              = np.linspace(0.05,  0.7,   5)    
     
-    parametric_analyses(comb_lengths, comb_areas, temperatures, pressures, mdots, FARs)         
+    #parametric_analyses(comb_lengths, comb_areas, temperatures, pressures, mdots, FARs)         
     
-    #emissions_L_A = read_results('emissions_L_A')
-    #emissions_T_P = read_results('emissions_T_P')
-    #emissions_M_F = read_results('emissions_M_F')
+    emissions_L_A = read_results('emissions_L_A')
+    emissions_T_P = read_results('emissions_T_P')
+    emissions_M_F = read_results('emissions_M_F')
     
-    #data = emissions_L_A['EI_CO2']
+    data = emissions_L_A['EI_CO2']
     
-    #comb_diameters    = 2 * np.sqrt(comb_areas / np.pi)
-    #X, Y              = np.meshgrid(comb_lengths, comb_diameters)
+    comb_diameters    = 2 * np.sqrt(comb_areas / np.pi)
+    X, Y              = np.meshgrid(comb_lengths, comb_diameters)
     
-    #plt.figure(1)
-    ##contour = plt.contourf(X, Y, emissions_L_A['EI_CO2'], levels=20, cmap='viridis')
-    #contour = plt.contourf(X, Y, data, levels=50, cmap='viridis')
-    #color_bar = plt.colorbar(contour, label='EI_CO2')
-    #color_bar.formatter.useOffset = False
-    #color_bar.update_ticks()   
-    #plt.xlabel('Length [m]')
-    #plt.ylabel('Diameter [m]')
+    plt.figure(1)
+    #contour = plt.contourf(X, Y, emissions_L_A['EI_CO2'], levels=20, cmap='viridis')
+    contour = plt.contourf(X, Y, data, levels=50, cmap='viridis')
+    color_bar = plt.colorbar(contour, label='EI_CO2')
+    color_bar.formatter.useOffset = False
+    color_bar.update_ticks()   
+    plt.xlabel('Length [m]')
+    plt.ylabel('Diameter [m]')
     
-    #data = emissions_L_A['EI_CO']
+    data = emissions_L_A['EI_CO']
     
-    #plt.figure(2)
-    ##contour = plt.contourf(X, Y, emissions_L_A['EI_CO'], levels=20, cmap='viridis')
-    #contour = plt.contourf(X, Y, data, levels=50, cmap='viridis')
-    #color_bar = plt.colorbar(contour, label='EI_CO')
-    #color_bar.formatter.useOffset = False
-    #color_bar.update_ticks()   
-    #plt.xlabel('Length [m]')
-    #plt.ylabel('Diameter [m]')
+    plt.figure(2)
+    #contour = plt.contourf(X, Y, emissions_L_A['EI_CO'], levels=20, cmap='viridis')
+    contour = plt.contourf(X, Y, data, levels=50, cmap='viridis')
+    color_bar = plt.colorbar(contour, label='EI_CO')
+    color_bar.formatter.useOffset = False
+    color_bar.update_ticks()   
+    plt.xlabel('Length [m]')
+    plt.ylabel('Diameter [m]')
     
-    #data = emissions_L_A['EI_H2O']
+    data = emissions_L_A['EI_H2O']
     
-    #plt.figure(3)
-    ##contour = plt.contourf(X, Y, emissions_L_A['EI_H2O'], levels=20, cmap='viridis')
-    #contour = plt.contourf(X, Y, data, levels=50, cmap='viridis')
-    #color_bar = plt.colorbar(contour, label='EI_H2O')
-    #color_bar.formatter.useOffset = False
-    #color_bar.update_ticks()   
-    #plt.xlabel('Length [m]')
-    #plt.ylabel('Diameter [m]')    
-    
-    # ---------------------------------------------------------
-    
-    #data = emissions_T_P['EI_CO2']
-    
-    #comb_diameters    = 2 * np.sqrt(comb_areas / np.pi)
-    #X, Y              = np.meshgrid(comb_lengths[:-1], comb_diameters[:-1])
-    
-    #plt.figure(4)
-    #contour = plt.contourf(X, Y, data, levels=50, cmap='viridis')
-    #color_bar = plt.colorbar(contour, label='EI_CO2')
-    #color_bar.formatter.useOffset = False
-    #color_bar.update_ticks()   
-    #plt.xlabel('Temperature [K]')
-    #plt.ylabel('Pressure [Pa]')
-    
-    #data = emissions_T_P['EI_CO']
-    
-    #plt.figure(5)
-    #contour = plt.contourf(X, Y, data, levels=50, cmap='viridis')
-    #color_bar = plt.colorbar(contour, label='EI_CO')
-    #color_bar.formatter.useOffset = False
-    #color_bar.update_ticks()   
-    #plt.xlabel('Temperature [K]')
-    #plt.ylabel('Pressure [Pa]')
-    
-    #data = emissions_T_P['EI_H2O']
-    
-    #plt.figure(6)
-    #contour = plt.contourf(X, Y, data, levels=50, cmap='viridis')
-    #color_bar = plt.colorbar(contour, label='EI_H2O')
-    #color_bar.formatter.useOffset = False
-    #color_bar.update_ticks()   
-    #plt.xlabel('Temperature [K]')
-    #plt.ylabel('Pressure [Pa]')  
+    plt.figure(3)
+    #contour = plt.contourf(X, Y, emissions_L_A['EI_H2O'], levels=20, cmap='viridis')
+    contour = plt.contourf(X, Y, data, levels=50, cmap='viridis')
+    color_bar = plt.colorbar(contour, label='EI_H2O')
+    color_bar.formatter.useOffset = False
+    color_bar.update_ticks()   
+    plt.xlabel('Length [m]')
+    plt.ylabel('Diameter [m]')    
     
     # ---------------------------------------------------------
     
-    #data = emissions_M_F['EI_CO2']
+    data = emissions_T_P['EI_CO2']
     
-    #X, Y              = np.meshgrid(mdots, FARs)
+    X, Y              = np.meshgrid(temperatures, pressures)
     
-    #plt.figure(7)
-    #contour = plt.contourf(X, Y, data, levels=50, cmap='viridis')
-    #color_bar = plt.colorbar(contour, label='EI_CO2')
-    #color_bar.formatter.useOffset = False
-    #color_bar.update_ticks()   
-    #plt.xlabel('Air mass flow rate [kg/s]')
-    #plt.ylabel('Fuel to Air ratio [-]')
+    plt.figure(4)
+    contour = plt.contourf(X, Y, data, levels=50, cmap='viridis')
+    color_bar = plt.colorbar(contour, label='EI_CO2')
+    color_bar.formatter.useOffset = False
+    color_bar.update_ticks()   
+    plt.xlabel('Temperature [K]')
+    plt.ylabel('Pressure [Pa]')
     
-    #data = emissions_M_F['EI_CO']
+    data = emissions_T_P['EI_CO']
     
-    #plt.figure(8)
-    #contour = plt.contourf(X, Y, data, levels=50, cmap='viridis')
-    #color_bar = plt.colorbar(contour, label='EI_CO')
-    #color_bar.formatter.useOffset = False
-    #color_bar.update_ticks()   
-    #plt.xlabel('Air mass flow rate [kg/s]')
-    #plt.ylabel('Fuel to Air ratio [-]')
+    plt.figure(5)
+    contour = plt.contourf(X, Y, data, levels=50, cmap='viridis')
+    color_bar = plt.colorbar(contour, label='EI_CO')
+    color_bar.formatter.useOffset = False
+    color_bar.update_ticks()   
+    plt.xlabel('Temperature [K]')
+    plt.ylabel('Pressure [Pa]')
     
-    #data = emissions_M_F['EI_H2O']
+    data = emissions_T_P['EI_H2O']
     
-    #plt.figure(9)
-    #contour = plt.contourf(X, Y, data, levels=50, cmap='viridis')
-    #color_bar = plt.colorbar(contour, label='EI_H2O')
-    #color_bar.formatter.useOffset = False
-    #color_bar.update_ticks()   
-    #plt.xlabel('Air mass flow rate [kg/s]')
-    #plt.ylabel('Fuel to Air ratio [-]')       
+    plt.figure(6)
+    contour = plt.contourf(X, Y, data, levels=50, cmap='viridis')
+    color_bar = plt.colorbar(contour, label='EI_H2O')
+    color_bar.formatter.useOffset = False
+    color_bar.update_ticks()   
+    plt.xlabel('Temperature [K]')
+    plt.ylabel('Pressure [Pa]')  
+    
+    # ---------------------------------------------------------
+    
+    data = emissions_M_F['EI_CO2']
+    
+    X, Y              = np.meshgrid(mdots, FARs)
+    
+    plt.figure(7)
+    contour = plt.contourf(X, Y, data, levels=50, cmap='viridis')
+    color_bar = plt.colorbar(contour, label='EI_CO2')
+    color_bar.formatter.useOffset = False
+    color_bar.update_ticks()   
+    plt.xlabel('Air mass flow rate [kg/s]')
+    plt.ylabel('Fuel to Air ratio [-]')
+    
+    data = emissions_M_F['EI_CO']
+    
+    plt.figure(8)
+    contour = plt.contourf(X, Y, data, levels=50, cmap='viridis')
+    color_bar = plt.colorbar(contour, label='EI_CO')
+    color_bar.formatter.useOffset = False
+    color_bar.update_ticks()   
+    plt.xlabel('Air mass flow rate [kg/s]')
+    plt.ylabel('Fuel to Air ratio [-]')
+    
+    data = emissions_M_F['EI_H2O']
+    
+    plt.figure(9)
+    contour = plt.contourf(X, Y, data, levels=50, cmap='viridis')
+    color_bar = plt.colorbar(contour, label='EI_H2O')
+    color_bar.formatter.useOffset = False
+    color_bar.update_ticks()   
+    plt.xlabel('Air mass flow rate [kg/s]')
+    plt.ylabel('Fuel to Air ratio [-]')       
     
     return    
 
