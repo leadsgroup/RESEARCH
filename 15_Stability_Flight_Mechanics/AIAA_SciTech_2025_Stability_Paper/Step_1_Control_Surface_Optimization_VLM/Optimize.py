@@ -173,16 +173,16 @@ def stick_fixed_stability_and_drag_optimization_setup(vehicle,cruise_velocity,cr
     # [ tag, sense, edge, scaling, units ] See http://everyspec.com/MIL-SPECS/MIL-SPECS-MIL-F/MIL-F-8785C_5295/
     # Level 1, Category B
     problem.constraints = np.array([
-        [ 'CL_residual'               ,   '<' ,   1E-2  ,   1E-2  , 1*Units.less], # close to zero 2 works 
-        [ 'CM_residual'               ,   '<' ,   1E-2  ,   1E-2  , 1*Units.less], # close to zero 2 works 
+        #[ 'CL_residual'               ,   '<' ,   1E-2  ,   1E-2  , 1*Units.less], # close to zero 2 works 
+        #[ 'CM_residual'               ,   '<' ,   1E-2  ,   1E-2  , 1*Units.less], # close to zero 2 works 
         [ 'static_margin'             ,   '>' ,   0.1   ,   0.1   , 1*Units.less],  # checked 
         [ 'CM_alpha'                  ,   '<' ,   0.0   ,   1.0   , 1*Units.less],  # checked 
-        #[ 'phugoid_damping_ratio'     ,   '>' ,   0.04  ,   1.0   , 1*Units.less],  # checked 
-        [ 'short_period_damping_ratio',   '<' ,   2.0   ,   1.0   , 1*Units.less],  # checked 
-        [ 'short_period_damping_ratio',   '>' ,   0.3   ,   1.0   , 1*Units.less], # checked    
-        [ 'dutch_roll_frequency'      ,   '>' ,   0.4   ,   1.0   , 1*Units.less],  # checked   frequency in rad/sec
+        [ 'phugoid_damping_ratio'     ,   '>' ,   0.04  ,   1.0   , 1*Units.less],  # checked 
+        #[ 'short_period_damping_ratio',   '<' ,   2.0   ,   1.0   , 1*Units.less],  # checked 
+        #[ 'short_period_damping_ratio',   '>' ,   0.3   ,   1.0   , 1*Units.less], # checked    
+        #[ 'dutch_roll_frequency'      ,   '>' ,   0.4   ,   1.0   , 1*Units.less],  # checked   frequency in rad/sec
         #[ 'dutch_roll_damping_ratio'  ,   '>' ,   0.08  ,   1.0   , 1*Units.less],  # checked   
-        [ 'spiral_doubling_time'      ,   '>' ,   20.0  ,   1.0   , 1*Units.less],  # checked   
+        #[ 'spiral_doubling_time'      ,   '>' ,   20.0  ,   1.0   , 1*Units.less],  # checked   
         #[ 'spiral_criteria'           ,   '>' ,   1.0   ,   1.0   , 1*Units.less],  # checked   
     ],dtype=object)
     
