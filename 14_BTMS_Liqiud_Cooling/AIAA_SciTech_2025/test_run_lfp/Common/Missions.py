@@ -4,7 +4,7 @@
 #   Imports
 # ---------------------------------------------------------------------
 import RCAIDE
-from RCAIDE.Framework.Core import Units    
+from RCAIDE.Framework.Core import Units,Data    
 
 # ------------------------------------------------------------------
 #   Repeated Flight Operation Setup
@@ -46,10 +46,14 @@ def repeated_flight_operation_setup(configs,analyses,day_group,g_idx,group,days_
             segment.initial_battery_state_of_charge               = 1.0
             if group != 1 and d_idx == 0:
                 try:
-                    segment.charge_throughput = charge_througput[str(group-1)][0]
-                    segment.resistance_growth = resistance_growth[str(group-1)]
-                    segment.capacity_fade = capacity_fade[str(group-1)]
-                    segment.cycle_day = cycle_day[str(group-1)]
+                    segment.charge_throughput            = Data()
+                    segment.charge_throughput.bus  = charge_througput[str(group-1)][0]
+                    segment.resistance_growth            = Data()
+                    segment.resistance_growth.bus  = resistance_growth[str(group-1)]
+                    segment.capacity_fade                = Data()
+                    segment.capacity_fade.bus      = capacity_fade[str(group-1)]
+                    segment.cycle_day                    = Data()
+                    segment.cycle_day.bus          = cycle_day[str(group-1)]
                 except KeyError:
                     raise Exception(f"Error: The key '{group-1}' was not found in charge_throughput or cycle_day. Run the simulation for the previous day group.")
                         
