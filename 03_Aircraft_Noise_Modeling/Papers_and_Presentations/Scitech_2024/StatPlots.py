@@ -1,24 +1,68 @@
+import numpy as np
 import geopandas as gpd
-import matplotlib.pyplot as plt
-from shapely.geometry import Point, Polygon
-import pandas as pd
+from shapely.geometry import Polygon
 
-# Read the noise data and census data
-gdf_census = gpd.read_file('combined_tracts_data_all.geojson')
+def community_annoyance(gdf_data, noise_sensitive_structures, sensitivity_levels):
+    # Read the census data (GeoDataFrame)
+    gdf_census = gpd.read_file(gdf_data)
 
-merged_gdf = gdf_census
+    # Define the bounding box coordinates (optional, can change from within to intersects)
+    min_lon, max_lon = -119, -117.3
+    min_lat, max_lat = 33.6, 34.4
+
+    # Create a Polygon object for the bounding box
+    bbox = Polygon([(min_lon, min_lat), 
+                    (max_lon, min_lat), 
+                    (max_lon, max_lat), 
+                    (min_lon, max_lat), 
+                    (min_lon, min_lat)])
+
+    # Filter census tracts within the bounding box (can also use `within` instead of `intersects`)
+    gdf_census = gdf_census[gdf_census.geometry.intersects(bbox)]
+
+    # Compute population density (vectorized)
+    total_population = gdf_census['B03002001']  # Total population in census tract
+    tract_area = gdf_census['geometry'].area  # Area of the census tract
+    print(tract_area[0:20])
+    population_density = total_population / tract_area  # Population density (per unit area)
+
+    print(population_density)
+
+    temp_gdf = gdf_census.copy()
+    noise_sens_struct_sum = 0
+
+    for structure in noise_sensitive_structures:
+        noise_sens_struct_sum = gdf_census[structure]
+    
+        noise_sens_struct_density = noise_sens_struct_sum/tract_area
+
+        log_noise_sens_struct = np.nan_to_num(np.log(noise_sens_struct_density),nan=0)
+
+        temp_gdf[structure+'s_net'] = log_noise_sens_struct *  sensitivity_levels[structure]
+
+    temp_gdf['summation'] = sum(temp_gdf[structure + 's_net'] for structure in noise_sensitive_structures)
+
+    print(temp_gdf['summation'][:20])
+    density_calc = np.nan_to_num(np.log(population_density),nan=0)
+    print(density_calc[:20])
+    c_a = gdf_census['L_dn'] * np.nan_to_num(np.log(population_density),nan=0) * temp_gdf['summation']
+
+    gdf_census['Community Annoyance'] = c_a
+
+    # Save the updated GeoDataFrame to a GeoJSON file
+    # gdf_census.to_file('CA'+gdf_data, driver='GeoJSON')
+
+    return c_a  
 
 
-# Filter the census data based on the bounding box
-file_list = ['combined_results_per_tract.xlsx']
-for file in file_list:
-    data = pd.read_excel(file)
+sensitivity_levels = {
+"Schools_Colleges_and_Universities": .6,
+"Churches": .7
+}
 
-    # Create GeoDataFrames for noise data
-    geometry = [Point(xy) for xy in zip(data['Longitude'], data['Latitude'])]
-    data_gdf = gpd.GeoDataFrame(data, geometry=geometry, crs='EPSG:4326')
+sensitive_list = ['Churches', 'Schools_Colleges_and_Universities']
+file = 'TRcombined_tracts_data_all.geojson'
 
-    # Perform a spatial join to combine the census geometries with the noise data
-    merged_gdf = gpd.sjoin(merged_gdf, data_gdf, how='left', op='contains')
+test = community_annoyance(file,sensitive_list,sensitivity_levels)
 
-merged_gdf.to_file('processed.geojson', driver="GeoJSON") 
+# print(np.where(test>0))
