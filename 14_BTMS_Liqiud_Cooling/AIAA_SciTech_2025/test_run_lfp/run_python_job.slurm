@@ -13,7 +13,7 @@
 module load /opt/modulefiles/anaconda3/2024.10  # This has the latest version of python
 
 # Activate the virtual environment
-source $HOME/leads_research/.rcaideenv/bin/activate
+source $HOME/scratch/leads_research/.rcaideenv/bin/activate
 
 # Run the Python script
 python3 -u BTMS_Battery_Degradation_study_LFP.py

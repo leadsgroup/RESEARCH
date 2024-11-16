@@ -9,7 +9,7 @@ ti=time.time()
 
 def noise_preprocess(file_list, census_tracts_file):
     # Load the existing census tracts GeoDataFrame
-    census_tracts = gpd.read_file('Raw_Data/'+census_tracts_file)
+    census_tracts = gpd.read_file(census_tracts_file)
 
     for file in file_list:
         # Load noise data

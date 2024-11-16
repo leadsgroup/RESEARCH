@@ -306,6 +306,25 @@ def vehicle_setup(redesign_rotors=True) :
     wing.high_lift                        = False 
     wing.dynamic_pressure_ratio           = 0.9 
     
+    # Segment                                  
+    segment                       = RCAIDE.Library.Components.Wings.Segment()
+    segment.tag                   = 'Root'   
+    segment.percent_span_location = 0.0
+    segment.root_chord_percent    = 1. 
+    segment.sweeps.leading_edge   = 6 * Units.degrees 
+    segment.thickness_to_chord    = 0.12  
+    segment.append_airfoil(airfoil)
+    wing.Segments.append(segment)  
+    
+    # Segment                                  
+    segment                       = RCAIDE.Library.Components.Wings.Segment()
+    segment.tag                   = 'Tip'   
+    segment.percent_span_location = 1.0
+    segment.root_chord_percent    = wing.taper
+    segment.thickness_to_chord    = 0.12  
+    segment.append_airfoil(airfoil)
+    wing.Segments.append(segment)      
+        
     elevator                              = RCAIDE.Library.Components.Wings.Control_Surfaces.Elevator()
     elevator.tag                          = 'elevator'
     elevator.span_fraction_start          = 0.1
@@ -343,6 +362,25 @@ def vehicle_setup(redesign_rotors=True) :
     wing.t_tail                           = False
     wing.winglet_fraction                 = 0.0  
     wing.dynamic_pressure_ratio           = 1.0
+    
+    # Segment                                  
+    segment                       = RCAIDE.Library.Components.Wings.Segment()
+    segment.tag                   = 'Root'   
+    segment.percent_span_location = 0.0
+    segment.root_chord_percent    = 1. 
+    segment.sweeps.leading_edge   = 20 * Units.degrees 
+    segment.thickness_to_chord    = 0.125  
+    segment.append_airfoil(airfoil)
+    wing.Segments.append(segment)  
+    
+    # Segment                                  
+    segment                       = RCAIDE.Library.Components.Wings.Segment()
+    segment.tag                   = 'Tip'   
+    segment.percent_span_location = 1.0
+    segment.root_chord_percent    = wing.taper
+    segment.thickness_to_chord    = 0.125  
+    segment.append_airfoil(airfoil)
+    wing.Segments.append(segment)      
     
     rudder                                = RCAIDE.Library.Components.Wings.Control_Surfaces.Rudder()
     rudder.tag                            = 'rudder'
