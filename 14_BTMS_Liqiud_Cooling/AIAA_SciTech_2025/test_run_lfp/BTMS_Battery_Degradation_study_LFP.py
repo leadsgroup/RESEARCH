@@ -93,15 +93,16 @@ def create_excel(filename,group):
 # ----------------------------------------------------------------------
 #   Save Results
 # ----------------------------------------------------------------------
-def load_results(filename, group):  
-    load_dir = '/home/sshekar2/storage/degradation_results_11_15/lfp'
-    load_file = os.path.join(load_dir, filename + 'group_number' + str(group) + '.pkl')
-    if os.path.exists(load_file):
-        with open(load_file, 'rb') as file:
-            results = pickle.load(file) 
-        return results
-    else:
-        raise FileNotFoundError(f"File {load_file} not found.")
+def save_results(results, filename, group):
+   # Pickle Backup Files
+    save_dir = '/home/sshekar2/storage/degradation_results_11_15/lfp'
+    if not os.path.exists(save_dir):
+        os.makedirs(save_dir)  # Create the directory if it doesn't exist
+    pickle_file = os.path.join(save_dir, filename + 'group_number' + str(group) + '.pkl')
+    with open(pickle_file, 'wb') as file:
+        pickle.dump(results, file) 
+    return
+
 
 def load_charge_throughput(filename='previous_day_data'):
     load_dir = '/home/sshekar2/storage/degradation_results_11_15/lfp'

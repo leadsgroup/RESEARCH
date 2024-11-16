@@ -552,7 +552,7 @@ def vehicle_setup(BTMS_flag):
     #------------------------------------------------------------------------------------------------------------------------------------   
     starboard_propulsor                              = RCAIDE.Library.Components.Propulsors.Electric_Rotor()  
     starboard_propulsor.tag                          = 'starboard_propulsor'
-    starboard_propulsor.active_busses                = ['bus']    
+    #starboard_propulsor.active_busses                = ['bus']    
     # Electronic Speed Controller       
     esc                                              = RCAIDE.Library.Components.Energy.Modulators.Electronic_Speed_Controller()
     esc.tag                                          = 'esc_1'
@@ -611,7 +611,7 @@ def vehicle_setup(BTMS_flag):
     #------------------------------------------------------------------------------------------------------------------------------------   
     port_propulsor                             = RCAIDE.Library.Components.Propulsors.Electric_Rotor() 
     port_propulsor.tag                         = "port_propulsor"
-    port_propulsor.active_busses               = ['bus']   
+    #port_propulsor.active_busses               = ['bus']   
             
     esc_2                                      = deepcopy(esc)
     esc_2.origin                               = [[3.8, -2.8129,1.22 ]]        
@@ -654,7 +654,6 @@ def vehicle_setup(BTMS_flag):
     net.busses.append(power_bus)
     net.propulsors.append(starboard_propulsor) 
     net.propulsors.append(port_propulsor) 
-    
     vehicle.append_energy_network(net)
  
     
@@ -679,27 +678,23 @@ def configs_setup(vehicle):
     #   Initialize Configurations
     # ------------------------------------------------------------------
 
-    configs             = RCAIDE.Library.Components.Configs.Config.Container() 
-    base_config     = RCAIDE.Library.Components.Configs.Config(vehicle)
-    base_config.tag = 'base'  
-    configs.append(base_config)
+    configs    = RCAIDE.Library.Components.Configs.Config.Container() 
+    config     = RCAIDE.Library.Components.Configs.Config(vehicle)
+    config.tag = 'base' 
+    configs.append(config)
 
     
     config                     = RCAIDE.Library.Components.Configs.Config(vehicle) 
-    config.tag                 = 'nmc'
-    config_propulsors          = config.networks.electric.propulsors
-    config_assign_propulsors   = config.networks.electric.busses.cruise_bus.assigned_propulsors
-    config_assign_propulsors.append(config_propulsors.starboard_propulsor)
-    config_assign_propulsors.append(config_propulsors.port_propulsor)
-    configs.append(config) 
+    config.tag                 = 'low_power'
+    config.networks.electric.busses['power_bus'].active = False
+    config.networks.electric.busses['cruise_bus'].assigned_propulsors =  [['starboard_propulsor', 'port_propulsor']]
+    configs.append(config)
 
     
     config                     = RCAIDE.Library.Components.Configs.Config(vehicle) 
-    config.tag                 = 'lfp'
-    config_propulsors          = config.networks.electric.propulsors
-    config_assign_propulsors   = config.networks.electric.busses.power_bus.assigned_propulsors
-    config_assign_propulsors.append(config_propulsors.starboard_propulsor)
-    config_assign_propulsors.append(config_propulsors.port_propulsor)
+    config.tag                 = 'high_power'
+    config.networks.electric.busses['cruise_bus'].active = False
+    config.networks.electric.busses['power_bus'].assigned_propulsors =  [['starboard_propulsor', 'port_propulsor']]
     configs.append(config) 
 
     return configs
@@ -737,7 +732,7 @@ def mission_setup(analyses):
     # ------------------------------------------------------------------ 
     segment = Segments.Climb.Linear_Speed_Constant_Rate(base_segment) 
     segment.tag = 'Departure_End_of_Runway'        
-    segment.analyses.extend(analyses.lfp)  
+    segment.analyses.extend(analyses.high_power)  
     segment.altitude_start                                = 0.0 * Units.feet
     segment.altitude_end                                  = 50.0 * Units.feet
     segment.air_speed_start                               = Vstall *1.2  
@@ -760,7 +755,7 @@ def mission_setup(analyses):
     # ------------------------------------------------------------------ 
     segment = Segments.Climb.Linear_Speed_Constant_Rate(base_segment) 
     segment.tag = 'Initial_CLimb_Area'  
-    segment.analyses.extend(analyses.lfp)   
+    segment.analyses.extend(analyses.high_power)   
     segment.altitude_start                                = 50.0 * Units.feet
     segment.altitude_end                                  = 500.0 * Units.feet 
     segment.air_speed_end                                 = Vstall *1.3 
@@ -783,7 +778,7 @@ def mission_setup(analyses):
     # ------------------------------------------------------------------ 
     segment = Segments.Climb.Linear_Speed_Constant_Rate(base_segment) 
     segment.tag = 'Climb_1'        
-    segment.analyses.extend(analyses.lfp)      
+    segment.analyses.extend(analyses.high_power)      
     segment.altitude_start                                = 500.0 * Units.feet
     segment.altitude_end                                  = 2500 * Units.feet   
     segment.air_speed_end                                 = 120 * Units.kts  
@@ -806,7 +801,7 @@ def mission_setup(analyses):
     # ------------------------------------------------------------------ 
     segment = Segments.Climb.Linear_Speed_Constant_Rate(base_segment)
     segment.tag = "Climb_2"
-    segment.analyses.extend(analyses.lfp)
+    segment.analyses.extend(analyses.high_power)
     segment.altitude_start                                = 2500.0  * Units.feet
     segment.altitude_end                                  = 5000   * Units.feet  
     segment.air_speed_end                                 = 130 * Units.kts 
@@ -828,7 +823,7 @@ def mission_setup(analyses):
     # ------------------------------------------------------------------ 
     segment = Segments.Cruise.Constant_Speed_Constant_Altitude(base_segment)
     segment.tag = "Cruise" 
-    segment.analyses.extend(analyses.nmc) 
+    segment.analyses.extend(analyses.low_power) 
     segment.altitude                                      = 5000   * Units.feet 
     segment.air_speed                                     = 130 * Units.kts
     segment.distance                                      = 20.   * Units.nautical_mile  
@@ -849,7 +844,7 @@ def mission_setup(analyses):
     # ------------------------------------------------------------------ 
     segment = Segments.Climb.Linear_Speed_Constant_Rate(base_segment) 
     segment.tag = "Decent"  
-    segment.analyses.extend( analyses.nmc )       
+    segment.analyses.extend( analyses.low_power )       
     segment.altitude_start                                = 5000   * Units.feet 
     segment.altitude_end                                  = 1000 * Units.feet  
     segment.air_speed_end                                 = 100 * Units['mph']   
@@ -872,7 +867,7 @@ def mission_setup(analyses):
     
     segment = Segments.Cruise.Constant_Speed_Constant_Altitude(base_segment)
     segment.tag = 'Downleg'
-    segment.analyses.extend(analyses.nmc)  
+    segment.analyses.extend(analyses.low_power)  
     segment.air_speed                                     = 100 * Units['mph']   
     segment.distance                                      = 6000 * Units.feet 
     # define flight dynamics to model 
@@ -891,7 +886,7 @@ def mission_setup(analyses):
     # ------------------------------------------------------------------ 
     segment = Segments.Climb.Linear_Speed_Constant_Rate(base_segment)
     segment.tag = 'Baseleg'
-    segment.analyses.extend( analyses.lfp)   
+    segment.analyses.extend( analyses.high_power)   
     segment.altitude_start                                = 1000 * Units.feet
     segment.altitude_end                                  = 500.0 * Units.feet
     segment.air_speed_end                                 = 90 * Units['mph']  
@@ -912,7 +907,7 @@ def mission_setup(analyses):
     # ------------------------------------------------------------------ 
     segment = Segments.Climb.Linear_Speed_Constant_Rate(base_segment) 
     segment.tag = 'Final_Approach'
-    segment.analyses.extend( analyses.lfp)      
+    segment.analyses.extend( analyses.high_power)      
     segment.altitude_start                                = 500.0 * Units.feet
     segment.altitude_end                                  = 00.0 * Units.feet
     segment.air_speed_end                                 = 80 * Units['mph']  
@@ -937,7 +932,7 @@ def mission_setup(analyses):
     segment.tag  = 'Charge_Day'   
     segment.analyses.extend( analyses.base) 
     segment.cooling_time = 30 * Units.minutes
-    segment.state.numerics.number_of_control_points = 32
+    segment.state.numerics.number_of_control_points = 64
     #segment.initial_battery_state_of_charge = 0.2
     #if f_idx ==  (flights_per_day - 1): 
         #segment.increment_battery_age_by_one_day =  True 
