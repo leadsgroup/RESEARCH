@@ -6,7 +6,6 @@ def community_annoyance(gdf_data, noise_sensitive_structures, sensitivity_levels
     # Read the census data (GeoDataFrame)
     gdf_census = gpd.read_file(gdf_data)
 
-    # Define the bounding box coordinates (optional, can change from within to intersects)
     min_lon, max_lon = -119, -117.3
     min_lat, max_lat = 33.6, 34.4
 
@@ -17,10 +16,8 @@ def community_annoyance(gdf_data, noise_sensitive_structures, sensitivity_levels
                     (min_lon, max_lat), 
                     (min_lon, min_lat)])
 
-    # Filter census tracts within the bounding box (can also use `within` instead of `intersects`)
     gdf_census = gdf_census[gdf_census.geometry.intersects(bbox)]
 
-    # Compute population density (vectorized)
     total_population = gdf_census['B03002001']  # Total population in census tract
     tract_area = gdf_census['geometry'].area  # Area of the census tract
     print(tract_area[0:20])
