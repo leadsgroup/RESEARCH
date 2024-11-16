@@ -116,7 +116,7 @@ def vehicle_setup(BTMS_flag):
     wing.dynamic_pressure_ratio           = 1.0  
     ospath                                = os.path.abspath(__file__)
     separator                             = os.path.sep
-    rel_path                              = os.path.dirname(ospath)   + separator + '..' + separator + '..' + separator 
+    rel_path                              = os.path.dirname(ospath)   + separator + '..' + separator + '..' + separator  + '..' + separator 
     airfoil                               = RCAIDE.Library.Components.Airfoils.Airfoil()
     airfoil.tag                           = 'Clark_y' 
     airfoil.coordinate_file               = rel_path + separator + 'Airfoils' + separator + 'Clark_y.txt'   # absolute path     
@@ -483,7 +483,7 @@ def vehicle_setup(BTMS_flag):
     #------------------------------------------------------------------------------------------------------------------------------------  
     bat_module                                             = RCAIDE.Library.Components.Energy.Sources.Battery_Modules.Lithium_Ion_NMC()
     bat_module.electrical_configuration.series             = 18
-    bat_module.electrical_configuration.parallel           = 125
+    bat_module.electrical_configuration.parallel           = 124
     bat_module.geometrtic_configuration.total              = bat_module.electrical_configuration.parallel*bat_module.electrical_configuration.series  
     bat_module.voltage                                     = bat_module.maximum_voltage 
     bat_module.geometrtic_configuration.normal_count       = 42
@@ -501,7 +501,7 @@ def vehicle_setup(BTMS_flag):
     #------------------------------------------------------------------------------------------------------------------------------------  
     bat_module_1                                             = RCAIDE.Library.Components.Energy.Sources.Battery_Modules.Lithium_Ion_LFP()
     bat_module_1.electrical_configuration.series             = 50
-    bat_module_1.electrical_configuration.parallel           = 70
+    bat_module_1.electrical_configuration.parallel           = 54
     bat_module_1.geometrtic_configuration.total              = bat_module_1.electrical_configuration.parallel*bat_module_1.electrical_configuration.series  
     bat_module_1.voltage                                     = bat_module_1.maximum_voltage 
     bat_module_1.geometrtic_configuration.normal_count       = 42
@@ -831,7 +831,7 @@ def mission_setup(analyses):
     segment.analyses.extend(analyses.nmc) 
     segment.altitude                                      = 5000   * Units.feet 
     segment.air_speed                                     = 130 * Units.kts
-    segment.distance                                      = 20.   * Units.nautical_mile  
+    segment.distance                                      = 25.   * Units.nautical_mile  
     # define flight dynamics to model 
     segment.flight_dynamics.force_x                       = True  
     segment.flight_dynamics.force_z                       = True     
@@ -936,8 +936,8 @@ def mission_setup(analyses):
     segment      = Segments.Ground.Battery_Recharge(base_segment)     
     segment.tag  = 'Charge_Day'   
     segment.analyses.extend( analyses.base) 
-    segment.cooling_time = 30 * Units.minutes
-    segment.state.numerics.number_of_control_points = 32
+    segment.cooling_time = 15 * Units.minutes
+    segment.state.numerics.number_of_control_points = 64
     #segment.initial_battery_state_of_charge = 0.2
     #if f_idx ==  (flights_per_day - 1): 
         #segment.increment_battery_age_by_one_day =  True 

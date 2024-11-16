@@ -7,13 +7,11 @@
 import RCAIDE      
 from RCAIDE.Framework.Core import Units  
 from RCAIDE.Framework.Networks.Electric                 import Electric
-#from RCAIDE.Framework.Networks.Thermal_Management.All_Electric_Thermal_Management_Network           import All_Electric_Thermal_Management_Network
 from RCAIDE.Library.Methods.Propulsors.Converters.Rotor      import design_propeller 
 from RCAIDE.Library.Methods.Performance.estimate_stall_speed        import estimate_stall_speed 
 from RCAIDE.Library.Methods.Propulsors.Converters.DC_Motor   import design_motor 
 from RCAIDE.Library.Methods.Weights.Correlation_Buildups.Propulsion import compute_motor_weight
 from RCAIDE.Library.Methods.Geometry.Planform       import wing_segmented_planform 
-from RCAIDE.Library.Methods.Weights.Physics_Based_Buildups.Electric import converge_physics_based_weight_buildup , compute_operating_empty_weight 
 from RCAIDE.Library.Plots                                           import *  
 from RCAIDE.Library.Methods.Thermal_Management.Heat_Exchangers.Cross_Flow_Heat_Exchanger        import design_cross_flow_heat_exchanger
 from RCAIDE.Library.Methods.Thermal_Management.Batteries.Liquid_Cooled_Wavy_Channel  import design_wavy_channel    
@@ -479,7 +477,7 @@ def vehicle_setup(BTMS_flag):
     #------------------------------------------------------------------------------------------------------------------------------------  
     bat_module                                             = RCAIDE.Library.Components.Energy.Sources.Battery_Modules.Lithium_Ion_NMC()
     bat_module.electrical_configuration.series             = 10
-    bat_module.electrical_configuration.parallel           = 210 
+    bat_module.electrical_configuration.parallel           = 220 
     bat_module.geometrtic_configuration.normal_count       = 42
     bat_module.geometrtic_configuration.parallel_count     = 50 
 
@@ -492,7 +490,7 @@ def vehicle_setup(BTMS_flag):
     ##------------------------------------------------------------------------------------------------------------------------------------  
     # Coolant Line
     #------------------------------------------------------------------------------------------------------------------------------------  
-    coolant_line                                           = RCAIDE.Library.Components.Energy.Distributors.Coolant_Line(bus)
+    coolant_line                                           = RCAIDE.Library.Components.Energy.Distributors.Coolant_Line([bus])
     net.coolant_lines.append(coolant_line)
     HAS                                                    = RCAIDE.Library.Components.Thermal_Management.Batteries.Liquid_Cooled_Wavy_Channel(coolant_line)
     HAS.design_altitude                                    = 2500. * Units.feet  
@@ -577,7 +575,7 @@ def vehicle_setup(BTMS_flag):
     starboard_propulsor.motor                        = motor 
  
     # append propulsor to distribution line 
-    bus.propulsors.append(starboard_propulsor) 
+    net.propulsors.append(starboard_propulsor) 
 
     #------------------------------------------------------------------------------------------------------------------------------------  
     # Port Propulsor
@@ -601,7 +599,7 @@ def vehicle_setup(BTMS_flag):
     port_propulsor.motor                       = motor_2  
     
     # append propulsor to distribution line 
-    bus.propulsors.append(port_propulsor) 
+    net.propulsors.append(port_propulsor) 
 
 
     #------------------------------------------------------------------------------------------------------------------------------------           
@@ -651,66 +649,13 @@ def configs_setup(vehicle):
     base_config.tag = 'base'  
     configs.append(base_config)
 
-    
-    #config                                                = RCAIDE.Library.Components.Configs.Config(vehicle) 
-    #config.tag                                            = 'no_hex_operation'
-    #config_tms                                            = config.networks.all_electric.busses.bus.batteries.lithium_ion_nmc.thermal_management_system
-    #config_tms.heat_exchanger_system.percent_operation    = 0 
-    #config_tms.heat_acquisition_system.percent_operation  = 0
-    #config_tms.heat_exchanger_system.fan_operation        = False
-    #configs.append(config)  
-     
-    
-    #config                                                = RCAIDE.Library.Components.Configs.Config(vehicle) 
-    #config.tag                                            = 'max_hex_operation'
-    #config_tms                                            = config.networks.all_electric.busses.bus.batteries.lithium_ion_nmc.thermal_management_system
-    #config_tms.heat_exchanger_system.percent_operation    = 1 
-    #config_tms.heat_acquisition_system.percent_operation  = 1
-    #config_tms.heat_exchanger_system.fan_operation        = True
-    #configs.append(config)  
-     
- 
-    #config                                                = RCAIDE.Library.Components.Configs.Config(vehicle)   
-    #config.tag                                            = 'hex_low_alt_climb_operation'
-    #config_tms                                            = config.networks.all_electric.busses.bus.batteries.lithium_ion_nmc.thermal_management_system
-    #config_tms.heat_exchanger_system.percent_operation    = 0.5
-    #config_tms.heat_acquisition_system.percent_operation  = 0.5
-    #config_tms.heat_exchanger_system.fan_operation        = True
-    #configs.append(config)     
-
-    #config                                                = RCAIDE.Library.Components.Configs.Config(vehicle)
-    #config.tag                                            = 'hex_high_alt_climb_operation'
-    #config_tms                                            = config.networks.all_electric.busses.bus.batteries.lithium_ion_nmc.thermal_management_system
-    #config_tms.heat_exchanger_system.percent_operation    = 0.2
-    #config_tms.heat_acquisition_system.percent_operation  = 0.5
-    #config_tms.heat_exchanger_system.fan_operation        = True
-    #configs.append(config)        
-
-    #config                                                = RCAIDE.Library.Components.Configs.Config(vehicle) 
-    #config.tag                                            = 'hex_cruise_operation'
-    #config_tms                                            = config.networks.all_electric.busses.bus.batteries.lithium_ion_nmc.thermal_management_system
-    #config_tms.heat_exchanger_system.percent_operation    = 0.1
-    #config_tms.heat_acquisition_system.percent_operation  = 0.8
-    #config_tms.heat_exchanger_system.fan_operation        = False
-    #configs.append(config)         
-    
-
-    #config                                               = RCAIDE.Library.Components.Configs.Config(vehicle) 
-    #config.tag                                           = 'hex_descent_operation'
-    #config_tms                                           = config.networks.all_electric.busses.bus.batteries.lithium_ion_nmc.thermal_management_system
-    #config_tms.heat_exchanger_system.percent_operation   = 0.1
-    #config_tms.heat_acquisition_system.percent_operation = 0.8
-    #config_tms.heat_exchanger_system.fan_operation       = False
-    #configs.append(config)                   
- 
-
-    #config                                               = RCAIDE.Library.Components.Configs.Config(vehicle)
-    #config.tag                                           = 'recharge'
-    #config_tms                                           = config.networks.all_electric.busses.bus.batteries.lithium_ion_nmc.thermal_management_system
-    #config_tms.heat_exchanger_system.percent_operation   = 1.0
-    #config_tms.heat_acquisition_system.percent_operation = 1.0
-    #config_tms.heat_exchanger_system.fan_operation       = True
-    #configs.append(config)  
+    config                     = RCAIDE.Library.Components.Configs.Config(vehicle) 
+    config.tag                 = 'nmc'
+    config_propulsors          = config.networks.electric.propulsors
+    config_assign_propulsors   = config.networks.electric.busses.bus.assigned_propulsors
+    config_assign_propulsors.append(config_propulsors.starboard_propulsor)
+    config_assign_propulsors.append(config_propulsors.port_propulsor)
+    configs.append(config) 
  
     return configs
 
@@ -736,7 +681,7 @@ def mission_setup(analyses):
   
 
     # VSTALL Calculation  
-    vehicle        = analyses.base.aerodynamics.vehicle
+    vehicle        = analyses.nmc.aerodynamics.vehicle
     vehicle_mass   = vehicle.mass_properties.max_takeoff
     reference_area = vehicle.reference_area 
     Vstall         = estimate_stall_speed(vehicle_mass,reference_area,altitude = 0.0,maximum_lift_coefficient = 1.2)
@@ -747,7 +692,7 @@ def mission_setup(analyses):
     # ------------------------------------------------------------------ 
     segment = Segments.Climb.Linear_Speed_Constant_Rate(base_segment) 
     segment.tag = 'Departure_End_of_Runway'       
-    segment.analyses.extend( analyses.base )  
+    segment.analyses.extend( analyses.nmc )  
     #segment.analyses.extend( analyses.max_hex_operation )  
     segment.altitude_start                                = 0.0 * Units.feet
     segment.altitude_end                                  = 50.0 * Units.feet
@@ -771,7 +716,7 @@ def mission_setup(analyses):
     # ------------------------------------------------------------------ 
     segment = Segments.Climb.Linear_Speed_Constant_Rate(base_segment) 
     segment.tag = 'Initial_CLimb_Area' 
-    segment.analyses.extend( analyses.base )  
+    segment.analyses.extend( analyses.nmc )  
     #segment.analyses.extend( analyses.max_hex_operation )   
     segment.altitude_start                                = 50.0 * Units.feet
     segment.altitude_end                                  = 500.0 * Units.feet 
@@ -795,7 +740,7 @@ def mission_setup(analyses):
     # ------------------------------------------------------------------ 
     segment = Segments.Climb.Linear_Speed_Constant_Rate(base_segment) 
     segment.tag = 'Climb_1'        
-    segment.analyses.extend( analyses.base )  
+    segment.analyses.extend( analyses.nmc )  
     #segment.analyses.extend( analyses.hex_low_alt_climb_operation )      
     segment.altitude_start                                = 500.0 * Units.feet
     segment.altitude_end                                  = 2500 * Units.feet   
@@ -819,7 +764,7 @@ def mission_setup(analyses):
     # ------------------------------------------------------------------ 
     segment = Segments.Climb.Linear_Speed_Constant_Rate(base_segment)
     segment.tag = "Climb_2"
-    segment.analyses.extend( analyses.base )  
+    segment.analyses.extend( analyses.nmc )  
     #segment.analyses.extend( analyses.hex_high_alt_climb_operation)
     segment.altitude_start                                = 2500.0  * Units.feet
     segment.altitude_end                                  = 5000   * Units.feet  
@@ -842,11 +787,11 @@ def mission_setup(analyses):
     # ------------------------------------------------------------------ 
     segment = Segments.Cruise.Constant_Speed_Constant_Altitude(base_segment)
     segment.tag = "Cruise" 
-    segment.analyses.extend( analyses.base )  
+    segment.analyses.extend( analyses.nmc )  
     #segment.analyses.extend(analyses.hex_cruise_operation) 
     segment.altitude                                      = 5000   * Units.feet 
     segment.air_speed                                     = 130 * Units.kts
-    segment.distance                                      = 20.   * Units.nautical_mile  
+    segment.distance                                      = 23.   * Units.nautical_mile  
     # define flight dynamics to model 
     segment.flight_dynamics.force_x                       = True  
     segment.flight_dynamics.force_z                       = True     
@@ -864,7 +809,7 @@ def mission_setup(analyses):
     # ------------------------------------------------------------------ 
     segment = Segments.Climb.Linear_Speed_Constant_Rate(base_segment) 
     segment.tag = "Decent"  
-    segment.analyses.extend( analyses.base )  
+    segment.analyses.extend( analyses.nmc )  
     #segment.analyses.extend( analyses.hex_descent_operation )       
     segment.altitude_start                                = 5000   * Units.feet 
     segment.altitude_end                                  = 1000 * Units.feet  
@@ -888,7 +833,7 @@ def mission_setup(analyses):
     
     segment = Segments.Cruise.Constant_Speed_Constant_Altitude(base_segment)
     segment.tag = 'Downleg'
-    segment.analyses.extend( analyses.base )  
+    segment.analyses.extend( analyses.nmc )  
     #segment.analyses.extend(analyses.hex_descent_operation)  
     segment.air_speed                                     = 100 * Units['mph']   
     segment.distance                                      = 6000 * Units.feet 
@@ -908,7 +853,7 @@ def mission_setup(analyses):
     # ------------------------------------------------------------------ 
     segment = Segments.Climb.Linear_Speed_Constant_Rate(base_segment)
     segment.tag = 'Baseleg'
-    segment.analyses.extend( analyses.base )  
+    segment.analyses.extend( analyses.nmc )  
     #segment.analyses.extend( analyses.hex_descent_operation)   
     segment.altitude_start                                = 1000 * Units.feet
     segment.altitude_end                                  = 500.0 * Units.feet
@@ -930,7 +875,7 @@ def mission_setup(analyses):
     # ------------------------------------------------------------------ 
     segment = Segments.Climb.Linear_Speed_Constant_Rate(base_segment) 
     segment.tag = 'Final_Approach'
-    segment.analyses.extend( analyses.base )      
+    segment.analyses.extend( analyses.nmc )      
     #segment.analyses.extend( analyses.hex_descent_operation)      
     segment.altitude_start                                = 500.0 * Units.feet
     segment.altitude_end                                  = 00.0 * Units.feet
@@ -954,7 +899,7 @@ def mission_setup(analyses):
     # Charge Model 
     segment      = Segments.Ground.Battery_Recharge(base_segment)     
     segment.tag  = 'Charge_Day'   
-    segment.analyses.extend( analyses.base) 
+    segment.analyses.extend( analyses.nmc) 
     segment.cooling_time = 30 * Units.minutes
     segment.state.numerics.number_of_control_points = 32
     #segment.initial_battery_state_of_charge = 0.2

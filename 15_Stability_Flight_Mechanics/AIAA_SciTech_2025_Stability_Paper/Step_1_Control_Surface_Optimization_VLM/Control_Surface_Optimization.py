@@ -45,46 +45,37 @@ def main():
         vehicle =  HC_vehicle_setup(redesign_rotors=False)
     if aircraft_model == 'TSR':
         vehicle =  TSR_vehicle_setup(redesign_rotors=False)
-    
-    #                                     CG: X,    Y,  Z,  rx  ry  rz 
-    configuration_CGbatt_MOIbatt = np.array([[0.6,  0., 0., 0.,   0., 0.],
-                                             [2.7,  0., 0., 0.,   0., 0.],
-                                             [2.8,  0., 0., 0.,   0., 0.],
-                                             [2.9,  0., 0., 0.,   0., 0.],
-                                             [3.0,  0., 0., 0.,   0., 0.],
-                                             [2.6,  0., 0., 0.25, 0., 0.],
-                                             [2.7,  0., 0., 0.25, 0., 0.],
-                                             [2.8,  0., 0., 0.25, 0., 0.],
-                                             [2.9,  0., 0., 0.25, 0., 0.],
-                                             [3.0,  0., 0., 0.25, 0., 0.],
-                                             [2.6,  0., 0., 0.5,  0., 0.],
-                                             [2.7,  0., 0., 0.5,  0., 0.],
-                                             [2.8,  0., 0., 0.5,  0., 0.],
-                                             [2.9,  0., 0., 0.5,  0., 0.],
-                                             [3.0,  0., 0., 0.5,  0., 0.],
-                                             [2.88, 0., 0., 0.,   1., 0.],
-                                             [2.88, 0., 0., 0.,   2., 0.],
-                                             [2.88, 0., 0., 0.,   3., 0.]])
-               
-    for i in range(len(configuration_CGbatt_MOIbatt)):
         
-        case_vehicle  = deepcopy(vehicle)
-      
-        case_vehicle.networks.electric.busses.prop_rotor_bus.battery_modules.nmc_module_1.origin = np.array([[configuration_CGbatt_MOIbatt[i,0] + configuration_CGbatt_MOIbatt[i,3], 
-                                                                                                              configuration_CGbatt_MOIbatt[i,1] + configuration_CGbatt_MOIbatt[i,4], 
-                                                                                                              configuration_CGbatt_MOIbatt[i,2] + configuration_CGbatt_MOIbatt[i,5]]])
-        case_vehicle.networks.electric.busses.lift_rotor_bus.battery_modules.nmc_module_1.origin = np.array([[configuration_CGbatt_MOIbatt[i,0] + configuration_CGbatt_MOIbatt[i,3], 
-                                                                                                              configuration_CGbatt_MOIbatt[i,1] + configuration_CGbatt_MOIbatt[i,4], 
-                                                                                                              configuration_CGbatt_MOIbatt[i,2] + configuration_CGbatt_MOIbatt[i,5]]])
-        case_vehicle.networks.electric.busses.prop_rotor_bus.battery_modules.nmc_module_2.origin = np.array([[configuration_CGbatt_MOIbatt[i,0] - configuration_CGbatt_MOIbatt[i,3], 
-                                                                                                              configuration_CGbatt_MOIbatt[i,1] - configuration_CGbatt_MOIbatt[i,4], 
-                                                                                                              configuration_CGbatt_MOIbatt[i,2] - configuration_CGbatt_MOIbatt[i,5]]])
-        case_vehicle.networks.electric.busses.lift_rotor_bus.battery_modules.nmc_module_2.origin = np.array([[configuration_CGbatt_MOIbatt[i,0] - configuration_CGbatt_MOIbatt[i,3], 
-                                                                                                              configuration_CGbatt_MOIbatt[i,1] - configuration_CGbatt_MOIbatt[i,4], 
-                                                                                                              configuration_CGbatt_MOIbatt[i,2] - configuration_CGbatt_MOIbatt[i,5]]])
-                   
-        size_control_surfaces(configuration_CGbatt_MOIbatt, case_vehicle)
+    case_vehicle  = deepcopy(vehicle)
     
+    # prop rotor battery module (first module)
+    #                 CG: X,    Y,  Z 
+    CG_bat_1 = np.array([[0.25, 0., 0.],
+                         [0.35, 0., 0.],
+                         [0.45, 0., 0.]])
+    
+    # lift rotor battery modules
+    #                 CG: X,    Y,  Z 
+    CG_bat_2 = np.array([[4.0,  0., 0.],
+                         [4.1,  0., 0.],
+                         [4.2,  0., 0.]])   
+ 
+    for i in range(len(CG_bat_1)):
+        for j in range(len(CG_bat_2)):
+            
+            
+            # prop rotor battery modules      
+            case_vehicle.networks.electric.busses.prop_rotor_bus.battery_modules.nmc_module_1.origin = np.array([CG_bat_1[i]])
+            case_vehicle.networks.electric.busses.prop_rotor_bus.battery_modules.nmc_module_2.origin = np.array([CG_bat_1[i,0] + case_vehicle.networks.electric.busses.prop_rotor_bus.battery_modules.nmc_module_1.length, 
+                                                                                                                 CG_bat_1[i,1], 
+                                                                                                                 CG_bat_1[i,2]])
+            # lift rotor battery modules 
+            case_vehicle.networks.electric.busses.lift_rotor_bus.battery_modules.nmc_module_1.origin = np.array([CG_bat_2[j]])
+            case_vehicle.networks.electric.busses.lift_rotor_bus.battery_modules.nmc_module_2.origin = np.array([CG_bat_2[i,0], 
+                                                                                                                 CG_bat_2[i,1], 
+                                                                                                                 CG_bat_2[i,2] + case_vehicle.networks.electric.busses.lift_rotor_bus.battery_modules.nmc_module_2.height])
+            size_control_surfaces(CG_bat_1, CG_bat_2, case_vehicle)
+        
     return 
 
 if __name__ == '__main__': 

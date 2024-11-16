@@ -23,7 +23,7 @@ import matplotlib.pyplot as plt
 # ----------------------------------------------------------------------        
 #   Run the whole thing
 # ----------------------------------------------------------------------  
-def size_control_surfaces(configuration_CGbatt_MOIbatt,vehicle, cruise_velocity = 120 * Units['mph'], cruise_altitude= 5000*Units.feet): 
+def size_control_surfaces(CG_bat_1, CG_bat_2, vehicle, cruise_velocity = 120 * Units['mph'], cruise_altitude= 5000*Units.feet): 
     '''
     STICK FIXED (STATIC STABILITY AND DRAG OTIMIZATION
     '''
@@ -96,7 +96,8 @@ def size_control_surfaces(configuration_CGbatt_MOIbatt,vehicle, cruise_velocity 
     total_elapsed_time = round((tf_0-ti_0)/60,2)    
     print('Total Control Surface Sizing Time: ' + str(total_elapsed_time))
     
-    Optimization_Data_2_CSV(configuration_CGbatt_MOIbatt,
+    Optimization_Data_2_CSV(CG_bat_1, 
+                            CG_bat_2,
                             optimized_vehicle_v4.tag, 
                             output_stick_fixed, 
                             output_elevator_sizing, 
@@ -130,18 +131,31 @@ def stick_fixed_stability_and_drag_optimization_setup(vehicle,cruise_velocity,cr
     # -------------------------------------------------------------------
 
     #             [ tag,                          initial,                                       (lb , ub) , scaling , units ]  
+    #problem.inputs = np.array([       
+                  ##[ 'mw_span'                     , 11.82855  , 10  , 13   , 1.0  ,  1*Units.less],    
+                  ##[ 'mw_AR'                       , 8.95198 , 7 , 10  , 10. ,  1*Units.meter**2],                                                                                                         
+                  #[ 'mw_root_twist'               , vehicle.wings.main_wing.twists.root,          vehicle.wings.main_wing.twists.root*(1 - scaling_factor),          vehicle.wings.main_wing.twists.root*(1 + scaling_factor),           1.,   1*Units.degree], 
+                  #[ 'mw_tip_twist'                , vehicle.wings.main_wing.twists.tip,           vehicle.wings.main_wing.twists.tip*(1 - scaling_factor),           vehicle.wings.main_wing.twists.tip*(1 + scaling_factor),            1.,   1*Units.degree], 
+                  #[ 'vt_span'                     , vehicle.wings.vertical_tail.spans.projected,  vehicle.wings.vertical_tail.spans.projected*(1 - scaling_factor),  vehicle.wings.vertical_tail.spans.projected*(1 + scaling_factor),   1.,   1*Units.meter],  
+                  #[ 'vt_AR'                       , vehicle.wings.vertical_tail.aspect_ratio,     vehicle.wings.vertical_tail.aspect_ratio*(1 - scaling_factor),     vehicle.wings.vertical_tail.aspect_ratio*(1 + scaling_factor),      100., 1*Units.meter**2],    
+                  #[ 'ht_span'                     , vehicle.wings.horizontal_tail.spans.projected,vehicle.wings.horizontal_tail.spans.projected*(1 - scaling_factor),vehicle.wings.horizontal_tail.spans.projected*(1 + scaling_factor), 10.,  1*Units.less], 
+                  #[ 'ht_AR'                       , vehicle.wings.horizontal_tail.aspect_ratio,   vehicle.wings.horizontal_tail.aspect_ratio*(1 - scaling_factor),   vehicle.wings.horizontal_tail.aspect_ratio*(1 + scaling_factor),    10.,  1*Units.meter**2], 
+                  #[ 'AoA'                         , 5     , -10  , 10    , 1    ,  1*Units.degree],  
+                  
+    #],dtype=object)   
+    
     problem.inputs = np.array([       
                   #[ 'mw_span'                     , 11.82855  , 10  , 13   , 1.0  ,  1*Units.less],    
-                  #[ 'mw_AR'                       , 8.95198 , 7 , 10  , 10. ,  1*Units.meter**2],                                                                                                         
-                  [ 'mw_root_twist'               , vehicle.wings.main_wing.twists.root,          vehicle.wings.main_wing.twists.root*(1 - scaling_factor),          vehicle.wings.main_wing.twists.root*(1 + scaling_factor),           1.,   1*Units.degree], 
-                  [ 'mw_tip_twist'                , vehicle.wings.main_wing.twists.tip,           vehicle.wings.main_wing.twists.tip*(1 - scaling_factor),           vehicle.wings.main_wing.twists.tip*(1 + scaling_factor),            1.,   1*Units.degree], 
-                  [ 'vt_span'                     , vehicle.wings.vertical_tail.spans.projected,  vehicle.wings.vertical_tail.spans.projected*(1 - scaling_factor),  vehicle.wings.vertical_tail.spans.projected*(1 + scaling_factor),   1.,   1*Units.meter],  
-                  [ 'vt_AR'                       , vehicle.wings.vertical_tail.aspect_ratio,     vehicle.wings.vertical_tail.aspect_ratio*(1 - scaling_factor),     vehicle.wings.vertical_tail.aspect_ratio*(1 + scaling_factor),      100., 1*Units.meter**2],    
-                  [ 'ht_span'                     , vehicle.wings.horizontal_tail.spans.projected,vehicle.wings.horizontal_tail.spans.projected*(1 - scaling_factor),vehicle.wings.horizontal_tail.spans.projected*(1 + scaling_factor), 10.,  1*Units.less], 
-                  [ 'ht_AR'                       , vehicle.wings.horizontal_tail.aspect_ratio,   vehicle.wings.horizontal_tail.aspect_ratio*(1 - scaling_factor),   vehicle.wings.horizontal_tail.aspect_ratio*(1 + scaling_factor),    10.,  1*Units.meter**2], 
+                  #[ 'mw_AR'                       , 8.95198 , 7 , 10  , 10. ,  1*Units.meter**2],        
+                  [ 'mw_root_twist'               , 4   , 3.0  , 5.0   , 1.   ,  1*Units.degree], 
+                  [ 'mw_tip_twist'                , 0  , -1.0 , 1.0   , 1.   ,  1*Units.degree], 
+                  [ 'vt_span'                     , 1.4816, 1.0  , 2     , 1.   ,  1*Units.meter],  
+                  [ 'vt_AR'                       , 1.8874 , 1 , 2  , 100. ,  1*Units.meter**2],    
+                  [ 'ht_span'                     , 4.0   , 3.0  , 5.0   , 10.  ,  1*Units.less], 
+                  [ 'ht_AR'                       , 5.3333   , 3.0  , 6.0   , 10.  ,  1*Units.meter**2], 
                   [ 'AoA'                         , 5     , -10  , 10    , 1    ,  1*Units.degree],  
                   
-    ],dtype=object)   
+    ],dtype=object)       
 
     # -------------------------------------------------------------------
     # Objective
@@ -163,13 +177,13 @@ def stick_fixed_stability_and_drag_optimization_setup(vehicle,cruise_velocity,cr
         [ 'CM_residual'               ,   '<' ,   1E-2  ,   1E-2  , 1*Units.less], # close to zero 2 works 
         [ 'static_margin'             ,   '>' ,   0.1   ,   0.1   , 1*Units.less],  # checked 
         [ 'CM_alpha'                  ,   '<' ,   0.0   ,   1.0   , 1*Units.less],  # checked 
-        [ 'phugoid_damping_ratio'     ,   '>' ,   0.04  ,   1.0   , 1*Units.less],  # checked 
+        #[ 'phugoid_damping_ratio'     ,   '>' ,   0.04  ,   1.0   , 1*Units.less],  # checked 
         [ 'short_period_damping_ratio',   '<' ,   2.0   ,   1.0   , 1*Units.less],  # checked 
         [ 'short_period_damping_ratio',   '>' ,   0.3   ,   1.0   , 1*Units.less], # checked    
         [ 'dutch_roll_frequency'      ,   '>' ,   0.4   ,   1.0   , 1*Units.less],  # checked   frequency in rad/sec
-        [ 'dutch_roll_damping_ratio'  ,   '>' ,   0.08  ,   1.0   , 1*Units.less],  # checked   
+        #[ 'dutch_roll_damping_ratio'  ,   '>' ,   0.08  ,   1.0   , 1*Units.less],  # checked   
         [ 'spiral_doubling_time'      ,   '>' ,   20.0  ,   1.0   , 1*Units.less],  # checked   
-        [ 'spiral_criteria'           ,   '>' ,   1.0   ,   1.0   , 1*Units.less],  # checked   
+        #[ 'spiral_criteria'           ,   '>' ,   1.0   ,   1.0   , 1*Units.less],  # checked   
     ],dtype=object)
     
     # -------------------------------------------------------------------

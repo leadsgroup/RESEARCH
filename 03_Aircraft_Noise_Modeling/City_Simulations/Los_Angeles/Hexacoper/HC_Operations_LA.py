@@ -117,8 +117,12 @@ def main():
         if max_cruise_distance > total_cruise_distance:
             #with  open('results_data.pkl', 'rb') as  file:
                 #results = pickle.load(file)            
-            results = missions.base_mission.evaluate() 
+            results = missions.base_mission.evaluate()
             
+            filename =  aircraft_code +'_mission' + '_' + city_code + '_' + origin_code + '_' +  destination_code  + '_' + str(cruise_altitude)    # Aircraft_City_Frequency_Origin_Destination_Altitude            
+            with  open((filename + '.pkl'), 'wb') as  file:
+                pickle.dump(results, file)
+            '''
             # post process noise 
             noise_data   = post_process_noise_data(results,
                                                    flight_times = operation_flight_times,  
@@ -127,7 +131,8 @@ def main():
           
             # save data
             filename =  aircraft_code + '_' + city_code + '_' + origin_code + '_' +  destination_code  + '_' + str(cruise_altitude)    # Aircraft_City_Frequency_Origin_Destination_Altitude
-            save(noise_data, filename + '.res') 
+            save(noise_data, filename + '.res')
+            '''
         
     return  
 
