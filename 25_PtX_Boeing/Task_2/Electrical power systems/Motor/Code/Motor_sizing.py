@@ -752,7 +752,7 @@ def emrax_348():
 
     I_In_avg                   = (3/4)*I_0*m_a*PF               # Average inverter current (Eq. 111) 
     I_In_rms                   = I_ph_rms*np.sqrt(2*(np.sqrt(3)/np.pi)*m_a*(PF**2 + 0.25)) # Root mean squared inverter input current (Eq. 110) 
-    diff                       = max(I_In_rms**2 - I_In_avg**2, 0)  
+    diff                       = max(abs(I_In_rms**2 - I_In_avg**2), 0)  
     I_c_rms                    = np.sqrt(diff)                  # Current in the DC link capacitor (Eq. 109)
     if I_c_rms > 0:
         C                          = I_c_rms/(dV*f_sw)          # Needed capacitance to limit voltage ripple on the supply side to a desired value (Eq. 112)  
