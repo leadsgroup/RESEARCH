@@ -140,7 +140,7 @@ def repeated_flight_operation_setup(configs,analyses,day_group,g_idx,group,days_
             segment.analyses.extend( analyses.nmc )  
             segment.altitude                                      = 5000   * Units.feet 
             segment.air_speed                                     = 130 * Units.kts
-            segment.distance                                      = 23.   * Units.nautical_mile  
+            segment.distance                                      = 13.   * Units.nautical_mile  
             
             # define flight dynamics to model 
             segment.flight_dynamics.force_x                       = True  
