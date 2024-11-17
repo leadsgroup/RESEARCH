@@ -4,13 +4,13 @@
 #   Imports
 # ---------------------------------------------------------------------
 import RCAIDE
-from RCAIDE.Framework.Core import Units    
+from RCAIDE.Framework.Core import Units, Data    
 from RCAIDE.Library.Methods.Performance.estimate_stall_speed        import estimate_stall_speed 
 
 # ------------------------------------------------------------------
 #   Repeated Flight Operation Setup
 # ------------------------------------------------------------------
-def repeated_flight_operation_setup(configs,analyses,day_group,g_idx,group,days_per_group, flights_per_day ,charge_througput,cycle_day,resistance_growth,capacity_fade):
+def repeated_flight_operation_setup(configs,analyses,day_group,g_idx,group,days_per_group, flights_per_day ,charge_throughput_nmc,cycle_day_nmc,resistance_growth_nmc,capacity_fade_nmc,charge_throughput_lfp,cycle_day_lfp,resistance_growth_lfp,capacity_fade_lfp):
  
 
     # ------------------------------------------------------------------
@@ -51,10 +51,18 @@ def repeated_flight_operation_setup(configs,analyses,day_group,g_idx,group,days_
             segment.initial_battery_state_of_charge               = 1.0
             if group != 1 and d_idx == 0:
                 try:
-                    segment.charge_throughput = charge_througput[str(group-1)][0]
-                    segment.resistance_growth = resistance_growth[str(group-1)]
-                    segment.capacity_fade = capacity_fade[str(group-1)]
-                    segment.cycle_day = cycle_day[str(group-1)]
+                    segment.charge_throughput            = Data()
+                    segment.charge_throughput.power_bus  = charge_throughput_lfp[str(group-1)][0]
+                    segment.charge_throughput.cruise_bus = charge_throughput_nmc[str(group-1)][0]
+                    segment.resistance_growth            = Data()
+                    segment.resistance_growth.power_bus  = resistance_growth_lfp[str(group-1)]
+                    segment.resistance_growth.cruise_bus = resistance_growth_nmc[str(group-1)]
+                    segment.capacity_fade                = Data()
+                    segment.capacity_fade.power_bus      = capacity_fade_lfp[str(group-1)]
+                    segment.capacity_fade.cruise_bus     = capacity_fade_nmc[str(group-1)]
+                    segment.cycle_day                    = Data()
+                    segment.cycle_day.power_bus          = cycle_day_lfp[str(group-1)]
+                    segment.cycle_day.cruise_bus         = cycle_day_nmc[str(group-1)]
                 except KeyError:
                     raise Exception(f"Error: The key '{group-1}' was not found in charge_throughput or cycle_day. Run the simulation for the previous day group.")
                         

@@ -69,7 +69,7 @@ def main():
             # -------------------------------------------------------------------------------------------    
             # SAVE RESULTS
             # -------------------------------------------------------------------------------------------
-            filename          = 'e_Twin_Otter_'
+            filename          = 'e_Twin_Otter_nmc_range'
             save_results(results,filename,group)
             create_excel(filename,group)
             
@@ -95,7 +95,7 @@ def create_excel(filename,group):
 # ----------------------------------------------------------------------
 def save_results(results, filename, group):
    # Pickle Backup Files
-    save_dir = '/home/sshekar2/storage/degradation_results_11_15/nmc_soc'
+    save_dir = '/home/sshekar2/storage/degradation_results_11_15/nmc_range'
     if not os.path.exists(save_dir):
         os.makedirs(save_dir)  # Create the directory if it doesn't exist
     pickle_file = os.path.join(save_dir, filename + 'group_number' + str(group) + '.pkl')
@@ -105,7 +105,7 @@ def save_results(results, filename, group):
 
 
 def load_charge_throughput(filename='previous_day_data'):
-    load_dir = '/home/sshekar2/storage/degradation_results_11_15/nmc_soc'
+    load_dir = '/home/sshekar2/storage/degradation_results_11_15/nmc_range'
     file_path = os.path.join(load_dir, filename + '.pkl')
     if os.path.exists(file_path):
         with open(file_path, 'rb') as f:
@@ -116,7 +116,7 @@ def load_charge_throughput(filename='previous_day_data'):
 
     
 def save_charge_throughput(charge_throughput, cycle_day, resistance_growth, capacity_fade, filename='previous_day_data'):
-    save_dir = '/home/sshekar2/storage/degradation_results_11_15/nmc_soc'
+    save_dir = '/home/sshekar2/storage/degradation_results_11_15/nmc_range'
     if not os.path.exists(save_dir):
         os.makedirs(save_dir)  # Create the directory if it doesn't exist
     file_path = os.path.join(save_dir, filename + '.pkl')
@@ -133,7 +133,7 @@ def save_charge_throughput(charge_throughput, cycle_day, resistance_growth, capa
 #   Load Results
 # ------------------------------------------------------------------   
 def load_results(filename, group):  
-    load_dir = '/home/sshekar2/storage/degradation_results_11_15/nmc_soc'
+    load_dir = '/home/sshekar2/storage/degradation_results_11_15/nmc_range'
     load_file = os.path.join(load_dir, filename + 'group_number' + str(group) + '.pkl')
     if os.path.exists(load_file):
         with open(load_file, 'rb') as file:

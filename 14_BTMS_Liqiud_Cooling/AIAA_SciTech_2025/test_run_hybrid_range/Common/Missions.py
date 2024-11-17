@@ -4,26 +4,32 @@
 #   Imports
 # ---------------------------------------------------------------------
 import RCAIDE
-from RCAIDE.Framework.Core import Units    
+from RCAIDE.Framework.Core import Units, Data    
+from RCAIDE.Library.Methods.Performance.estimate_stall_speed        import estimate_stall_speed 
 
 # ------------------------------------------------------------------
 #   Repeated Flight Operation Setup
 # ------------------------------------------------------------------
-def repeated_flight_operation_setup(configs,analyses,day_group,g_idx,group,days_per_group, flights_per_day ,charge_througput,cycle_day,resistance_growth,capacity_fade):
+def repeated_flight_operation_setup(configs,analyses,day_group,g_idx,group,days_per_group, flights_per_day ,charge_throughput_nmc,cycle_day_nmc,resistance_growth_nmc,capacity_fade_nmc,charge_throughput_lfp,cycle_day_lfp,resistance_growth_lfp,capacity_fade_lfp):
  
 
     # ------------------------------------------------------------------
     #   Initialize the Mission
     # ------------------------------------------------------------------
     mission = RCAIDE.Framework.Mission.Sequential_Segments()
-    mission.tag = 'mission'
-    vehicle =  configs.base
+    mission.tag = 'mission' 
 
     # unpack Segments module
     Segments = RCAIDE.Framework.Mission.Segments  
     base_segment = Segments.Segment()
     base_segment.temperature_deviation  = 10
-    base_segment.state.numerics.number_of_control_points  = 8
+    base_segment.state.numerics.number_of_control_points  = 16
+     # VSTALL Calculation  
+    vehicle        = analyses.base.aerodynamics.vehicle
+    vehicle_mass   = vehicle.mass_properties.max_takeoff
+    reference_area = vehicle.reference_area 
+    Vstall         = estimate_stall_speed(vehicle_mass,reference_area,altitude = 0.0,maximum_lift_coefficient = 1.2)
+  
  
     for d_idx in  range(days_per_group):
         day =  ((group -1) * days_per_group) +  d_idx + 1
@@ -32,13 +38,12 @@ def repeated_flight_operation_setup(configs,analyses,day_group,g_idx,group,days_
             current_flight_no = f_idx + 1
             print(' ***********  Flight ' + str(current_flight_no) + ' ***********  ')
                
-            Vstall =  45
             # ------------------------------------------------------------------
             #   Departure End of Runway Segment Flight 1 : 
             # ------------------------------------------------------------------ 
             segment = Segments.Climb.Linear_Speed_Constant_Rate(base_segment) 
             segment.tag = 'Departure_End_of_Runway'+ "_F_" + str(current_flight_no) + "_D_" + str (day)           
-            segment.analyses.extend( analyses.nmc )  
+            segment.analyses.extend( analyses.lfp )  
             segment.altitude_start                                = 0.0 * Units.feet
             segment.altitude_end                                  = 50.0 * Units.feet
             segment.air_speed_start                               = Vstall *1.2  
@@ -46,10 +51,18 @@ def repeated_flight_operation_setup(configs,analyses,day_group,g_idx,group,days_
             segment.initial_battery_state_of_charge               = 1.0
             if group != 1 and d_idx == 0:
                 try:
-                    segment.charge_throughput = charge_througput[str(group-1)][0]
-                    segment.resistance_growth = resistance_growth[str(group-1)]
-                    segment.capacity_fade = capacity_fade[str(group-1)]
-                    segment.cycle_day = cycle_day[str(group-1)]
+                    segment.charge_throughput            = Data()
+                    segment.charge_throughput.power_bus  = charge_throughput_lfp[str(group-1)][0]
+                    segment.charge_throughput.cruise_bus = charge_throughput_nmc[str(group-1)][0]
+                    segment.resistance_growth            = Data()
+                    segment.resistance_growth.power_bus  = resistance_growth_lfp[str(group-1)]
+                    segment.resistance_growth.cruise_bus = resistance_growth_nmc[str(group-1)]
+                    segment.capacity_fade                = Data()
+                    segment.capacity_fade.power_bus      = capacity_fade_lfp[str(group-1)]
+                    segment.capacity_fade.cruise_bus     = capacity_fade_nmc[str(group-1)]
+                    segment.cycle_day                    = Data()
+                    segment.cycle_day.power_bus          = cycle_day_lfp[str(group-1)]
+                    segment.cycle_day.cruise_bus         = cycle_day_nmc[str(group-1)]
                 except KeyError:
                     raise Exception(f"Error: The key '{group-1}' was not found in charge_throughput or cycle_day. Run the simulation for the previous day group.")
                         
@@ -69,7 +82,7 @@ def repeated_flight_operation_setup(configs,analyses,day_group,g_idx,group,days_
             # ------------------------------------------------------------------ 
             segment = Segments.Climb.Linear_Speed_Constant_Rate(base_segment) 
             segment.tag = 'Initial_CLimb_Area'+ "_F_" + str(current_flight_no) + "_D_" + str (day)     
-            segment.analyses.extend( analyses.nmc )     
+            segment.analyses.extend( analyses.lfp )     
             segment.altitude_start                                = 50.0 * Units.feet
             segment.altitude_end                                  = 500.0 * Units.feet 
             segment.air_speed_end                                 = Vstall *1.3 
@@ -92,7 +105,7 @@ def repeated_flight_operation_setup(configs,analyses,day_group,g_idx,group,days_
             # ------------------------------------------------------------------ 
             segment = Segments.Climb.Linear_Speed_Constant_Rate(base_segment) 
             segment.tag = 'Climb_1'+ "_F_" + str(current_flight_no) + "_D_" + str (day)            
-            segment.analyses.extend( analyses.nmc )   
+            segment.analyses.extend( analyses.lfp )   
             segment.altitude_start                                = 500.0 * Units.feet
             segment.altitude_end                                  = 2500 * Units.feet   
             segment.air_speed_end                                 = 120 * Units.kts  
@@ -115,7 +128,7 @@ def repeated_flight_operation_setup(configs,analyses,day_group,g_idx,group,days_
             # ------------------------------------------------------------------ 
             segment = Segments.Climb.Linear_Speed_Constant_Rate(base_segment)
             segment.tag = "Climb_2"+ "_F_" + str(current_flight_no) + "_D_" + str (day)    
-            segment.analyses.extend( analyses.nmc )  
+            segment.analyses.extend( analyses.lfp )  
             segment.altitude_start                                = 2500.0  * Units.feet
             segment.altitude_end                                  = 5000   * Units.feet  
             segment.air_speed_end                                 = 130 * Units.kts 
@@ -140,7 +153,7 @@ def repeated_flight_operation_setup(configs,analyses,day_group,g_idx,group,days_
             segment.analyses.extend( analyses.nmc )  
             segment.altitude                                      = 5000   * Units.feet 
             segment.air_speed                                     = 130 * Units.kts
-            segment.distance                                      = 23.   * Units.nautical_mile  
+            segment.distance                                      = 13.   * Units.nautical_mile  
             
             # define flight dynamics to model 
             segment.flight_dynamics.force_x                       = True  
@@ -201,7 +214,7 @@ def repeated_flight_operation_setup(configs,analyses,day_group,g_idx,group,days_
             # ------------------------------------------------------------------ 
             segment = Segments.Climb.Linear_Speed_Constant_Rate(base_segment)
             segment.tag = 'Baseleg'+ "_F_" + str(current_flight_no) + "_D_" + str (day)    
-            segment.analyses.extend( analyses.nmc ) 
+            segment.analyses.extend( analyses.lfp ) 
             segment.altitude_start                                = 1000 * Units.feet
             segment.altitude_end                                  = 500.0 * Units.feet
             segment.air_speed_end                                 = 90 * Units['mph']  
@@ -222,7 +235,7 @@ def repeated_flight_operation_setup(configs,analyses,day_group,g_idx,group,days_
             # ------------------------------------------------------------------ 
             segment = Segments.Climb.Linear_Speed_Constant_Rate(base_segment) 
             segment.tag = 'Final_Approach'+ "_F_" + str(current_flight_no) + "_D_" + str (day)    
-            segment.analyses.extend( analyses.nmc )        
+            segment.analyses.extend( analyses.lfp )        
             segment.altitude_start                                = 500.0 * Units.feet
             segment.altitude_end                                  = 00.0 * Units.feet
             segment.air_speed_end                                 = 80 * Units['mph']  
@@ -244,9 +257,9 @@ def repeated_flight_operation_setup(configs,analyses,day_group,g_idx,group,days_
             # Charge Model 
             segment      = Segments.Ground.Battery_Recharge(base_segment)     
             segment.tag  = 'Charge_Day' + "_F_" + str(current_flight_no) + "_D_" + str (day)    
-            segment.analyses.extend( analyses.nmc) 
+            segment.analyses.extend( analyses.base) 
             segment.cooling_time = 30 * Units.minutes
-            segment.state.numerics.number_of_control_points = 32
+            segment.state.numerics.number_of_control_points = 64
             if f_idx ==  (flights_per_day - 1): 
                 segment.increment_battery_age_by_one_day =  True 
                 #segment.increment_battery_cycle_day      =  day-1
@@ -264,16 +277,14 @@ def repeated_flight_operation_setup(configs,analyses,day_group,g_idx,group,days_
 # ----------------------------------------------------------------------
 #   Missions Setup
 # ----------------------------------------------------------------------
-def missions_setup(base_mission):
+def missions_setup(mission):
 
-    # the mission container
     missions         = RCAIDE.Framework.Mission.Missions()
-
-    # ------------------------------------------------------------------
-    #   Base Mission
-    # ------------------------------------------------------------------
-
-    missions.base = base_mission
+    
+    # base mission 
+    mission.tag  = 'base_mission'
+    missions.append(mission)
+ 
 
 
     # done!
