@@ -33,10 +33,15 @@ def main():
     mic_x_res                 = 1200
     mic_y_res                 = 1600     
     
+    # create data structures to store noise 
     L_eq_T     = np.empt((0,mic_x_res,mic_y_res))      
     L_eq_24hr  = np.empt((0,mic_x_res,mic_y_res))      
     L_dn       = np.empt((0,mic_x_res,mic_y_res))      
-    L_max      = np.empt((0,mic_x_res,mic_y_res))      
+    L_max      = np.empt((0,mic_x_res,mic_y_res))
+    
+    # create data structure to store energy comsumed at each airport 
+    unique_airports =  0 # TO CORRECT 
+    E_origin        = np.zeros(len(unique_airports))
     
     for i in  range(len(LA_flight_data)):
         # Extract Data
@@ -53,22 +58,28 @@ def main():
             L_eq_24hr = np.concatenate((L_eq_24hr,PND.L_eq_24hr), axis = 0)
             L_dn      = np.concatenate((L_dn     ,PND.L_dn), axis = 0)
             L_max     = np.concatenate((L_max    ,PND.L_max ), axis = 0)
+            
+            # add the energy consumed by each origin airport
+            loc           =  np.where( unique_airports,origin_code)
+            E_origin[loc] += PND.Route_Energy_Consumed
         except:
             pass 
     
     
     # Add all routes
-    Total_L_eq      =  0
-    Total_L_eq_24hr =  0
-    Total_L_dn      =  0
-    Total_L_max     =  0
+    Total_L_eq      =  0 #NEEDS TO BE UPDATES 
+    Total_L_eq_24hr =  0 #NEEDS TO BE UPDATES 
+    Total_L_dn      =  0 #NEEDS TO BE UPDATES 
+    Total_L_max     =  0 #NEEDS TO BE UPDATES 
     
     # create data structure
     cumulative_PND = Data(
         Total_L_eq = Total_L_eq,
         Total_L_eq_24hr = Total_L_eq_24hr, 
         Total_L_dn = Total_L_dn, 
-        Total_L_max = Total_L_max, 
+        Total_L_max = Total_L_max,
+        Total_Energy = E_origin, 
+        Airports      = unique_airports, 
     )
     
     # save data 
