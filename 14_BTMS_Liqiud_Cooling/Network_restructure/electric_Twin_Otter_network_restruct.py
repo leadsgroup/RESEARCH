@@ -488,12 +488,10 @@ def vehicle_setup(BTMS_flag):
     bat_module.voltage                                     = bat_module.maximum_voltage 
     bat_module.geometrtic_configuration.normal_count       = 42
     bat_module.geometrtic_configuration.parallel_count     = 50
-    bat_module.nominal_capacity                            = bat_module.cell.nominal_capacity* bat_module.electrical_configuration.parallel
-
+    bat_module.nominal_capacity                            = bat_module.cell.nominal_capacity* bat_module.electrical_configuration.parallel 
     for _ in range(int(bus.number_of_battery_modules)):
         bat_copy = deepcopy(bat_module)
-        bus.battery_modules.append(bat_copy)
-
+        bus.battery_modules.append(bat_copy) 
     bus.initialize_bus_properties()
 
     #------------------------------------------------------------------------------------------------------------------------------------           
@@ -625,11 +623,7 @@ def vehicle_setup(BTMS_flag):
               
     motor_2                                    = deepcopy(motor)
     motor_2.origin                             =  [[4.0, -2.8129,1.22 ]]        
-    port_propulsor.motor                       = motor_2  
-    
-    # append propulsor to distribution line 
-
-
+    port_propulsor.motor                       = motor_2   
 
     #------------------------------------------------------------------------------------------------------------------------------------           
     # Payload 
@@ -655,7 +649,6 @@ def vehicle_setup(BTMS_flag):
     net.propulsors.append(starboard_propulsor) 
     net.propulsors.append(port_propulsor) 
     vehicle.append_energy_network(net)
- 
     
     weight_analysis          = RCAIDE.Framework.Analyses.Weights.Weights_EVTOL()
     weight_analysis.vehicle  = vehicle
@@ -686,14 +679,14 @@ def configs_setup(vehicle):
     
     config                     = RCAIDE.Library.Components.Configs.Config(vehicle) 
     config.tag                 = 'low_power'
-    #config.networks.electric.busses['power_bus'].active = False
+    config.networks.electric.busses['power_bus'].active = False
     config.networks.electric.busses['cruise_bus'].assigned_propulsors =  [['starboard_propulsor', 'port_propulsor']]
     configs.append(config)
 
     
     config                     = RCAIDE.Library.Components.Configs.Config(vehicle) 
     config.tag                 = 'high_power'
-    #config.networks.electric.busses['cruise_bus'].active = False
+    config.networks.electric.busses['cruise_bus'].active = False
     config.networks.electric.busses['power_bus'].assigned_propulsors =  [['starboard_propulsor', 'port_propulsor']]
     configs.append(config) 
 
