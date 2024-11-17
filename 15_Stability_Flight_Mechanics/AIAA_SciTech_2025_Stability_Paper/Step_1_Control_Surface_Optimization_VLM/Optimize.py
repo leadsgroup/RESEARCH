@@ -145,7 +145,7 @@ def stick_fixed_stability_and_drag_optimization_setup(vehicle,cruise_velocity,cr
     #],dtype=object)   
     
     problem.inputs = np.array([       
-                  #[ 'mw_span'                     , 11.82855  , 10  , 13   , 1.0  ,  1*Units.less],    
+                  [ 'mw_span'                     , 11.82855  , 10  , 13   , 1.0  ,  1*Units.less],    
                   #[ 'mw_AR'                       , 8.95198 , 7 , 10  , 10. ,  1*Units.meter**2],        
                   [ 'mw_root_twist'               , 4   , 3.0  , 5.0   , 1.   ,  1*Units.degree], 
                   [ 'mw_tip_twist'                , 0  , -1.0 , 1.0   , 1.   ,  1*Units.degree], 
@@ -204,7 +204,7 @@ def stick_fixed_stability_and_drag_optimization_setup(vehicle,cruise_velocity,cr
         [ 'dutch_roll_damping_ratio'          , 'summary.dutch_roll_damping_ratio' ],  
         [ 'spiral_doubling_time'              , 'summary.spiral_doubling_time' ],   
         [ 'spiral_criteria'                   , 'summary.spiral_criteria' ],       
-        #[ 'mw_span'                           , 'vehicle_configurations.*.wings.main_wing.spans.projected'],
+        [ 'mw_span'                           , 'vehicle_configurations.*.wings.main_wing.spans.projected'],
         #[ 'mw_AR'                            -118.599323 , 'vehicle_configurations.*.wings.main_wing.aspect_ratio'],         
         [ 'mw_root_twist'                     , 'vehicle_configurations.*.wings.main_wing.twists.root' ], 
         [ 'mw_tip_twist'                      , 'vehicle_configurations.*.wings.main_wing.twists.tip'  ],     
