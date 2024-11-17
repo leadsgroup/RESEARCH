@@ -64,14 +64,26 @@ def main():
         destination_code  = LA_flight_data['Destination Code'][i]
          
         try: 
-            filename =  aircraft_code +'_mission' + '_' + city_code + '_' + origin_code + '_' +  destination_code  + '_' + str(cruise_altitude)    # Aircraft_City_Frequency_Origin_Destination_Altitude            
+            filename =  aircraft_code +'_mission' + '_' + city_code + '_' + origin_code + '_' +  destination_code  + '_' + str(cruise_altitude)   
             results = load_results(filename)
            
             # post process noise
             processed_noise_data =  post_process_noise_data(results, topography_file, operation_flight_times, operation_period , noise_timesteps,  mic_x_res, mic_y_res)
               
             # save data in json file 
-            processed_filename =  'Processed_'  +  aircraft_code + '_' + city_code + '_' + origin_code + '_' +  destination_code  + '_' + str(cruise_altitude)    # Aircraft_City_Frequency_Origin_Destination_Altitude
+            processed_filename =  'Processed_'  +  aircraft_code + '_' + city_code + '_' + origin_code + '_' +  destination_code  + '_' + str(cruise_altitude)
+            
+            # get total energy comsumed for each route and append it onto noise 
+            Total_Energy = 0
+            for network in results.segments[0].analyses.energy.vehicle.networks: 
+                busses  = network.busses 
+                for bus in busses:
+                    for battery_module in enumerate(bus.battery_modules): 
+                        E_start_module  = results.segments[0].conditions.energy[bus.tag].battery_modules[battery_module.tag]  
+                        E_end_module    = results.segments[-1].conditions.energy[bus.tag].battery_modules[battery_module.tag]    
+                        Total_Energy    += E_start_module - E_end_module  
+            processed_filename.Route_Energy_Consumed = Total_Energy
+            
             save(processed_noise_data, processed_filename + '.res')
         except:
             pass 
