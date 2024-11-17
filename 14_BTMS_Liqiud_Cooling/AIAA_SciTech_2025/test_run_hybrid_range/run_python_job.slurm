@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --job-name=nmc_range_degradation            # Job name
+#SBATCH --job-name=range_Hybrid_degradation            # Job name
 #SBATCH --output=output_%j.log            # Output log file (%j will be replaced by the job ID)
 #SBATCH --error=error_%j.log              # Error log file (%j will be replaced by the job ID)
 #SBATCH --nodes=1                         # Request nodes
@@ -16,7 +16,7 @@ module load /opt/modulefiles/anaconda3/2024.10  # This has the latest version of
 source $HOME/scratch/leads_research/.rcaideenv/bin/activate
 
 # Run the Python script
-python3 -u BTMS_Battery_Degradation_study_NMC_range.py
+python3 -u BTMS_Battery_Degradation_study_hybrid_range.py
 
 # Deactivate the virtual environment after completion
 deactivate

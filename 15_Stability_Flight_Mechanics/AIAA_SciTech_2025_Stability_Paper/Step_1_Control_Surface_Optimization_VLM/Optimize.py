@@ -23,7 +23,7 @@ import matplotlib.pyplot as plt
 # ----------------------------------------------------------------------        
 #   Run the whole thing
 # ----------------------------------------------------------------------  
-def size_control_surfaces(CG_bat_1, CG_bat_2, vehicle, cruise_velocity = 120 * Units['mph'], cruise_altitude= 5000*Units.feet): 
+def size_control_surfaces(CG_bat_1, CG_bat_2, vehicle, cruise_velocity = 150 * Units['mph'], cruise_altitude= 5000*Units.feet): 
     '''
     STICK FIXED (STATIC STABILITY AND DRAG OTIMIZATION
     '''
@@ -135,7 +135,7 @@ def stick_fixed_stability_and_drag_optimization_setup(vehicle,cruise_velocity,cr
                   ##[ 'mw_span'                     , 11.82855  , 10  , 13   , 1.0  ,  1*Units.less],    
                   ##[ 'mw_AR'                       , 8.95198 , 7 , 10  , 10. ,  1*Units.meter**2],                                                                                                         
                   #[ 'mw_root_twist'               , vehicle.wings.main_wing.twists.root,          vehicle.wings.main_wing.twists.root*(1 - scaling_factor),          vehicle.wings.main_wing.twists.root*(1 + scaling_factor),           1.,   1*Units.degree], 
-                  #[ 'mw_tip_twist'                , vehicle.wings.main_wing.twists.tip,           vehicle.wings.main_wing.twists.tip*(1 - scaling_factor),           vehicle.wings.main_wing.twists.tip*(1 + scaling_factor),            1.,   1*Units.degree], 
+                  #[ 'mw_tip_twist'           -118.599323     , vehicle.wings.main_wing.twists.tip,           vehicle.wings.main_wing.twists.tip*(1 - scaling_factor),           vehicle.wings.main_wing.twists.tip*(1 + scaling_factor),            1.,   1*Units.degree], 
                   #[ 'vt_span'                     , vehicle.wings.vertical_tail.spans.projected,  vehicle.wings.vertical_tail.spans.projected*(1 - scaling_factor),  vehicle.wings.vertical_tail.spans.projected*(1 + scaling_factor),   1.,   1*Units.meter],  
                   #[ 'vt_AR'                       , vehicle.wings.vertical_tail.aspect_ratio,     vehicle.wings.vertical_tail.aspect_ratio*(1 - scaling_factor),     vehicle.wings.vertical_tail.aspect_ratio*(1 + scaling_factor),      100., 1*Units.meter**2],    
                   #[ 'ht_span'                     , vehicle.wings.horizontal_tail.spans.projected,vehicle.wings.horizontal_tail.spans.projected*(1 - scaling_factor),vehicle.wings.horizontal_tail.spans.projected*(1 + scaling_factor), 10.,  1*Units.less], 
@@ -145,15 +145,16 @@ def stick_fixed_stability_and_drag_optimization_setup(vehicle,cruise_velocity,cr
     #],dtype=object)   
     
     problem.inputs = np.array([       
-                  #[ 'mw_span'                     , 11.82855  , 10  , 13   , 1.0  ,  1*Units.less],    
+                  [ 'mw_span'                     , 11.82855  , 10  , 13   , 1.0  ,  1*Units.less],    
                   #[ 'mw_AR'                       , 8.95198 , 7 , 10  , 10. ,  1*Units.meter**2],        
                   [ 'mw_root_twist'               , 4   , 3.0  , 5.0   , 1.   ,  1*Units.degree], 
                   [ 'mw_tip_twist'                , 0  , -1.0 , 1.0   , 1.   ,  1*Units.degree], 
-                  [ 'vt_span'                     , 1.4816, 1.0  , 2     , 1.   ,  1*Units.meter],  
-                  [ 'vt_AR'                       , 1.8874 , 1 , 2  , 100. ,  1*Units.meter**2],    
+                  #[ 'vt_span'                     , 1.4816, 1.0  , 2     , 1.   ,  1*Units.meter],  
+                  #[ 'vt_AR'                       , 1.8874 , 1 , 2  , 100. ,  1*Units.meter**2],    
                   [ 'ht_span'                     , 4.0   , 3.0  , 5.0   , 10.  ,  1*Units.less], 
-                  [ 'ht_AR'                       , 5.3333   , 3.0  , 6.0   , 10.  ,  1*Units.meter**2], 
-                  [ 'AoA'                         , 5     , -10  , 10    , 1    ,  1*Units.degree],  
+                  #[ 'ht_AR'                       , 5.3333   , 3.0  , 6.0   , 10.  ,  1*Units.meter**2], 
+                  [ 'AoA'                         , 7     , -10  , 14    , 1    ,  1*Units.degree],
+                  [ 'ht_tip_twist'                         , 0     , -2  , 4    , 1    ,  1*Units.degree],                   
                   
     ],dtype=object)       
 
@@ -175,14 +176,14 @@ def stick_fixed_stability_and_drag_optimization_setup(vehicle,cruise_velocity,cr
     problem.constraints = np.array([
         [ 'CL_residual'               ,   '<' ,   1E-2  ,   1E-2  , 1*Units.less], # close to zero 2 works 
         [ 'CM_residual'               ,   '<' ,   1E-2  ,   1E-2  , 1*Units.less], # close to zero 2 works 
-        [ 'static_margin'             ,   '>' ,   0.1   ,   0.1   , 1*Units.less],  # checked 
-        [ 'CM_alpha'                  ,   '<' ,   0.0   ,   1.0   , 1*Units.less],  # checked 
+        #[ 'static_margin'             ,   '>' ,   0.1   ,   0.1   , 1*Units.less],  # checked 
+        #[ 'CM_alpha'                  ,   '<' ,   0.0   ,   1.0   , 1*Units.less],  # checked 
         #[ 'phugoid_damping_ratio'     ,   '>' ,   0.04  ,   1.0   , 1*Units.less],  # checked 
-        [ 'short_period_damping_ratio',   '<' ,   2.0   ,   1.0   , 1*Units.less],  # checked 
-        [ 'short_period_damping_ratio',   '>' ,   0.3   ,   1.0   , 1*Units.less], # checked    
-        [ 'dutch_roll_frequency'      ,   '>' ,   0.4   ,   1.0   , 1*Units.less],  # checked   frequency in rad/sec
+        #[ 'short_period_damping_ratio',   '<' ,   2.0   ,   1.0   , 1*Units.less],  # checked 
+        #[ 'short_period_damping_ratio',   '>' ,   0.3   ,   1.0   , 1*Units.less], # checked    
+        #[ 'dutch_roll_frequency'      ,   '>' ,   0.4   ,   1.0   , 1*Units.less],  # checked   frequency in rad/sec
         #[ 'dutch_roll_damping_ratio'  ,   '>' ,   0.08  ,   1.0   , 1*Units.less],  # checked   
-        [ 'spiral_doubling_time'      ,   '>' ,   20.0  ,   1.0   , 1*Units.less],  # checked   
+        #[ 'spiral_doubling_time'      ,   '>' ,   20.0  ,   1.0   , 1*Units.less],  # checked   
         #[ 'spiral_criteria'           ,   '>' ,   1.0   ,   1.0   , 1*Units.less],  # checked   
     ],dtype=object)
     
@@ -203,15 +204,16 @@ def stick_fixed_stability_and_drag_optimization_setup(vehicle,cruise_velocity,cr
         [ 'dutch_roll_damping_ratio'          , 'summary.dutch_roll_damping_ratio' ],  
         [ 'spiral_doubling_time'              , 'summary.spiral_doubling_time' ],   
         [ 'spiral_criteria'                   , 'summary.spiral_criteria' ],       
-        #[ 'mw_span'                           , 'vehicle_configurations.*.wings.main_wing.spans.projected'],
-        #[ 'mw_AR'                             , 'vehicle_configurations.*.wings.main_wing.aspect_ratio'],         
+        [ 'mw_span'                           , 'vehicle_configurations.*.wings.main_wing.spans.projected'],
+        #[ 'mw_AR'                            -118.599323 , 'vehicle_configurations.*.wings.main_wing.aspect_ratio'],         
         [ 'mw_root_twist'                     , 'vehicle_configurations.*.wings.main_wing.twists.root' ], 
         [ 'mw_tip_twist'                      , 'vehicle_configurations.*.wings.main_wing.twists.tip'  ],     
         [ 'vt_span'                           , 'vehicle_configurations.*.wings.vertical_tail.spans.projected'],
         [ 'vt_AR'                             , 'vehicle_configurations.*.wings.vertical_tail.aspect_ratio'],         
         [ 'ht_AR'                             , 'vehicle_configurations.*.wings.horizontal_tail.aspect_ratio'],     
         [ 'ht_span'                           , 'vehicle_configurations.*.wings.horizontal_tail.spans.projected'], 
-        [ 'AoA'                               , 'missions.stick_fixed_cruise.segments.cruise.state.conditions.aerodynamics.angles.alpha[0][0]' ], 
+        [ 'AoA'                               , 'missions.stick_fixed_cruise.segments.cruise.state.conditions.aerodynamics.angles.alpha[0][0]' ],
+        [ 'ht_tip_twist'                      , 'vehicle_configurations.*.wings.horizontal_tail.twists.tip'], 
     ]      
     
     # -------------------------------------------------------------------

@@ -26,7 +26,11 @@ def main():
 
 def emrax_348():
     
-    corr_factor    = 100                                                   # [-]            correction factor
+    print("--------------------------------------------------------------")
+    print("EMRAX 348")
+    print("--------------------------------------------------------------")
+    
+    corr_factor    = 300                                                   # [-]            correction factor
     omega_max      = 4000* (2 * np.pi / 60)                                # [RPM -> rad/s] max rotor angular velocity    
     tau_max        = 1000                                                  # [Nm]           max torque                                                                
     omega          = 2500* (2 * np.pi / 60)                                # [RPM -> rad/s] rotor angular velocity 
@@ -34,7 +38,7 @@ def emrax_348():
     D_out          = 0.348                                                 # [m]            stator outer diameter
     k_w            = 0.95                                                  # [-]            winding factor
     I_tot          = 375                                                   # [A]            total current that passes through the stator in both axial directions
-    L              = 0.112                                                 # [m]            motor stack length    
+    L_motor_stack  = 0.112                                                 # [m]            motor stack length    
     T              = 10                                                    # [s]            total time average power is being calculated over
     I              = 375                                                   # [A]            current
     V              = 830                                                   # [V]            voltage   
@@ -83,7 +87,6 @@ def emrax_348():
     sigma          = 5.8e7                                                 # [S/m]          electrical conductivity of the material
     H_e            = 1000                                                  # [A/m]          peak value of the external magnetic field
     n              = 1                                                     # [-]            number of strands
-    Ns             = N                                                     # [-]            number of turns
     b              = 0.02                                                  # [m]            winding width
     Rdc            = 0.1                                                   # [Ω]            DC resistance
     m              = 1                                                     # [-]            number of conductor layers in the slot
@@ -95,7 +98,6 @@ def emrax_348():
     I_d            = 375                                                   # [A]            d-axis current
     I_s            = 375                                                   # [A]            motor supply current
     Nt             = 10                                                    # [-]            number of turns per coil
-    leng           = 2 * L * Nt                                            # [m]            length of the winding (calculated from stack length and turns)
     Np             = 3                                                     # [-]            number of phases
     L_aa           = 0.12                                                  # [H]            self-inductance for phase A
     L_bb           = 0.12                                                  # [H]            self-inductance for phase B
@@ -132,7 +134,6 @@ def emrax_348():
     N_p            = 1                                                     # [-]            number of parallel paths
     N_t            = 100                                                   # [-]            number of turns per phase
     I_tot          = 150                                                   # [A]            total current per phase
-    omega          = 1000                                                  # [rad/s]        rotational speed
     D              = 0.2                                                   # [m]            stator diameter
     L              = 0.05                                                  # [m]            stator length
     k_w            = 0.85                                                  # [-]            winding factor
@@ -194,7 +195,6 @@ def emrax_348():
     k              = 1                                                     # [-]            windage loss factor
     C_f            = 0.005                                                 # [-]            friction coefficient (initial guess)
     rho            = 1.2                                                   # [kg/m³]        air density
-    omega          = 300                                                   # [rad/s]        rotational speed
     r              = 0.15                                                  # [m]            rotor radius
     Stack          = 0.05                                                  # [m]            stack length
     R              = 0.1                                                   # [m]            radius for calculations
@@ -259,16 +259,15 @@ def emrax_348():
     # 3.1 The Basic Motor Sizing Equation
     # -----------------------------------------------------------------------------------------   
 
-    P_max          = omega_max*tau_max                                     # [W]            max power
+    P_max          = omega_max*tau_max/1000                                # [kW]           max power
     B_sign         = 1.2*corr_factor                                       #o[V*s/m**2]     average magnitude of the radial flux density produced by the rotor
     A_sign         = (k_w*I_tot)/(np.pi*D_in)                              # [-]            stator electrical loading (Eq.2)    
-    tau            = (np.pi/2)*(B_sign*A_sign)*(D_in**2)*L                 # [Nm]           torque (Eq.1) 
+    tau            = (np.pi/2)*(B_sign*A_sign)*(D_in**2)*L_motor_stack     # [Nm]           torque (Eq.1) 
     P              = ((omega)*tau)/1000                                    # [kW]           power (Eq.1)                                                
     B_g1           = 4*B_sign/np.pi                                        # [V*s/m**2]     peak magnetic flux density of the fundamental harmonic produced by the rotor (Eq.4)
     K_s1           = A_sign*np.pi/2                                        # [V*s/m**2]     peak fundamental value of the linear current density (Eq.5)      
-    P_lipo         = ((omega)*(np.pi/4)*(B_g1*K_s1)*(D_in**2)*L)/1000      # [kW]           power (Eq.3)
-    
-    print("EMRAX 348:") 
+    P_lipo         = ((omega)*(np.pi/4)*(B_g1*K_s1)*(D_in**2)*L_motor_stack)/1000 # [kW]    power (Eq.3)
+     
     print("Power =", "%0.3f" % P, "[kW]") 
     print("Torque =", "%0.3f" % tau, "[Nm]")
     print("Power with Lipo's formula =", "%0.3f" % P_lipo, "[kW]")
@@ -312,7 +311,7 @@ def emrax_348():
     print("Real power =", "%0.3f" % P_time, "[kW]")
     print("Apparent power =", "%0.3f" % S, "[kW]")
     print("Reactive power =", "%0.3f" % Q, "[kW]")
-    print("Power Factor =", "%0.3f" % PF, "[-]")    
+    print("Power Factor =", "%0.3f" % PF)    
     
     # -----------------------------------------------------------------------------------------
     # 3.2.1 Magnetic Reluctance Networks
@@ -354,8 +353,8 @@ def emrax_348():
     R              = 1/((2/R_tip) + (1/R_rotor))                           # reluctance of one coil (Eq.22)
     L_m            = N**2/R                                                # self-inductance of a single coil (Eq.23)
     
-    print("Self-inductance of a single coil  =", "%0.3f" % L_m, "[]")
-    
+    print("Self-inductance of a single coil  =", "%0.3f" % L_m, "[H]")
+
     # -----------------------------------------------------------------------------------------
     # 3.2.2 Closed Form Field Solutions
     # ----------------------------------------------------------------------------------------- 
@@ -370,7 +369,7 @@ def emrax_348():
     Br_result      = B_r(r, theta, Br, p, Rr, Rm, Rs)
     B_sign         = (2/np.pi)*Br_result                                   # average airgap field (Eq.25)    
     
-    print("Average airgap field  =", "%0.3f" % B_sign, "[]")
+    print("Average airgap field  =", "%0.3f" % B_sign, "[T]")
     
     # -----------------------------------------------------------------------------------------
     # 3.2.3 Magnet Remnant Flux Density Br
@@ -379,8 +378,8 @@ def emrax_348():
     Br_20C         = Br                                                    # remnant flux density at 20 °C
     Br_T           = Br_20C - alpha_mag*(T - 20)*Br_20C                    # magnet remnant flux density at temperature (Eq.26)    
         
-    print("Magnet remnant flux density at temperature =", "%0.3f" % Br_T, "[]")    
-    
+    print("Magnet remnant flux density at temperature =", "%0.3f" % Br_T, "[T]") 
+
     # -----------------------------------------------------------------------------------------
     # 3.3 Magnet Losses
     # -----------------------------------------------------------------------------------------    
@@ -397,11 +396,11 @@ def emrax_348():
     f_tooth                    = f*(slots/(2*p))                           # effective frequency of magnetization of the tooth (Eq.31)
     P_v_tooth                  = (f/f_tooth)*k*(f_tooth**alpha)*(B**beta)  # loss in the stator teeth per unit volume (Eq.32)
         
-    print("Iron loss per volume with Steinmetz' formulation =", "%0.3f" % P_v_Steinmetz, "[]") 
-    print("Iron loss per volume with Bertotti's formulation =", "%0.3f" % P_v_Bertotti , "[]") 
-    print("Peak field in the back iron =", "%0.3f" % B_back , "[]")       
-    print("Peak field in the tooth iron =", "%0.3f" % B_tooth_slots , "[]") 
-    print("loss in the stator teeth per unit volume =", "%0.3f" % P_v_tooth , "[]")   
+    print("Iron loss per volume with Steinmetz' formulation =", "%0.3f" % P_v_Steinmetz, "[W/m³]") 
+    print("Iron loss per volume with Bertotti's formulation =", "%0.3f" % P_v_Bertotti, "[W/m³]") 
+    print("Peak field in the back iron =", "%0.3f" % B_back, "[T]")       
+    print("Peak field in the tooth iron =", "%0.3f" % B_tooth_slots, "[T]") 
+    print("Loss in the stator teeth per unit volume =", "%0.3f" % P_v_tooth, "[W/m³]") 
     
     # -----------------------------------------------------------------------------------------
     # 3.4 Calculating Current and Resistive Losses
@@ -413,13 +412,15 @@ def emrax_348():
     LOSS_I2R                   = slots*Layers*rho_copper*(L_layer/(SF*A_layer))*I_rms_layer**2 # resistive losses in the motor (Eq.36) 
     rho_copper_T               = rho_copper*(1 + 0.00393*(T - 20))         # resistivity of copper at a given temperature (Eq.37)
     
-    print("Resistive losses in the motor =", "%0.3f" % LOSS_I2R , "[]")  
-    print("Resistivity of copper at a given temperature =", "%0.10f" % rho_copper_T , "[]") 
+    print("Resistive losses in the motor =", "%0.3f" % LOSS_I2R, "[W]")  
+    print("Resistivity of copper at a given temperature =", "%0.10f" % rho_copper_T, "[Ω·m]")  
+
     
     # -----------------------------------------------------------------------------------------
     # 3.4.1 AC Winding Loss
     # -----------------------------------------------------------------------------------------    
     
+    Ns                         = N                                         # [-]            number of turns
     gamma                      = d/(delta*np.sqrt(2))                      #                (Eq.39)  
     ber_gamma, bei_gamma, der_ber_gamma, der_bei_gamma          = kelvin(gamma)
     ber_2_gamma, bei_2_gamma, _, _                              = kelvin(2 * gamma)
@@ -430,11 +431,12 @@ def emrax_348():
     R_ac_d_less_than_delta     = np.real(Rdc*(1 + ((np.pi*n*Ns)**2)*d**6/(192*(delta**4)*b**2))) # AC resistance of the winding with d<𝛿 (Eq.42)
     P_prox_d_less_than_delta   = np.real((((np.pi**2)*sigma*d**4)/(32))*(f*B)**2) # proximity loss per unit length generated in a round conductor when d<δ (Eq.43)    
     
-    print("AC resistance due to skin effect for round conductors =", "%0.3f" % Rac , "[]")  
-    print("Proximity loss per unit stack length in a conductor =", "%0.3f" % P_prox , "[]")  
-    print("AC resistivity of the mth layer of conductors in the slot =", "%0.3f" % R_ac_layer , "[]")  
-    print("AC resistance of the winding with d<𝛿 =", "%0.3f" % R_ac_d_less_than_delta , "[]")  
-    print("Proximity loss per unit length generated in a round conductor when d<δ =", "%0.3f" % P_prox_d_less_than_delta , "[]")  
+    print("AC resistance due to skin effect for round conductors =", "%0.3f" % Rac, "[Ω]")  
+    print("Proximity loss per unit stack length in a conductor =", "%0.3f" % P_prox, "[W/m]")  
+    print("AC resistivity of the mth layer of conductors in the slot =", "%0.3f" % R_ac_layer, "[Ω/m]")  
+    print("AC resistance of the winding with d<𝛿 =", "%0.3f" % R_ac_d_less_than_delta, "[Ω]")  
+    print("Proximity loss per unit length generated in a round conductor when d<δ =", "%0.3f" % P_prox_d_less_than_delta, "[W/m]")  
+  
     
     # -----------------------------------------------------------------------------------------
     # 3.5 Voltage and Turn Count
@@ -447,13 +449,14 @@ def emrax_348():
     V_d_max_torque             = X_q*I_s                                   # d axis voltage of the machine (Eq.48)
     V_ph_max_torque            = np.sqrt((EMF_i + R_s*I_s)**2 + (X_q*I_s)**2) # peak per phase motor voltage (Eq.49)   
     
-    print("Voltage of the machine =",        "%0.3f" % V_ph , "[]")  
-    print("Peak per phase motor voltage  =", "%0.3f" % V_ph_max_torque , "[]")   
+    print("Voltage of the machine =",        "%0.3f" % V_ph, "[V]")  
+    print("Peak per phase motor voltage =", "%0.3f" % V_ph_max_torque, "[V]") 
     
     # -----------------------------------------------------------------------------------------
     # 3.5.1 Back EMF
     # ----------------------------------------------------------------------------------------- 
     
+    leng           = 2 * L * Nt                                            # [m] length of the winding (calculated from stack length and turns)
     D                          = D_in
     vel                        = omega*D_in/2
     P1                         = (3/2)*EMF_i*I_s                           # back EMF of the motor (Eq.50)    
@@ -463,9 +466,10 @@ def emrax_348():
     EMF_i1                     = omega*D*L*k_w*B_g1*Nt                     # per phase back electromotive force of the motor (Eq.51)  
     E                          = B*leng*vel                                # flux cutting form of Faraday’s law (Eq.52) 
 
-    print("Back EMF of the motor  =", "%0.3f" % P3 , "[]")   
-    print("Per phase back electromotive force of the motor  =", "%0.3f" % EMF_i1 , "[]")  
-    print("flux cutting form of Faraday’s law  =", "%0.3f" % E , "[]")   
+    print("Back EMF of the motor  =", "%0.3f" % P3, "[W]")   
+    print("Per phase back electromotive force of the motor  =", "%0.3f" % EMF_i1, "[V]")  
+    print("Flux cutting form of Faraday’s law  =", "%0.3f" % E, "[V]") 
+   
     
     # -----------------------------------------------------------------------------------------
     # 3.5.2 Reactance
@@ -748,7 +752,7 @@ def emrax_348():
 
     I_In_avg                   = (3/4)*I_0*m_a*PF               # Average inverter current (Eq. 111) 
     I_In_rms                   = I_ph_rms*np.sqrt(2*(np.sqrt(3)/np.pi)*m_a*(PF**2 + 0.25)) # Root mean squared inverter input current (Eq. 110) 
-    diff                       = max(I_In_rms**2 - I_In_avg**2, 0)  
+    diff                       = max(abs(I_In_rms**2 - I_In_avg**2), 0)  
     I_c_rms                    = np.sqrt(diff)                  # Current in the DC link capacitor (Eq. 109)
     if I_c_rms > 0:
         C                          = I_c_rms/(dV*f_sw)          # Needed capacitance to limit voltage ripple on the supply side to a desired value (Eq. 112)  

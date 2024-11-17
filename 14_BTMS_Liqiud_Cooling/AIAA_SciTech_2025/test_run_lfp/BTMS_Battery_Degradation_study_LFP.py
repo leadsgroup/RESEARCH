@@ -28,9 +28,9 @@ def main():
     # -------------------------------------------------------------------------------------------    
     # SET UP SIMULATION PARAMETERS   
     # -------------------------------------------------------------------------------------------  
-    days_per_group             = 1#5              # total number of days simulated
-    flights_per_day            = 1#6               # number of flights per day
-    day_group                  = 1#list(range(1, 25))  # Creates a list from 1 to 24
+    days_per_group             = 5              # total number of days simulated
+    flights_per_day            = 6               # number of flights per day
+    day_group                  = list(range(1, 40))  # Creates a list from 1 to 24
     plot_mission               = True            # plot mission flag  
    
     if RUN_NEW_MODEL_FLAG:    
@@ -69,7 +69,7 @@ def main():
             # -------------------------------------------------------------------------------------------    
             # SAVE RESULTS
             # -------------------------------------------------------------------------------------------
-            filename          = 'e_Twin_Otter_'
+            filename          = 'e_Twin_Otter_lfp'
             save_results(results,filename,group)
             create_excel(filename,group)
             

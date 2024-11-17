@@ -1201,7 +1201,7 @@ def mission_setup(analyses):
     segment.analyses.extend( analyses.forward_flight )                             
     segment.altitude                                                 = 1000.0 * Units.ft  
     segment.air_speed                                                = 110.  * Units['mph']  
-    segment.distance                                                 = 40 *Units.nmi 
+    segment.distance                                                 = 64 *Units.nmi 
     segment.true_course                                              = 30 * Units.degree
                                                                      
     # define flight dynamics to model                                
@@ -1340,7 +1340,7 @@ def mission_setup(analyses):
     segment.tag                                           = "Vertical_Descent" 
     segment.analyses.extend( analyses.vertical_flight)     
     segment.altitude_start                                = 50.0 * Units.ft   
-    segment.altitude_end                                  = 0.   * Units.ft  
+    segment.altitude_end                                  = 500.   * Units.ft  
     segment.descent_rate                                  = 300. * Units['ft/min']
     segment.true_course                                   = 30 * Units.degree
     
