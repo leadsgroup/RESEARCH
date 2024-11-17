@@ -30,7 +30,7 @@ def main():
     # -------------------------------------------------------------------------------------------  
     days_per_group             = 5              # total number of days simulated
     flights_per_day            = 6               # number of flights per day
-    day_group                  = list(range(1, 25))  # Creates a list from 1 to 24
+    day_group                  = list(range(1, 35))  # Creates a list from 1 to 24
     plot_mission               = True            # plot mission flag  
    
     if RUN_NEW_MODEL_FLAG:    
