@@ -312,7 +312,7 @@ def base_analysis(vehicle, N_gm_x, N_gm_y, min_y, max_y, min_x, max_x, aircraft_
     # ------------------------------------------------------------------
     #  Aerodynamics Analysis
     aerodynamics                                = SUAVE.Analyses.Aerodynamics.Fidelity_Zero()
-    aerodynamics.geometry                       = vehicle
+    aerodynamics.vehicle                       = vehicle
     aerodynamics.settings.model_fuselage        = True
     analyses.append(aerodynamics)
 
@@ -976,7 +976,7 @@ def full_mission_setup(analyses, vehicle, simulated_days, flights_per_day, aircr
 
     # base segment
     base_segment                                                                = Segments.Segment()
-    base_segment.state.numerics.number_control_points                           = control_points
+    base_segment.state.numerics.number_of_control_points                           = control_points
     ones_row                                                                    = base_segment.state.ones_row
     base_segment.battery_discharge                                              = True
     base_segment.process.iterate.conditions.stability                           = SUAVE.Methods.skip
@@ -1266,7 +1266,7 @@ def approach_departure_mission_setup(analyses, vehicle, simulated_days, flights_
 
     # base segment
     base_segment                                                                = Segments.Segment()
-    base_segment.state.numerics.number_control_points                           = control_points
+    base_segment.state.numerics.number_of_control_points                           = control_points
     ones_row                                                                    = base_segment.state.ones_row
     base_segment.battery_discharge                                              = True
     base_segment.process.iterate.conditions.stability                           = SUAVE.Methods.skip
@@ -1431,7 +1431,7 @@ def hover_mission_setup(analyses,vehicle, simulated_days, flights_per_day, aircr
 
     # base segment
     base_segment                                                                = Segments.Segment()
-    base_segment.state.numerics.number_control_points                           = 3
+    base_segment.state.numerics.number_of_control_points                           = 3
     ones_row                                                                    = base_segment.state.ones_row
     base_segment.battery_discharge                                              = True
     base_segment.process.iterate.conditions.stability                           = SUAVE.Methods.skip

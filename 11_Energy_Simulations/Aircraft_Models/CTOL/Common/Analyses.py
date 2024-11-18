@@ -60,14 +60,14 @@ def base_analysis(vehicle,run_noise_analysis_flag,use_topology_flag,microphone_t
 
 
     aerodynamics = RCAIDE.Framework.Analyses.Aerodynamics.Vortex_Lattice_Method() 
-    aerodynamics.geometry                            = vehicle
+    aerodynamics.vehicle                            = vehicle
     aerodynamics.settings.drag_coefficient_increment = drag_area/vehicle.reference_area
     analyses.append(aerodynamics)
 
     # ------------------------------------------------------------------
     #  Energy
     energy= RCAIDE.Framework.Analyses.Energy.Energy()
-    energy.networks = vehicle.networks  
+    energy.vehicle = vehicle  
     analyses.append(energy)
 
     # ------------------------------------------------------------------

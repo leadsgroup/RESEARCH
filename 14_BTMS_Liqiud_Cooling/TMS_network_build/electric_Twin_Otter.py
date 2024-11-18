@@ -807,7 +807,7 @@ def mission_setup(analyses):
   
 
     # VSTALL Calculation  
-    vehicle        = analyses.base.aerodynamics.geometry
+    vehicle        = analyses.base.aerodynamics.vehicle
     vehicle_mass   = vehicle.mass_properties.max_takeoff
     reference_area = vehicle.reference_area 
     Vstall         = estimate_stall_speed(vehicle_mass,reference_area,altitude = 0.0,maximum_lift_coefficient = 1.2)
@@ -933,50 +933,50 @@ def mission_setup(analyses):
     mission.append_segment(segment)
     
         
-    ## ------------------------------------------------------------------
-    ##   Climb 1 : constant Speed, constant rate segment 
-    ## ------------------------------------------------------------------ 
-    #segment = Segments.Climb.Linear_Speed_Constant_Rate(base_segment)
-    #segment.tag = "Climb_2"
-    #segment.analyses.extend( analyses.base )  
-    ##segment.analyses.extend( analyses.hex_high_alt_climb_operation)
-    #segment.altitude_start                                = 2500.0  * Units.feet
-    #segment.altitude_end                                  = 5000   * Units.feet  
-    #segment.air_speed_end                                 = 130 * Units.kts 
-    #segment.climb_rate                                    = 700.034 * Units['ft/min']   
+    # ------------------------------------------------------------------
+    #   Climb 1 : constant Speed, constant rate segment 
+    # ------------------------------------------------------------------ 
+    segment = Segments.Climb.Linear_Speed_Constant_Rate(base_segment)
+    segment.tag = "Climb_2"
+    segment.analyses.extend( analyses.base )  
+    #segment.analyses.extend( analyses.hex_high_alt_climb_operation)
+    segment.altitude_start                                = 2500.0  * Units.feet
+    segment.altitude_end                                  = 5000   * Units.feet  
+    segment.air_speed_end                                 = 130 * Units.kts 
+    segment.climb_rate                                    = 700.034 * Units['ft/min']   
     
-    ## define flight dynamics to model 
-    #segment.flight_dynamics.force_x                       = True  
-    #segment.flight_dynamics.force_z                       = True     
+    # define flight dynamics to model 
+    segment.flight_dynamics.force_x                       = True  
+    segment.flight_dynamics.force_z                       = True     
     
-    ## define flight controls 
-    #segment.assigned_control_variables.throttle.active               = True           
-    #segment.assigned_control_variables.throttle.assigned_propulsors  = [['starboard_propulsor','port_propulsor']] 
-    #segment.assigned_control_variables.body_angle.active             = True                 
+    # define flight controls 
+    segment.assigned_control_variables.throttle.active               = True           
+    segment.assigned_control_variables.throttle.assigned_propulsors  = [['starboard_propulsor','port_propulsor']] 
+    segment.assigned_control_variables.body_angle.active             = True                 
             
-    #mission.append_segment(segment)
+    mission.append_segment(segment)
 
-    ## ------------------------------------------------------------------
-    ##   Cruise Segment: constant Speed, constant altitude
-    ## ------------------------------------------------------------------ 
-    #segment = Segments.Cruise.Constant_Speed_Constant_Altitude(base_segment)
-    #segment.tag = "Cruise" 
-    #segment.analyses.extend( analyses.base )  
-    ##segment.analyses.extend(analyses.hex_cruise_operation) 
-    #segment.altitude                                      = 5000   * Units.feet 
-    #segment.air_speed                                     = 130 * Units.kts
-    #segment.distance                                      = 20.   * Units.nautical_mile  
+    # ------------------------------------------------------------------
+    #   Cruise Segment: constant Speed, constant altitude
+    # ------------------------------------------------------------------ 
+    segment = Segments.Cruise.Constant_Speed_Constant_Altitude(base_segment)
+    segment.tag = "Cruise" 
+    segment.analyses.extend( analyses.base )  
+    #segment.analyses.extend(analyses.hex_cruise_operation) 
+    segment.altitude                                      = 5000   * Units.feet 
+    segment.air_speed                                     = 130 * Units.kts
+    segment.distance                                      = 20.   * Units.nautical_mile  
     
-    ## define flight dynamics to model 
-    #segment.flight_dynamics.force_x                       = True  
-    #segment.flight_dynamics.force_z                       = True     
+    # define flight dynamics to model 
+    segment.flight_dynamics.force_x                       = True  
+    segment.flight_dynamics.force_z                       = True     
     
-    ## define flight controls 
-    #segment.assigned_control_variables.throttle.active               = True           
-    #segment.assigned_control_variables.throttle.assigned_propulsors  = [['starboard_propulsor','port_propulsor']] 
-    #segment.assigned_control_variables.body_angle.active             = True                  
+    # define flight controls 
+    segment.assigned_control_variables.throttle.active               = True           
+    segment.assigned_control_variables.throttle.assigned_propulsors  = [['starboard_propulsor','port_propulsor']] 
+    segment.assigned_control_variables.body_angle.active             = True                  
           
-    #mission.append_segment(segment)    
+    mission.append_segment(segment)    
 
 
     ## ------------------------------------------------------------------
@@ -1038,7 +1038,7 @@ def mission_setup(analyses):
     ##segment.flight_dynamics.force_z                       = True     
     
     ### define flight controls 
-    ##segment.assigned_control_variables.throttle.active               = True           
+    ##segment.assigned_control_variables.throttle.actcapacity_Ahive               = True           
     ##segment.assigned_control_variables.throttle.assigned_propulsors  = [['starboard_propulsor','port_propulsor']] 
     ##segment.assigned_control_variables.body_angle.active             = True                
         
@@ -1182,7 +1182,7 @@ def plot_mission(results):
     
     #plot_propulsor_throttles(results)
     
-    #plot_flight_conditions(results) 
+    plot_flight_conditions(results) 
     
     #plot_aerodynamic_forces(results)
 
@@ -1190,7 +1190,7 @@ def plot_mission(results):
     
     #plot_aircraft_velocities(results)
     
-    #plot_battery_pack_conditions(results)
+    plot_battery_pack_conditions(results)
     
     plot_battery_cell_conditions(results)
     
@@ -1237,7 +1237,7 @@ def base_analysis(vehicle):
     
     
     aerodynamics = RCAIDE.Framework.Analyses.Aerodynamics.Vortex_Lattice_Method() 
-    aerodynamics.geometry                            = vehicle
+    aerodynamics.vehicle                            = vehicle
     aerodynamics.settings.drag_coefficient_increment = drag_area/vehicle.reference_area
     analyses.append(aerodynamics)
 

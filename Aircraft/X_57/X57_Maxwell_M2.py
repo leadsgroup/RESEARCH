@@ -133,7 +133,7 @@ def base_analysis(vehicle):
     #  Aerodynamics Analysis
     aerodynamics = RCAIDE.Analyses.Aerodynamics.Vortex_Lattice_Method()
     aerodynamics.settings.plot_vortex_distribution  = True     
-    aerodynamics.geometry = vehicle 
+    aerodynamics.vehicle = vehicle 
     aerodynamics.settings.drag_coefficient_increment = 0.0000
     analyses.append(aerodynamics)
 
@@ -141,7 +141,7 @@ def base_analysis(vehicle):
     #aerodynamics.process.compute.lift.inviscid.settings.filenames.avl_bin_name =  '/Users/matthewclarke/Documents/AVL/avl3.35'
     #aerodynamics.settings.print_output = True 
     #aerodynamics.settings.keep_files = True  
-    #aerodynamics.geometry = vehicle
+    #aerodynamics.vehicle = vehicle
     #analyses.append(aerodynamics)
 
 
@@ -748,7 +748,7 @@ def mission_setup(analyses,vehicle):
     base_segment = Segments.Segment()
     ones_row     = base_segment.state.ones_row
     base_segment.process.initialize.initialize_battery       = RCAIDE.Methods.Missions.Segments.Common.Energy.initialize_battery  
-    base_segment.state.numerics.number_control_points        = 4 
+    base_segment.state.numerics.number_of_control_points        = 4 
     base_segment.battery_age_in_days                         = 1 # optional but added for regression
     base_segment.temperature_deviation                       = 1 # Kelvin #  optional but added for regression
     

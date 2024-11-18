@@ -475,8 +475,7 @@ def vehicle_setup(resize_aircraft,vehicle_name = 'CTOL_CRM') :
         # Component 3: Battery       
         bat                                                    = RCAIDE.Components.Energy.Storages.Batteries.Constant_Mass.Lithium_Ion_LiNiMnCoO2_18650() 
         bat.pack.electrical_configuration.series               = 140   
-        bat.pack.electrical_configuration.parallel             = 100
-        initialize_from_circuit_configuration(bat)  
+        bat.pack.electrical_configuration.parallel             = 100 
         bat.module_config.number_of_modules                    = 14  
         bat.module.geometrtic_configuration.total              = bat.pack.electrical_configuration.total
         bat.module_config.voltage                              = bat.pack.max_voltage/bat.module_config.number_of_modules # assumes modules are connected in parallel, must be less than max_module_voltage (~50) /safety_factor (~ 1.5)  

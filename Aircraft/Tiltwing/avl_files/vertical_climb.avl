@@ -1,0 +1,60 @@
+vertical_climb
+
+#Mach
+ 0.0
+ 
+#Iysym   IZsym   Zsym
+  0      0     0.0
+  
+#Sref    Cref    Bref 	<meters>
+10.2      1.0944753244806673     9.319534001225598
+
+#Xref    Yref    Zref   <meters>
+2.773024015146469      0.0     0.1580254496845431
+
+
+
+#---------------------------------------------------------
+SURFACE
+canard_wing
+#Nchordwise  Cspace   Nspanwise  Sspace
+10         1.0         20      1.0
+
+YDUPLICATE
+0.0
+
+
+SECTION
+#Xle    Yle      Zle      Chord     Ainc  Nspanwise  Sspace
+0.1  0.0    0.0    0.85    90.0     
+AFILE
+/Users/matthewclarke/Documents/LEADS/RESEARCH/Aircraft/Tiltwing/../Airfoils/NACA_63_412.txt
+
+SECTION
+#Xle    Yle      Zle      Chord     Ainc  Nspanwise  Sspace
+0.1  6.0    0.0    0.85    90.0     
+AFILE
+/Users/matthewclarke/Documents/LEADS/RESEARCH/Aircraft/Tiltwing/../Airfoils/NACA_63_412.txt
+
+
+#---------------------------------------------------------
+SURFACE
+main_wing
+#Nchordwise  Cspace   Nspanwise  Sspace
+10         1.0         20      1.0
+
+YDUPLICATE
+0.0
+
+
+SECTION
+#Xle    Yle      Zle      Chord     Ainc  Nspanwise  Sspace
+5.138  0.0    1.323    1.0945    90.0     
+AFILE
+/Users/matthewclarke/Documents/LEADS/RESEARCH/Aircraft/Tiltwing/../Airfoils/NACA_63_412.txt
+
+SECTION
+#Xle    Yle      Zle      Chord     Ainc  Nspanwise  Sspace
+5.138  4.6598    1.323    1.0945    90.0     
+AFILE
+/Users/matthewclarke/Documents/LEADS/RESEARCH/Aircraft/Tiltwing/../Airfoils/NACA_63_412.txt

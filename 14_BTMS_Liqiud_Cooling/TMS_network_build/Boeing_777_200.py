@@ -929,7 +929,7 @@ def base_analysis(vehicle):
     # ------------------------------------------------------------------
     #  Aerodynamics Analysis
     aerodynamics = RCAIDE.Framework.Analyses.Aerodynamics.Vortex_Lattice_Method()
-    aerodynamics.geometry = vehicle
+    aerodynamics.vehicle = vehicle
     aerodynamics.settings.number_of_spanwise_vortices   = 30
     aerodynamics.settings.number_of_chordwise_vortices  = 5   
     analyses.append(aerodynamics)
@@ -937,7 +937,7 @@ def base_analysis(vehicle):
     # ------------------------------------------------------------------
     #  Energy
     energy = RCAIDE.Framework.Analyses.Energy.Energy()
-    energy.networks = vehicle.networks
+    energy.vehicle = vehicle
     analyses.append(energy)
 
     # ------------------------------------------------------------------
@@ -1004,7 +1004,7 @@ def mission_setup(analyses):
     
     ## define flight controls 
     #segment.assigned_control_variables.throttle.active               = True           
-    #segment.assigned_control_variables.throttle.assigned_propulsors  = [['starboard_ge90_propulsor','port_ge90_propulsor']] 
+    #segment.assigned_control_variables.throttle.assigned_propulsors  = [['outer_starboard_propulsor','inner_starboard_propulsor','outer_port_propulsor','inner_port_propulsor']] 
     #segment.assigned_control_variables.body_angle.active             = True                 
     
     #mission.append_segment(segment)
@@ -1027,7 +1027,7 @@ def mission_setup(analyses):
     
     ## define flight controls 
     #segment.assigned_control_variables.throttle.active               = True           
-    #segment.assigned_control_variables.throttle.assigned_propulsors  = [['starboard_ge90_propulsor','port_ge90_propulsor']] 
+    #segment.assigned_control_variables.throttle.assigned_propulsors  = [['outer_starboard_propulsor','inner_starboard_propulsor','outer_port_propulsor','inner_port_propulsor']] 
     #segment.assigned_control_variables.body_angle.active             = True                  
     
     #mission.append_segment(segment)
@@ -1050,7 +1050,7 @@ def mission_setup(analyses):
     
     ## define flight controls 
     #segment.assigned_control_variables.throttle.active               = True           
-    #segment.assigned_control_variables.throttle.assigned_propulsors  = [['starboard_ge90_propulsor','port_ge90_propulsor']] 
+    #segment.assigned_control_variables.throttle.assigned_propulsors  = [['outer_starboard_propulsor','inner_starboard_propulsor','outer_port_propulsor','inner_port_propulsor']] 
     #segment.assigned_control_variables.body_angle.active             = True                
     
     #mission.append_segment(segment)
@@ -1073,7 +1073,7 @@ def mission_setup(analyses):
     
     ## define flight controls 
     #segment.assigned_control_variables.throttle.active               = True           
-    #segment.assigned_control_variables.throttle.assigned_propulsors  = [['starboard_ge90_propulsor','port_ge90_propulsor']] 
+    #segment.assigned_control_variables.throttle.assigned_propulsors  = [['outer_starboard_propulsor','inner_starboard_propulsor','outer_port_propulsor','inner_port_propulsor']] 
     #segment.assigned_control_variables.body_angle.active             = True                
     
     #mission.append_segment(segment)
@@ -1097,7 +1097,7 @@ def mission_setup(analyses):
     
     ## define flight controls 
     #segment.assigned_control_variables.throttle.active               = True           
-    #segment.assigned_control_variables.throttle.assigned_propulsors  = [['starboard_ge90_propulsor','port_ge90_propulsor']] 
+    #segment.assigned_control_variables.throttle.assigned_propulsors  = [['outer_starboard_propulsor','inner_starboard_propulsor','outer_port_propulsor','inner_port_propulsor']] 
     #segment.assigned_control_variables.body_angle.active             = True                
     
     #mission.append_segment(segment)
@@ -1120,7 +1120,7 @@ def mission_setup(analyses):
     
     ## define flight controls 
     #segment.assigned_control_variables.throttle.active               = True           
-    #segment.assigned_control_variables.throttle.assigned_propulsors  = [['starboard_ge90_propulsor','port_ge90_propulsor']] 
+    #segment.assigned_control_variables.throttle.assigned_propulsors  = [['outer_starboard_propulsor','inner_starboard_propulsor','outer_port_propulsor','inner_port_propulsor']] 
     #segment.assigned_control_variables.body_angle.active             = True                
     
     #mission.append_segment(segment)
@@ -1143,7 +1143,7 @@ def mission_setup(analyses):
     
     ## define flight controls 
     #segment.assigned_control_variables.throttle.active               = True           
-    #segment.assigned_control_variables.throttle.assigned_propulsors  = [['starboard_ge90_propulsor','port_ge90_propulsor']] 
+    #segment.assigned_control_variables.throttle.assigned_propulsors  = [['outer_starboard_propulsor','inner_starboard_propulsor','outer_port_propulsor','inner_port_propulsor']] 
     #segment.assigned_control_variables.body_angle.active             = True                
     
     #mission.append_segment(segment)
@@ -1166,7 +1166,7 @@ def mission_setup(analyses):
     
     ## define flight controls 
     #segment.assigned_control_variables.throttle.active               = True           
-    #segment.assigned_control_variables.throttle.assigned_propulsors  = [['starboard_ge90_propulsor','port_ge90_propulsor']] 
+    #segment.assigned_control_variables.throttle.assigned_propulsors  = [['outer_starboard_propulsor','inner_starboard_propulsor','outer_port_propulsor','inner_port_propulsor']] 
     #segment.assigned_control_variables.body_angle.active             = True                
     
     #mission.append_segment(segment)
@@ -1190,7 +1190,7 @@ def mission_setup(analyses):
     
     ## define flight controls 
     #segment.assigned_control_variables.throttle.active               = True           
-    #segment.assigned_control_variables.throttle.assigned_propulsors  = [['starboard_ge90_propulsor','port_ge90_propulsor']] 
+    #segment.assigned_control_variables.throttle.assigned_propulsors  = [['outer_starboard_propulsor','inner_starboard_propulsor','outer_port_propulsor','inner_port_propulsor']] 
     #segment.assigned_control_variables.body_angle.active             = True                
     
     #mission.append_segment(segment)

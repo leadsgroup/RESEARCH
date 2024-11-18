@@ -41,7 +41,7 @@ def baseline_mission_setup(analyses,vehicle,simulated_days = 1,flights_per_day =
 
     # base segment           
     base_segment                                                              = Segments.Segment()  
-    base_segment.state.numerics.number_control_points                         = control_points 
+    base_segment.state.numerics.number_of_control_points                         = control_points 
     base_segment.state.numerics.discretization_method                         = linear_data
     base_segment.process.initialize.initialize_battery                        = RCAIDE.Methods.Missions.Segments.Common.Energy.initialize_battery
     base_segment.process.finalize.post_process.update_battery_state_of_health = RCAIDE.Methods.Missions.Segments.Common.Energy.update_battery_state_of_health  
@@ -254,7 +254,7 @@ def repeated_flight_operation_setup(analyses,vehicle,simulated_days = 1,flights_
     # base segment           
     base_segment                                             = Segments.Segment() 
     base_segment.battery_discharge                           = True  
-    base_segment.state.numerics.number_control_points        = control_points  
+    base_segment.state.numerics.number_of_control_points        = control_points  
     base_segment.state.numerics.discretization_method        = linear_data    
     base_segment.process.initialize.initialize_battery       = RCAIDE.Methods.Missions.Segments.Common.Energy.initialize_battery
     base_segment.process.finalize.post_process.update_battery_state_of_health = RCAIDE.Methods.Missions.Segments.Common.Energy.update_battery_state_of_health  
@@ -492,7 +492,7 @@ def direct_mission_setup_at_1000ft(analyses,vehicle,simulated_days = 1,flights_p
 
     # base segment           
     base_segment                                                              = Segments.Segment()  
-    base_segment.state.numerics.number_control_points                         = control_points 
+    base_segment.state.numerics.number_of_control_points                         = control_points 
     base_segment.state.numerics.discretization_method                         = linear_data
     base_segment.process.initialize.initialize_battery                        = RCAIDE.Methods.Missions.Segments.Common.Energy.initialize_battery
     base_segment.process.finalize.post_process.update_battery_state_of_health = RCAIDE.Methods.Missions.Segments.Common.Energy.update_battery_state_of_health  
@@ -722,7 +722,7 @@ def direct_mission_setup_at_1500ft(analyses,vehicle,simulated_days = 1,flights_p
 
     # base segment           
     base_segment                                                              = Segments.Segment()  
-    base_segment.state.numerics.number_control_points                         = control_points 
+    base_segment.state.numerics.number_of_control_points                         = control_points 
     base_segment.state.numerics.discretization_method                         = linear_data
     base_segment.process.initialize.initialize_battery                        = RCAIDE.Methods.Missions.Segments.Common.Energy.initialize_battery
     base_segment.process.finalize.post_process.update_battery_state_of_health = RCAIDE.Methods.Missions.Segments.Common.Energy.update_battery_state_of_health  
@@ -954,7 +954,7 @@ def direct_mission_setup_at_2000ft(analyses,vehicle,simulated_days = 1,flights_p
 
     # base segment           
     base_segment                                                              = Segments.Segment()  
-    base_segment.state.numerics.number_control_points                         = control_points 
+    base_segment.state.numerics.number_of_control_points                         = control_points 
     base_segment.state.numerics.discretization_method                         = linear_data
     base_segment.process.initialize.initialize_battery                        = RCAIDE.Methods.Missions.Segments.Common.Energy.initialize_battery
     base_segment.process.finalize.post_process.update_battery_state_of_health = RCAIDE.Methods.Missions.Segments.Common.Energy.update_battery_state_of_health  
@@ -1182,7 +1182,7 @@ def flyover_at_200ft_mission_setup(analyses,vehicle,simulated_days = 1,flights_p
 
     # base segment           
     base_segment                                                              = Segments.Segment()  
-    base_segment.state.numerics.number_control_points                         = control_points 
+    base_segment.state.numerics.number_of_control_points                         = control_points 
     base_segment.state.numerics.discretization_method                         = linear_data
     base_segment.process.initialize.initialize_battery                        = RCAIDE.Methods.Missions.Segments.Common.Energy.initialize_battery
     base_segment.process.finalize.post_process.update_battery_state_of_health = RCAIDE.Methods.Missions.Segments.Common.Energy.update_battery_state_of_health  
@@ -1227,7 +1227,7 @@ def flyover_at_500ft_mission_setup(analyses,vehicle,simulated_days = 1,flights_p
 
     # base segment           
     base_segment                                                              = Segments.Segment()  
-    base_segment.state.numerics.number_control_points                         = control_points 
+    base_segment.state.numerics.number_of_control_points                         = control_points 
     base_segment.state.numerics.discretization_method                         = linear_data
     base_segment.process.initialize.initialize_battery                        = RCAIDE.Methods.Missions.Segments.Common.Energy.initialize_battery
     base_segment.process.finalize.post_process.update_battery_state_of_health = RCAIDE.Methods.Missions.Segments.Common.Energy.update_battery_state_of_health  
@@ -1273,7 +1273,7 @@ def flyover_at_1000ft_mission_setup(analyses,vehicle,simulated_days = 1,flights_
 
     # base segment           
     base_segment                                                              = Segments.Segment()  
-    base_segment.state.numerics.number_control_points                         = control_points 
+    base_segment.state.numerics.number_of_control_points                         = control_points 
     base_segment.state.numerics.discretization_method                         = linear_data
     base_segment.process.initialize.initialize_battery                        = RCAIDE.Methods.Missions.Segments.Common.Energy.initialize_battery
     base_segment.process.finalize.post_process.update_battery_state_of_health = RCAIDE.Methods.Missions.Segments.Common.Energy.update_battery_state_of_health  
@@ -1319,7 +1319,7 @@ def flyover_at_1500ft_mission_setup(analyses,vehicle,simulated_days = 1,flights_
 
     # base segment           
     base_segment                                                              = Segments.Segment()  
-    base_segment.state.numerics.number_control_points                         = control_points 
+    base_segment.state.numerics.number_of_control_points                         = control_points 
     base_segment.state.numerics.discretization_method                         = linear_data
     base_segment.process.initialize.initialize_battery                        = RCAIDE.Methods.Missions.Segments.Common.Energy.initialize_battery
     base_segment.process.finalize.post_process.update_battery_state_of_health = RCAIDE.Methods.Missions.Segments.Common.Energy.update_battery_state_of_health  
@@ -1365,7 +1365,7 @@ def flyover_at_2000ft_mission_setup(analyses,vehicle,simulated_days = 1,flights_
 
     # base segment           
     base_segment                                                              = Segments.Segment()  
-    base_segment.state.numerics.number_control_points                         = control_points 
+    base_segment.state.numerics.number_of_control_points                         = control_points 
     base_segment.state.numerics.discretization_method                         = linear_data
     base_segment.process.initialize.initialize_battery                        = RCAIDE.Methods.Missions.Segments.Common.Energy.initialize_battery
     base_segment.process.finalize.post_process.update_battery_state_of_health = RCAIDE.Methods.Missions.Segments.Common.Energy.update_battery_state_of_health  
@@ -1411,7 +1411,7 @@ def approach_departure_mission_setup(analyses,vehicle,simulated_days = 1,flights
 
     # base segment           
     base_segment                                                              = Segments.Segment()  
-    base_segment.state.numerics.number_control_points                         = control_points 
+    base_segment.state.numerics.number_of_control_points                         = control_points 
     base_segment.state.numerics.discretization_method                         = linear_data
     base_segment.process.initialize.initialize_battery                        = RCAIDE.Methods.Missions.Segments.Common.Energy.initialize_battery
     base_segment.process.finalize.post_process.update_battery_state_of_health = RCAIDE.Methods.Missions.Segments.Common.Energy.update_battery_state_of_health  
@@ -1549,7 +1549,7 @@ def hover_mission_setup(analyses,vehicle,simulated_days = 1,flights_per_day = 1,
 
     # base segment
     base_segment = Segments.Segment()
-    base_segment.state.numerics.number_control_points    = 4
+    base_segment.state.numerics.number_of_control_points    = 4
     base_segment.state.numerics.discretization_method    = linear_data
     base_segment.process.initialize.initialize_battery   = RCAIDE.Methods.Missions.Segments.Common.Energy.initialize_battery
     
@@ -1598,7 +1598,7 @@ def uber_mission_setup(analyse,vehicle,simulated_days = 1,flights_per_day = 1,co
 
     # base segment
     base_segment = Segments.Segment()
-    base_segment.state.numerics.number_control_points    = 4
+    base_segment.state.numerics.number_of_control_points    = 4
     base_segment.state.numerics.discretization_method    = linear_data
     base_segment.process.initialize.initialize_battery   = RCAIDE.Methods.Missions.Segments.Common.Energy.initialize_battery
     

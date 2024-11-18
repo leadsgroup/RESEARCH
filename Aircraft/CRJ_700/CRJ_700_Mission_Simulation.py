@@ -528,8 +528,8 @@ def vehicle_setup():
     turbofan.origin                             = [[21.5, -2.2,1.45]]  
     turbofan.engine_length                      = 3.3     
     turbofan.bypass_ratio                       = 5    
-    turbofan.design_altitude                    = 35000.0*Units.ft
-    turbofan.design_mach_number                 = 0.78   
+    turbofan.design_altitude                    = 0.0*Units.ft
+    turbofan.design_mach_number                 = 0.1   
     turbofan.design_thrust                      = 60000.0* Units.N 
              
     # fan                
@@ -800,7 +800,7 @@ def base_analysis(vehicle):
     # ------------------------------------------------------------------
     #  Aerodynamics Analysis
     aerodynamics = RCAIDE.Framework.Analyses.Aerodynamics.Vortex_Lattice_Method()
-    aerodynamics.geometry = vehicle
+    aerodynamics.vehicle = vehicle
     aerodynamics.settings.number_of_spanwise_vortices   = 25
     aerodynamics.settings.number_of_chordwise_vortices  = 5   
     analyses.append(aerodynamics)
@@ -808,7 +808,7 @@ def base_analysis(vehicle):
     # ------------------------------------------------------------------
     #  Energy
     energy = RCAIDE.Framework.Analyses.Energy.Energy()
-    energy.networks = vehicle.networks
+    energy.vehicle = vehicle
     analyses.append(energy)
 
     # ------------------------------------------------------------------

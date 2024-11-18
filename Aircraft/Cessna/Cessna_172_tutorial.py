@@ -10,11 +10,11 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 import RCAIDE
-from RCAIDE.Core import Units
+from RCAIDE.Framework.Core import Units
 
-from RCAIDE.Methods.Propulsion import propeller_design
-from RCAIDE.Methods.Geometry.Two_Dimensional.Planform import segment_properties
-from RCAIDE.Plots.Performance import *
+from RCAIDE.Library.Methods.Propulsors.Converters.Rotor import design_propeller
+from RCAIDE.Library.Methods.Geometry.Two_Dimensional.Planform import segment_properties
+from RCAIDE.Library.Plots.Performance import *
 
 #from RCAIDE.Input_Output.OpenVSP import write
 
@@ -338,7 +338,7 @@ def vehicle_setup():
                                      './Airfoils/Polars/NACA_4412_polar_Re_1000000.txt' ]]
 
     prop.airfoil_polar_stations  = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]      
-    prop                         = propeller_design(prop)   
+    prop                         = design_propeller(prop)   
     
     net.rotors.append(prop)
      
@@ -408,7 +408,7 @@ def mission_setup(analyses,vehicle):
     segment.distance  = 100 * Units.nautical_mile
     
     ones_row                                        = segment.state.ones_row   
-    segment.state.numerics.number_control_points    = 16
+    segment.state.numerics.number_of_control_points    = 16
     segment.state.unknowns.throttle                 = 1.0 * ones_row(1)
     segment = vehicle.networks.internal_combustion.add_unknowns_and_residuals_to_segment(segment,rpm=2600)
     
@@ -466,7 +466,7 @@ def base_analysis(vehicle):
     
     
     aerodynamics = RCAIDE.Analyses.Aerodynamics.Vortex_Lattice_Method() 
-    aerodynamics.geometry                            = vehicle
+    aerodynamics.vehicle                            = vehicle
     aerodynamics.settings.drag_coefficient_increment = 1.0*drag_area/vehicle.reference_area
     analyses.append(aerodynamics)
 

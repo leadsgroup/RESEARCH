@@ -1,0 +1,121 @@
+cruise
+
+#Mach
+ 0.0
+ 
+#Iysym   IZsym   Zsym
+  0      0     0.0
+  
+#Sref    Cref    Bref 	<meters>
+16.16512896      1.4873336259672691     10.9982
+
+#Xref    Yref    Zref   <meters>
+0.0      0.0     0.0
+
+
+
+#---------------------------------------------------------
+SURFACE
+main_wing
+#Nchordwise  Cspace   Nspanwise  Sspace
+5         1.0         60      1.0
+
+YDUPLICATE
+0.0
+
+
+SECTION
+#Xle    Yle      Zle      Chord     Ainc  Nspanwise  Sspace
+2.032  0    0    1.7479    3.0     
+
+SECTION
+#Xle    Yle      Zle      Chord     Ainc  Nspanwise  Sspace
+2.0529  0.8249    0.0    1.6644    2.9433     
+CONTROL
+flap    1.0   0.81   0. 0. 0.  +1
+
+SECTION
+#Xle    Yle      Zle      Chord     Ainc  Nspanwise  Sspace
+2.077  1.7817    0.0    1.5677    2.8775     
+CONTROL
+flap    1.0   0.81   0. 0. 0.  +1
+CONTROL
+slat    -1.0   -0.1   0. 0. 0.  +1
+
+SECTION
+#Xle    Yle      Zle      Chord     Ainc  Nspanwise  Sspace
+2.1293  3.8494    0.0    1.3586    2.7353     
+CONTROL
+slat    -1.0   -0.1   0. 0. 0.  +1
+CONTROL
+aileron    -1.0   0.84   0. 0. 0.  -1
+
+SECTION
+#Xle    Yle      Zle      Chord     Ainc  Nspanwise  Sspace
+2.1659  5.2956    0.0    1.2123    2.6358     
+CONTROL
+slat    -1.0   -0.1   0. 0. 0.  +1
+CONTROL
+aileron    -1.0   0.84   0. 0. 0.  -1
+
+SECTION
+#Xle    Yle      Zle      Chord     Ainc  Nspanwise  Sspace
+2.171  5.4991    0.0    1.1917    1.5     
+
+
+#---------------------------------------------------------
+SURFACE
+horizontal_stabilizer
+#Nchordwise  Cspace   Nspanwise  Sspace
+5         1.0         60      1.0
+
+YDUPLICATE
+0.0
+
+
+SECTION
+#Xle    Yle      Zle      Chord     Ainc  Nspanwise  Sspace
+6.2484  0    0    1.397    0.0     
+
+SECTION
+#Xle    Yle      Zle      Chord     Ainc  Nspanwise  Sspace
+6.2627  0.1554    0.0    1.3399    0.0     
+CONTROL
+elevator    1.0   0.7   0. 0. 0.  +1
+
+SECTION
+#Xle    Yle      Zle      Chord     Ainc  Nspanwise  Sspace
+6.3944  1.589    0.0    0.8128    0.0     
+CONTROL
+elevator    1.0   0.7   0. 0. 0.  +1
+
+SECTION
+#Xle    Yle      Zle      Chord     Ainc  Nspanwise  Sspace
+6.4072  1.7272    0.0    0.762    0.0     
+
+
+#---------------------------------------------------------
+SURFACE
+vertical_stabilizer
+#Nchordwise  Cspace   Nspanwise  Sspace
+5         1.0         60      -1.1 
+
+SECTION
+#Xle    Yle      Zle      Chord     Ainc  Nspanwise  Sspace
+6.0198  0    0    1.6764    0.0     
+
+SECTION
+#Xle    Yle      Zle      Chord     Ainc  Nspanwise  Sspace
+6.131  0.0    0.1854    1.5773    0.0     
+CONTROL
+rudder    1.0   0.7   0. 0. 0.  +1
+
+SECTION
+#Xle    Yle      Zle      Chord     Ainc  Nspanwise  Sspace
+7.0909  0.0    1.7856    0.7225    0.0     
+CONTROL
+rudder    1.0   0.7   0. 0. 0.  +1
+
+SECTION
+#Xle    Yle      Zle      Chord     Ainc  Nspanwise  Sspace
+7.1321  0.0    1.8542    0.6858    0.0     

@@ -67,7 +67,7 @@ def repeated_flight_operation_setup(vehicle,simulated_days,flight_no, idle_time,
             analyses          = Analyses.analyses_setup(configs)
             
             # VSTALL Calculation  
-            vehicle        = analyses.base.aerodynamics.geometry
+            vehicle        = analyses.base.aerodynamics.vehicle
             vehicle_mass   = vehicle.mass_properties.max_takeoff
             reference_area = vehicle.reference_area 
             Vstall         = estimate_stall_speed(vehicle_mass,reference_area,altitude = 0.0,maximum_lift_coefficient = 1.2)            
