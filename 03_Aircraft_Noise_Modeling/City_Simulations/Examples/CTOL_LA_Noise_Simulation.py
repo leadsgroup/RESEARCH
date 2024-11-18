@@ -31,8 +31,8 @@ import os
 # ---------------------------------------------------------------------- 
 def main():    
     microphone_terrain_data =  generate_terrain_elevated_microphone_locations(topography_file   ='LA_Metropolitan_Area.txt',
-                                                           ground_microphone_x_resolution    = 201,  
-                                                           ground_microphone_y_resolution    = 101, 
+                                                           ground_microphone_x_resolution    = 300,  
+                                                           ground_microphone_y_resolution    = 90, 
                                                            ground_microphone_x_stencil       = 1,   
                                                            ground_microphone_y_stencil       = 1)    
     
