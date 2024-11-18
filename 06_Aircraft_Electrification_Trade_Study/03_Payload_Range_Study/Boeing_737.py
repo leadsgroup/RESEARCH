@@ -72,9 +72,9 @@ def vehicle_setup(propellant):
     
     vehicle = RCAIDE.Vehicle()
     vehicle.tag = 'Boeing_737-800'    
-    vehicle.mass_properties.max_takeoff               = 79015.8 * Units.kilogram  
-    vehicle.mass_properties.takeoff                   = 79015.8 * Units.kilogram    
-    vehicle.mass_properties.operating_empty           = 62746.4 * Units.kilogram  
+    vehicle.mass_properties.max_takeoff               = 79016.0 * Units.kilogram  
+    vehicle.mass_properties.takeoff                   = 79016.0 * Units.kilogram    
+    vehicle.mass_properties.operating_empty           = 41413.0 * Units.kilogram  
     vehicle.mass_properties.max_zero_fuel             = 62732.0 * Units.kilogram 
     vehicle.mass_properties.cargo                     = 10000.  * Units.kilogram  
     vehicle.envelope.ultimate_load                    = 3.75

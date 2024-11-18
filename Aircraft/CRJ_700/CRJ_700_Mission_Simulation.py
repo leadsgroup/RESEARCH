@@ -9,7 +9,7 @@ Bombardier/Mitsubishi CRJ-700 series aircraft. twin turbofan regional jet with t
 import RCAIDE
 from RCAIDE.Framework.Core import Units   
 from RCAIDE.Library.Methods.Propulsors.Turbofan_Propulsor          import design_turbofan
-from RCAIDE.Library.Methods.Stability.Center_of_Gravity            import compute_component_centers_of_gravity
+#from RCAIDE.Library.Methods.Stability.Center_of_Gravity            import compute_component_centers_of_gravity
 from RCAIDE.Library.Methods.Geometry.Planform                      import segment_properties
 from RCAIDE.Library.Plots                                          import *     
 
@@ -247,8 +247,8 @@ def vehicle_setup():
     segment.percent_span_location  = 0.0
     segment.twist                  = 1.0 * Units.deg
     segment.root_chord_percent     = 1.0
-    segment.dihedral_outboard      = -3.25 * Units.degrees
-    segment.sweeps.quarter_chord   = -30 * Units.degrees 
+    segment.dihedral_outboard      = 3.25 * Units.degrees
+    segment.sweeps.quarter_chord   = 30 * Units.degrees 
     segment.thickness_to_chord     = .11
     wing.append_segment(segment)
 
@@ -666,7 +666,7 @@ def vehicle_setup():
     #------------------------------------------------------------------------------------------------------------------------- 
    
     vehicle.center_of_gravity()    
-    compute_component_centers_of_gravity(vehicle)
+    #compute_component_centers_of_gravity(vehicle)
     
     #------------------------------------------------------------------------------------------------------------------------- 
     # Done ! 
