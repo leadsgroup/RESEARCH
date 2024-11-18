@@ -5,9 +5,9 @@
 # --------------------------------------------------------------------- 
 import sys 
 import RCAIDE  
-from RCAIDE.Core import Units, Data 
+from RCAIDE.Framework.Core import Units, Data 
 from RCAIDE.Methods.Power.Battery.Sizing import initialize_from_mass  
-from RCAIDE.Components.Energy.Storages.Batteries import Battery
+from RCAIDE.Library.Components.Energy.Storages.Batteries import Battery
 from RCAIDE.Core import Units 
 from RCAIDE.Methods.Power.Battery.Sizing import initialize_from_circuit_configuration
 from RCAIDE.Core import Data 

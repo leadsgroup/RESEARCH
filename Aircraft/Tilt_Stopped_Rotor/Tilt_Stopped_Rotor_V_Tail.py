@@ -276,6 +276,7 @@ def vehicle_setup(redesign_rotors=True) :
 
         
     # add to vehicle 
+    wing_segmented_planform(wing, overwrite_reference = True ) 
     vehicle.append_component(wing)  
     
     
@@ -321,6 +322,7 @@ def vehicle_setup(redesign_rotors=True) :
     
         
     # add to vehicle 
+    wing_segmented_planform(wing, overwrite_reference = True ) 
     vehicle.append_component(wing)     
       
     #------------------------------------------------------------------------------------------------------------------------------------

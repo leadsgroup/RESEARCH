@@ -10,9 +10,10 @@ from RCAIDE.Framework.Mission.Common                       import Results, State
 from RCAIDE.Library.Methods.Stability.Common               import compute_dynamic_flight_modes   
 from RCAIDE.Library.Methods.Weights.Moment_of_Inertia      import compute_aircraft_moment_of_inertia
 from RCAIDE.Library.Methods.Weights.Center_of_Gravity      import compute_vehicle_center_of_gravity
-from RCAIDE.Library.Methods.Aerodynamics.Vortex_Lattice_Method.evaluate_VLM import evaluate_no_surrogate
-from RCAIDE.Library.Mission.Common.Update  import orientations
-from RCAIDE.Library.Mission.Common.Unpack_Unknowns import orientation
+from RCAIDE.Library.Methods.Aerodynamics.Vortex_Lattice_Method.evaluate_VLM import evaluate_no_surrogate 
+from RCAIDE.Library.Mission.Common.Update                  import orientations, moments , forces
+from RCAIDE.Library.Mission.Common.Residuals               import flight_dynamics
+from RCAIDE.Library.Mission.Common.Unpack_Unknowns         import orientation
 
 # Routines  
 import Missions 
@@ -20,35 +21,25 @@ import Missions
 import numpy as np
 from copy import  deepcopy
 
-# ----------------------------------------------------------------------        
-#   Setup
-# ----------------------------------------------------------------------    
+# ############################################################################################################################################################       
+# STICK FIXED MISSION 
+# ############################################################################################################################################################    
 
 def stick_fixed_stability_and_drag_procedure(): 
     procedure                 = Process()
-    procedure.modify_vehicle  = modify_stick_fixed_vehicle   
-    procedure.post_process    = longitudinal_static_stability_and_drag_post_process   
+    procedure.modify_vehicle  = modify_stick_fixed_vehicle
+ 
+    procedure.missions                   = Process()
+    procedure.missions.design_mission    = run_stick_fixed_mission     
+    procedure.post_process               = longitudinal_static_stability_and_drag_post_process   
         
-    return procedure 
+    return procedure
+    
+def run_stick_fixed_mission(nexus): 
+    results                    = nexus.results
+    results.stick_fixed_cruise = nexus.missions.stick_fixed_cruise.evaluate()
+    return nexus
 
-def elevator_sizing_setup(): 
-    procedure = Process()  
-    procedure.post_process  = elevator_sizing_post_process   
-    return procedure   
-
-def aileron_rudder_sizing_setup(): 
-    procedure = Process()  
-    procedure.post_process  = aileron_rudder_sizing_post_process   
-    return procedure   
-
-def flap_sizing_setup(): 
-    procedure = Process()    
-    procedure.post_process  = flap_sizing_post_process 
-    return procedure  
-
-# ----------------------------------------------------------------------      
-#   Modify Vehicle 
-# ----------------------------------------------------------------------  
 
 def modify_stick_fixed_vehicle(nexus): 
     '''
@@ -97,89 +88,51 @@ def modify_stick_fixed_vehicle(nexus):
     vehicle.mass_properties.moments_of_inertia.tensor[2, 0] = 0
     vehicle.mass_properties.moments_of_inertia.tensor[2, 1] = 0    
 
-    # Update Mission  
-    nexus.missions = Missions.stick_fixed_stability_setup(nexus.analyses,weight_analysis.vehicle,nexus.cruise_velocity, nexus.cruise_altitude)      
+    # Update Mission
+    AoA_guess      = nexus.missions['stick_fixed_cruise'].segments['cruise'].angle_of_attack 
+    Phi_guess      = nexus.missions['stick_fixed_cruise'].segments['cruise'].bank_angle 
+    nexus.missions = Missions.stick_fixed_stability_setup(nexus.analyses,weight_analysis.vehicle,nexus.cruise_velocity, nexus.cruise_altitude,AoA_guess,Phi_guess)      
     
     # diff the new data
     vehicle.store_diff() 
     
-    return nexus   
-  
+    return nexus
+
 def longitudinal_static_stability_and_drag_post_process(nexus): 
     '''
     This function analyses and post processes the aircraft at cruise conditions. 
     The objective of is to minimize the drag  of a trimmed aircraft 
     '''
-    summary     = nexus.summary 
-    vehicle     = nexus.vehicle_configurations.stick_fixed_cruise 
-    g           = 9.81   
-    m           = vehicle.mass_properties.max_takeoff 
-    S           = vehicle.reference_area
-    atmosphere  = RCAIDE.Framework.Analyses.Atmospheric.US_Standard_1976()
-    atmo_data   = atmosphere.compute_values(altitude = nexus.missions['stick_fixed_cruise'].segments['cruise'].altitude )       
-      
-    
-    # ------------------------------------------------------------------------------------------------------------------------  
-    # Stick Fixed 
-    # ------------------------------------------------------------------------------------------------------------------------       
-    # ------------------------------------------------------------------------------------------------------------------------  
-    # initialize run conditions                                         
-    stick_fixed_conditions                                             = Results()
-    stick_fixed_conditions.freestream.density[:,0]                     = atmo_data.density[0,0]
-    stick_fixed_conditions.freestream.gravity[:,0]                     = g          
-    stick_fixed_conditions.freestream.speed_of_sound[:,0]              = atmo_data.speed_of_sound[0,0] 
-    stick_fixed_conditions.freestream.dynamic_viscosity[:,0]           = atmo_data.dynamic_viscosity[0,0] 
-    stick_fixed_conditions.freestream.temperature[:,0]                 = atmo_data.temperature[0,0] 
-    stick_fixed_conditions.freestream.pressure[:,0]                    = atmo_data.pressure[0,0]   
-    stick_fixed_conditions.freestream.altitude[:,0]                    = nexus.missions['stick_fixed_cruise'].segments['cruise'].altitude     
-    stick_fixed_conditions.freestream.velocity[:,0]                    = nexus.missions['stick_fixed_cruise'].segments['cruise'].air_speed 
-    stick_fixed_conditions.frames.inertial.velocity_vector[:,0]        = nexus.missions['stick_fixed_cruise'].segments['cruise'].air_speed 
-    stick_fixed_conditions.freestream.mach_number                      = stick_fixed_conditions.freestream.velocity/stick_fixed_conditions.freestream.speed_of_sound
-    stick_fixed_conditions.freestream.dynamic_pressure                 = 0.5 * stick_fixed_conditions.freestream.density *  (stick_fixed_conditions.freestream.velocity ** 2)
-    stick_fixed_conditions.freestream.reynolds_number                  = stick_fixed_conditions.freestream.density * stick_fixed_conditions.freestream.velocity / stick_fixed_conditions.freestream.dynamic_viscosity  
-    
-    # ------------------------------------------------------------------------------------------------------------------------  
-    # initialize analyses                                      
-    stability_stick_fixed                                       = RCAIDE.Framework.Analyses.Stability.Vortex_Lattice_Method()   
-    stability_stick_fixed.settings.number_of_spanwise_vortices  = 20
-    stability_stick_fixed.settings.number_of_chordwise_vortices = 4
-    stability_stick_fixed.settings.discretize_control_surfaces  = False
-    stability_stick_fixed.vehicle                               = vehicle 
-    stability_stick_fixed.settings.use_surrogate = False 
-    stability_stick_fixed.initialize()
-     
-    # ------------------------------------------------------------------------------------------------------------------------  
-    # Run VLM
-    stick_fixed_segment =  nexus.missions.stick_fixed_cruise.segments['cruise']
-    stick_fixed_segment.conditions = stick_fixed_conditions
-    stick_fixed_segment.state.conditions = stick_fixed_conditions
-    orientation(stick_fixed_segment)
-    orientations(stick_fixed_segment)
-    evaluate_no_surrogate(stick_fixed_segment,stability_stick_fixed.settings,vehicle) 
-    compute_dynamic_flight_modes(stick_fixed_segment,stability_stick_fixed.settings,vehicle)
-
+    summary         = nexus.summary 
+    vehicle         = nexus.vehicle_configurations.stick_fixed_cruise 
+    segment_results =  nexus.results.stick_fixed.segments.cruise
     # ------------------------------------------------------------------------------------------------------------------------  
     # Post Process Results 
     # ------------------------------------------------------------------------------------------------------------------------     
-    summary.CD              = stick_fixed_conditions.static_stability.coefficients.drag[0,0]  
-    summary.CM_residual     = abs(stick_fixed_conditions.static_stability.coefficients.M[0,0])
-    summary.spiral_criteria = stick_fixed_conditions.static_stability.spiral_criteria[0,0]
-    NP                      = stick_fixed_conditions.static_stability.neutral_point[0,0]
+    summary.CD              = segment_results.conditions.static_stability.coefficients.drag[0,0]  
+    summary.CM_residual     = abs( segment_results.conditions.static_stability.coefficients.M[0,0])
+    summary.spiral_criteria = segment_results.conditions.static_stability.spiral_criteria[0,0]
+    NP                      = segment_results.conditions.static_stability.neutral_point[0,0]
     cg                      = vehicle.mass_properties.center_of_gravity[0][0]
     MAC                     = vehicle.wings.main_wing.chords.mean_aerodynamic
     summary.static_margin   = (NP - cg)/MAC
-    summary.CM_alpha        = stick_fixed_conditions.static_stability.derivatives.CM_alpha[0,0] 
-
-    CL_stick_fixed                   = stick_fixed_conditions.aerodynamics.coefficients.lift.total
-    CL_stick_fixed_required          = m*g/(S*stick_fixed_conditions.freestream.dynamic_pressure)    
-    summary.CL_stick_fixed_residual  = abs(CL_stick_fixed[0, 0] - CL_stick_fixed_required[0, 0])    
+    summary.CM_alpha        = segment_results.conditions.static_stability.derivatives.CM_alpha[0,0]
+    AoA                     = segment_results.conditions.aerodynamics.angles.alpha[0,0] / Units.degree
+ 
+    summary.F_x_residual      =  segment_results.state.residuals.force_x[0,0] 
+    summary.F_y_residual      =  segment_results.state.residuals.force_y[0,0]   
+    summary.F_z_residual      =  segment_results.state.residuals.force_z[0,0] 
+    summary.M_x_residual      =  segment_results.state.residuals.moment_x[0,0] 
+    summary.M_y_residual      =  segment_results.state.residuals.moment_y[0,0] 
+    summary.M_z_residual      =  segment_results.state.residuals.moment_z[0,0]  
  
     if np.count_nonzero(vehicle.mass_properties.moments_of_inertia.tensor) > 0:  
-        summary.phugoid_damping_ratio       = stick_fixed_conditions.dynamic_stability.LongModes.phugoidDamping[0,0] 
-        summary.short_period_damping_ratio  = stick_fixed_conditions.dynamic_stability.LongModes.shortPeriodDamping[0,0] 
-        summary.dutch_roll_frequency        = stick_fixed_conditions.dynamic_stability.LatModes.dutchRollFreqHz[0,0]* (2 * np.pi)  
-        summary.dutch_roll_damping_ratio    = stick_fixed_conditions.dynamic_stability.LatModes.dutchRollDamping[0,0]
-        summary.spiral_doubling_time        = stick_fixed_conditions.dynamic_stability.LatModes.spiralTimeDoubleHalf[0,0] 
+        summary.phugoid_damping_ratio       = segment_results.conditions.dynamic_stability.LongModes.phugoidDamping[0,0] 
+        summary.short_period_damping_ratio  = segment_results.conditions.dynamic_stability.LongModes.shortPeriodDamping[0,0] 
+        summary.dutch_roll_frequency        = segment_results.conditions.dynamic_stability.LatModes.dutchRollFreqHz[0,0]* (2 * np.pi)  
+        summary.dutch_roll_damping_ratio    = segment_results.conditions.dynamic_stability.LatModes.dutchRollDamping[0,0]
+        summary.spiral_doubling_time        = segment_results.conditions.dynamic_stability.LatModes.spiralTimeDoubleHalf[0,0] 
+        print("Angle of Attack            : " + str(AoA))
         print("Drag Coefficient           : " + str(summary.CD))
         print("Moment Coefficient         : " + str(summary.CM_residual))
         print("Static Margin              : " + str(summary.static_margin))
@@ -206,7 +159,28 @@ def longitudinal_static_stability_and_drag_post_process(nexus):
         print("\n\n")    
     
     return nexus  
-    
+
+
+
+# ############################################################################################################################################################   
+# ELEVATOR SIZING
+# ############################################################################################################################################################   
+
+def elevator_sizing_setup(): 
+    procedure = Process()  
+    procedure.missions                   = Process()
+    procedure.missions.design_mission    = run_elevator_sizing_mission     
+    procedure.post_process               = elevator_sizing_post_process   
+    return procedure
+ 
+
+def run_elevator_sizing_mission(nexus): 
+    results                           = nexus.results
+    results.elevator_sizing_pull_up   = nexus.missions.elevator_sizing_pull_up.evaluate()
+    results.elevator_sizing_push_over = nexus.missions.elevator_sizing_push_over.evaluate()
+    return nexus
+ 
+
 def elevator_sizing_post_process(nexus): 
     '''
     This function analyses and post processes the aircraft at the flight conditions required to size
@@ -214,89 +188,18 @@ def elevator_sizing_post_process(nexus):
     1) Stick pull maneuver with a load factor of 3.0
     2) Stick push maneuver with a load factor of -1
     ''' 
-    summary     = nexus.summary  
-    g           = 9.81 
-    vehicle     = nexus.vehicle_configurations.elevator_sizing 
-    m           = vehicle.mass_properties.max_takeoff
-    S           = vehicle.reference_area 
-    V_trim      = nexus.cruise_velocity   
-    V_max       = nexus.missions['elevator_sizing'].segments['cruise'].air_speed 
-    atmosphere  = RCAIDE.Framework.Analyses.Atmospheric.US_Standard_1976()
-    atmo_data   = atmosphere.compute_values(altitude = nexus.missions['elevator_sizing'].segments['cruise'].altitude )
+    summary               = nexus.summary   
+    vehicle               = nexus.vehicle_configurations.elevator_sizing 
+    pull_up_conditions    =  nexus.results.elevator_sizing_pull_up.segments.cruise.conditions
+    push_over_conditions  =  nexus.results.elevator_sizing_push_over.segments.cruise.conditions
 
-    
-    # ------------------------------------------------------------------------------------------------------------------------  
-    # Pull Up Maneuver 
-    # ------------------------------------------------------------------------------------------------------------------------       
-    # ------------------------------------------------------------------------------------------------------------------------  
-    # initialize run conditions        
-    pull_up_conditions                                       = Results()
-    pull_up_conditions.freestream.density                    = np.array([[atmo_data.density[0,0]]])
-    pull_up_conditions.freestream.gravity                    = np.array([[g]])           
-    pull_up_conditions.freestream.speed_of_sound             = np.array([[atmo_data.speed_of_sound[0,0]]]) 
-    pull_up_conditions.freestream.dynamic_pressure           = 0.5 * pull_up_conditions.freestream.density *  (pull_up_conditions.freestream.velocity ** 2)     
-    pull_up_conditions.freestream.velocity                   = np.array([[V_max]])
-    pull_up_conditions.frames.inertial.velocity_vector[:,0]  = V_max
-    pull_up_conditions.freestream.mach_number                = pull_up_conditions.freestream.velocity/pull_up_conditions.freestream.speed_of_sound 
-    
-    # ------------------------------------------------------------------------------------------------------------------------  
-    # initialize analyses                                      
-    stability_pull_up                                       = RCAIDE.Framework.Analyses.Stability.Vortex_Lattice_Method()   
-    stability_pull_up.settings.number_of_spanwise_vortices  = 40
-    stability_pull_up.settings.number_of_chordwise_vortices = 10
-    stability_pull_up.settings.discretize_control_surfaces  = False
-    stability_pull_up.vehicle                               = vehicle 
-    stability_pull_up.settings.use_surrogate = False 
-    stability_pull_up.initialize()
-     
-    # ------------------------------------------------------------------------------------------------------------------------  
-    # Run VLM
-    pull_up_segment =  nexus.missions.elevator_sizing.segments['cruise']
-    pull_up_segment.conditions = pull_up_conditions
-    pull_up_segment.state.conditions = pull_up_conditions
-    orientation(pull_up_segment)
-    orientations(pull_up_segment)
-    evaluate_no_surrogate(pull_up_segment,stability_pull_up.settings,vehicle) 
-    compute_dynamic_flight_modes(pull_up_segment,stability_pull_up.settings,vehicle) 
-    
-    # ------------------------------------------------------------------------------------------------------------------------  
-    # Push Over Maneuver 
-    # ------------------------------------------------------------------------------------------------------------------------          
-    # ------------------------------------------------------------------------------------------------------------------------  
-    # initialize run conditions    
-    push_over_conditions                                               = Results()
-    push_over_conditions.freestream.density                            = np.array([[atmo_data.density[0,0]]]) 
-    push_over_conditions.freestream.gravity                            = np.array([[g]])           
-    push_over_conditions.freestream.speed_of_sound                     = np.array([[atmo_data.speed_of_sound[0,0]]]) 
-    push_over_conditions.freestream.dynamic_pressure                   = 0.5 * push_over_conditions.freestream.density *  (push_over_conditions.freestream.velocity ** 2) 
-    push_over_conditions.aerodynamics.angles.beta                      = np.array([[0.0]])
-    push_over_conditions.aerodynamics.angles.alpha                     = np.array([[0.0]])
-    push_over_conditions.static_stability.coefficients.roll            = np.array([[0.0]])
-    push_over_conditions.static_stability.coefficients.pitch           = np.array([[0.0 ]])  
-    push_over_conditions.aerodynamics.coefficients.lift.total          = CL_push_man
-    push_over_conditions.freestream.velocity                           = V_trim
-    push_over_conditions.frames.inertial.velocity_vector               = V_trim
-    push_over_conditions.freestream.mach_number                        = push_over_conditions.freestream.velocity/push_over_conditions.freestream.speed_of_sound 
-
-    # ------------------------------------------------------------------------------------------------------------------------  
-    # initialize analyses                                      
-    stability_push_over                                       = RCAIDE.Framework.Analyses.Stability.Vortex_Lattice_Method()   
-    stability_push_over.settings.number_of_spanwise_vortices  = 40
-    stability_push_over.settings.number_of_chordwise_vortices = 10
-    stability_push_over.settings.discretize_control_surfaces  = False
-    stability_push_over.vehicle                               = vehicle 
-    stability_push_over.settings.use_surrogate = False 
-    stability_push_over.initialize()
-
-    # ------------------------------------------------------------------------------------------------------------------------  
-    # Run VLM
-    push_over_segment =  nexus.missions.elevator_sizing.segments['cruise']
-    push_over_segment.conditions = push_over_conditions
-    push_over_segment.state.conditions = push_over_conditions
-    orientation(push_over_segment)
-    orientations(push_over_segment)
-    evaluate_no_surrogate(push_over_segment,stability_push_over.settings,vehicle) 
-    compute_dynamic_flight_modes(push_over_segment,stability_push_over.settings,vehicle)  
+    g            = 9.81      
+    S            = vehicle.reference_area 
+    m            = vehicle.mass_properties.max_takeoff  
+    q            = push_over_conditions.freestream.dynamic_pressure[0, 0]    
+    CL_pull_man  = vehicle.maxiumum_load_factor*m*g/(S*q)  
+    CL_push_man  = vehicle.minimum_load_factor*m*g/(S*q)
+            
 
     # ------------------------------------------------------------------------------------------------------------------------  
     # Post Process Results 
@@ -306,7 +209,7 @@ def elevator_sizing_post_process(nexus):
     
     # compute control surface area 
     control_surfaces = ['elevator'] 
-    total_control_surface_area = compute_control_surface_areas(control_surfaces,vehicle)  
+    total_control_surface_area    = compute_control_surface_areas(control_surfaces,vehicle)  
     summary.elevator_surface_area =  total_control_surface_area
     
     # compute lift coefficient and residual from target CLs 
@@ -332,7 +235,31 @@ def elevator_sizing_post_process(nexus):
     print("Elevator Push Defl.: " + str(elevator_push_deflection)) 
     print("\n\n")     
          
-    return nexus    
+    return nexus
+
+
+
+
+
+# ############################################################################################################################################################    
+# AILERON AND RUDDER SIZING
+# ############################################################################################################################################################  
+
+def aileron_rudder_sizing_setup(): 
+    procedure = Process()  
+    procedure.missions                   = Process()
+    procedure.missions.design_mission    = run_aileron_rudder_sizing_mission     
+    procedure.post_process               = aileron_rudder_sizing_post_process   
+    return procedure   
+  
+ 
+def run_aileron_rudder_sizing_mission(nexus): 
+    results                = nexus.results
+    results.aileron_sizing = nexus.missions.aileron_sizing.evaluate()
+    results.turn_criteria  = nexus.missions.turn_criteria.evaluate()  
+    return nexus
+
+
  
 def aileron_rudder_sizing_post_process(nexus):  
     '''
@@ -345,8 +272,7 @@ def aileron_rudder_sizing_post_process(nexus):
     g            = 9.81   
     m            = vehicle.mass_properties.max_takeoff
     S            = vehicle.reference_area 
-    vehicle      = nexus.vehicle_configurations.aileron_rudder_sizing 
-    #CL_trim      = vehicle.trim_cl 
+    vehicle      = nexus.vehicle_configurations.aileron_rudder_sizing  
     V_crosswind  = vehicle.crosswind_velocity 
     atmosphere   = RCAIDE.Framework.Analyses.Atmospheric.US_Standard_1976()
     atmo_data    = atmosphere.compute_values(altitude = nexus.missions['aileron_sizing'].segments['cruise'].altitude )
@@ -476,6 +402,25 @@ def aileron_rudder_sizing_post_process(nexus):
     return nexus     
 
 
+
+
+# ############################################################################################################################################################   
+# FLAP SIZING
+# ############################################################################################################################################################  
+
+def flap_sizing_setup(): 
+    procedure = Process()    
+    procedure.missions                   = Process()
+    procedure.missions.design_mission    = run_flap_sizing_mission    
+    procedure.post_process               = flap_sizing_post_process 
+    return procedure  
+ 
+def run_flap_sizing_mission(nexus): 
+    results                = nexus.results 
+    results.flap_sizing  = nexus.missions.flap_sizing.evaluate()  
+    return nexus
+
+  
 def flap_sizing_post_process(nexus): 
     '''
     This function analyses and post processes the aircraft at the flight conditions required to size
@@ -582,6 +527,11 @@ def flap_sizing_post_process(nexus):
     return nexus    
 
 
+
+
+# ############################################################################################################################################################  
+# SUPPLEMENTAL FUNCTIONS 
+# ############################################################################################################################################################  
 def  compute_control_surface_areas(control_surfaces,vehicle): 
     '''
     This function computes the control suface area used in the objectives of the 
