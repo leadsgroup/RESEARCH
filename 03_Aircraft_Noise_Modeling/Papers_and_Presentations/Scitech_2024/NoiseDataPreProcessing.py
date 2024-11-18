@@ -7,101 +7,71 @@ import numpy as np
 
 ti=time.time()
 
-# Read census tracts and noise data
-census_tracts = gpd.read_file('combined_tracts_data_all.geojson')
+def noise_preprocess(file_list, census_tracts_file):
+    # Load the existing census tracts GeoDataFrame
+    census_tracts = gpd.read_file(census_tracts_file)
 
-
-
-def noise_preprocess(file_list):
     for file in file_list:
         # Load noise data
-        noise_data = pd.read_csv(file)
+        noise_data = pd.read_csv(f'Noise_Data/{file}.csv')
 
         # Extract noise columns (excluding the first two columns for Latitude and Longitude)
         noise_columns = noise_data.columns.values.tolist()[2:]
-        
+
         # Dictionary to store minimum noise levels for each column (used if no points are found within a tract)
         threshold_values = {column: noise_data[column].min() for column in noise_columns}
 
-        # Create a spatial index for noise points
-        spatial_index = index.Index()
-        for idx, noise_point in noise_data.iterrows():
-            spatial_index.insert(idx, (noise_point['Longitude'] - 360, noise_point['Latitude'], 
-                                       noise_point['Longitude'] - 360, noise_point['Latitude']))
+        # Convert noise data to GeoDataFrame with adjusted longitude
+        noise_data['geometry'] = noise_data.apply(
+            lambda row: Point(row['Longitude'] - 360, row['Latitude']), axis=1
+        )
+        noise_gdf = gpd.GeoDataFrame(noise_data, geometry='geometry', crs=census_tracts.crs)
 
-        # Initialize an empty DataFrame for the results per census tract
-        noise_per_tract = pd.DataFrame(columns=['geometry'] + noise_columns)
+        # Perform a spatial join to associate noise points with census tracts
+        joined = gpd.sjoin(noise_gdf, census_tracts, how='inner', predicate='within')
 
-        # Process each census tract
-        for idx, tract in census_tracts.iterrows():
-            tract_polygon = tract['geometry']
+        # Group by census tract and calculate the mean noise levels for each column
+        for column in noise_columns:
+            mean_noise = joined.groupby('index_right')[column].mean()
 
-            # Get noise points within the current tract
-            possible_matches_idx = list(spatial_index.intersection(tract_polygon.bounds))
-            possible_matches = noise_data.iloc[possible_matches_idx]
+            # Add a new column for the calculated mean noise levels to the census tracts GeoDataFrame
+            census_tracts[column] = census_tracts.index.map(mean_noise).fillna(threshold_values[column])
+    # Save the updated GeoDataFrame back to a GeoJSON file
+    census_tracts.to_file(f'{file[0:2]}'+census_tracts_file, driver="GeoJSON")
 
-            # Filter points within the tract and calculate the average noise for each column
-            for column in noise_columns:
-                noise_within_tract = possible_matches[
-                    possible_matches.apply(lambda row: tract_polygon.contains(Point(row['Longitude'] - 360, row['Latitude'])), axis=1)]
-                
-                # Calculate the average noise level or use the threshold value if no points are found
-                if not noise_within_tract.empty:
-                    noise_level = noise_within_tract[column].mean()
-                else:
-                    noise_level = threshold_values[column]
-                
-                # Populate the average noise level and geometry for the current tract
-                noise_per_tract.loc[idx, column] = noise_level
-            noise_per_tract.loc[idx, 'geometry'] = tract_polygon
 
-        # Convert to GeoDataFrame and save as GeoJSON
-        noise_per_tract_gdf = gpd.GeoDataFrame(noise_per_tract, geometry='geometry')
-        noise_per_tract_gdf.to_file(f"{file}_noise.geojson", driver="GeoJSON")
-
-def sensitive_area_preprocess(file_list):
-    demo_per_tract = census_tracts
+def sensitive_area_preprocess(file_list, census_tracts_file):
+    # Load the existing census tracts GeoDataFrame
+    demo_per_tract = gpd.read_file('Raw_Data/'+census_tracts_file)
 
     for file in file_list:
         # Read each CSV file
-        loc_data = pd.read_csv(file+'.csv')
+        loc_data = pd.read_csv(f'Raw_Data/{file}.csv')
 
-        # Create spatial index for the current file's points
-        spatial_index = index.Index()
-        for idx, point in loc_data.iterrows():
-            spatial_index.insert(idx, (point['Longitude'], point['Latitude'], point['Longitude'], point['Latitude']))
+        # Convert points to a GeoDataFrame
+        loc_data['geometry'] = loc_data.apply(
+            lambda row: Point(row['Longitude'], row['Latitude']), axis=1
+        )
+        loc_gdf = gpd.GeoDataFrame(loc_data, geometry='geometry', crs=demo_per_tract.crs)
 
-        # Initialize a temporary DataFrame for the current file
-        temp_df = pd.DataFrame(columns=['geometry'] + [file])
-        
-        # Iterate through each census tract
-        for idx, tract in demo_per_tract.iterrows():
-            tract_polygon = tract['geometry']
+        # Perform a spatial join to associate points with census tracts
+        joined = gpd.sjoin(loc_gdf, demo_per_tract, how='inner', predicate='within')
 
-            # Check if the tract geometry is valid
-            if tract_polygon.is_valid:
-                # Get points within the current tract using spatial indexing
-                possible_matches_idx = list(spatial_index.intersection(tract_polygon.bounds))
-                possible_matches = loc_data.iloc[possible_matches_idx]
+        # Count points within each census tract
+        point_counts = joined.groupby('index_right').size()
 
-                # Filter points that are within the current tract
-                points_within_tract = possible_matches[possible_matches.apply(
-                    lambda row: tract_polygon.contains(Point(row['Longitude'], row['Latitude'])), axis=1)]
+        # Add a new column for the point counts to the census tracts GeoDataFrame
+        demo_per_tract[file] = demo_per_tract.index.map(point_counts).fillna(0).astype(int)
 
-                # Store the count of points in the tract and its centroid location
-                temp_df.loc[idx, 'geometry'] = tract_polygon
-                temp_df.loc[idx, file] = len(points_within_tract)
-        demo_per_tract = pd.merge(demo_per_tract, temp_df, on=['geometry'], how='left')
-    
-    # Save the combined results to one Excel file
-    demo_per_tract.to_file('sensitive_results_tract.geojson', driver="GeoJSON") 
+    # Save the updated GeoDataFrame back to a GeoJSON file
+    demo_per_tract.to_file(census_tracts_file, driver="GeoJSON")
 
 sensitive_list = ['Churches', 'Schools_Colleges_and_Universities']
-sensitive_area_preprocess(sensitive_list)
+sensitive_area_preprocess(sensitive_list,'combined_tracts_data_all.geojson')
 
 
-file_name= ['TR_1000ft_LA_10min_All','SR_1000ft_LA_10min_All']
-noise_preprocess(file_name)
+file_name= ['TR_1000ft_LA_10min_All']
+noise_preprocess(file_name,'combined_tracts_data_all.geojson')
 
 to = time.time()
 

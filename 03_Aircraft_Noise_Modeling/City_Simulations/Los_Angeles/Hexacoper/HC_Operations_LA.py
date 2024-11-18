@@ -19,7 +19,7 @@ import numpy as  np
 local_path_1 =  os.path.split(os.path.split(os.path.split(sys.path[0])[0])[0])[0]
 local_path_2 =  os.path.split(os.path.split(os.path.split(os.path.split(sys.path[0])[0])[0])[0])[0]
 
-sys.path.append( os.path.join(local_path_1, 'Flight_Path'))
+sys.path.append( os.path.join(local_path_1, 'Flight_Path_Functions'))
 sys.path.append(os.path.join(local_path_2, 'Aircraft' + os.path.sep + 'Hexacopter'))
 from Hexacopter              import vehicle_setup, configs_setup
 from compute_route_distances import compute_route_distances
@@ -117,18 +117,11 @@ def main():
         if max_cruise_distance > total_cruise_distance:
             #with  open('results_data.pkl', 'rb') as  file:
                 #results = pickle.load(file)            
-            results = missions.base_mission.evaluate() 
+            results = missions.base_mission.evaluate()
             
-            # post process noise 
-            noise_data   = post_process_noise_data(results,
-                                                   flight_times = operation_flight_times,  
-                                                   time_period  = operation_period,
-                                                   evalaute_noise_metrics = False)  
-          
-            # save data
-            filename =  aircraft_code + '_' + city_code + '_' + origin_code + '_' +  destination_code  + '_' + str(cruise_altitude)    # Aircraft_City_Frequency_Origin_Destination_Altitude
-            save(noise_data, filename + '.res') 
-        
+            filename =  aircraft_code +'_mission' + '_' + city_code + '_' + origin_code + '_' +  destination_code  + '_' + str(cruise_altitude)    # Aircraft_City_Frequency_Origin_Destination_Altitude            
+            with  open((filename + '.pkl'), 'wb') as  file:
+                pickle.dump(results, file) 
     return  
 
 def analyses_setup(configs, origin_coord,destination_coord ,mic_x_res, mic_y_res ,noise_timesteps ,mic_stencil):

@@ -727,7 +727,7 @@ def mission_setup(analyses ):
     segment.analyses.extend(analyses.vertical_climb) 
     segment.altitude_start                             = 0.0  * Units.ft  
     segment.altitude_end                               = 50.  * Units.ft   
-    segment.climb_rate                                 = 100. * Units['ft/min'] 
+    segment.climb_rate                                 = 00. * Units['ft/min'] 
     segment.initial_battery_state_of_charge            = 1.0 
     segment.true_course                                = 0   * Units.degree # this is the true couse of the starting value  
 
@@ -851,8 +851,8 @@ def mission_setup(analyses ):
     segment.analyses.extend(analyses.cruise) 
     segment.climb_rate                = 500. * Units['ft/min']
     segment.air_speed_start           = 125.   * Units['mph']
-    segment.air_speed_end             = 130.  * Units['mph']   
-    segment.altitude_end              = 2500.0 * Units.ft 
+    segment.air_speed_end             = 125.  * Units['mph']   
+    segment.altitude_end              = 1000.0 * Units.ft 
     segment.true_course               = 90 * Units.degree  
     
     # define flight dynamics to model 
@@ -874,8 +874,8 @@ def mission_setup(analyses ):
     segment                          = Segments.Cruise.Constant_Speed_Constant_Altitude(base_segment)
     segment.tag                      = "Cruise"  
     segment.analyses.extend(analyses.cruise) 
-    segment.altitude                 = 2500.0 * Units.ft
-    segment.air_speed                = 130.  * Units['mph']   
+    segment.altitude                 = 1000.0 * Units.ft
+    segment.air_speed                = 125.  * Units['mph']   
     segment.distance                 = 30*Units.nmi
     segment.true_course              = 90 * Units.degree  
     
@@ -897,9 +897,9 @@ def mission_setup(analyses ):
     segment.tag                      = "Descent"  
     segment.analyses.extend(analyses.cruise)
     segment.climb_rate               = -300. * Units['ft/min']
-    segment.air_speed_start          = 130.  * Units['mph'] 
+    segment.air_speed_start          = 125.  * Units['mph'] 
     segment.air_speed_end            = 90 * Units.kts 
-    segment.altitude_start           = 2500.0 * Units.ft
+    segment.altitude_start           = 1000.0 * Units.ft
     segment.altitude_end             = 500.0 * Units.ft
     segment.true_course              = 90 * Units.degree  
 
