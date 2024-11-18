@@ -322,7 +322,8 @@ def vehicle_setup(redesign_rotors=True) :
     segment.root_chord_percent    = wing.taper
     segment.thickness_to_chord    = 0.12  
     segment.append_airfoil(airfoil)
-    wing.Segments.append(segment)      
+    wing.Segments.append(segment)
+    
         
     elevator                              = RCAIDE.Library.Components.Wings.Control_Surfaces.Elevator()
     elevator.tag                          = 'elevator'
@@ -330,11 +331,10 @@ def vehicle_setup(redesign_rotors=True) :
     elevator.span_fraction_end            = 0.9
     elevator.deflection                   = 0.0  * Units.deg
     elevator.chord_fraction               = 0.35
-    wing.append_control_surface(elevator)       
-
-    RCAIDE.Library.Methods.Geometry.Planform.wing_planform(wing)     
+    wing.append_control_surface(elevator)         
 
     # add to vehicle
+    wing_segmented_planform(wing, overwrite_reference = True ) 
     vehicle.append_component(wing)
 
 
@@ -390,6 +390,7 @@ def vehicle_setup(redesign_rotors=True) :
     wing.append_control_surface(rudder) 
     
     # add to vehicle
+    wing_segmented_planform(wing, overwrite_reference = True ) 
     vehicle.append_component(wing)
       
     #------------------------------------------------------------------------------------------------------------------------------------
