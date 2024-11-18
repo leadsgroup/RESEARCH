@@ -41,13 +41,13 @@ def kde_density_plot(ax, coords, boundary_gdf, title):
 # Main function
 def main(): 
 # replace username in file paths with your username
-    boundary_gdf = gpd.read_file('/Users/avacipriani/Desktop/LEADS/RESEARCH/03_Aircraft_Noise_Modeling/Cencus_Data/Los_Angeles_Metroplex/data race la county/Edited_CensusData_LACounty_filtered.geojson')
+    boundary_gdf = gpd.read_file('/Users/avacipriani/Desktop/LEADS/RESEARCH/03_Aircraft_Noise_Modeling/Cencus_Data/Los_Angeles/data race la county/Edited_CensusData_LACounty_filtered.geojson')
 
     # Sensitive area datasets
     data_files = {
-        'Schools': '/Users/avacipriani/Desktop/LEADS/RESEARCH/03_Aircraft_Noise_Modeling/Cencus_Data/Los_Angeles_Metroplex/various other data/Schools_Colleges_and_Universities_-4260208272874444542.geojson',
-        'Hospitals': '/Users/avacipriani/Desktop/LEADS/RESEARCH/03_Aircraft_Noise_Modeling/Cencus_Data/Los_Angeles_Metroplex/various other data/Hospitals_and_Medical_Centers.geojson',
-        'Churches': '/Users/avacipriani/Desktop/LEADS/RESEARCH/03_Aircraft_Noise_Modeling/Cencus_Data/Los_Angeles_Metroplex/various other data/Churches.geojson'
+        'Schools': '/Users/avacipriani/Desktop/LEADS/RESEARCH/03_Aircraft_Noise_Modeling/Cencus_Data/Los_Angeles/various other data/Schools_Colleges_and_Universities_-4260208272874444542.geojson',
+        'Hospitals': '/Users/avacipriani/Desktop/LEADS/RESEARCH/03_Aircraft_Noise_Modeling/Cencus_Data/Los_Angeles/various other data/Hospitals_and_Medical_Centers.geojson',
+        'Churches': '/Users/avacipriani/Desktop/LEADS/RESEARCH/03_Aircraft_Noise_Modeling/Cencus_Data/Los_Angeles/various other data/Churches.geojson'
     }
 
     # Plot KDE for each sensitive area
