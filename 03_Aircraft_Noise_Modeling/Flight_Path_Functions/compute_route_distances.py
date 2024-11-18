@@ -1,7 +1,7 @@
 from  RCAIDE.Framework.Core import  Units 
 import  numpy as  np
 
-def compute_route_distances(x1, y1, x2, y2, radius_Vert1, radius_Vert2, dep_heading_rad, app_heading_rad,high_speed_climb_distance,high_speed_descent_distance):
+def compute_route_distances(x1, y1, x2, y2, radius_Vert1, radius_Vert2, dep_heading_rad, app_heading_rad,high_speed_climb_distance):
     
     dep_heading  =  dep_heading_rad / Units.degree
     app_heading  =  app_heading_rad / Units.degree
@@ -29,7 +29,7 @@ def compute_route_distances(x1, y1, x2, y2, radius_Vert1, radius_Vert2, dep_head
     # ---------------------------------------------------------------------------------------------------------------------- 
     # Path distance:
     # ---------------------------------------------------------------------------------------------------------------------- 
-    path_distance = np.sqrt((y1-y2)**2 + (x1-x2)**2) - radius_Vert1 - radius_Vert2 -  high_speed_climb_distance - high_speed_descent_distance
+    path_distance = np.sqrt((y1-y2)**2 + (x1-x2)**2) - radius_Vert1 - radius_Vert2 -  high_speed_climb_distance  
     
     # ---------------------------------------------------------------------------------------------------------------------- 
     # Path approach heading: The angle measures on the circle that is the traffic apttern are 180 degrees offset from the heading 
