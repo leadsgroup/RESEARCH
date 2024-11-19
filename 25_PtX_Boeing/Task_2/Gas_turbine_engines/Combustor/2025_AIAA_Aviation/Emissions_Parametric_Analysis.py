@@ -168,18 +168,31 @@ def read_results(file_name):
     print(emissions)
     return emissions 
 
-
 # ----------------------------------------------------------------------
 #   Save Results
 # ----------------------------------------------------------------------
-def save_results(results,filename):
-   #  Pickle Backup Files
-    current_dir = os.path.dirname(os.path.abspath(__file__))
-    load_dir = os.path.join(current_dir)
-    pickle_file = os.path.join(load_dir, filename + '.pkl')
+def save_results(results, filename):
+    # Pickle Backup Files
+    save_dir = '/home/matteog2/storage/emission_results/methane'
+    if not os.path.exists(save_dir):
+        os.makedirs(save_dir)  # Create the directory if it doesn't exist
+    pickle_file = os.path.join(save_dir, filename + '.pkl')
     with open(pickle_file, 'wb') as file:
-        pickle.dump(results, file) 
+        pickle.dump(results, file)
     return
+
+
+## ----------------------------------------------------------------------
+##   Save Results
+## ----------------------------------------------------------------------
+#def save_results(results,filename):
+   ##  Pickle Backup Files
+    #current_dir = os.path.dirname(os.path.abspath(__file__))
+    #load_dir = os.path.join(current_dir)
+    #pickle_file = os.path.join(load_dir, filename + '.pkl')
+    #with open(pickle_file, 'wb') as file:
+        #pickle.dump(results, file) 
+    #return
 
 # ------------------------------------------------------------------
 #   Load Results
