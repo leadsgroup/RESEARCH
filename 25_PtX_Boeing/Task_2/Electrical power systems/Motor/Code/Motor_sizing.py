@@ -19,8 +19,8 @@ from   scipy.special     import kelvin
 def main():
     
     #compute_basic_motor_sizing(B_sign, k_w, I_tot, D, L, omega)
-    #example_problem()
-    emrax_348()
+    example_problem()
+    #emrax_348()
     
     return
 
@@ -30,7 +30,7 @@ def emrax_348():
     print("EMRAX 348")
     print("--------------------------------------------------------------")
     
-    corr_factor    = 300                                                   # [-]            correction factor
+    corr_factor    = 100                                                   # [-]            correction factor
     omega_max      = 4000* (2 * np.pi / 60)                                # [RPM -> rad/s] max rotor angular velocity    
     tau_max        = 1000                                                  # [Nm]           max torque                                                                
     omega          = 2500* (2 * np.pi / 60)                                # [RPM -> rad/s] rotor angular velocity 
@@ -133,10 +133,8 @@ def emrax_348():
     Layers         = 2                                                     # [-]            number of winding layers
     N_p            = 1                                                     # [-]            number of parallel paths
     N_t            = 100                                                   # [-]            number of turns per phase
-    I_tot          = 150                                                   # [A]            total current per phase
     D              = 0.2                                                   # [m]            stator diameter
     L              = 0.05                                                  # [m]            stator length
-    k_w            = 0.85                                                  # [-]            winding factor
     B_g1           = 0.8                                                   # [T]            air gap flux density
     N_t            = 100                                                   # [-]            number of turns per phase
     r_copper       = 1.68e-8                                               # [Ω·m]          resistivity of copper
@@ -144,7 +142,6 @@ def emrax_348():
     Fill           = 0.6                                                   # [-]            fill factor
     A_Layer        = 1e-6                                                  # [m²]           cross-sectional area of winding layer
     I_peak_layer   = 50                                                    # [A]            peak current per layer
-    I_tot          = 150                                                   # [A]            total current per phase
     B_sign         = 0.7                                                   # [T]            sign flux density
     R_a            = 0.1                                                   # [Ω]            resistance per winding
     I_rms          = 100                                                   # [A]            RMS current
@@ -186,7 +183,6 @@ def emrax_348():
     R_1            = 0.1                                                   # [m]            inner radius
     R_2            = 0.15                                                  # [m]            outer radius
     t              = 0.01                                                  # [m]            wall thickness
-    omega          = 300                                                   # [rad/s]        rotational speed
     R_cg           = 0.125                                                 # [m]            center of gravity radius
     M_mag          = 5                                                     # [kg]           magnet mass
     M_iron         = 10                                                    # [kg]           iron mass
@@ -276,7 +272,7 @@ def emrax_348():
     # 3.1.1 Power and Torque Density
     # -----------------------------------------------------------------------------------------    
 
-    torque_density = (1/2)*(B_sign*A_sign)*D_in                            # [N/m**2]       torque per unit volume (Eq.6)  
+    torque_density = (np.pi/2)*(B_sign*A_sign)*D_in                            # [N/m**2]       torque per unit volume (Eq.6)  
     power_density  = (omega*torque_density)/1000                           # [kW/m**3]      power per unit rotor volume (Eq.6)   
     
     print("Torque density =", "%0.3f" % torque_density, "[N/m**2]") 
@@ -1162,11 +1158,27 @@ def compute_basic_motor_sizing(B_sign, k_w, I_tot, D, L, omega):
         Loss_cap = np.nan           
     return
 
+def plot_style():
+    plt.rcParams['axes.linewidth'] = 1.0
+    plt.rcParams["font.family"] = "Times New Roman"
+    parameters = {
+        'axes.labelsize': 20,
+        'xtick.labelsize': 14,
+        'ytick.labelsize': 14,
+        'axes.titlesize': 18,
+        'figure.dpi': 130
+    }
+    plt.rcParams.update(parameters)
+    
+   
+
 def example_problem():
     
     # -----------------------------------------------------------------------------------------
     # Solution and plot
     # -----------------------------------------------------------------------------------------      
+    
+    plot_style()
     
     l_m            = np.linspace(0,0.02,100)                    # thickness of the magnet or the size of the element if multiple elements span a magnet
     l_g            = 0.001                                      # airgap size
@@ -1174,25 +1186,53 @@ def example_problem():
     mu_r           = 1.05                                       # relative permeability of the magnetic material
     B_m            = (Br*l_m)/(l_g*mu_r + l_m)                  # airgap field in the gap produced by the magnets
     
-    fig, ax1       = plt.subplots()
-    line1,         = ax1.plot(l_m, B_m, 'b-', label="B_m")
-    ax1.set_xlabel("Magnet Thickness [m]")
-    ax1.set_ylabel("B_m [T]", color='b')
-    ax1.tick_params(axis='y', labelcolor='b')
-    ax1.grid(True)
-    ax1.set_ylim(0, 1.4)
-    line2          = ax1.axhline(y=Br, color='r', linestyle='--', label="Br")
+    #fig, ax1       = plt.subplots()
+    #line1,         = ax1.plot(l_m, B_m, 'b-', label="B_m")
+    #ax1.set_xlabel("Magnet Thickness [m]")
+    #ax1.set_ylabel("B_m [T]", color='b')
+    #ax1.tick_params(axis='y', labelcolor='b')
+    #ax1.grid(True)
+    #ax1.set_ylim(0, 1.4)
+    #line2          = ax1.axhline(y=Br, color='r', linestyle='--', label="Br")
                    
-    ax2            = ax1.twinx()
-    line3,         = ax2.plot(l_m, [bm / lm for bm, lm in zip(B_m, l_m)], 'k-', label="B_m/l_m")
-    ax2.set_ylabel("B_m / l_m [T/m]", color='k')
-    ax2.tick_params(axis='y', labelcolor='k')
+    #ax2            = ax1.twinx()
+    #line3,         = ax2.plot(l_m, [bm / lm for bm, lm in zip(B_m, l_m)], 'k-', label="B_m/l_m")
+    #ax2.set_ylabel("B_m / l_m [T/m]", color='k')
+    #ax2.tick_params(axis='y', labelcolor='k')
+    #ax2.set_ylim(0, 1200)
+    
+    #lines          = [line1, line2, line3]
+    #labels         = [line.get_label() for line in lines]
+    #plt.legend(lines, labels, loc="upper left")
+    ##plt.title("Effect of Magnet Thickness on Gap Magnetic Field")
+
+    fig, ax1 = plt.subplots(figsize=(8, 6))
+    
+    # Plot B_m vs. l_m
+    line1, = ax1.plot(l_m, B_m, 'b-', linewidth=1.5, label="$B_m$")
+    ax1.set_xlabel("Magnet Thickness [m]", fontsize=20)
+    ax1.set_ylabel("$B_m$ [T]", color='b', fontsize=20)
+    ax1.tick_params(axis='y', labelcolor='b', width=1.2)
+    ax1.grid(True, linestyle='--', linewidth=0.5)
+    ax1.set_ylim(0, 1.4)
+    
+    # Add a horizontal line for Br
+    line2 = ax1.axhline(y=Br, color='r', linestyle='--', linewidth=1.5, label="$B_r$")
+    
+    # Add a secondary y-axis for B_m / l_m
+    ax2 = ax1.twinx()
+    line3, = ax2.plot(l_m, [bm / lm for bm, lm in zip(B_m, l_m)], 'k-', linewidth=1.5, label="$B_m/l_m$")
+    ax2.set_ylabel("$B_m / l_m$ [T/m]", color='k', fontsize=20)
+    ax2.tick_params(axis='y', labelcolor='k', width=1.2)
     ax2.set_ylim(0, 1200)
     
-    lines          = [line1, line2, line3]
-    labels         = [line.get_label() for line in lines]
-    plt.legend(lines, labels, loc="upper left")
-    plt.title("Effect of Magnet Thickness on Gap Magnetic Field")
+    # Combine all lines and labels
+    lines = [line1, line2, line3]
+    labels = [line.get_label() for line in lines]
+    ax1.legend(lines, labels, loc="upper left", bbox_to_anchor=(1.05, 1), fontsize=12)
+    
+    # Display the plot
+    plt.tight_layout()
     
     return
 
