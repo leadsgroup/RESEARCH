@@ -58,6 +58,7 @@ nosetests.xml
 .DS_Store
 
 *.pkl
+*.xlsx
 *.dat
 *.mp4
 *.m
