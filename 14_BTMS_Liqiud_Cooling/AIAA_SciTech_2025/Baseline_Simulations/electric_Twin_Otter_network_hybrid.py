@@ -476,14 +476,14 @@ def vehicle_setup(BTMS_flag):
     #------------------------------------------------------------------------------------------------------------------------------------  
     power_bus                            = RCAIDE.Library.Components.Energy.Distributors.Electrical_Bus()
     power_bus.tag                              = 'power_bus'
-    power_bus.number_of_battery_modules  = 6
+    power_bus.number_of_battery_modules  = 4
     
     #------------------------------------------------------------------------------------------------------------------------------------           
     # Battery
     #------------------------------------------------------------------------------------------------------------------------------------  
     bat_module                                             = RCAIDE.Library.Components.Energy.Sources.Battery_Modules.Lithium_Ion_NMC()
-    bat_module.electrical_configuration.series             = 18
-    bat_module.electrical_configuration.parallel           = 124
+    bat_module.electrical_configuration.series             = 20
+    bat_module.electrical_configuration.parallel           = 120
     bat_module.geometrtic_configuration.total              = bat_module.electrical_configuration.parallel*bat_module.electrical_configuration.series  
     bat_module.voltage                                     = bat_module.maximum_voltage 
     bat_module.geometrtic_configuration.normal_count       = 42
@@ -500,8 +500,8 @@ def vehicle_setup(BTMS_flag):
     # Battery
     #------------------------------------------------------------------------------------------------------------------------------------  
     bat_module_1                                             = RCAIDE.Library.Components.Energy.Sources.Battery_Modules.Lithium_Ion_LFP()
-    bat_module_1.electrical_configuration.series             = 50
-    bat_module_1.electrical_configuration.parallel           = 54
+    bat_module_1.electrical_configuration.series             = 40
+    bat_module_1.electrical_configuration.parallel           = 95
     bat_module_1.geometrtic_configuration.total              = bat_module_1.electrical_configuration.parallel*bat_module_1.electrical_configuration.series  
     bat_module_1.voltage                                     = bat_module_1.maximum_voltage 
     bat_module_1.geometrtic_configuration.normal_count       = 42
@@ -743,7 +743,6 @@ def mission_setup(analyses):
     segment.air_speed_start                               = Vstall *1.2  
     segment.air_speed_end                                 = Vstall *1.25
     segment.initial_battery_state_of_charge               = 1.0
-            
     # define flight dynamics to model 
     segment.flight_dynamics.force_x                       = True  
     segment.flight_dynamics.force_z                       = True     
@@ -806,7 +805,7 @@ def mission_setup(analyses):
     # ------------------------------------------------------------------ 
     segment = Segments.Climb.Linear_Speed_Constant_Rate(base_segment)
     segment.tag = "Climb_2"
-    segment.analyses.extend(analyses.lfp)
+    segment.analyses.extend(analyses.nmc)
     segment.altitude_start                                = 2500.0  * Units.feet
     segment.altitude_end                                  = 5000   * Units.feet  
     segment.air_speed_end                                 = 130 * Units.kts 
@@ -831,7 +830,7 @@ def mission_setup(analyses):
     segment.analyses.extend(analyses.nmc) 
     segment.altitude                                      = 5000   * Units.feet 
     segment.air_speed                                     = 130 * Units.kts
-    segment.distance                                      = 25.   * Units.nautical_mile  
+    segment.distance                                      = 13.   * Units.nautical_mile  
     # define flight dynamics to model 
     segment.flight_dynamics.force_x                       = True  
     segment.flight_dynamics.force_z                       = True     
