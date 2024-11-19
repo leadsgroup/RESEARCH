@@ -21,10 +21,12 @@ local_path_1 =  os.path.split(os.path.split(os.path.split(sys.path[0])[0])[0])[0
 local_path_2 =  os.path.split(os.path.split(os.path.split(os.path.split(sys.path[0])[0])[0])[0])[0]
 
 sys.path.append( os.path.join(local_path_1, 'Flight_Path_Functions'))
+sys.path.append( os.path.join(local_path_1, 'Post_Processing_Functions'))
 sys.path.append(os.path.join(local_path_2, 'Aircraft' + os.path.sep + 'Hexacopter'))
-from Hexacopter              import vehicle_setup, configs_setup
-from compute_route_distances import compute_route_distances
-from compute_terrain_points  import compute_terrain_points
+from Hexacopter               import vehicle_setup, configs_setup
+from compute_route_distances  import compute_route_distances
+from compute_terrain_points   import compute_terrain_points
+from Aircraft_Noise_Emissions import read_flight_simulation_results 
 # ----------------------------------------------------------------------------------------------------------------------
 #  Main 
 # ----------------------------------------------------------------------------------------------------------------------  
@@ -50,7 +52,8 @@ def main():
     radius_Vert2                 = 3600* Units.feet # circular pattern radius around vertiport 2
     dep_heading                  = 200 * Units.degree # Heading [degrees] of the departure from vertiport 1
     app_heading                  = 90  * Units.degree# Heading [degrees] of the approach to vertiport 2 
-    max_cruise_distance          = 58*Units.nmi #CHANGE FOR EACH AIRCRAFT 
+    max_cruise_distance          = 58*Units.nmi #CHANGE FOR EACH AIRCRAFT
+    number_of_cpts               = 10
     
     for i in range(len(LA_flight_data)):
         # Extract Data
@@ -90,17 +93,16 @@ def main():
         analyses = analyses_setup(configs, origin_coord,destination_coord ,mic_x_res, mic_y_res ,noise_timesteps ,mic_stencil)
         
         # mission analyses 
-        mission = mission_setup(analyses, radius_Vert1, radius_Vert2, dep_heading, app_heading, dep_sector, app_sector, path_heading, total_cruise_distance,cruise_altitude)        
+        mission = mission_setup(number_of_cpts, analyses, radius_Vert1, radius_Vert2, dep_heading, app_heading, dep_sector, app_sector, path_heading, total_cruise_distance,cruise_altitude)        
         missions = missions_setup(mission) 
          
         if (max_cruise_distance > total_cruise_distance):
             ti =  time.time()
             results = missions.base_mission.evaluate()
-            
             filename =  aircraft_code +'_mission' + '_' + city_code + '_' + origin_code + '_' +  destination_code  + '_' + str(round(cruise_altitude/Units.feet,0)) + 'ft'    # Aircraft_City_Frequency_Origin_Destination_Altitude            
-            with  open((filename + '.pkl'), 'wb') as  file:
-                pickle.dump(results, file)
-                    
+             
+            res =  read_flight_simulation_results(results)
+            save(res, filename, pickle_format=False)
             tf = time.time() 
             print ('time taken: '+ str(round(((tf-ti)/60),3)) + ' mins')
             
@@ -160,7 +162,8 @@ def base_analysis(vehicle, origin_coord,destination_coord ,mic_x_res, mic_y_res 
     noise.settings.microphone_y_resolution          = mic_y_res        
     noise.settings.noise_times_steps                = noise_timesteps 
     noise.settings.number_of_microphone_in_stencil  = mic_stencil     
-    noise.settings.topography_file                  = topography_file
+    noise.settings.topography_file                  = topography_file 
+    noise.settings.noise_hemisphere_radius          = 10     
     analyses.append(noise)
  
     # ------------------------------------------------------------------
@@ -188,7 +191,7 @@ def base_analysis(vehicle, origin_coord,destination_coord ,mic_x_res, mic_y_res 
 # ------------------------------------------------------------------
 #   Baseline Mission Setup
 # ------------------------------------------------------------------
-def mission_setup(analyses, radius_Vert1, radius_Vert2, dep_heading, app_heading, dep_sector, app_sector, path_heading, level_cruise_distance,cruise_altitude): 
+def mission_setup(number_of_cpts,analyses, radius_Vert1, radius_Vert2, dep_heading, app_heading, dep_sector, app_sector, path_heading, level_cruise_distance,cruise_altitude): 
     
     # ------------------------------------------------------------------
     #   Initialize the Mission
@@ -199,6 +202,7 @@ def mission_setup(analyses, radius_Vert1, radius_Vert2, dep_heading, app_heading
     # unpack Segments module
     Segments = RCAIDE.Framework.Mission.Segments  
     base_segment = Segments.Segment()
+    base_segment.state.numerics.number_of_control_points    = number_of_cpts
     
     
     # ------------------------------------------------------------------
