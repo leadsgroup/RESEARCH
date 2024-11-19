@@ -43,16 +43,9 @@ def base_analysis(vehicle, configs):
     aerodynamics                                      = RCAIDE.Framework.Analyses.Aerodynamics.Vortex_Lattice_Method() 
     aerodynamics.vehicle                              = vehicle  
     aerodynamics.settings.use_surrogate               = False 
-    analyses.append(aerodynamics) 
-     
-    stability                                       = RCAIDE.Framework.Analyses.Stability.Vortex_Lattice_Method() 
-    stability.settings.discretize_control_surfaces  = True
-    stability.settings.model_fuselage               = False                
-    stability.settings.model_nacelle                = False
-    stability.settings.use_surrogate                = False 
-    stability.vehicle                               = vehicle
-    analyses.append(stability)
-
+    aerodynamics.settings.trim_aircraft               = False 
+    analyses.append(aerodynamics)
+    
     # ------------------------------------------------------------------
     #  Energy
     # ------------------------------------------------------------------

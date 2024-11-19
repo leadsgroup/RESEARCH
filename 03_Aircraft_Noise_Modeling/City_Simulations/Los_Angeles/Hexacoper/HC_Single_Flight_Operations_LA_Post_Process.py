@@ -3,8 +3,8 @@
 # --------------------------------------------------------------------- 
 from RCAIDE.Framework.Core import Units, Data    
 from RCAIDE.Library.Plots import *        
-from RCAIDE import  save
-import  pickle
+from RCAIDE import  save     
+from RCAIDE import  load   
 
 # python imports 
 import os 
@@ -64,40 +64,21 @@ def main():
         destination_code  = LA_flight_data['Destination Code'][i]
          
         try: 
-            filename =  aircraft_code +'_mission' + '_' + city_code + '_' + origin_code + '_' +  destination_code  + '_' + str(cruise_altitude)   
-            results = load_results(filename)
+            filename =  aircraft_code +'_mission' + '_' + city_code + '_' + origin_code + '_' +  destination_code  + '_' + str(round(cruise_altitude/Units.feet,0)) + 'ft' 
+            results = load(filename)
            
             # post process noise
             processed_noise_data =  post_process_noise_data(results, topography_file, operation_flight_times, operation_period , noise_timesteps,  mic_x_res, mic_y_res)
               
             # save data in json file 
-            processed_filename =  'Processed_'  +  aircraft_code + '_' + city_code + '_' + origin_code + '_' +  destination_code  + '_' + str(cruise_altitude)
+            processed_filename =  'Processed_'  +  aircraft_code + '_' + city_code + '_' + origin_code + '_' +  destination_code  + '_' + str(round(cruise_altitude/Units.feet,0)) + 'ft'
             
-            # get total energy comsumed for each route and append it onto noise 
-            Total_Energy = 0
-            for network in results.segments[0].analyses.energy.vehicle.networks: 
-                busses  = network.busses 
-                for bus in busses:
-                    for battery_module in enumerate(bus.battery_modules): 
-                        E_start_module  = results.segments[0].conditions.energy[bus.tag].battery_modules[battery_module.tag]  
-                        E_end_module    = results.segments[-1].conditions.energy[bus.tag].battery_modules[battery_module.tag]    
-                        Total_Energy    += E_start_module - E_end_module  
-            processed_filename.Route_Energy_Consumed = Total_Energy
-            
+            print("saving results")
             save(processed_noise_data, processed_filename + '.res')
         except:
             pass 
              
-    return    
- 
-# ------------------------------------------------------------------
-#   Load Results
-# ------------------------------------------------------------------   
-def load_results(filename):  
-    load_file = filename + '.pkl' 
-    with open(load_file, 'rb') as file:
-        results = pickle.load(file) 
-    return results  
+    return     
 
  
 if __name__ == '__main__': 

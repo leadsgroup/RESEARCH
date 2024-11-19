@@ -102,10 +102,9 @@ def base_analysis(vehicle):
 
 
     # ------------------------------------------------------------------
-    #  Aerodynamics Analysis
+    #  Stability Analysis
     stability         = RCAIDE.Framework.Analyses.Stability.Vortex_Lattice_Method() 
     stability.vehicle = vehicle
-    stability.settings.drag_coefficient_increment = 0.0000
     analyses.append(stability)    
 
     # ------------------------------------------------------------------
@@ -323,7 +322,8 @@ def vehicle_setup(redesign_rotors=True) :
     segment.root_chord_percent    = wing.taper
     segment.thickness_to_chord    = 0.12  
     segment.append_airfoil(airfoil)
-    wing.Segments.append(segment)      
+    wing.Segments.append(segment)
+    
         
     elevator                              = RCAIDE.Library.Components.Wings.Control_Surfaces.Elevator()
     elevator.tag                          = 'elevator'
@@ -331,11 +331,10 @@ def vehicle_setup(redesign_rotors=True) :
     elevator.span_fraction_end            = 0.9
     elevator.deflection                   = 0.0  * Units.deg
     elevator.chord_fraction               = 0.35
-    wing.append_control_surface(elevator)       
-
-    RCAIDE.Library.Methods.Geometry.Planform.wing_planform(wing)     
+    wing.append_control_surface(elevator)         
 
     # add to vehicle
+    wing_segmented_planform(wing, overwrite_reference = True ) 
     vehicle.append_component(wing)
 
 
@@ -391,6 +390,7 @@ def vehicle_setup(redesign_rotors=True) :
     wing.append_control_surface(rudder) 
     
     # add to vehicle
+    wing_segmented_planform(wing, overwrite_reference = True ) 
     vehicle.append_component(wing)
       
     #------------------------------------------------------------------------------------------------------------------------------------
@@ -606,7 +606,6 @@ def vehicle_setup(redesign_rotors=True) :
     # ########################################################  Energy Network  ######################################################### 
     #------------------------------------------------------------------------------------------------------------------------------------ 
     network                                                = RCAIDE.Framework.Networks.Electric()   
-    
     #==================================================================================================================================== 
     # Tilt Rotor Bus 
     #====================================================================================================================================          
@@ -632,7 +631,8 @@ def vehicle_setup(redesign_rotors=True) :
         module.origin = [modules_origins[m_i]]
         prop_rotor_bus.battery_modules.append(module) 
     prop_rotor_bus.initialize_bus_properties()
-        
+
+    
     #------------------------------------------------------------------------------------------------------------------------------------  
     # Front Propulsors 
     #------------------------------------------------------------------------------------------------------------------------------------    
@@ -765,12 +765,13 @@ def vehicle_setup(redesign_rotors=True) :
     #------------------------------------------------------------------------------------------------------------------------------------  
     # Bus Battery
     #------------------------------------------------------------------------------------------------------------------------------------ 
-    battery_module                                                    = RCAIDE.Library.Components.Energy.Sources.Battery_Modules.Lithium_Ion_NMC()  
+    battery_module                                                    = RCAIDE.Library.Components.Energy.Sources.Battery_Modules.Lithium_Ion_NMC() 
+    battery_module.tag                                                = 'lift_bus_battery'
     battery_module.electrical_configuration.series                    = 140   
     battery_module.electrical_configuration.parallel                  = 10  
-    battery_module.geometrtic_configuration.normal_count              = 56 
-    battery_module.geometrtic_configuration.parallel_count            = 25 
-     
+    battery_module.geometrtic_configuration.normal_count              = 56
+    battery_module.geometrtic_configuration.parallel_count            = 25
+
     modules_origins = [[4, 0.0, 0.0],[4, 0.0, 0.2 ]]  # rear modules are stacked inside cabin
     for m_i in range(lift_rotor_bus.number_of_battery_modules):
         module =  deepcopy(battery_module)
@@ -778,7 +779,7 @@ def vehicle_setup(redesign_rotors=True) :
         module.origin = [modules_origins[m_i]]
         lift_rotor_bus.battery_modules.append(module) 
     lift_rotor_bus.initialize_bus_properties()
-
+    
     #------------------------------------------------------------------------------------------------------------------------------------  
     # Lift Propulsors 
     #------------------------------------------------------------------------------------------------------------------------------------    
@@ -880,20 +881,19 @@ def vehicle_setup(redesign_rotors=True) :
     payload                                                 = RCAIDE.Library.Components.Systems.Avionics()
     payload.power_draw                                      = 10. # Watts 
     payload.mass_properties.mass                            = 1.0 * Units.kg
-    lift_rotor_bus.payload                                  = payload 
+    lift_rotor_bus.payload                                        = payload 
                              
     # Avionics                            
     avionics                                                = RCAIDE.Library.Components.Systems.Avionics()
     avionics.power_draw                                     = 10. # Watts  
     avionics.mass_properties.mass                           = 1.0 * Units.kg
-    lift_rotor_bus.avionics                                 = avionics    
+    lift_rotor_bus.avionics                                       = avionics    
 
    
     network.busses.append(lift_rotor_bus)       
         
     # append energy network 
     vehicle.append_energy_network(network)
-    
 
     #------------------------------------------------------------------------------------------------------------------------------------
     # ##################################   Determine Vehicle Mass Properties Using Physic Based Methods  ################################ 
@@ -913,7 +913,6 @@ def vehicle_setup(redesign_rotors=True) :
     MOI, _ = compute_aircraft_moment_of_inertia(converged_vehicle, CG_location) 
 
     return converged_vehicle
-  
 def configs_setup(vehicle):
     '''
     The configration set up below the scheduling of the nacelle angle and vehicle speed.
@@ -1029,7 +1028,7 @@ def configs_setup(vehicle):
     configs.append(config)
 
     return configs
-
+ 
 
 # ----------------------------------------------------------------------
 #   Define the Mission
@@ -1201,7 +1200,7 @@ def mission_setup(analyses):
     segment.analyses.extend( analyses.forward_flight )                             
     segment.altitude                                                 = 1000.0 * Units.ft  
     segment.air_speed                                                = 110.  * Units['mph']  
-    segment.distance                                                 = 64 *Units.nmi 
+    segment.distance                                                 = 40 *Units.nmi 
     segment.true_course                                              = 30 * Units.degree
                                                                      
     # define flight dynamics to model                                
@@ -1306,33 +1305,6 @@ def mission_setup(analyses):
                                                                          'lift_rotor_propulsor_4', 'lift_rotor_propulsor_5', 'lift_rotor_propulsor_6']]
     mission.append_segment(segment)   
     
-    '''
-    #------------------------------------------------------------------------------------------------------------------------------------  
-    # Low-Speed Transition
-    #------------------------------------------------------------------------------------------------------------------------------------   
-
-    segment                                               = Segments.Cruise.Constant_Acceleration_Constant_Altitude(base_segment)
-    segment.tag                                           = "Low_Speed_Approach_Transition"  
-    segment.analyses.extend( analyses.vertical_transition)   
-    segment.air_speed_end                                 = 50. * Units['ft/min'] 
-    segment.acceleration                                  =  -0.25 * Units['m/s/s']
-    segment.true_course                                   = 30 * Units.degree
-
-    # define flight dynamics to model 
-    segment.flight_dynamics.force_x                        = True  
-    segment.flight_dynamics.force_z                        = True  
-    segment.flight_dynamics.moment_y                       = True     
-    
-    # define flight controls
-    segment.assigned_control_variables.body_angle.active             = True
-    segment.assigned_control_variables.throttle.active               = True           
-    segment.assigned_control_variables.throttle.assigned_propulsors  = [['prop_rotor_propulsor_1','prop_rotor_propulsor_2','prop_rotor_propulsor_3',
-                                                                         'prop_rotor_propulsor_4','prop_rotor_propulsor_5','prop_rotor_propulsor_6'],
-                                                                        ['lift_rotor_propulsor_1','lift_rotor_propulsor_2','lift_rotor_propulsor_3',
-                                                                         'lift_rotor_propulsor_4', 'lift_rotor_propulsor_5', 'lift_rotor_propulsor_6']]
-    mission.append_segment(segment) 
-    
-    '''   
     #------------------------------------------------------------------------------------------------------------------------------------ 
     # Vertical Descent 
     #------------------------------------------------------------------------------------------------------------------------------------ 
@@ -1340,7 +1312,7 @@ def mission_setup(analyses):
     segment.tag                                           = "Vertical_Descent" 
     segment.analyses.extend( analyses.vertical_flight)     
     segment.altitude_start                                = 50.0 * Units.ft   
-    segment.altitude_end                                  = 500.   * Units.ft  
+    segment.altitude_end                                  = 0.   * Units.ft  
     segment.descent_rate                                  = 300. * Units['ft/min']
     segment.true_course                                   = 30 * Units.degree
     
@@ -1357,6 +1329,7 @@ def mission_setup(analyses):
        
     mission.append_segment(segment)  
     
+   
     return mission 
 
 
@@ -1369,6 +1342,17 @@ def missions_setup(mission):
     missions.append(mission)
  
     return missions
+
+def missions_setup(mission): 
+ 
+    missions         = RCAIDE.Framework.Mission.Missions()
+    
+    # base mission 
+    mission.tag  = 'base_mission'
+    missions.append(mission)
+ 
+    return missions
+
 
 def plot_results(results): 
     # Plots fligh conditions 

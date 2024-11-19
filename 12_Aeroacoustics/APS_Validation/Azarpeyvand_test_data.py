@@ -11,6 +11,7 @@ from RCAIDE.Framework.Core import Data
 # Python Imports  
 import pandas as pd
 import numpy as np
+import pickle
 
 def excel_column_to_number(column_letter):
     """
@@ -202,3 +203,10 @@ def Azarpeyvand_test_data():
     Azarpeyvand_data = process_data_structure(Columns)
 
     return Azarpeyvand_data
+
+
+Azarpeyvand_data = Azarpeyvand_test_data()
+
+# Save the data structure
+with open('Azarpeyvand_data.pkl', 'wb') as f:
+    pickle.dump(Azarpeyvand_data, f)

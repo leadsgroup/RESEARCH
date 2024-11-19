@@ -276,6 +276,7 @@ def vehicle_setup(redesign_rotors=True) :
 
         
     # add to vehicle 
+    wing_segmented_planform(wing, overwrite_reference = True ) 
     vehicle.append_component(wing)  
     
     
@@ -321,6 +322,7 @@ def vehicle_setup(redesign_rotors=True) :
     
         
     # add to vehicle 
+    wing_segmented_planform(wing, overwrite_reference = True ) 
     vehicle.append_component(wing)     
       
     #------------------------------------------------------------------------------------------------------------------------------------
@@ -1132,7 +1134,7 @@ def mission_setup(analyses):
     segment.analyses.extend( analyses.forward_flight )                             
     segment.altitude                                                 = 1000.0 * Units.ft  
     segment.air_speed                                                = 110.  * Units['mph']  
-    segment.distance                                                 = 40 *Units.nmi 
+    segment.distance                                                 = 62 *Units.nmi 
     segment.true_course                                              = 30 * Units.degree
                                                                      
     # define flight dynamics to model                                
