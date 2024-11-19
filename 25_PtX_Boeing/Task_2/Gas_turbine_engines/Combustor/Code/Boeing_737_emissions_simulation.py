@@ -26,9 +26,10 @@ def main():
     
     emissions_CO2      = np.zeros_like(time)
     emissions_H2O      = np.zeros_like(time)
+    emissions_CO      = np.zeros_like(time)
     emission_index_CO2 = np.zeros_like(time)
     emission_index_H2O = np.zeros_like(time)
-    
+    emission_index_CO = np.zeros_like(time)
     
     #emissions_methods = ['Emission_Index_Correlation_Method', 'Emission_Index_CRN_Method']
     emissions_methods = ['Emission_Index_CRN_Method']
@@ -52,19 +53,24 @@ def main():
         results = missions.base_mission.evaluate()
         
         last_CO2 = 0
-        last_H2O = 0        
+        last_H2O = 0 
+        last_CO = 0
         
         for i in range(len(results.segments)): 
             time[em,i*4:((i+1)*4)]                = results.segments[i].conditions.frames.inertial.time[:, 0] / Units.min 
             emissions_CO2[em,i*4:((i+1)*4)]       = last_CO2 + results.segments[i].conditions.emissions.total.CO2[:, 0]  
-            emissions_H2O[em,i*4:((i+1)*4)]       = last_H2O + results.segments[i].conditions.emissions.total.H2O[:, 0]
+            emissions_H2O[em,i*4:((i+1)*4)]       = last_H2O + results.segments[i].conditions.emissions.total.H2O[:, 0] 
+            emissions_CO[em,i*4:((i+1)*4)]        = last_CO + results.segments[i].conditions.emissions.total.CO[:, 0]
             last_CO2 = emissions_CO2[em, (i + 1) * 4 - 1]  # Get the last CO2 value for the next segment
-            last_H2O = emissions_H2O[em, (i + 1) * 4 - 1]  # Get the last H2O value for the next segment          
+            last_H2O = emissions_H2O[em, (i + 1) * 4 - 1]  # Get the last H2O value for the next segment
+            last_CO = emissions_CO[em, (i + 1) * 4 - 1]  # Get the last CO value for the next segment          
             if em == 0 and i == range(len(results.segments)):
                 last_CO2 = 0 
-                last_H2O = 0  
+                last_H2O = 0 
+                last_CO = 0  
             emission_index_CO2[em,i*4:((i+1)*4)]  = results.segments[i].conditions.emissions.index.CO2[:, 0]  
-            emission_index_H2O[em,i*4:((i+1)*4)]  = results.segments[i].conditions.emissions.index.H2O[:, 0] 
+            emission_index_H2O[em,i*4:((i+1)*4)]  = results.segments[i].conditions.emissions.index.H2O[:, 0]  
+            emission_index_CO[em,i*4:((i+1)*4)]  = results.segments[i].conditions.emissions.index.CO[:, 0] 
             
             
             
