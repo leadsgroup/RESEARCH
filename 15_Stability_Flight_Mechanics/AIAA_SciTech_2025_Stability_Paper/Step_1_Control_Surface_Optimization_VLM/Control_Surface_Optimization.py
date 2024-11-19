@@ -64,16 +64,16 @@ def main():
         for j in range(len(CG_bat_2)):
             
             
-            # prop rotor battery modules      
-            case_vehicle.networks.electric.busses.prop_rotor_bus.battery_modules.nmc_module_1.origin = np.array([CG_bat_1[i]])
-            case_vehicle.networks.electric.busses.prop_rotor_bus.battery_modules.nmc_module_2.origin = np.array([CG_bat_1[i,0] + case_vehicle.networks.electric.busses.prop_rotor_bus.battery_modules.nmc_module_1.length, 
-                                                                                                                 CG_bat_1[i,1], 
-                                                                                                                 CG_bat_1[i,2]])
-            # lift rotor battery modules 
-            case_vehicle.networks.electric.busses.lift_rotor_bus.battery_modules.nmc_module_1.origin = np.array([CG_bat_2[j]])
-            case_vehicle.networks.electric.busses.lift_rotor_bus.battery_modules.nmc_module_2.origin = np.array([CG_bat_2[i,0], 
-                                                                                                                 CG_bat_2[i,1], 
-                                                                                                                 CG_bat_2[i,2] + case_vehicle.networks.electric.busses.lift_rotor_bus.battery_modules.nmc_module_2.height])
+            ## prop rotor battery modules      
+            #case_vehicle.networks.electric.busses.prop_rotor_bus.battery_modules.nmc_module_1.origin = np.array([CG_bat_1[i]])
+            #case_vehicle.networks.electric.busses.prop_rotor_bus.battery_modules.nmc_module_2.origin = np.array([CG_bat_1[i,0] + case_vehicle.networks.electric.busses.prop_rotor_bus.battery_modules.nmc_module_1.length, 
+                                                                                                                 #CG_bat_1[i,1], 
+                                                                                                                 #CG_bat_1[i,2]])
+            ## lift rotor battery modules 
+            #case_vehicle.networks.electric.busses.lift_rotor_bus.battery_modules.nmc_module_1.origin = np.array([CG_bat_2[j]])
+            #case_vehicle.networks.electric.busses.lift_rotor_bus.battery_modules.nmc_module_2.origin = np.array([CG_bat_2[i,0], 
+                                                                                                                 #CG_bat_2[i,1], 
+                                                                                                                 #CG_bat_2[i,2] + case_vehicle.networks.electric.busses.lift_rotor_bus.battery_modules.nmc_module_2.height])
             size_control_surfaces(CG_bat_1, CG_bat_2, case_vehicle)
         
     return 

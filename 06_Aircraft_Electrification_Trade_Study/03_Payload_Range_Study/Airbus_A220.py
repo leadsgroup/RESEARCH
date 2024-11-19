@@ -561,7 +561,7 @@ def vehicle_setup(propellant):
     fan                                         = RCAIDE.Library.Components.Propulsors.Converters.Fan()   
     fan.tag                                     = 'fan'
     fan.polytropic_efficiency                   = 0.93
-    fan.pressure_ratio                          = 1.4  # 1.7   
+    fan.pressure_ratio                          = 1.7 
     turbofan.fan                                = fan        
 
     # working fluid                   
@@ -581,7 +581,7 @@ def vehicle_setup(propellant):
     low_pressure_compressor                       = RCAIDE.Library.Components.Propulsors.Converters.Compressor()    
     low_pressure_compressor.tag                   = 'lpc'
     low_pressure_compressor.polytropic_efficiency = 0.91
-    low_pressure_compressor.pressure_ratio        = 3.0   # 1.9
+    low_pressure_compressor.pressure_ratio        = 2.65
     turbofan.low_pressure_compressor              = low_pressure_compressor
 
     # high pressure compressor  
@@ -608,9 +608,9 @@ def vehicle_setup(propellant):
     # combustor  
     combustor                                      = RCAIDE.Library.Components.Propulsors.Converters.Combustor()   
     combustor.tag                                  = 'Comb'
-    combustor.efficiency                           = 0.995 
+    combustor.efficiency                           = 0.99 
     combustor.alphac                               = 1.0     
-    combustor.turbine_inlet_temperature            = 1500     # 1500
+    combustor.turbine_inlet_temperature            = 1800     # 1500
     combustor.pressure_ratio                       = 0.95
     combustor.fuel_data                            = propellant
     turbofan.combustor                             = combustor
@@ -618,14 +618,14 @@ def vehicle_setup(propellant):
     # core nozzle
     core_nozzle                                    = RCAIDE.Library.Components.Propulsors.Converters.Expansion_Nozzle()   
     core_nozzle.tag                                = 'core nozzle'
-    core_nozzle.polytropic_efficiency              = 0.93        # 0.95
+    core_nozzle.polytropic_efficiency              = 0.95        # 0.95
     core_nozzle.pressure_ratio                     = 0.99  
     turbofan.core_nozzle                           = core_nozzle
 
     # fan nozzle             
     fan_nozzle                                     = RCAIDE.Library.Components.Propulsors.Converters.Expansion_Nozzle()   
     fan_nozzle.tag                                 = 'fan nozzle'
-    fan_nozzle.polytropic_efficiency               = 0.93       # 0.95
+    fan_nozzle.polytropic_efficiency               = 0.95       # 0.95
     fan_nozzle.pressure_ratio                      = 0.99 
     turbofan.fan_nozzle                            = fan_nozzle 
 
@@ -861,18 +861,18 @@ def mission_setup(analyses):
     base_segment = Segments.Segment()
     base_segment.state.numerics.number_of_control_points = 3
 
-    # ------------------------------------------------------------------------------------------------------------------------------------ 
-    #   Takeoff Roll
-    # ------------------------------------------------------------------------------------------------------------------------------------ 
+    ## ------------------------------------------------------------------------------------------------------------------------------------ 
+    ##   Takeoff Roll
+    ## ------------------------------------------------------------------------------------------------------------------------------------ 
 
-    segment = Segments.Ground.Takeoff(base_segment)
-    segment.tag = "Takeoff" 
-    segment.analyses.extend( analyses.takeoff )
-    segment.velocity_start           = 10.* Units.knots
-    segment.velocity_end             = 125.0 * Units['m/s']
-    segment.friction_coefficient     = 0.04
-    segment.altitude                 = 0.0   
-    mission.append_segment(segment)
+    #segment = Segments.Ground.Takeoff(base_segment)
+    #segment.tag = "Takeoff" 
+    #segment.analyses.extend( analyses.takeoff )
+    #segment.velocity_start           = 10.* Units.knots
+    #segment.velocity_end             = 125.0 * Units['m/s']
+    #segment.friction_coefficient     = 0.04
+    #segment.altitude                 = 0.0   
+    #mission.append_segment(segment)
 
     # ------------------------------------------------------------------
     #   First Climb Segment: Constant Speed Constant Rate  
@@ -943,21 +943,21 @@ def mission_setup(analyses):
     
     mission.append_segment(segment)
     
-    # ------------------------------------------------------------------------------------------------------------------------------------ 
-    #   Landing Roll
-    # ------------------------------------------------------------------------------------------------------------------------------------ 
+    ## ------------------------------------------------------------------------------------------------------------------------------------ 
+    ##   Landing Roll
+    ## ------------------------------------------------------------------------------------------------------------------------------------ 
 
-    segment = Segments.Ground.Landing(base_segment)
-    segment.tag = "Landing"
+    #segment = Segments.Ground.Landing(base_segment)
+    #segment.tag = "Landing"
 
-    segment.analyses.extend( analyses.reverse_thrust ) 
-    segment.velocity_start                                                = 145.0 * Units['m/s']
-    segment.velocity_end                                                  = 10 * Units.knots 
-    segment.friction_coefficient                                          = 0.4
-    segment.altitude                                                      = 0.0   
-    segment.assigned_control_variables.elapsed_time.active                = True  
-    segment.assigned_control_variables.elapsed_time.initial_guess_values  = [[30.]]  
-    mission.append_segment(segment)     
+    #segment.analyses.extend( analyses.reverse_thrust ) 
+    #segment.velocity_start                                                = 145.0 * Units['m/s']
+    #segment.velocity_end                                                  = 10 * Units.knots 
+    #segment.friction_coefficient                                          = 0.4
+    #segment.altitude                                                      = 0.0   
+    #segment.assigned_control_variables.elapsed_time.active                = True  
+    #segment.assigned_control_variables.elapsed_time.initial_guess_values  = [[30.]]  
+    #mission.append_segment(segment)     
 
 
     # ------------------------------------------------------------------

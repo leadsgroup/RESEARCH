@@ -8,33 +8,35 @@ import RCAIDE
 from RCAIDE.Framework.Core import Units  
 
 #   Define the Mission
-def stick_fixed_stability_setup(analyses,vehicle,cruise_velocity,cruise_altitude): 
+def stick_fixed_stability_setup(analyses,vehicle,cruise_velocity,cruise_altitude,angle_of_attack = 0 ,bank_angle= 0): 
     missions                     =RCAIDE.Framework.Mission.Missions()
     max_speed_multiplier         = 1.0 # this multiplier is used to compute V_max from V_nominal
-    missions.stick_fixed_cruise  = base_mission_setup(analyses.stick_fixed_cruise,max_speed_multiplier,cruise_velocity,cruise_altitude) 
+    missions.stick_fixed_cruise  = base_mission_setup(analyses.stick_fixed_cruise,max_speed_multiplier,cruise_velocity,cruise_altitude,angle_of_attack,bank_angle) 
  
     return missions   
 
-def elevator_sizing_setup(analyses,vehicle,cruise_velocity,cruise_altitude): 
+def elevator_sizing_setup(analyses,vehicle,cruise_velocity,cruise_altitude,angle_of_attack,bank_angle): 
     missions =RCAIDE.Framework.Mission.Missions()
-    max_speed_multiplier      = 1.4 # this multiplier is used to compute V_max from V_nominal
-    missions.elevator_sizing  = base_mission_setup(analyses,max_speed_multiplier,cruise_velocity,cruise_altitude)   
- 
+    max_speed_multiplier                = 1.4 # this multiplier is used to compute V_max from V_nominal
+    missions.elevator_sizing_pull_up    = base_mission_setup(analyses,max_speed_multiplier,cruise_velocity,cruise_altitude,angle_of_attack,bank_angle)   
+
+    max_speed_multiplier                = 1.0
+    missions.elevator_sizing_push_over  = base_mission_setup(analyses,max_speed_multiplier,cruise_velocity,cruise_altitude,angle_of_attack,bank_angle)   
     return missions   
 
-def aileron_rudder_sizing_setup(analyses,vehicle,cruise_velocity,cruise_altitude): 
+def aileron_rudder_sizing_setup(analyses,vehicle,cruise_velocity,cruise_altitude,angle_of_attack,bank_angle): 
     missions = RCAIDE.Framework.Mission.Missions()
     max_speed_multiplier      = 1.0     
-    missions.aileron_sizing   = base_mission_setup(analyses,max_speed_multiplier,cruise_velocity,cruise_altitude)  
+    missions.aileron_sizing   = base_mission_setup(analyses,max_speed_multiplier,cruise_velocity,cruise_altitude,angle_of_attack,bank_angle)  
     max_speed_multiplier      = 1.4   # this multiplier is used to compute V_max from V_nominal   
-    missions.turn_criteria    = base_mission_setup(analyses,max_speed_multiplier,cruise_velocity,cruise_altitude) 
+    missions.turn_criteria    = base_mission_setup(analyses,max_speed_multiplier,cruise_velocity,cruise_altitude,angle_of_attack,bank_angle) 
  
     return missions   
     
-def flap_sizing_setup(analyses,vehicle,cruise_velocity,cruise_altitude): 
+def flap_sizing_setup(analyses,vehicle,cruise_velocity,cruise_altitude,angle_of_attack,bank_angle): 
     missions = RCAIDE.Framework.Mission.Missions()
     max_speed_multiplier     = 1.0      
-    missions.flap_sizing     = base_mission_setup(analyses,max_speed_multiplier,cruise_velocity,cruise_altitude)   
+    missions.flap_sizing     = base_mission_setup(analyses,max_speed_multiplier,cruise_velocity,cruise_altitude,angle_of_attack,bank_angle)   
     return missions        
     
 
@@ -42,7 +44,7 @@ def flap_sizing_setup(analyses,vehicle,cruise_velocity,cruise_altitude):
 #   Initialize the Mission
 # ------------------------------------------------------------------    
     
-def base_mission_setup(analyses,max_speed_multiplier,cruise_velocity,cruise_altitude):   
+def base_mission_setup(analyses,max_speed_multiplier,cruise_velocity,cruise_altitude,angle_of_attack,bank_angle):   
     '''
     This sets up the nominal cruise of the aircraft
     '''
@@ -53,17 +55,22 @@ def base_mission_setup(analyses,max_speed_multiplier,cruise_velocity,cruise_alti
     # unpack Segments module
     Segments = RCAIDE.Framework.Mission.Segments
 
-    # base segment
-    base_segment = Segments.Segment() 
-    base_segment.state.numerics.number_control_points    = 3
- 
     #   Cruise Segment: constant Speed, constant altitude 
-    segment                           = Segments.Cruise.Constant_Speed_Constant_Altitude(base_segment)
+    segment                           = Segments.Untrimmed.Untrimmed()
     segment.analyses.extend( analyses )   
-    segment.tag                       = "cruise"   
+    segment.tag                       = "cruise"
+    segment.angle_of_attack           = angle_of_attack
+    segment.bank_angle                = bank_angle
     segment.altitude                  = cruise_altitude
     segment.air_speed                 = cruise_velocity * max_speed_multiplier
-    segment.distance                  =  20.   * Units.nautical_mile   
+
+    segment.flight_dynamics.force_x   = True    
+    segment.flight_dynamics.force_z   = True    
+    segment.flight_dynamics.force_y   = True     
+    segment.flight_dynamics.moment_y  = True 
+    segment.flight_dynamics.moment_x  = True
+    segment.flight_dynamics.moment_z  = True
+    
     mission.append_segment(segment)     
     
     return mission

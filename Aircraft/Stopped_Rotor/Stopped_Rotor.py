@@ -960,7 +960,6 @@ def mission_setup(analyses):
 
     segment                                               = Segments.Climb.Linear_Speed_Constant_Rate(base_segment)
     segment.tag                                           = "Low_Altitude_Climb"   
-    segment.analyses.extend( analyses.high_speed_climb_transition )   
     segment.altitude_end                                  = 500. * Units.ft   
     segment.climb_rate                                    = 628.0  * Units['ft/min']
     segment.air_speed_start                               = 10 *  Units.kts
@@ -1004,7 +1003,7 @@ def mission_setup(analyses):
                                                             'lift_propulsor_5','lift_propulsor_6','lift_propulsor_7','lift_propulsor_8']]
     mission.append_segment(segment) 
   
-    '''
+    
     #------------------------------------------------------------------------------------------------------------------------------------ 
     # Circular departure pattern 
     #------------------------------------------------------------------------------------------------------------------------------------ 
@@ -1173,7 +1172,7 @@ def mission_setup(analyses):
                                                             'lift_propulsor_5','lift_propulsor_6','lift_propulsor_7','lift_propulsor_8'] ]
         
     mission.append_segment(segment)  
-    '''
+    ### here too
     #------------------------------------------------------------------------------------------------------------------------------------ 
     # Low Speed Approach Transition
     #------------------------------------------------------------------------------------------------------------------------------------ 
@@ -1198,7 +1197,7 @@ def mission_setup(analyses):
                                                              ['lift_propulsor_1','lift_propulsor_2','lift_propulsor_3','lift_propulsor_4',
                                                             'lift_propulsor_5','lift_propulsor_6','lift_propulsor_7','lift_propulsor_8']] 
     mission.append_segment(segment)       
-    '''
+    
     #------------------------------------------------------------------------------------------------------------------------------------ 
     # Vertical Descent 
     #------------------------------------------------------------------------------------------------------------------------------------ 
@@ -1206,7 +1205,7 @@ def mission_setup(analyses):
     segment.tag                                           = "Vertical_Descent" 
     segment.analyses.extend( analyses.vertical_flight)     
     segment.altitude_start                                = 50.0 * Units.ft   
-    segment.altitude_end                                  = 500.   * Units.ft  
+    segment.altitude_end                                  = 0.   * Units.ft  
     segment.descent_rate                                  = 300. * Units['ft/min'] 
     segment.true_course                                   = 180    * Units.degree 
     
@@ -1219,7 +1218,7 @@ def mission_setup(analyses):
                                                               'lift_propulsor_5','lift_propulsor_6','lift_propulsor_7','lift_propulsor_8']] 
             
     mission.append_segment(segment)  
-   
+    '''
     return mission 
 
 
