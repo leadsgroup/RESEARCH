@@ -26,10 +26,8 @@ import json
 
 
 def main():
-    fuels = [Ethane(), Methane(), Propane(), Ethanol(), Butanol(), Propanol(), \
-        Jet_A1(), Liquid_Natural_Gas(), Liquid_Petroleum_Gas()]
-    fuel_names = ["Ethane", "Methane", "Propane", "Ethanol", "Butanol", "Propanol", \
-        "Jet A1", "Liquid Natural Gas", "Liquid Petroleum Gas"]
+    fuels = [Jet_A1()]
+    fuel_names = ["Jet A1"]
     
     for index, fuel in enumerate(fuels):
         print("Running simulation for", fuel_names[index])
@@ -54,13 +52,11 @@ def main():
         mission = mission_setup(analyses)
         
         # Step 5 get payload-range diagram
-        output = payload_range_diagram(vehicle, mission, 'cruise', reserves=0., plot_diagram=True, fuel_name=fuel_name)
+        payload_range_diagram(vehicle, mission, 'cruise', reserves=0., plot_diagram=True, fuel_name=fuel_name)
         
-        range = output.range.tolist()
-        payload = output.payload.tolist()
-        with open("06_Aircraft_Electrification_Trade_Study/03_Payload_Range_Study/B737_data/" + fuel_name + "_range.json", "w") as out:
-            out.write(json.dumps({"payload": payload, "range": range}))
-            out.close()
+        #output_filename = "./06_Aircraft_Electrification_Trade_Study/03_Payload_Range_Study/data/B737_" + fuel_name + ".json"
+        #with open(output_filename, "w") as ofile:
+            #ofile.write(json.dumps(output))
         
         end = time.time()
         m, s = divmod(end - start, 60)
