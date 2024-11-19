@@ -5,30 +5,69 @@
 import RCAIDE
 from RCAIDE.Framework.Core import Data , Units 
 from RCAIDE.Library.Methods.Noise.Common.background_noise     import background_noise
-from RCAIDE.Library.Methods.Noise.Metrics import * 
-from RCAIDE.Library.Methods.Noise.Common.generate_zero_elevation_microphone_locations import generate_zero_elevation_microphone_locations 
-from RCAIDE.Library.Methods.Noise.Common.generate_terrain_microphone_locations        import generate_terrain_microphone_locations     
-from RCAIDE.Library.Methods.Noise.Common.compute_relative_noise_evaluation_locations  import compute_relative_noise_evaluation_locations
-from RCAIDE.Library.Methods.Geodesics.compute_point_to_point_geospacial_data          import compute_point_to_point_geospacial_data   
-from RCAIDE.Library.Methods.Noise.Common.background_noise     import background_noise  
-
-# Python package imports   
-import numpy as np  
+from RCAIDE.Library.Methods.Noise.Metrics                     import *    
+from RCAIDE.Library.Methods.Noise.Common.background_noise     import background_noise 
+from RCAIDE.Framework.Analyses.Geodesics.Geodesics            import Calculate_Distance
 from RCAIDE.Library.Plots import * 
 
-# package imports
-import numpy as np
-from scipy.interpolate                                           import RegularGridInterpolator  
-import os 
-import pickle
-import sys 
-import pandas as pd 
-from RCAIDE import  load 
-from RCAIDE import  save  
+# package imports 
+from scipy.interpolate import griddata
+from scipy.interpolate  import RegularGridInterpolator     
+import numpy as np  
+ 
+
+
+def read_flight_simulation_results(results):
+    # Unpack settings      
+    settings   = results.segments[0].analyses.noise.settings
+         
+    # Create data strutures for storing noise data 
+    noise_results          =  Data()
+    noise_results.settings =  Data() 
+    noise_results.settings.topography_file                  = settings.topography_file   
+    noise_results.settings.aircraft_origin_coordinates      = settings.aircraft_origin_coordinates      
+    noise_results.settings.aircraft_destination_coordinates = settings.aircraft_destination_coordinates  
+    noise_results.settings.number_of_microphone_in_stencil  = settings.number_of_microphone_in_stencil 
+    noise_results.settings.noise_hemisphere_phi_angles      = settings.noise_hemisphere_phi_angles
+    noise_results.settings.noise_hemisphere_theta_angles    = settings.noise_hemisphere_theta_angles
+    noise_results.settings.mean_sea_level_altitude          = settings.mean_sea_level_altitude
+    noise_results.settings.noise_hemisphere_radius          = settings.noise_hemisphere_radius  
+                           
+    
+    # Step 3: Create empty arrays to store noise data 
+    N_segs = len(results.segments) 
+    N_cpts = len(results.segments)  
+
+    noise_results.segment_name            = []
+    noise_results.time                    = np.zeros((N_segs,N_cpts,1 )) 
+    noise_results.position_vector         = np.zeros((N_segs,N_cpts,3 )) 
+    noise_results.hemisphere_SPL_dBA      = np.zeros((N_segs,N_cpts, )) 
+    
+    # Step 5: loop through segments and store noise 
+    for seg in range(N_segs):  
+        segment                                     = results.segments[seg] 
+        noise_results.segment_name[seg]             = segment.tag
+        noise_results.time[seg]                     = segment.state.conditions.frames.inertial.time 
+        noise_results.position_vector[seg]          = segment.state.conditions.frames.inertial.position_vector
+        noise_results.hemisphere_SPL_dBA[seg]       = segment.state.conditions.noise.hemisphere_SPL_dBA 
+         
+    Total_Energy = 0
+    # get total energy comsumed for each route and append it onto noise 
+    for network in results.segments[0].analyses.energy.vehicle.networks: 
+        busses  = network.busses 
+        for bus in busses:
+            for battery_module in enumerate(bus.battery_modules): 
+                E_start_module  = results.segments[0].conditions.energy[bus.tag].battery_modules[battery_module.tag]  
+                E_end_module    = results.segments[-1].conditions.energy[bus.tag].battery_modules[battery_module.tag]    
+                Total_Energy    += (E_start_module - E_end_module)  
+    noise_results.energy_consumed = Total_Energy
+        
+    return noise_results
+
 # ----------------------------------------------------------------------------------------------------------------------
 #  Main 
 # ----------------------------------------------------------------------------------------------------------------------  
-def post_process_noise_data(results, topography_file ,  flight_times, time_period , noise_times_steps,  N_gm_x, N_gm_y): 
+def post_process_noise_data(noise_results, topography_file ,  flight_times, time_period , noise_times_steps,  N_gm_x, N_gm_y): 
     """This translates all noise data into metadata for plotting 
     
     Assumptions:
@@ -44,33 +83,32 @@ def post_process_noise_data(results, topography_file ,  flight_times, time_perio
     N/A
     """
   
-    # Step 1: Unpack settings      
-    settings   = results.segments[0].analyses.noise.settings
-    n          = settings.number_of_microphone_in_stencil 
+    # Step 1: Unpack settings       
     noise_data = Data()   
      
-    # Step 2: Determing microhpone points where noise is to be computed
-    microphone_coordinates   = None
-    settings.topography_file = topography_file
-    if settings.topography_file !=  None:
-        compute_point_to_point_geospacial_data(settings)
-        microphone_locations ,microphone_coordinates = generate_terrain_microphone_locations(settings) 
-        noise_data.topography_file                    = settings.topography_file  
-        noise_data.microphone_coordinates             = microphone_coordinates.reshape(N_gm_x,N_gm_y,3)     
-        noise_data.aircraft_origin_coordinates        = settings.aircraft_origin_coordinates          
-        noise_data.aircraft_destination_coordinates   = settings.aircraft_destination_coordinates         
-    else:    
-        microphone_locations =  generate_zero_elevation_microphone_locations(settings)   
-    noise_data.microphone_y_resolution       = N_gm_y
-    noise_data.microphone_x_resolution       = N_gm_x              
-    noise_data.microphone_locations          = microphone_locations.reshape(N_gm_x,N_gm_y,3)         
+    # Step 2: Determing microhpone points where noise is to be computed 
+    noise_results.settings.topography_file  = topography_file 
+    aircraft_origin_coordinates             = noise_results.settings.aircraft_origin_coordinates      
+    aircraft_destination_coordinates        = noise_results.settings.aircraft_destination_coordinates  
+    n                                       = noise_results.settings.number_of_microphone_in_stencil  
+
+    aircraft_origin_location ,  aircraft_destination_location =  compute_point_to_point_geospacial_data(topography_file,aircraft_origin_coordinates,aircraft_destination_coordinates)
+
+    microphone_locations ,microphone_coordinates  = generate_terrain_microphone_locations(topography_file, N_gm_x, N_gm_y) 
+    noise_data.topography_file                    = noise_results.settings.topography_file  
+    noise_data.microphone_coordinates             = microphone_coordinates.reshape(N_gm_x,N_gm_y,3)     
+    noise_data.aircraft_origin_coordinates        = noise_results.settings.aircraft_origin_coordinates          
+    noise_data.aircraft_destination_coordinates   = noise_results.settings.aircraft_destination_coordinates     
+    noise_data.microphone_y_resolution            = N_gm_y
+    noise_data.microphone_x_resolution            = N_gm_x              
+    noise_data.microphone_locations               = microphone_locations.reshape(N_gm_x,N_gm_y,3)         
     
     # Step 3: Create empty arrays to store noise data 
-    num_fligth_segs = len(results.segments)
+    N_segs = len(noise_results.segments)
     num_gm_mic      = len(microphone_locations) 
     
     # Step 4: Initalize Arrays 
-    N_ctrl_pts            = ( num_fligth_segs-1) * (noise_times_steps -1) + noise_times_steps # ensures that noise is computed continuously across segments 
+    N_ctrl_pts            = ( N_segs-1) * (noise_times_steps -1) + noise_times_steps # ensures that noise is computed continuously across segments 
     SPL_dBA               = np.ones((N_ctrl_pts,N_gm_x,N_gm_y))*background_noise()  
     Aircraft_pos          = np.empty((0,3))
     Time                  = np.empty((0))
@@ -79,20 +117,20 @@ def post_process_noise_data(results, topography_file ,  flight_times, time_perio
     idx =  0
     
     # Step 5: loop through segments and store noise 
-    for seg in range(num_fligth_segs):  
-        segment    = results.segments[seg]
-        settings   = segment.analyses.noise.settings  
-        phi        = settings.noise_hemisphere_phi_angles
-        theta      = settings.noise_hemisphere_theta_angles
-        conditions = segment.state.conditions  
-        time       = conditions.frames.inertial.time[:,0]
+    for seg in range(N_segs):   
+        phi                      = noise_results.settingssettings.noise_hemisphere_phi_angles
+        theta                    = noise_results.settingssettings.noise_hemisphere_theta_angles
+        mean_sea_level_altitude  = noise_results.settings.mean_sea_level_altitude
+        time                     = noise_results.time[seg][:,0]
+        position_vector          = noise_results.position_vector[seg]
+        hemisphere_SPL_dBA       = noise_results.hemisphere_SPL_dBA[seg]  
         
         # Step 5.1 : Compute relative microhpone locations 
-        noise_time,noise_pos,RML,PHI,THETA,num_gm_mic  = compute_relative_noise_evaluation_locations(settings, microphone_locations,segment) 
+        noise_time,noise_pos,RML,PHI,THETA,num_gm_mic  = compute_relative_noise_evaluation_locations(mean_sea_level_altitude,noise_times_steps,aircraft_origin_location,microphone_locations,position_vector,time) 
          
         # Step 5.2: Compute aircraft position and npose at interpolated hemisphere locations
         cpt   = 0 
-        if seg == (num_fligth_segs - 1):
+        if seg == (N_segs - 1):
             noise_time_ = noise_time 
         else:
             noise_time_ = noise_time[:-1]
@@ -103,8 +141,8 @@ def post_process_noise_data(results, topography_file ,  flight_times, time_perio
         for i in range(len(noise_time_)):
             # Step 5.2.1 :Noise interpolation 
             delta_t         = (noise_time[i] -time[cpt]) / (time[cpt+1] - time[cpt])
-            SPL_lower       = conditions.noise.hemisphere_SPL_dBA[cpt].reshape(len(phi),len(theta))
-            SPL_uppper      = conditions.noise.hemisphere_SPL_dBA[cpt+1].reshape(len(phi),len(theta))
+            SPL_lower       = hemisphere_SPL_dBA[cpt].reshape(len(phi),len(theta))
+            SPL_uppper      = hemisphere_SPL_dBA[cpt+1].reshape(len(phi),len(theta))
             SPL_gradient    = SPL_uppper -  SPL_lower
             SPL_interp      = SPL_lower + SPL_gradient *delta_t
      
@@ -118,7 +156,7 @@ def post_process_noise_data(results, topography_file ,  flight_times, time_perio
             SPL_dBA_unscaled  = SPL_dBA_surrogate(pts) 
             
             #  Step 5.2.4 Scale data using radius  
-            R_ref                = settings.noise_hemisphere_radius  
+            R_ref                = noise_results.settings.noise_hemisphere_radius  
             SPL_dBA_scaled       = SPL_dBA_unscaled - 20*np.log10(R[locs]/R_ref)
             
             SPL_dBA_temp         = SPL_dBA[idx].flatten()
@@ -152,11 +190,185 @@ def post_process_noise_data(results, topography_file ,  flight_times, time_perio
          L_dn       = L_dn)
     return  processed_noise_data
 
+
+# ----------------------------------------------------------------------
+#  Compute Point to Point Geospacial Data
+# ---------------------------------------------------------------------
+## @ingroup Library-Missions
+def compute_point_to_point_geospacial_data(topography_file,aircraft_origin_coordinates,aircraft_destination_coordinates):
+    """This computes the absolute microphone/observer locations on a defined topography
+            
+    Assumptions: 
+        topography_file is a text file obtained from https://topex.ucsd.edu/cgi-bin/get_data.cgi
     
+    Source:
+        N/A  
+
+    Inputs:   
+        topography_file                        - file of lattide, longitude and elevation points     
+        origin_coordinates                     - coordinates of origin location                                              [degrees]
+        destination_coordinates                - coordinates of destimation location                                            [degrees]  
+        
+    Outputs:                                   
+        latitude_longitude_micrphone_locations - latitude-longitude and elevation coordinates of all microphones in domain      [deg,deg,m]  
+        flight_range                           - gound distance between origin and destination location                      [meters]              
+        true_course                            - true course angle measured clockwise from true north                     [radians]                      
+        origin_location                        - cartesial coordinates of origin location relative to computational domain   [meters]                   
+        destination_xyz_location               - cartesial coordinates of destination location relative to computational domain [meters]    
+    
+    Properties Used:
+        N/A       
+    """     
+    # convert cooordinates to array 
+    origin_coordinates      = np.asarray(aircraft_origin_coordinates)
+    destination_coordinates = np.asarray(aircraft_destination_coordinates)
+    
+    # extract data from file 
+    data  = np.loadtxt(topography_file)
+    Long  = data[:,0]
+    Lat   = data[:,1]
+    Elev  = data[:,2] 
+
+    x_min_coord = np.min(Lat)
+    y_min_coord = np.min(Long)
+    dep_lat     = origin_coordinates[0]
+    dep_long    = origin_coordinates[1]
+    des_lat     = destination_coordinates[0]
+    des_long    = destination_coordinates[1]
+    if dep_long < 0: 
+        dep_long = 360 + dep_long
+    if des_long< 0:
+        des_long =360 +  des_long 
+    
+    bottom_left_map_coords   = np.array([x_min_coord,y_min_coord])  
+    x0_coord                 = np.array([dep_lat,y_min_coord])
+    y0_coord                 = np.array([x_min_coord,dep_long])
+    x1_coord                 = np.array([des_lat,y_min_coord])
+    y1_coord                 = np.array([x_min_coord,des_long])  
+    
+    x0 = RCAIDE.Framework.Analyses.Geodesics.Geodesics.Calculate_Distance(x0_coord,bottom_left_map_coords) * Units.kilometers
+    y0 = RCAIDE.Framework.Analyses.Geodesics.Geodesics.Calculate_Distance(y0_coord,bottom_left_map_coords) * Units.kilometers
+    x1 = RCAIDE.Framework.Analyses.Geodesics.Geodesics.Calculate_Distance(x1_coord,bottom_left_map_coords) * Units.kilometers
+    y1 = RCAIDE.Framework.Analyses.Geodesics.Geodesics.Calculate_Distance(y1_coord,bottom_left_map_coords) * Units.kilometers
+    
+    lat_flag             = np.where(origin_coordinates<0)[0]
+    origin_coordinates[lat_flag]  = origin_coordinates[lat_flag] + 360 
+    long_flag            = np.where(destination_coordinates<0)[0]
+    destination_coordinates[long_flag] = destination_coordinates[long_flag] + 360 
+    z0                   = griddata((Lat,Long), Elev, (np.array([origin_coordinates[0]]),np.array([origin_coordinates[1]])), method='nearest')[0]
+    z1                   = griddata((Lat,Long), Elev, (np.array([destination_coordinates[0]]),np.array([destination_coordinates[1]])), method='nearest')[0] 
+    dep_loc              = np.array([x0,y0,z0])
+    des_loc              = np.array([x1,y1,z1])
+    
+    # pack data 
+    aircraft_origin_location      = dep_loc
+    aircraft_destination_location = des_loc 
+        
+    return aircraft_origin_location ,  aircraft_destination_location
+
+
+# ---------------------------------------------------------------------------------------------------------------------- 
+#  generate_terrain_microphone_locations
+# ----------------------------------------------------------------------------------------------------------------------  
+def generate_terrain_microphone_locations(topography_file, microphone_x_resolution, microphone_y_resolution):
+    """This computes the absolute microphone/observer locations on a defined topography
+            
+    Assumptions: 
+        topography_file is a text file obtained from https://topex.ucsd.edu/cgi-bin/get_data.cgi 
+    """      
+    # extract data from file 
+    data  = np.loadtxt(topography_file) # settings.topography_file) CHANGED 10-15-2024
+    Long  = data[:,0]
+    Lat   = data[:,1]
+    Elev  = data[:,2] 
+    
+    x_min_coord = np.min(Lat)
+    x_max_coord = np.max(Lat)
+    y_min_coord = np.min(Long)
+    y_max_coord = np.max(Long) 
+
+    if y_min_coord < 0: 
+        y_min_coord = 360 + y_min_coord
+    if y_max_coord< 0:
+        y_max_coord=360 + y_max_coord 
+    
+    top_left_map_coords      = np.array([x_max_coord,y_min_coord])
+    bottom_left_map_coords   = np.array([x_min_coord,y_min_coord])  
+    bottom_right_map_coords  = np.array([x_min_coord,y_max_coord]) 
+    
+    x_dist_max = Calculate_Distance(top_left_map_coords,bottom_left_map_coords) * Units.kilometers
+    y_dist_max = Calculate_Distance(bottom_right_map_coords,bottom_left_map_coords) * Units.kilometers
+    
+    [y_pts,x_pts]      = np.meshgrid(np.linspace(0,y_dist_max,microphone_y_resolution),np.linspace(0,x_dist_max,microphone_x_resolution))
+    [long_deg,lat_deg] = np.meshgrid(np.linspace(np.min(Long),np.max(Long),microphone_y_resolution),np.linspace(np.min(Lat),np.max(Lat),microphone_x_resolution)) 
+    z_deg              = griddata((Lat,Long), Elev, (lat_deg, long_deg), method='linear')        
+    cartesian_pts      = np.dstack((np.dstack((x_pts[:,:,None],y_pts[:,:,None] )),z_deg[:,:,None])).reshape(microphone_x_resolution*microphone_y_resolution,3)
+    lat_long_pts       = np.dstack((np.dstack((lat_deg[:,:,None],long_deg[:,:,None] )),z_deg[:,:,None])).reshape(microphone_x_resolution*microphone_y_resolution,3)  
+    return cartesian_pts , lat_long_pts
+
+  
+# ----------------------------------------------------------------------------------------------------------------------  
+#  Relative Noise Evaluatation Locations
+# ----------------------------------------------------------------------------------------------------------------------       
+def compute_relative_noise_evaluation_locations(mean_sea_level_altitude,noise_times_steps, aircraft_origin_location,microphone_locations,position_vector,time):
+    """This computes the relative locations on the surface in the computational domain where the 
+    propogated sound is computed. Vectors point from observer/microphone to aircraft/source  
+            
+    Assumptions: 
+        Acoustic scattering is not modeled
+
+    Source:
+        N/A  
+
+    Inputs:  
+        settings.microphone_locations                - array of microphone locations on the ground  [meters] 
+        segment.conditions.frames.inertial.position_vector  - position of aircraft                         [boolean]                                          
+
+    Outputs: 
+    GM_THETA   - angle measured from ground microphone in the x-z plane from microphone to aircraft 
+    GM_PHI     - angle measured from ground microphone in the y-z plane from microphone to aircraft 
+    RML        - relative microphone locations  
+    num_gm_mic - number of ground microphones
+ 
+    Properties Used:
+        N/A       
+    """       
+  
+    MSL_altitude      = mean_sea_level_altitude
+    N                 = noise_times_steps
+    
+    # rediscretize time and aircraft position to get finer resolution  
+    noise_time        = np.linspace(time[0], time[-1], N) 
+    noise_pos         = np.zeros((N,3)) 
+    noise_pos[:,0]    = np.interp(noise_time,time,position_vector[:,0])
+    noise_pos[:,1]    = np.interp(noise_time,time,position_vector[:,1])
+    noise_pos[:,2]    = np.interp(noise_time,time,position_vector[:,2])
+    
+    num_gm_mic        = len(microphone_locations)  
+    RML               = np.zeros((N,num_gm_mic,3)) 
+    PHI               = np.zeros((N,num_gm_mic))
+    THETA             = np.zeros((N,num_gm_mic)) 
+    
+    for cpt in range(N):  
+        relative_locations         = np.zeros((num_gm_mic,3))
+        relative_locations[:,0]    = microphone_locations[:,0] - (aircraft_origin_location[0] + noise_pos[cpt,0])    
+        relative_locations[:,1]    = microphone_locations[:,1] - (aircraft_origin_location[1] + noise_pos[cpt,1]) 
+        if MSL_altitude:
+            relative_locations[:,2]    = -(noise_pos[cpt,2])  - microphone_locations[:,2] 
+        else:
+            relative_locations[:,2]    = -(noise_pos[cpt,2])
+            
+        RML[cpt,:,:]   = relative_locations 
+        PHI[cpt,:]     =  np.arctan2(np.sqrt(np.square(relative_locations[:, 0]) + np.square(relative_locations[:, 1])),  relative_locations[:, 2])  
+        THETA[cpt,:]   =  np.arctan2(relative_locations[:, 1], relative_locations[:, 0]) 
+    
+    return noise_time,noise_pos,RML,PHI,THETA,num_gm_mic 
+  
+  
+      
 # ----------------------------------------------------------------------------------------------------------------------  
 #  compute_noise_metrics
 # ----------------------------------------------------------------------------------------------------------------------     
-## @ingroup Methods-Noise-Metrics  
 def compute_noise_metrics(noise_data, flight_times,time_period):   
     """This method calculates the Average A-weighted Sound Level (LAeqT), the Day-Night Average Sound Level and the
     Single Event Noise Exposure Level (SENEL) or Sound Exposure Level (SEL)
