@@ -48,6 +48,12 @@ def main():
         
     case_vehicle  = deepcopy(vehicle)
     
+    # delete control surfaces if they have been defined 
+    for wing in case_vehicle.wings:
+        for control_surface in wing.control_surfaces:
+            del wing.control_surfaces[control_surface.tag]
+    
+    
     # prop rotor battery module (first module)
     #                 CG: X,    Y,  Z 
     CG_bat_1 = np.array([[0.25, 0., 0.],
