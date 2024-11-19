@@ -56,6 +56,7 @@ def main():
     number_of_cpts               = 10
     
     noise_results = run_noise_mission(number_of_cpts ) # Run noise simulation
+    filename_list = []
     
     for i in range(len(LA_flight_data)):
         # Extract Data
@@ -106,9 +107,11 @@ def main():
             save(res, filename, pickle_format=False)
             tf = time.time() 
             print ('time taken: '+ str(round(((tf-ti)/60),3)) + ' mins')
+            filename_list.append(filename)
             dummy = 0
-            
-    return  
+    save(filename_list, 'filename_list', pickle_format=False)
+      
+    return
 def run_noise_mission(number_of_cpts):           
     vehicle  = vehicle_setup(redesign_rotors = False)     
     # Set up configs
@@ -141,7 +144,7 @@ def unconverged_analyses_setup(configs, origin_coord,destination_coord ,mic_x_re
 
     # build a base analysis for each config
     for tag,config in configs.items():
-        analysis = unconverged_base_analysis(config, origin_coord,destination_coord ,mic_x_res, mic_y_res ,noise_timesteps ,mic_stencil)
+        analysis = unconverged_base_analysis(config)
         analyses[tag] = analysis
 
     return analyses
