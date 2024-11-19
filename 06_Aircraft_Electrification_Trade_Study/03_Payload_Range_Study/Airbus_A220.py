@@ -50,9 +50,6 @@ def main():
         max_fuel_mass = np.min((fuel_density * 17534.4 / jet_a1_density, 17534.4))
         print("Max Fuel Mass:", max_fuel_mass)
         vehicle.mass_properties.max_fuel = max_fuel_mass
-        MTOW = vehicle.mass_properties.max_takeoff
-        OEW = vehicle.mass_properties.operating_empty
-        MaxPLD = min(vehicle.mass_properties.max_payload, MTOW - max_fuel_mass - OEW)
         
         # Step 2 create aircraft configuration based on vehicle 
         configs  = configs_setup(vehicle)
