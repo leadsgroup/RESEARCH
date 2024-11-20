@@ -1,9 +1,10 @@
 import os
 import json
+import numpy as np
 import matplotlib.pyplot as plt
 
 # Define the directory path
-directory = r"C:\Research\RESEARCH\06_Aircraft_Electrification_Trade_Study\03_Payload_Range_Study\A220_data"
+directory = r"C:\Research\RESEARCH\06_Aircraft_Electrification_Trade_Study\03_Payload_Range_Study\B737_data"
 
 # Check if the directory exists
 if not os.path.exists(directory):
@@ -24,17 +25,24 @@ fuel_colors = {
     "Butanol": colors[1],  # Blue
     "Ethane": colors[2],   # Green
     "Ethanol": colors[3],  # Purple
-    "Liquid Natural Gas": colors[4],      # Orange
-    "Liquid Petroleum Gas": colors[5],      # Yellow
+    "Liquid Natural Gas": colors[4],  # Orange
+    "Liquid Petroleum Gas": colors[5],  # Yellow
     "Methane": colors[6],  # Brown
     "Propane": colors[7],  # Pink
     "Propanol": colors[8]  # Gray
 }
 
+# Set Times New Roman font and 30 pt for general elements
+plt.rcParams["font.family"] = "Times New Roman"
+plt.rcParams["font.size"] = 35
+
 # Prepare the plot
-plt.figure(figsize=(10, 6))  # Set DPI for on-screen display
-plt.xlabel("Range (nmi)")
-plt.ylabel("Payload (kg)")
+plt.figure(figsize=(10, 6))  # High DPI for saving
+plt.xlabel("Range (nmi)", fontsize=35)
+plt.ylabel("Payload (kg)", fontsize=35)
+
+# Adjust tick label size to 20 pt
+plt.tick_params(axis='both', labelsize=25)
 
 # Loop through each JSON file and plot the data
 for file in json_files:
@@ -59,15 +67,20 @@ for file in json_files:
     label = file.replace("_range.json", "")
     color = fuel_colors.get(label, "black")  # Default to black if fuel not explicitly mapped
     
-    # Plot the data
-    plt.plot(range_data, payload_data, label=label, color=color)
+    # Plot the data with increased line width
+    plt.plot(range_data, payload_data, label=label, color=color, linewidth=2.5)
 
-# Add legend and grid
-plt.legend()
-plt.grid(True)
+x_ticks = np.arange(0, 4500 + 500, 500)  # Adjust range as needed
+plt.xticks(x_ticks)
+
+y_ticks = np.arange(0, 20000 + 2000, 2000)  # Adjust range as needed
+plt.yticks(y_ticks)
+
+# Add legend with 20 pt font size for legend text
+plt.legend(fontsize=20)
 
 # Save the plot with high DPI
-plt.savefig("A220_payload_range_plot.png", dpi=600)  # Save with 300 DPI
+plt.savefig("payload_range_plot.png", dpi=600)  # Save with 300 DPI
 
 # Show the plot
 plt.show()
