@@ -2,6 +2,7 @@
 #   Imports
 # --------------------------------------------------------------------- 
 from RCAIDE.Framework.Core import Units, Data    
+from RCAIDE.Library.Methods.Noise.Common.decibel_arithmetic   import SPL_arithmetic  
 from RCAIDE.Library.Plots import *       
 from RCAIDE import  load 
 from RCAIDE import  save
@@ -34,52 +35,43 @@ def main():
     mic_y_res                 = 1600     
     
     # create data structures to store noise 
-    L_eq_T     = np.empt((0,mic_x_res,mic_y_res))      
-    L_eq_24hr  = np.empt((0,mic_x_res,mic_y_res))      
-    L_dn       = np.empt((0,mic_x_res,mic_y_res))      
-    L_max      = np.empt((0,mic_x_res,mic_y_res))
+    Total_L_eq       = np.empt((mic_x_res,mic_y_res))      
+    Total_L_eq_24hr  = np.empt((mic_x_res,mic_y_res))      
+    Total_L_dn       = np.empt((mic_x_res,mic_y_res))      
+    Total_L_max      = np.empt((mic_x_res,mic_y_res))
     
     # create data structure to store energy comsumed at each airport 
-    unique_airports =  0 # TO CORRECT 
+    unique_airports = LA_flight_data['Origin Code'].unique()
     E_origin        = np.zeros(len(unique_airports))
     
+    processed_filename_list_name =  aircraft_code + '_' + city_code +  '_Single_Flights_Processed' 
+    filename_list                = load(processed_filename_list_name)    
     for i in  range(len(LA_flight_data)):
         # Extract Data
-        origin_code       = LA_flight_data['Origin Code'][i]   
-        destination_code  = LA_flight_data['Destination Code'][i]
+        origin_code       = LA_flight_data['Origin Code'][i]    
          
-        try:  
-            # load data
-            processed_filename  =  'Processed_'  +  aircraft_code + '_' + city_code + '_' + origin_code + '_' +  destination_code  + '_' + str(cruise_altitude)    # Aircraft_City_Frequency_Origin_Destination_Altitude
-            PND =  load(processed_filename + '.res') # this is a json file 
+        for filename in filename_list: 
+            # load data 
+            PND =  load(filename + '.res') # this is a json file 
             
-            # concatenate  L_eq,L_eq_24hr, L_dn
-            L_eq_T    = np.concatenate((L_eq_T   ,PND.L_eq), axis = 0)
-            L_eq_24hr = np.concatenate((L_eq_24hr,PND.L_eq_24hr), axis = 0)
-            L_dn      = np.concatenate((L_dn     ,PND.L_dn), axis = 0)
-            L_max     = np.concatenate((L_max    ,PND.L_max ), axis = 0)
+            # concatenate  L_eq,L_eq_24hr,L_dn
+            Total_L_eq      = SPL_arithmetic( np.concatenate((Total_L_eq[:,:,None]     ,PND.L_eq[:,:,None]), axis = 2), sum_axis=2)
+            Total_L_eq_24hr = SPL_arithmetic(np.concatenate((Total_L_eq_24hr[:,:,None],PND.L_eq_24hr[:,:,None]), axis = 2), sum_axis=2)
+            Total_L_dn      = SPL_arithmetic(np.concatenate((Total_L_dn[:,:,None]     ,PND.L_dn[:,:,None]), axis = 2), sum_axis=2)
+            Total_L_max     = np.max(np.concatenate((Total_L_max[:,:,None]    ,PND.L_max[:,:,None] ), axis = 2), axis=2)
             
             # add the energy consumed by each origin airport
             loc           =  np.where( unique_airports,origin_code)
-            E_origin[loc] += PND.Route_Energy_Consumed
-        except:
-            pass 
-    
-    
-    # Add all routes
-    Total_L_eq      =  0 #NEEDS TO BE UPDATES 
-    Total_L_eq_24hr =  0 #NEEDS TO BE UPDATES 
-    Total_L_dn      =  0 #NEEDS TO BE UPDATES 
-    Total_L_max     =  0 #NEEDS TO BE UPDATES 
+            E_origin[loc] += PND.Route_Energy_Consumed   
     
     # create data structure
     cumulative_PND = Data(
-        Total_L_eq = Total_L_eq,
+        Total_L_eq      = Total_L_eq,
         Total_L_eq_24hr = Total_L_eq_24hr, 
-        Total_L_dn = Total_L_dn, 
-        Total_L_max = Total_L_max,
-        Total_Energy = E_origin, 
-        Airports      = unique_airports, 
+        Total_L_dn      = Total_L_dn, 
+        Total_L_max     = Total_L_max,
+        Total_Energy    = E_origin, 
+        Airports        = unique_airports, 
     )
     
     # save data 

@@ -212,10 +212,10 @@ def elevator_sizing_post_process(nexus):
     summary.CL_pull_residual     = abs(CL_pull_man - CL_pull_man_required)  
     summary.CL_push_residual     = abs(CL_push_man - CL_push_man_required)  
    
-    summary.pull_up_CZ_residual     =  pull_up.conditions.static_stability.coefficients.Z[0,0] # pull_up.state.residuals.force_z[0,0]  
-    summary.pull_up_CM_residual     =  pull_up.conditions.static_stability.coefficients.M[0,0] # pull_up.state.residuals.moment_y[0,0]    
-    summary.push_over_CZ_residual   =  push_over.conditions.static_stability.coefficients.Z[0,0] # push_over.state.residuals.force_z[0,0]  
-    summary.push_over_CM_residual   =  push_over.conditions.static_stability.coefficients.M[0,0] # push_over.state.residuals.moment_y[0,0]
+    summary.pull_up_CZ_residual     =  abs(pull_up.conditions.static_stability.coefficients.Z[0,0]) # pull_up.state.residuals.force_z[0,0]  
+    summary.pull_up_CM_residual     =  abs(pull_up.conditions.static_stability.coefficients.M[0,0]) # pull_up.state.residuals.moment_y[0,0]    
+    summary.push_over_CZ_residual   =  abs(push_over.conditions.static_stability.coefficients.Z[0,0]) # push_over.state.residuals.force_z[0,0]  
+    summary.push_over_CM_residual   =  abs(push_over.conditions.static_stability.coefficients.M[0,0]) # push_over.state.residuals.moment_y[0,0]
       
     # compute elevator deflections 
     elevator_pull_deflection          = pull_up.conditions.control_surfaces.elevator.deflection[0,0]  
@@ -252,7 +252,9 @@ def aileron_rudder_sizing_setup():
  
 def run_aileron_rudder_sizing_mission(nexus): 
     results                     = nexus.results 
-    results.roll_maneuver       = nexus.missions.roll_maneuver.evaluate() 
+    results.roll_maneuver       = nexus.missions.roll_maneuver.evaluate()
+    vehicle               = nexus.vehicle_configurations.aileron_rudder_roll_sizing 
+    nexus.missions.crosswind_maneuver.segments.cruise.sideslip_angle =  np.tan(vehicle.crosswind_velocity/nexus.cruise_velocity)  
     results.crosswind_maneuver  = nexus.missions.crosswind_maneuver.evaluate()  
     return nexus
 
@@ -275,7 +277,6 @@ def aileron_rudder_sizing_post_process(nexus):
     V                     = roll.conditions.freestream.velocity[0, 0]  
     span                  = vehicle.wings.main_wing.spans.projected
     desired_roll_rate     = 0.07 
-     
 
     # ------------------------------------------------------------------------------------------------------------------------  
     # Post Process Results 
@@ -284,15 +285,8 @@ def aileron_rudder_sizing_post_process(nexus):
     # ------------------------------------------------------------------------------------------------------------------------  
     # Aileron 
     # compute lift coefficient and residual from target CLs 
-    CL_roll_man                   = roll.conditions.aerodynamics.coefficients.lift.total[0,0] 
     CL_p                          = roll.conditions.static_stability.derivatives.CL_p[0,0] 
     CL_delta_a                    = roll.conditions.static_stability.derivatives.CL_a[0,0] 
-    CL_crosswind_man              = crosswind.conditions.aerodynamics.coefficients.lift.total[0,0]
-    CL_roll_required              = vehicle.maxiumum_load_factor*m*g/(S*roll.conditions.freestream.dynamic_pressure[0,0] ) 
-    CL_crosswind_required         = vehicle.minimum_load_factor*m*g/(S*crosswind.conditions.freestream.dynamic_pressure[0,0] )
-    summary.CL_roll_residual      = abs(CL_roll_man - CL_roll_required)  
-    summary.CL_crosswind_residual = abs(CL_crosswind_man - CL_crosswind_required)  
-     
     
     # compute aileron deflections 
     aileron_roll_deflection               = roll.conditions.control_surfaces.aileron.deflection[0,0]   
@@ -300,17 +294,17 @@ def aileron_rudder_sizing_post_process(nexus):
     summary.aileron_roll_deflection       = abs(aileron_roll_deflection)  
     summary.aileron_crosswind_deflection  = abs(aileron_crosswind_deflection)
  
-    summary.crosswind_CY_residual    =  crosswind.conditions.static_stability.coefficients.Y[0,0] 
-    summary.crosswind_CZ_residual    =  crosswind.conditions.static_stability.coefficients.Z[0,0]
-    summary.crosswind_CL_residual    =  crosswind.conditions.static_stability.coefficients.L[0,0]
-    summary.crosswind_CM_residual    =  crosswind.conditions.static_stability.coefficients.M[0,0]
-    summary.crosswind_CN_residual    =  crosswind.conditions.static_stability.coefficients.N[0,0]   
+    summary.crosswind_CY_residual    =  abs(crosswind.conditions.static_stability.coefficients.Y[0,0])
+    summary.crosswind_CZ_residual    =  abs(crosswind.conditions.static_stability.coefficients.Z[0,0])
+    summary.crosswind_CL_residual    =  abs(crosswind.conditions.static_stability.coefficients.L[0,0])
+    summary.crosswind_CM_residual    =  abs(crosswind.conditions.static_stability.coefficients.M[0,0])
+    summary.crosswind_CN_residual    =  abs(crosswind.conditions.static_stability.coefficients.N[0,0])  
 
     # ------------------------------------------------------------------------------------------------------------------------  
     # Rudder     
     if vehicle.rudder_flag: 
-        rudder_roll_deflection               = roll.conditions.control_surfaces.rudder.deflection  
-        rudder_crosswind_deflection          = crosswind.conditions.control_surfaces.rudder.deflection 
+        rudder_roll_deflection               = roll.conditions.control_surfaces.rudder.deflection[0,0]  
+        rudder_crosswind_deflection          = crosswind.conditions.control_surfaces.rudder.deflection[0,0] 
         summary.rudder_roll_deflection       = abs(rudder_roll_deflection)  
         summary.rudder_crosswind_deflection  = abs(rudder_crosswind_deflection)  
     else:
@@ -330,7 +324,6 @@ def aileron_rudder_sizing_post_process(nexus):
     print("Total Rudder Aileron Surface Area : " + str(summary.aileron_rudder_surface_area)) 
     print("Roll Rate                         : " + str(roll_rate)) 
     print("Aileron Roll Defl                 : " + str(aileron_roll_deflection/Units.degree)) 
-    print("Rudder Roll Defl                  : " + str(rudder_roll_deflection/Units.degree))  
     print("Aileron Crosswind Defl            : " + str(aileron_crosswind_deflection/Units.degree)) 
     print("Rudder  Crosswind Defl            : " + str(rudder_crosswind_deflection/Units.degree )) 
     print("\n\n")     
@@ -351,7 +344,9 @@ def flap_sizing_setup():
  
 def run_flap_sizing_mission(nexus): 
     results                         = nexus.results 
-    results.flap_sizing_flaps_up    = nexus.missions.flap_sizing_flaps_up.evaluate()  
+    results.flap_sizing_flaps_up    = nexus.missions.flap_sizing_flaps_up.evaluate()
+
+    vehicle                         = nexus.vehicle_configurations.flap_sizing_flaps_down.wings.main_wing.control_surfaces.flap.deflection = 12 *Units.degree      
     results.flap_sizing_flaps_down  = nexus.missions.flap_sizing_flaps_down.evaluate()  
     return nexus
 

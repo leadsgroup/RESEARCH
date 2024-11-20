@@ -36,7 +36,6 @@ def aileron_rudder_sizing_setup(analyses,vehicle,cruise_velocity,cruise_altitude
     missions.roll_maneuver                      = base_mission_setup(analyses.aileron_rudder_roll_sizing,max_speed_multiplier,cruise_velocity,cruise_altitude,angle_of_attack,sideslip_angle,bank_angle, roll_rate,pitch_rate,yaw_rate)    
     
     max_speed_multiplier                        = 1.0
-    sideslip_angle                              =  np.tan(vehicle.crosswind_velocity/cruise_velocity)  
     missions.crosswind_maneuver                 = base_mission_setup(analyses.aileron_rudder_crosswind_sizing,max_speed_multiplier,cruise_velocity,cruise_altitude,angle_of_attack,sideslip_angle,bank_angle, roll_rate,pitch_rate,yaw_rate)    
     
     return missions   
@@ -52,6 +51,7 @@ def flap_sizing_setup(analyses,vehicle,cruise_velocity,cruise_altitude,angle_of_
     missions.flap_sizing_flaps_up       = base_mission_setup(analyses.flap_sizing,max_speed_multiplier,stall_velocity,cruise_altitude,angle_of_attack,sideslip_angle,bank_angle, roll_rate,pitch_rate,yaw_rate) 
     
     missions.flap_sizing_flaps_down     = base_mission_setup(analyses.flap_sizing,max_speed_multiplier,stall_velocity,cruise_altitude,angle_of_attack,sideslip_angle,bank_angle, roll_rate,pitch_rate,yaw_rate)  
+    
     return missions        
     
 

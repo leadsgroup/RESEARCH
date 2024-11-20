@@ -105,6 +105,11 @@ def flap_sizing_configs_setup(vehicle):
     configs     = RCAIDE.Library.Components.Configs.Config.Container()  
     base_config = RCAIDE.Library.Components.Configs.Config(vehicle)  
     config      = RCAIDE.Library.Components.Configs.Config(base_config)
-    config.tag  = 'flap_sizing'   
-    configs.append(config)   
+    config.tag  = 'flap_sizing_flaps_up'   
+    configs.append(config)
+    
+
+    config      = RCAIDE.Library.Components.Configs.Config(base_config)
+    config.tag  = 'flap_sizing_flaps_down'   
+    configs.append(config)       
     return configs

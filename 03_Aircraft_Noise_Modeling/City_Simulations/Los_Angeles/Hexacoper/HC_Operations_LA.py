@@ -100,16 +100,26 @@ def main():
         missions = missions_setup(mission) 
          
         if (max_cruise_distance > total_cruise_distance):
-            ti =  time.time()
-            results = missions.base_mission.evaluate()
-            filename =  aircraft_code +'_mission' + '_' + city_code + '_' + origin_code + '_' +  destination_code  + '_' + str(round(cruise_altitude/Units.feet,0)) + 'ft'    # Aircraft_City_Frequency_Origin_Destination_Altitude            
-            res =  read_flight_simulation_results(results)
-            save(res, filename, pickle_format=False)
-            tf = time.time() 
-            print ('time taken: '+ str(round(((tf-ti)/60),3)) + ' mins')
+            
+            # evaluate mission, not that it purposely does not converge
+            results  = missions.base_mission.evaluate()
+             
+            N_segs = len(results.segments) 
+            N_cpts = results.segments[0].state.numerics.number_of_control_points  
+            for seg in range(N_segs):
+                for i in range(N_cpts):  
+                    results.segments[seg].state.conditions.noise.hemisphere_SPL_dBA[i]  = noise_results.segments[seg].state.conditions.noise.hemisphere_SPL_dBA[i]          
+             
+            filename =  aircraft_code +'_mission' + '_' + city_code + '_' + origin_code + '_' +  destination_code  + '_' + str(round(cruise_altitude/Units.feet,0)) + 'ft'   
+            res      =  read_flight_simulation_results(results)
+            
+            # save results 
+            save(res, filename + '.res')
+            
             filename_list.append(filename)
-            dummy = 0
-    save(filename_list, 'filename_list', pickle_format=False)
+        
+    filename_list_name =  aircraft_code + '_' + city_code +  '_Single_Flights_Raw'
+    save(filename_list, filename_list_name + '.res')
       
     return
 def run_noise_mission(number_of_cpts):           
@@ -370,7 +380,7 @@ def noise_mission_setup(number_of_cpts, analyses, radius_Vert1=3600*Units.ft, ra
     segment.assigned_control_variables.throttle.assigned_propulsors  = [['rotor_propulsor_1','rotor_propulsor_2','rotor_propulsor_3',
                                                                          'rotor_propulsor_4','rotor_propulsor_5','rotor_propulsor_6']]  
     mission.append_segment(segment)
-    '''
+ 
     # ------------------------------------------------------------------
     #  First Transition Segment
     # ------------------------------------------------------------------  
@@ -397,7 +407,7 @@ def noise_mission_setup(number_of_cpts, analyses, radius_Vert1=3600*Units.ft, ra
     segment.assigned_control_variables.body_angle.active             = True 
     
     mission.append_segment(segment)
-
+    '''
     
     # ------------------------------------------------------------------
     #   First Climb Segment: Constant Acceleration, Constant Altitude
@@ -705,7 +715,7 @@ def unconverged_mission_setup(number_of_cpts,analyses, radius_Vert1, radius_Vert
     
     mission.append_segment(segment)
 
-    
+    '''
     # ------------------------------------------------------------------
     #   First Climb Segment: Constant Acceleration, Constant Altitude
     # ------------------------------------------------------------------
@@ -935,7 +945,7 @@ def unconverged_mission_setup(number_of_cpts,analyses, radius_Vert1, radius_Vert
     segment.assigned_control_variables.throttle.assigned_propulsors  = [['rotor_propulsor_1','rotor_propulsor_2','rotor_propulsor_3',
                                                                          'rotor_propulsor_4','rotor_propulsor_5','rotor_propulsor_6']]      
     mission.append_segment(segment)      
-  
+    '''
     return mission  
 
 def missions_setup(mission): 
