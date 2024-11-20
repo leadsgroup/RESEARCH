@@ -1,21 +1,21 @@
 import  pandas as  pd
 
 
-def Optimization_Data_2_CSV(CG_bat_1, 
-                            CG_bat_2,
-                            vehicle_tag, 
-                            output_stick_fixed, 
-                            output_elevator_sizing, 
-                            output_aileron_and_rudder_sizing, 
-                            output_flap_sizing, 
-                            planform_optimization_problem, 
-                            elevator_sizing_optimization_problem, 
-                            aileron_rudder_sizing_optimization_problem, 
-                            flap_sizing_optimization_problem,
-                            elapsed_time_stick_fixed,
-                            elapsed_time_elevator_sizing,
-                            elapsed_time_aileron_and_rudder_sizing,
-                            elapsed_time_flap_sizing):
+def save_data(CG_bat_1, 
+            CG_bat_2,
+            vehicle_tag, 
+            output_stick_fixed, 
+            output_elevator_sizing, 
+            output_aileron_and_rudder_sizing, 
+            output_flap_sizing, 
+            planform_optimization_problem, 
+            elevator_sizing_optimization_problem, 
+            aileron_rudder_sizing_optimization_problem, 
+            flap_sizing_optimization_problem,
+            elapsed_time_stick_fixed,
+            elapsed_time_elevator_sizing,
+            elapsed_time_aileron_and_rudder_sizing,
+            elapsed_time_flap_sizing):
     
     data_stick_fixed = pd.DataFrame({ 
                                      'mw_root_twist'             : [output_stick_fixed[0]],   
