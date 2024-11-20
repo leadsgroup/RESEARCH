@@ -187,12 +187,12 @@ def elevator_sizing_post_process(nexus):
     pull_up    = nexus.results.elevator_sizing_pull_up.segments.cruise 
     push_over  = nexus.results.elevator_sizing_push_over.segments.cruise
 
-    g            = 9.81      
-    S            = vehicle.reference_area 
-    m            = vehicle.mass_properties.max_takeoff  
-    q            = push_over.conditions.freestream.dynamic_pressure[0, 0]    
-    CL_pull_man  = vehicle.maxiumum_load_factor*m*g/(S*q)  
-    CL_push_man  = vehicle.minimum_load_factor*m*g/(S*q)
+    g                     = 9.81      
+    S                     = vehicle.reference_area 
+    m                     = vehicle.mass_properties.max_takeoff  
+    q                     = push_over.conditions.freestream.dynamic_pressure[0, 0]   
+    CL_pull_man_required  = vehicle.maxiumum_load_factor*m*g/(S*q)  
+    CL_push_man_required  = vehicle.minimum_load_factor*m*g/(S*q)
             
 
     # ------------------------------------------------------------------------------------------------------------------------  
@@ -208,17 +208,15 @@ def elevator_sizing_post_process(nexus):
     
     # compute lift coefficient and residual from target CLs 
     CL_pull_man                  = pull_up.conditions.aerodynamics.coefficients.lift.total[0,0]
-    CL_push_man                  = push_over.conditions.aerodynamics.coefficients.lift.total[0,0]
-    CL_pull_man_required         = vehicle.maxiumum_load_factor*m*g/(S*pull_up.conditions.freestream.dynamic_pressure[0,0]) 
-    CL_push_man_required         = vehicle.minimum_load_factor*m*g/(S*push_over.conditions.freestream.dynamic_pressure[0,0])
+    CL_push_man                  = push_over.conditions.aerodynamics.coefficients.lift.total[0,0] 
     summary.CL_pull_residual     = abs(CL_pull_man - CL_pull_man_required)  
     summary.CL_push_residual     = abs(CL_push_man - CL_push_man_required)  
    
-    summary.pull_up_F_z_residual     =  pull_up.state.residuals.force_z[0,0]  
-    summary.pull_up_M_y_residual     =  pull_up.state.residuals.moment_y[0,0]    
-    summary.push_over_F_z_residual   =  push_over.state.residuals.force_z[0,0]  
-    summary.push_over_M_y_residual   =  push_over.state.residuals.moment_y[0,0]   
-    
+    summary.pull_up_CZ_residual     =  pull_up.conditions.static_stability.coefficients.Z[0,0] # pull_up.state.residuals.force_z[0,0]  
+    summary.pull_up_CM_residual     =  pull_up.conditions.static_stability.coefficients.M[0,0] # pull_up.state.residuals.moment_y[0,0]    
+    summary.push_over_CZ_residual   =  push_over.conditions.static_stability.coefficients.Z[0,0] # push_over.state.residuals.force_z[0,0]  
+    summary.push_over_CM_residual   =  push_over.conditions.static_stability.coefficients.M[0,0] # push_over.state.residuals.moment_y[0,0]
+      
     # compute elevator deflections 
     elevator_pull_deflection          = pull_up.conditions.control_surfaces.elevator.deflection[0,0]  
     elevator_push_deflection          = push_over.conditions.control_surfaces.elevator.deflection[0,0] 
@@ -264,16 +262,19 @@ def aileron_rudder_sizing_post_process(nexus):
     '''
     This function analyses and post processes the aircraft at the flight conditions required to size
     the aileron and rudder. These conditions are:
-    1) A controlled roll at a  rate of 0.07
+    1) A controlled roll at a  rate of 0.07 https://www.conachenuavs.com/downloads/ProAdvice%203%20-%20AILERON%20SIZING.pdf
     2) Trimmed flight in a 20 knot crosswind
     ''' 
     summary               = nexus.summary  
     g                     = 9.81   
+    vehicle               = nexus.vehicle_configurations.aileron_rudder_roll_sizing  
     m                     = vehicle.mass_properties.max_takeoff
-    S                     = vehicle.reference_area 
-    vehicle               = nexus.vehicle_configurations.aileron_rudder_roll_sizing     
+    S                     = vehicle.reference_area    
     roll                  = nexus.results.roll_maneuver.segments.cruise 
-    crosswind             = nexus.results.crosswind_maneuver.segments.cruise 
+    crosswind             = nexus.results.crosswind_maneuver.segments.cruise
+    V                     = roll.conditions.freestream.velocity[0, 0]  
+    span                  = vehicle.wings.main_wing.spans.projected
+    desired_roll_rate     = 0.07 
      
 
     # ------------------------------------------------------------------------------------------------------------------------  
@@ -284,28 +285,26 @@ def aileron_rudder_sizing_post_process(nexus):
     # Aileron 
     # compute lift coefficient and residual from target CLs 
     CL_roll_man                   = roll.conditions.aerodynamics.coefficients.lift.total[0,0] 
-    CL_crosswind_man              = crosswind.conditions.aerodynamics.coefficients.lift.total[0,0] 
+    CL_p                          = roll.conditions.static_stability.derivatives.CL_p[0,0] 
+    CL_delta_a                    = roll.conditions.static_stability.derivatives.CL_a[0,0] 
+    CL_crosswind_man              = crosswind.conditions.aerodynamics.coefficients.lift.total[0,0]
     CL_roll_required              = vehicle.maxiumum_load_factor*m*g/(S*roll.conditions.freestream.dynamic_pressure[0,0] ) 
     CL_crosswind_required         = vehicle.minimum_load_factor*m*g/(S*crosswind.conditions.freestream.dynamic_pressure[0,0] )
     summary.CL_roll_residual      = abs(CL_roll_man - CL_roll_required)  
     summary.CL_crosswind_residual = abs(CL_crosswind_man - CL_crosswind_required)  
+     
     
     # compute aileron deflections 
     aileron_roll_deflection               = roll.conditions.control_surfaces.aileron.deflection[0,0]   
     aileron_crosswind_deflection          = crosswind.conditions.control_surfaces.aileron.deflection[0,0]  
     summary.aileron_roll_deflection       = abs(aileron_roll_deflection)  
     summary.aileron_crosswind_deflection  = abs(aileron_crosswind_deflection)
-     
-    summary.roll_F_y_residual         =  roll.state.residuals.force_y[0,0]   
-    summary.roll_F_z_residual         =  roll.state.residuals.force_z[0,0] 
-    summary.roll_M_x_residual         =  roll.state.residuals.moment_x[0,0] 
-    summary.roll_M_y_residual         =  roll.state.residuals.moment_y[0,0] 
-    summary.roll_M_z_residual         =  roll.state.residuals.moment_z[0,0]   
-    summary.crosswind_F_y_residual    =  crosswind.state.residuals.force_y[0,0]   
-    summary.crosswind_F_z_residual    =  crosswind.state.residuals.force_z[0,0] 
-    summary.crosswind_M_x_residual    =  crosswind.state.residuals.moment_x[0,0] 
-    summary.crosswind_M_y_residual    =  crosswind.state.residuals.moment_y[0,0] 
-    summary.crosswind_M_z_residual    =  crosswind.state.residuals.moment_z[0,0]    
+ 
+    summary.crosswind_CY_residual    =  crosswind.conditions.static_stability.coefficients.Y[0,0] 
+    summary.crosswind_CZ_residual    =  crosswind.conditions.static_stability.coefficients.Z[0,0]
+    summary.crosswind_CL_residual    =  crosswind.conditions.static_stability.coefficients.L[0,0]
+    summary.crosswind_CM_residual    =  crosswind.conditions.static_stability.coefficients.M[0,0]
+    summary.crosswind_CN_residual    =  crosswind.conditions.static_stability.coefficients.N[0,0]   
 
     # ------------------------------------------------------------------------------------------------------------------------  
     # Rudder     
@@ -319,13 +318,17 @@ def aileron_rudder_sizing_post_process(nexus):
         summary.rudder_roll_deflection      = 0  
         rudder_crosswind_deflection         = 0  
         summary.rudder_crosswind_deflection = 0 
+         
+    roll_rate =  - (CL_delta_a / CL_p) * aileron_roll_deflection * (2 * V * span)
         
     # compute control surface area 
     control_surfaces = ['aileron','rudder'] 
     total_control_surface_area = compute_control_surface_areas(control_surfaces,vehicle)   
     summary.aileron_rudder_surface_area =  total_control_surface_area
+    summary.roll_rate_residual          = (roll_rate - desired_roll_rate)
 
     print("Total Rudder Aileron Surface Area : " + str(summary.aileron_rudder_surface_area)) 
+    print("Roll Rate                         : " + str(roll_rate)) 
     print("Aileron Roll Defl                 : " + str(aileron_roll_deflection/Units.degree)) 
     print("Rudder Roll Defl                  : " + str(rudder_roll_deflection/Units.degree))  
     print("Aileron Crosswind Defl            : " + str(aileron_crosswind_deflection/Units.degree)) 
