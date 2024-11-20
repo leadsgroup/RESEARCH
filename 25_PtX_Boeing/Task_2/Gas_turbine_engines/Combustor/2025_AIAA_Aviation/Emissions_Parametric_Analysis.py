@@ -20,20 +20,20 @@ import pickle
 
 def main():
     
-    comb_lengths      = np.linspace(0.05,  0.6,   5)
-    comb_areas        = np.linspace(0.05,  0.2,   5)
+    comb_lengths      = np.linspace(0.05, 0.45,   5)
+    comb_areas        = np.linspace(0.05, 0.45,   5)
     temperatures      = np.linspace(800,   900,   5)
     pressures         = np.linspace(4e6,   6e6,   5)
-    mdots             = np.linspace(40,     80,   5) 
+    mdots             = np.linspace(60,     90,   5) 
     FARs              = np.linspace(0.05,  0.7,   5)    
     
-    #parametric_analyses(comb_lengths, comb_areas, temperatures, pressures, mdots, FARs)         
+    parametric_analyses(comb_lengths, comb_areas, temperatures, pressures, mdots, FARs)         
     
-    emissions_L_A = read_results('emissions_L_A')
-    emissions_T_P = read_results('emissions_T_P')
-    emissions_M_F = read_results('emissions_M_F')
+    #emissions_L_A = read_results('emissions_L_A')
+    #emissions_T_P = read_results('emissions_T_P')
+    #emissions_M_F = read_results('emissions_M_F')
     
-    plot_results(emissions_L_A, emissions_T_P, emissions_M_F, comb_lengths, comb_areas, temperatures, pressures, mdots, FARs)
+    #plot_results(emissions_L_A, emissions_T_P, emissions_M_F, comb_lengths, comb_areas, temperatures, pressures, mdots, FARs)
       
     return    
 
@@ -50,7 +50,8 @@ def parametric_analyses(comb_lengths, comb_areas, temperatures, pressures, mdots
     EI_H2O_M_F          = np.zeros_like(EI_CO2_M_F)    
 
     combustor           = RCAIDE.Library.Components.Propulsors.Converters.Combustor()
-    combustor.fuel_data = RCAIDE.Library.Attributes.Propellants.Jet_A1()  
+    #combustor.fuel_data = RCAIDE.Library.Attributes.Propellants.Jet_A1()
+    combustor.fuel_data = RCAIDE.Library.Attributes.Propellants.Methane()     
 
     for l in range(len(comb_lengths)):  
         for a in range(len(comb_areas)):   
@@ -167,18 +168,31 @@ def read_results(file_name):
     print(emissions)
     return emissions 
 
-
 # ----------------------------------------------------------------------
 #   Save Results
 # ----------------------------------------------------------------------
-def save_results(results,filename):
-   #  Pickle Backup Files
-    current_dir = os.path.dirname(os.path.abspath(__file__))
-    load_dir = os.path.join(current_dir)
-    pickle_file = os.path.join(load_dir, filename + '.pkl')
+def save_results(results, filename):
+    # Pickle Backup Files
+    save_dir = '/home/matteog2/storage/emission_results/methane'
+    if not os.path.exists(save_dir):
+        os.makedirs(save_dir)  # Create the directory if it doesn't exist
+    pickle_file = os.path.join(save_dir, filename + '.pkl')
     with open(pickle_file, 'wb') as file:
-        pickle.dump(results, file) 
+        pickle.dump(results, file)
     return
+
+
+## ----------------------------------------------------------------------
+##   Save Results
+## ----------------------------------------------------------------------
+#def save_results(results,filename):
+   ##  Pickle Backup Files
+    #current_dir = os.path.dirname(os.path.abspath(__file__))
+    #load_dir = os.path.join(current_dir)
+    #pickle_file = os.path.join(load_dir, filename + '.pkl')
+    #with open(pickle_file, 'wb') as file:
+        #pickle.dump(results, file) 
+    #return
 
 # ------------------------------------------------------------------
 #   Load Results
@@ -192,7 +206,9 @@ def load_results(filename):
     return results
 
 def plot_results(emissions_L_A, emissions_T_P, emissions_M_F, comb_lengths, comb_areas, temperatures, pressures, mdots, FARs):
-    ps =  plot_style(number_of_lines = len(emissions_L_A)) 
+    
+    plot_style()
+    
     data = emissions_L_A['EI_CO2']
     
     comb_diameters    = 2 * np.sqrt(comb_areas / np.pi)
@@ -296,31 +312,17 @@ def plot_results(emissions_L_A, emissions_T_P, emissions_M_F, comb_lengths, comb
     
     return
 
-def plot_style(number_of_lines= 10): 
-    plt.rcParams['axes.linewidth'] = 1.
+def plot_style():
+    plt.rcParams['axes.linewidth'] = 1.0
     plt.rcParams["font.family"] = "Times New Roman"
-    parameters = {'axes.labelsize': 20,
-                  'xtick.labelsize': 14,
-                  'ytick.labelsize': 14,
-                  'axes.titlesize': 18,
-                  #figure.dpi': 1200
-                  }
-
-    # Universal Plot Settings  
+    parameters = {
+        'axes.labelsize': 20,
+        'xtick.labelsize': 14,
+        'ytick.labelsize': 14,
+        'axes.titlesize': 18,
+        'figure.dpi': 130
+    }
     plt.rcParams.update(parameters)
-    plot_parameters                        = Data()
-    plot_parameters.line_width             = 1.5  
-    plot_parameters.line_style             = ['-','--']
-    plot_parameters.marker_size            = 4
-    plot_parameters.legend_fontsize        = '12'
-    plot_parameters.legend_title_font_size = 14
-    plot_parameters.axis_font_size         = 16
-    plot_parameters.title_font_size        = 16   
-    plot_parameters.markers                =  ['o','x','o','v','P','p','^','D','*']
-    plot_parameters.color                  = cm.inferno(np.linspace(0,0.9,number_of_lines)) 
-
-    return plot_parameters
-
 
 
 if __name__ == '__main__': 

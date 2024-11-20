@@ -498,7 +498,7 @@ def vehicle_setup(BTMS_flag):
     atmo_data                                              = atmosphere.compute_values(altitude = HAS.design_altitude)     
     HAS.coolant_inlet_temperature                          = atmo_data.temperature[0,0]  
     HAS.design_battery_operating_temperature               = 313
-    HAS.design_heat_removed                                = 150000 /bus.number_of_battery_modules 
+    HAS.design_heat_removed                                = 12500
     HAS                                                    = design_wavy_channel(HAS,bat_module) 
     
     for battery_module in bus.battery_modules:
@@ -508,8 +508,9 @@ def vehicle_setup(BTMS_flag):
     HEX                                                    = RCAIDE.Library.Components.Thermal_Management.Heat_Exchangers.Cross_Flow_Heat_Exchanger() 
     HEX.design_altitude                                    = 1500. * Units.feet 
     HEX.inlet_temperature_of_cold_fluid                    = atmo_data.temperature[0,0]   
-    HEX                                                    = design_cross_flow_heat_exchanger(HEX,coolant_line,bat_module)
+    HEX.design_heat_removed                                = bus.number_of_battery_modules * 8333.3333
     HEX.minimum_air_speed                                  = 105* Units.knots 
+    HEX                                                    = design_cross_flow_heat_exchanger(HEX,coolant_line,bat_module)
     coolant_line.heat_exchangers.append(HEX)
 
     

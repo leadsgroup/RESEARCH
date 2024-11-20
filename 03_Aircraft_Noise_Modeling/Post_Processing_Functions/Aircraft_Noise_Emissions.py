@@ -36,17 +36,17 @@ def read_flight_simulation_results(results):
     
     # Step 3: Create empty arrays to store noise data 
     N_segs = len(results.segments) 
-    N_cpts = len(results.segments)  
+    N_cpts = results.segments[0].state.numerics.number_of_control_points
 
     noise_results.segment_name            = []
     noise_results.time                    = np.zeros((N_segs,N_cpts,1 )) 
     noise_results.position_vector         = np.zeros((N_segs,N_cpts,3 )) 
-    noise_results.hemisphere_SPL_dBA      = np.zeros((N_segs,N_cpts, )) 
+    noise_results.hemisphere_SPL_dBA      = np.zeros((N_segs,N_cpts, 72)) 
     
     # Step 5: loop through segments and store noise 
     for seg in range(N_segs):  
         segment                                     = results.segments[seg] 
-        noise_results.segment_name[seg]             = segment.tag
+        noise_results.segment_name.append(segment.tag)
         noise_results.time[seg]                     = segment.state.conditions.frames.inertial.time 
         noise_results.position_vector[seg]          = segment.state.conditions.frames.inertial.position_vector
         noise_results.hemisphere_SPL_dBA[seg]       = segment.state.conditions.noise.hemisphere_SPL_dBA 
@@ -56,9 +56,9 @@ def read_flight_simulation_results(results):
     for network in results.segments[0].analyses.energy.vehicle.networks: 
         busses  = network.busses 
         for bus in busses:
-            for battery_module in enumerate(bus.battery_modules): 
-                E_start_module  = results.segments[0].conditions.energy[bus.tag].battery_modules[battery_module.tag]  
-                E_end_module    = results.segments[-1].conditions.energy[bus.tag].battery_modules[battery_module.tag]    
+            for battery_module in bus.battery_modules: 
+                E_start_module  = results.segments[0].conditions.energy[bus.tag].battery_modules[battery_module.tag].energy 
+                E_end_module    = results.segments[-1].conditions.energy[bus.tag].battery_modules[battery_module.tag].energy
                 Total_Energy    += (E_start_module - E_end_module)  
     noise_results.energy_consumed = Total_Energy
         
