@@ -600,12 +600,13 @@ def vehicle_setup(resize_aircraft,vehicle_name) :
       # ------------------------------------------------------------------
       #   Vehicle Definition Complete
       # ------------------------------------------------------------------      
-      save_aircraft_geometry(vehicle,vehicle_name)        
+      save_aircraft_geometry(weight_analysis.vehicle,vehicle_name)   
+      final_vehicle = weight_analysis.vehicle     
 
    else: 
-      vehicle = load_aircraft_geometry(vehicle_name) 
+      final_vehicle = load_aircraft_geometry(vehicle_name) 
 
-   return weight_analysis.vehicle 
+   return final_vehicle 
 
 # ---------------------------------------------------------------------
 #   Define the Configurations
