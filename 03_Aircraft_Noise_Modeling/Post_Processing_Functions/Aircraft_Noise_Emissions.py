@@ -17,16 +17,15 @@ import numpy as np
  
 
 
-def read_flight_simulation_results(results):
+def read_flight_simulation_results(results, baseline_results, aircraft_origin_coordinates, aircraft_destination_coordinates):
     # Unpack settings      
-    settings   = results.segments[0].analyses.noise.settings
-         
+    settings   = baseline_results.segments[0].analyses.noise.settings
+ 
     # Create data strutures for storing noise data 
     noise_results          =  Data()
     noise_results.settings =  Data() 
-    noise_results.settings.topography_file                  = settings.topography_file   
-    noise_results.settings.aircraft_origin_coordinates      = settings.aircraft_origin_coordinates      
-    noise_results.settings.aircraft_destination_coordinates = settings.aircraft_destination_coordinates  
+    noise_results.settings.aircraft_origin_coordinates      = aircraft_origin_coordinates      
+    noise_results.settings.aircraft_destination_coordinates = aircraft_destination_coordinates  
     noise_results.settings.number_of_microphone_in_stencil  = settings.number_of_microphone_in_stencil 
     noise_results.settings.noise_hemisphere_phi_angles      = settings.noise_hemisphere_phi_angles
     noise_results.settings.noise_hemisphere_theta_angles    = settings.noise_hemisphere_theta_angles
@@ -101,10 +100,11 @@ def post_process_noise_data(noise_results, topography_file ,  flight_times, time
     noise_data.aircraft_destination_coordinates   = noise_results.settings.aircraft_destination_coordinates     
     noise_data.microphone_y_resolution            = N_gm_y
     noise_data.microphone_x_resolution            = N_gm_x              
-    noise_data.microphone_locations               = microphone_locations.reshape(N_gm_x,N_gm_y,3)         
+    noise_data.microphone_locations               = microphone_locations.reshape(N_gm_x,N_gm_y,3)
+    noise_data.energy_consumed                    = noise_results.energy_consumed
     
     # Step 3: Create empty arrays to store noise data 
-    N_segs = len(noise_results.segments)
+    N_segs = len(noise_results.time[:, 0, 0])
     num_gm_mic      = len(microphone_locations) 
     
     # Step 4: Initalize Arrays 
@@ -118,8 +118,8 @@ def post_process_noise_data(noise_results, topography_file ,  flight_times, time
     
     # Step 5: loop through segments and store noise 
     for seg in range(N_segs):   
-        phi                      = noise_results.settingssettings.noise_hemisphere_phi_angles
-        theta                    = noise_results.settingssettings.noise_hemisphere_theta_angles
+        phi                      = noise_results.settings.noise_hemisphere_phi_angles
+        theta                    = noise_results.settings.noise_hemisphere_theta_angles
         mean_sea_level_altitude  = noise_results.settings.mean_sea_level_altitude
         time                     = noise_results.time[seg][:,0]
         position_vector          = noise_results.position_vector[seg]
@@ -181,9 +181,10 @@ def post_process_noise_data(noise_results, topography_file ,  flight_times, time
     L_max = np.max(SPL_dBA, axis= 0) 
     
     # Step 8: Perform noise metric calculations 
-    L_eq,L_eq_24hr, L_dn =  compute_noise_metrics(noise_data, flight_times)
+    L_eq,L_eq_24hr, L_dn =  compute_noise_metrics(noise_data, flight_times, time_period)
     
-    processed_noise_data = Data(
+    processed_noise_data = Data( 
+         energy_consumed = noise_data.energy_consumed,      
          L_max      = L_max,
          L_eq       = L_eq,
          L_eq_24hr  = L_eq_24hr,
