@@ -30,39 +30,40 @@ def main():
     
     aircraft_code             = 'HC'
     city_code                 = 'LA' 
-    cruise_altitude           = 1500*Units.feet 
+    cruise_altitude           = 1000*Units.feet 
     mic_x_res                 = 1200
     mic_y_res                 = 1600     
     
     # create data structures to store noise 
-    Total_L_eq       = np.empt((mic_x_res,mic_y_res))      
-    Total_L_eq_24hr  = np.empt((mic_x_res,mic_y_res))      
-    Total_L_dn       = np.empt((mic_x_res,mic_y_res))      
-    Total_L_max      = np.empt((mic_x_res,mic_y_res))
+    Total_L_eq       = np.empty((mic_x_res,mic_y_res))      
+    Total_L_eq_24hr  = np.empty((mic_x_res,mic_y_res))      
+    Total_L_dn       = np.empty((mic_x_res,mic_y_res))      
+    Total_L_max      = np.empty((mic_x_res,mic_y_res))
     
     # create data structure to store energy comsumed at each airport 
     unique_airports = LA_flight_data['Origin Code'].unique()
     E_origin        = np.zeros(len(unique_airports))
     
     processed_filename_list_name =  aircraft_code + '_' + city_code +  '_Single_Flights_Processed' 
-    filename_list                = load(processed_filename_list_name)    
-    for i in  range(len(LA_flight_data)):
-        # Extract Data
-        origin_code       = LA_flight_data['Origin Code'][i]    
+    file_name_dict               = ['Processed_HC_LA_ONT_BUR_1000ft', 'Processed_HC_LA_ONT_DIS_1000ft', 'Processed_HC_LA_ONT_LAX_1000ft', 'Processed_HC_LA_ONT_LGB_1000ft', 'Processed_HC_LA_ONT_SNA_1000ft'] # load(processed_filename_list_name)    
+  
          
-        for filename in filename_list: 
-            # load data 
-            PND =  load(filename + '.res') # this is a json file 
-            
-            # concatenate  L_eq,L_eq_24hr,L_dn
-            Total_L_eq      = SPL_arithmetic( np.concatenate((Total_L_eq[:,:,None]     ,PND.L_eq[:,:,None]), axis = 2), sum_axis=2)
-            Total_L_eq_24hr = SPL_arithmetic(np.concatenate((Total_L_eq_24hr[:,:,None],PND.L_eq_24hr[:,:,None]), axis = 2), sum_axis=2)
-            Total_L_dn      = SPL_arithmetic(np.concatenate((Total_L_dn[:,:,None]     ,PND.L_dn[:,:,None]), axis = 2), sum_axis=2)
-            Total_L_max     = np.max(np.concatenate((Total_L_max[:,:,None]    ,PND.L_max[:,:,None] ), axis = 2), axis=2)
-            
-            # add the energy consumed by each origin airport
-            loc           =  np.where( unique_airports,origin_code)
-            E_origin[loc] += PND.Route_Energy_Consumed   
+    for filename in file_name_dict: # file_name_dict.filename_list: 
+        # load data
+
+        origin_code = filename.split('_')[3]
+        
+        PND =  load(filename + '.res') # this is a json file 
+        
+        # concatenate  L_eq,L_eq_24hr,L_dn
+        Total_L_eq      = SPL_arithmetic( np.concatenate((Total_L_eq[:,:,None]     ,PND.L_eq[:,:,None]), axis = 2), sum_axis=2)
+        Total_L_eq_24hr = SPL_arithmetic(np.concatenate((Total_L_eq_24hr[:,:,None],PND.L_eq_24hr[:,:,None]), axis = 2), sum_axis=2)
+        Total_L_dn      = SPL_arithmetic(np.concatenate((Total_L_dn[:,:,None]     ,PND.L_dn[:,:,None]), axis = 2), sum_axis=2)
+        Total_L_max     = np.max(np.concatenate((Total_L_max[:,:,None]    ,PND.L_max[:,:,None] ), axis = 2), axis=2)
+        
+        # add the energy consumed by each origin airport
+        loc           =  list(unique_airports).index(origin_code)
+        #E_origin[loc] += PND.energy_consumed   
     
     # create data structure
     cumulative_PND = Data(
@@ -70,12 +71,12 @@ def main():
         Total_L_eq_24hr = Total_L_eq_24hr, 
         Total_L_dn      = Total_L_dn, 
         Total_L_max     = Total_L_max,
-        Total_Energy    = E_origin, 
+        #Total_Energy    = E_origin, 
         Airports        = unique_airports, 
     )
     
     # save data 
-    cumulative_processed_filename =  'Cumulative_'  +  aircraft_code + '_' + city_code + '_' + str(cruise_altitude)    # Aircraft_City_Frequency_Origin_Destination_Altitude
+    cumulative_processed_filename =  'Cumulative_'  +  aircraft_code + '_' + city_code + '_' + str(int(cruise_altitude/Units.feet))    # Aircraft_City_Frequency_Origin_Destination_Altitude
     save(cumulative_PND, cumulative_processed_filename + '.res')    
     return     
  

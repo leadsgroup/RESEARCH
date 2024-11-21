@@ -498,7 +498,7 @@ def vehicle_setup(BTMS_flag):
     atmo_data                                              = atmosphere.compute_values(altitude = HAS.design_altitude)     
     HAS.coolant_inlet_temperature                          = atmo_data.temperature[0,0]  
     HAS.design_battery_operating_temperature               = 313
-    HAS.design_heat_removed                                = 12500
+    HAS.design_heat_removed                                = 2000
     HAS                                                    = design_wavy_channel(HAS,bat_module) 
     
     for battery_module in bus.battery_modules:
@@ -508,14 +508,14 @@ def vehicle_setup(BTMS_flag):
     HEX                                                    = RCAIDE.Library.Components.Thermal_Management.Heat_Exchangers.Cross_Flow_Heat_Exchanger() 
     HEX.design_altitude                                    = 1500. * Units.feet 
     HEX.inlet_temperature_of_cold_fluid                    = atmo_data.temperature[0,0]   
-    HEX.design_heat_removed                                = bus.number_of_battery_modules * 8333.3333
+    HEX.design_heat_removed                                = bus.number_of_battery_modules * 500
     HEX.minimum_air_speed                                  = 105* Units.knots 
     HEX                                                    = design_cross_flow_heat_exchanger(HEX,coolant_line,bat_module)
     coolant_line.heat_exchangers.append(HEX)
 
     
     # Reservoir for Battery TMS
-    RES                                                    = RCAIDE.Library.Components.Thermal_Management.Reservoirs.Reservoir()
+    RES                                                    = RCAIDE.Library.Components.Thermal_Management.Reservoirs.Reservoir() 
     coolant_line.reservoirs.append(RES)
 
     
@@ -634,7 +634,7 @@ def vehicle_setup(BTMS_flag):
     #   Vehicle Definition Complete
     # ------------------------------------------------------------------
     
-    return vehicle
+    return weight_analysis.vehicle
   
 # ---------------------------------------------------------------------
 #   Define the Configurations
@@ -745,7 +745,7 @@ def mission_setup(analyses):
     #segment.analyses.extend( analyses.hex_low_alt_climb_operation )      
     segment.altitude_start                                = 500.0 * Units.feet
     segment.altitude_end                                  = 2500 * Units.feet   
-    segment.air_speed_end                                 = 120 * Units.kts  
+    segment.air_speed_end                                 = 1.4*Vstall
     segment.climb_rate                                    = 500* Units['ft/min']  
     
     # define flight dynamics to model 
@@ -769,7 +769,7 @@ def mission_setup(analyses):
     #segment.analyses.extend( analyses.hex_high_alt_climb_operation)
     segment.altitude_start                                = 2500.0  * Units.feet
     segment.altitude_end                                  = 5000   * Units.feet  
-    segment.air_speed_end                                 = 130 * Units.kts 
+    segment.air_speed_end                                 = 150 * Units['mph']
     segment.climb_rate                                    = 700.034 * Units['ft/min']   
     
     # define flight dynamics to model 
@@ -791,7 +791,7 @@ def mission_setup(analyses):
     segment.analyses.extend( analyses.nmc )  
     #segment.analyses.extend(analyses.hex_cruise_operation) 
     segment.altitude                                      = 5000   * Units.feet 
-    segment.air_speed                                     = 130 * Units.kts
+    segment.air_speed                                     = 170 * Units['mph']
     segment.distance                                      = 13.   * Units.nautical_mile  
     # define flight dynamics to model 
     segment.flight_dynamics.force_x                       = True  
@@ -814,7 +814,7 @@ def mission_setup(analyses):
     #segment.analyses.extend( analyses.hex_descent_operation )       
     segment.altitude_start                                = 5000   * Units.feet 
     segment.altitude_end                                  = 1000 * Units.feet  
-    segment.air_speed_end                                 = 100 * Units['mph']   
+    segment.air_speed_end                                 = 150 * Units['mph']   
     segment.climb_rate                                    = -200 * Units['ft/min']  
     
     # define flight dynamics to model 
@@ -836,7 +836,7 @@ def mission_setup(analyses):
     segment.tag = 'Downleg'
     segment.analyses.extend( analyses.nmc )  
     #segment.analyses.extend(analyses.hex_descent_operation)  
-    segment.air_speed                                     = 100 * Units['mph']   
+    segment.air_speed                                     = 1.4 *  Vstall 
     segment.distance                                      = 6000 * Units.feet 
     # define flight dynamics to model 
     segment.flight_dynamics.force_x                       = True  
@@ -858,7 +858,7 @@ def mission_setup(analyses):
     #segment.analyses.extend( analyses.hex_descent_operation)   
     segment.altitude_start                                = 1000 * Units.feet
     segment.altitude_end                                  = 500.0 * Units.feet
-    segment.air_speed_end                                 = 90 * Units['mph']  
+    segment.air_speed_end                                 = 1.3* Vstall
     segment.climb_rate                                    = -350 * Units['ft/min'] 
     
     # define flight dynamics to model 
@@ -880,7 +880,7 @@ def mission_setup(analyses):
     #segment.analyses.extend( analyses.hex_descent_operation)      
     segment.altitude_start                                = 500.0 * Units.feet
     segment.altitude_end                                  = 00.0 * Units.feet
-    segment.air_speed_end                                 = 80 * Units['mph']  
+    segment.air_speed_end                                 = 1.3* Vstall
     segment.climb_rate                                    = -300 * Units['ft/min']   
     
     # define flight dynamics to model 

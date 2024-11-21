@@ -54,7 +54,7 @@ def main():
     app_heading                  = 90  * Units.degree# Heading [degrees] of the approach to vertiport 2 
     max_cruise_distance          = 58*Units.nmi #CHANGE FOR EACH AIRCRAFT
     number_of_cpts               = 10
-    
+    'HC_mission_LA_ONT_BUR_1000ft'
     noise_results = run_noise_mission(number_of_cpts ) # Run noise simulation
     filename_list = []
     
@@ -108,10 +108,10 @@ def main():
             N_cpts = results.segments[0].state.numerics.number_of_control_points  
             for seg in range(N_segs):
                 for i in range(N_cpts):  
-                    results.segments[seg].state.conditions.noise.hemisphere_SPL_dBA[i]  = noise_results.segments[seg].state.conditions.noise.hemisphere_SPL_dBA[i]          
+                    results.segments[seg].state.conditions.noise  = noise_results.segments[seg].state.conditions.noise          
              
-            filename =  aircraft_code +'_mission' + '_' + city_code + '_' + origin_code + '_' +  destination_code  + '_' + str(round(cruise_altitude/Units.feet,0)) + 'ft'   
-            res      =  read_flight_simulation_results(results)
+            filename =  aircraft_code +'_mission' + '_' + city_code + '_' + origin_code + '_' +  destination_code  + '_' + str(int(round(cruise_altitude/Units.feet,0))) + 'ft'   
+            res      =  read_flight_simulation_results(results, noise_results,  origin_coord, destination_coord)
             
             # save results 
             save(res, filename + '.res')
@@ -119,7 +119,8 @@ def main():
             filename_list.append(filename)
         
     filename_list_name =  aircraft_code + '_' + city_code +  '_Single_Flights_Raw'
-    save(filename_list, filename_list_name + '.res')
+    F =  Data(filename_list_name=filename_list_name)
+    save(F, filename_list_name + '.res')
       
     return
 def run_noise_mission(number_of_cpts):           
@@ -186,7 +187,7 @@ def noise_base_analysis(vehicle, origin_coord,destination_coord ,mic_x_res, mic_
     analyses.append(aerodynamics)
      
     # ------------------------------------------------------------------
-    #  Stability Analysis
+    #  Stability Analysis'HC_mission_LA_ONT_BUR_1000ft'
     stability         = RCAIDE.Framework.Analyses.Stability.Vortex_Lattice_Method() 
     stability.vehicle = vehicle 
     analyses.append(stability)    
@@ -249,10 +250,10 @@ def unconverged_base_analysis(vehicle):
     stability.vehicle = vehicle 
     analyses.append(stability)    
 
-    #  Noise Analysis   
-    noise = RCAIDE.Framework.Analyses.Noise.Frequency_Domain_Buildup()   
-    noise.vehicle = vehicle   
-    analyses.append(noise)
+    ##  Noise Analysis   
+    #noise = RCAIDE.Framework.Analyses.Noise.Frequency_Domain_Buildup()   
+    #noise.vehicle = vehicle   
+    #analyses.append(noise)
  
     # ------------------------------------------------------------------
     #  Energy
@@ -356,7 +357,7 @@ def noise_mission_setup(number_of_cpts, analyses, radius_Vert1=3600*Units.ft, ra
     # ------------------------------------------------------------------
     
     pattern_speed    = 55  * Units['mph'] #CHANGE FOR EACH AIRCRAFT 
-    cruise_speed     = 75. * Units['mph'] #CHANGE FOR EACH AIRCRAFT 
+    cruise_speed     = 75. * Units['mph'] #CHANGE FOR EACH AIRCRA processed_filename_list_name + '.res'FT 
     transition_speed = 35. * Units['mph'] #CHANGE FOR EACH AIRCRAFT 
             
     # ------------------------------------------------------------------
@@ -407,9 +408,8 @@ def noise_mission_setup(number_of_cpts, analyses, radius_Vert1=3600*Units.ft, ra
     segment.assigned_control_variables.body_angle.active             = True 
     
     mission.append_segment(segment)
-    '''
     
-    # ------------------------------------------------------------------
+    # ------------------------------------------------------------------'HC_mission_LA_ONT_BUR_1000ft'
     #   First Climb Segment: Constant Acceleration, Constant Altitude
     # ------------------------------------------------------------------
     segment                                  = Segments.Climb.Linear_Speed_Constant_Rate(base_segment)
@@ -576,6 +576,7 @@ def noise_mission_setup(number_of_cpts, analyses, radius_Vert1=3600*Units.ft, ra
     segment.air_speed_start                  = pattern_speed      
     segment.air_speed_end                    = transition_speed      
     segment.altitude_start                   = 500.0 * Units.ft 
+    del segment.process.converge
     segment.altitude_end                     = 50.0 * Units.ft
     segment.true_course                      = app_heading
 
@@ -638,7 +639,7 @@ def noise_mission_setup(number_of_cpts, analyses, radius_Vert1=3600*Units.ft, ra
     segment.assigned_control_variables.throttle.assigned_propulsors  = [['rotor_propulsor_1','rotor_propulsor_2','rotor_propulsor_3',
                                                                          'rotor_propulsor_4','rotor_propulsor_5','rotor_propulsor_6']]      
     mission.append_segment(segment)      
-    '''
+    
     return mission 
 # ------------------------------------------------------------------
 #   Baseline Mission Setup
@@ -673,7 +674,7 @@ def unconverged_mission_setup(number_of_cpts,analyses, radius_Vert1, radius_Vert
     segment.tag                                            = "Vertical_Climb" 
     segment.analyses.extend( analyses.vertical_flight)     
     segment.altitude_start                                 = 0.0  * Units.ft
-    #del segment.process('converge')
+    del segment.process.converge
     segment.altitude_end                                   = 50.  * Units.ft  
     segment.climb_rate                                     = 500. * Units['ft/min']   
     segment.initial_battery_state_of_charge                = 1.0
@@ -695,7 +696,8 @@ def unconverged_mission_setup(number_of_cpts,analyses, radius_Vert1, radius_Vert
     segment                                  = Segments.Cruise.Constant_Acceleration_Constant_Altitude(base_segment)
     segment.tag                              = "Vertical_Transition"  
     segment.analyses.extend( analyses.vertical_transition) 
-    segment.altitude                         = 50.  * Units.ft       
+    segment.altitude                         = 50.  * Units.ft
+    del segment.process.converge
     segment.air_speed_start                  = 300. * Units['ft/min'] 
     segment.air_speed_end                    = transition_speed    
     segment.acceleration                     = 1.0
@@ -715,7 +717,7 @@ def unconverged_mission_setup(number_of_cpts,analyses, radius_Vert1, radius_Vert
     
     mission.append_segment(segment)
 
-    '''
+    
     # ------------------------------------------------------------------
     #   First Climb Segment: Constant Acceleration, Constant Altitude
     # ------------------------------------------------------------------
@@ -723,7 +725,8 @@ def unconverged_mission_setup(number_of_cpts,analyses, radius_Vert1, radius_Vert
     segment.tag                              = "Departure_Climb"  
     segment.analyses.extend(analyses.climb) 
     segment.climb_rate                       = 551.181  * Units['ft/min']
-    segment.air_speed_start                  = transition_speed 
+    segment.air_speed_start                  = transition_speed
+    del segment.process.converge
     segment.air_speed_end                    = pattern_speed       
     segment.altitude_start                   = 50.0 * Units.ft  
     segment.altitude_end                     = 500.0 * Units.ft
@@ -746,7 +749,8 @@ def unconverged_mission_setup(number_of_cpts,analyses, radius_Vert1, radius_Vert
     segment                                               = Segments.Cruise.Curved_Constant_Radius_Constant_Speed_Constant_Altitude(base_segment)
     segment.tag                                           = "Departure_Pattern_Curve"     
     segment.analyses.extend(analyses.climb) 
-    segment.altitude    = 500.0 * Units.ft  
+    segment.altitude    = 500.0 * Units.ft
+    del segment.process.converge
     segment.air_speed   = pattern_speed       
     segment.turn_radius = radius_Vert1  
     segment.true_course = dep_heading + (90 * Units.degree)
@@ -779,6 +783,7 @@ def unconverged_mission_setup(number_of_cpts,analyses, radius_Vert1, radius_Vert
     segment.analyses.extend(analyses.climb) 
     segment.climb_rate                       = 500. * Units['ft/min']
     segment.air_speed_start                  = pattern_speed
+    del segment.process.converge
     segment.air_speed_end                    = cruise_speed      
     segment.altitude_start                   = 500.0 * Units.ft     
     segment.altitude_end                     = cruise_altitude
@@ -800,7 +805,8 @@ def unconverged_mission_setup(number_of_cpts,analyses, radius_Vert1, radius_Vert
     # ------------------------------------------------------------------ 
     segment                                  = Segments.Cruise.Constant_Speed_Constant_Altitude(base_segment)
     segment.tag                              = "Cruise"  
-    segment.analyses.extend(analyses.forward_flight)  
+    segment.analyses.extend(analyses.forward_flight)
+    del segment.process.converge
     segment.altitude                         = cruise_altitude      
     segment.air_speed                        = cruise_speed    
     segment.distance                         = level_cruise_distance
@@ -824,6 +830,7 @@ def unconverged_mission_setup(number_of_cpts,analyses, radius_Vert1, radius_Vert
     segment                                  = Segments.Climb.Linear_Speed_Constant_Rate(base_segment)
     segment.tag                              = "Cruise_Descent"  
     segment.analyses.extend(analyses.forward_flight)
+    del segment.process.converge
     segment.climb_rate                       = -500. * Units['ft/min']
     segment.air_speed_start                  = cruise_speed      
     segment.air_speed_end                    = pattern_speed     
@@ -847,7 +854,8 @@ def unconverged_mission_setup(number_of_cpts,analyses, radius_Vert1, radius_Vert
     #------------------------------------------------------------------------------------------------------------------------------------ 
     segment                                               = Segments.Cruise.Curved_Constant_Radius_Constant_Speed_Constant_Altitude(base_segment)
     segment.tag                                           = "Approach_Pattern_Curve"     
-    segment.analyses.extend(analyses.climb) 
+    segment.analyses.extend(analyses.climb)
+    del segment.process.converge
     segment.altitude       = 500.0 * Units.ft  
     segment.air_speed      = pattern_speed     
     segment.turn_radius    = radius_Vert2  
@@ -879,6 +887,7 @@ def unconverged_mission_setup(number_of_cpts,analyses, radius_Vert1, radius_Vert
     segment                                  = Segments.Climb.Linear_Speed_Constant_Rate(base_segment)
     segment.tag                              = "Approach_Descent"  
     segment.analyses.extend(analyses.forward_flight)
+    del segment.process.converge
     segment.climb_rate                       = -551.181  * Units['ft/min']
     segment.air_speed_start                  = pattern_speed      
     segment.air_speed_end                    = transition_speed      
@@ -905,7 +914,8 @@ def unconverged_mission_setup(number_of_cpts,analyses, radius_Vert1, radius_Vert
 
     segment                           = Segments.Cruise.Constant_Acceleration_Constant_Altitude(base_segment)
     segment.tag                       = "Final_Approach_Transition" 
-    segment.analyses.extend( analyses.descent_transition) 
+    segment.analyses.extend( analyses.descent_transition)
+    del segment.process.converge
     segment.altitude                  = 50.  * Units.ft 
     segment.air_speed_start           = transition_speed  
     segment.air_speed_end             = 300. * Units['ft/min']
@@ -930,7 +940,8 @@ def unconverged_mission_setup(number_of_cpts,analyses, radius_Vert1, radius_Vert
     # ------------------------------------------------------------------ 
     segment                           = Segments.Vertical_Flight.Descent(base_segment)
     segment.tag                       = "Vertical_Descent"  
-    segment.analyses.extend( analyses.vertical_flight) 
+    segment.analyses.extend( analyses.vertical_flight)
+    del segment.process.converge
     segment.altitude_start            = 50.0  * Units.ft  
     segment.altitude_end              = 0.  * Units.ft  
     segment.descent_rate              = 300. * Units['ft/min']
@@ -945,7 +956,7 @@ def unconverged_mission_setup(number_of_cpts,analyses, radius_Vert1, radius_Vert
     segment.assigned_control_variables.throttle.assigned_propulsors  = [['rotor_propulsor_1','rotor_propulsor_2','rotor_propulsor_3',
                                                                          'rotor_propulsor_4','rotor_propulsor_5','rotor_propulsor_6']]      
     mission.append_segment(segment)      
-    '''
+    
     return mission  
 
 def missions_setup(mission): 
