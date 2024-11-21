@@ -13,7 +13,6 @@ from RCAIDE.Library.Methods.Weights.Center_of_Gravity      import compute_vehicl
 import Missions 
 
 import numpy as np
-from copy import deepcopy
 
 # ############################################################################################################################################################       
 # STICK FIXED MISSION 
@@ -319,7 +318,7 @@ def aileron_rudder_sizing_post_process(nexus):
     control_surfaces = ['aileron','rudder'] 
     total_control_surface_area = compute_control_surface_areas(control_surfaces,vehicle)   
     summary.aileron_rudder_surface_area =  total_control_surface_area
-    summary.roll_rate_residual          = (roll_rate - desired_roll_rate)
+    summary.roll_rate_residual          = abs(roll_rate - desired_roll_rate) *10
 
     print("Total Rudder Aileron Surface Area : " + str(summary.aileron_rudder_surface_area)) 
     print("Roll Rate                         : " + str(roll_rate)) 
