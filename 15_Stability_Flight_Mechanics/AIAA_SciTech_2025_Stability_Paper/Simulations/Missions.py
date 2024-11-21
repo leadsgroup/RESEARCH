@@ -19,21 +19,23 @@ def stick_fixed_stability_setup(analyses,vehicle,cruise_velocity,cruise_altitude
 
 def elevator_sizing_setup(analyses,vehicle,cruise_velocity,cruise_altitude,angle_of_attack = 0 ,sideslip_angle=0,bank_angle= 0, roll_rate = 0,pitch_rate = 0,yaw_rate = 0): 
     missions                            = RCAIDE.Framework.Mission.Missions()
-    max_speed_multiplier                = 1.4  
-    missions.elevator_sizing_pull_up    = base_mission_setup(analyses.elevator_sizing_pull_up,max_speed_multiplier,cruise_velocity,cruise_altitude,angle_of_attack,sideslip_angle,bank_angle, roll_rate,pitch_rate,yaw_rate)   
+    max_speed_multiplier                = 1.87
 
-    max_speed_multiplier                = 1.0
-    missions.elevator_sizing_push_over  = base_mission_setup(analyses.elevator_sizing_push_over,max_speed_multiplier,cruise_velocity,cruise_altitude,angle_of_attack,sideslip_angle,bank_angle, roll_rate,pitch_rate,yaw_rate)   
+    vehicle_mass                        = vehicle.mass_properties.max_takeoff
+    reference_area                      = vehicle.reference_area 
+    stall_velocity                      = estimate_stall_speed(vehicle_mass,reference_area,altitude = 0.0,maximum_lift_coefficient = 1.2)   
+    missions.elevator_sizing_pull_up    = base_mission_setup(analyses.elevator_sizing_pull_up,max_speed_multiplier,stall_velocity,cruise_altitude,angle_of_attack,sideslip_angle,bank_angle, roll_rate,pitch_rate,yaw_rate)   
+
+    max_speed_multiplier                = 1.87
+    missions.elevator_sizing_push_over  = base_mission_setup(analyses.elevator_sizing_push_over,max_speed_multiplier,stall_velocity,cruise_altitude,angle_of_attack,sideslip_angle,bank_angle, roll_rate,pitch_rate,yaw_rate)   
     return missions   
 
 def aileron_rudder_sizing_setup(analyses,vehicle,cruise_velocity,cruise_altitude,angle_of_attack = 0,sideslip_angle=0 ,bank_angle= 0, roll_rate = 0,pitch_rate = 0,yaw_rate = 0): 
     missions                                    = RCAIDE.Framework.Mission.Missions()
-    max_speed_multiplier                        = 1.0
-    roll_rate                                   = 0.07
+    max_speed_multiplier                        = 1.0 
     missions.roll_maneuver                      = base_mission_setup(analyses.aileron_rudder_roll_sizing,max_speed_multiplier,cruise_velocity,cruise_altitude,angle_of_attack,sideslip_angle,bank_angle, roll_rate,pitch_rate,yaw_rate)    
     
     max_speed_multiplier                        = 1.0
-    sideslip_angle                              =  np.tan(vehicle.crosswind_velocity/cruise_velocity)  
     missions.crosswind_maneuver                 = base_mission_setup(analyses.aileron_rudder_crosswind_sizing,max_speed_multiplier,cruise_velocity,cruise_altitude,angle_of_attack,sideslip_angle,bank_angle, roll_rate,pitch_rate,yaw_rate)    
     
     return missions   
@@ -49,6 +51,7 @@ def flap_sizing_setup(analyses,vehicle,cruise_velocity,cruise_altitude,angle_of_
     missions.flap_sizing_flaps_up       = base_mission_setup(analyses.flap_sizing,max_speed_multiplier,stall_velocity,cruise_altitude,angle_of_attack,sideslip_angle,bank_angle, roll_rate,pitch_rate,yaw_rate) 
     
     missions.flap_sizing_flaps_down     = base_mission_setup(analyses.flap_sizing,max_speed_multiplier,stall_velocity,cruise_altitude,angle_of_attack,sideslip_angle,bank_angle, roll_rate,pitch_rate,yaw_rate)  
+    
     return missions        
     
 

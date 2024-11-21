@@ -58,26 +58,29 @@ def main():
     city_code                 = 'LA' 
     cruise_altitude           = 1500*Units.feet
     
+    filename_list_name =  aircraft_code + '_' + city_code +  '_Single_Flights_Raw'
+    filename_list = load(filename_list_name)
+    processed_filename_list = []
     for i in  range(len(LA_flight_data)):
         # Extract Data
         origin_code       = LA_flight_data['Origin Code'][i]   
         destination_code  = LA_flight_data['Destination Code'][i]
          
-        try: 
-            filename =  aircraft_code +'_mission' + '_' + city_code + '_' + origin_code + '_' +  destination_code  + '_' + str(round(cruise_altitude/Units.feet,0)) + 'ft' 
-            results = load(filename)
+        for filename in filename_list:  
+            results = load(filename + '.res')
            
             # post process noise
             processed_noise_data =  post_process_noise_data(results, topography_file, operation_flight_times, operation_period , noise_timesteps,  mic_x_res, mic_y_res)
               
             # save data in json file 
-            processed_filename =  'Processed_'  +  aircraft_code + '_' + city_code + '_' + origin_code + '_' +  destination_code  + '_' + str(round(cruise_altitude/Units.feet,0)) + 'ft'
+            processed_filename =  'Processed_'  +  aircraft_code + '_' + city_code + '_' + origin_code + '_' +  destination_code  + '_' + str(int(round(cruise_altitude/Units.feet,0)))+ 'ft'
             
             print("saving results")
             save(processed_noise_data, processed_filename + '.res')
-        except:
-            pass 
-             
+            processed_filename_list.append(processed_filename)
+        
+    processed_filename_list_name =  aircraft_code + '_' + city_code +  '_Single_Flights_Processed'
+    save(processed_filename_list, processed_filename_list_name + '.res')             
     return     
 
  
