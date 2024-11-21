@@ -27,13 +27,17 @@ def main():
     mdots             = np.linspace(60,     90,   5) 
     FARs              = np.linspace(0.05,  0.7,   5)    
     
-    parametric_analyses(comb_lengths, comb_areas, temperatures, pressures, mdots, FARs)         
+    #parametric_analyses(comb_lengths, comb_areas, temperatures, pressures, mdots, FARs)         
     
-    #emissions_L_A = read_results('emissions_L_A')
-    #emissions_T_P = read_results('emissions_T_P')
-    #emissions_M_F = read_results('emissions_M_F')
+    emissions_L_A = read_results('JetA_emissions_L_A')
+    emissions_T_P = read_results('JetA_emissions_T_P')
+    emissions_M_F = read_results('JetA_emissions_M_F')    
     
-    #plot_results(emissions_L_A, emissions_T_P, emissions_M_F, comb_lengths, comb_areas, temperatures, pressures, mdots, FARs)
+    #emissions_L_A = read_results('CH4_emissions_L_A')
+    #emissions_T_P = read_results('CH4_emissions_T_P')
+    #emissions_M_F = read_results('CH4_emissions_M_F')
+    
+    plot_results(emissions_L_A, emissions_T_P, emissions_M_F, comb_lengths, comb_areas, temperatures, pressures, mdots, FARs)
       
     return    
 
@@ -208,39 +212,46 @@ def load_results(filename):
 def plot_results(emissions_L_A, emissions_T_P, emissions_M_F, comb_lengths, comb_areas, temperatures, pressures, mdots, FARs):
     
     plot_style()
+    plt.rcParams["font.family"] = "Times New Roman"
     
     data = emissions_L_A['EI_CO2']
     
-    comb_diameters    = 2 * np.sqrt(comb_areas / np.pi)
-    X, Y              = np.meshgrid(comb_lengths, comb_diameters)
+    #comb_diameters    = 2 * np.sqrt(comb_areas / np.pi)
+    X, Y              = np.meshgrid(comb_lengths, comb_areas)
     
     fig    =  plt.figure(1)
     contour = plt.contourf(X, Y, data, levels=50, cmap='viridis')
-    color_bar = plt.colorbar(contour, label='EI_CO2')
-    color_bar.formatter.useOffset = False
+    color_bar = plt.colorbar(contour, label='$EI_{CO_2}$')
+    #color_bar.formatter.useOffset = False
     color_bar.update_ticks()   
     plt.xlabel('Length [m]')
-    plt.ylabel('Diameter [m]')
+    plt.ylim([Y[0,0], 0.15])
+    plt.ylabel('Area [m^2]') 
+    plt.tight_layout()
     
     data = emissions_L_A['EI_CO']
     
     fig    =  plt.figure(2)
     contour = plt.contourf(X, Y, data, levels=50, cmap='viridis')
-    color_bar = plt.colorbar(contour, label='EI_CO')
-    color_bar.formatter.useOffset = False
+    color_bar = plt.colorbar(contour, label='$EI_{CO}$')
+    #color_bar.formatter.useOffset = False
     color_bar.update_ticks()   
     plt.xlabel('Length [m]')
-    plt.ylabel('Diameter [m]')
+    plt.ylim([Y[0,0], 0.15])
+    plt.ylabel('Area [m^2]') 
+    plt.tight_layout()
     
     data = emissions_L_A['EI_H2O']
     
     fig    =  plt.figure(3)
     contour = plt.contourf(X, Y, data, levels=50, cmap='viridis')
-    color_bar = plt.colorbar(contour, label='EI_H2O')
-    color_bar.formatter.useOffset = False
+    color_bar = plt.colorbar(contour, label='$EI_{H_2O}$')
+    #color_bar.formatter.useOffset = False
     color_bar.update_ticks()   
     plt.xlabel('Length [m]')
-    plt.ylabel('Diameter [m]')    
+    plt.ylim([Y[0,0], 0.15])
+    plt.ylabel('Area [m^2]') 
+    plt.tight_layout()
     
     # ---------------------------------------------------------
     
@@ -250,31 +261,34 @@ def plot_results(emissions_L_A, emissions_T_P, emissions_M_F, comb_lengths, comb
     
     fig    =  plt.figure(4)
     contour = plt.contourf(X, Y, data, levels=50, cmap='viridis')
-    color_bar = plt.colorbar(contour, label='EI_CO2')
-    color_bar.formatter.useOffset = False
+    color_bar = plt.colorbar(contour, label='$EI_{CO_2}$')
+    #color_bar.formatter.useOffset = False
     color_bar.update_ticks()   
     plt.xlabel('Temperature [K]')
     plt.ylabel('Pressure [Pa]')
+    plt.tight_layout()
     
     data = emissions_T_P['EI_CO']
     
     fig    =  plt.figure(5)
     contour = plt.contourf(X, Y, data, levels=50, cmap='viridis')
-    color_bar = plt.colorbar(contour, label='EI_CO')
-    color_bar.formatter.useOffset = False
+    color_bar = plt.colorbar(contour, label='$EI_{CO}$')
+    #color_bar.formatter.useOffset = False
     color_bar.update_ticks()   
     plt.xlabel('Temperature [K]')
     plt.ylabel('Pressure [Pa]')
+    plt.tight_layout()
     
     data = emissions_T_P['EI_H2O']
     
     fig    =  plt.figure(6)
     contour = plt.contourf(X, Y, data, levels=50, cmap='viridis')
-    color_bar = plt.colorbar(contour, label='EI_H2O')
-    color_bar.formatter.useOffset = False
+    color_bar = plt.colorbar(contour, label='$EI_{H_2O}$')
+    #color_bar.formatter.useOffset = False
     color_bar.update_ticks()   
     plt.xlabel('Temperature [K]')
-    plt.ylabel('Pressure [Pa]')  
+    plt.ylabel('Pressure [Pa]')
+    plt.tight_layout()
     
     # ---------------------------------------------------------
     
@@ -284,31 +298,34 @@ def plot_results(emissions_L_A, emissions_T_P, emissions_M_F, comb_lengths, comb
     
     fig    =  plt.figure(7)
     contour = plt.contourf(X, Y, data, levels=50, cmap='viridis')
-    color_bar = plt.colorbar(contour, label='EI_CO2')
-    color_bar.formatter.useOffset = False
+    color_bar = plt.colorbar(contour, label='$EI_{CO_2}$')
+    #color_bar.formatter.useOffset = False
     color_bar.update_ticks()   
     plt.xlabel('Air mass flow rate [kg/s]')
     plt.ylabel('Fuel to Air ratio [-]')
+    plt.tight_layout()
     
     data = emissions_M_F['EI_CO']
     
     fig    =  plt.figure(8)
     contour = plt.contourf(X, Y, data, levels=50, cmap='viridis')
-    color_bar = plt.colorbar(contour, label='EI_CO')
-    color_bar.formatter.useOffset = False
+    color_bar = plt.colorbar(contour, label='$EI_{CO}$')
+    #color_bar.formatter.useOffset = False
     color_bar.update_ticks()   
     plt.xlabel('Air mass flow rate [kg/s]')
     plt.ylabel('Fuel to Air ratio [-]')
+    plt.tight_layout()
     
     data = emissions_M_F['EI_H2O']
     
     fig    =  plt.figure(9)
     contour = plt.contourf(X, Y, data, levels=50, cmap='viridis')
-    color_bar = plt.colorbar(contour, label='EI_H2O')
-    color_bar.formatter.useOffset = False
+    color_bar = plt.colorbar(contour, label='$EI_{H_2O}$')
+    #color_bar.formatter.useOffset = False
     color_bar.update_ticks()   
     plt.xlabel('Air mass flow rate [kg/s]')
-    plt.ylabel('Fuel to Air ratio [-]')       
+    plt.ylabel('Fuel to Air ratio [-]') 
+    plt.tight_layout()
     
     return
 
