@@ -126,7 +126,8 @@ def post_process_noise_data(noise_results, topography_file ,  flight_times, time
         hemisphere_SPL_dBA       = noise_results.hemisphere_SPL_dBA[seg]  
         
         # Step 5.1 : Compute relative microhpone locations 
-        noise_time,noise_pos,RML,PHI,THETA,num_gm_mic  = compute_relative_noise_evaluation_locations(mean_sea_level_altitude,noise_times_steps,aircraft_origin_location,microphone_locations,position_vector,time) 
+        noise_time, ### TO CHANGE 11/22. Claculate based on position of aircraft at start and end of segment and the time of the aircraft at the start and end of the segment. 
+        noise_pos,RML,PHI,THETA,num_gm_mic  = compute_relative_noise_evaluation_locations(mean_sea_level_altitude,noise_time,aircraft_origin_location,microphone_locations,position_vector,time) 
          
         # Step 5.2: Compute aircraft position and npose at interpolated hemisphere locations
         cpt   = 0 
@@ -139,7 +140,9 @@ def post_process_noise_data(noise_results, topography_file ,  flight_times, time
         Time         = np.hstack((Time,noise_time_))
         
         for i in range(len(noise_time_)):
-            # Step 5.2.1 :Noise interpolation 
+            # Step 5.2.1 :Noise interpolation
+            ### TO CHANGE 11/22. If segment is equal to cruise and i is greater than 1 then use the initial noise results (use the alst results, i.e.).
+            # Update the location of the aircraft but everything else stays the same. 
             delta_t         = (noise_time[i] -time[cpt]) / (time[cpt+1] - time[cpt])
             SPL_lower       = hemisphere_SPL_dBA[cpt].reshape(len(phi),len(theta))
             SPL_uppper      = hemisphere_SPL_dBA[cpt+1].reshape(len(phi),len(theta))
@@ -161,7 +164,7 @@ def post_process_noise_data(noise_results, topography_file ,  flight_times, time
             
             SPL_dBA_temp         = SPL_dBA[idx].flatten()
             SPL_dBA_temp[locs]   = SPL_dBA_scaled
-            SPL_dBA[idx]         = SPL_dBA_temp.reshape(N_gm_x,N_gm_y) 
+            SPL_dBA[idx]         = SPL_dBA_temp.reshape(N_gm_x,N_gm_y) ### TO CHANGE 11/22. This is equal to the same one from the previous point if cruise. 
             mic_locs[idx]        = locs 
             idx += 1
             
@@ -184,7 +187,8 @@ def post_process_noise_data(noise_results, topography_file ,  flight_times, time
     L_eq,L_eq_24hr, L_dn =  compute_noise_metrics(noise_data, flight_times, time_period)
     
     processed_noise_data = Data( 
-         energy_consumed = noise_data.energy_consumed,      
+         energy_consumed = noise_data.energy_consumed,
+         flight_time = noise_time, 
          L_max      = L_max,
          L_eq       = L_eq,
          L_eq_24hr  = L_eq_24hr,
@@ -311,7 +315,7 @@ def generate_terrain_microphone_locations(topography_file, microphone_x_resoluti
 # ----------------------------------------------------------------------------------------------------------------------  
 #  Relative Noise Evaluatation Locations
 # ----------------------------------------------------------------------------------------------------------------------       
-def compute_relative_noise_evaluation_locations(mean_sea_level_altitude,noise_times_steps, aircraft_origin_location,microphone_locations,position_vector,time):
+def compute_relative_noise_evaluation_locations(mean_sea_level_altitude,noise_time, aircraft_origin_location,microphone_locations,position_vector,time):
     """This computes the relative locations on the surface in the computational domain where the 
     propogated sound is computed. Vectors point from observer/microphone to aircraft/source  
             
@@ -336,10 +340,8 @@ def compute_relative_noise_evaluation_locations(mean_sea_level_altitude,noise_ti
     """       
   
     MSL_altitude      = mean_sea_level_altitude
-    N                 = noise_times_steps
     
     # rediscretize time and aircraft position to get finer resolution  
-    noise_time        = np.linspace(time[0], time[-1], N) 
     noise_pos         = np.zeros((N,3)) 
     noise_pos[:,0]    = np.interp(noise_time,time,position_vector[:,0])
     noise_pos[:,1]    = np.interp(noise_time,time,position_vector[:,1])
@@ -363,7 +365,7 @@ def compute_relative_noise_evaluation_locations(mean_sea_level_altitude,noise_ti
         PHI[cpt,:]     =  np.arctan2(np.sqrt(np.square(relative_locations[:, 0]) + np.square(relative_locations[:, 1])),  relative_locations[:, 2])  
         THETA[cpt,:]   =  np.arctan2(relative_locations[:, 1], relative_locations[:, 0]) 
     
-    return noise_time,noise_pos,RML,PHI,THETA,num_gm_mic 
+    return noise_pos,RML,PHI,THETA,num_gm_mic 
   
   
       
@@ -416,13 +418,14 @@ def compute_noise_metrics(noise_data, flight_times,time_period):
         ambient_noise_duration      -= flight_time[-1]
         ambient_noise_duration_24hr -= flight_time[-1]
 
+
         # create noise penalty 
         noise_penality          = np.zeros((len(flight_time),N_gm_x,N_gm_y))         
         noise_penality[t_flight_during_day<t_7am]  = 10
         noise_penality[t_flight_during_day>t_10pm] = 10         
         
         # convert SPL to pressure and multiply by duration 
-        p_sq_ref_flight_sq     = np.nansum(time_step * (10**(SPL/10)), axis=0)   
+        p_sq_ref_flight_sq     = np.nansum(time_step * (10**(SPL/10)), axis=0)   ### TO CHANGE 11/22. Add multiplier based ont eh number of flights there are in that time perioud. 
         p_sq_ref_flight_sq_dn  = np.nansum(time_step * (10**( (noise_penality + SPL)/10)), axis=0)  
     
         # add to current  

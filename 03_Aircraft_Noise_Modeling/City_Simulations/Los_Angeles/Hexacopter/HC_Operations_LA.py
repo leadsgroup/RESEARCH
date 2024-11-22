@@ -40,10 +40,9 @@ def main():
     flight_data     = pd.read_excel(routes_filepath,sheet_name=['Los_Angeles'])
     LA_flight_data         =  flight_data['Los_Angeles']
     
-    mic_x_res                    = 1200
-    mic_y_res                    = 1600 
-    noise_timesteps              = 225  
-    mic_stencil                  = 500
+    mic_x_res                    = 1200 ### TO CHANGE 11/22
+    mic_y_res                    = 1600 ### TO CHANGE 11/22
+    mic_stencil                  = 500 ### TO CHANGE 11/22. or at least double check this.
     aircraft_code                = 'HC' # CHANGE FOR EACH AIRCRAFT 
     city_code                    = 'LA' 
     cruise_altitude              = 1000*Units.feet
@@ -53,7 +52,7 @@ def main():
     dep_heading                  = 200 * Units.degree # Heading [degrees] of the departure from vertiport 1
     app_heading                  = 90  * Units.degree# Heading [degrees] of the approach to vertiport 2 
     max_cruise_distance          = 58*Units.nmi #CHANGE FOR EACH AIRCRAFT
-    number_of_cpts               = 10
+    number_of_cpts               = 10 
     'HC_mission_LA_ONT_BUR_1000ft'
     noise_results = run_noise_mission(number_of_cpts ) # Run noise simulation
     filename_list = []
