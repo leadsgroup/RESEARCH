@@ -4,7 +4,7 @@
 import argparse
 import pickle
 import time  
-import pylab as plt
+import matplotlib.pyplot as plt
 import os
 import sys
 
@@ -38,9 +38,9 @@ def degradation_simulator(HAS_power, HEX_power, RES_dimensions, storage_dir):
     # -------------------------------------------------------------------------------------------    
     # SET UP SIMULATION PARAMETERS   
     # -------------------------------------------------------------------------------------------  
-    days_per_group = 5  # total number of days simulated
-    flights_per_day = 6  # number of flights per day
-    day_group = list(range(1, 31)) 
+    days_per_group = 1#5  # total number of days simulated
+    flights_per_day = 1#6  # number of flights per day
+    day_group = [1]#list(range(1, 31)) 
     plot_mission = True  # plot mission flag  
    
     if RUN_NEW_MODEL_FLAG:    

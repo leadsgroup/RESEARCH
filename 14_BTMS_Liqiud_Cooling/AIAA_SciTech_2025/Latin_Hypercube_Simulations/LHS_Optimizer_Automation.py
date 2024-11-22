@@ -1,20 +1,18 @@
 # ----------------------------------------------------------------------
 #   Imports
 # ---------------------------------------------------------------------
-import numpy as np
-import matplotlib.pyplot as plt
 import os
 import subprocess
 from pathlib import Path
 import time
 import latin_hypercube_sampler  # Assuming this contains `generate_lhs_samples`
-import BTMS_Battery_Degradation_study  # Assuming this is the degradation simulator module
+
 
 
 def main():
     # Define parameters
-    total_no_sims = 50  # Total number of simulations to run
-    parallel_sims = 10  # Number of simulations to run in parallel
+    total_no_sims = 2  # Total number of simulations to run
+    parallel_sims = 2  # Number of simulations to run in parallel
 
     variable_limits = [(1000, 12500), (500, 9000), (0.1, 0.7)]
     variable_names  = ['Power_HAS', 'Power_HEX', 'Dim_RES']
@@ -81,7 +79,7 @@ def create_slurm_job(sim_id, sim_params, script_dir,sim_storage_dir):
 module load /opt/modulefiles/anaconda3/2024.10
 
 # Activate the virtual environment
-source $HOME/leads_research/.rcaideenv/bin/activate
+source /home/sshekar2/scratch/leads_research/.rcaideenv/bin/activate
 
 # Print job information
 echo "Job ID: $SLURM_JOB_ID"
@@ -90,7 +88,7 @@ echo "Partition: $SLURM_JOB_PARTITION"
 echo "Number of CPUs: $SLURM_CPUS_ON_NODE"
 
 # Run the simulation with parameters
-python BTMS_Battery_Degradation_study.py {sim_params[0]} {sim_params[1]} {sim_params[2]} --storage_dir {sim_storage_dir}
+python3 -u  BTMS_Battery_Degradation_study.py {sim_params[0]} {sim_params[1]} {sim_params[2]} --storage_dir {sim_storage_dir}
 
 # Deactivate the virtual environment after the script finishes
 deactivate
@@ -123,4 +121,3 @@ def wait_for_jobs_to_complete():
 # ---------------------------------------------------------------------
 if __name__ == "__main__":
     main()
-    plt.show()
