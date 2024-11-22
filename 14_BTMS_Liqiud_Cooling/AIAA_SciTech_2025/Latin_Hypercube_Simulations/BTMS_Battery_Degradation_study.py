@@ -25,13 +25,15 @@ def main():
     HEX_power = args.HEX_power
     RES_dimensions = args.RES_dimensions
     storage_dir = args.storage_dir
+    sim_id = args.sim_id
 
     # Print to verify the inputs (optional)
     print(f"HAS_power: {HAS_power}, HEX_power: {HEX_power}, RES_dimensions: {RES_dimensions}")
     print(f"Storage directory: {storage_dir}")
+    print(f"Simulation ID: {sim_id}")
 
     # Run the degradation simulator
-    degradation_simulator(HAS_power, HEX_power, RES_dimensions, storage_dir)
+    degradation_simulator(HAS_power, HEX_power, RES_dimensions, storage_dir,sim_id)
 
 
     return
@@ -45,13 +47,14 @@ def parse_arguments():
     parser.add_argument("HEX_power", type=float, help="Power for the Heat Exchanger (HEX)")
     parser.add_argument("RES_dimensions", type=float, help="Dimensions for the reservoir (RES)")
     parser.add_argument("--storage_dir", type=str, required=True, help="Directory to store results")
+    parser.add_argument("sim_id",type=float, help="Simulation ID")
 
     return parser.parse_args()
 
 # ----------------------------------------------------------------------
 #   Degradation Simulator
 # ----------------------------------------------------------------------
-def degradation_simulator(HAS_power, HEX_power, RES_dimensions, storage_dir):  
+def degradation_simulator(HAS_power, HEX_power, RES_dimensions, storage_dir,sim_id):  
     # Start simulation clock
     ti = time.time()
     RUN_NEW_MODEL_FLAG = True
@@ -102,7 +105,7 @@ def degradation_simulator(HAS_power, HEX_power, RES_dimensions, storage_dir):
             # -------------------------------------------------------------------------------------------    
             # SAVE RESULTS
             # -------------------------------------------------------------------------------------------
-            filename = f'e_Twin_Otter_nmc_case_{group}_'
+            filename = f'e_Twin_Otter_nmc_case_{sim_id}'
             save_results(results, filename, group, storage_dir)
             create_excel(filename, group, storage_dir)
             
