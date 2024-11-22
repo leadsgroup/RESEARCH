@@ -663,7 +663,7 @@ def load_aircraft_geometry(storage_dir,filename):
     load_dir = os.path.join(current_dir, 'Raw_Data')
     
     # Create full path for pickle file
-    pickle_file = os.path.join(current_dir, filename + '.pkl')
+    pickle_file = os.path.join(load_dir, filename + '.pkl')
     
     # Load the file
     with open(pickle_file, 'rb') as file:

@@ -62,9 +62,9 @@ def degradation_simulator(HAS_power, HEX_power, RES_dimensions, storage_dir,sim_
     # -------------------------------------------------------------------------------------------    
     # SET UP SIMULATION PARAMETERS   
     # -------------------------------------------------------------------------------------------  
-    days_per_group = 5  # total number of days simulated
-    flights_per_day = 6  # number of flights per day
-    day_group = list(range(1, 51)) 
+    days_per_group = 2#5  # total number of days simulated
+    flights_per_day = 2#6  # number of flights per day
+    day_group = [1,2,3]#list(range(1, 51)) 
     plot_mission = False  # plot mission flag  
    
     if RUN_NEW_MODEL_FLAG:    
@@ -127,9 +127,6 @@ def degradation_simulator(HAS_power, HEX_power, RES_dimensions, storage_dir,sim_
                 print(f'time taken: {round(((tf - ti) / 60), 3)} mins')
                 break 
                         
-    tf = time.time() 
-    print('Battery has life left, run more simulations')
-    print(f'time taken: {round(((tf - ti) / 60), 3)} mins')
     return 
 
 # ----------------------------------------------------------------------

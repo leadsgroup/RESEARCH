@@ -1,7 +1,7 @@
 #!/bin/bash
-#SBATCH --job-name=3_simulation             # Job name
-#SBATCH --output=outputs/output_3.log      # Output log file
-#SBATCH --error=outputs/error_3.log        # Error log file
+#SBATCH --job-name=18_simulation             # Job name
+#SBATCH --output=outputs/output_18.log      # Output log file
+#SBATCH --error=outputs/error_18.log        # Error log file
 #SBATCH --nodes=1                         # Request one node
 #SBATCH --ntasks=1                        # Number of tasks (processes)
 #SBATCH --cpus-per-task=1                 # Number of CPU cores per task
@@ -20,7 +20,7 @@ echo "Partition: $SLURM_JOB_PARTITION"
 echo "Number of CPUs: $SLURM_CPUS_ON_NODE"
 
 # Run the simulation with parameters
-python3 -u  BTMS_Battery_Degradation_study.py 3299.2868565137996 8993.50887497871 0.34593376574580614 --storage_dir /home/sshekar2/storage/optimization_LHS_11_21/case_3 3
+python3 -u  BTMS_Battery_Degradation_study.py 3721.6380002932074 2917.690224733585 0.10193793485378373 --storage_dir /home/sshekar2/storage/optimization_LHS_11_21/case_18 18
 
 # Deactivate the virtual environment after the script finishes
 deactivate
