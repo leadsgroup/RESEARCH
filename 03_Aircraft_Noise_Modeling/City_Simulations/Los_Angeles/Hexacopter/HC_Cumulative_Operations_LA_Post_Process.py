@@ -45,7 +45,7 @@ def main():
     E_origin        = np.zeros(len(unique_airports))
     
     processed_filename_list_name =  aircraft_code + '_' + city_code +  '_Single_Flights_Processed' 
-    file_name_dict               = ['Processed_HC_LA_ONT_BUR_1000ft', 'Processed_HC_LA_ONT_DIS_1000ft', 'Processed_HC_LA_ONT_LAX_1000ft', 'Processed_HC_LA_ONT_LGB_1000ft', 'Processed_HC_LA_ONT_SNA_1000ft'] # load(processed_filename_list_name)    
+    file_name_dict               = ['Processed_HC_LA_ONT_BUR_1000ft', 'Processed_HC_LA_ONT_LAX_1000ft', 'Processed_HC_LA_ONT_LGB_1000ft', 'Processed_HC_LA_ONT_SNA_1000ft'] # load(processed_filename_list_name)    
   
          
     for filename in file_name_dict: # file_name_dict.filename_list: 

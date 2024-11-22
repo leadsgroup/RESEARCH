@@ -29,7 +29,7 @@ def compute_route_distances(x1, y1, x2, y2, radius_Vert1, radius_Vert2, dep_head
     # ---------------------------------------------------------------------------------------------------------------------- 
     # Path distance:
     # ---------------------------------------------------------------------------------------------------------------------- 
-    path_distance = np.sqrt((y1-y2)**2 + (x1-x2)**2) - radius_Vert1 - radius_Vert2 -  high_speed_climb_distance  
+    path_distance = np.sqrt((y1-y2)**2 + (x1-x2)**2) - radius_Vert1 - radius_Vert2 -  high_speed_climb_distance * 2  
     
     # ---------------------------------------------------------------------------------------------------------------------- 
     # Path approach heading: The angle measures on the circle that is the traffic apttern are 180 degrees offset from the heading 
