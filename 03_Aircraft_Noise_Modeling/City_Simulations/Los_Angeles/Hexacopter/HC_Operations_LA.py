@@ -40,8 +40,6 @@ def main():
     flight_data     = pd.read_excel(routes_filepath,sheet_name=['Los_Angeles'])
     LA_flight_data         =  flight_data['Los_Angeles']
     
-    mic_x_res                    = 1200 ### TO CHANGE 11/22
-    mic_y_res                    = 1600 ### TO CHANGE 11/22
     mic_stencil                  = 500 ### TO CHANGE 11/22. or at least double check this.
     aircraft_code                = 'HC' # CHANGE FOR EACH AIRCRAFT 
     city_code                    = 'LA' 
@@ -92,7 +90,7 @@ def main():
         configs  = configs_setup(vehicle)
         
         # vehicle analyses
-        analyses = unconverged_analyses_setup(configs, origin_coord,destination_coord ,mic_x_res, mic_y_res ,noise_timesteps ,mic_stencil)
+        analyses = unconverged_analyses_setup(configs, origin_coord,destination_coord ,mic_stencil)
         
         # mission analyses 
         mission = unconverged_mission_setup(number_of_cpts, analyses, radius_Vert1, radius_Vert2, dep_heading, app_heading, dep_sector, app_sector, path_heading, total_cruise_distance,cruise_altitude)        
@@ -148,7 +146,7 @@ def noise_analyses_setup(configs):
 
     return analyses
 
-def unconverged_analyses_setup(configs, origin_coord,destination_coord ,mic_x_res, mic_y_res ,noise_timesteps ,mic_stencil):
+def unconverged_analyses_setup(configs, origin_coord,destination_coord, noise_timesteps ,mic_stencil):
 
     analyses = RCAIDE.Framework.Analyses.Analysis.Container()
 
