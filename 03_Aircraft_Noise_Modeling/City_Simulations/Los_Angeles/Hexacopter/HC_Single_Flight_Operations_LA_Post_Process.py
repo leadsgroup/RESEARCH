@@ -56,7 +56,7 @@ def main():
          
 
     mic_x_res                 = 1200
-    mic_y_res                 = 1600 
+    mic_y_res                 = 2700 
     noise_timesteps           = 20 #225   
     aircraft_code             = 'HC'
     city_code                 = 'LA' 
