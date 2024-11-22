@@ -11,7 +11,8 @@ import os
 import pickle
 import sys 
 import pandas as pd
-import numpy as  np 
+import numpy as  np
+
 
 local_path_1 =  os.path.split(os.path.split(os.path.split(sys.path[0])[0])[0])[0] 
 
@@ -22,7 +23,8 @@ from Aircraft_Noise_Emissions   import post_process_noise_data
 #  Main 
 # ----------------------------------------------------------------------------------------------------------------------  
 def main():           
-           
+    import  time as  t
+      
     ospath          = os.path.abspath(__file__)
     separator       = os.path.sep
     relative_path   = os.path.dirname(ospath) + separator 
@@ -31,30 +33,31 @@ def main():
     flight_data     = pd.read_excel(routes_filepath,sheet_name=['Los_Angeles'])
     LA_flight_data  =  flight_data['Los_Angeles']
     route_count     = {}
-    
+    ti = t.time() 
     
     operation_flight_times = np.array(['06:00:00',
                                        '07:00:00',
                                        '08:00:00',
-                                       '09:00:00',
-                                       '10:00:00',
-                                       '11:00:00', 
-                                       '12:00:00',
-                                       '13:00:00',
-                                       '14:00:00',
-                                       '15:00:00',
-                                       '16:00:00',
-                                       '17:00:00',
-                                       '18:00:00',
-                                       '19:00:00',
-                                       '20:00:00',
-                                       '21:00:00', ])
+                                       #'09:00:00',
+                                       #'10:00:00',
+                                       #'11:00:00', 
+                                       #'12:00:00',
+                                       #'13:00:00',
+                                       #'14:00:00',
+                                       #'15:00:00',
+                                       #'16:00:00',
+                                       #'17:00:00',
+                                       #'18:00:00',
+                                       #'19:00:00',
+                                       #'20:00:00',
+                                       #'21:00:00', 
+                                       ])
     operation_period  = ['06:00:00','22:00:00']
          
 
     mic_x_res                 = 1200
     mic_y_res                 = 1600 
-    noise_timesteps           = 100 #225   
+    noise_timesteps           = 20 #225   
     aircraft_code             = 'HC'
     city_code                 = 'LA' 
     cruise_altitude           = 1000*Units.feet
@@ -97,7 +100,10 @@ def main():
         
     processed_filename_list_name =  aircraft_code + '_' + city_code +  '_Single_Flights_Processed'
     F =  Data(filename_list_name=processed_filename_list_name)
-    save(F, processed_filename_list_name + '.res')             
+    save(F, processed_filename_list_name + '.res')
+    tf = t.time()
+    
+    print("Total time: "+str(tf-ti))
     return     
 
  
