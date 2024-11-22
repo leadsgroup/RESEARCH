@@ -1,10 +1,10 @@
 #!/bin/bash
-#SBATCH --job-name=case_3_nmc             # Job name
+#SBATCH --job-name=optimizer             # Job name
 #SBATCH --output=output_%j.log            # Output log file (%j will be replaced by the job ID)
 #SBATCH --error=error_%j.log              # Error log file (%j will be replaced by the job ID)
 #SBATCH --nodes=1                         # Request nodes
 #SBATCH --ntasks=1                        # Number of tasks (processes)
-#SBATCH --cpus-per-task=4                 # Number of CPU cores per task
+#SBATCH --cpus-per-task=1                 # Number of CPU cores per task
 #SBATCH --partition=primary               # Partition/queue to submit the job
 #SBATCH --mail-type=ALL                   # Send email on job start, end and fail
 #SBATCH --mail-user=sshekar2@illinois.edu # Email for notifications
@@ -16,7 +16,7 @@ module load /opt/modulefiles/anaconda3/2024.10  # This has the latest version of
 source $HOME/scratch/leads_research/.rcaideenv/bin/activate
 
 # Run the Python script
-python3 -u BTMS_Battery_Degradation_study_tms_nmc_case_3.py
+python3 -u LHS_Optimizer_Automation.py
 
 # Deactivate the virtual environment after completion
 deactivate

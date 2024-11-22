@@ -3,14 +3,14 @@ from openpyxl import load_workbook
 import os
 from RCAIDE.Framework.Core import Units
 import numpy as np
-def write_data(results, filename, group):
+def write_data(results, storage_dir,filename, group):
     
     # Create or append to Excel file with group sheets
 
-    current_dir = os.path.dirname(os.path.abspath(__file__))
+    current_dir = storage_dir# os.path.dirname(os.path.abspath(__file__))
     
     # Go one folder back and into Raw_Data
-    load_dir = os.path.join(current_dir, '..', 'Raw_Data')
+    load_dir = os.path.join(current_dir, 'Raw_Data')
     
     excel_file = os.path.join(load_dir, filename + '.xlsx')
     sheet_name = 'Group_' + str(group)

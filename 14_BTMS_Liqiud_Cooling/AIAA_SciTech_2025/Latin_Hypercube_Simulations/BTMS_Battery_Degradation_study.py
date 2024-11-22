@@ -51,7 +51,7 @@ def degradation_simulator(HAS_power, HEX_power, RES_dimensions, storage_dir):
             # SET UP VEHICLE
             # -------------------------------------------------------------------------------------------  
             resize_aircraft = group == 1
-            vehicle = Vehicle.vehicle_setup(resize_aircraft, 'e_twin_otter_vehicle')
+            vehicle = Vehicle.vehicle_setup(resize_aircraft, HAS_power, HEX_power, RES_dimensions, storage_dir, 'e_twin_otter_vehicle')
             configs = Vehicle.configs_setup(vehicle)
             analyses = Analyses.analyses_setup(configs)
             charge_throughput, cycle_day, resistance_growth, capacity_fade = load_charge_throughput(storage_dir)
@@ -94,7 +94,7 @@ def degradation_simulator(HAS_power, HEX_power, RES_dimensions, storage_dir):
 # ----------------------------------------------------------------------
 def create_excel(filename, group, storage_dir):
     results = load_results(filename, group, storage_dir)
-    Create_Excel.write_data(results, filename, group)
+    Create_Excel.write_data(results, storage_dir,filename, group)
     return
 
 def save_results(results, filename, group, storage_dir):

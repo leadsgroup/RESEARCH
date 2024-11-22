@@ -24,7 +24,7 @@ import pickle
 # ----------------------------------------------------------------------
 #   Define the Vehicle
 # ----------------------------------------------------------------------   
-def vehicle_setup(resize_aircraft,vehicle_name) :
+def vehicle_setup(resize_aircraft,HAS_power, HEX_power, RES_dimensions, storage_dir, vehicle_name) :
 
    if resize_aircraft:
       #------------------------------------------------------------------------------------------------------------------------------------
@@ -465,7 +465,7 @@ def vehicle_setup(resize_aircraft,vehicle_name) :
       atmo_data                                              = atmosphere.compute_values(altitude = HAS.design_altitude)     
       HAS.coolant_inlet_temperature                          = atmo_data.temperature[0,0]  
       HAS.design_battery_operating_temperature               = 313
-      HAS.design_heat_removed                                = 5000
+      HAS.design_heat_removed                                = HAS_power
       HAS                                                    = design_wavy_channel(HAS,bat_module) 
       
       for battery_module in bus.battery_modules:
@@ -475,13 +475,16 @@ def vehicle_setup(resize_aircraft,vehicle_name) :
       HEX                                                    = RCAIDE.Library.Components.Thermal_Management.Heat_Exchangers.Cross_Flow_Heat_Exchanger() 
       HEX.design_altitude                                    = 1500. * Units.feet 
       HEX.inlet_temperature_of_cold_fluid                    = atmo_data.temperature[0,0]   
-      HEX.design_heat_removed                                = bus.number_of_battery_modules * 2000
+      HEX.design_heat_removed                                = bus.number_of_battery_modules * HEX_power
       HEX.minimum_air_speed                                  = 105* Units.knots 
       HEX                                                    = design_cross_flow_heat_exchanger(HEX,coolant_line,bat_module)
       coolant_line.heat_exchangers.append(HEX)
       
       # Reservoir for Battery TMS
       RES                                                    = RCAIDE.Library.Components.Thermal_Management.Reservoirs.Reservoir()
+      RES.length                                             = RES_dimensions                                     
+      RES.width                                              = RES_dimensions                                    
+      RES.height                                             = RES_dimensions   
       coolant_line.reservoirs.append(RES)
 
       
@@ -600,11 +603,11 @@ def vehicle_setup(resize_aircraft,vehicle_name) :
       # ------------------------------------------------------------------
       #   Vehicle Definition Complete
       # ------------------------------------------------------------------      
-      save_aircraft_geometry(weight_analysis.vehicle,vehicle_name)   
+      save_aircraft_geometry(weight_analysis.vehicle,storage_dir,vehicle_name)   
       final_vehicle = weight_analysis.vehicle     
 
    else: 
-      final_vehicle = load_aircraft_geometry(vehicle_name) 
+      final_vehicle = load_aircraft_geometry(storage_dir,vehicle_name) 
 
    return final_vehicle 
 
@@ -633,12 +636,12 @@ def configs_setup(vehicle):#, tms_operation):
 
    return configs
 
-def save_aircraft_geometry(geometry,filename): 
+def save_aircraft_geometry(geometry,storage_dir,filename): 
     # Get the current file's directory (Common folder)
-    current_dir = os.path.dirname(os.path.abspath(__file__))
+    current_dir = storage_dir# os.path.dirname(os.path.abspath(__file__))
     
-    # Go one folder back and into Raw_Data
-    save_dir = os.path.join(current_dir, '..', 'Raw_Data')
+    # Go  into Raw_Data
+    save_dir = os.path.join(current_dir, 'Raw_Data')
     
     # Create Raw_Data directory if it doesn't exist
     os.makedirs(save_dir, exist_ok=True)
@@ -652,15 +655,15 @@ def save_aircraft_geometry(geometry,filename):
     return
 
 
-def load_aircraft_geometry(filename):
+def load_aircraft_geometry(storage_dir,filename):
     # Get the current file's directory (Common folder)
-    current_dir = os.path.dirname(os.path.abspath(__file__))
+    current_dir = storage_dir# os.path.dirname(os.path.abspath(__file__))
     
-    # Go one folder back and into Raw_Data
-    load_dir = os.path.join(current_dir, '..', 'Raw_Data')
+    # Go  into Raw_Data
+    load_dir = os.path.join(current_dir, 'Raw_Data')
     
     # Create full path for pickle file
-    pickle_file = os.path.join(load_dir, filename + '.pkl')
+    pickle_file = os.path.join(current_dir, filename + '.pkl')
     
     # Load the file
     with open(pickle_file, 'rb') as file:

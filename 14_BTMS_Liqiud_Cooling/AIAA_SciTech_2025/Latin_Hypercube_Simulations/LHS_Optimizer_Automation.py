@@ -2,6 +2,7 @@
 #   Imports
 # ---------------------------------------------------------------------
 import os
+import getpass
 import subprocess
 from pathlib import Path
 import time
@@ -59,17 +60,23 @@ def automation_optimizations(total_simulations, parallel_simulations, variable_l
 # ----------------------------------------------------------------------
 #   Helper Functions
 # ---------------------------------------------------------------------
-def create_slurm_job(sim_id, sim_params, script_dir,sim_storage_dir):
+def create_slurm_job(sim_id, sim_params, script_dir, sim_storage_dir):
     """
     Creates a SLURM job file for a given simulation.
     """
-    job_name = f"simulation_{sim_id}"
+    job_name = f"{sim_id}_simulation"
+    output_dir = Path("outputs")  # Directory for logs
+
+    # Ensure the outputs directory exists
+    if not output_dir.exists():
+        output_dir.mkdir(parents=True, exist_ok=True)
+
     job_file = Path(script_dir) / f"{job_name}.slurm"
 
     slurm_script = f"""#!/bin/bash
 #SBATCH --job-name={job_name}             # Job name
-#SBATCH --output=output_{sim_id}.log      # Output log file
-#SBATCH --error=error_{sim_id}.log        # Error log file
+#SBATCH --output={output_dir}/output_{sim_id}.log      # Output log file
+#SBATCH --error={output_dir}/error_{sim_id}.log        # Error log file
 #SBATCH --nodes=1                         # Request one node
 #SBATCH --ntasks=1                        # Number of tasks (processes)
 #SBATCH --cpus-per-task=1                 # Number of CPU cores per task
@@ -110,12 +117,18 @@ def wait_for_jobs_to_complete():
     Waits for all SLURM jobs to complete before proceeding.
     """
     print("Waiting for jobs to complete...")
+    user = getpass.getuser()  # Fetch username reliably in SLURM
     while True:
-        result = subprocess.run(["squeue", "-u", os.getlogin()], capture_output=True, text=True)
-        if len(result.stdout.strip().splitlines()) <= 1:  # No running jobs except the header
+        result = subprocess.run(["squeue", "-u", user], capture_output=True, text=True)
+        lines = result.stdout.strip().splitlines()
+        
+        # Remove header line(s)
+        if len(lines) > 1:  # Jobs are still running
+            print(f"Jobs running: {len(lines) - 1}")
+        else:
+            print("All jobs are complete.")
             break
-        time.sleep(30)  # Check every 30 seconds
-
+        time.sleep(1)  # Check every second
 # ----------------------------------------------------------------------
 #   Main
 # ---------------------------------------------------------------------
