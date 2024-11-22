@@ -1,0 +1,109 @@
+# ----------------------------------------------------------------------
+#   Imports
+# ---------------------------------------------------------------------
+import numpy as np
+import matplotlib.pyplot as plt
+import os
+import subprocess
+from pathlib import Path
+import latin_hypercube_sampler  # Assuming this contains `generate_lhs_samples`
+import BTMS_Battery_Degradation_study  # Assuming this is the degradation simulator module
+
+
+def main():
+    # Define parameters
+    total_no_sims = 50  # Total number of simulations to run
+    parallel_sims = 10  # Number of simulations to run in parallel
+
+    variable_limits = [(1000, 12500), (500, 9000), (0.1, 0.7)]
+    variable_names  = ['Power_HAS', 'Power_HEX', 'Dim_RES']
+
+    storage_dir  = '/home/sshekar2/storage/optimization_LHS_11_21'
+    automation_optimizations(total_no_sims, parallel_sims, variable_limits,variable_names,storage_dir)
+    
+    return
+
+# ----------------------------------------------------------------------
+#   Automation Optimization Script
+# ---------------------------------------------------------------------
+def automation_optimizations(total_simulations, parallel_simulations, variable_limits,variable_names,storage_dir):
+
+    # Generate Latin Hypercube Samples
+    lhs_samples = latin_hypercube_sampler.generate_lhs_samples(variable_limits, total_simulations,variable_names)
+    print(f"Generated {total_simulations} Latin Hypercube samples.")
+
+    # Create SLURM job scripts directory
+    script_dir = Path("slurm_scripts")
+    script_dir.mkdir(exist_ok=True)
+
+    # Write SLURM scripts for all simulations
+    job_files = []
+    for sim_id, params in enumerate(lhs_samples):
+        job_file = create_slurm_job(sim_id, params, script_dir)
+        job_files.append(job_file)
+
+    # Step 4: Submit jobs in parallel batches
+    for i in range(0, total_simulations, parallel_simulations):
+        batch_jobs = job_files[i:i + parallel_simulations]
+        print(f"Submitting batch {i // parallel_simulations + 1}: {len(batch_jobs)} jobs")
+
+        for job_file in batch_jobs:
+            submit_slurm_job(job_file)
+
+        # Wait for the current batch to finish
+        wait_for_jobs_to_complete()
+
+    print("All simulations completed.")
+
+# ----------------------------------------------------------------------
+#   Helper Functions
+# ---------------------------------------------------------------------
+def create_slurm_job(sim_id, sim_params, script_dir):
+    """
+    Creates a SLURM job file for a given simulation.
+    """
+    job_name = f"simulation_{sim_id}"
+    job_file = Path(script_dir) / f"{job_name}.slurm"
+
+    slurm_script = f"""#!/bin/bash
+#SBATCH --job-name={job_name}
+#SBATCH --output=output_{sim_id}.log
+#SBATCH --error=error_{sim_id}.log
+#SBATCH --time=01:00:00
+#SBATCH --cpus-per-task=4
+#SBATCH --mem=4G
+
+module load anaconda3
+source activate my_environment
+
+# Run the simulation with parameters
+python BTMS_Battery_Degradation_study.py {sim_params[0]} {sim_params[1]} {sim_params[2]}
+"""
+
+    with open(job_file, "w") as f:
+        f.write(slurm_script)
+    return job_file
+
+def submit_slurm_job(job_file):
+    """
+    Submits a SLURM job file.
+    """
+    subprocess.run(["sbatch", str(job_file)], check=True)
+
+def wait_for_jobs_to_complete():
+    """
+    Waits for all SLURM jobs to complete before proceeding.
+    """
+    print("Waiting for jobs to complete...")
+    while True:
+        result = subprocess.run(["squeue", "-u", os.getlogin()], capture_output=True, text=True)
+        if len(result.stdout.strip().splitlines()) <= 1:  # No running jobs except the header
+            break
+        time.sleep(30)  # Check every 30 seconds
+
+# ----------------------------------------------------------------------
+#   Main
+# ---------------------------------------------------------------------
+if __name__ == "__main__":
+    main()
+    plt.show()
