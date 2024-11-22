@@ -140,9 +140,8 @@ def cruise_oei_mission_setup(analyses,max_speed_multiplier,cruise_velocity,cruis
     segment.flight_dynamics.moment_z  = True
 
     segment.assigned_control_variables.throttle.active               = True
-    segment.assigned_control_variables.throttle.initial_guess_values = [[0.5], [0.6], [0.5], [0.6], [0.5]]
-    segment.assigned_control_variables.throttle.assigned_propulsors  = [['prop_rotor_propulsor_1'],['prop_rotor_propulsor_2'],['prop_rotor_propulsor_3'],
-                                                                         ['prop_rotor_propulsor_4'],['prop_rotor_propulsor_5']]
+    segment.assigned_control_variables.throttle.initial_guess_values = [[0.5]]
+    segment.assigned_control_variables.throttle.assigned_propulsors  = [['prop_rotor_propulsor_1','prop_rotor_propulsor_2','prop_rotor_propulsor_3','prop_rotor_propulsor_4','prop_rotor_propulsor_5']]
     
         
     mission.append_segment(segment)     

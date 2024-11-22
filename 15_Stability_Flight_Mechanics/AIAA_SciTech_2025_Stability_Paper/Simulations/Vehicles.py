@@ -103,27 +103,7 @@ def aileron_rudder_sizing_configs_setup(vehicle):
 ################################################################################################################################################
 # AILERON AND RUDDER ONE ENGINE INOPERATIVE SIZING
 ################################################################################################################################################
-def aileron_rudder_oei_sizing_setup(vehicle):
-
-    mw_wing                       = vehicle.wings.main_wing 
-    aileron                       = RCAIDE.Library.Components.Wings.Control_Surfaces.Aileron()
-    aileron.tag                   = 'aileron'
-    aileron.span_fraction_start   = 0.7
-    aileron.span_fraction_end     = 0.9 
-    aileron.deflection            = 0.0 * Units.degrees
-    aileron.chord_fraction        = 0.2
-    mw_wing.append_control_surface(aileron) 
-    
-    if vehicle.rudder_flag:
-        vt_wing                      = vehicle.wings.vertical_tail
-        rudder                       = RCAIDE.Library.Components.Wings.Control_Surfaces.Rudder()
-        rudder.tag                   = 'rudder'
-        rudder.span_fraction_start   = 0.2
-        rudder.span_fraction_end     = 0.8
-        rudder.deflection            = 0.0  * Units.deg
-        rudder.chord_fraction        = 0.2
-        vt_wing.append_control_surface(rudder)
-              
+def aileron_rudder_oei_sizing_setup(vehicle): 
     configs  = aileron_rudder_oei_sizing_configs_setup(vehicle) 
     return configs 
  
@@ -132,8 +112,7 @@ def aileron_rudder_oei_sizing_configs_setup(vehicle):
     configs     = RCAIDE.Library.Components.Configs.Config.Container() 
     base_config = RCAIDE.Library.Components.Configs.Config(vehicle)  
        
-    config      = RCAIDE.Library.Components.Configs.Config(base_config)  
-    config.networks.electric.busses.prop_rotor_bus.identical_propulsors = False 
+    config      = RCAIDE.Library.Components.Configs.Config(base_config)   
     for p_i ,  propulsor in  enumerate(config.networks.electric.busses.prop_rotor_bus.propulsors):
         propulsor.rotor.orientation_euler_angles =  [0, 0.0, 0] 
         propulsor.rotor.pitch_command   = propulsor.rotor.cruise.design_pitch_command

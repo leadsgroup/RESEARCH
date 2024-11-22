@@ -287,11 +287,11 @@ def aileron_rudder_sizing_post_process(nexus):
     summary.aileron_roll_deflection       = abs(aileron_roll_deflection)  
     summary.aileron_crosswind_deflection  = abs(aileron_crosswind_deflection) 
  
-    summary.crosswind_CY_residual    = abs(crosswind.conditions.static_stability.coefficients.Y[0,0])  
-    summary.crosswind_CZ_residual    = abs(crosswind.conditions.static_stability.coefficients.Z[0,0])  
-    summary.crosswind_CL_residual    = abs(crosswind.conditions.static_stability.coefficients.L[0,0])  
-    summary.crosswind_CM_residual    = abs(crosswind.conditions.static_stability.coefficients.M[0,0])  
-    summary.crosswind_CN_residual    = abs(crosswind.conditions.static_stability.coefficients.N[0,0])  
+    summary.F_y_residual    = abs(crosswind.conditions.static_stability.coefficients.Y[0,0])  
+    summary.F_z_residual    = abs(crosswind.conditions.static_stability.coefficients.Z[0,0])  
+    summary.M_x_residual    = abs(crosswind.conditions.static_stability.coefficients.L[0,0])  
+    summary.M_y_residual    = abs(crosswind.conditions.static_stability.coefficients.M[0,0])  
+    summary.M_z_residual    = abs(crosswind.conditions.static_stability.coefficients.N[0,0])  
  
     # ------------------------------------------------------------------------------------------------------------------------  
     # Rudder     
@@ -353,17 +353,18 @@ def aileron_rudder_oei_sizing_post_process(nexus):
     # ------------------------------------------------------------------------------------------------------------------------  
     # Post Process Results 
     # ------------------------------------------------------------------------------------------------------------------------   
-    # compute aileron deflections  
-    
+    # compute aileron deflections   
+    elevator_oei_deflection               = cruise_oei.conditions.control_surfaces.elevator.deflection[0,0]  
+    summary.elevator_oei_deflection       = abs(elevator_oei_deflection)    
     aileron_oei_deflection                = cruise_oei.conditions.control_surfaces.aileron.deflection[0,0]  
     summary.aileron_oei_deflection        = abs(aileron_oei_deflection)
   
-    summary.cruise_oei_CX_residual    = abs(cruise_oei.conditions.static_stability.coefficients.Y[0,0])
-    summary.cruise_oei_CY_residual    = abs(cruise_oei.conditions.static_stability.coefficients.Y[0,0])
-    summary.cruise_oei_CZ_residual    = abs(cruise_oei.conditions.static_stability.coefficients.Z[0,0])
-    summary.cruise_oei_CL_residual    = abs(cruise_oei.conditions.static_stability.coefficients.L[0,0])
-    summary.cruise_oei_CM_residual    = abs(cruise_oei.conditions.static_stability.coefficients.M[0,0])
-    summary.cruise_oei_CN_residual    = abs(cruise_oei.conditions.static_stability.coefficients.N[0,0])      
+    summary.F_x_residual    = abs(cruise_oei.state.residuals.force_x[0,0] )
+    summary.F_y_residual    = abs(cruise_oei.state.residuals.force_y[0,0]  )
+    summary.F_z_residual    = abs(cruise_oei.state.residuals.force_z[0,0] )
+    summary.M_x_residual    = abs(cruise_oei.state.residuals.moment_x[0,0] )
+    summary.M_y_residual    = abs(cruise_oei.state.residuals.moment_y[0,0] )
+    summary.M_z_residual    = abs(cruise_oei.state.residuals.moment_z[0,0] )      
 
     # ------------------------------------------------------------------------------------------------------------------------  
     # Rudder     
@@ -376,9 +377,11 @@ def aileron_rudder_oei_sizing_post_process(nexus):
       
     # compute control surface area 
     control_surfaces = ['aileron','rudder'] 
-    total_control_surface_area = compute_control_surface_areas(control_surfaces,vehicle)   
-    summary.aileron_rudder_surface_area = total_control_surface_area
- 
+    total_control_surface_area = compute_control_surface_areas(control_surfaces,vehicle)
+    
+    summary.oei_objective = total_control_surface_area #  +  power / 1E5 # objective to minimize power and elevator surface area 
+
+    print("Elevator One Engine Inoperative Defl : " + str(elevator_oei_deflection/Units.degree))  
     print("Aileron One Engine Inoperative Defl : " + str(aileron_oei_deflection/Units.degree)) 
     print("Rudder  One Engine Inoperative Defl : " + str(rudder_oei_deflection/Units.degree )) 
     print("\n\n")     
