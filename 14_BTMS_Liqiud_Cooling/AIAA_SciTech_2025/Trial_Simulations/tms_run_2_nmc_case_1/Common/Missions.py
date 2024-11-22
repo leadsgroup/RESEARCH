@@ -22,7 +22,7 @@ def repeated_flight_operation_setup(configs,analyses,day_group,g_idx,group,days_
     # unpack Segments module
     Segments = RCAIDE.Framework.Mission.Segments  
     base_segment = Segments.Segment()
-    base_segment.temperature_deviation  = 10
+    base_segment.temperature_deviation  = 35
     base_segment.state.numerics.number_of_control_points  = 8
  
     for d_idx in  range(days_per_group):

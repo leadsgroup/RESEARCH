@@ -12,7 +12,7 @@ import latin_hypercube_sampler  # Assuming this contains `generate_lhs_samples`
 
 def main():
     # Define parameters
-    total_no_sims = 2  # Total number of simulations to run
+    total_no_sims = 5  # Total number of simulations to run
     parallel_sims = 2  # Number of simulations to run in parallel
 
     variable_limits = [(1000, 12500), (500, 9000), (0.1, 0.7)]
@@ -20,6 +20,9 @@ def main():
 
     storage_dir  = '/home/sshekar2/storage/optimization_LHS_11_21'
     automation_optimizations(total_no_sims, parallel_sims, variable_limits,variable_names,storage_dir)
+
+    print("Parent Optimzation job completing.")
+    exit(0)  
     
     return
 
@@ -95,7 +98,7 @@ echo "Partition: $SLURM_JOB_PARTITION"
 echo "Number of CPUs: $SLURM_CPUS_ON_NODE"
 
 # Run the simulation with parameters
-python3 -u  BTMS_Battery_Degradation_study.py {sim_params[0]} {sim_params[1]} {sim_params[2]} --storage_dir {sim_storage_dir}
+python3 -u  BTMS_Battery_Degradation_study.py {sim_params[0]} {sim_params[1]} {sim_params[2]} --storage_dir {sim_storage_dir} {sim_id}
 
 # Deactivate the virtual environment after the script finishes
 deactivate
@@ -106,29 +109,45 @@ deactivate
     
     return job_file
 
+
 def submit_slurm_job(job_file):
     """
     Submits a SLURM job file.
     """
-    subprocess.run(["sbatch", str(job_file)], check=True)
+    result = subprocess.run(["sbatch", str(job_file)], capture_output=True, text=True)
+    if result.returncode == 0:
+        print(f"Submitted job: {job_file}")
+    else:
+        print(f"Failed to submit job: {job_file}")
+        print(result.stderr)
+        exit(1)
+
 
 def wait_for_jobs_to_complete():
     """
-    Waits for all SLURM jobs to complete before proceeding.
+    Waits for all SLURM jobs (excluding the parent job) to complete.
     """
     print("Waiting for jobs to complete...")
-    user = getpass.getuser()  # Fetch username reliably in SLURM
+    user = getpass.getuser()
+    parent_job_id = os.getenv("SLURM_JOB_ID")  # Get the current job's ID
+
     while True:
+        # Fetch the list of jobs
         result = subprocess.run(["squeue", "-u", user], capture_output=True, text=True)
         lines = result.stdout.strip().splitlines()
-        
-        # Remove header line(s)
-        if len(lines) > 1:  # Jobs are still running
-            print(f"Jobs running: {len(lines) - 1}")
+
+        # Extract job IDs (skip header line)
+        job_ids = [line.split()[0] for line in lines[1:]]
+
+        # Filter out the parent job
+        running_jobs = [job for job in job_ids if job != parent_job_id]
+
+        if running_jobs:  # There are still child jobs running
+            print(f"Jobs running: {len(running_jobs)}")
+            time.sleep(1)  # Wait and check again
         else:
             print("All jobs are complete.")
             break
-        time.sleep(1)  # Check every second
 # ----------------------------------------------------------------------
 #   Main
 # ---------------------------------------------------------------------

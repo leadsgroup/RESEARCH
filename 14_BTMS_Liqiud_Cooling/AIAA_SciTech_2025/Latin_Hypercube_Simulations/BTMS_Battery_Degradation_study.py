@@ -4,9 +4,9 @@
 import argparse
 import pickle
 import time  
-import matplotlib.pyplot as plt
 import os
 import sys
+import numpy as np
 
 sys.path.append(os.path.join(sys.path[0], 'Common'))
 import Vehicle
@@ -14,6 +14,29 @@ import Analyses
 import Missions
 import Plots
 import Create_Excel
+
+
+
+def main():
+    args = parse_arguments()
+
+    # Extract arguments
+    HAS_power = args.HAS_power
+    HEX_power = args.HEX_power
+    RES_dimensions = args.RES_dimensions
+    storage_dir = args.storage_dir
+    sim_id = args.sim_id
+
+    # Print to verify the inputs (optional)
+    print(f"HAS_power: {HAS_power}, HEX_power: {HEX_power}, RES_dimensions: {RES_dimensions}")
+    print(f"Storage directory: {storage_dir}")
+    print(f"Simulation ID: {sim_id}")
+
+    # Run the degradation simulator
+    degradation_simulator(HAS_power, HEX_power, RES_dimensions, storage_dir,sim_id)
+
+
+    return
 
 # ----------------------------------------------------------------------
 #   Parse Command-Line Arguments
@@ -24,13 +47,14 @@ def parse_arguments():
     parser.add_argument("HEX_power", type=float, help="Power for the Heat Exchanger (HEX)")
     parser.add_argument("RES_dimensions", type=float, help="Dimensions for the reservoir (RES)")
     parser.add_argument("--storage_dir", type=str, required=True, help="Directory to store results")
+    parser.add_argument("sim_id",type=float, help="Simulation ID")
 
     return parser.parse_args()
 
 # ----------------------------------------------------------------------
 #   Degradation Simulator
 # ----------------------------------------------------------------------
-def degradation_simulator(HAS_power, HEX_power, RES_dimensions, storage_dir):  
+def degradation_simulator(HAS_power, HEX_power, RES_dimensions, storage_dir,sim_id):  
     # Start simulation clock
     ti = time.time()
     RUN_NEW_MODEL_FLAG = True
@@ -52,6 +76,9 @@ def degradation_simulator(HAS_power, HEX_power, RES_dimensions, storage_dir):
             # -------------------------------------------------------------------------------------------  
             resize_aircraft = group == 1
             vehicle = Vehicle.vehicle_setup(resize_aircraft, HAS_power, HEX_power, RES_dimensions, storage_dir, 'e_twin_otter_vehicle')
+            if vehicle.mass_properties.takeoff > 5670:
+                print('**********Aircraft Overweight | Terminating Simulation**********')
+                break
             configs = Vehicle.configs_setup(vehicle)
             analyses = Analyses.analyses_setup(configs)
             charge_throughput, cycle_day, resistance_growth, capacity_fade = load_charge_throughput(storage_dir)
@@ -78,12 +105,21 @@ def degradation_simulator(HAS_power, HEX_power, RES_dimensions, storage_dir):
             # -------------------------------------------------------------------------------------------    
             # SAVE RESULTS
             # -------------------------------------------------------------------------------------------
-            filename = f'e_Twin_Otter_nmc_case_{group}_'
+            filename = f'e_Twin_Otter_nmc_case_{sim_id}'
             save_results(results, filename, group, storage_dir)
             create_excel(filename, group, storage_dir)
             
             if plot_mission: 
-                Plots.plot_results(results, save_figure_flag=False)       
+                Plots.plot_results(results, save_figure_flag=False)      
+            for i in range(len(results.segments)):
+                state_of_charge = results.segments[i].conditions.energy.bus.battery_modules.lithium_ion_nmc.cell.state_of_charge[:, 0]   
+                temperature     = results.segments[i].conditions.energy.bus.battery_modules.lithium_ion_nmc.cell.temperature[:, 0]   
+                SOC = np.concatenate((SOC, state_of_charge))
+                Temp = np.concatenate((Temp, temperature))
+
+            if np.any(SOC<0.2) or np.any(Temp>=322.65):
+                print('**********Battery End of Life Reached**********')
+                break 
                         
     tf = time.time() 
     print(f'time taken: {round(((tf - ti) / 60), 3)} mins')
@@ -147,17 +183,4 @@ def load_results(filename, group, storage_dir):
 #   Main
 # ----------------------------------------------------------------------
 if __name__ == "__main__":
-    args = parse_arguments()
-
-    # Extract arguments
-    HAS_power = args.HAS_power
-    HEX_power = args.HEX_power
-    RES_dimensions = args.RES_dimensions
-    storage_dir = args.storage_dir
-
-    # Print to verify the inputs (optional)
-    print(f"HAS_power: {HAS_power}, HEX_power: {HEX_power}, RES_dimensions: {RES_dimensions}")
-    print(f"Storage directory: {storage_dir}")
-
-    # Run the degradation simulator
-    degradation_simulator(HAS_power, HEX_power, RES_dimensions, storage_dir)
+    main()
