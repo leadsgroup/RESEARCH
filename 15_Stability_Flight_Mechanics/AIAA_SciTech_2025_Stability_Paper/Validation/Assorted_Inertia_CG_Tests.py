@@ -11,6 +11,7 @@ from RCAIDE.Library.Methods.Geometry.Planform           import segment_propertie
 from RCAIDE.Library.Plots                               import *
 import numpy as np
 import os
+import  pickle
 
 # ----------------------------------------------------------------------------------------------------------------------
 #  IMPORT
@@ -47,10 +48,10 @@ def main():
     #Twin_Otter_Analysis()
     #print("\n ############################\n")
     #B738_Analysis()
-    #print("\n ############################\n")    
-    #C5a_Analysis()
+    print("\n ############################\n")    
+    C5a_Analysis()
     print("\n ############################\n")
-    Joby_Analysis()
+    #Joby_Analysis()
     #print("\n ############################\n")
     #Stop_Rotor_Analysis()
     #print("\n ############################\n")
@@ -59,7 +60,7 @@ def main():
     #ATR72_Analysis()
     #print("\n ############################\n")
     #CRJ7_Analysis()
-    print("\n ############################\n")    
+    #print("\n ############################\n")    
     
     return
     
@@ -188,7 +189,7 @@ def C5a_Analysis():
     error    = (MOI - MOI_true) / MOI_true * 100
     print(error)
     print("Percent of empty mass used for C-5a inertia tensor calcs: "+str((mass)/results['empty']*100)+"%")
-
+    save_results(MOI,"c5a_moi_weight_results")
     
 def Joby_Analysis():
     vehicle = Joby_setup()
@@ -291,6 +292,15 @@ def CRJ7_Analysis():
     print("Operating empty weight estimate for CRJ-700: " + str(results["operating_empty"]))
     print("Max takeoff weight estimate for CRJ-700: " + str(results["max_takeoff"]))
 
+def save_results(results,filename):
+      # Pickle Backup Files
+    save_dir = '/home/aidanrm2/storage/moi_results'
+    if not os.path.exists(save_dir):
+        os.makedirs(save_dir)  # Create the directory if it doesn't exist
+    pickle_file = os.path.join(save_dir, filename + '.pkl')
+    with open(pickle_file, 'wb') as file:
+        pickle.dump(results, file) 
+    return
 
 if __name__ == '__main__': 
     main()
