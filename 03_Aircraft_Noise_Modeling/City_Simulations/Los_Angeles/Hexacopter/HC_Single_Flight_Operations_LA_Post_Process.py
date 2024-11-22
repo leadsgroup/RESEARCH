@@ -54,13 +54,13 @@ def main():
 
     mic_x_res                 = 1200
     mic_y_res                 = 1600 
-    noise_timesteps           = 20 #225   
+    noise_timesteps           = 100 #225   
     aircraft_code             = 'HC'
     city_code                 = 'LA' 
     cruise_altitude           = 1000*Units.feet
     
     filename_list_name =  aircraft_code + '_' + city_code +  '_Single_Flights_Raw'
-    file_name_dict = ['HC_mission_LA_ONT_BUR_1000ft', 'HC_mission_LA_ONT_LAX_1000ft', 'HC_mission_LA_ONT_LGB_1000ft', 'HC_mission_LA_ONT_SNA_1000ft', 'HC_mission_LA_ONT_DIS_1000ft', 'HC_mission_LA_ONT_SMO_1000ft', 'HC_mission_LA_ONT_LAUS_1000ft'] #load(filename_list_name)
+    file_name_dict = ['HC_mission_LA_ONT_BUR_1000ft', 'HC_mission_LA_ONT_LAX_1000ft', 'HC_mission_LA_ONT_LGB_1000ft', 'HC_mission_LA_ONT_SNA_1000ft']
     processed_filename_list = []
              
     for filename in file_name_dict: #file_name_dict.filename_list:  
