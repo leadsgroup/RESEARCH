@@ -6,14 +6,16 @@ import getpass
 import subprocess
 from pathlib import Path
 import time
-import latin_hypercube_sampler  # Assuming this contains `generate_lhs_samples`
+import latin_hypercube_sampler  
 
 
-
+# ----------------------------------------------------------------------
+#   Main
+# ---------------------------------------------------------------------
 def main():
     # Define parameters
-    total_no_sims = 23  # Total number of simulations to run
-    parallel_sims = 23 # Number of simulations to run in parallel
+    total_no_sims = 75  # Total number of simulations to run
+    parallel_sims = 15 # Number of simulations to run in parallel
 
     variable_limits = [(1000, 12500), (500, 9000), (0.1, 0.7)]
     variable_names  = ['Power_HAS', 'Power_HEX', 'Dim_RES']
@@ -82,7 +84,7 @@ def create_slurm_job(sim_id, sim_params, script_dir, sim_storage_dir):
 #SBATCH --error={output_dir}/error_{sim_id}.log        # Error log file
 #SBATCH --nodes=1                         # Request one node
 #SBATCH --ntasks=1                        # Number of tasks (processes)
-#SBATCH --cpus-per-task=1                 # Number of CPU cores per task
+#SBATCH --cpus-per-task=2                 # Number of CPU cores per task
 #SBATCH --partition=primary               # Partition/queue to submit the job
 
 # Load the necessary module
@@ -142,9 +144,9 @@ def wait_for_jobs_to_complete():
         # Filter out the parent job
         running_jobs = [job for job in job_ids if job != parent_job_id]
 
-        if running_jobs:  # There are still child jobs running
+        if running_jobs: 
             print(f"Jobs running: {len(running_jobs)}")
-            time.sleep(1)  # Wait and check again
+            time.sleep(300)  
         else:
             print("All jobs are complete.")
             break
