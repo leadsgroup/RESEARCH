@@ -62,10 +62,10 @@ def degradation_simulator(HAS_power, HEX_power, RES_dimensions, storage_dir,sim_
     # -------------------------------------------------------------------------------------------    
     # SET UP SIMULATION PARAMETERS   
     # -------------------------------------------------------------------------------------------  
-    days_per_group = 1#5  # total number of days simulated
-    flights_per_day = 1#6  # number of flights per day
-    day_group = [1]#list(range(1, 31)) 
-    plot_mission = True  # plot mission flag  
+    days_per_group = 5  # total number of days simulated
+    flights_per_day = 6  # number of flights per day
+    day_group = list(range(1, 51)) 
+    plot_mission = False  # plot mission flag  
    
     if RUN_NEW_MODEL_FLAG:    
         for g_idx, group in enumerate(day_group):
@@ -110,7 +110,9 @@ def degradation_simulator(HAS_power, HEX_power, RES_dimensions, storage_dir,sim_
             create_excel(filename, group, storage_dir)
             
             if plot_mission: 
-                Plots.plot_results(results, save_figure_flag=False)      
+                Plots.plot_results(results, save_figure_flag=False)  
+            SOC = np.array([])    
+            Temp = np.array([])    
             for i in range(len(results.segments)):
                 state_of_charge = results.segments[i].conditions.energy.bus.battery_modules.lithium_ion_nmc.cell.state_of_charge[:, 0]   
                 temperature     = results.segments[i].conditions.energy.bus.battery_modules.lithium_ion_nmc.cell.temperature[:, 0]   
@@ -119,9 +121,14 @@ def degradation_simulator(HAS_power, HEX_power, RES_dimensions, storage_dir,sim_
 
             if np.any(SOC<0.2) or np.any(Temp>=322.65):
                 print('**********Battery End of Life Reached**********')
+                end_day = results.segments[-1].conditions.energy.bus.battery_modules.lithium_ion_nmc.cell.cycle_in_day
+                print('The battery lasted for ',end_day)
+                tf = time.time() 
+                print(f'time taken: {round(((tf - ti) / 60), 3)} mins')
                 break 
                         
     tf = time.time() 
+    print('Battery has life left, run more simulations')
     print(f'time taken: {round(((tf - ti) / 60), 3)} mins')
     return 
 
