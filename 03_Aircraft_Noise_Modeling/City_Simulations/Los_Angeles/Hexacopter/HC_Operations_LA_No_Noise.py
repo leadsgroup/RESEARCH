@@ -15,7 +15,8 @@ import pickle
 import sys 
 import pandas as pd
 import numpy as  np
-import time 
+import time
+import matplotlib.pyplot as  plt
 
 local_path_1 =  os.path.split(os.path.split(os.path.split(sys.path[0])[0])[0])[0]
 local_path_2 =  os.path.split(os.path.split(os.path.split(os.path.split(sys.path[0])[0])[0])[0])[0]
@@ -55,7 +56,7 @@ def main():
     max_cruise_distance          = 58*Units.nmi #CHANGE FOR EACH AIRCRAFT
     number_of_cpts               = 10
     'HC_mission_LA_ONT_BUR_1000ft'
-    noise_results = run_noise_mission(number_of_cpts ) # Run noise simulation
+    #noise_results = run_noise_mission(number_of_cpts ) # Run noise simulation
     filename_list = []
     
     for i in range(len(LA_flight_data)):
@@ -77,10 +78,11 @@ def main():
         # -------------------------------------
         #   Lat-lon to X-Y. Assume that vertiport 1 is at 0,0 and then calcualte vertiport two lcoation. We'll calcualte everything in this frame, find the distnaces and then the program when it converts the mission profile back will handle it on that side. 
         # -------------------------------------
-        x1 = Calculate_Distance(x0_coord,bottom_left_map_coords) * Units.kilometers # Correct
-        y1 = Calculate_Distance(y0_coord,bottom_left_map_coords) * Units.kilometers # Correct
-        x2 = Calculate_Distance([bottom_left_map_coords[0], destination_coord[1]],bottom_left_map_coords) * Units.kilometers # Double check
-        y2 = Calculate_Distance([destination_coord[0], bottom_left_map_coords[1]],bottom_left_map_coords) * Units.kilometers # Double check
+        
+        y1 = Calculate_Distance(x0_coord,bottom_left_map_coords) * Units.kilometers # Correct
+        x1 = Calculate_Distance(y0_coord,bottom_left_map_coords) * Units.kilometers # Correct
+        y2 = Calculate_Distance([bottom_left_map_coords[0], destination_coord[1]],bottom_left_map_coords) * Units.kilometers # Double check
+        x2 = Calculate_Distance([destination_coord[0], bottom_left_map_coords[1]],bottom_left_map_coords) * Units.kilometers # Double check
         
         # -------------------------------------
         #   Calculate Distance
@@ -106,17 +108,27 @@ def main():
              
             N_segs = len(results.segments) 
             N_cpts = results.segments[0].state.numerics.number_of_control_points  
-            for seg in range(N_segs):
-                for i in range(N_cpts):  
-                    results.segments[seg].state.conditions.noise  = noise_results.segments[seg].state.conditions.noise          
+            #for seg in range(N_segs):
+            #    for i in range(N_cpts):  
+            #        results.segments[seg].state.conditions.noise  = noise_results.segments[seg].state.conditions.noise          
              
-            filename =  aircraft_code +'_mission' + '_' + city_code + '_' + origin_code + '_' +  destination_code  + '_' + str(int(round(cruise_altitude/Units.feet,0))) + 'ft'   
-            res      =  read_flight_simulation_results(results, noise_results,  origin_coord, destination_coord)
+            filename =  aircraft_code +'_mission' + '_' + city_code + '_' + origin_code + '_' +  destination_code  + '_' + str(int(np.ceil(round(cruise_altitude/Units.feet,0)))) + 'ft'   
+            #res      =  read_flight_simulation_results(results, noise_results,  origin_coord, destination_coord)
             
             # save results 
-            save(res, filename + '.res')
+            #save(res, filename + '.res')
             
-            filename_list.append(filename)
+            #filename_list.append(filename)
+            fig = plot_flight_trajectory(results,
+                                       line_color = 'bo-',
+                                       line_color2 = 'rs--',
+                                       save_figure = False,
+                                       show_legend   = True,
+                                       save_filename = filename,
+                                       file_type = ".png",
+                                       width = 11, height = 7)
+            plt.show()
+            dummy = 0
         
     filename_list_name =  aircraft_code + '_' + city_code +  '_Single_Flights_Raw'
     F =  Data(filename_list_name=filename_list_name)
@@ -730,7 +742,7 @@ def unconverged_mission_setup(number_of_cpts,analyses, radius_Vert1, radius_Vert
     segment.air_speed_end                    = pattern_speed       
     segment.altitude_start                   = 50.0 * Units.ft  
     segment.altitude_end                     = 500.0 * Units.ft
-    segment.true_course                      = dep_heading * Units.degree        
+    segment.true_course                      = dep_heading       
     
     # define flight dynamics to model 
     segment.flight_dynamics.force_x                       = True  
@@ -754,7 +766,7 @@ def unconverged_mission_setup(number_of_cpts,analyses, radius_Vert1, radius_Vert
     segment.air_speed   = pattern_speed       
     segment.turn_radius = radius_Vert1  
     segment.true_course = dep_heading + (90 * Units.degree)
-    segment.turn_angle  = dep_sector * Units.degree
+    segment.turn_angle  = dep_sector
     
     # define flight dynamics to model 
     segment.flight_dynamics.force_x                                             = True    
@@ -787,7 +799,7 @@ def unconverged_mission_setup(number_of_cpts,analyses, radius_Vert1, radius_Vert
     segment.air_speed_end                    = cruise_speed      
     segment.altitude_start                   = 500.0 * Units.ft     
     segment.altitude_end                     = cruise_altitude
-    segment.true_course                      = path_heading    
+    segment.true_course                      = np.pi / 2 #path_heading    
     
     # define flight dynamics to model 
     segment.flight_dynamics.force_x                       = True  
@@ -810,7 +822,7 @@ def unconverged_mission_setup(number_of_cpts,analyses, radius_Vert1, radius_Vert
     segment.altitude                         = cruise_altitude      
     segment.air_speed                        = cruise_speed    
     segment.distance                         = level_cruise_distance
-    segment.true_course                      = path_heading
+    segment.true_course                      = 0 #path_heading
 
     # define flight dynamics to model 
     segment.flight_dynamics.force_x                       = True  
@@ -836,7 +848,7 @@ def unconverged_mission_setup(number_of_cpts,analyses, radius_Vert1, radius_Vert
     segment.air_speed_end                    = pattern_speed     
     segment.altitude_start                   = cruise_altitude
     segment.altitude_end                     = 500.0 * Units.ft
-    segment.true_course                      = path_heading    
+    segment.true_course                      = 180 * Units.degrees #path_heading    
 
     # define flight dynamics to model 
     segment.flight_dynamics.force_x                       = True  

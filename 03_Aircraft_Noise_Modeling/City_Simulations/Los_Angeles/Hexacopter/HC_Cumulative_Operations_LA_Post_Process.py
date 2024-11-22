@@ -76,7 +76,7 @@ def main():
     )
     
     # save data 
-    cumulative_processed_filename =  'Cumulative_'  +  aircraft_code + '_' + city_code + '_' + str(int(cruise_altitude/Units.feet))    # Aircraft_City_Frequency_Origin_Destination_Altitude
+    cumulative_processed_filename =  'Cumulative_'  +  aircraft_code + '_' + city_code + '_' + str(int(np.ceil(round(cruise_altitude/Units.feet)))) +'ft'    # Aircraft_City_Frequency_Origin_Destination_Altitude
     save(cumulative_PND, cumulative_processed_filename + '.res')    
     return     
  
