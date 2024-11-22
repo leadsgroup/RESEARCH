@@ -84,7 +84,7 @@ def vehicle_setup(resize_aircraft,vehicle_name) :
       wing.dynamic_pressure_ratio           = 1.0  
       ospath                                = os.path.abspath(__file__)
       separator                             = os.path.sep
-      rel_path                              = os.path.dirname(ospath)   + separator + '..' +separator +'..'+ separator +  '..' +  separator+  '..' +  separator
+      rel_path                              = os.path.dirname(ospath)   + separator + '..' +separator +'..'+ separator +  '..' +  separator+  '..' +  separator+  '..' +  separator
       airfoil                               = RCAIDE.Library.Components.Airfoils.Airfoil()
       airfoil.tag                           = 'Clark_y' 
       airfoil.coordinate_file               = rel_path + separator + 'Airfoils' + separator + 'Clark_y.txt'   # absolute path     
@@ -482,6 +482,9 @@ def vehicle_setup(resize_aircraft,vehicle_name) :
       
       # Reservoir for Battery TMS
       RES                                                    = RCAIDE.Library.Components.Thermal_Management.Reservoirs.Reservoir()
+      # RES.length = 1
+      # RES.width =1 
+      # RES.height = 1
       coolant_line.reservoirs.append(RES)
 
       
@@ -595,7 +598,7 @@ def vehicle_setup(resize_aircraft,vehicle_name) :
       weight_analysis.settings.miscelleneous_weight_factor = 1.0
       weight                   = weight_analysis.evaluate()
       print(weight)
-
+      weight_analysis.vehicle.mass_properties.max_takeoff = 5670
 
       # ------------------------------------------------------------------
       #   Vehicle Definition Complete

@@ -6,6 +6,7 @@ import time
 import pylab as plt
 import os
 import sys
+import numpy as np 
 
 
 
@@ -28,9 +29,9 @@ def main():
     # -------------------------------------------------------------------------------------------    
     # SET UP SIMULATION PARAMETERS   
     # -------------------------------------------------------------------------------------------  
-    days_per_group             = 5              # total number of days simulated
-    flights_per_day            = 6               # number of flights per day
-    day_group                  = list(range(1, 31))  # Creates a list from 1 to 24
+    days_per_group             = 1#5              # total number of days simulated
+    flights_per_day            = 1#6               # number of flights per day
+    day_group                  = [1]#list(range(1, 31))  # Creates a list from 1 to 24
     plot_mission               = True            # plot mission flag  
    
     if RUN_NEW_MODEL_FLAG:    
@@ -44,6 +45,9 @@ def main():
             else:
                 resize_aircraft = False
             vehicle = Vehicle.vehicle_setup(resize_aircraft,'e_twin_otter_vehicle')
+            if vehicle.mass_properties.takeoff > vehicle.mass_properties.max_takeoff:
+                print('**********Aircraft Overweight Terminating Simulation**********')
+                break
             configs = Vehicle.configs_setup(vehicle)
             analyses = Analyses.analyses_setup(configs)
             charge_throughput,cycle_day,resistance_growth,capacity_fade = load_charge_throughput()
@@ -72,6 +76,19 @@ def main():
             filename          = 'e_Twin_Otter_nmc_case_1_'
             save_results(results,filename,group)
             create_excel(filename,group)
+            SOC = np.array([])
+            Temp = np.array([])
+
+            # Loop through all segments
+            for i in range(len(results.segments)):
+                state_of_charge = results.segments[i].conditions.energy.bus.battery_modules.lithium_ion_nmc.cell.state_of_charge[:, 0]   
+                temperature     = results.segments[i].conditions.energy.bus.battery_modules.lithium_ion_nmc.cell.temperature[:, 0]   
+                SOC = np.concatenate((SOC, state_of_charge))
+                Temp = np.concatenate((Temp, temperature))
+
+            if np.any(SOC<0.2) or np.any(Temp>=322.65):
+                print('**********Battery End of Life Reached**********')
+                break
             
             if plot_mission: 
                 Plots.plot_results(results,save_figure_flag = False)       
@@ -90,103 +107,103 @@ def create_excel(filename,group):
     return
 
 
-# # ----------------------------------------------------------------------
-# #   Save Results
-# # ----------------------------------------------------------------------
-# def save_results(results,filename,group):
-#    #  Pickle Backup Files
-#     current_dir = os.path.dirname(os.path.abspath(__file__))
-#     load_dir = os.path.join(current_dir, 'Raw_Data')
-#     pickle_file = os.path.join(load_dir, filename + 'group_number' + str(group) + '.pkl')
-#     with open(pickle_file, 'wb') as file:
-#         pickle.dump(results, file) 
-#     return
-
-# # Function to load the existing pickle file, if it exists
-# def load_charge_throughput(filename='previous_day_data'):
-#     current_dir = os.path.dirname(os.path.abspath(__file__))
-#     load_dir = os.path.join(current_dir, 'Raw_Data')
-#     filename = os.path.join(load_dir, filename + '.pkl')
-#     if os.path.exists(filename):
-#         with open(filename, 'rb') as f:
-#             data = pickle.load(f)
-#             return data['charge_throughput'], data['cycle_day'],data['resistance_growth'],data['capacity_fade']
-#     else:   
-#         return {}, {}, {}, {} # Return empty dictionaries if the file does not exist
-    
-# # Function to save the updated dictionary to the pickle file
-# def save_charge_throughput(charge_throughput, cycle_day, resistance_growth, capacity_fade, filename='previous_day_data'):
-#     current_dir = os.path.dirname(os.path.abspath(__file__))
-#     load_dir = os.path.join(current_dir, 'Raw_Data')
-#     filename = os.path.join(load_dir, filename + '.pkl')
-#     data = {'charge_throughput': charge_throughput, 'cycle_day': cycle_day,'resistance_growth': resistance_growth,'capacity_fade': capacity_fade}
-#     with open(filename, 'wb') as f:
-#         pickle.dump(data, f)
-
-
-# # ------------------------------------------------------------------
-# #   Load Results
-# # ------------------------------------------------------------------   
-# def load_results(filename, group):  
-#     current_dir = os.path.dirname(os.path.abspath(__file__))
-#     load_dir = os.path.join(current_dir, 'Raw_Data')
-#     load_file = os.path.join(load_dir, filename + 'group_number' + str(group) + '.pkl')
-#     with open(load_file, 'rb') as file:
-#         results = pickle.load(file) 
-#     return results
-
-
 # ----------------------------------------------------------------------
 #   Save Results
 # ----------------------------------------------------------------------
-def save_results(results, filename, group):
-   # Pickle Backup Files
-    save_dir = '/home/sshekar2/storage/tms_degradation_11_20/case_1'
-    if not os.path.exists(save_dir):
-        os.makedirs(save_dir)  # Create the directory if it doesn't exist
-    pickle_file = os.path.join(save_dir, filename + 'group_number' + str(group) + '.pkl')
+def save_results(results,filename,group):
+   #  Pickle Backup Files
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    load_dir = os.path.join(current_dir, 'Raw_Data')
+    pickle_file = os.path.join(load_dir, filename + 'group_number' + str(group) + '.pkl')
     with open(pickle_file, 'wb') as file:
         pickle.dump(results, file) 
     return
 
-
+# Function to load the existing pickle file, if it exists
 def load_charge_throughput(filename='previous_day_data'):
-    load_dir = '/home/sshekar2/storage/tms_degradation_11_20/case_1'
-    file_path = os.path.join(load_dir, filename + '.pkl')
-    if os.path.exists(file_path):
-        with open(file_path, 'rb') as f:
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    load_dir = os.path.join(current_dir, 'Raw_Data')
+    filename = os.path.join(load_dir, filename + '.pkl')
+    if os.path.exists(filename):
+        with open(filename, 'rb') as f:
             data = pickle.load(f)
-            return data['charge_throughput'], data['cycle_day'], data['resistance_growth'], data['capacity_fade']
+            return data['charge_throughput'], data['cycle_day'],data['resistance_growth'],data['capacity_fade']
     else:   
-        return {}, {}, {}, {}  # Return empty dictionaries if the file does not exist
-
+        return {}, {}, {}, {} # Return empty dictionaries if the file does not exist
     
+# Function to save the updated dictionary to the pickle file
 def save_charge_throughput(charge_throughput, cycle_day, resistance_growth, capacity_fade, filename='previous_day_data'):
-    save_dir = '/home/sshekar2/storage/tms_degradation_11_20/case_1'
-    if not os.path.exists(save_dir):
-        os.makedirs(save_dir)  # Create the directory if it doesn't exist
-    file_path = os.path.join(save_dir, filename + '.pkl')
-    data = {'charge_throughput': charge_throughput, 
-            'cycle_day': cycle_day, 
-            'resistance_growth': resistance_growth, 
-            'capacity_fade': capacity_fade}
-    with open(file_path, 'wb') as f:
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    load_dir = os.path.join(current_dir, 'Raw_Data')
+    filename = os.path.join(load_dir, filename + '.pkl')
+    data = {'charge_throughput': charge_throughput, 'cycle_day': cycle_day,'resistance_growth': resistance_growth,'capacity_fade': capacity_fade}
+    with open(filename, 'wb') as f:
         pickle.dump(data, f)
-
 
 
 # ------------------------------------------------------------------
 #   Load Results
 # ------------------------------------------------------------------   
 def load_results(filename, group):  
-    load_dir = '/home/sshekar2/storage/tms_degradation_11_20/case_1'
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    load_dir = os.path.join(current_dir, 'Raw_Data')
     load_file = os.path.join(load_dir, filename + 'group_number' + str(group) + '.pkl')
-    if os.path.exists(load_file):
-        with open(load_file, 'rb') as file:
-            results = pickle.load(file) 
-        return results
-    else:
-        raise FileNotFoundError(f"File {load_file} not found.")
+    with open(load_file, 'rb') as file:
+        results = pickle.load(file) 
+    return results
+
+
+# # ----------------------------------------------------------------------
+# #   Save Results
+# # ----------------------------------------------------------------------
+# def save_results(results, filename, group):
+#    # Pickle Backup Files
+#     save_dir = '/home/sshekar2/storage/tms_degradation_11_20/case_1'
+#     if not os.path.exists(save_dir):
+#         os.makedirs(save_dir)  # Create the directory if it doesn't exist
+#     pickle_file = os.path.join(save_dir, filename + 'group_number' + str(group) + '.pkl')
+#     with open(pickle_file, 'wb') as file:
+#         pickle.dump(results, file) 
+#     return
+
+
+# def load_charge_throughput(filename='previous_day_data'):
+#     load_dir = '/home/sshekar2/storage/tms_degradation_11_20/case_1'
+#     file_path = os.path.join(load_dir, filename + '.pkl')
+#     if os.path.exists(file_path):
+#         with open(file_path, 'rb') as f:
+#             data = pickle.load(f)
+#             return data['charge_throughput'], data['cycle_day'], data['resistance_growth'], data['capacity_fade']
+#     else:   
+#         return {}, {}, {}, {}  # Return empty dictionaries if the file does not exist
+
+    
+# def save_charge_throughput(charge_throughput, cycle_day, resistance_growth, capacity_fade, filename='previous_day_data'):
+#     save_dir = '/home/sshekar2/storage/tms_degradation_11_20/case_1'
+#     if not os.path.exists(save_dir):
+#         os.makedirs(save_dir)  # Create the directory if it doesn't exist
+#     file_path = os.path.join(save_dir, filename + '.pkl')
+#     data = {'charge_throughput': charge_throughput, 
+#             'cycle_day': cycle_day, 
+#             'resistance_growth': resistance_growth, 
+#             'capacity_fade': capacity_fade}
+#     with open(file_path, 'wb') as f:
+#         pickle.dump(data, f)
+
+
+
+# # ------------------------------------------------------------------
+# #   Load Results
+# # ------------------------------------------------------------------   
+# def load_results(filename, group):  
+#     load_dir = '/home/sshekar2/storage/tms_degradation_11_20/case_1'
+#     load_file = os.path.join(load_dir, filename + 'group_number' + str(group) + '.pkl')
+#     if os.path.exists(load_file):
+#         with open(load_file, 'rb') as file:
+#             results = pickle.load(file) 
+#         return results
+#     else:
+#         raise FileNotFoundError(f"File {load_file} not found.")
 
 
   
