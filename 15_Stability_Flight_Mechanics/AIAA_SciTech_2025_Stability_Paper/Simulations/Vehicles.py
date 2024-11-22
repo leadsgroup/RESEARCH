@@ -95,17 +95,34 @@ def aileron_rudder_sizing_configs_setup(vehicle):
 
     config      = RCAIDE.Library.Components.Configs.Config(base_config)
     config.tag  = 'aileron_rudder_crosswind_sizing'   
-    configs.append(config)
-    
-       
-    config      = RCAIDE.Library.Components.Configs.Config(base_config) 
-    # TO DO MODIFY CONFIG BY SETTING ONE ENGINE TO BE INACTIVE 
-    config.tag  = 'aileron_rudder_engine_out'   
-    configs.append(config)
+    configs.append(config) 
          
     return configs   
 
 
+################################################################################################################################################
+# AILERON AND RUDDER ONE ENGINE INOPERATIVE SIZING
+################################################################################################################################################
+def aileron_rudder_oei_sizing_setup(vehicle): 
+    configs  = aileron_rudder_oei_sizing_configs_setup(vehicle) 
+    return configs 
+ 
+
+def aileron_rudder_oei_sizing_configs_setup(vehicle): 
+    configs     = RCAIDE.Library.Components.Configs.Config.Container() 
+    base_config = RCAIDE.Library.Components.Configs.Config(vehicle)  
+       
+    config      = RCAIDE.Library.Components.Configs.Config(base_config)   
+    for p_i ,  propulsor in  enumerate(config.networks.electric.busses.prop_rotor_bus.propulsors):
+        propulsor.rotor.orientation_euler_angles =  [0, 0.0, 0] 
+        propulsor.rotor.pitch_command   = propulsor.rotor.cruise.design_pitch_command
+        if p_i == 5:
+            propulsor.active = False  
+    config.tag  = 'aileron_rudder_oei_sizing'   
+    configs.append(config)
+         
+    return configs
+ 
 ################################################################################################################################################
 # FLAP SIZING
 ################################################################################################################################################ 
@@ -138,16 +155,29 @@ def flap_sizing_configs_setup(vehicle):
 ################################################################################################################################################
 # HOVER OEI
 ################################################################################################################################################ 
-def hover_setup(vehicle):    
-    configs                       = hover_OEI_configs_setup(vehicle) 
+def hover_oei_setup(vehicle):    
+    configs                       = hover_oei_configs_setup(vehicle) 
     return configs
 
-def hover_OEI_configs_setup(vehicle): 
+def hover_oei_configs_setup(vehicle): 
     configs     = RCAIDE.Library.Components.Configs.Config.Container()  
     base_config = RCAIDE.Library.Components.Configs.Config(vehicle)
     
     config      = RCAIDE.Library.Components.Configs.Config(base_config)
-    # TO DO MODIFY CONFIG BY SETTING ONE ENGINE TO BE INACTIVE  
-    config.tag  = 'hover_OEI'   
-    configs.append(config)       
+    config.networks.electric.busses.prop_rotor_bus.identical_propulsors = False 
+    for p_i ,  propulsor in  enumerate(config.networks.electric.busses.prop_rotor_bus.propulsors): 
+        propulsor.rotor.pitch_command   = propulsor.rotor.hover.design_pitch_command
+        if p_i == 5:
+            propulsor.active = False  
+    config.tag  = 'hover_prop_rotor_oei'   
+    configs.append(config)
+    
+    config      = RCAIDE.Library.Components.Configs.Config(base_config)
+    config.networks.electric.busses.lift_rotor_bus.identical_propulsors = False 
+    for p_i ,  propulsor in  enumerate(config.networks.electric.busses.lift_rotor_bus.propulsors): 
+        propulsor.rotor.pitch_command   = propulsor.rotor.hover.design_pitch_command
+        if p_i == 5:
+            propulsor.active = False  
+    config.tag  = 'hover_lift_rotor_oei'   
+    configs.append(config)           
     return configs 

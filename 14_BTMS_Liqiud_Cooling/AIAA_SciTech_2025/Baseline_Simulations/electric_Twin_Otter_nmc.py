@@ -516,6 +516,9 @@ def vehicle_setup(BTMS_flag):
     
     # Reservoir for Battery TMS
     RES                                                    = RCAIDE.Library.Components.Thermal_Management.Reservoirs.Reservoir() 
+    RES.length                                             = 0.1                                      
+    RES.width                                              = 0.1                                     
+    RES.height                                             = 0.1    
     coolant_line.reservoirs.append(RES)
 
     
