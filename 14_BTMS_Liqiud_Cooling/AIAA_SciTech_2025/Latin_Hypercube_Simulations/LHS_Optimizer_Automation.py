@@ -12,8 +12,8 @@ import latin_hypercube_sampler  # Assuming this contains `generate_lhs_samples`
 
 def main():
     # Define parameters
-    total_no_sims = 20  # Total number of simulations to run
-    parallel_sims = 2  # Number of simulations to run in parallel
+    total_no_sims = 23  # Total number of simulations to run
+    parallel_sims = 23 # Number of simulations to run in parallel
 
     variable_limits = [(1000, 12500), (500, 9000), (0.1, 0.7)]
     variable_names  = ['Power_HAS', 'Power_HEX', 'Dim_RES']

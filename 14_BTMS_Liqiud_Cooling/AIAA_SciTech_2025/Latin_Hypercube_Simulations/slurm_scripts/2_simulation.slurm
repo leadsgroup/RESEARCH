@@ -20,7 +20,7 @@ echo "Partition: $SLURM_JOB_PARTITION"
 echo "Number of CPUs: $SLURM_CPUS_ON_NODE"
 
 # Run the simulation with parameters
-python3 -u  BTMS_Battery_Degradation_study.py 8881.932465437936 4361.701455753531 0.2741820118832181 --storage_dir /home/sshekar2/storage/optimization_LHS_11_21/case_2 2
+python3 -u  BTMS_Battery_Degradation_study.py 5234.037077080744 4001.6827148662123 0.43956274109848614 --storage_dir /home/sshekar2/storage/optimization_LHS_11_21/case_2 2
 
 # Deactivate the virtual environment after the script finishes
 deactivate

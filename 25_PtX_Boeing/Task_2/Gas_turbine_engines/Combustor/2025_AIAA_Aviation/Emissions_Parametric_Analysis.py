@@ -29,13 +29,13 @@ def main():
     
     #parametric_analyses(comb_lengths, comb_areas, temperatures, pressures, mdots, FARs)         
     
-    emissions_L_A = read_results('JetA_emissions_L_A')
-    emissions_T_P = read_results('JetA_emissions_T_P')
-    emissions_M_F = read_results('JetA_emissions_M_F')    
+    #emissions_L_A = read_results('JetA_emissions_L_A')
+    #emissions_T_P = read_results('JetA_emissions_T_P')
+    #emissions_M_F = read_results('JetA_emissions_M_F')    
     
-    #emissions_L_A = read_results('CH4_emissions_L_A')
-    #emissions_T_P = read_results('CH4_emissions_T_P')
-    #emissions_M_F = read_results('CH4_emissions_M_F')
+    emissions_L_A = read_results('CH4_emissions_L_A')
+    emissions_T_P = read_results('CH4_emissions_T_P')
+    emissions_M_F = read_results('CH4_emissions_M_F')
     
     plot_results(emissions_L_A, emissions_T_P, emissions_M_F, comb_lengths, comb_areas, temperatures, pressures, mdots, FARs)
       
@@ -224,9 +224,9 @@ def plot_results(emissions_L_A, emissions_T_P, emissions_M_F, comb_lengths, comb
     color_bar = plt.colorbar(contour, label='$EI_{CO_2}$')
     #color_bar.formatter.useOffset = False
     color_bar.update_ticks()   
-    plt.xlabel('Length [m]')
+    plt.xlabel('Length [$\mathrm{m}$]')
     plt.ylim([Y[0,0], 0.15])
-    plt.ylabel('Area [m^2]') 
+    plt.ylabel('Cross Sectional Area [$\mathrm{m^2}$]') 
     plt.tight_layout()
     
     data = emissions_L_A['EI_CO']
@@ -236,9 +236,9 @@ def plot_results(emissions_L_A, emissions_T_P, emissions_M_F, comb_lengths, comb
     color_bar = plt.colorbar(contour, label='$EI_{CO}$')
     #color_bar.formatter.useOffset = False
     color_bar.update_ticks()   
-    plt.xlabel('Length [m]')
+    plt.xlabel('Length [$\mathrm{m}$]')
     plt.ylim([Y[0,0], 0.15])
-    plt.ylabel('Area [m^2]') 
+    plt.ylabel('Cross Sectional Area [$\mathrm{m^2}$]') 
     plt.tight_layout()
     
     data = emissions_L_A['EI_H2O']
@@ -248,9 +248,9 @@ def plot_results(emissions_L_A, emissions_T_P, emissions_M_F, comb_lengths, comb
     color_bar = plt.colorbar(contour, label='$EI_{H_2O}$')
     #color_bar.formatter.useOffset = False
     color_bar.update_ticks()   
-    plt.xlabel('Length [m]')
+    plt.xlabel('Length [$\mathrm{m}$]')
     plt.ylim([Y[0,0], 0.15])
-    plt.ylabel('Area [m^2]') 
+    plt.ylabel('Cross Sectional Area [$\mathrm{m^2}$]') 
     plt.tight_layout()
     
     # ---------------------------------------------------------
