@@ -84,7 +84,7 @@ def modify_stick_fixed_vehicle(nexus):
     # Update Mission
     AoA_guess      = nexus.missions['stick_fixed_cruise'].segments['cruise'].angle_of_attack 
     Phi_guess      = nexus.missions['stick_fixed_cruise'].segments['cruise'].bank_angle 
-    nexus.missions = Missions.stick_fixed_stability_setup(nexus.analyses,weight_analysis.vehicle,nexus.cruise_velocity, nexus.cruise_altitude,AoA_guess,Phi_guess)      
+    nexus.missions = Missions.stick_fixed_stability_setup(nexus.analyses,nexus.cruise_velocity, nexus.cruise_altitude,AoA_guess,Phi_guess)      
     
     # diff the new data
     vehicle.store_diff() 
@@ -159,7 +159,7 @@ def longitudinal_static_stability_and_drag_post_process(nexus):
 # ELEVATOR SIZING
 # ############################################################################################################################################################   
 
-def elevator_sizing_setup(): 
+def elevator_sizing_procedure(): 
     procedure = Process()  
     procedure.missions                   = Process()
     procedure.missions.design_mission    = run_elevator_sizing_mission     
@@ -241,7 +241,7 @@ def elevator_sizing_post_process(nexus):
 # AILERON AND RUDDER SIZING
 # ############################################################################################################################################################  
 
-def aileron_rudder_sizing_setup(): 
+def aileron_rudder_sizing_procedure(): 
     procedure = Process()  
     procedure.missions                   = Process()
     procedure.missions.design_mission    = run_aileron_rudder_sizing_mission     
@@ -250,14 +250,17 @@ def aileron_rudder_sizing_setup():
   
  
 def run_aileron_rudder_sizing_mission(nexus): 
-    results                     = nexus.results 
+    results                     = nexus.results
+    
+    # roll 
     results.roll_maneuver       = nexus.missions.roll_maneuver.evaluate()
-    vehicle               = nexus.vehicle_configurations.aileron_rudder_roll_sizing 
+    
+    # crosswind 
+    vehicle                     = nexus.vehicle_configurations.aileron_rudder_roll_sizing 
     nexus.missions.crosswind_maneuver.segments.cruise.sideslip_angle =  np.tan(vehicle.crosswind_velocity/nexus.cruise_velocity)  
-    results.crosswind_maneuver  = nexus.missions.crosswind_maneuver.evaluate()  
-    return nexus
-
-
+    results.crosswind_maneuver  = nexus.missions.crosswind_maneuver.evaluate()
+       
+    return nexus 
  
 def aileron_rudder_sizing_post_process(nexus):  
     '''
@@ -266,75 +269,131 @@ def aileron_rudder_sizing_post_process(nexus):
     1) A controlled roll at a  rate of 0.07 https://www.conachenuavs.com/downloads/ProAdvice%203%20-%20AILERON%20SIZING.pdf
     2) Trimmed flight in a 20 knot crosswind
     ''' 
-    summary               = nexus.summary  
-    g                     = 9.81   
-    vehicle               = nexus.vehicle_configurations.aileron_rudder_roll_sizing  
-    m                     = vehicle.mass_properties.max_takeoff
-    S                     = vehicle.reference_area    
+    summary               = nexus.summary   
+    vehicle               = nexus.vehicle_configurations.aileron_rudder_roll_sizing   
     roll                  = nexus.results.roll_maneuver.segments.cruise 
-    crosswind             = nexus.results.crosswind_maneuver.segments.cruise
+    crosswind             = nexus.results.crosswind_maneuver.segments.cruise 
+    
     V                     = roll.conditions.freestream.velocity[0, 0]  
     span                  = vehicle.wings.main_wing.spans.projected
     desired_roll_rate     = 0.07 
 
     # ------------------------------------------------------------------------------------------------------------------------  
     # Post Process Results 
-    # ------------------------------------------------------------------------------------------------------------------------  
-
-    # ------------------------------------------------------------------------------------------------------------------------  
-    # Aileron 
-    # compute lift coefficient and residual from target CLs 
-    CL_p                          = roll.conditions.static_stability.derivatives.CL_p[0,0] 
-    CL_delta_a                    = roll.conditions.static_stability.derivatives.CL_a[0,0] 
-    
+    # ------------------------------------------------------------------------------------------------------------------------   
     # compute aileron deflections 
     aileron_roll_deflection               = roll.conditions.control_surfaces.aileron.deflection[0,0]   
     aileron_crosswind_deflection          = crosswind.conditions.control_surfaces.aileron.deflection[0,0]  
     summary.aileron_roll_deflection       = abs(aileron_roll_deflection)  
-    summary.aileron_crosswind_deflection  = abs(aileron_crosswind_deflection)
+    summary.aileron_crosswind_deflection  = abs(aileron_crosswind_deflection) 
  
-    summary.crosswind_CY_residual    =  abs(crosswind.conditions.static_stability.coefficients.Y[0,0])
-    summary.crosswind_CZ_residual    =  abs(crosswind.conditions.static_stability.coefficients.Z[0,0])
-    summary.crosswind_CL_residual    =  abs(crosswind.conditions.static_stability.coefficients.L[0,0])
-    summary.crosswind_CM_residual    =  abs(crosswind.conditions.static_stability.coefficients.M[0,0])
-    summary.crosswind_CN_residual    =  abs(crosswind.conditions.static_stability.coefficients.N[0,0])  
-
+    summary.F_y_residual    = abs(crosswind.conditions.static_stability.coefficients.Y[0,0])  
+    summary.F_z_residual    = abs(crosswind.conditions.static_stability.coefficients.Z[0,0])  
+    summary.M_x_residual    = abs(crosswind.conditions.static_stability.coefficients.L[0,0])  
+    summary.M_y_residual    = abs(crosswind.conditions.static_stability.coefficients.M[0,0])  
+    summary.M_z_residual    = abs(crosswind.conditions.static_stability.coefficients.N[0,0])  
+ 
     # ------------------------------------------------------------------------------------------------------------------------  
     # Rudder     
     if vehicle.rudder_flag: 
         rudder_roll_deflection               = roll.conditions.control_surfaces.rudder.deflection[0,0]  
-        rudder_crosswind_deflection          = crosswind.conditions.control_surfaces.rudder.deflection[0,0] 
-        summary.rudder_roll_deflection       = abs(rudder_roll_deflection)  
-        summary.rudder_crosswind_deflection  = abs(rudder_crosswind_deflection)  
+        summary.rudder_roll_deflection       = abs(rudder_roll_deflection)
+        
+        rudder_crosswind_deflection          = crosswind.conditions.control_surfaces.rudder.deflection[0,0]
+        summary.rudder_crosswind_deflection  = abs(rudder_crosswind_deflection)    
     else:
         rudder_roll_deflection              = 0 
-        summary.rudder_roll_deflection      = 0  
+        summary.rudder_roll_deflection      = 0
+        
         rudder_crosswind_deflection         = 0  
         summary.rudder_crosswind_deflection = 0 
-         
-    roll_rate =  - (CL_delta_a / CL_p) * aileron_roll_deflection * (2 * V * span)
+    
+    # compute roll rate
+    CL_p        = roll.conditions.static_stability.derivatives.CL_p[0,0] 
+    CL_delta_a  = roll.conditions.static_stability.derivatives.CL_a[0,0] 
+    roll_rate   =  - (CL_delta_a / CL_p) * aileron_roll_deflection * (2 * V * span) 
+    summary.roll_rate_residual = abs(roll_rate - desired_roll_rate) 
         
     # compute control surface area 
     control_surfaces = ['aileron','rudder'] 
     total_control_surface_area = compute_control_surface_areas(control_surfaces,vehicle)   
-    summary.aileron_rudder_surface_area =  total_control_surface_area
-    summary.roll_rate_residual          = abs(roll_rate - desired_roll_rate) *10
+    summary.aileron_rudder_surface_area = total_control_surface_area
 
-    print("Total Rudder Aileron Surface Area : " + str(summary.aileron_rudder_surface_area)) 
-    print("Roll Rate                         : " + str(roll_rate)) 
-    print("Aileron Roll Defl                 : " + str(aileron_roll_deflection/Units.degree)) 
-    print("Aileron Crosswind Defl            : " + str(aileron_crosswind_deflection/Units.degree)) 
-    print("Rudder  Crosswind Defl            : " + str(rudder_crosswind_deflection/Units.degree )) 
+    print("Total Rudder Aileron Surface Area   : " + str(summary.aileron_rudder_surface_area)) 
+    print("Roll Rate                           : " + str(roll_rate)) 
+    print("Aileron Roll Defl                   : " + str(aileron_roll_deflection/Units.degree)) 
+    print("Aileron Crosswind Defl              : " + str(aileron_crosswind_deflection/Units.degree)) 
+    print("Rudder  Crosswind Defl              : " + str(rudder_crosswind_deflection/Units.degree ))  
     print("\n\n")     
   
     return nexus     
  
 
+# ############################################################################################################################################################    
+# AILERON AND RUDDER ONE ENGINE INOPERATIVE SIZING
+# ############################################################################################################################################################  
+def aileron_rudder_oei_sizing_procedure(): 
+    procedure = Process()  
+    procedure.missions                   = Process()
+    procedure.missions.design_mission    = run_aileron_rudder_oei_sizing_mission     
+    procedure.post_process               = aileron_rudder_oei_sizing_post_process   
+    return procedure   
+  
+ 
+def run_aileron_rudder_oei_sizing_mission(nexus): 
+    results             = nexus.results  
+    results.cruise_oei  = nexus.missions.cruise_oei.evaluate()      
+    return nexus
+ 
+def aileron_rudder_oei_sizing_post_process(nexus):   
+    summary               = nexus.summary   
+    vehicle               = nexus.vehicle_configurations.aileron_rudder_oei_sizing    
+    cruise_oei            = nexus.results.cruise_oei.segments.cruise  
+
+    # ------------------------------------------------------------------------------------------------------------------------  
+    # Post Process Results 
+    # ------------------------------------------------------------------------------------------------------------------------   
+    # compute aileron deflections   
+    elevator_oei_deflection               = cruise_oei.conditions.control_surfaces.elevator.deflection[0,0]  
+    summary.elevator_oei_deflection       = abs(elevator_oei_deflection)    
+    aileron_oei_deflection                = cruise_oei.conditions.control_surfaces.aileron.deflection[0,0]  
+    summary.aileron_oei_deflection        = abs(aileron_oei_deflection)
+  
+    summary.F_x_residual    = abs(cruise_oei.state.residuals.force_x[0,0] )
+    summary.F_y_residual    = abs(cruise_oei.state.residuals.force_y[0,0]  )
+    summary.F_z_residual    = abs(cruise_oei.state.residuals.force_z[0,0] )
+    summary.M_x_residual    = abs(cruise_oei.state.residuals.moment_x[0,0] )
+    summary.M_y_residual    = abs(cruise_oei.state.residuals.moment_y[0,0] )
+    summary.M_z_residual    = abs(cruise_oei.state.residuals.moment_z[0,0] )      
+
+    # ------------------------------------------------------------------------------------------------------------------------  
+    # Rudder     
+    if vehicle.rudder_flag:  
+        rudder_oei_deflection                = cruise_oei.conditions.control_surfaces.rudder.deflection[0,0] 
+        summary.rudder_oei_deflection        = abs(rudder_oei_deflection) 
+    else: 
+        rudder_oei_deflection               = 0
+        summary.rudder_oei_deflection       = 0 
+      
+    # compute control surface area 
+    control_surfaces = ['aileron','rudder'] 
+    total_control_surface_area = compute_control_surface_areas(control_surfaces,vehicle)
+    
+    summary.oei_objective = total_control_surface_area #  +  power / 1E5 # objective to minimize power and elevator surface area 
+
+    print("Elevator One Engine Inoperative Defl : " + str(elevator_oei_deflection/Units.degree))  
+    print("Aileron One Engine Inoperative Defl : " + str(aileron_oei_deflection/Units.degree)) 
+    print("Rudder  One Engine Inoperative Defl : " + str(rudder_oei_deflection/Units.degree )) 
+    print("\n\n")     
+  
+    return nexus
+
+
 # ############################################################################################################################################################   
 # FLAP SIZING
 # ############################################################################################################################################################  
 
-def flap_sizing_setup(): 
+def flap_sizing_procedure(): 
     procedure = Process()    
     procedure.missions                   = Process()
     procedure.missions.design_mission    = run_flap_sizing_mission    
@@ -379,12 +438,59 @@ def flap_sizing_post_process(nexus):
     print("Flap Criteria : " + str(flap_criteria))  # https://aviation.stackexchange.com/questions/48715/how-is-the-area-of-flaps-determined
     print("\n\n")     
          
+    return nexus
+
+# ############################################################################################################################################################   
+# HOVER OEI SIZING
+# ############################################################################################################################################################  
+
+def hover_oei_procedure(): 
+    procedure = Process()    
+    procedure.missions                   = Process()
+    procedure.missions.design_mission    = run_hover_mission    
+    procedure.post_process               = hover_post_process 
+    return procedure  
+ 
+def run_hover_mission(nexus): 
+    results                         = nexus.results 
+    results.hover_prop_rotor_oei    = nexus.missions.hover_prop_rotor_oei.evaluate() 
+    results.hover_lift_rotor_oei    = nexus.missions.hover_lift_rotor_oei.evaluate() 
+    return nexus
+
+  
+def hover_post_process(nexus): 
+    '''
+    This function analyses and post processes the aircraft at the flight conditions required to size
+    the flap. These conditions are:
+    1) A comparison of clean and deployed flap at 12 deg. angle of attack
+    ''' 
+    summary   = nexus.summary   
+    vehicle   = nexus.vehicle_configurations.hover_oei   
+
+    hover_prop_rotor_oei  = nexus.results.hover_prop_rotor_oei.segments.hover_oei  
+    hover_lift_rotor_oei  = nexus.results.hover_lift_rotor_oei.segments.hover_oei  
+    # ------------------------------------------------------------------------------------------------------------------------  
+    # Post Process Results 
+    # ------------------------------------------------------------------------------------------------------------------------       
+    # critera       
+    summary.PR_OEI_F_z_residual    =  abs(hover_prop_rotor_oei.conditions.residuals.Z[0,0])
+    summary.PR_OEI_M_x_residual    =  abs(hover_prop_rotor_oei.conditions.residuals.L[0,0])
+    summary.PR_OEI_M_y_residual    =  abs(hover_prop_rotor_oei.conditions.residuals.M[0,0])
+    summary.PR_OEI_M_z_residual    =  abs(hover_prop_rotor_oei.conditions.residuals.N[0,0])    
+    summary.LR_OEI_F_z_residual    =  abs(hover_lift_rotor_oei.conditions.residuals.Z[0,0])
+    summary.LR_OEI_M_x_residual    =  abs(hover_lift_rotor_oei.conditions.residuals.L[0,0])
+    summary.LR_OEI_M_y_residual    =  abs(hover_lift_rotor_oei.conditions.residuals.M[0,0])
+    summary.LR_OEI_M_z_residual    =  abs(hover_lift_rotor_oei.conditions.residuals.N[0,0])    
+  
+    print("Power         : " + str(summary.Power))  # https://aviation.stackexchange.com/questions/48715/how-is-the-area-of-flaps-determined
+    print("\n\n")     
+         
     return nexus     
 
 # ############################################################################################################################################################  
 # SUPPLEMENTAL FUNCTIONS 
 # ############################################################################################################################################################  
-def  compute_control_surface_areas(control_surfaces,vehicle): 
+def compute_control_surface_areas(control_surfaces,vehicle): 
     '''
     This function computes the control suface area used in the objectives of the 
     control surface sizing scripts 

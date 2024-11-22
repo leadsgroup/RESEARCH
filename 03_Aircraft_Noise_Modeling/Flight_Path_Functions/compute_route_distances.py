@@ -11,7 +11,7 @@ def compute_route_distances(x1, y1, x2, y2, radius_Vert1, radius_Vert2, dep_head
     # ---------------------------------------------------------------------------------------------------------------------- 
     # Path heading:
     # ---------------------------------------------------------------------------------------------------------------------- 
-    path_heading = (np.arctan2((x2 - x1), (y2 - y1)) *180 /np.pi) % 360
+    path_heading = (np.arctan2((y2 - y1), (x2 - x1)) *180 /np.pi) % 360
     
     # ---------------------------------------------------------------------------------------------------------------------- 
     # Departure sector: follows a right-hand pattern
@@ -29,7 +29,7 @@ def compute_route_distances(x1, y1, x2, y2, radius_Vert1, radius_Vert2, dep_head
     # ---------------------------------------------------------------------------------------------------------------------- 
     # Path distance:
     # ---------------------------------------------------------------------------------------------------------------------- 
-    path_distance = np.sqrt((y1-y2)**2 + (x1-x2)**2) - radius_Vert1 - radius_Vert2 -  high_speed_climb_distance  
+    path_distance = np.sqrt((y1-y2)**2 + (x1-x2)**2) - radius_Vert1 - radius_Vert2 -  high_speed_climb_distance * 2  
     
     # ---------------------------------------------------------------------------------------------------------------------- 
     # Path approach heading: The angle measures on the circle that is the traffic apttern are 180 degrees offset from the heading 
@@ -60,4 +60,4 @@ def compute_route_distances(x1, y1, x2, y2, radius_Vert1, radius_Vert2, dep_head
     # ---------------------------------------------------------------------------------------------------------------------- 
     p2p_distance = np.sqrt((y1-y2)**2 + (x1-x2)**2)
     
-    return path_distance, path_heading, dep_sector, app_sector
+    return path_distance, path_heading* np.pi / 180, dep_sector * np.pi / 180, app_sector * np.pi / 180
