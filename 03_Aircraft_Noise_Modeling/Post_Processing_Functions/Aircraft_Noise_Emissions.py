@@ -359,6 +359,7 @@ def compute_relative_noise_evaluation_locations(mean_sea_level_altitude,noise_ti
     """       
   
     MSL_altitude      = mean_sea_level_altitude
+    N                 = len(noise_time)
     
     # rediscretize time and aircraft position to get finer resolution  
     noise_pos         = np.zeros((N,3)) 
@@ -418,11 +419,14 @@ def compute_noise_metrics(noise_data, flight_times,time_period):
     t_10pm                    = float(DNL_time_period[1].split(':')[0])*60*60 + float(DNL_time_period[1].split(':')[1])*60 +  float(DNL_time_period[1].split(':')[2])            
     t_start                   = float(time_period[0].split(':')[0])*60*60 + float(time_period[0].split(':')[1])*60 +  float(time_period[0].split(':')[2])
     t_end                     = float(time_period[1].split(':')[0])*60*60 + float(time_period[1].split(':')[1])*60 +  float(time_period[1].split(':')[2])     
+    
+    # unpack noise data 
     SPL                       = noise_data.SPL_dBA    
     N_gm_y                    = noise_data.microphone_y_resolution   
     N_gm_x                    = noise_data.microphone_x_resolution 
-    flight_time               = noise_data.time    
-    time_step                 = flight_time[1]-flight_time[0] 
+    flight_time               = noise_data.time
+    
+    # create empty arrays 
     number_of_flights         = len(flight_times)    
     p_div_p_ref_sq_L_eq       = np.zeros((N_gm_x,N_gm_y)) 
     p_div_p_ref_sq_L_24hr     = np.zeros((N_gm_x,N_gm_y))
@@ -452,12 +456,14 @@ def compute_noise_metrics(noise_data, flight_times,time_period):
 
 
     # create noise penalty 
-    noise_penality          = np.zeros((len(flight_time),N_gm_x,N_gm_y))         
+    noise_penality        = np.zeros((len(flight_time),N_gm_x,N_gm_y))         
     noise_penality[True]  = 10       
-    
-    # convert SPL to pressure and multiply by duration
+     
     
     # Added number of penalty and non penalty flights together. Check if this is correct. 
+    time_step_m1           = np.diff(flight_time) #numpy diff produced one less in the array so we will add one timestep at the front of 10 seconds 
+    time_step              = np.concatenate((np.array([10]),time_step_m1))
+    
     p_sq_ref_flight_sq     = np.nansum((number_of_no_penalty_flights + number_of_penalty_flights)*time_step * (10**(SPL/10)), axis=0)   ### TO CHANGE 11/22. Add multiplier based ont eh number of flights there are in that time period. Need to have two multipliers, pre and post 7am. 
     p_sq_ref_flight_sq_dn_penalty  = np.nansum(time_step *(number_of_penalty_flights)* (10**( (noise_penality + SPL)/10)), axis=0)  # ADDED penalty and no penalty arrays 11/22/2024
     p_sq_ref_flight_sq_dn_no_penalty  = np.nansum(time_step *(number_of_no_penalty_flights)* (10**( (SPL)/10)), axis=0)  # ADDED penalty and no penalty arrays 11/22/2024
