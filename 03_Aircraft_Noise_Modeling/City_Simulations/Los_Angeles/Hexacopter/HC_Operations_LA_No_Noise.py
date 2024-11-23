@@ -45,6 +45,7 @@ def main():
     mic_y_res                    = 1600 
     noise_timesteps              = 225  
     mic_stencil                  = 100
+    noise_evaluation_pitch       = 150 * Units.feet 
     aircraft_code                = 'HC' # CHANGE FOR EACH AIRCRAFT 
     city_code                    = 'LA' 
     cruise_altitude              = 1000*Units.feet
