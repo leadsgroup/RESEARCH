@@ -33,7 +33,9 @@ from   Tilt_Stopped_Rotor.Tilt_Stopped_Rotor_Conv_Tail                    import
 
 def main():  
     
-    aircraft_model =  'TSR' 
+    aircraft_model  =  'TSR'
+    cruise_velocity = 150  * Units['mph']
+    cruise_altitude = 1000*Units.feet
     
     if aircraft_model == 'SR':
         vehicle =  SR_vehicle_setup(redesign_rotors=False)
@@ -80,7 +82,7 @@ def main():
             #case_vehicle.networks.electric.busses.lift_rotor_bus.battery_modules.nmc_module_2.origin = np.array([CG_bat_2[i,0], 
                                                                                                                  #CG_bat_2[i,1], 
                                                                                                                  #CG_bat_2[i,2] + case_vehicle.networks.electric.busses.lift_rotor_bus.battery_modules.nmc_module_2.height])
-            size_control_surfaces(CG_bat_1, CG_bat_2, case_vehicle)
+            size_control_surfaces(CG_bat_1, CG_bat_2, case_vehicle, cruise_velocity, cruise_altitude)
         
     return 
 

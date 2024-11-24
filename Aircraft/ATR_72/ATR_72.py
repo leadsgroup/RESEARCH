@@ -77,7 +77,17 @@ def vehicle_setup():
 
     # envelope properties
     vehicle.flight_envelope.ultimate_load        = 3.75
-    vehicle.flight_envelope.limit_load           = 1.5
+    vehicle.flight_envelope.limit_load           = 1.5 
+                                                
+    cruise_speed                                = 343 *  0.6
+    altitude                                    = 25000. * Units.ft
+    atmo                                        = RCAIDE.Framework.Analyses.Atmospheric.US_Standard_1976()
+    freestream                                  = atmo.compute_values (0.)
+    freestream0                                 = atmo.compute_values (altitude)
+    mach_number                                 = (cruise_speed/freestream.speed_of_sound)[0][0] 
+    vehicle.design_dynamic_pressure             = ( .5 *freestream0.density*(cruise_speed*cruise_speed))[0][0]
+    vehicle.flight_envelope.design_mach_number  =  mach_number
+        
        
     # basic parameters       
     vehicle.reference_area                = 61.0  
@@ -620,7 +630,7 @@ def vehicle_setup():
     net.fuel_lines.append(fuel_line)   
 
     # Append energy network to aircraft 
-    vehicle.append_energy_network(net)     
+    vehicle.append_energy_network(net)    
 
     return vehicle
 

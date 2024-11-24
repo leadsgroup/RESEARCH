@@ -72,13 +72,15 @@ def vehicle_setup():
     # mass properties
     vehicle.mass_properties.max_takeoff   = 5670  # kg 
     vehicle.mass_properties.takeoff       = 5670  # kg 
-    vehicle.mass_properties.max_zero_fuel = 5000  # kg # INCORRECT  
-    vehicle.envelope.ultimate_load        = 5.7
-    vehicle.envelope.limit_load           = 3.8 
+    vehicle.mass_properties.max_zero_fuel = 5000  # kg # INCORRECT   
     vehicle.reference_area                = 39 
     vehicle.passengers                    = 19
     vehicle.systems.control               = "fully powered"
     vehicle.systems.accessories           = "commuter"    
+
+    # envelope properties                       
+    vehicle.flight_envelope.ultimate_load       = 5.7 
+    vehicle.flight_envelope.limit_load          = 3.8
     
     cruise_speed                          = 130 * Units.kts
     altitude                              = 5000 * Units.feet
@@ -87,7 +89,8 @@ def vehicle_setup():
     freestream0                           = atmo.compute_values (altitude)
     mach_number                           = (cruise_speed/freestream.speed_of_sound)[0][0] 
     vehicle.design_dynamic_pressure       = ( .5 *freestream0.density*(cruise_speed*cruise_speed))[0][0]
-    vehicle.design_mach_number            =  mach_number
+    vehicle.flight_envelope.design_mach_number  =  mach_number 
+        
 
          
     # ##########################################################  Wings ################################################################    
@@ -157,7 +160,7 @@ def vehicle_setup():
     #------------------------------------------------------------------------------------------------------------------------------------  
     #   Horizontal Tail
     #------------------------------------------------------------------------------------------------------------------------------------    
-    wing                                  = RCAIDE.Library.Components.Wings.Wing()
+    wing                                  = RCAIDE.Library.Components.Wings.Horizontal_Tail()
     wing.tag                              = 'horizontal_stabilizer' 
     wing.sweeps.quarter_chord             = 0.0 * Units.degree
     wing.thickness_to_chord               = 0.12 
@@ -171,7 +174,7 @@ def vehicle_setup():
     wing.twists.root                      = 0.0 * Units.degree
     wing.twists.tip                       = 0.0 * Units.degree 
     wing.origin                           = [[13.17 , 0 , 1.25]] 
-    wing.aerodynamic_center               = [[13.17 , 0 , 1.25]]  
+    wing.aerodynamic_center               = [13.17 + wing.chords.root /4 , 0 , 1.25]
     wing.vertical                         = False
     wing.winglet_fraction                 = 0.0  
     wing.symmetric                        = True
@@ -185,7 +188,7 @@ def vehicle_setup():
     #------------------------------------------------------------------------------------------------------------------------------------  
     #   Vertical Stabilizer
     #------------------------------------------------------------------------------------------------------------------------------------ 
-    wing                                  = RCAIDE.Library.Components.Wings.Wing()
+    wing                                  = RCAIDE.Library.Components.Wings.Vertical_Tail()
     wing.tag                              = 'vertical_stabilizer'     
     wing.sweeps.leading_edge              = 28.6 * Units.degree 
     wing.thickness_to_chord               = 0.12 
@@ -198,8 +201,8 @@ def vehicle_setup():
     wing.aspect_ratio                     = wing.spans.projected**2. / wing.areas.reference 
     wing.twists.root                      = 0.0 * Units.degree
     wing.twists.tip                       = 0.0 * Units.degree 
-    wing.origin                           = [[ 12.222 , 0 , 0.385 ]]  
-    wing.aerodynamic_center               = [[ 12.222 + 0.25 * wing.chords.root, 0 , 0.385 ]]  
+    wing.origin                           = [[ 12.222 , 0 , 0.385 ]] 
+    wing.aerodynamic_center               = [ 12.222 + 0.25 * wing.chords.root, 0 , 0.385 ]
     wing.vertical                         = True 
     wing.symmetric                        = False
     wing.t_tail                           = False
@@ -563,8 +566,8 @@ def vehicle_setup():
     net.fuel_lines.append(fuel_line) 
     
     vehicle.append_energy_network(net)   
-
-     
+ 
+    
     return vehicle
   
 # ---------------------------------------------------------------------

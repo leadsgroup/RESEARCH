@@ -348,24 +348,23 @@ def run_aileron_rudder_oei_sizing_mission(nexus):
 def aileron_rudder_oei_sizing_post_process(nexus):   
     summary               = nexus.summary   
     vehicle               = nexus.vehicle_configurations.aileron_rudder_oei_sizing    
-    cruise_oei            = nexus.results.cruise_oei.segments.cruise  
-
+    cruise_oei            = nexus.results.cruise_oei.segments.cruise
+    V                     = cruise_oei.conditions.freestream.velocity[0, 0]
+    eta                   = cruise_oei.conditions.energy.prop_rotor_bus.prop_rotor_propulsor_1.throttle[0][0] 
+    rpm                   = cruise_oei.conditions.energy.prop_rotor_bus.prop_rotor_propulsor_1.prop_rotor_1.rpm[0][0]
+    AoA                   = cruise_oei.conditions.aerodynamics.angles.alpha[0,0] / Units.degree
+    
     # ------------------------------------------------------------------------------------------------------------------------  
     # Post Process Results 
     # ------------------------------------------------------------------------------------------------------------------------   
     # compute aileron deflections   
-    elevator_oei_deflection               = cruise_oei.conditions.control_surfaces.elevator.deflection[0,0]  
-    summary.elevator_oei_deflection       = abs(elevator_oei_deflection)    
     aileron_oei_deflection                = cruise_oei.conditions.control_surfaces.aileron.deflection[0,0]  
-    summary.aileron_oei_deflection        = abs(aileron_oei_deflection)
-  
-    summary.F_x_residual    = abs(cruise_oei.state.residuals.force_x[0,0] )
-    summary.F_y_residual    = abs(cruise_oei.state.residuals.force_y[0,0]  )
-    summary.F_z_residual    = abs(cruise_oei.state.residuals.force_z[0,0] )
-    summary.M_x_residual    = abs(cruise_oei.state.residuals.moment_x[0,0] )
-    summary.M_y_residual    = abs(cruise_oei.state.residuals.moment_y[0,0] )
-    summary.M_z_residual    = abs(cruise_oei.state.residuals.moment_z[0,0] )      
-
+    summary.aileron_oei_deflection        = abs(aileron_oei_deflection) 
+ 
+    summary.F_y_residual      =  cruise_oei.state.residuals.force_y[0,0]    
+    summary.M_x_residual      =  cruise_oei.state.residuals.moment_x[0,0]  
+    summary.M_z_residual      =  cruise_oei.state.residuals.moment_z[0,0]
+    
     # ------------------------------------------------------------------------------------------------------------------------  
     # Rudder     
     if vehicle.rudder_flag:  
@@ -379,11 +378,12 @@ def aileron_rudder_oei_sizing_post_process(nexus):
     control_surfaces = ['aileron','rudder'] 
     total_control_surface_area = compute_control_surface_areas(control_surfaces,vehicle)
     
-    summary.oei_objective = total_control_surface_area #  +  power / 1E5 # objective to minimize power and elevator surface area 
+    summary.total_control_surface_area = total_control_surface_area #  +  power / 1E5 # objective to minimize power and elevator surface area 
 
-    print("Elevator One Engine Inoperative Defl : " + str(elevator_oei_deflection/Units.degree))  
-    print("Aileron One Engine Inoperative Defl : " + str(aileron_oei_deflection/Units.degree)) 
-    print("Rudder  One Engine Inoperative Defl : " + str(rudder_oei_deflection/Units.degree )) 
+    print("Propulsor Throttle                   : " + str(eta)) 
+    print("Propulsor RPM                        : " + str(rpm))  
+    print("Aileron One Engine Inoperative Defl  : " + str(aileron_oei_deflection/Units.degree)) 
+    print("Rudder  One Engine Inoperative Defl  : " + str(rudder_oei_deflection/Units.degree )) 
     print("\n\n")     
   
     return nexus

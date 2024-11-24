@@ -189,7 +189,7 @@ def vehicle_setup():
     vehicle.systems.accessories           = "medium range"   
     
     cruise_speed                          = 470 * Units.kts
-    altitude                              = 40000 * Units.feet
+    altitude                              = 30000 * Units.feet
     atmo                                  = RCAIDE.Framework.Analyses.Atmospheric.US_Standard_1976()
     freestream                            = atmo.compute_values (0.)
     freestream0                           = atmo.compute_values (altitude)
@@ -781,19 +781,18 @@ def vehicle_setup():
     net.fuel_lines.append(fuel_line)   
 
     # Append energy network to aircraft 
-    vehicle.append_energy_network(net)    
-    
-    #------------------------------------------------------------------------------------------------------------------------- 
-    # Compute Center of Gravity of aircraft (Optional)
-    #------------------------------------------------------------------------------------------------------------------------- 
-   
-    vehicle.center_of_gravity()    
-    #compute_component_centers_of_gravity(vehicle)
+    vehicle.append_energy_network(net)     
     
     #------------------------------------------------------------------------------------------------------------------------- 
     # Done ! 
     #------------------------------------------------------------------------------------------------------------------------- 
-      
+
+
+    weight_analysis                               = RCAIDE.Framework.Analyses.Weights.Weights_Transport()
+    weight_analysis.vehicle                       = vehicle
+    weight_analysis.method                        = 'RCAIDE' 
+    weight                                        = weight_analysis.evaluate() 
+    print(weight)      
     return vehicle
 
 #------------------------------------------------------------------
