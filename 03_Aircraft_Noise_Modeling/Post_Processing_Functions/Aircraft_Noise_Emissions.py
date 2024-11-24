@@ -150,7 +150,7 @@ def post_process_noise_data(noise_results, topography_file ,  flight_times, time
             noise_time_ = noise_time[:-1]
              
         Aircraft_pos = np.vstack((Aircraft_pos,noise_pos))
-        Time         = np.hstack((Time,noise_time_))
+        Time         = noise_time_ #np.hstack((Time,noise_time_))
         
         for i in range(len(noise_time_)): 
             SPL_dBA_i       = np.zeros((N_gm_x,N_gm_y))     
