@@ -31,15 +31,21 @@ from Aircraft_Noise_Emissions import read_flight_simulation_results
 #  Main 
 # ----------------------------------------------------------------------------------------------------------------------  
 def main():           
-           
+
+    # ----------------------------------------------------------------------------------------------------------------------
+    # FILE IMPORTS 
+    # ----------------------------------------------------------------------------------------------------------------------            
     ospath          = os.path.abspath(__file__)
     separator       = os.path.sep
     relative_path   = os.path.dirname(ospath) + separator 
     routes_filepath = relative_path +  '..' + separator +  '..' + separator + 'UAM_City_Routes.xlsx'
     topography_file = relative_path +  '..' + separator +  'Topography' + separator + 'LA_Metropolitan_Area.txt'
     flight_data     = pd.read_excel(routes_filepath,sheet_name=['Los_Angeles'])
-    LA_flight_data         =  flight_data['Los_Angeles']
+    LA_flight_data  =  flight_data['Los_Angeles']
     
+    # ----------------------------------------------------------------------------------------------------------------------
+    #  SIMULATION SETTINGS 
+    # ---------------------------------------------------------------------------------------------------------------------- 
     mic_stencil                  = 500 ### TO CHANGE 11/22. or at least double check this.
     aircraft_code                = 'HC' # CHANGE FOR EACH AIRCRAFT 
     city_code                    = 'LA' 
@@ -52,9 +58,18 @@ def main():
     max_cruise_distance          = 58*Units.nmi #CHANGE FOR EACH AIRCRAFT
     number_of_cpts               = 10 
     'HC_mission_LA_ONT_BUR_1000ft'
-    noise_results = run_noise_mission(number_of_cpts ) # Run noise simulation
-    filename_list = []
     
+
+    # ----------------------------------------------------------------------------------------------------------------------
+    #  RUN BASELINE MISSION TO GET NOISE 
+    # ----------------------------------------------------------------------------------------------------------------------     
+    noise_results = run_noise_mission(number_of_cpts ) # Run noise simulation
+    
+
+    # ----------------------------------------------------------------------------------------------------------------------
+    #  USE BASE MISSION TO GET NOISE OF ALL OPERATIONS 
+    # ----------------------------------------------------------------------------------------------------------------------     
+    filename_list = [] 
     for i in range(len(LA_flight_data)):
         # Extract Data
         origin_code       = LA_flight_data['Origin Code'][i]   
@@ -93,7 +108,7 @@ def main():
         analyses = unconverged_analyses_setup(configs, origin_coord,destination_coord ,mic_stencil)
         
         # mission analyses 
-        mission = unconverged_mission_setup(number_of_cpts, analyses, radius_Vert1, radius_Vert2, dep_heading, app_heading, dep_sector, app_sector, path_heading, total_cruise_distance,cruise_altitude)        
+        mission  = unconverged_mission_setup(number_of_cpts, analyses, radius_Vert1, radius_Vert2, dep_heading, app_heading, dep_sector, app_sector, path_heading, total_cruise_distance,cruise_altitude)        
         missions = missions_setup(mission) 
          
         if (max_cruise_distance > total_cruise_distance):
@@ -120,6 +135,8 @@ def main():
     save(F, filename_list_name + '.res')
       
     return
+
+
 def run_noise_mission(number_of_cpts):           
     vehicle  = vehicle_setup(redesign_rotors = False)     
     # Set up configs
@@ -146,7 +163,7 @@ def noise_analyses_setup(configs):
 
     return analyses
 
-def unconverged_analyses_setup(configs, origin_coord,destination_coord, noise_timesteps ,mic_stencil):
+def unconverged_analyses_setup(configs, origin_coord,destination_coord ,mic_stencil):
 
     analyses = RCAIDE.Framework.Analyses.Analysis.Container()
 
@@ -160,7 +177,7 @@ def unconverged_analyses_setup(configs, origin_coord,destination_coord, noise_ti
 # ------------------------------------------------------------------
 # Base Analysis
 # ------------------------------------------------------------------
-def noise_base_analysis(vehicle, origin_coord,destination_coord ,mic_x_res, mic_y_res ,noise_timesteps ,mic_stencil):
+def noise_base_analysis(vehicle, origin_coord,destination_coord ,mic_x_res, mic_y_res ,mic_stencil):
     ospath          = os.path.abspath(__file__)
     separator       = os.path.sep
     relative_path   = os.path.dirname(ospath) + separator 
@@ -197,7 +214,6 @@ def noise_base_analysis(vehicle, origin_coord,destination_coord ,mic_x_res, mic_
     noise.settings.aircraft_destination_coordinates = destination_coord  
     noise.settings.microphone_x_resolution          = mic_x_res       
     noise.settings.microphone_y_resolution          = mic_y_res        
-    noise.settings.noise_times_steps                = noise_timesteps 
     noise.settings.number_of_microphone_in_stencil  = mic_stencil     
     noise.settings.topography_file                  = topography_file     
     analyses.append(noise)
@@ -246,11 +262,6 @@ def unconverged_base_analysis(vehicle):
     stability         = RCAIDE.Framework.Analyses.Stability.Vortex_Lattice_Method() 
     stability.vehicle = vehicle 
     analyses.append(stability)    
-
-    ##  Noise Analysis   
-    #noise = RCAIDE.Framework.Analyses.Noise.Frequency_Domain_Buildup()   
-    #noise.vehicle = vehicle   
-    #analyses.append(noise)
  
     # ------------------------------------------------------------------
     #  Energy
@@ -300,14 +311,7 @@ def noise_base_analysis(vehicle):
     #  Noise Analysis   
     noise = RCAIDE.Framework.Analyses.Noise.Frequency_Domain_Buildup()   
     noise.vehicle = vehicle
-    noise.settings.mean_sea_level_altitude          = False         
-    #noise.settings.aircraft_origin_coordinates      = origin_coord  
-    #noise.settings.aircraft_destination_coordinates = destination_coord  
-    #noise.settings.microphone_x_resolution          = mic_x_res       
-    #noise.settings.microphone_y_resolution          = mic_y_res        
-    #noise.settings.noise_times_steps                = noise_timesteps 
-    #noise.settings.number_of_microphone_in_stencil  = mic_stencil     
-    #noise.settings.topography_file                  = topography_file     
+    noise.settings.mean_sea_level_altitude          = False           
     analyses.append(noise)
  
     # ------------------------------------------------------------------

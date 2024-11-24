@@ -84,7 +84,7 @@ def size_control_surfaces(CG_bat_1, CG_bat_2, vehicle, cruise_velocity = 120 * U
     optimized_vehicle.rudder_flag                  = True    
     trim_angle_of_attack =  0.09328504 # output_elevator_sizing[0]
     aileron_rudder_oei_sizing_optimization_problem = aileron_rudder_oei_sizing_optimization_setup(optimized_vehicle,cruise_velocity,cruise_altitude,trim_angle_of_attack)
-    output_aileron_and_rudder_oei_sizing = scipy_setup.SciPy_Solve(aileron_rudder_oei_sizing_optimization_problem,solver='SLSQP', sense_step = 1E-2, tolerance = 1E-2) # sense_step = 1E-2, tolerance = 1E-2
+    output_aileron_and_rudder_oei_sizing = scipy_setup.SciPy_Solve(aileron_rudder_oei_sizing_optimization_problem,solver='SLSQP', sense_step = 1E-3, tolerance = 1E-3) # sense_step = 1E-2, tolerance = 1E-2
     print (output_aileron_and_rudder_oei_sizing)     
     tf   = time.time()
     elapsed_time_aileron_and_rudder_oei_sizing = round((tf-ti)/60,2)
@@ -355,7 +355,7 @@ def elevator_sizing_optimization_setup(vehicle,cruise_velocity,cruise_altitude):
     return nexus  
  
  
-def aileron_rudder_sizing_optimization_setup(vehicle,cruise_velocity,cruise_altitude):
+def aileron_rudder_sizing_optimization_setup(vehicle,cruise_velocity,cruise_altitude,trim_angle_of_attack):
 
     nexus = Nexus()
     problem = Data()
@@ -368,30 +368,22 @@ def aileron_rudder_sizing_optimization_setup(vehicle,cruise_velocity,cruise_alti
     # Inputs
     # -------------------------------------------------------------------
 
-    #   [ tag                   , initial,         (lb , ub)        , scaling , units ]  
-    if vehicle.rudder_flag:
-        problem.inputs = np.array([         
-                      [ 'crosswind_AoA'                ,  5  , -5   ,  20  ,  1.0  ,  1*Units.degree],
-                      [ 'aileron_roll_deflection'      ,  0  , -30  , 30   ,  1.0  ,  1*Units.degree],   
-                      [ 'aileron_crosswind_deflection' ,  0  , -30  , 30   ,  1.0  ,  1*Units.degree], 
-                      [ 'rudder_crosswind_deflection'  ,  0  , -30  , 30   ,  1.0  ,  1*Units.degree],  
-                      [ 'mw_aileron_chord_fraction'    , 0.2 , 0.15 , 0.3  ,  1.0 ,  1*Units.less],
-                      [ 'mw_aileron_span_frac_start'   , 0.7 , 0.55 , 0.8  ,  1.0 ,  1*Units.less],
-                      [ 'mw_aileron_span_frac_end'     , 0.9 , 0.85 , 0.95 ,  1.0 ,  1*Units.less],  
-                      [ 'vs_rudder_chord_fraction'     , 0.4 , 0.15 , 0.5  ,  1.0 ,  1*Units.less],
-                      [ 'vs_rudder_span_frac_start'    , 0.1 , 0.05 , 0.35 ,  1.0 ,  1*Units.less],
-                      [ 'vs_rudder_span_frac_end'      , 0.9 , 0.5  , 0.95 ,  1.0 ,  1*Units.less],      
-                      ],dtype=object)   
-    else:
-        problem.inputs = np.array([              
-                      [ 'crosswind_AoA'                ,  5  , -5   ,  20   ,  1.0  ,  1*Units.degree], 
-                      [ 'aileron_roll_deflection'      ,  0  , -30  , 30    ,  1.0  ,  1*Units.degree],    
-                      [ 'aileron_crosswind_deflection' ,  5  , -30   , 30   ,  1.0  ,  1*Units.degree], 
-                      [ 'mw_aileron_chord_fraction'    , 0.2  , 0.15 , 0.3  ,  1.0  ,  1*Units.less],
-                      [ 'mw_aileron_span_frac_start'   , 0.7  , 0.55 , 0.8  ,  1.0  ,  1*Units.less],
-                      [ 'mw_aileron_span_frac_end'     , 0.9  , 0.85 , 0.95 ,  1.0  ,  1*Units.less],   
-                      
-        ],dtype=object)      
+    #   [ tag                   , initial,         (lb , ub)        , scaling , units ]   
+    problem.inputs = np.array([         
+                  [ 'crosswind_AoA'                ,  5  , -5   ,  20  ,  1.0  ,  1*Units.degree],
+                  [ 'aileron_roll_deflection'      ,  0  , -30  , 30   ,  1.0  ,  1*Units.degree],   
+                  [ 'aileron_crosswind_deflection' ,  0  , -30  , 30   ,  1.0  ,  1*Units.degree], 
+                  [ 'rudder_crosswind_deflection'  ,  0  , -30  , 30   ,  1.0  ,  1*Units.degree],  
+                  [ 'PR_OEI_eta_1'                 , 0.5 ,  0.1 ,  1.0 ,  1.0  ,  1*Units.less], 
+                  [ 'aileron_oei_deflection'       ,  0  , -30  ,  30   ,  1.0 , 1*Units.degree],  
+                  [ 'rudder_oei_deflection'        ,  0  , -30  ,  30  ,  1.0 ,  1*Units.degree], 
+                  [ 'mw_aileron_chord_fraction'    , 0.2 , 0.15 , 0.3  ,  1.0 ,  1*Units.less],
+                  [ 'mw_aileron_span_frac_start'   , 0.7 , 0.55 , 0.8  ,  1.0 ,  1*Units.less],
+                  [ 'mw_aileron_span_frac_end'     , 0.9 , 0.85 , 0.95 ,  1.0 ,  1*Units.less],  
+                  [ 'vs_rudder_chord_fraction'     , 0.4 , 0.15 , 0.5  ,  1.0 ,  1*Units.less],
+                  [ 'vs_rudder_span_frac_start'    , 0.1 , 0.05 , 0.35 ,  1.0 ,  1*Units.less],
+                  [ 'vs_rudder_span_frac_end'      , 0.9 , 0.5  , 0.95 ,  1.0 ,  1*Units.less],      
+                  ],dtype=object)      
 
     # -------------------------------------------------------------------
     # Objective
@@ -414,6 +406,9 @@ def aileron_rudder_sizing_optimization_setup(vehicle,cruise_velocity,cruise_alti
         [ 'M_x_residual'          ,   '<' ,   5E-2 ,   1.0 , 1*Units.less],  # 1E-1 works 
         [ 'M_y_residual'          ,   '<' ,   5E-2 ,   1.0 , 1*Units.less],  # 1E-1 works 
         [ 'M_z_residual'          ,   '<' ,   5E-2 ,   1.0 , 1*Units.less],  # 1E-1 works 
+        [ 'PR_OEI_CY_residual'    ,   '<' ,   1E-6 ,   1 , 1*Units.less],    
+        [ 'PR_OEI_CL_residual'    ,   '<' ,   1E-6 ,   1 , 1*Units.less],    
+        [ 'PR_OEI_CN_residual'    ,   '<' ,   1E-6 ,   1 , 1*Units.less],  
     ],dtype=object)
         
         
@@ -421,42 +416,34 @@ def aileron_rudder_sizing_optimization_setup(vehicle,cruise_velocity,cruise_alti
     #  Aliases
     # -------------------------------------------------------------------
     
-    # [ 'alias' , ['data.path1.name','data.path2.name'] ] 
-    if vehicle.rudder_flag:
-        crosswind_maneuver_segment_name =  'missions.crosswind_maneuver.segments.cruise'  
-        problem.aliases = [   
-            [ 'crosswind_AoA'                          , crosswind_maneuver_segment_name + '.angle_of_attack' ],   
-            [ 'aileron_roll_deflection'                , 'vehicle_configurations.aileron_rudder_roll_sizing.wings.main_wing.control_surfaces.aileron.deflection' ],  
-            [ 'aileron_crosswind_deflection'           , 'vehicle_configurations.aileron_rudder_crosswind_sizing.wings.main_wing.control_surfaces.aileron.deflection' ],   
-            [ 'rudder_crosswind_deflection'            , 'vehicle_configurations.aileron_rudder_crosswind_sizing.wings.vertical_tail.control_surfaces.rudder.deflection' ],   
-            [ 'mw_aileron_chord_fraction'              , 'vehicle_configurations.*.wings.main_wing.control_surfaces.aileron.chord_fraction'],  
-            [ 'mw_aileron_span_frac_start'             , 'vehicle_configurations.*.wings.main_wing.control_surfaces.aileron.span_fraction_start'],    
-            [ 'mw_aileron_span_frac_end'               , 'vehicle_configurations.*.wings.main_wing.control_surfaces.aileron.span_fraction_end'],     
-            [ 'vs_rudder_chord_fraction'               , 'vehicle_configurations.*.wings.vertical_tail.control_surfaces.rudder.chord_fraction'],    
-            [ 'vs_rudder_span_frac_start'              , 'vehicle_configurations.*.wings.vertical_tail.control_surfaces.rudder.span_fraction_start'],    
-            [ 'vs_rudder_span_frac_end'                , 'vehicle_configurations.*.wings.vertical_tail.control_surfaces.rudder.span_fraction_end'], 
-            [ 'aileron_rudder_surface_area'            , 'summary.aileron_rudder_surface_area' ], 
-            [ 'roll_rate_residual'                     , 'summary.roll_rate_residual' ],  
-            [ 'F_y_residual'                  , 'summary.F_y_residual' ], 
-            [ 'F_z_residual'                  , 'summary.F_z_residual' ],
-            [ 'M_x_residual'                  , 'summary.M_x_residual' ], 
-            [ 'M_y_residual'                  , 'summary.M_y_residual' ], 
-            [ 'M_z_residual'                  , 'summary.M_z_residual' ], 
-        ]      
-    else:
-        problem.aliases = [  
-            [ 'F_y_residual'          , 'summary.F_y_residual' ], 
-            [ 'F_z_residual'          , 'summary.F_z_residual' ],
-            [ 'M_x_residual'          , 'summary.M_x_residual' ], 
-            [ 'M_y_residual'          , 'summary.M_y_residual' ], 
-            [ 'M_z_residual'          , 'summary.M_z_residual' ],  
-            [ 'roll_rate_residual'             , 'summary.roll_rate_residual' ], 
-            [ 'aileron_rudder_surface_area'    , 'summary.aileron_rudder_surface_area' ],  
-            [ 'aileron_roll_deflection'        , 'vehicle_configurations.aileron_rudder_roll_sizing.wings.main_wing.control_surfaces.aileron.deflection' ],          
-            [ 'aileron_crosswind_deflection'   , 'vehicle_configurations.aileron_rudder_crosswind_sizing.wings.main_wing.control_surfaces.aileron.deflection' ],   
-            [ 'mw_aileron_chord_fraction'      , 'vehicle_configurations.*.wings.main_wing.control_surfaces.aileron.chord_fraction'],  
-            [ 'mw_aileron_span_frac_start'     , 'vehicle_configurations.*.wings.main_wing.control_surfaces.aileron.span_fraction_start'],    
-            [ 'mw_aileron_span_frac_end'       , 'vehicle_configurations.*.wings.main_wing.control_surfaces.aileron.span_fraction_end']] 
+    # [ 'alias' , ['data.path1.name','data.path2.name'] ]  
+    crosswind_maneuver_segment_name =  'missions.crosswind_maneuver.segments.cruise'  
+    cruise_oei_maneuver_segment_name =  'missions.cruise_oei.segments.cruise' 
+    problem.aliases = [   
+        [ 'crosswind_AoA'                          , crosswind_maneuver_segment_name + '.angle_of_attack' ],   
+        [ 'PR_OEI_eta_1'                           , cruise_oei_maneuver_segment_name + '.assigned_control_variables.throttle.initial_guess_values[0][0]'],  
+        [ 'aileron_roll_deflection'                , 'vehicle_configurations.aileron_rudder_roll_sizing.wings.main_wing.control_surfaces.aileron.deflection' ],  
+        [ 'aileron_crosswind_deflection'           , 'vehicle_configurations.aileron_rudder_crosswind_sizing.wings.main_wing.control_surfaces.aileron.deflection' ],   
+        [ 'rudder_crosswind_deflection'            , 'vehicle_configurations.aileron_rudder_crosswind_sizing.wings.vertical_tail.control_surfaces.rudder.deflection' ], 
+        [ 'aileron_oei_deflection'                 , 'vehicle_configurations.aileron_rudder_oei_sizing.wings.main_wing.control_surfaces.aileron.deflection' ],      
+        [ 'rudder_oei_deflection'                  , 'vehicle_configurations.aileron_rudder_oei_sizing.wings.vertical_tail.control_surfaces.rudder.deflection' ],     
+        [ 'mw_aileron_chord_fraction'              , 'vehicle_configurations.*.wings.main_wing.control_surfaces.aileron.chord_fraction'],  
+        [ 'mw_aileron_span_frac_start'             , 'vehicle_configurations.*.wings.main_wing.control_surfaces.aileron.span_fraction_start'],    
+        [ 'mw_aileron_span_frac_end'               , 'vehicle_configurations.*.wings.main_wing.control_surfaces.aileron.span_fraction_end'],     
+        [ 'vs_rudder_chord_fraction'               , 'vehicle_configurations.*.wings.vertical_tail.control_surfaces.rudder.chord_fraction'],    
+        [ 'vs_rudder_span_frac_start'              , 'vehicle_configurations.*.wings.vertical_tail.control_surfaces.rudder.span_fraction_start'],    
+        [ 'vs_rudder_span_frac_end'                , 'vehicle_configurations.*.wings.vertical_tail.control_surfaces.rudder.span_fraction_end'], 
+        [ 'aileron_rudder_surface_area'            , 'summary.aileron_rudder_surface_area' ], 
+        [ 'roll_rate_residual'                     , 'summary.roll_rate_residual' ],  
+        [ 'F_y_residual'                           , 'summary.F_y_residual' ], 
+        [ 'F_z_residual'                           , 'summary.F_z_residual' ],
+        [ 'M_x_residual'                           , 'summary.M_x_residual' ], 
+        [ 'M_y_residual'                           , 'summary.M_y_residual' ], 
+        [ 'M_z_residual'                           , 'summary.M_z_residual' ],   
+        [ 'PR_OEI_CY_residual'                     , 'summary.OEI_F_y_residual'],    
+        [ 'PR_OEI_CL_residual'                     , 'summary.OEI_M_x_residual'],       
+        [ 'PR_OEI_CN_residual'                     , 'summary.OEI_M_z_residual'],             
+        ]       
         
     # -------------------------------------------------------------------
     #  Vehicles
@@ -471,7 +458,7 @@ def aileron_rudder_sizing_optimization_setup(vehicle,cruise_velocity,cruise_alti
     # -------------------------------------------------------------------
     #  Missions
     # ------------------------------------------------------------------- 
-    nexus.missions = Missions.aileron_rudder_sizing_setup(nexus.analyses,nexus.cruise_velocity,nexus.cruise_altitude)
+    nexus.missions = Missions.aileron_rudder_sizing_setup(nexus.analyses,nexus.cruise_velocity,nexus.cruise_altitude, angle_of_attack=trim_angle_of_attack)
     
     # -------------------------------------------------------------------
     #  Procedure
@@ -483,125 +470,7 @@ def aileron_rudder_sizing_optimization_setup(vehicle,cruise_velocity,cruise_alti
     # -------------------------------------------------------------------    
     nexus.summary = Data()     
     return nexus  
-
-def aileron_rudder_oei_sizing_optimization_setup(vehicle,cruise_velocity,cruise_altitude,trim_angle_of_attack):
-
-    nexus = Nexus()
-    problem = Data()
-    nexus.optimization_problem = problem
-    
-    nexus.cruise_velocity = cruise_velocity
-    nexus.cruise_altitude = cruise_altitude 
-
-    # -------------------------------------------------------------------
-    # Inputs
-    # -------------------------------------------------------------------
-
-    #   [ tag                   , initial,         (lb , ub)        , scaling , units ]  
-    if vehicle.rudder_flag:
-        problem.inputs = np.array([          
-                      [ 'PR_OEI_eta_1'                 , 0.5 ,  0.1 ,  1.0 ,  1.0  ,  1*Units.less], 
-                      [ 'aileron_oei_deflection'       ,  0  , -30  ,  30   ,  1.0  ,  1*Units.degree], 
-                      [ 'mw_aileron_chord_fraction'    , 0.2 , 0.15 , 0.3  ,  1.0 ,  1*Units.less],
-                      [ 'mw_aileron_span_frac_start'   , 0.7 , 0.55 , 0.8  ,  1.0 ,  1*Units.less],
-                      [ 'mw_aileron_span_frac_end'     , 0.9 , 0.85 , 0.95 ,  1.0 ,  1*Units.less],  
-                      [ 'rudder_oei_deflection'        ,  0  , -30  ,  30   ,  1.0  ,  1*Units.degree], 
-                      [ 'vs_rudder_chord_fraction'     , 0.4 , 0.15 , 0.5  ,  1.0 ,  1*Units.less],
-                      [ 'vs_rudder_span_frac_start'    , 0.1 , 0.05 , 0.35 ,  1.0 ,  1*Units.less],
-                      [ 'vs_rudder_span_frac_end'      , 0.9 , 0.5  , 0.95 ,  1.0 ,  1*Units.less],        
-                      ],dtype=object)   
-    else:
-        problem.inputs = np.array([              
-                      [ 'PR_OEI_eta_1'                 , 0.5 ,  0.1 ,  1.0 ,  1.0  ,  1*Units.less], 
-                      [ 'aileron_oei_deflection'       ,  0  , -30  ,  30   ,  1.0  ,  1*Units.degree],     
-                      [ 'mw_aileron_chord_fraction'    , 0.2  , 0.15 , 0.3  ,  1.0  ,  1*Units.less],
-                      [ 'mw_aileron_span_frac_start'   , 0.7  , 0.55 , 0.8  ,  1.0  ,  1*Units.less],
-                      [ 'mw_aileron_span_frac_end'     , 0.9  , 0.85 , 0.95 ,  1.0  ,  1*Units.less],   
-                      
-        ],dtype=object)      
-
-    # -------------------------------------------------------------------
-    # Objective
-    # -------------------------------------------------------------------
-
-    # [ tag, scaling, units ]
-    problem.objective = np.array([ 
-                                  [ 'total_control_surface_area', 1E-1 , 1*Units.kg],
-    ],dtype=object)
-    
-    # -------------------------------------------------------------------
-    # Constraints
-    # -------------------------------------------------------------------
-    
-    # [ tag, sense, edge, scaling, units ] 
-    problem.constraints = np.array([ 
-        [ 'PR_OEI_CY_residual'             ,   '<' ,   1E-6 ,   1 , 1*Units.less],    
-        [ 'PR_OEI_CL_residual'             ,   '<' ,   1E-6 ,   1 , 1*Units.less],    
-        [ 'PR_OEI_CN_residual'             ,   '<' ,   1E-6 ,   1 , 1*Units.less],  
-    ],dtype=object)
-        
-        
-    # -------------------------------------------------------------------
-    #  Aliases
-    # -------------------------------------------------------------------
-    
-    # [ 'alias' , ['data.path1.name','data.path2.name'] ] 
-    if vehicle.rudder_flag: 
-        cruis_oei_maneuver_segment_name =  'missions.cruise_oei.segments.cruise' 
-        problem.aliases = [    
-            [ 'PR_OEI_eta_1'                           ,  cruis_oei_maneuver_segment_name + '.assigned_control_variables.throttle.initial_guess_values[0][0]'],  
-            [ 'aileron_oei_deflection'                 , 'vehicle_configurations.aileron_rudder_oei_sizing.wings.main_wing.control_surfaces.aileron.deflection' ],       
-            [ 'mw_aileron_chord_fraction'              , 'vehicle_configurations.*.wings.main_wing.control_surfaces.aileron.chord_fraction'],  
-            [ 'mw_aileron_span_frac_start'             , 'vehicle_configurations.*.wings.main_wing.control_surfaces.aileron.span_fraction_start'],    
-            [ 'mw_aileron_span_frac_end'               , 'vehicle_configurations.*.wings.main_wing.control_surfaces.aileron.span_fraction_end'],  
-            [ 'rudder_oei_deflection'                  , 'vehicle_configurations.aileron_rudder_oei_sizing.wings.vertical_tail.control_surfaces.rudder.deflection' ],    
-            [ 'vs_rudder_chord_fraction'               , 'vehicle_configurations.*.wings.vertical_tail.control_surfaces.rudder.chord_fraction'],    
-            [ 'vs_rudder_span_frac_start'              , 'vehicle_configurations.*.wings.vertical_tail.control_surfaces.rudder.span_fraction_start'],    
-            [ 'vs_rudder_span_frac_end'                , 'vehicle_configurations.*.wings.vertical_tail.control_surfaces.rudder.span_fraction_end'], 
-            [ 'total_control_surface_area'             , 'summary.total_control_surface_area' ],       
-            [ 'PR_OEI_CY_residual'                     , 'summary.F_y_residual'],    
-            [ 'PR_OEI_CL_residual'                     , 'summary.M_x_residual'],       
-            [ 'PR_OEI_CN_residual'                     , 'summary.M_z_residual'],  
-        ]      
-    else:
-        problem.aliases = [  
-            [ 'PR_OEI_CX_residual'                     , 'summary.F_x_residual'],   
-            [ 'PR_OEI_CZ_residual'                     , 'summary.F_z_residual'],     
-            [ 'PR_OEI_CL_residual'                     , 'summary.M_x_residual'],   
-            [ 'PR_OEI_CM_residual'                     , 'summary.M_y_residual'],     
-            [ 'PR_OEI_CN_residual'                     , 'summary.M_z_residual'],   
-            [ 'aileron_rudder_surface_area'            , 'summary.aileron_rudder_surface_area' ],  
-            [ 'aileron_oei_deflection'                 , 'vehicle_configurations.aileron_rudder_oei_sizing.wings.main_wing.control_surfaces.aileron.deflection' ],      
-            [ 'mw_aileron_chord_fraction'              , 'vehicle_configurations.*.wings.main_wing.control_surfaces.aileron.chord_fraction'],  
-            [ 'mw_aileron_span_frac_start'             , 'vehicle_configurations.*.wings.main_wing.control_surfaces.aileron.span_fraction_start'],    
-            [ 'mw_aileron_span_frac_end'               , 'vehicle_configurations.*.wings.main_wing.control_surfaces.aileron.span_fraction_end']] 
-        
-    # -------------------------------------------------------------------
-    #  Vehicles
-    # -------------------------------------------------------------------
-    nexus.vehicle_configurations = Vehicles.aileron_rudder_oei_sizing_setup(vehicle)
-    
-    # -------------------------------------------------------------------
-    #  Analyses
-    # -------------------------------------------------------------------
-    nexus.analyses = Analyses.analyses_setup(nexus.vehicle_configurations)
-    
-    # -------------------------------------------------------------------
-    #  Missions
-    # ------------------------------------------------------------------- 
-    nexus.missions = Missions.aileron_rudder_oei_sizing_setup(nexus.analyses,nexus.cruise_velocity,nexus.cruise_altitude, angle_of_attack = trim_angle_of_attack)
-    
-    # -------------------------------------------------------------------
-    #  Procedure
-    # -------------------------------------------------------------------    
-    nexus.procedure = Procedure.aileron_rudder_oei_sizing_procedure()
-    
-    # -------------------------------------------------------------------
-    #  Summary
-    # -------------------------------------------------------------------    
-    nexus.summary = Data()     
-    return nexus
-
+ 
 def flap_sizing_optimization_setup(optimized_vehicle,cruise_velocity,cruise_altitude):
 
     nexus = Nexus()

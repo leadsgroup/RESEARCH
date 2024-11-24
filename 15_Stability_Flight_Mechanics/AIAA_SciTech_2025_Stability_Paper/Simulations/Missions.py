@@ -31,22 +31,19 @@ def elevator_sizing_setup(analyses,cruise_velocity,cruise_altitude,angle_of_atta
     missions.elevator_sizing_push_over  = base_mission_setup(analyses.elevator_sizing_push_over,max_speed_multiplier,stall_velocity,cruise_altitude,angle_of_attack,sideslip_angle,bank_angle, roll_rate,pitch_rate,yaw_rate)   
     return missions   
 
-def aileron_rudder_sizing_setup(analyses,cruise_velocity,cruise_altitude,angle_of_attack = 0,sideslip_angle=0 ,bank_angle= 0, roll_rate = 0,pitch_rate = 0,yaw_rate = 0): 
+def aileron_rudder_sizing_setup(analyses,cruise_velocity,cruise_altitude,angle_of_attack = 0,sideslip_angle=0 ,bank_angle= 0, roll_rate = 0,pitch_rate = 0,yaw_rate = 0):  
     missions                                    = RCAIDE.Framework.Mission.Missions()
     max_speed_multiplier                        = 1.0 
     missions.roll_maneuver                      = base_mission_setup(analyses.aileron_rudder_roll_sizing,max_speed_multiplier,cruise_velocity,cruise_altitude,angle_of_attack,sideslip_angle,bank_angle, roll_rate,pitch_rate,yaw_rate)    
     
     max_speed_multiplier                        = 1.0
     missions.crosswind_maneuver                 = base_mission_setup(analyses.aileron_rudder_crosswind_sizing,max_speed_multiplier,cruise_velocity,cruise_altitude,angle_of_attack,sideslip_angle,bank_angle, roll_rate,pitch_rate,yaw_rate)
+     
+    max_speed_multiplier                        = 1.0
+    missions.cruise_oei                         = cruise_oei_mission_setup(analyses.aileron_rudder_oei_sizing,max_speed_multiplier,cruise_velocity,cruise_altitude,angle_of_attack,sideslip_angle,bank_angle, roll_rate,pitch_rate,yaw_rate)    
+        
     return missions   
      
-
-def aileron_rudder_oei_sizing_setup(analyses,cruise_velocity,cruise_altitude,angle_of_attack = 0,sideslip_angle=0 ,bank_angle= 0, roll_rate = 0,pitch_rate = 0,yaw_rate = 0): 
-    missions                                    = RCAIDE.Framework.Mission.Missions() 
-    max_speed_multiplier                        = 1.0
-    missions.cruise_oei                         = cruise_oei_mission_setup(analyses.aileron_rudder_oei_sizing,max_speed_multiplier,cruise_velocity,cruise_altitude,angle_of_attack,sideslip_angle,bank_angle, roll_rate,pitch_rate,yaw_rate)     
-    return missions   
-
 
 def flap_sizing_setup(analyses,cruise_velocity,cruise_altitude,angle_of_attack = 0,sideslip_angle=0 ,bank_angle= 0, roll_rate = 0,pitch_rate = 0,yaw_rate = 0): 
     missions                            = RCAIDE.Framework.Mission.Missions()

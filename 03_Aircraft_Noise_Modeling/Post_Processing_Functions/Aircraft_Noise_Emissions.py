@@ -136,8 +136,8 @@ def post_process_noise_data(noise_results, topography_file ,  flight_times, time
         hemisphere_SPL_dBA       = noise_results.hemisphere_SPL_dBA[seg]
         
         # compute number of timesteps in segment 
-        number_of_segment_timesteps = int(np.ceil(noise_results.segment_length / noise_evaluation_pitch)) 
-        noise_time =  (time[-1] -  time[0]) / number_of_segment_timesteps
+        number_of_segment_timesteps = int(np.ceil(noise_results.segment_length[seg][0] / noise_evaluation_pitch)) 
+        noise_time = np.linspace(time[0],time[-1], number_of_segment_timesteps)
          
         # Step 5.1 : Compute relative microhpone locations   
         noise_pos,RML,PHI,THETA,num_gm_mic  = compute_relative_noise_evaluation_locations(mean_sea_level_altitude,noise_time,aircraft_origin_location,microphone_locations,position_vector,time) 
@@ -275,14 +275,14 @@ def compute_point_to_point_geospacial_data(topography_file,aircraft_origin_coord
     x1 = RCAIDE.Framework.Analyses.Geodesics.Geodesics.Calculate_Distance(x1_coord,bottom_left_map_coords) * Units.kilometers
     y1 = RCAIDE.Framework.Analyses.Geodesics.Geodesics.Calculate_Distance(y1_coord,bottom_left_map_coords) * Units.kilometers
     
-    lat_flag             = np.where(origin_coordinates<0)[0]
-    origin_coordinates[lat_flag]  = origin_coordinates[lat_flag] + 360 
-    long_flag            = np.where(destination_coordinates<0)[0]
+    lat_flag                           = np.where(origin_coordinates<0)[0]
+    origin_coordinates[lat_flag]       = origin_coordinates[lat_flag] + 360 
+    long_flag                          = np.where(destination_coordinates<0)[0]
     destination_coordinates[long_flag] = destination_coordinates[long_flag] + 360 
-    z0                   = griddata((Lat,Long), Elev, (np.array([origin_coordinates[0]]),np.array([origin_coordinates[1]])), method='nearest')[0]
-    z1                   = griddata((Lat,Long), Elev, (np.array([destination_coordinates[0]]),np.array([destination_coordinates[1]])), method='nearest')[0] 
-    dep_loc              = np.array([x0,y0,z0])
-    des_loc              = np.array([x1,y1,z1])
+    z0                                 = griddata((Lat,Long), Elev, (np.array([origin_coordinates[0]]),np.array([origin_coordinates[1]])), method='nearest')[0]
+    z1                                 = griddata((Lat,Long), Elev, (np.array([destination_coordinates[0]]),np.array([destination_coordinates[1]])), method='nearest')[0] 
+    dep_loc                            = np.array([x0,y0,z0])
+    des_loc                            = np.array([x1,y1,z1])
     
     # pack data 
     aircraft_origin_location      = dep_loc
