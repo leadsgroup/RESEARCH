@@ -136,7 +136,7 @@ def post_process_noise_data(noise_results, topography_file ,  flight_times, time
         hemisphere_SPL_dBA       = noise_results.hemisphere_SPL_dBA[seg]
         
         # compute number of timesteps in segment 
-        number_of_segment_timesteps = int(np.ceil(noise_results.segment_length / noise_evaluation_pitch)) 
+        number_of_segment_timesteps = (np.ceil(noise_results.segment_length / noise_evaluation_pitch)).astype(int)
         noise_time =  (time[-1] -  time[0]) / number_of_segment_timesteps
          
         # Step 5.1 : Compute relative microhpone locations   
@@ -363,9 +363,9 @@ def compute_relative_noise_evaluation_locations(mean_sea_level_altitude,noise_ti
     
     # rediscretize time and aircraft position to get finer resolution  
     noise_pos         = np.zeros((N,3)) 
-    noise_pos[:,0]    = np.interp(noise_time,time,position_vector[:,0])
-    noise_pos[:,1]    = np.interp(noise_time,time,position_vector[:,1])
-    noise_pos[:,2]    = np.interp(noise_time,time,position_vector[:,2])
+    noise_pos[:,0]    = np.interp(noise_time,time,position_vector[:,0])[:, 0]
+    noise_pos[:,1]    = np.interp(noise_time,time,position_vector[:,1])[:, 0]
+    noise_pos[:,2]    = np.interp(noise_time,time,position_vector[:,2])[:, 0]
     
     num_gm_mic        = len(microphone_locations)  
     RML               = np.zeros((N,num_gm_mic,3)) 

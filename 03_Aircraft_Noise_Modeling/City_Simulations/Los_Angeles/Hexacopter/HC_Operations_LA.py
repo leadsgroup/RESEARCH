@@ -90,7 +90,7 @@ def main():
         configs  = configs_setup(vehicle)
         
         # vehicle analyses
-        analyses = unconverged_analyses_setup(configs, origin_coord,destination_coord ,mic_stencil)
+        analyses = unconverged_analyses_setup(configs, origin_coord,destination_coord, mic_stencil)
         
         # mission analyses 
         mission = unconverged_mission_setup(number_of_cpts, analyses, radius_Vert1, radius_Vert2, dep_heading, app_heading, dep_sector, app_sector, path_heading, total_cruise_distance,cruise_altitude)        
@@ -146,7 +146,7 @@ def noise_analyses_setup(configs):
 
     return analyses
 
-def unconverged_analyses_setup(configs, origin_coord,destination_coord, noise_timesteps ,mic_stencil):
+def unconverged_analyses_setup(configs, origin_coord,destination_coord ,mic_stencil): # noise_timesteps
 
     analyses = RCAIDE.Framework.Analyses.Analysis.Container()
 
