@@ -45,8 +45,7 @@ def main():
     E_origin        = np.zeros(len(unique_airports))
     
     processed_filename_list_name =  aircraft_code + '_' + city_code +  '_Single_Flights_Processed' 
-    file_name_dict               = ['Processed_HC_LA_ONT_BUR_1000ft', 'Processed_HC_LA_ONT_LAX_1000ft', 'Processed_HC_LA_ONT_LGB_1000ft', 'Processed_HC_LA_ONT_SNA_1000ft'] # load(processed_filename_list_name)    
-  
+    file_name_dict               =  load(processed_filename_list_name)    
          
     for filename in file_name_dict: # file_name_dict.filename_list: 
         # load data
@@ -63,7 +62,7 @@ def main():
         
         # add the energy consumed by each origin airport
         loc           =  list(unique_airports).index(origin_code)
-        #E_origin[loc] += PND.energy_consumed   
+        E_origin[loc] += PND.energy_consumed   
     
     # create data structure
     cumulative_PND = Data(
@@ -71,7 +70,7 @@ def main():
         Total_L_eq_24hr = Total_L_eq_24hr, 
         Total_L_dn      = Total_L_dn, 
         Total_L_max     = Total_L_max,
-        #Total_Energy    = E_origin, 
+        Total_Energy    = E_origin, 
         Airports        = unique_airports, 
     )
     

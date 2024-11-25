@@ -6,12 +6,13 @@ from RCAIDE.Library.Plots import *
 from RCAIDE import  save     
 from RCAIDE import  load   
 
-# python imports 
+# python imports
+import time as t
 import os 
 import pickle
 import sys 
 import pandas as pd
-import numpy as  np
+import numpy as  np 
 
 
 local_path_1 =  os.path.split(os.path.split(os.path.split(sys.path[0])[0])[0])[0] 
@@ -23,7 +24,6 @@ from Aircraft_Noise_Emissions   import post_process_noise_data
 #  Main 
 # ----------------------------------------------------------------------------------------------------------------------  
 def main():           
-    import  time as  t
       
     ospath          = os.path.abspath(__file__)
     separator       = os.path.sep
@@ -33,7 +33,8 @@ def main():
     flight_data     = pd.read_excel(routes_filepath,sheet_name=['Los_Angeles'])
     LA_flight_data  =  flight_data['Los_Angeles']
     route_count     = {}
-    ti = t.time() 
+    
+    ti = t.time()
     
     operation_flight_times = np.array(['06:00:00',
                                        '07:00:00',
@@ -55,18 +56,21 @@ def main():
     operation_period  = ['06:00:00','22:00:00']
          
 
-    mic_x_res                 = 1200
-    mic_y_res                 = 2700   
-    aircraft_code             = 'HC'
-    city_code                 = 'LA' 
-    cruise_altitude           = 1000*Units.feet
-    noise_evaluation_pitch    = 150 * Units.feet
+    mic_x_res                       = 600
+    mic_y_res                       = 1350
+    aircraft_code                   = 'HC'
+    city_code                       = 'LA' 
+    cruise_altitude                 = 1000 * Units.feet
+    noise_evaluation_pitch          = 300 * Units.feet
+    number_of_microphone_in_stencil = 25
     
-    filename_list_name        =  aircraft_code + '_' + city_code +  '_Single_Flights_Raw'
-    file_name_dict            = ['HC_mission_LA_ONT_BUR_1000ft', 'HC_mission_LA_ONT_LAX_1000ft', 'HC_mission_LA_ONT_LGB_1000ft', 'HC_mission_LA_ONT_SNA_1000ft']
+    
+
+    filename_list_name =  aircraft_code + '_' + city_code +  '_Single_Flights_Raw'
+    file_name_dict     =  Data(filename_list_name=filename_list_name) 
     processed_filename_list   = []
              
-    for filename in file_name_dict: #file_name_dict.filename_list:  
+    for filename in file_name_dict.filename_list:  
         results = load(filename + '.res')
         
         origin_code = filename.split('_')[3]
@@ -89,7 +93,7 @@ def main():
             operation_flight_times[i] = time[0] +':' + time[1] + ':'+ time[2]
         
         # post process noise
-        processed_noise_data =  post_process_noise_data(results, topography_file, operation_flight_times, operation_period , noise_evaluation_pitch,  mic_x_res, mic_y_res)
+        processed_noise_data =  post_process_noise_data(results, topography_file, operation_flight_times, operation_period ,number_of_microphone_in_stencil, noise_evaluation_pitch,  mic_x_res, mic_y_res)
           
         # save data in json file 
         processed_filename =  'Processed_'  +  aircraft_code + '_' + city_code + '_' + origin_code + '_' +  destination_code  + '_' + str(int(round(cruise_altitude/Units.feet,0)))+ 'ft'
@@ -101,8 +105,7 @@ def main():
     processed_filename_list_name =  aircraft_code + '_' + city_code +  '_Single_Flights_Processed'
     F =  Data(filename_list_name=processed_filename_list_name)
     save(F, processed_filename_list_name + '.res')
-    tf = t.time()
-    
+    tf = t.time() 
     print("Total time: "+str(tf-ti))
     return     
 
