@@ -31,7 +31,7 @@ def main():
     aircraft_code             = 'HC'
     city_code                 = 'LA' 
     cruise_altitude           = 1000*Units.feet 
-    mic_x_res                 = 1600
+    mic_x_res                 = 1200
     mic_y_res                 = 2700
     
     # create data structures to store noise 

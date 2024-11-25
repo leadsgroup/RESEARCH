@@ -26,20 +26,9 @@ import matplotlib.pyplot as plt
 # ----------------------------------------------------------------------        
 #   Run the whole thing
 # ----------------------------------------------------------------------  
-def size_control_surfaces(CG_bat_1, CG_bat_2, vehicle, cruise_velocity = 120 * Units['mph'], cruise_altitude= 5000*Units.feet):
+def size_control_surfaces(vehicle, cruise_velocity = 120 * Units['mph'], cruise_altitude= 5000*Units.feet):
 
-    ti_0 = time.time()
-    
-    '''
-    STICK FIXED (STATIC STABILITY AND DRAG OTIMIZATION
-    '''
-    ti   = time.time()   
-    planform_optimization_problem = stick_fixed_stability_and_drag_optimization_setup(vehicle,cruise_velocity,cruise_altitude)
-    output_stick_fixed = scipy_setup.SciPy_Solve(planform_optimization_problem,solver='SLSQP', sense_step = 1E-3, tolerance = 1E-3)   
-    print (output_stick_fixed)    
-    tf           = time.time()
-    elapsed_time_stick_fixed = round((tf-ti)/60,2)
-    print('Stick Fixed Stability and Drag Otimization Simulation Time: ' + str(elapsed_time_stick_fixed))
+     
     
     '''
     RUN LOOP TO GET DERIVATIVE FUNCTIONS OF CONTROL SURFACES     

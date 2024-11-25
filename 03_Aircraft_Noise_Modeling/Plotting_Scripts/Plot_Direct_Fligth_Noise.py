@@ -47,7 +47,7 @@ def main():
     aircraft_folder_names                   = ['Hexacopter', ]
     altitudes                               = ['1000']
     flight_intervals                        = ['60','30','10']
-    microphone_x_resolution                 = 1600 
+    microphone_x_resolution                 = 1200 
     microphone_y_resolution                 = 2700
     ospath          = os.path.abspath(__file__)
     separator       = os.path.sep
