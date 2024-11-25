@@ -41,6 +41,12 @@ def size_control_surfaces(CG_bat_1, CG_bat_2, vehicle, cruise_velocity = 120 * U
     elapsed_time_stick_fixed = round((tf-ti)/60,2)
     print('Stick Fixed Stability and Drag Otimization Simulation Time: ' + str(elapsed_time_stick_fixed))
     
+    '''
+    RUN LOOP TO GET DERIVATIVE FUNCTIONS OF CONTROL SURFACES     
+    '''
+    
+    
+    
     
     '''
     ELEVATOR SIZING (7 mins)
