@@ -277,6 +277,7 @@ def aileron_rudder_sizing_post_process(nexus):
     roll                  = nexus.results.roll_maneuver.segments.cruise 
     crosswind             = nexus.results.crosswind_maneuver.segments.cruise 
     cruise_oei            = nexus.results.cruise_oei.segments.cruise 
+    trim_AoA              = cruise_oei.conditions.aerodynamics.angles.alpha[0][0] 
     OEI_eta               = cruise_oei.conditions.energy.prop_rotor_bus.prop_rotor_propulsor_1.throttle[0][0] 
     OEI_rpm               = cruise_oei.conditions.energy.prop_rotor_bus.prop_rotor_propulsor_1.prop_rotor_1.rpm[0][0] 
     

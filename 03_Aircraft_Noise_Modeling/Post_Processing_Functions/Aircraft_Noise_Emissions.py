@@ -116,12 +116,8 @@ def post_process_noise_data(noise_results, topography_file ,  flight_times, time
     # Step 3: Create empty arrays to store noise data 
     N_segs = len(noise_results.time[:, 0, 0]) 
     
-    # Step 4: Initalize Arrays
-    SPL_dBA               = np.empty((0,N_gm_x,N_gm_y))
-    Aircraft_pos          = np.empty((0,3))
-    Time                  = np.empty((0)) 
-    mic_locs              = np.empty((0,number_of_microphone_in_stencil)) 
- 
+    # Step 4: Initalize Arrays 
+    Time         = np.empty((0))  
     idx =  0
      
     # Step 5: loop through segments and store noise 
@@ -140,11 +136,13 @@ def post_process_noise_data(noise_results, topography_file ,  flight_times, time
         if seg == (N_segs - 1):
             noise_time_ = noise_time 
         else:
-            noise_time_ = noise_time[:-1]
-             
-        Time         = np.hstack((Time,noise_time_)) 
-    SPL_dBA               = np.empty((len(Time),N_gm_x,N_gm_y))
-    mic_locs              = np.empty((len(Time),number_of_microphone_in_stencil))  
+            noise_time_ = noise_time[:-1] 
+        Time = np.hstack((Time,noise_time_))
+        
+    BG                    =  background_noise()   
+    SPL_dBA               = np.ones((len(Time),N_gm_x,N_gm_y)) *BG
+    Aircraft_pos          = np.zeros((len(Time),3))
+    mic_locs              = np.zeros((len(Time),number_of_microphone_in_stencil))  
     
     # Step 5: loop through segments and store noise 
     for seg in range(N_segs):
@@ -177,9 +175,8 @@ def post_process_noise_data(noise_results, topography_file ,  flight_times, time
             time_step =  np.array([noise_time[i]])
             current_position,locs,R,pts  = compute_relative_noise_evaluation_locations(mean_sea_level_altitude,time_step,aircraft_origin_location,microphone_locations,position_vector,time,number_of_microphone_in_stencil) 
             
-            Aircraft_pos    = np.vstack((Aircraft_pos,current_position))
+            Aircraft_pos[i] = current_position
             
-            SPL_dBA_i       = np.zeros((N_gm_x,N_gm_y))
             
             # Step 5.2.2 :Noise interpolation             
             delta_t         = (noise_time[i] -time[cpt]) / (time[cpt+1] - time[cpt])
@@ -200,23 +197,21 @@ def post_process_noise_data(noise_results, topography_file ,  flight_times, time
             #  Step 5.2.5 Scale data using radius  
             R_ref                = noise_results.settings.noise_hemisphere_radius  
             SPL_dBA_scaled       = SPL_dBA_unscaled - 20*np.log10(R/R_ref)  
+            noise                = np.nan_to_num(SPL_dBA_scaled)
+            noise[noise<BG] = BG
 
-            #ti6 = t.time()                          
+            SPL_dBA_i            = np.zeros((N_gm_x,N_gm_y))                                
             SPL_dBA_temp         = SPL_dBA_i.flatten()
-            SPL_dBA_temp[locs]   = SPL_dBA_scaled
+            SPL_dBA_temp[locs]   = noise
     
-            # Step 5.2.6 concatenate noise for each timestep 
-            SPL_dBA[i] =  SPL_dBA_temp.reshape(N_gm_x,N_gm_y)        
+            # Step 5.2.6 concatenate noise for each timestep  
+            SPL_dBA[i]         = SPL_dBA_temp.reshape(N_gm_x,N_gm_y)     
             
             # Stpe 5.2.7 store indexes of microhpone locations  
             mic_locs[i]        = locs           
             idx += 1            
             if noise_time[i] >= time[cpt+1]:
-                cpt += 1             
-                
-    # Step 6: Make any readings less that background noise equal to background noise
-    SPL_dBA                             = np.nan_to_num(SPL_dBA) 
-    SPL_dBA[SPL_dBA<background_noise()] = background_noise()  
+                cpt += 1    
      
     # Step 7: Store data 
     noise_data.SPL_dBA               = SPL_dBA

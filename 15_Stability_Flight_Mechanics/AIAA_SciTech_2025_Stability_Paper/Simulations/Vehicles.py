@@ -97,31 +97,19 @@ def aileron_rudder_sizing_configs_setup(vehicle):
     config.tag  = 'aileron_rudder_crosswind_sizing'   
     configs.append(config) 
          
-    return configs   
 
-
-################################################################################################################################################
-# AILERON AND RUDDER ONE ENGINE INOPERATIVE SIZING
-################################################################################################################################################
-def aileron_rudder_oei_sizing_setup(vehicle): 
-    configs  = aileron_rudder_oei_sizing_configs_setup(vehicle) 
-    return configs 
- 
-
-def aileron_rudder_oei_sizing_configs_setup(vehicle): 
-    configs     = RCAIDE.Library.Components.Configs.Config.Container() 
-    base_config = RCAIDE.Library.Components.Configs.Config(vehicle)  
-       
     config      = RCAIDE.Library.Components.Configs.Config(base_config)   
     for p_i ,  propulsor in  enumerate(config.networks.electric.busses.prop_rotor_bus.propulsors):
         propulsor.rotor.orientation_euler_angles =  [0, 0.0, 0] 
         propulsor.rotor.pitch_command   = propulsor.rotor.cruise.design_pitch_command
         if p_i == 5:
             propulsor.active = False  
-    config.tag  = 'aileron_rudder_oei_sizing'   
+    config.tag  = 'aileron_rudder_oei_sizing'
+    
     configs.append(config)
-         
-    return configs
+                  
+    return configs   
+
  
 ################################################################################################################################################
 # FLAP SIZING

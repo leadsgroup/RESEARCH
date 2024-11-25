@@ -30,72 +30,57 @@ def size_control_surfaces(CG_bat_1, CG_bat_2, vehicle, cruise_velocity = 120 * U
 
     ti_0 = time.time()
     
-    #'''
-    #STICK FIXED (STATIC STABILITY AND DRAG OTIMIZATION
-    #'''
-    #ti   = time.time()   
-    #planform_optimization_problem = stick_fixed_stability_and_drag_optimization_setup(vehicle,cruise_velocity,cruise_altitude)
-    #output_stick_fixed = scipy_setup.SciPy_Solve(planform_optimization_problem,solver='SLSQP', sense_step = 1E-3, tolerance = 1E-3)   
-    #print (output_stick_fixed)    
-    #tf           = time.time()
-    #elapsed_time_stick_fixed = round((tf-ti)/60,2)
-    #print('Stick Fixed Stability and Drag Otimization Simulation Time: ' + str(elapsed_time_stick_fixed))
-    
-    
-    #'''
-    #ELEVATOR SIZING (7 mins)
-    #'''
-    #ti = time.time()    
-    #optimized_vehicle                             = planform_optimization_problem.vehicle_configurations.stick_fixed_cruise 
-    #save(optimized_vehicle, 'optimized_vehicle_stick_fixed', pickle_format=True) 
-    #optimized_vehicle.maxiumum_load_factor        = 3.0
-    #optimized_vehicle.minimum_load_factor         = -1 
-    #elevator_sizing_optimization_problem = elevator_sizing_optimization_setup(optimized_vehicle,cruise_velocity,cruise_altitude)
-    #output_elevator_sizing = scipy_setup.SciPy_Solve(elevator_sizing_optimization_problem,solver='SLSQP', sense_step = 1E-2, tolerance = 1E-2) 
-    #print (output_elevator_sizing)     
-    #tf           = time.time()
-    #elapsed_time_elevator_sizing = round((tf-ti)/60,2)
-    #print('Elevator Sizing Simulation Time: ' + str(elapsed_time_elevator_sizing))
-   
-    
-    #'''
-    #AILERON AND RUDDER SIZING (22 mins)
-    #'''       
-    #ti = time.time()  
-    #optimized_vehicle                    = elevator_sizing_optimization_problem.vehicle_configurations.elevator_sizing_pull_up # 
-    #save(optimized_vehicle, 'optimized_vehicle_ele', pickle_format=True)  
-    #optimized_vehicle.rudder_flag        = True  
-    #optimized_vehicle.crosswind_velocity = 20 * Units.knots 
-    #aileron_rudder_sizing_optimization_problem = aileron_rudder_sizing_optimization_setup(optimized_vehicle,cruise_velocity,cruise_altitude)
-    #output_aileron_and_rudder_sizing = scipy_setup.SciPy_Solve(aileron_rudder_sizing_optimization_problem,solver='SLSQP', sense_step = 1E-3, tolerance = 1E-3) 
-    #print (output_aileron_and_rudder_sizing)     
-    #tf           = time.time()
-    #elapsed_time_aileron_and_rudder_sizing = round((tf-ti)/60,2)
-    #print('Aileron and Rudder Sizing Simulation Time: ' + str(elapsed_time_aileron_and_rudder_sizing))   
+    '''
+    STICK FIXED (STATIC STABILITY AND DRAG OTIMIZATION
+    '''
+    ti   = time.time()   
+    planform_optimization_problem = stick_fixed_stability_and_drag_optimization_setup(vehicle,cruise_velocity,cruise_altitude)
+    output_stick_fixed = scipy_setup.SciPy_Solve(planform_optimization_problem,solver='SLSQP', sense_step = 1E-3, tolerance = 1E-3)   
+    print (output_stick_fixed)    
+    tf           = time.time()
+    elapsed_time_stick_fixed = round((tf-ti)/60,2)
+    print('Stick Fixed Stability and Drag Otimization Simulation Time: ' + str(elapsed_time_stick_fixed))
     
     
     '''
-    AILERON AND RUDDER SIZING OEI
-    '''     
-    ti = time.time()      
-    #optimized_vehicle                              = aileron_rudder_sizing_optimization_problem.vehicle_configurations.aileron_rudder_roll_sizing  
-    #save(optimized_vehicle, 'optimized_vehicle_ail_rud', pickle_format=True) 
-    optimized_vehicle =  load('optimized_vehicle_ail_rud', pickle_format=True) 
-    optimized_vehicle.rudder_flag                  = True    
+    ELEVATOR SIZING (7 mins)
+    '''
+    ti = time.time()    
+    optimized_vehicle                             = planform_optimization_problem.vehicle_configurations.stick_fixed_cruise 
+    save(optimized_vehicle, 'optimized_vehicle_stick_fixed', pickle_format=True) 
+    optimized_vehicle.maxiumum_load_factor        = 3.0
+    optimized_vehicle.minimum_load_factor         = -1 
+    elevator_sizing_optimization_problem = elevator_sizing_optimization_setup(optimized_vehicle,cruise_velocity,cruise_altitude)
+    output_elevator_sizing = scipy_setup.SciPy_Solve(elevator_sizing_optimization_problem,solver='SLSQP', sense_step = 1E-2, tolerance = 1E-2) 
+    print (output_elevator_sizing)     
+    tf           = time.time()
+    elapsed_time_elevator_sizing = round((tf-ti)/60,2)
+    print('Elevator Sizing Simulation Time: ' + str(elapsed_time_elevator_sizing))
+   
+    
+    '''
+    AILERON AND RUDDER SIZING (22 mins)
+    '''       
+    ti = time.time()  
+    optimized_vehicle                    = elevator_sizing_optimization_problem.vehicle_configurations.elevator_sizing_pull_up # 
+    save(optimized_vehicle, 'optimized_vehicle_ele', pickle_format=True)   
+    optimized_vehicle.rudder_flag        = True  
+    optimized_vehicle.crosswind_velocity = 20 * Units.knots 
     trim_angle_of_attack =  0.09328504 # output_elevator_sizing[0]
-    aileron_rudder_oei_sizing_optimization_problem = aileron_rudder_oei_sizing_optimization_setup(optimized_vehicle,cruise_velocity,cruise_altitude,trim_angle_of_attack)
-    output_aileron_and_rudder_oei_sizing = scipy_setup.SciPy_Solve(aileron_rudder_oei_sizing_optimization_problem,solver='SLSQP', sense_step = 1E-3, tolerance = 1E-3) # sense_step = 1E-2, tolerance = 1E-2
-    print (output_aileron_and_rudder_oei_sizing)     
-    tf   = time.time()
-    elapsed_time_aileron_and_rudder_oei_sizing = round((tf-ti)/60,2)
-    print('Aileron and Rudder Sizing Simulation Time: ' + str(elapsed_time_aileron_and_rudder_oei_sizing))   
+    aileron_rudder_sizing_optimization_problem = aileron_rudder_sizing_optimization_setup(optimized_vehicle,cruise_velocity,cruise_altitude, trim_angle_of_attack)
+    output_aileron_and_rudder_sizing = scipy_setup.SciPy_Solve(aileron_rudder_sizing_optimization_problem,solver='SLSQP', sense_step = 1E-3, tolerance = 1E-3) 
+    print (output_aileron_and_rudder_sizing)     
+    tf           = time.time()
+    elapsed_time_aileron_and_rudder_sizing = round((tf-ti)/60,2)
+    print('Aileron and Rudder Sizing Simulation Time: ' + str(elapsed_time_aileron_and_rudder_sizing))   
+    
      
      
     '''
     FLAP SIZING
     ''' 
     ti = time.time()     
-    optimized_vehicle = aileron_rudder_oei_sizing_optimization_problem.vehicle_configurations.aileron_rudder_oei_sizing 
+    optimized_vehicle = aileron_rudder_sizing_optimization_problem.vehicle_configurations.aileron_rudder_oei_sizing 
     save(optimized_vehicle, 'optimized_vehicle_ail_rud_oei', pickle_format=True) 
     flap_sizing_optimization_problem = flap_sizing_optimization_setup(optimized_vehicle,cruise_velocity,cruise_altitude)
     output_flap_sizing = scipy_setup.SciPy_Solve(flap_sizing_optimization_problem,solver='SLSQP', sense_step = 1E-1, tolerance = 1E-1) 
@@ -369,8 +354,7 @@ def aileron_rudder_sizing_optimization_setup(vehicle,cruise_velocity,cruise_alti
     # -------------------------------------------------------------------
 
     #   [ tag                   , initial,         (lb , ub)        , scaling , units ]   
-    problem.inputs = np.array([         
-                  [ 'crosswind_AoA'                ,  5  , -5   ,  20  ,  1.0  ,  1*Units.degree],
+    problem.inputs = np.array([          
                   [ 'aileron_roll_deflection'      ,  0  , -30  , 30   ,  1.0  ,  1*Units.degree],   
                   [ 'aileron_crosswind_deflection' ,  0  , -30  , 30   ,  1.0  ,  1*Units.degree], 
                   [ 'rudder_crosswind_deflection'  ,  0  , -30  , 30   ,  1.0  ,  1*Units.degree],  
@@ -400,15 +384,13 @@ def aileron_rudder_sizing_optimization_setup(vehicle,cruise_velocity,cruise_alti
     
     # [ tag, sense, edge, scaling, units ] 
     problem.constraints = np.array([
-        [ 'roll_rate_residual'             ,   '<' ,   5E-3 ,   1.0 , 1*Units.less],  # 1E-2 works 
-        [ 'F_y_residual'          ,   '<' ,   5E-2 ,   1.0 , 1*Units.less],  # 1E-1 works 
-        [ 'F_z_residual'          ,   '<' ,   5E-2 ,   1.0 , 1*Units.less],  # 1E-1 works  
-        [ 'M_x_residual'          ,   '<' ,   5E-2 ,   1.0 , 1*Units.less],  # 1E-1 works 
-        [ 'M_y_residual'          ,   '<' ,   5E-2 ,   1.0 , 1*Units.less],  # 1E-1 works 
-        [ 'M_z_residual'          ,   '<' ,   5E-2 ,   1.0 , 1*Units.less],  # 1E-1 works 
-        [ 'PR_OEI_CY_residual'    ,   '<' ,   1E-6 ,   1 , 1*Units.less],    
-        [ 'PR_OEI_CL_residual'    ,   '<' ,   1E-6 ,   1 , 1*Units.less],    
-        [ 'PR_OEI_CN_residual'    ,   '<' ,   1E-6 ,   1 , 1*Units.less],  
+        [ 'roll_rate_residual'    ,   '<' ,   1E-6 ,   1 , 1*Units.less],  # 1E-2 works 
+        [ 'F_y_residual'          ,   '<' ,   1E-6 ,   1 , 1*Units.less],  # 1E-1 works   
+        [ 'M_y_residual'          ,   '<' ,   1E-6 ,   1 , 1*Units.less],  # 1E-1 works 
+        [ 'M_z_residual'          ,   '<' ,   1E-6 ,   1 , 1*Units.less],  # 1E-1 works 
+        [ 'OEI_CY_residual'       ,   '<' ,   1E-6 ,   1 , 1*Units.less],    
+        [ 'OEI_CL_residual'       ,   '<' ,   1E-6 ,   1 , 1*Units.less],    
+        [ 'OEI_CN_residual'       ,   '<' ,   1E-6 ,   1 , 1*Units.less],  
     ],dtype=object)
         
         
@@ -416,12 +398,10 @@ def aileron_rudder_sizing_optimization_setup(vehicle,cruise_velocity,cruise_alti
     #  Aliases
     # -------------------------------------------------------------------
     
-    # [ 'alias' , ['data.path1.name','data.path2.name'] ]  
-    crosswind_maneuver_segment_name =  'missions.crosswind_maneuver.segments.cruise'  
+    # [ 'alias' , ['data.path1.name','data.path2.name'] ]   
     cruise_oei_maneuver_segment_name =  'missions.cruise_oei.segments.cruise' 
-    problem.aliases = [   
-        [ 'crosswind_AoA'                          , crosswind_maneuver_segment_name + '.angle_of_attack' ],   
-        [ 'PR_OEI_eta_1'                           , cruise_oei_maneuver_segment_name + '.assigned_control_variables.throttle.initial_guess_values[0][0]'],  
+    problem.aliases = [    
+        [ 'OEI_eta_1'                              , cruise_oei_maneuver_segment_name + '.assigned_control_variables.throttle.initial_guess_values[0][0]'],  
         [ 'aileron_roll_deflection'                , 'vehicle_configurations.aileron_rudder_roll_sizing.wings.main_wing.control_surfaces.aileron.deflection' ],  
         [ 'aileron_crosswind_deflection'           , 'vehicle_configurations.aileron_rudder_crosswind_sizing.wings.main_wing.control_surfaces.aileron.deflection' ],   
         [ 'rudder_crosswind_deflection'            , 'vehicle_configurations.aileron_rudder_crosswind_sizing.wings.vertical_tail.control_surfaces.rudder.deflection' ], 
@@ -435,14 +415,12 @@ def aileron_rudder_sizing_optimization_setup(vehicle,cruise_velocity,cruise_alti
         [ 'vs_rudder_span_frac_end'                , 'vehicle_configurations.*.wings.vertical_tail.control_surfaces.rudder.span_fraction_end'], 
         [ 'aileron_rudder_surface_area'            , 'summary.aileron_rudder_surface_area' ], 
         [ 'roll_rate_residual'                     , 'summary.roll_rate_residual' ],  
-        [ 'F_y_residual'                           , 'summary.F_y_residual' ], 
-        [ 'F_z_residual'                           , 'summary.F_z_residual' ],
-        [ 'M_x_residual'                           , 'summary.M_x_residual' ], 
+        [ 'F_y_residual'                           , 'summary.F_y_residual' ],  
         [ 'M_y_residual'                           , 'summary.M_y_residual' ], 
         [ 'M_z_residual'                           , 'summary.M_z_residual' ],   
-        [ 'PR_OEI_CY_residual'                     , 'summary.OEI_F_y_residual'],    
-        [ 'PR_OEI_CL_residual'                     , 'summary.OEI_M_x_residual'],       
-        [ 'PR_OEI_CN_residual'                     , 'summary.OEI_M_z_residual'],             
+        [ 'OEI_CY_residual'                        , 'summary.OEI_F_y_residual'],    
+        [ 'OEI_CL_residual'                        , 'summary.OEI_M_x_residual'],       
+        [ 'OEI_CN_residual'                        , 'summary.OEI_M_z_residual'],             
         ]       
         
     # -------------------------------------------------------------------
