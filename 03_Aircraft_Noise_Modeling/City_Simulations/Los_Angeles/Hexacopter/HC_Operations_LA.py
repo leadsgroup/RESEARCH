@@ -142,7 +142,7 @@ def main():
             filename_list.append(filename)
         
     filename_list_name =  aircraft_code + '_' + city_code +  '_Single_Flights_Raw'
-    F =  Data(filename_list_name=filename_list_name)
+    F =  Data(filename_list=filename_list)
     save(F, filename_list_name + '.res')
       
     return

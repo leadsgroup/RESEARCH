@@ -28,7 +28,7 @@ def main():
     ospath          = os.path.abspath(__file__)
     separator       = os.path.sep
     relative_path   = os.path.dirname(ospath) + separator 
-    routes_filepath = relative_path +  '..' + separator +  '..' + separator + 'UAM_City_Routes.xlsx'
+    routes_filepath = relative_path  +  '..' + separator + 'UAM_City_Routes.xlsx'
     topography_file = relative_path +  '..' + separator +  'Topography' + separator + 'LA_Metropolitan_Area.txt'
     flight_data     = pd.read_excel(routes_filepath,sheet_name=['Los_Angeles'])
     LA_flight_data  =  flight_data['Los_Angeles']
@@ -63,12 +63,11 @@ def main():
     cruise_altitude                 = 1000 * Units.feet
     noise_evaluation_pitch          = 300 * Units.feet
     number_of_microphone_in_stencil = 25
-    
-    
+     
 
     filename_list_name =  aircraft_code + '_' + city_code +  '_Single_Flights_Raw'
-    file_name_dict     =  Data(filename_list_name=filename_list_name) 
-    processed_filename_list   = []
+    file_name_dict     =  load(filename_list_name + '.res' )
+    processed_filename_list  = []
              
     for filename in file_name_dict.filename_list:  
         results = load(filename + '.res')
