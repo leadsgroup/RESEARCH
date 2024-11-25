@@ -554,7 +554,7 @@ def noise_mission_setup(number_of_cpts, analyses, radius_Vert1=3600*Units.ft, ra
     segment.altitude       = 500.0 * Units.ft  
     segment.air_speed      = pattern_speed     
     segment.turn_radius    = radius_Vert2  
-    segment.true_course    = path_heading - (90 *Units.degrees)     # CHECK UNITS
+    segment.true_course    = path_heading - (90 *Units.degrees)  
     segment.turn_angle     = app_sector  
     
     # define flight dynamics to model 
@@ -585,8 +585,7 @@ def noise_mission_setup(number_of_cpts, analyses, radius_Vert1=3600*Units.ft, ra
     segment.climb_rate                       = -551.181  * Units['ft/min']
     segment.air_speed_start                  = pattern_speed      
     segment.air_speed_end                    = transition_speed      
-    segment.altitude_start                   = 500.0 * Units.ft 
-    del segment.process.converge
+    segment.altitude_start                   = 500.0 * Units.ft  
     segment.altitude_end                     = 50.0 * Units.ft
     segment.true_course                      = app_heading
 
