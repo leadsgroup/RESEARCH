@@ -442,8 +442,7 @@ def compute_noise_metrics(noise_data, flight_times,time_period):
     t_start                   = float(time_period[0].split(':')[0])*60*60 + float(time_period[0].split(':')[1])*60 +  float(time_period[0].split(':')[2])
     t_end                     = float(time_period[1].split(':')[0])*60*60 + float(time_period[1].split(':')[1])*60 +  float(time_period[1].split(':')[2])     
     
-    # unpack noise data 
-    SPL                       = noise_data.SPL_dBA    
+    # unpack noise data   
     N_gm_y                    = noise_data.microphone_y_resolution   
     N_gm_x                    = noise_data.microphone_x_resolution 
     flight_time               = noise_data.time
@@ -470,25 +469,23 @@ def compute_noise_metrics(noise_data, flight_times,time_period):
     ambient_noise_duration_24hr -= flight_time[-1] * (number_of_penalty_flights + number_of_no_penalty_flights) 
 
     # create noise penalty 
-    noise_penality        = np.zeros((len(flight_time),N_gm_x,N_gm_y))         
-    noise_penality[True]  = 10       
-     
+    noise_penality        = np.ones((len(flight_time),N_gm_x,N_gm_y))*10      
     
     # Added number of penalty and non penalty flights together. Check if this is correct. 
     time_step_m1           = np.diff(flight_time) #numpy diff produced one less in the array so we will add one timestep at the front of 10 seconds 
-    time_step              = np.concatenate((np.array([10]),time_step_m1))
+    time_step              = np.hstack((np.array([10]),time_step_m1))
     time_matrix            = np.tile(time_step[:,None, None], (1,N_gm_x,N_gm_y))
     
-    p_sq_ref_flight_sq                = np.nansum((number_of_no_penalty_flights + number_of_penalty_flights)*time_matrix * (10**(SPL/10)), axis=0)   ### TO CHANGE 11/22. Add multiplier based ont eh number of flights there are in that time period. Need to have two multipliers, pre and post 7am. 
-    p_sq_ref_flight_sq_dn_penalty     = np.nansum(time_matrix *(number_of_penalty_flights)* (10**( (noise_penality + SPL)/10)), axis=0)  # ADDED penalty and no penalty arrays 11/22/2024
-    p_sq_ref_flight_sq_dn_no_penalty  = np.nansum(time_matrix *(number_of_no_penalty_flights)* (10**( (SPL)/10)), axis=0)  # ADDED penalty and no penalty arrays 11/22/2024
+    p_sq_ref_flight_sq                = np.sum((number_of_no_penalty_flights + number_of_penalty_flights)*time_matrix * (10**(noise_data.SPL_dBA/10)), axis=0)   ### TO CHANGE 11/22. Add multiplier based ont eh number of flights there are in that time period. Need to have two multipliers, pre and post 7am. 
+    p_sq_ref_flight_sq_dn_penalty     = np.sum(time_matrix *(number_of_penalty_flights)* (10**( (noise_penality + noise_data.SPL_dBA)/10)), axis=0)  # ADDED penalty and no penalty arrays 11/22/2024
+    p_sq_ref_flight_sq_dn_no_penalty  = np.sum(time_matrix *(number_of_no_penalty_flights)* (10**( (noise_data.SPL_dBA)/10)), axis=0)  # ADDED penalty and no penalty arrays 11/22/2024
  
     # add to current  
-    p_div_p_ref_sq_L_eq    = np.nansum(p_sq_ref_flight_sq[:,:,None], axis =2)
-    p_div_p_ref_sq_L_24hr  = np.nansum(p_sq_ref_flight_sq[:,:,None], axis =2)
+    p_div_p_ref_sq_L_eq    = np.sum(p_sq_ref_flight_sq[:,:,None], axis =2)
+    p_div_p_ref_sq_L_24hr  = np.sum(p_sq_ref_flight_sq[:,:,None], axis =2)
 
-    total_dn_penalty       = np.nansum(p_sq_ref_flight_sq_dn_penalty[:,:,None], axis =2)
-    total_no_dn_penalty    = np.nansum(p_sq_ref_flight_sq_dn_no_penalty[:,:,None], axis =2)
+    total_dn_penalty       = np.sum(p_sq_ref_flight_sq_dn_penalty[:,:,None], axis =2)
+    total_no_dn_penalty    = np.sum(p_sq_ref_flight_sq_dn_no_penalty[:,:,None], axis =2)
     p_div_p_ref_sq_L_dn    = total_dn_penalty + total_no_dn_penalty 
 
     # add on background noise for remainder of time
