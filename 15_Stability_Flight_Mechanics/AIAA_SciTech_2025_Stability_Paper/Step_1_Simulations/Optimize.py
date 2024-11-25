@@ -40,103 +40,100 @@ def size_control_surfaces(CG_bat_1, CG_bat_2, vehicle, cruise_velocity = 120 * U
     tf           = time.time()
     elapsed_time_stick_fixed = round((tf-ti)/60,2)
     print('Stick Fixed Stability and Drag Otimization Simulation Time: ' + str(elapsed_time_stick_fixed))
-    
-    '''
-    RUN LOOP TO GET DERIVATIVE FUNCTIONS OF CONTROL SURFACES     
-    '''
-    
-    
-    
-    
-    '''
-    ELEVATOR SIZING (7 mins)
-    '''
-    ti = time.time()    
     optimized_vehicle                             = planform_optimization_problem.vehicle_configurations.stick_fixed_cruise 
-    save(optimized_vehicle, 'optimized_vehicle_stick_fixed', pickle_format=True) 
-    optimized_vehicle.maxiumum_load_factor        = 3.0
-    optimized_vehicle.minimum_load_factor         = -1 
-    elevator_sizing_optimization_problem = elevator_sizing_optimization_setup(optimized_vehicle,cruise_velocity,cruise_altitude)
-    output_elevator_sizing = scipy_setup.SciPy_Solve(elevator_sizing_optimization_problem,solver='SLSQP', sense_step = 1E-2, tolerance = 1E-2) 
-    print (output_elevator_sizing)     
-    tf           = time.time()
-    elapsed_time_elevator_sizing = round((tf-ti)/60,2)
-    print('Elevator Sizing Simulation Time: ' + str(elapsed_time_elevator_sizing))
+    save(optimized_vehicle, 'optimized_vehicle_stick_fixed', pickle_format=True)    
+    
+    
+    #'''
+    #ELEVATOR SIZING (7 mins)
+    #'''
+    #ti = time.time()    
+    #optimized_vehicle                             = planform_optimization_problem.vehicle_configurations.stick_fixed_cruise 
+    #save(optimized_vehicle, 'optimized_vehicle_stick_fixed', pickle_format=True) 
+    #optimized_vehicle.maxiumum_load_factor        = 3.0
+    #optimized_vehicle.minimum_load_factor         = -1 
+    #elevator_sizing_optimization_problem = elevator_sizing_optimization_setup(optimized_vehicle,cruise_velocity,cruise_altitude)
+    #output_elevator_sizing = scipy_setup.SciPy_Solve(elevator_sizing_optimization_problem,solver='SLSQP', sense_step = 1E-2, tolerance = 1E-2) 
+    #print (output_elevator_sizing)     
+    #tf           = time.time()
+    #elapsed_time_elevator_sizing = round((tf-ti)/60,2)
+    #print('Elevator Sizing Simulation Time: ' + str(elapsed_time_elevator_sizing))
    
     
-    '''
-    AILERON AND RUDDER SIZING (22 mins)
-    '''       
-    ti = time.time()  
-    optimized_vehicle                    = elevator_sizing_optimization_problem.vehicle_configurations.elevator_sizing_pull_up # 
-    save(optimized_vehicle, 'optimized_vehicle_ele', pickle_format=True)   
-    optimized_vehicle.rudder_flag        = True  
-    optimized_vehicle.crosswind_velocity = 20 * Units.knots 
-    trim_angle_of_attack =  0.09328504 # output_elevator_sizing[0]
-    aileron_rudder_sizing_optimization_problem = aileron_rudder_sizing_optimization_setup(optimized_vehicle,cruise_velocity,cruise_altitude, trim_angle_of_attack)
-    output_aileron_and_rudder_sizing = scipy_setup.SciPy_Solve(aileron_rudder_sizing_optimization_problem,solver='SLSQP', sense_step = 1E-3, tolerance = 1E-3) 
-    print (output_aileron_and_rudder_sizing)     
-    tf           = time.time()
-    elapsed_time_aileron_and_rudder_sizing = round((tf-ti)/60,2)
-    print('Aileron and Rudder Sizing Simulation Time: ' + str(elapsed_time_aileron_and_rudder_sizing))   
+    #'''
+    #AILERON AND RUDDER SIZING (22 mins)
+    #'''       
+    #ti = time.time()  
+    #optimized_vehicle                    = elevator_sizing_optimization_problem.vehicle_configurations.elevator_sizing_pull_up # 
+    #save(optimized_vehicle, 'optimized_vehicle_ele', pickle_format=True)   
+    #optimized_vehicle.rudder_flag        = True  
+    #optimized_vehicle.crosswind_velocity = 20 * Units.knots 
+    #trim_angle_of_attack =  0.09328504 # output_elevator_sizing[0]
+    #aileron_rudder_sizing_optimization_problem = aileron_rudder_sizing_optimization_setup(optimized_vehicle,cruise_velocity,cruise_altitude, trim_angle_of_attack)
+    #output_aileron_and_rudder_sizing = scipy_setup.SciPy_Solve(aileron_rudder_sizing_optimization_problem,solver='SLSQP', sense_step = 1E-3, tolerance = 1E-3) 
+    #print (output_aileron_and_rudder_sizing)     
+    #tf           = time.time()
+    #elapsed_time_aileron_and_rudder_sizing = round((tf-ti)/60,2)
+    #print('Aileron and Rudder Sizing Simulation Time: ' + str(elapsed_time_aileron_and_rudder_sizing))   
     
      
      
-    '''
-    FLAP SIZING
-    ''' 
-    ti = time.time()     
-    optimized_vehicle = aileron_rudder_sizing_optimization_problem.vehicle_configurations.aileron_rudder_oei_sizing 
-    save(optimized_vehicle, 'optimized_vehicle_ail_rud_oei', pickle_format=True) 
-    flap_sizing_optimization_problem = flap_sizing_optimization_setup(optimized_vehicle,cruise_velocity,cruise_altitude)
-    output_flap_sizing = scipy_setup.SciPy_Solve(flap_sizing_optimization_problem,solver='SLSQP', sense_step = 1E-1, tolerance = 1E-1) 
-    print (output_flap_sizing)     
-    tf   = time.time()
-    elapsed_time_flap_sizing = round((tf-ti)/60,2)
-    print('Flap Sizing Simulation Time: ' + str(elapsed_time_flap_sizing))   
+    #'''
+    #FLAP SIZING
+    #''' 
+    #ti = time.time()     
+    #optimized_vehicle = aileron_rudder_sizing_optimization_problem.vehicle_configurations.aileron_rudder_oei_sizing 
+    #save(optimized_vehicle, 'optimized_vehicle_ail_rud_oei', pickle_format=True) 
+    #flap_sizing_optimization_problem = flap_sizing_optimization_setup(optimized_vehicle,cruise_velocity,cruise_altitude)
+    #output_flap_sizing = scipy_setup.SciPy_Solve(flap_sizing_optimization_problem,solver='SLSQP', sense_step = 1E-1, tolerance = 1E-1) 
+    #print (output_flap_sizing)     
+    #tf   = time.time()
+    #elapsed_time_flap_sizing = round((tf-ti)/60,2)
+    #print('Flap Sizing Simulation Time: ' + str(elapsed_time_flap_sizing))   
     
      
-    '''
-    ONE ENGINE INOPERATIVE = HOVER 
-    '''     
-    ti   = time.time()   
-    optimized_vehicle  = flap_sizing_optimization_problem.vehicle_configurations.flap_sizing  
-    save(optimized_vehicle, 'optimized_vehicle_flap', pickle_format=True) 
-    hover_oei_optimization_problem = hover_oei_optimization_setup(optimized_vehicle,cruise_velocity,cruise_altitude)
-    output_hover_oei = scipy_setup.SciPy_Solve(hover_oei_optimization_problem,solver='SLSQP', sense_step = 1E-1, tolerance = 1E-1)  # -3, -3 works 
-    print (output_hover_oei)    
-    tf   = time.time()
-    elapsed_time_hover_oei = round((tf-ti)/60,2)
-    print('Hover OEI Simulation Time: ' + str(elapsed_time_hover_oei))
+    #'''
+    #ONE ENGINE INOPERATIVE = HOVER 
+    #'''     
+    #ti   = time.time()   
+    #optimized_vehicle  = flap_sizing_optimization_problem.vehicle_configurations.flap_sizing  
+    #save(optimized_vehicle, 'optimized_vehicle_flap', pickle_format=True) 
+    #hover_oei_optimization_problem = hover_oei_optimization_setup(optimized_vehicle,cruise_velocity,cruise_altitude)
+    #output_hover_oei = scipy_setup.SciPy_Solve(hover_oei_optimization_problem,solver='SLSQP', sense_step = 1E-1, tolerance = 1E-1)  # -3, -3 works 
+    #print (output_hover_oei)    
+    #tf   = time.time()
+    #elapsed_time_hover_oei = round((tf-ti)/60,2)
+    #print('Hover OEI Simulation Time: ' + str(elapsed_time_hover_oei))
     
 
-    '''
-    PRINT VEHICLE CONTROL SURFACES
-    '''          
-    optimized_vehicle  = hover_oei_optimization_problem.vehicle_configurations.hover_prop_rotor_oei  
-    save(optimized_vehicle, 'optimized_vehicle_hover_oei', pickle_format=True) 
-    print_vehicle_control_surface_geoemtry(optimized_vehicle)
+    #'''
+    #PRINT VEHICLE CONTROL SURFACES
+    #'''          
+    #optimized_vehicle  = hover_oei_optimization_problem.vehicle_configurations.hover_prop_rotor_oei  
+    #save(optimized_vehicle, 'optimized_vehicle_hover_oei', pickle_format=True) 
+    #print_vehicle_control_surface_geoemtry(optimized_vehicle)
      
-    tf_0           = time.time()
-    total_elapsed_time = round((tf_0-ti_0)/60,2)    
-    print('Total Control Surface Sizing Time: ' + str(total_elapsed_time))    
+    #tf_0           = time.time()
+    #total_elapsed_time = round((tf_0-ti_0)/60,2)    
+    #print('Total Control Surface Sizing Time: ' + str(total_elapsed_time))    
     
     # THIS CAN BE REWRITEN, need to store if optimization works or not as well
-    #Optimization_Data_2_CSV(CG_bat_1, 
-                            #CG_bat_2,
-                            #optimized_vehicle_v4.tag, 
-                            #output_stick_fixed, 
-                            #output_elevator_sizing, 
-                            #output_aileron_and_rudder_sizing, 
-                            #output_flap_sizing, 
-                            #planform_optimization_problem, 
-                            #elevator_sizing_optimization_problem, 
-                            #aileron_rudder_sizing_optimization_problem, 
-                            #flap_sizing_optimization_problem,
-                            #elapsed_time_stick_fixed,
-                            #elapsed_time_elevator_sizing,
-                            #elapsed_time_aileron_and_rudder_sizing,
-                            #elapsed_time_flap_sizing)
+    save_data(CG_bat_1, 
+              CG_bat_2,
+              optimized_vehicle.tag, 
+              output_stick_fixed, 
+              #output_elevator_sizing, 
+              #output_aileron_and_rudder_sizing, 
+              #output_flap_sizing, 
+              planform_optimization_problem, 
+              #elevator_sizing_optimization_problem, 
+              #aileron_rudder_sizing_optimization_problem, 
+              #flap_sizing_optimization_problem,
+              elapsed_time_stick_fixed,
+              #elapsed_time_elevator_sizing,
+              #elapsed_time_aileron_and_rudder_sizing,
+              #elapsed_time_flap_sizing
+              )
     
     # Save Vehicle!!!
     

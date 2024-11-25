@@ -292,59 +292,6 @@ def unconverged_base_analysis(vehicle):
     # done!
     return analyses    
 
-
-def noise_base_analysis(vehicle):
-    # ------------------------------------------------------------------
-    #   Initialize the Analyses
-    # ------------------------------------------------------------------     
-    analyses = RCAIDE.Framework.Analyses.Vehicle() 
-    
-    # ------------------------------------------------------------------
-    #  Weights
-    weights         = RCAIDE.Framework.Analyses.Weights.Weights_EVTOL()
-    weights.vehicle = vehicle
-    analyses.append(weights)
-
-    # ------------------------------------------------------------------
-    #  Aerodynamics Analysis
-    aerodynamics         = RCAIDE.Framework.Analyses.Aerodynamics.Vortex_Lattice_Method() 
-    aerodynamics.vehicle = vehicle 
-    analyses.append(aerodynamics)
-     
-    # ------------------------------------------------------------------
-    #  Stability Analysis
-    stability         = RCAIDE.Framework.Analyses.Stability.Vortex_Lattice_Method() 
-    stability.vehicle = vehicle 
-    analyses.append(stability)    
-
-    #  Noise Analysis   
-    noise = RCAIDE.Framework.Analyses.Noise.Frequency_Domain_Buildup()   
-    noise.vehicle = vehicle
-    noise.settings.mean_sea_level_altitude          = False           
-    analyses.append(noise)
- 
-    # ------------------------------------------------------------------
-    #  Energy
-    energy          = RCAIDE.Framework.Analyses.Energy.Energy()
-    energy.vehicle = vehicle 
-    analyses.append(energy)
-
-    # ------------------------------------------------------------------
-    #  Planet Analysis
-    planet = RCAIDE.Framework.Analyses.Planets.Planet()
-    analyses.append(planet)
-
-    # ------------------------------------------------------------------
-    #  Atmosphere Analysis
-    atmosphere = RCAIDE.Framework.Analyses.Atmospheric.US_Standard_1976()
-    atmosphere.features.planet = planet.features
-    analyses.append(atmosphere)   
-
-    # done!
-    return analyses    
-
-
-
 # ------------------------------------------------------------------
 #   Baseline Mission Setup
 # ------------------------------------------------------------------
@@ -367,7 +314,7 @@ def noise_mission_setup(number_of_cpts, analyses, radius_Vert1=3600*Units.ft, ra
     # ------------------------------------------------------------------
     
     pattern_speed    = 55  * Units['mph'] #CHANGE FOR EACH AIRCRAFT 
-    cruise_speed     = 75. * Units['mph'] #CHANGE FOR EACH AIRCRA processed_filename_list_name + '.res'FT 
+    cruise_speed     = 75. * Units['mph'] #CHANGE FOR EACH AIRCRAFT
     transition_speed = 35. * Units['mph'] #CHANGE FOR EACH AIRCRAFT 
             
     # ------------------------------------------------------------------
