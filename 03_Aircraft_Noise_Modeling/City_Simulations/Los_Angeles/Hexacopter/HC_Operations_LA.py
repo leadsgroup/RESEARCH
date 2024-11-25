@@ -68,7 +68,6 @@ def main():
     app_heading                  = 90  * Units.degree# Heading [degrees] of the approach to vertiport 2 
     max_cruise_distance          = 58*Units.nmi #CHANGE FOR EACH AIRCRAFT
     number_of_cpts               = 10  
-    'HC_mission_LA_ONT_BUR_1000ft'
     
 
     # ----------------------------------------------------------------------------------------------------------------------
@@ -140,11 +139,11 @@ def main():
             save(res, filename + '.res')
             
             filename_list.append(filename)
-        
-    filename_list_name =  aircraft_code + '_' + city_code +  '_Single_Flights_Raw'
-    F =  Data(filename_list=filename_list)
-    save(F, filename_list_name + '.res')
-      
+                
+            filename_list_name =  aircraft_code + '_' + city_code +  '_Single_Flights_Raw'
+            F =  Data(filename_list=filename_list)
+            save(F, filename_list_name + '.res')
+              
     return
 
 

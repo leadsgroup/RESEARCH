@@ -37,18 +37,18 @@ def main():
     plot_parameters.legend_font_size = 20 
     
     # topography data  
-    use_lat_long                = True
-    save_figure                 = True
-    file_type                   = '.png'
-     
-    # tag for city  
-    city                        = 'LA' 
-    aircraft_models             = ['HC']# ,'SR','TR']
-    aircraft_folder_names = ['Hexacopter', ]
-    altitudes                   = ['1000']
-    flight_intervals            = ['60','30','10']
-    microphone_x_resolution                 = 1200
-    microphone_y_resolution                 = 1600     
+    use_lat_long                            = True
+    save_figure                             = True
+    file_type                               = '.png'
+                 
+    # tag for city              
+    city                                    = 'LA' 
+    aircraft_models                         = ['HC']# ,'SR','TR']
+    aircraft_folder_names                   = ['Hexacopter', ]
+    altitudes                               = ['1000']
+    flight_intervals                        = ['60','30','10']
+    microphone_x_resolution                 = 1600 
+    microphone_y_resolution                 = 2700
     ospath          = os.path.abspath(__file__)
     separator       = os.path.sep
     relative_path   = os.path.dirname(ospath) + separator 
@@ -64,7 +64,7 @@ def main():
                           noise_level              = noise_data.Total_L_max, # d
                           min_noise_level          = 35,  
                           max_noise_level          = 90, 
-                          noise_scale_label        = 'SPL_{max} [dBA]',
+                          noise_scale_label        = r'$SPL_{max} [dBA]$',
                           save_figure              = False,
                           show_figure              = True,
                           save_filename            = "2D_Noise_Contour",

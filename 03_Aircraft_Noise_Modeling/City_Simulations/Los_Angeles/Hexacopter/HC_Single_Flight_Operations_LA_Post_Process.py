@@ -39,30 +39,30 @@ def main():
     operation_flight_times = np.array(['06:00:00',
                                        '07:00:00',
                                        '08:00:00',
-                                       #'09:00:00',
-                                       #'10:00:00',
-                                       #'11:00:00', 
-                                       #'12:00:00',
-                                       #'13:00:00',
-                                       #'14:00:00',
-                                       #'15:00:00',
-                                       #'16:00:00',
-                                       #'17:00:00',
-                                       #'18:00:00',
-                                       #'19:00:00',
-                                       #'20:00:00',
-                                       #'21:00:00', 
+                                       '09:00:00',
+                                       '10:00:00',
+                                       '11:00:00', 
+                                       '12:00:00',
+                                       '13:00:00',
+                                       '14:00:00',
+                                       '15:00:00',
+                                       '16:00:00',
+                                       '17:00:00',
+                                       '18:00:00',
+                                       '19:00:00',
+                                       '20:00:00',
+                                       '21:00:00', 
                                        ])
     operation_period  = ['06:00:00','22:00:00']
          
 
-    mic_x_res                       = 600
-    mic_y_res                       = 1350
+    mic_x_res                       = 1200
+    mic_y_res                       = 2700
     aircraft_code                   = 'HC'
     city_code                       = 'LA' 
     cruise_altitude                 = 1000 * Units.feet
-    noise_evaluation_pitch          = 300 * Units.feet
-    number_of_microphone_in_stencil = 25
+    noise_evaluation_pitch          = 150 * Units.feet
+    number_of_microphone_in_stencil = 100
      
 
     filename_list_name =  aircraft_code + '_' + city_code +  '_Single_Flights_Raw'
@@ -101,9 +101,10 @@ def main():
         save(processed_noise_data, processed_filename + '.res')
         processed_filename_list.append(processed_filename)
         
-    processed_filename_list_name =  aircraft_code + '_' + city_code +  '_Single_Flights_Processed'
-    F =  Data(filename_list_name=processed_filename_list_name)
-    save(F, processed_filename_list_name + '.res')
+        processed_filename_list_name =  aircraft_code + '_' + city_code +  '_Single_Flights_Processed'
+        F =  Data(filename_list=processed_filename_list)
+        save(F, processed_filename_list_name + '.res')
+        
     tf = t.time() 
     print("Total time: "+str(tf-ti))
     return     

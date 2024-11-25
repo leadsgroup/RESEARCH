@@ -23,7 +23,7 @@ def main():
     ospath          = os.path.abspath(__file__)
     separator       = os.path.sep
     relative_path   = os.path.dirname(ospath) + separator 
-    routes_filepath = relative_path +  '..' + separator +  '..' + separator + 'UAM_City_Routes.xlsx' 
+    routes_filepath = relative_path  +  '..' + separator + 'UAM_City_Routes.xlsx' 
     flight_data     = pd.read_excel(routes_filepath,sheet_name=['Los_Angeles'])
     LA_flight_data  =  flight_data['Los_Angeles']
      
@@ -31,8 +31,8 @@ def main():
     aircraft_code             = 'HC'
     city_code                 = 'LA' 
     cruise_altitude           = 1000*Units.feet 
-    mic_x_res                 = 600
-    mic_y_res                 = 1350
+    mic_x_res                 = 1600
+    mic_y_res                 = 2700
     
     # create data structures to store noise 
     Total_L_eq       = np.empty((mic_x_res,mic_y_res))      
@@ -45,14 +45,14 @@ def main():
     E_origin        = np.zeros(len(unique_airports))
     
     processed_filename_list_name =  aircraft_code + '_' + city_code +  '_Single_Flights_Processed' 
-    file_name_dict               =  load(processed_filename_list_name)    
-         
-    for filename in file_name_dict: # file_name_dict.filename_list: 
+    file_name_dict               =  load(processed_filename_list_name + '.res')
+    
+    for filename in file_name_dict.filename_list: 
         # load data
 
         origin_code = filename.split('_')[3]
         
-        PND =  load(filename + '.res') # this is a json file 
+        PND =  load(filename + '.res')  
         
         # concatenate  L_eq,L_eq_24hr,L_dn
         Total_L_eq      = SPL_arithmetic( np.concatenate((Total_L_eq[:,:,None]     ,PND.L_eq[:,:,None]), axis = 2), sum_axis=2)
