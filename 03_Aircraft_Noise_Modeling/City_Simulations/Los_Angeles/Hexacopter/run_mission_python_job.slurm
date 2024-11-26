@@ -2,7 +2,7 @@
 #SBATCH --job-name=hexacopter_mission_run             # Job name
 #SBATCH --output=output_%j.log            # Output log file (%j will be replaced by the job ID)
 #SBATCH --error=error_%j.log              # Error log file (%j will be replaced by the job ID)
-#SBATCH --nodes=2                         # Request nodes
+#SBATCH --nodes=1                         # Request nodes
 #SBATCH --ntasks=1                        # Number of tasks (processes)
 #SBATCH --cpus-per-task=2                 # Number of CPU cores per task
 #SBATCH --partition=primary               # Partition/queue to submit the job
