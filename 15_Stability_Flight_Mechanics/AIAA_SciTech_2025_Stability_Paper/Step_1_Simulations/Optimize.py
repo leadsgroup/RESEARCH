@@ -7,28 +7,27 @@ import RCAIDE
 from   RCAIDE.Framework.Core                        import Units, Data 
 from   RCAIDE.Framework.Optimization.Packages.scipy import scipy_setup
 from   RCAIDE.Framework.Optimization.Common         import Nexus
-from   save_data                      import save_data    
-from RCAIDE import  load 
-from RCAIDE import  save
+from   save_data_stick_fixed          import save_data_stick_fixed 
+from   RCAIDE import  load 
+from   RCAIDE import  save
 
 # python imports 
 import numpy as np
 import time
-import  pickle
-from copy import  deepcopy
+import pickle
+from   copy  import  deepcopy
 
 # local imports 
 import Vehicles
 import Missions
 import Analyses
 import Procedure
-import matplotlib.pyplot as plt 
+import matplotlib.pyplot as plt
+
 # ----------------------------------------------------------------------        
 #   Run the whole thing
 # ----------------------------------------------------------------------  
 def size_control_surfaces(CG_bat_1, CG_bat_2, vehicle, cruise_velocity = 120 * Units['mph'], cruise_altitude= 5000*Units.feet):
-
-    #ti_0 = time.time()
     
     '''
     STICK FIXED (STATIC STABILITY AND DRAG OTIMIZATION
@@ -43,97 +42,13 @@ def size_control_surfaces(CG_bat_1, CG_bat_2, vehicle, cruise_velocity = 120 * U
     optimized_vehicle                             = planform_optimization_problem.vehicle_configurations.stick_fixed_cruise 
     save(optimized_vehicle, 'optimized_vehicle_stick_fixed', pickle_format=True)    
     
-    
-    #'''
-    #ELEVATOR SIZING (7 mins)
-    #'''
-    #ti = time.time()    
-    #optimized_vehicle                             = planform_optimization_problem.vehicle_configurations.stick_fixed_cruise 
-    #save(optimized_vehicle, 'optimized_vehicle_stick_fixed', pickle_format=True) 
-    #optimized_vehicle.maxiumum_load_factor        = 3.0
-    #optimized_vehicle.minimum_load_factor         = -1 
-    #elevator_sizing_optimization_problem = elevator_sizing_optimization_setup(optimized_vehicle,cruise_velocity,cruise_altitude)
-    #output_elevator_sizing = scipy_setup.SciPy_Solve(elevator_sizing_optimization_problem,solver='SLSQP', sense_step = 1E-2, tolerance = 1E-2) 
-    #print (output_elevator_sizing)     
-    #tf           = time.time()
-    #elapsed_time_elevator_sizing = round((tf-ti)/60,2)
-    #print('Elevator Sizing Simulation Time: ' + str(elapsed_time_elevator_sizing))
-   
-    
-    #'''
-    #AILERON AND RUDDER SIZING (22 mins)
-    #'''       
-    #ti = time.time()  
-    #optimized_vehicle                    = elevator_sizing_optimization_problem.vehicle_configurations.elevator_sizing_pull_up # 
-    #save(optimized_vehicle, 'optimized_vehicle_ele', pickle_format=True)   
-    #optimized_vehicle.rudder_flag        = True  
-    #optimized_vehicle.crosswind_velocity = 20 * Units.knots 
-    #trim_angle_of_attack =  0.09328504 # output_elevator_sizing[0]
-    #aileron_rudder_sizing_optimization_problem = aileron_rudder_sizing_optimization_setup(optimized_vehicle,cruise_velocity,cruise_altitude, trim_angle_of_attack)
-    #output_aileron_and_rudder_sizing = scipy_setup.SciPy_Solve(aileron_rudder_sizing_optimization_problem,solver='SLSQP', sense_step = 1E-3, tolerance = 1E-3) 
-    #print (output_aileron_and_rudder_sizing)     
-    #tf           = time.time()
-    #elapsed_time_aileron_and_rudder_sizing = round((tf-ti)/60,2)
-    #print('Aileron and Rudder Sizing Simulation Time: ' + str(elapsed_time_aileron_and_rudder_sizing))   
-    
-     
-     
-    #'''
-    #FLAP SIZING
-    #''' 
-    #ti = time.time()     
-    #optimized_vehicle = aileron_rudder_sizing_optimization_problem.vehicle_configurations.aileron_rudder_oei_sizing 
-    #save(optimized_vehicle, 'optimized_vehicle_ail_rud_oei', pickle_format=True) 
-    #flap_sizing_optimization_problem = flap_sizing_optimization_setup(optimized_vehicle,cruise_velocity,cruise_altitude)
-    #output_flap_sizing = scipy_setup.SciPy_Solve(flap_sizing_optimization_problem,solver='SLSQP', sense_step = 1E-1, tolerance = 1E-1) 
-    #print (output_flap_sizing)     
-    #tf   = time.time()
-    #elapsed_time_flap_sizing = round((tf-ti)/60,2)
-    #print('Flap Sizing Simulation Time: ' + str(elapsed_time_flap_sizing))   
-    
-     
-    #'''
-    #ONE ENGINE INOPERATIVE = HOVER 
-    #'''     
-    #ti   = time.time()   
-    #optimized_vehicle  = flap_sizing_optimization_problem.vehicle_configurations.flap_sizing  
-    #save(optimized_vehicle, 'optimized_vehicle_flap', pickle_format=True) 
-    #hover_oei_optimization_problem = hover_oei_optimization_setup(optimized_vehicle,cruise_velocity,cruise_altitude)
-    #output_hover_oei = scipy_setup.SciPy_Solve(hover_oei_optimization_problem,solver='SLSQP', sense_step = 1E-1, tolerance = 1E-1)  # -3, -3 works 
-    #print (output_hover_oei)    
-    #tf   = time.time()
-    #elapsed_time_hover_oei = round((tf-ti)/60,2)
-    #print('Hover OEI Simulation Time: ' + str(elapsed_time_hover_oei))
-    
-
-    #'''
-    #PRINT VEHICLE CONTROL SURFACES
-    #'''          
-    #optimized_vehicle  = hover_oei_optimization_problem.vehicle_configurations.hover_prop_rotor_oei  
-    #save(optimized_vehicle, 'optimized_vehicle_hover_oei', pickle_format=True) 
-    #print_vehicle_control_surface_geoemtry(optimized_vehicle)
-     
-    #tf_0           = time.time()
-    #total_elapsed_time = round((tf_0-ti_0)/60,2)    
-    #print('Total Control Surface Sizing Time: ' + str(total_elapsed_time))    
-    
-    # THIS CAN BE REWRITEN, need to store if optimization works or not as well
-    save_data(CG_bat_1, 
-              CG_bat_2,
-              optimized_vehicle.tag, 
-              output_stick_fixed, 
-              #output_elevator_sizing, 
-              #output_aileron_and_rudder_sizing, 
-              #output_flap_sizing, 
-              planform_optimization_problem, 
-              #elevator_sizing_optimization_problem, 
-              #aileron_rudder_sizing_optimization_problem, 
-              #flap_sizing_optimization_problem,
-              elapsed_time_stick_fixed,
-              #elapsed_time_elevator_sizing,
-              #elapsed_time_aileron_and_rudder_sizing,
-              #elapsed_time_flap_sizing
-              )
+    save_data_stick_fixed(CG_bat_1, 
+                          CG_bat_2,
+                          optimized_vehicle.tag, 
+                          output_stick_fixed, 
+                          planform_optimization_problem,
+                          elapsed_time_stick_fixed
+                         )    
     
     save_aircraft_geometry(vehicle.geometry,'vehicle_stick_fixed_stability')
     
@@ -250,287 +165,7 @@ def stick_fixed_stability_and_drag_optimization_setup(vehicle,cruise_velocity,cr
     nexus.summary = Data()     
     return nexus 
 
-def elevator_sizing_optimization_setup(vehicle,cruise_velocity,cruise_altitude):
 
-    nexus = Nexus()
-    problem = Data()
-    nexus.optimization_problem = problem
-    
-    nexus.cruise_velocity = cruise_velocity
-    nexus.cruise_altitude = cruise_altitude    
-
-    # -------------------------------------------------------------------
-    # Inputs
-    # -------------------------------------------------------------------
-
-    #   [ tag                   , initial,         (lb , ub)        , scaling , units ]  
-    problem.inputs = np.array([            
-                  [ 'pull_up_AoA'                , 5     , -20  ,  20    ,  1.0 ,  1*Units.degree],
-                  [ 'push_over_AoA'              , -5    , -20  ,  20    ,  1.0 ,  1*Units.degree],
-                  [ 'elevator_push_deflection'   ,  10   , -30  ,  30    ,  1.0 ,  1*Units.degree],
-                  [ 'elevator_pull_deflection'   , -10   , -30  ,  30    ,  1.0 ,  1*Units.degree], 
-                  [ 'ht_elevator_chord_fraction' , 0.35  , 0.15 , 0.45   ,  1.0  ,  1*Units.less],
-                  [ 'ht_elevator_span_frac_start', 0.1   , 0.05 , 0.5    ,  1.0  ,  1*Units.less], 
-                  [ 'ht_elevator_span_frac_end'  , 0.9   , 0.6  , 0.95   ,  1.0  ,  1*Units.less],   
-                  
-    ],dtype=object)   
-
-    # -------------------------------------------------------------------
-    # Objective
-    # -------------------------------------------------------------------
-
-    # [ tag, scaling, units ]
-    problem.objective = np.array([ 
-                                  [ 'elevator_surface_area', 1E-2 , 1*Units.kg],
-    ],dtype=object)
-    
-    # -------------------------------------------------------------------
-    # Constraints
-    # -------------------------------------------------------------------
-    
-    # [ tag, sense, edge, scaling, units ]
-    problem.constraints = np.array([   
-        [ 'CL_pull_residual'                  ,   '<' ,   1E-3  ,   1.0  , 1*Units.less],  
-        [ 'CL_push_residual'                  ,   '<' ,   1E-3  ,   1.0  , 1*Units.less],   
-        [ 'pull_up_CM_residual'               ,   '<' ,   1E-3  ,   1.0  , 1*Units.less],     
-        [ 'push_over_CM_residual'             ,   '<' ,   1E-3  ,   1.0  , 1*Units.less],      
-    ],dtype=object)
-    
-    # -------------------------------------------------------------------
-    #  Aliases
-    # -------------------------------------------------------------------
-    
-    # [ 'alias' , ['data.path1.name','data.path2.name'] ] 
-    problem.aliases = [   
-        [ 'pull_up_CM_residual'               , 'summary.pull_up_CM_residual' ],   
-        [ 'push_over_CM_residual'             , 'summary.push_over_CM_residual' ],  
-        [ 'CL_pull_residual'                  , 'summary.CL_pull_residual' ],  
-        [ 'CL_push_residual'                  , 'summary.CL_push_residual' ],    
-        [ 'elevator_surface_area'             , 'summary.elevator_surface_area' ], 
-        [ 'pull_up_AoA'                       , 'missions.elevator_sizing_pull_up.segments.cruise.angle_of_attack' ], 
-        [ 'push_over_AoA'                     , 'missions.elevator_sizing_push_over.segments.cruise.angle_of_attack' ], 
-        [ 'elevator_push_deflection'          , 'vehicle_configurations.elevator_sizing_pull_up.wings.horizontal_tail.control_surfaces.elevator.deflection' ],   
-        [ 'elevator_pull_deflection'          , 'vehicle_configurations.elevator_sizing_push_over.wings.horizontal_tail.control_surfaces.elevator.deflection' ],     
-        [ 'ht_elevator_chord_fraction'        , 'vehicle_configurations.*.wings.horizontal_tail.control_surfaces.elevator.chord_fraction'],    
-        [ 'ht_elevator_span_frac_start'       , 'vehicle_configurations.*.wings.horizontal_tail.control_surfaces.elevator.span_fraction_start'],    
-        [ 'ht_elevator_span_frac_end'         , 'vehicle_configurations.*.wings.horizontal_tail.control_surfaces.elevator.span_fraction_end'],  
-    ]      
-    
-    # -------------------------------------------------------------------
-    #  Vehicles
-    # -------------------------------------------------------------------
-    nexus.vehicle_configurations = Vehicles.elevator_sizing_setup(vehicle)
-    
-    # -------------------------------------------------------------------
-    #  Analyses
-    # -------------------------------------------------------------------
-    nexus.analyses = Analyses.analyses_setup(nexus.vehicle_configurations)
-    
-    # -------------------------------------------------------------------
-    #  Missions
-    # -------------------------------------------------------------------
-    nexus.missions = Missions.elevator_sizing_setup(nexus.analyses,nexus.cruise_velocity,nexus.cruise_altitude)
-    
-    # -------------------------------------------------------------------
-    #  Procedure
-    # -------------------------------------------------------------------    
-    nexus.procedure = Procedure.elevator_sizing_procedure()
-    
-    # -------------------------------------------------------------------
-    #  Summary
-    # -------------------------------------------------------------------    
-    nexus.summary = Data()     
-    return nexus  
- 
- 
-def aileron_rudder_sizing_optimization_setup(vehicle,cruise_velocity,cruise_altitude,trim_angle_of_attack):
-
-    nexus = Nexus()
-    problem = Data()
-    nexus.optimization_problem = problem
-    
-    nexus.cruise_velocity = cruise_velocity
-    nexus.cruise_altitude = cruise_altitude    
-
-    # -------------------------------------------------------------------
-    # Inputs
-    # -------------------------------------------------------------------
-
-    #   [ tag                   , initial,         (lb , ub)        , scaling , units ]   
-    problem.inputs = np.array([          
-                  [ 'aileron_roll_deflection'      ,  0  , -30  , 30   ,  1.0  ,  1*Units.degree],   
-                  [ 'aileron_crosswind_deflection' ,  0  , -30  , 30   ,  1.0  ,  1*Units.degree], 
-                  [ 'rudder_crosswind_deflection'  ,  0  , -30  , 30   ,  1.0  ,  1*Units.degree],  
-                  [ 'PR_OEI_eta_1'                 , 0.5 ,  0.1 ,  1.0 ,  1.0  ,  1*Units.less], 
-                  [ 'aileron_oei_deflection'       ,  0  , -30  ,  30   ,  1.0 , 1*Units.degree],  
-                  [ 'rudder_oei_deflection'        ,  0  , -30  ,  30  ,  1.0 ,  1*Units.degree], 
-                  [ 'mw_aileron_chord_fraction'    , 0.2 , 0.15 , 0.3  ,  1.0 ,  1*Units.less],
-                  [ 'mw_aileron_span_frac_start'   , 0.7 , 0.55 , 0.8  ,  1.0 ,  1*Units.less],
-                  [ 'mw_aileron_span_frac_end'     , 0.9 , 0.85 , 0.95 ,  1.0 ,  1*Units.less],  
-                  [ 'vs_rudder_chord_fraction'     , 0.4 , 0.15 , 0.5  ,  1.0 ,  1*Units.less],
-                  [ 'vs_rudder_span_frac_start'    , 0.1 , 0.05 , 0.35 ,  1.0 ,  1*Units.less],
-                  [ 'vs_rudder_span_frac_end'      , 0.9 , 0.5  , 0.95 ,  1.0 ,  1*Units.less],      
-                  ],dtype=object)      
-
-    # -------------------------------------------------------------------
-    # Objective
-    # -------------------------------------------------------------------
-
-    # [ tag, scaling, units ]
-    problem.objective = np.array([ 
-                                  [ 'aileron_rudder_surface_area', 1E-1 , 1*Units.kg],
-    ],dtype=object)
-    
-    # -------------------------------------------------------------------
-    # Constraints
-    # -------------------------------------------------------------------
-    
-    # [ tag, sense, edge, scaling, units ] 
-    problem.constraints = np.array([
-        [ 'roll_rate_residual'    ,   '<' ,   1E-6 ,   1 , 1*Units.less],  # 1E-2 works 
-        [ 'F_y_residual'          ,   '<' ,   1E-6 ,   1 , 1*Units.less],  # 1E-1 works   
-        [ 'M_y_residual'          ,   '<' ,   1E-6 ,   1 , 1*Units.less],  # 1E-1 works 
-        [ 'M_z_residual'          ,   '<' ,   1E-6 ,   1 , 1*Units.less],  # 1E-1 works 
-        [ 'OEI_CY_residual'       ,   '<' ,   1E-6 ,   1 , 1*Units.less],    
-        [ 'OEI_CL_residual'       ,   '<' ,   1E-6 ,   1 , 1*Units.less],    
-        [ 'OEI_CN_residual'       ,   '<' ,   1E-6 ,   1 , 1*Units.less],  
-    ],dtype=object)
-        
-        
-    # -------------------------------------------------------------------
-    #  Aliases
-    # -------------------------------------------------------------------
-    
-    # [ 'alias' , ['data.path1.name','data.path2.name'] ]   
-    cruise_oei_maneuver_segment_name =  'missions.cruise_oei.segments.cruise' 
-    problem.aliases = [    
-        [ 'OEI_eta_1'                              , cruise_oei_maneuver_segment_name + '.assigned_control_variables.throttle.initial_guess_values[0][0]'],  
-        [ 'aileron_roll_deflection'                , 'vehicle_configurations.aileron_rudder_roll_sizing.wings.main_wing.control_surfaces.aileron.deflection' ],  
-        [ 'aileron_crosswind_deflection'           , 'vehicle_configurations.aileron_rudder_crosswind_sizing.wings.main_wing.control_surfaces.aileron.deflection' ],   
-        [ 'rudder_crosswind_deflection'            , 'vehicle_configurations.aileron_rudder_crosswind_sizing.wings.vertical_tail.control_surfaces.rudder.deflection' ], 
-        [ 'aileron_oei_deflection'                 , 'vehicle_configurations.aileron_rudder_oei_sizing.wings.main_wing.control_surfaces.aileron.deflection' ],      
-        [ 'rudder_oei_deflection'                  , 'vehicle_configurations.aileron_rudder_oei_sizing.wings.vertical_tail.control_surfaces.rudder.deflection' ],     
-        [ 'mw_aileron_chord_fraction'              , 'vehicle_configurations.*.wings.main_wing.control_surfaces.aileron.chord_fraction'],  
-        [ 'mw_aileron_span_frac_start'             , 'vehicle_configurations.*.wings.main_wing.control_surfaces.aileron.span_fraction_start'],    
-        [ 'mw_aileron_span_frac_end'               , 'vehicle_configurations.*.wings.main_wing.control_surfaces.aileron.span_fraction_end'],     
-        [ 'vs_rudder_chord_fraction'               , 'vehicle_configurations.*.wings.vertical_tail.control_surfaces.rudder.chord_fraction'],    
-        [ 'vs_rudder_span_frac_start'              , 'vehicle_configurations.*.wings.vertical_tail.control_surfaces.rudder.span_fraction_start'],    
-        [ 'vs_rudder_span_frac_end'                , 'vehicle_configurations.*.wings.vertical_tail.control_surfaces.rudder.span_fraction_end'], 
-        [ 'aileron_rudder_surface_area'            , 'summary.aileron_rudder_surface_area' ], 
-        [ 'roll_rate_residual'                     , 'summary.roll_rate_residual' ],  
-        [ 'F_y_residual'                           , 'summary.F_y_residual' ],  
-        [ 'M_y_residual'                           , 'summary.M_y_residual' ], 
-        [ 'M_z_residual'                           , 'summary.M_z_residual' ],   
-        [ 'OEI_CY_residual'                        , 'summary.OEI_F_y_residual'],    
-        [ 'OEI_CL_residual'                        , 'summary.OEI_M_x_residual'],       
-        [ 'OEI_CN_residual'                        , 'summary.OEI_M_z_residual'],             
-        ]       
-        
-    # -------------------------------------------------------------------
-    #  Vehicles
-    # -------------------------------------------------------------------
-    nexus.vehicle_configurations = Vehicles.aileron_rudder_sizing_setup(vehicle)
-    
-    # -------------------------------------------------------------------
-    #  Analyses
-    # -------------------------------------------------------------------
-    nexus.analyses = Analyses.analyses_setup(nexus.vehicle_configurations)
-    
-    # -------------------------------------------------------------------
-    #  Missions
-    # ------------------------------------------------------------------- 
-    nexus.missions = Missions.aileron_rudder_sizing_setup(nexus.analyses,nexus.cruise_velocity,nexus.cruise_altitude, angle_of_attack=trim_angle_of_attack)
-    
-    # -------------------------------------------------------------------
-    #  Procedure
-    # -------------------------------------------------------------------    
-    nexus.procedure = Procedure.aileron_rudder_sizing_procedure()
-    
-    # -------------------------------------------------------------------
-    #  Summary
-    # -------------------------------------------------------------------    
-    nexus.summary = Data()     
-    return nexus  
- 
-def flap_sizing_optimization_setup(optimized_vehicle,cruise_velocity,cruise_altitude):
-
-    nexus = Nexus()
-    problem = Data()
-    nexus.optimization_problem = problem
-    
-    nexus.cruise_velocity = cruise_velocity
-    nexus.cruise_altitude = cruise_altitude    
-
-    # -------------------------------------------------------------------
-    # Inputs
-    # -------------------------------------------------------------------
-
-    #   [ tag                   , initial,         (lb , ub)        , scaling , units ]  
-    problem.inputs = np.array([           
-                  [ 'mw_flap_chord_fraction'     , 0.2    , 0.15 , 0.4  ,  1.0 ,  1*Units.less],
-                  [ 'mw_flap_span_frac_start'    , 0.2    , 0.05 , 0.25 ,  1.0 ,  1*Units.less],
-                  [ 'mw_flap_span_frac_end'      , 0.5    , 0.3  , 0.6  ,  1.0 ,  1*Units.less],   
-                  
-    ],dtype=object)   
-
-    # -------------------------------------------------------------------
-    # Objective
-    # -------------------------------------------------------------------
-
-    # [ tag, scaling, units ]
-    problem.objective = np.array([ 
-                                  [ 'flap_surface_area', 1. , 1*Units.kg],
-    ],dtype=object)
-    
-    # -------------------------------------------------------------------
-    # Constraints
-    # -------------------------------------------------------------------
-    
-    # [ tag, sense, edge, scaling, units ]
-    problem.constraints = np.array([
-        [ 'flap_criteria'    ,   '>' ,  0.   ,  1.0   , 1*Units.less],  
-    ],dtype=object)
-    
-    # -------------------------------------------------------------------
-    #  Aliases
-    # -------------------------------------------------------------------
-    
-    # [ 'alias' , ['data.path1.name','data.path2.name'] ] 
-    problem.aliases = [  
-        [ 'flap_surface_area'                 , 'summary.flap_surface_area' ], 
-        [ 'flap_criteria'                     , 'summary.flap_criteria' ],   
-        [ 'mw_flap_chord_fraction'            , 'vehicle_configurations.*.wings.main_wing.control_surfaces.flap.chord_fraction'],    
-        [ 'mw_flap_span_frac_start'           , 'vehicle_configurations.*.wings.main_wing.control_surfaces.flap.span_fraction_start'],    
-        [ 'mw_flap_span_frac_end'             , 'vehicle_configurations.*.wings.main_wing.control_surfaces.flap.span_fraction_end'],    
-    ]      
-    
-    # -------------------------------------------------------------------
-    #  Vehicles
-    # -------------------------------------------------------------------
-    nexus.vehicle_configurations = Vehicles.flap_sizing_setup(optimized_vehicle)
-    
-    # -------------------------------------------------------------------
-    #  Analyses
-    # -------------------------------------------------------------------
-    nexus.analyses = Analyses.analyses_setup(nexus.vehicle_configurations)
-    
-    # -------------------------------------------------------------------
-    #  Missions
-    # -------------------------------------------------------------------
-    nexus.missions = Missions.flap_sizing_setup(nexus.analyses,nexus.cruise_velocity,nexus.cruise_altitude)
-    
-    # -------------------------------------------------------------------
-    #  Procedure
-    # -------------------------------------------------------------------    
-    nexus.procedure = Procedure.flap_sizing_procedure()
-    
-    # -------------------------------------------------------------------
-    #  Summary
-    # -------------------------------------------------------------------    
-    nexus.summary = Data()     
-    return nexus  
-
-def hover_oei_optimization_setup(vehicle,cruise_velocity,cruise_altitude): 
     nexus   = Nexus()
     problem = Data()
     nexus.optimization_problem = problem
