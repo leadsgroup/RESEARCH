@@ -260,8 +260,7 @@ def elevator_sizing_optimization_setup(vehicle,cruise_velocity,cruise_altitude):
                   [ 'pull_up_AoA'                , 5     , -20  ,  20    ,  1.0 ,  1*Units.degree],
                   [ 'push_over_AoA'              , -5    , -20  ,  20    ,  1.0 ,  1*Units.degree],
                   [ 'elevator_push_deflection'   ,  10   , -30  ,  30    ,  1.0 ,  1*Units.degree],
-                  [ 'elevator_pull_deflection'   , -10   , -30  ,  30    ,  1.0 ,  1*Units.degree], 
-                  [ 'ht_elevator_chord_fraction' , 0.35  , 0.15 , 0.45   ,  1.0  ,  1*Units.less],
+                  [ 'elevator_pull_deflection'   , -10   , -30  ,  30    ,  1.0 ,  1*Units.degree],  
                   [ 'ht_elevator_span_frac_start', 0.1   , 0.05 , 0.5    ,  1.0  ,  1*Units.less], 
                   [ 'ht_elevator_span_frac_end'  , 0.9   , 0.6  , 0.95   ,  1.0  ,  1*Units.less],   
                   
@@ -299,13 +298,12 @@ def elevator_sizing_optimization_setup(vehicle,cruise_velocity,cruise_altitude):
         [ 'CL_pull_residual'                  , 'summary.CL_pull_residual' ],  
         [ 'CL_push_residual'                  , 'summary.CL_push_residual' ],    
         [ 'elevator_surface_area'             , 'summary.elevator_surface_area' ], 
-        [ 'pull_up_AoA'                       , 'missions.elevator_sizing_pull_up.segments.cruise.angle_of_attack' ], 
-        [ 'push_over_AoA'                     , 'missions.elevator_sizing_push_over.segments.cruise.angle_of_attack' ], 
-        [ 'elevator_push_deflection'          , 'vehicle_configurations.elevator_sizing_pull_up.wings.horizontal_tail.control_surfaces.elevator.deflection' ],   
-        [ 'elevator_pull_deflection'          , 'vehicle_configurations.elevator_sizing_push_over.wings.horizontal_tail.control_surfaces.elevator.deflection' ],     
-        [ 'ht_elevator_chord_fraction'        , 'vehicle_configurations.*.wings.horizontal_tail.control_surfaces.elevator.chord_fraction'],    
-        [ 'ht_elevator_span_frac_start'       , 'vehicle_configurations.*.wings.horizontal_tail.control_surfaces.elevator.span_fraction_start'],    
-        [ 'ht_elevator_span_frac_end'         , 'vehicle_configurations.*.wings.horizontal_tail.control_surfaces.elevator.span_fraction_end'],  
+        [ 'pull_up_AoA'                       , 'summary.elevator_pull_up_angle_of_attack' ], 
+        [ 'push_over_AoA'                     , 'summary.elevator_push_over_angle_of_attack' ], 
+        [ 'elevator_push_deflection'          , 'summary.elevator_push_over_deflection' ],   
+        [ 'elevator_pull_deflection'          , 'summary.elevator_pull_up_deflection' ],      
+        [ 'ht_elevator_span_frac_start'       , 'summary.elevator_span_fraction_start'],    
+        [ 'ht_elevator_span_frac_end'         , 'summary.elevator_span_fraction_end'],  
     ]      
     
     # -------------------------------------------------------------------
