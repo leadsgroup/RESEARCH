@@ -921,7 +921,7 @@ def mission_setup(analyses ):
     #------------------------------------------------------------------------------------------------------------------------------------ 
     segment                                               = Segments.Cruise.Curved_Constant_Radius_Constant_Speed_Constant_Altitude(base_segment)
     segment.tag                                           = "Approach_Pattern_Curve"   
-    segment.analyses.extend( analyses.cruise )             
+    segment.analyses.extend( analyses.high_speed_climb_transition )             
     segment.air_speed   = 90 * Units.kts 
     segment.turn_radius = 3600 * Units.feet  
     segment.true_course = 90 * Units.degree     

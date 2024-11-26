@@ -40,14 +40,8 @@ def size_control_surfaces(CG_bat_1, CG_bat_2, vehicle, cruise_velocity = 120 * U
     tf           = time.time()
     elapsed_time_stick_fixed = round((tf-ti)/60,2)
     print('Stick Fixed Stability and Drag Otimization Simulation Time: ' + str(elapsed_time_stick_fixed))
-    
-    '''
-    RUN LOOP TO GET DERIVATIVE FUNCTIONS OF CONTROL SURFACES     
-    '''
-    
-    
-    
-    
+     
+     
     '''
     ELEVATOR SIZING (7 mins)
     '''
@@ -69,7 +63,7 @@ def size_control_surfaces(CG_bat_1, CG_bat_2, vehicle, cruise_velocity = 120 * U
     '''       
     ti = time.time()  
     optimized_vehicle                    = elevator_sizing_optimization_problem.vehicle_configurations.elevator_sizing_pull_up # 
-    save(optimized_vehicle, 'optimized_vehicle_ele', pickle_format=True)   
+    save(optimized_vehicle, 'optimized_vehicle_ele', pickle_format=True) 
     optimized_vehicle.rudder_flag        = True  
     optimized_vehicle.crosswind_velocity = 20 * Units.knots 
     trim_angle_of_attack =  0.09328504 # output_elevator_sizing[0]
@@ -80,8 +74,7 @@ def size_control_surfaces(CG_bat_1, CG_bat_2, vehicle, cruise_velocity = 120 * U
     elapsed_time_aileron_and_rudder_sizing = round((tf-ti)/60,2)
     print('Aileron and Rudder Sizing Simulation Time: ' + str(elapsed_time_aileron_and_rudder_sizing))   
     
-     
-     
+      
     '''
     FLAP SIZING
     ''' 
