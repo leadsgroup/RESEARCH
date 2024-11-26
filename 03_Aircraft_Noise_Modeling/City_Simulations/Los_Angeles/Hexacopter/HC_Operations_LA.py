@@ -46,7 +46,7 @@ def main():
     # ----------------------------------------------------------------------------------------------------------------------
     #  BATCH SETTINGS 
     # ----------------------------------------------------------------------------------------------------------------------      
-    number_of_batches = 3
+    number_of_batches = 1
     batch_number      = 0 # THIS HAS TO BE CHANGED ON THE SERVER BEFORE YOU RUN IT 
     
     n_sims_total   = len(LA_flight_data_total)
@@ -187,7 +187,7 @@ def unconverged_analyses_setup(configs, origin_coord,destination_coord):
 # ------------------------------------------------------------------
 # Base Analysis
 # ------------------------------------------------------------------
-def noise_base_analysis(vehicle, origin_coord,destination_coord ,mic_x_res, mic_y_res):
+def noise_base_analysis(vehicle, origin_coord=[[0, 0]],destination_coord=[[0, 0]] ,mic_x_res=1000, mic_y_res=1000):
     ospath          = os.path.abspath(__file__)
     separator       = os.path.sep
     relative_path   = os.path.dirname(ospath) + separator 
@@ -220,10 +220,10 @@ def noise_base_analysis(vehicle, origin_coord,destination_coord ,mic_x_res, mic_
     noise = RCAIDE.Framework.Analyses.Noise.Frequency_Domain_Buildup()   
     noise.vehicle = vehicle
     noise.settings.mean_sea_level_altitude          = False         
-    noise.settings.aircraft_origin_coordinates      = origin_coord  
-    noise.settings.aircraft_destination_coordinates = destination_coord  
-    noise.settings.microphone_x_resolution          = mic_x_res       
-    noise.settings.microphone_y_resolution          = mic_y_res         
+    #noise.settings.aircraft_origin_coordinates      = origin_coord  
+    #noise.settings.aircraft_destination_coordinates = destination_coord  
+    #noise.settings.microphone_x_resolution          = mic_x_res       
+    #noise.settings.microphone_y_resolution          = mic_y_res         
     noise.settings.topography_file                  = topography_file     
     analyses.append(noise)
  
