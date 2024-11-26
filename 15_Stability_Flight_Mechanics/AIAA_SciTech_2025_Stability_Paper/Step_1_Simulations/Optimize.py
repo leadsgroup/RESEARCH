@@ -28,7 +28,7 @@ import matplotlib.pyplot as plt
 # ----------------------------------------------------------------------  
 def size_control_surfaces(CG_bat_1, CG_bat_2, vehicle, cruise_velocity = 120 * Units['mph'], cruise_altitude= 5000*Units.feet):
 
-    ti_0 = time.time()
+    #ti_0 = time.time()
     
     '''
     STICK FIXED (STATIC STABILITY AND DRAG OTIMIZATION
@@ -135,7 +135,7 @@ def size_control_surfaces(CG_bat_1, CG_bat_2, vehicle, cruise_velocity = 120 * U
               #elapsed_time_flap_sizing
               )
     
-    # Save Vehicle!!!
+    save_aircraft_geometry(vehicle.geometry,'vehicle_stick_fixed_stability')
     
     return
   
