@@ -414,9 +414,9 @@ def noise_mission_setup(number_of_cpts, analyses, radius_Vert1=3600*Units.ft, ra
     #   Transition Segment
     # ------------------------------------------------------------------ 
     segment                          = Segments.Climb.Linear_Speed_Constant_Rate(base_segment)
-    segment.tag                      = "climb_transition" 
+    segment.tag                      = "low_speed_climb_transition" 
     segment.analyses.extend(analyses.low_speed_climb_transition) 
-    segment.climb_rate               = 500. * Units['ft/min'] 
+    segment.climb_rate               = 822. * Units['ft/min'] 
     segment.air_speed_end            = pattern_speed   
     segment.altitude_end             = 500.0 * Units.ft
     segment.true_course              = dep_heading  
@@ -585,7 +585,7 @@ def noise_mission_setup(number_of_cpts, analyses, radius_Vert1=3600*Units.ft, ra
     segment                          = Segments.Descent.Linear_Speed_Constant_Rate(base_segment)
     segment.tag                      = "Approach_Descent_Transition"   
     segment.analyses.extend(analyses.approach_transition)  
-    segment.descent_rate             = -822.  * Units['ft/min'] 
+    segment.descent_rate             = 822.  * Units['ft/min'] 
     segment.air_speed_end            = transition_speed 
     segment.altitude_end             = 50.0 * Units.ft
     segment.true_course              = app_heading
@@ -891,7 +891,7 @@ def unconverged_mission_setup(number_of_cpts,analyses, radius_Vert1, radius_Vert
     segment                          = Segments.Descent.Linear_Speed_Constant_Rate(base_segment)
     segment.tag                      = "Approach_Descent_Transition"   
     segment.analyses.extend(analyses.approach_transition)  
-    segment.descent_rate             = -822.  * Units['ft/min'] 
+    segment.descent_rate             = 822.  * Units['ft/min'] 
     segment.air_speed_end            = transition_speed 
     segment.altitude_end             = 50.0 * Units.ft
     segment.true_course              = app_heading
