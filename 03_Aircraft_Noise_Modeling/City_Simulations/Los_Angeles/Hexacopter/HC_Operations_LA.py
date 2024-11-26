@@ -46,7 +46,7 @@ def main():
     # ----------------------------------------------------------------------------------------------------------------------
     #  BATCH SETTINGS 
     # ----------------------------------------------------------------------------------------------------------------------      
-    number_of_batches = 3
+    number_of_batches = 1
     batch_number      = 0 # THIS HAS TO BE CHANGED ON THE SERVER BEFORE YOU RUN IT 
     
     n_sims_total   = len(LA_flight_data_total)
