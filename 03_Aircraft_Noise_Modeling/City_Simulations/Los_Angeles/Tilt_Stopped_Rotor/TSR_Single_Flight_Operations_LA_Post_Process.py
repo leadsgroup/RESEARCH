@@ -62,7 +62,7 @@ def main():
     city_code                       = 'LA' 
     cruise_altitude                 = 1000 * Units.feet
     noise_evaluation_pitch          = 150 * Units.feet
-    number_of_microphone_in_stencil = 100
+    number_of_microphone_in_stencil = 1600
      
 
     filename_list_name =  aircraft_code + '_' + city_code +  '_Single_Flights_Raw'

@@ -109,7 +109,8 @@ def post_process_noise_data(noise_results, topography_file ,  flight_times, time
     noise_data.aircraft_origin_coordinates        = noise_results.settings.aircraft_origin_coordinates          
     noise_data.aircraft_destination_coordinates   = noise_results.settings.aircraft_destination_coordinates     
     noise_data.microphone_y_resolution            = N_gm_y
-    noise_data.microphone_x_resolution            = N_gm_x              
+    noise_data.microphone_x_resolution            = N_gm_x    
+    number_of_segment_timesteps_default           =  5          
     noise_data.microphone_locations               = microphone_locations.reshape(N_gm_x,N_gm_y,3)
     noise_data.energy_consumed                    = noise_results.energy_consumed
     
@@ -117,7 +118,7 @@ def post_process_noise_data(noise_results, topography_file ,  flight_times, time
     N_segs = len(noise_results.time[:, 0, 0]) 
     
     # Step 4: Initalize Arrays 
-    Time         = np.empty((0))  
+    Time         = np.empty((0))
     idx =  0
      
     # Step 5: loop through segments and store noise 
@@ -130,7 +131,7 @@ def post_process_noise_data(noise_results, topography_file ,  flight_times, time
             number_of_segment_timesteps = int(np.ceil(noise_results.segment_length[seg][0] / noise_evaluation_pitch)) 
             noise_time = np.linspace(time[0],time[-1], number_of_segment_timesteps)
         else:
-            noise_time = np.linspace(time[0],time[-1],3)
+            noise_time = np.linspace(time[0],time[-1],number_of_segment_timesteps_default)
         # Step 5.3: Compute aircraft position and npose at interpolated hemisphere locations
         cpt   = 0 
         if seg == (N_segs - 1):
@@ -159,7 +160,7 @@ def post_process_noise_data(noise_results, topography_file ,  flight_times, time
             number_of_segment_timesteps = int(np.ceil(noise_results.segment_length[seg][0] / noise_evaluation_pitch)) 
             noise_time = np.linspace(time[0],time[-1], number_of_segment_timesteps)
         else:
-            noise_time = np.linspace(time[0],time[-1],3)
+            noise_time = np.linspace(time[0],time[-1],number_of_segment_timesteps_default)
         # Step 5.3: Compute aircraft position and npose at interpolated hemisphere locations
         cpt   = 0 
         if seg == (N_segs - 1):
@@ -182,8 +183,7 @@ def post_process_noise_data(noise_results, topography_file ,  flight_times, time
             SPL_uppper      = hemisphere_SPL_dBA[cpt+1].reshape(len(phi),len(theta))
             SPL_gradient    = SPL_uppper -  SPL_lower
             SPL_interp      = SPL_lower + SPL_gradient *delta_t     
- 
-            #ti4 = t.time()            
+           
             if (noise_results.segment_name[seg] == 'Cruise') and (i != 0): # create surrogate only if you are not in cruise and i is not equal to zero
                 pass
             else:
@@ -203,10 +203,11 @@ def post_process_noise_data(noise_results, topography_file ,  flight_times, time
             SPL_dBA_temp[locs]   = noise
     
             # Step 5.2.6 concatenate noise for each timestep  
-            SPL_dBA[i]         = SPL_dBA_temp.reshape(N_gm_x,N_gm_y)     
+            SPL_dBA[idx]         = SPL_dBA_temp.reshape(N_gm_x,N_gm_y)     
             
             # Stpe 5.2.7 store indexes of microhpone locations  
-            mic_locs[i]        = locs           
+            mic_locs[idx]        = locs
+            
             idx += 1            
             if noise_time[i] >= time[cpt+1]:
                 cpt += 1    
@@ -479,7 +480,7 @@ def compute_noise_metrics(noise_data, flight_times,time_period):
         time_matrix   = np.ones((N_gm_x,N_gm_y)) *time_step[t_i] 
         p_div_p_ref_sq_L_eq               += (number_of_no_penalty_flights + number_of_penalty_flights)*time_matrix * (10**(noise_data.SPL_dBA[t_i]/10))   ### TO CHANGE 11/22. Add multiplier based ont eh number of flights there are in that time period. Need to have two multipliers, pre and post 7am. 
         p_sq_ref_flight_sq_dn_penalty     += time_matrix *(number_of_penalty_flights)* (10**( (10 + noise_data.SPL_dBA[t_i])/10))   # ADDED penalty and no penalty arrays 11/22/2024
-        p_sq_ref_flight_sq_dn_no_penalty  += time_matrix *(number_of_no_penalty_flights)* (10**( (noise_data.SPL_dBA[t_i])/10))  # ADDED penalty and no penalty arrays 11/22/2024
+        p_sq_ref_flight_sq_dn_no_penalty  += time_matrix *(number_of_no_penalty_flights)* (10**( (noise_data.SPL_dBA[t_i])/10)) # ADDED penalty and no penalty arrays 11/22/2024
      
     # add to current
     from copy import  deepcopy
@@ -489,9 +490,9 @@ def compute_noise_metrics(noise_data, flight_times,time_period):
     # add on background noise for remainder of time
     ambient_noise_duration       = np.maximum(ambient_noise_duration,0)
     ambient_noise_duration_24hr  = np.maximum(ambient_noise_duration_24hr,0)
-    p_div_p_ref_sq_L_eq         += ambient_noise_duration *  (10**(background_noise()/10))
-    p_div_p_ref_sq_L_24hr       += ambient_noise_duration_24hr *  (10**(background_noise()/10))
-    p_div_p_ref_sq_L_dn         += ambient_noise_duration *  (10**(background_noise()/10))
+    p_div_p_ref_sq_L_eq          += ambient_noise_duration *  (10**(background_noise()/10))
+    p_div_p_ref_sq_L_24hr        += ambient_noise_duration_24hr *  (10**(background_noise()/10))
+    p_div_p_ref_sq_L_dn          += ambient_noise_duration *  (10**(background_noise()/10))
     
     L_eq              = 10*np.log10((1/(t_end-t_start))*p_div_p_ref_sq_L_eq)
     L_eq_24hr         = 10*np.log10((1/(24*Units.hours))*p_div_p_ref_sq_L_24hr)   
