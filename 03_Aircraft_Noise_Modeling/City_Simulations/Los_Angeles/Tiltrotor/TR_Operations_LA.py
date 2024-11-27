@@ -61,7 +61,7 @@ def main():
     aircraft_code                = 'TR' # CHANGE FOR EACH AIRCRAFT 
     city_code                    = 'LA' 
     cruise_altitude              = 1000*Units.feet
-    high_speed_climb_distance    = 4020.357 # DONE as of 11/18. CHANGE FOR EACH AIRCRAFT  
+    high_speed_climb_distance    = 3061.598 # DONE as of 11/18. CHANGE FOR EACH AIRCRAFT  
     radius_Vert1                 = 3600* Units.feet # circular pattern radius around vertiport 1
     radius_Vert2                 = 3600* Units.feet # circular pattern radius around vertiport 2
     dep_heading                  = 200 * Units.degree # Heading [degrees] of the departure from vertiport 1
