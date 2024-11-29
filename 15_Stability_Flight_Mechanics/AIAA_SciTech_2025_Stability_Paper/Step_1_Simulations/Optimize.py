@@ -50,7 +50,20 @@ def size_control_surfaces(CG_bat_1, CG_bat_2, vehicle, cruise_velocity = 120 * U
                           elapsed_time_stick_fixed
                          )    
     
-    save_aircraft_geometry(vehicle.geometry,'vehicle_stick_fixed_stability')
+    cg_x1   =  str(CG_bat_1[0]).replace('.', "")
+    cg_y1   =  str(CG_bat_1[1]).replace('.', "")
+    cg_z1   =  str(CG_bat_1[2]).replace('.', "")
+    cg_x2   =  str(CG_bat_2[0]).replace('.', "")
+    cg_y2   =  str(CG_bat_2[1]).replace('.', "")
+    cg_z2   =  str(CG_bat_2[2]).replace('.', "")
+    
+    def new_filename(filename):
+        return filename.replace('[', '').replace(']', '').replace(' ', '_').replace('.', '_')
+
+    raw_file_name = f"{cg_x1}_{cg_y1}_{cg_z1}_{cg_x2}_{cg_y2}_{cg_z2}_Baseline_Opt_Vehicle"
+    excel_file_name = new_filename(raw_file_name)
+    
+    save_aircraft_geometry(vehicle,excel_file_name)
     
     return
   
