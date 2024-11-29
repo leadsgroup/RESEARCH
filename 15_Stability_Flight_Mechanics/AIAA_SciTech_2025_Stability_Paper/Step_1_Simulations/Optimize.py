@@ -32,15 +32,14 @@ def size_control_surfaces(CG_bat_1, CG_bat_2, vehicle, cruise_velocity = 120 * U
     '''
     STICK FIXED (STATIC STABILITY AND DRAG OTIMIZATION
     '''
-    ti   = time.time()   
+    ti                            = time.time()   
     planform_optimization_problem = stick_fixed_stability_and_drag_optimization_setup(vehicle,cruise_velocity,cruise_altitude)
-    output_stick_fixed = scipy_setup.SciPy_Solve(planform_optimization_problem,solver='SLSQP', sense_step = 1E-3, tolerance = 1E-3)   
+    output_stick_fixed            = scipy_setup.SciPy_Solve(planform_optimization_problem,solver='SLSQP', sense_step = 1E-3, tolerance = 1E-3)   
     print (output_stick_fixed)    
-    tf           = time.time()
+    tf                            = time.time()
     elapsed_time_stick_fixed = round((tf-ti)/60,2)
     print('Stick Fixed Stability and Drag Otimization Simulation Time: ' + str(elapsed_time_stick_fixed))
-    optimized_vehicle                             = planform_optimization_problem.vehicle_configurations.stick_fixed_cruise 
-    save(optimized_vehicle, 'optimized_vehicle_stick_fixed', pickle_format=True)    
+    optimized_vehicle                             = planform_optimization_problem.vehicle_configurations.stick_fixed_cruise   
     
     save_data_stick_fixed(CG_bat_1, 
                           CG_bat_2,
@@ -60,10 +59,17 @@ def size_control_surfaces(CG_bat_1, CG_bat_2, vehicle, cruise_velocity = 120 * U
     def new_filename(filename):
         return filename.replace('[', '').replace(']', '').replace(' ', '_').replace('.', '_')
 
-    raw_file_name = f"{cg_x1}_{cg_y1}_{cg_z1}_{cg_x2}_{cg_y2}_{cg_z2}_Baseline_Opt_Vehicle"
-    excel_file_name = new_filename(raw_file_name)
+    raw_file_name1 = f"{cg_x1}_{cg_y1}_{cg_z1}_{cg_x2}_{cg_y2}_{cg_z2}_Optimized_Vehicle"
+    vehicle_file_name = new_filename(raw_file_name1)
+    save_data(optimized_vehicle,vehicle_file_name)
     
-    save_aircraft_geometry(vehicle,excel_file_name)
+    raw_file_name2 = f"{cg_x1}_{cg_y1}_{cg_z1}_{cg_x2}_{cg_y2}_{cg_z2}_Planform_Optimization_Problem"
+    planform_optimization_problem_file_name = new_filename(raw_file_name2)
+    save_data(planform_optimization_problem,planform_optimization_problem_file_name)  
+    
+    raw_file_name3 = f"{cg_x1}_{cg_y1}_{cg_z1}_{cg_x2}_{cg_y2}_{cg_z2}_Output_Stick_Fixed"
+    output_stick_fixed_file_name = new_filename(raw_file_name3)
+    save_data(output_stick_fixed,output_stick_fixed_file_name)      
     
     return
   
@@ -293,7 +299,7 @@ def print_vehicle_control_surface_geoemtry(vehicle):
 
     return
  
-def save_aircraft_geometry(geometry,filename): 
+def save_data(geometry,filename): 
     pickle_file  = filename + '.pkl'
     with open(pickle_file, 'wb') as file:
         pickle.dump(geometry, file) 
