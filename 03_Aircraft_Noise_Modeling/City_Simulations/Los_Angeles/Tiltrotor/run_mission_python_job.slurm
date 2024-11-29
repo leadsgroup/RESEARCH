@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --job-name=single_hexacopter_flight_post_process_run             # Job name
+#SBATCH --job-name=tiltrotor_mission_run             # Job name
 #SBATCH --output=output_%j.log            # Output log file (%j will be replaced by the job ID)
 #SBATCH --error=error_%j.log              # Error log file (%j will be replaced by the job ID)
 #SBATCH --nodes=1                         # Request nodes
@@ -16,7 +16,9 @@ module load /opt/modulefiles/anaconda3/2024.10  # This has the latest version of
 source $HOME/scratch/leads_research/rcaideenv/bin/activate
 
 # Run the Python script
-python3 -u HC_Single_Flight_Operations_LA_Post_Process.py
+python3 TR_Operations_LA.py
+
+python3 -u TR_Single_Flight_Operations_LA_Post_Process.py
 
 # Deactivate the virtual environment after completion
 deactivate

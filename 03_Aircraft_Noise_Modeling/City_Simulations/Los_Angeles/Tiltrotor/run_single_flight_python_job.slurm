@@ -16,7 +16,7 @@ module load /opt/modulefiles/anaconda3/2024.10  # This has the latest version of
 source $HOME/scratch/leads_research/rcaideenv/bin/activate
 
 # Run the Python script
-python3 -u HC_Single_Flight_Operations_LA_Post_Process.py
+python3 -u TR_Single_Flight_Operations_LA_Post_Process.py
 
 # Deactivate the virtual environment after completion
 deactivate
