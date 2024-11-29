@@ -80,7 +80,10 @@ plt.yticks(y_ticks)
 plt.legend(fontsize=20)
 
 # Save the plot with high DPI
-plt.savefig("payload_range_plot.png", dpi=600)  # Save with 300 DPI
+plt.savefig("payload_range_plot.png", dpi=600)  # Save with 600 DPI
 
-# Show the plot
+plt.minorticks_on() 
+plt.grid(which='minor', linestyle=':', linewidth=0.5)
+
+plt.grid(which='major', linestyle='-', linewidth=1)
 plt.show()
