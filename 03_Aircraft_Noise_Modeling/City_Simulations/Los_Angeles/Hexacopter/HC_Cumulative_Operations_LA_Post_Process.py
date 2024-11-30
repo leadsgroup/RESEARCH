@@ -21,7 +21,7 @@ import numpy as np
 #  Main 
 # ----------------------------------------------------------------------------------------------------------------------  
 def main():           
-           
+    storage_dir = "/home/aidanrm2/storage/noise/hexacopter_single_mission_results/"   
     ospath          = os.path.abspath(__file__)
     separator       = os.path.sep
     relative_path   = os.path.dirname(ospath) + separator 
@@ -54,7 +54,7 @@ def main():
 
         origin_code = filename.split('_')[3]
         
-        PND =  load(filename + '.res')  
+        PND =  load_results(filename,storage_dir)  
         
         L_eq = PND.L_eq[:,:,None]
         L_max = PND.L_max[:,:,None]
@@ -86,16 +86,34 @@ def main():
         Airports        = unique_airports, 
     )
     
-    mask = Total_L_dn < 35
+    mask = Total_L_dn < (background_noise() + 0.1)
     Total_L_dn[mask] = background_noise()
     Total_L_eq[mask] = background_noise()
     Total_L_max[mask] = background_noise()
     Total_L_eq_24hr[mask] = background_noise()    
     
     # save data 
-    cumulative_processed_filename =  'Cumulative3_'  +  aircraft_code + '_' + city_code + '_' + str(int(np.ceil(round(cruise_altitude/Units.feet)))) +'ft'    # Aircraft_City_Frequency_Origin_Destination_Altitude
-    save(cumulative_PND, cumulative_processed_filename + '.res')    
+    cumulative_processed_filename =  'Cumulative_'  +  aircraft_code + '_' + city_code + '_' + str(int(np.ceil(round(cruise_altitude/Units.feet)))) +'ft'    # Aircraft_City_Frequency_Origin_Destination_Altitude
+    save_results(cumulative_PND, cumulative_processed_filename, storage_dir)    
     return     
  
+def save_results(results, filename, storage_dir):
+    save_dir = storage_dir
+    if not os.path.exists(save_dir):
+        os.makedirs(save_dir)  # Create the directory if it doesn't exist
+    res_file = os.path.join(save_dir, f"{filename}.res")
+    save(results, res_file)
+    return
+
+def load_results(filename, storage_dir=os.getcwd()):
+    load_dir = storage_dir
+    load_file = os.path.join(load_dir, f"{filename}.res")
+    if os.path.exists(load_file):
+        results = load(load_file)
+        return results
+    else:
+        raise FileNotFoundError(f"File {load_file} not found.")
+ 
 if __name__ == '__main__': 
-    main()     
+    main()
+    
