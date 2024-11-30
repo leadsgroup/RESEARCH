@@ -3,7 +3,9 @@
 # --------------------------------------------------------------------- 
 from RCAIDE.Framework.Core import Units, Data    
 from RCAIDE.Library.Methods.Noise.Common.decibel_arithmetic   import SPL_arithmetic  
-from RCAIDE.Library.Plots import *       
+from RCAIDE.Library.Plots import *
+from RCAIDE.Library.Methods.Noise.Common.background_noise     import background_noise
+
 from RCAIDE import  load 
 from RCAIDE import  save
 import  pickle
@@ -47,7 +49,7 @@ def main():
     processed_filename_list_name =  aircraft_code + '_' + city_code +  '_Single_Flights_Processed' 
     file_name_dict               =  load(processed_filename_list_name + '.res')
     
-    for filename in ['Processed_HC_LA_HHR_LAUS_1000ft', 'Processed_HC_LA_ONT_BUR_1000ft']:#file_name_dict.filename_list:     
+    for filename in file_name_dict.filename_list:     
         # load data
 
         origin_code = filename.split('_')[3]
@@ -58,7 +60,7 @@ def main():
         L_max = PND.L_max[:,:,None]
         L_dn = PND.L_dn[:,:,None]
         L_eq_24hr = PND.L_eq_24hr[:,:,None]
-        mask = L_dn < 35
+        mask = L_dn < (background_noise + 0.1)
         L_dn[mask] = 0
         L_eq[mask] = 0
         L_max[mask] = 0
@@ -83,6 +85,12 @@ def main():
         Total_Energy    = E_origin, 
         Airports        = unique_airports, 
     )
+    
+    mask = Total_L_dn < 35
+    Total_L_dn[mask] = background_noise()
+    Total_L_eq[mask] = background_noise()
+    Total_L_max[mask] = background_noise()
+    Total_L_eq_24hr[mask] = background_noise()    
     
     # save data 
     cumulative_processed_filename =  'Cumulative3_'  +  aircraft_code + '_' + city_code + '_' + str(int(np.ceil(round(cruise_altitude/Units.feet)))) +'ft'    # Aircraft_City_Frequency_Origin_Destination_Altitude
