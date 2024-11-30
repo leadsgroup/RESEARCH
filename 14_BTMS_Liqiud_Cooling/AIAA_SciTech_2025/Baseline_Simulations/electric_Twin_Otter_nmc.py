@@ -33,26 +33,26 @@ def main():
     ti  =  time.time()
     # vehicle data
     vehicle  = vehicle_setup(BTMS_flag)
-    #plot_3d_vehicle(vehicle)
+    # #plot_3d_vehicle(vehicle)
     
-    # Set up vehicle configs
-    configs  = configs_setup(vehicle)
+    # # Set up vehicle configs
+    # configs  = configs_setup(vehicle)
 
-    # create analyses
-    analyses = analyses_setup(configs)
+    # # create analyses
+    # analyses = analyses_setup(configs)
 
-    # mission analyses
-    mission  = mission_setup(analyses) 
+    # # mission analyses
+    # mission  = mission_setup(analyses) 
     
-    # create mission instances (for multiple types of missions)
-    missions = missions_setup(mission) 
+    # # create mission instances (for multiple types of missions)
+    # missions = missions_setup(mission) 
      
-    # mission analysis 
-    results = missions.base_mission.evaluate()  
-    tf = time.time() 
-    print ('time taken: '+ str(round(((tf-ti)/60),3)) + ' mins')
+    # # mission analysis 
+    # results = missions.base_mission.evaluate()  
+    # tf = time.time() 
+    # print ('time taken: '+ str(round(((tf-ti)/60),3)) + ' mins')
         
-    plot_mission(results)
+    # plot_mission(results)
     
     return 
  
@@ -65,8 +65,9 @@ def vehicle_setup(BTMS_flag):
 
     vehicle = RCAIDE.Vehicle()
     vehicle.tag = 'Twin_Otter'
-
- 
+    HAS_power = 7137.296435
+    HEX_power = 3191.504726
+    RES_dimensions = 0.611827665
     # ################################################# Vehicle-level Properties ########################################################  
 
     # mass properties
@@ -89,7 +90,7 @@ def vehicle_setup(BTMS_flag):
     vehicle.design_dynamic_pressure       = ( .5 *freestream0.density*(cruise_speed*cruise_speed))[0][0]
     vehicle.design_mach_number            =  mach_number
 
-         
+        
     # ##########################################################  Wings ################################################################    
     #------------------------------------------------------------------------------------------------------------------------------------  
     #  Main Wing
@@ -116,7 +117,7 @@ def vehicle_setup(BTMS_flag):
     wing.dynamic_pressure_ratio           = 1.0  
     ospath                                = os.path.abspath(__file__)
     separator                             = os.path.sep
-    rel_path                              = os.path.dirname(ospath)   + separator + '..' + separator +  '..' +  separator+  '..' +  separator
+    rel_path                              = os.path.dirname(ospath)   + separator + '..' +separator +'..'+ separator +  '..' +  separator
     airfoil                               = RCAIDE.Library.Components.Airfoils.Airfoil()
     airfoil.tag                           = 'Clark_y' 
     airfoil.coordinate_file               = rel_path + separator + 'Airfoils' + separator + 'Clark_y.txt'   # absolute path     
@@ -209,7 +210,7 @@ def vehicle_setup(BTMS_flag):
     # add to vehicle
     vehicle.append_component(wing)
 
- 
+
     # ##########################################################   Fuselage  ############################################################    
     fuselage = RCAIDE.Library.Components.Fuselages.Tube_Fuselage() 
     fuselage.seats_abreast                      = 2.
@@ -300,7 +301,7 @@ def vehicle_setup(BTMS_flag):
     segment.height                              = 1.953333333  
     segment.width                               = 1.75  
     fuselage.Segments.append(segment)
-  
+
 
     # Segment
     segment                                     = RCAIDE.Library.Components.Fuselages.Segment()
@@ -350,12 +351,12 @@ def vehicle_setup(BTMS_flag):
     segment.height                              = 0.11	 
     segment.width                               = 0.05 
     fuselage.Segments.append(segment) 
-          
- 
+        
+
 
     # add to vehicle
     vehicle.append_component(fuselage)
- 
+
     #########################################################   Nacelles  ############################################################    
     nacelle                    = RCAIDE.Library.Components.Nacelles.Stack_Nacelle()
     nacelle.tag                = 'nacelle_1'
@@ -387,7 +388,7 @@ def vehicle_setup(BTMS_flag):
     nac_segment.height             = 0.44	 
     nac_segment.width              = 0.685705173 
     nacelle.append_segment(nac_segment)  
-     
+    
     nac_segment                    = RCAIDE.Library.Components.Nacelles.Segment()
     nac_segment.tag                = 'segment_4'
     nac_segment.percent_x_location = 0.170379029  
@@ -461,8 +462,8 @@ def vehicle_setup(BTMS_flag):
     #add to vehicle                             
     vehicle.landing_gear                        = landing_gear
 
- 
-    # ########################################################  Energy Network  #########################################################  
+    
+        # ########################################################  Energy Network  #########################################################  
     net                              = RCAIDE.Framework.Networks.Electric()   
 
     #------------------------------------------------------------------------------------------------------------------------------------  
@@ -470,7 +471,6 @@ def vehicle_setup(BTMS_flag):
     #------------------------------------------------------------------------------------------------------------------------------------  
     bus                              = RCAIDE.Library.Components.Energy.Distributors.Electrical_Bus()
     bus.number_of_battery_modules    = 12.
-    
 
     #------------------------------------------------------------------------------------------------------------------------------------           
     # Battery
@@ -498,7 +498,7 @@ def vehicle_setup(BTMS_flag):
     atmo_data                                              = atmosphere.compute_values(altitude = HAS.design_altitude)     
     HAS.coolant_inlet_temperature                          = atmo_data.temperature[0,0]  
     HAS.design_battery_operating_temperature               = 313
-    HAS.design_heat_removed                                = 2000
+    HAS.design_heat_removed                                = HAS_power
     HAS                                                    = design_wavy_channel(HAS,bat_module) 
     
     for battery_module in bus.battery_modules:
@@ -508,21 +508,20 @@ def vehicle_setup(BTMS_flag):
     HEX                                                    = RCAIDE.Library.Components.Thermal_Management.Heat_Exchangers.Cross_Flow_Heat_Exchanger() 
     HEX.design_altitude                                    = 1500. * Units.feet 
     HEX.inlet_temperature_of_cold_fluid                    = atmo_data.temperature[0,0]   
-    HEX.design_heat_removed                                = bus.number_of_battery_modules * 500
+    HEX.design_heat_removed                                = bus.number_of_battery_modules * HEX_power
     HEX.minimum_air_speed                                  = 105* Units.knots 
     HEX                                                    = design_cross_flow_heat_exchanger(HEX,coolant_line,bat_module)
     coolant_line.heat_exchangers.append(HEX)
-
     
     # Reservoir for Battery TMS
-    RES                                                    = RCAIDE.Library.Components.Thermal_Management.Reservoirs.Reservoir() 
-    RES.length                                             = 0.1                                      
-    RES.width                                              = 0.1                                     
-    RES.height                                             = 0.1    
+    RES                                                    = RCAIDE.Library.Components.Thermal_Management.Reservoirs.Reservoir()
+    RES.length                                             = RES_dimensions                                     
+    RES.width                                              = RES_dimensions                                    
+    RES.height                                             = RES_dimensions   
     coolant_line.reservoirs.append(RES)
 
     
-   #------------------------------------------------------------------------------------------------------------------------------------  
+    #------------------------------------------------------------------------------------------------------------------------------------  
     #  Starboard Propulsor
     #------------------------------------------------------------------------------------------------------------------------------------   
     starboard_propulsor                              = RCAIDE.Library.Components.Propulsors.Electric_Rotor()  
@@ -534,7 +533,7 @@ def vehicle_setup(BTMS_flag):
     esc.efficiency                                   = 0.95 
     esc.origin                                       = [[3.8,2.8129,1.22 ]]   
     starboard_propulsor.electronic_speed_controller  = esc   
-     
+    
     # Propeller              
     propeller                                        = RCAIDE.Library.Components.Propulsors.Converters.Propeller() 
     propeller.tag                                    = 'propeller_1'  
@@ -564,7 +563,7 @@ def vehicle_setup(BTMS_flag):
     propeller.airfoil_polar_stations                 = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0] 
     propeller                                        = design_propeller(propeller)    
     starboard_propulsor.rotor                        = propeller   
-              
+            
     # DC_Motor       
     motor                                            = RCAIDE.Library.Components.Propulsors.Converters.DC_Motor()
     motor.efficiency                                 = 0.98
@@ -577,7 +576,7 @@ def vehicle_setup(BTMS_flag):
     design_motor(motor)  
     motor.mass_properties.mass                       = compute_motor_weight(motor) 
     starboard_propulsor.motor                        = motor 
- 
+
     # append propulsor to distribution line 
     net.propulsors.append(starboard_propulsor) 
 
@@ -597,7 +596,7 @@ def vehicle_setup(BTMS_flag):
     propeller_2.origin                         =  [[3.5, -2.8129,1.22 ]]   
     propeller_2.clockwise_rotation             = False        
     port_propulsor.rotor                       = propeller_2  
-              
+            
     motor_2                                    = deepcopy(motor)
     motor_2.origin                             =  [[4.0, -2.8129,1.22 ]]        
     port_propulsor.motor                       = motor_2  
@@ -625,13 +624,14 @@ def vehicle_setup(BTMS_flag):
     net.busses.append(bus)
     
     vehicle.append_energy_network(net)
- 
+
     
     weight_analysis          = RCAIDE.Framework.Analyses.Weights.Weights_EVTOL()
     weight_analysis.vehicle  = vehicle
     weight_analysis.settings.miscelleneous_weight_factor = 1.0
     weight                   = weight_analysis.evaluate()
     print(weight)
+    plot_weight_breakdown(weight_analysis.vehicle, show_figure = True)
 
     # ------------------------------------------------------------------
     #   Vehicle Definition Complete
