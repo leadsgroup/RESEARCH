@@ -24,7 +24,7 @@ from Aircraft_Noise_Emissions   import post_process_noise_data
 #  Main 
 # ----------------------------------------------------------------------------------------------------------------------  
 def main():           
-    storage_dir = "/home/aidanrm2/storage/noise/hexacopter_single_mission_results/"
+      
     ospath          = os.path.abspath(__file__)
     separator       = os.path.sep
     relative_path   = os.path.dirname(ospath) + separator 
@@ -58,7 +58,7 @@ def main():
 
     mic_x_res                       = 1200
     mic_y_res                       = 2700
-    aircraft_code                   = 'HC'
+    aircraft_code                   = 'TSR'
     city_code                       = 'LA' 
     cruise_altitude                 = 1000 * Units.feet
     noise_evaluation_pitch          = 150 * Units.feet
@@ -70,8 +70,8 @@ def main():
     processed_filename_list  = []
              
     for filename in file_name_dict.filename_list:  
-        results = load_results(filename)
-        print(f'simulating {filename}')
+        results = load(filename + '.res')
+        
         origin_code = filename.split('_')[3]
         destination_code = filename.split('_')[4]
         
@@ -97,34 +97,18 @@ def main():
         # save data in json file 
         processed_filename =  'Processed_'  +  aircraft_code + '_' + city_code + '_' + origin_code + '_' +  destination_code  + '_' + str(int(round(cruise_altitude/Units.feet,0)))+ 'ft'
         
-        print(f'saving {filename}')
-        save_results(processed_noise_data, processed_filename, storage_dir)
+        print("saving results")
+        save(processed_noise_data, processed_filename + '.res')
         processed_filename_list.append(processed_filename)
         
         processed_filename_list_name =  aircraft_code + '_' + city_code +  '_Single_Flights_Processed'
         F =  Data(filename_list=processed_filename_list)
-        save_results(F, processed_filename_list_name,  storage_dir)
+        save(F, processed_filename_list_name + '.res')
         
     tf = t.time() 
     print("Total time: "+str(tf-ti))
     return     
-def save_results(results, filename, storage_dir):
-    save_dir = storage_dir
-    if not os.path.exists(save_dir):
-        os.makedirs(save_dir)  # Create the directory if it doesn't exist
-    res_file = os.path.join(save_dir, f"{filename}.res")
-    save(results, res_file)
-    return
 
-def load_results(filename, storage_dir=os.getcwd()):
-    load_dir = storage_dir
-    load_file = os.path.join(load_dir, f"{filename}.res")
-    if os.path.exists(load_file):
-        results = load(load_file)
-        return results
-    else:
-        raise FileNotFoundError(f"File {load_file} not found.")
  
 if __name__ == '__main__': 
-    main()
-    
+    main()     

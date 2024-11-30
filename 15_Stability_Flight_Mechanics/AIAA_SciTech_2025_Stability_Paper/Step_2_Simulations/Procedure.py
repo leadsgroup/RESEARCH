@@ -160,20 +160,11 @@ def longitudinal_static_stability_and_drag_post_process(nexus):
 # ############################################################################################################################################################   
 
 def elevator_sizing_procedure(): 
-    procedure = Process()  
-    procedure.missions                   = Process()
-    procedure.missions.design_mission    = run_elevator_sizing_mission     
+    procedure = Process()   
     procedure.post_process               = elevator_sizing_post_process   
     return procedure
  
-
-def run_elevator_sizing_mission(nexus): 
-    results                           = nexus.results
-    results.elevator_sizing_pull_up   = nexus.missions.elevator_sizing_pull_up.evaluate()
-    results.elevator_sizing_push_over = nexus.missions.elevator_sizing_push_over.evaluate()
-    return nexus
  
-
 def elevator_sizing_post_process(nexus): 
     '''
     This function analyses and post processes the aircraft at the flight conditions required to size
@@ -242,28 +233,10 @@ def elevator_sizing_post_process(nexus):
 # ############################################################################################################################################################  
 
 def aileron_rudder_sizing_procedure(): 
-    procedure = Process()  
-    procedure.missions                   = Process()
-    procedure.missions.design_mission    = run_aileron_rudder_sizing_mission     
+    procedure = Process()       
     procedure.post_process               = aileron_rudder_sizing_post_process   
     return procedure   
-  
- 
-def run_aileron_rudder_sizing_mission(nexus): 
-    results                     = nexus.results
-    
-    # roll 
-    results.roll_maneuver       = nexus.missions.roll_maneuver.evaluate()
-    
-    # crosswind 
-    vehicle                     = nexus.vehicle_configurations.aileron_rudder_roll_sizing 
-    nexus.missions.crosswind_maneuver.segments.cruise.sideslip_angle =  np.tan(vehicle.crosswind_velocity/nexus.cruise_velocity)  
-    results.crosswind_maneuver  = nexus.missions.crosswind_maneuver.evaluate()
-    
-    # OEI
-    results.cruise_oei  = nexus.missions.cruise_oei.evaluate()       
-       
-    return nexus 
+   
  
 def aileron_rudder_sizing_post_process(nexus):  
     '''
@@ -347,61 +320,7 @@ def aileron_rudder_sizing_post_process(nexus):
     print("\n\n")
     
  
-    
- 
-  
-
-# ############################################################################################################################################################   
-# FLAP SIZING
-# ############################################################################################################################################################  
-
-def flap_sizing_procedure(): 
-    procedure = Process()    
-    procedure.missions                   = Process()
-    procedure.missions.design_mission    = run_flap_sizing_mission    
-    procedure.post_process               = flap_sizing_post_process 
-    return procedure  
- 
-def run_flap_sizing_mission(nexus): 
-    results                         = nexus.results 
-    results.flap_sizing_flaps_up    = nexus.missions.flap_sizing_flaps_up.evaluate()
-
-    vehicle                         = nexus.vehicle_configurations.flap_sizing_flaps_down.wings.main_wing.control_surfaces.flap.deflection = 12 *Units.degree      
-    results.flap_sizing_flaps_down  = nexus.missions.flap_sizing_flaps_down.evaluate()  
-    return nexus
-
-  
-def flap_sizing_post_process(nexus): 
-    '''
-    This function analyses and post processes the aircraft at the flight conditions required to size
-    the flap. These conditions are:
-    1) A comparison of clean and deployed flap at 12 deg. angle of attack
-    ''' 
-    summary   = nexus.summary   
-    vehicle   = nexus.vehicle_configurations.flap_sizing_flaps_up   
-
-    no_flap  = nexus.results.flap_sizing_flaps_up.segments.cruise 
-    w_flap   = nexus.results.flap_sizing_flaps_down.segments.cruise 
-    # ------------------------------------------------------------------------------------------------------------------------  
-    # Post Process Results 
-    # ------------------------------------------------------------------------------------------------------------------------       
-    # critera    
-    CL_12_deg_no_flap    = no_flap.conditions.aerodynamics.coefficients.lift.total[0,0]  
-    CL_12_deg_flap       = w_flap.conditions.aerodynamics.coefficients.lift.total[0,0]
-    flap_criteria        = (CL_12_deg_flap-CL_12_deg_no_flap) - 0.95*(CL_12_deg_flap-CL_12_deg_no_flap) 
-    
-    # compute control surface area 
-    control_surfaces = ['flap'] 
-    total_control_surface_area = compute_control_surface_areas(control_surfaces,vehicle)  
-    summary.flap_surface_area  = total_control_surface_area
-    summary.flap_criteria      = flap_criteria
-
-    print("Flap Area     : " + str(summary.flap_surface_area))
-    print("Flap Criteria : " + str(flap_criteria))  # https://aviation.stackexchange.com/questions/48715/how-is-the-area-of-flaps-determined
-    print("\n\n")     
-         
-    return nexus
-
+     
 # ############################################################################################################################################################   
 # HOVER OEI SIZING
 # ############################################################################################################################################################  

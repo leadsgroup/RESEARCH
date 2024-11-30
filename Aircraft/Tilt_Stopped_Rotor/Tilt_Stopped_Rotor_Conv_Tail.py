@@ -772,7 +772,7 @@ def vehicle_setup(redesign_rotors=True) :
     battery_module.geometrtic_configuration.normal_count              = 56
     battery_module.geometrtic_configuration.parallel_count            = 25
 
-    modules_origins = [[4, 0.0, 0.0],[4, 0.0, 0.2 ]]  # rear modules are stacked inside cabin
+    modules_origins = [[3, 0.0, 0.0],[3, 0.0, 0.2 ]]  # rear modules are stacked inside cabin
     for m_i in range(lift_rotor_bus.number_of_battery_modules):
         module =  deepcopy(battery_module)
         module.tag = 'nmc_module_' + str(m_i+1) 
