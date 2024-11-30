@@ -1,7 +1,7 @@
-import numpy as np
-import matplotlib.pyplot as plt
-import pandas as pd
 import os
+import pandas as pd
+import plotly.graph_objects as go
+import plotly.express as px
 
 def main(): 
     file_name = 'e_Twin_Otter_nmc_case_2_.xlsx'
@@ -56,18 +56,33 @@ def read_excel_file(file_path):
 
 def plot_data(df, variables):
     for x_var, y_var, title_suffix in variables:
-        plt.figure(figsize=(10, 6))
-        
-        plt.plot(df[x_var], df[y_var], label=y_var)
-        
-        plt.xlabel(x_var)
-        plt.ylabel(y_var)
-        plt.title(title_suffix)
-        plt.grid(True)
-        plt.legend()
-        plt.tight_layout()
-       
+        fig = go.Figure()
+
+        # Add the line trace
+        fig.add_trace(go.Scatter(
+            x=df[x_var],
+            y=df[y_var],
+            mode='lines',
+            name=y_var,
+            line=dict(color='royalblue', width=2),
+            fill='tozeroy'  ,# Adds shading under the line
+            fillcolor='rgba(255, 0, 0, 0.3)'
+        ))
+
+        # Update layout for styling
+        fig.update_layout(
+            title=title_suffix,
+            xaxis_title=x_var,
+            yaxis_title=y_var,
+            template="simple_white",
+            title_font_size=20,
+            legend=dict(title_font_family="Times New Roman", font_size=14),
+            xaxis=dict(showgrid=True, gridwidth=0.5),
+            yaxis=dict(showgrid=True, gridwidth=0.5),
+        )
+
+        # Show plot
+        fig.show()
 
 if __name__ == "__main__":
     main()
-    plt.show()
