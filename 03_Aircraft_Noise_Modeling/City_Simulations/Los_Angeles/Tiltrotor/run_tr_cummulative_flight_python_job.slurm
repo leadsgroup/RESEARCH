@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --job-name=tiltrotor_cumulative_flights_run             # Job name
+#SBATCH --job-name=tiltrotor_cumulative_flight_post_process_run             # Job name
 #SBATCH --output=output_%j.log            # Output log file (%j will be replaced by the job ID)
 #SBATCH --error=error_%j.log              # Error log file (%j will be replaced by the job ID)
 #SBATCH --nodes=1                         # Request nodes
