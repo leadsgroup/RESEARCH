@@ -74,7 +74,10 @@ def degradation_simulator(HAS_power, HEX_power, RES_dimensions, storage_dir,sim_
             # -------------------------------------------------------------------------------------------    
             # SET UP VEHICLE
             # -------------------------------------------------------------------------------------------  
-            resize_aircraft = group == 1
+            if group == 1:
+                resize_aircraft = True
+            else:
+                resize_aircraft = False
             vehicle = Vehicle.vehicle_setup(resize_aircraft, HAS_power, HEX_power, RES_dimensions, storage_dir, 'e_twin_otter_vehicle')
             if vehicle.mass_properties.takeoff > 5670:
                 print('**********Aircraft Overweight | Terminating Simulation**********')
