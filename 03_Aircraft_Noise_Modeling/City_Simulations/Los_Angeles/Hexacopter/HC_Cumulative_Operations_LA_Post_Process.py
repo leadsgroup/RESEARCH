@@ -60,7 +60,7 @@ def main():
         L_max = PND.L_max[:,:,None]
         L_dn = PND.L_dn[:,:,None]
         L_eq_24hr = PND.L_eq_24hr[:,:,None]
-        mask = L_dn < (background_noise + 0.1)
+        mask = L_dn < (background_noise() + 0.1)
         L_dn[mask] = 0
         L_eq[mask] = 0
         L_max[mask] = 0
