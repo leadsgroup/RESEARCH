@@ -4,7 +4,7 @@
 #SBATCH --error=error_%j.log              # Error log file (%j will be replaced by the job ID)
 #SBATCH --nodes=1                         # Request nodes
 #SBATCH --ntasks=1                        # Number of tasks (processes)
-#SBATCH --cpus-per-task=1                 # Number of CPU cores per task
+#SBATCH --cpus-per-task=2                 # Number of CPU cores per task
 #SBATCH --partition=primary               # Partition/queue to submit the job
 #SBATCH --mail-type=ALL                   # Send email on job start, end and fail
 #SBATCH --mail-user=sshekar2@illinois.edu # Email for notifications

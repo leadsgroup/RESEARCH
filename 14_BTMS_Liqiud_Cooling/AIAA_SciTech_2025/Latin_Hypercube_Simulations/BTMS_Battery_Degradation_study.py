@@ -82,53 +82,53 @@ def degradation_simulator(HAS_power, HEX_power, RES_dimensions, storage_dir,sim_
             if vehicle.mass_properties.takeoff > 5670:
                 print('**********Aircraft Overweight | Terminating Simulation**********')
                 break
-            # configs = Vehicle.configs_setup(vehicle)
-            # analyses = Analyses.analyses_setup(configs)
-            # charge_throughput, cycle_day, resistance_growth, capacity_fade = load_charge_throughput(storage_dir)
+            configs = Vehicle.configs_setup(vehicle)
+            analyses = Analyses.analyses_setup(configs)
+            charge_throughput, cycle_day, resistance_growth, capacity_fade = load_charge_throughput(storage_dir)
             
-            # # -------------------------------------------------------------------------------------------    
-            # # SET UP MISSION PROFILE  
-            # # -------------------------------------------------------------------------------------------    
-            # base_mission = Missions.repeated_flight_operation_setup(
-            #     configs, analyses, day_group, g_idx, group, days_per_group, flights_per_day,
-            #     charge_throughput, cycle_day, resistance_growth, capacity_fade
-            # )
-            # missions_analyses = Missions.missions_setup(base_mission)
+            # -------------------------------------------------------------------------------------------    
+            # SET UP MISSION PROFILE  
+            # -------------------------------------------------------------------------------------------    
+            base_mission = Missions.repeated_flight_operation_setup(
+                configs, analyses, day_group, g_idx, group, days_per_group, flights_per_day,
+                charge_throughput, cycle_day, resistance_growth, capacity_fade
+            )
+            missions_analyses = Missions.missions_setup(base_mission)
         
-            # # -------------------------------------------------------------------------------------------    
-            # # RUN SIMULATION !!
-            # # -------------------------------------------------------------------------------------------
-            # results = missions_analyses.base.evaluate()
-            # charge_throughput[str(group)] = results.segments[-1].conditions.energy.bus.battery_modules.lithium_ion_nmc.cell.charge_throughput[-1]
-            # resistance_growth[str(group)] = results.segments[-1].conditions.energy.bus.battery_modules.lithium_ion_nmc.cell.resistance_growth_factor
-            # capacity_fade[str(group)] = results.segments[-1].conditions.energy.bus.battery_modules.lithium_ion_nmc.cell.capacity_fade_factor
-            # cycle_day[str(group)] = results.segments[-1].conditions.energy.bus.battery_modules.lithium_ion_nmc.cell.cycle_in_day
-            # save_charge_throughput(charge_throughput, cycle_day, resistance_growth, capacity_fade, storage_dir)
+            # -------------------------------------------------------------------------------------------    
+            # RUN SIMULATION !!
+            # -------------------------------------------------------------------------------------------
+            results = missions_analyses.base.evaluate()
+            charge_throughput[str(group)] = results.segments[-1].conditions.energy.bus.battery_modules.lithium_ion_nmc.cell.charge_throughput[-1]
+            resistance_growth[str(group)] = results.segments[-1].conditions.energy.bus.battery_modules.lithium_ion_nmc.cell.resistance_growth_factor
+            capacity_fade[str(group)] = results.segments[-1].conditions.energy.bus.battery_modules.lithium_ion_nmc.cell.capacity_fade_factor
+            cycle_day[str(group)] = results.segments[-1].conditions.energy.bus.battery_modules.lithium_ion_nmc.cell.cycle_in_day
+            save_charge_throughput(charge_throughput, cycle_day, resistance_growth, capacity_fade, storage_dir)
             
-            # # -------------------------------------------------------------------------------------------    
-            # # SAVE RESULTS
-            # # -------------------------------------------------------------------------------------------
-            # filename = f'e_Twin_Otter_nmc_case_{sim_id}'
-            # save_results(results, filename, group, storage_dir)
-            # create_excel(filename, group, storage_dir)
+            # -------------------------------------------------------------------------------------------    
+            # SAVE RESULTS
+            # -------------------------------------------------------------------------------------------
+            filename = f'e_Twin_Otter_nmc_case_{sim_id}'
+            save_results(results, filename, group, storage_dir)
+            create_excel(filename, group, storage_dir)
             
-            # if plot_mission: 
-            #     Plots.plot_results(results, save_figure_flag=False)  
-            # SOC = np.array([])    
-            # Temp = np.array([])    
-            # for i in range(len(results.segments)):
-            #     state_of_charge = results.segments[i].conditions.energy.bus.battery_modules.lithium_ion_nmc.cell.state_of_charge[:, 0]   
-            #     temperature     = results.segments[i].conditions.energy.bus.battery_modules.lithium_ion_nmc.cell.temperature[:, 0]   
-            #     SOC = np.concatenate((SOC, state_of_charge))
-            #     Temp = np.concatenate((Temp, temperature))
+            if plot_mission: 
+                Plots.plot_results(results, save_figure_flag=False)  
+            SOC = np.array([])    
+            Temp = np.array([])    
+            for i in range(len(results.segments)):
+                state_of_charge = results.segments[i].conditions.energy.bus.battery_modules.lithium_ion_nmc.cell.state_of_charge[:, 0]   
+                temperature     = results.segments[i].conditions.energy.bus.battery_modules.lithium_ion_nmc.cell.temperature[:, 0]   
+                SOC = np.concatenate((SOC, state_of_charge))
+                Temp = np.concatenate((Temp, temperature))
 
-            # if np.any(SOC<0.2) or np.any(Temp>=322.65):
-            #     print('**********Battery End of Life Reached**********')
-            #     end_day = results.segments[-1].conditions.energy.bus.battery_modules.lithium_ion_nmc.cell.cycle_in_day
-            #     print('The battery lasted for ',end_day)
-            #     tf = time.time() 
-            #     print(f'time taken: {round(((tf - ti) / 60), 3)} mins')
-            #     break 
+            if np.any(SOC<0.2) or np.any(Temp>=322.65):
+                print('**********Battery End of Life Reached**********')
+                end_day = results.segments[-1].conditions.energy.bus.battery_modules.lithium_ion_nmc.cell.cycle_in_day
+                print('The battery lasted for ',end_day)
+                tf = time.time() 
+                print(f'time taken: {round(((tf - ti) / 60), 3)} mins')
+                break 
                         
     return 
 
