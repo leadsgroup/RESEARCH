@@ -58,11 +58,11 @@ def main():
     mic_coord =     np.reshape(microphone_coordinates,   (microphone_x_resolution,microphone_y_resolution,3))
     for i in  range(len(aircraft_models)):
         # Read in results
-        filename = relative_path +  '..' + separator +  'City_Simulations' + separator + 'Los_Angeles' + separator +'Hexacopter' + separator + 'Cumulative3_' + aircraft_models[i] + '_'+ city +'_' +altitudes[0] +'ft.res'
+        filename = relative_path +  '..' + separator +  'City_Simulations' + separator + 'Los_Angeles' + separator +'Hexacopter' + separator + 'Cumulative_' + aircraft_models[i] + '_'+ city +'_' +altitudes[0] +'ft.res'
         noise_data = load(filename)
         plot_2D_noise_contour(mic_coord, mic_loc, topography_file, 
                           noise_level              = noise_data.Total_L_dn, # d
-                          min_noise_level          = 35,  
+                          min_noise_level          = 30,  
                           max_noise_level          = 90, 
                           noise_scale_label        = r'$SPL_{max} [dBA]$',
                           save_figure              = False,
@@ -80,7 +80,7 @@ def plot_2D_noise_contour(microphone_coordinates,
                           microphone_locations, 
                           topography_file, 
                           noise_level              = None ,
-                          min_noise_level          = 35,  
+                          min_noise_level          = 30,  
                           max_noise_level          = 90, 
                           noise_scale_label        = None,
                           save_figure              = False,
