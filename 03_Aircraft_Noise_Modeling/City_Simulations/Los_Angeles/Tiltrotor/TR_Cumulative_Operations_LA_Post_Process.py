@@ -47,7 +47,7 @@ def main():
     E_origin        = np.zeros(len(unique_airports))
     
     processed_filename_list_name =  aircraft_code + '_' + city_code +  '_Single_Flights_Processed' 
-    file_name_dict               =  load(processed_filename_list_name + '.res')
+    file_name_dict               =  load_results(processed_filename_list_name,  storage_dir)
     
     for filename in file_name_dict.filename_list:     
         # load data
