@@ -129,6 +129,8 @@ def main():
             N_segs = len(results.segments) 
             N_cpts = results.segments[0].state.numerics.number_of_control_points  
             for seg in range(N_segs):
+                print("segment: "+str(seg))
+                print(results.segments[seg])                
                 for i in range(N_cpts):  
                     results.segments[seg].state.conditions.noise  = noise_results.segments[seg].state.conditions.noise          
              
