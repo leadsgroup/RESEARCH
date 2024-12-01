@@ -592,7 +592,6 @@ def vehicle_setup(resize_aircraft,HAS_power, HEX_power, RES_dimensions, storage_
       
       vehicle.append_energy_network(net)
    
-      
       weight_analysis          = RCAIDE.Framework.Analyses.Weights.Weights_EVTOL()
       weight_analysis.vehicle  = vehicle
       weight_analysis.settings.miscelleneous_weight_factor = 1.0

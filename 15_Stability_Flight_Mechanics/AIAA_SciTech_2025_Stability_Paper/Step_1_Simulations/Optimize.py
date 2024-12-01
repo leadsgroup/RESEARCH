@@ -37,9 +37,9 @@ def size_control_surfaces(CG_bat_1, CG_bat_2, vehicle, cruise_velocity = 120 * U
     output_stick_fixed            = scipy_setup.SciPy_Solve(planform_optimization_problem,solver='SLSQP', sense_step = 1E-3, tolerance = 1E-3)   
     print (output_stick_fixed)    
     tf                            = time.time()
-    elapsed_time_stick_fixed = round((tf-ti)/60,2)
+    elapsed_time_stick_fixed      = round((tf-ti)/60,2)
     print('Stick Fixed Stability and Drag Otimization Simulation Time: ' + str(elapsed_time_stick_fixed))
-    optimized_vehicle                             = planform_optimization_problem.vehicle_configurations.stick_fixed_cruise   
+    optimized_vehicle             = planform_optimization_problem.vehicle_configurations.stick_fixed_cruise   
     
     save_data_stick_fixed(CG_bat_1, 
                           CG_bat_2,

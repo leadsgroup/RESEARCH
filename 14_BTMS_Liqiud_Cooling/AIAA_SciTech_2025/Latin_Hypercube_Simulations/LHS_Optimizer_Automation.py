@@ -15,12 +15,12 @@ import latin_hypercube_sampler
 def main():
     # Define parameters
     total_no_sims = 75  # Total number of simulations to run
-    parallel_sims = 15 # Number of simulations to run in parallel
+    parallel_sims = 75 # Number of simulations to run in parallel
 
-    variable_limits = [(1000, 12500), (500, 9000), (0.1, 0.7)]
+    variable_limits = [(1000, 12500), (500, 9000), (0.1, 0.6)]
     variable_names  = ['Power_HAS', 'Power_HEX', 'Dim_RES']
 
-    storage_dir  = '/home/sshekar2/storage/optimization_LHS_11_21'
+    storage_dir  = '/home/sshekar2/storage/optimization_LHS_12_1'
     automation_optimizations(total_no_sims, parallel_sims, variable_limits,variable_names,storage_dir)
 
     print("Parent Optimzation job completing.")
@@ -34,8 +34,9 @@ def main():
 def automation_optimizations(total_simulations, parallel_simulations, variable_limits,variable_names,storage_dir):
 
     # Generate Latin Hypercube Samples
-    lhs_samples = latin_hypercube_sampler.generate_lhs_samples(variable_limits, total_simulations,variable_names)
+    lhs_samples = latin_hypercube_sampler.generate_lhs_samples(variable_limits, total_simulations,variable_names,storage_dir)
     print(f"Generated {total_simulations} Latin Hypercube samples.")
+    
 
     # Create SLURM job scripts directory
     script_dir = Path("slurm_scripts")
@@ -146,7 +147,7 @@ def wait_for_jobs_to_complete():
 
         if running_jobs: 
             print(f"Jobs running: {len(running_jobs)}")
-            time.sleep(300)  
+            time.sleep(600)  
         else:
             print("All jobs are complete.")
             break
