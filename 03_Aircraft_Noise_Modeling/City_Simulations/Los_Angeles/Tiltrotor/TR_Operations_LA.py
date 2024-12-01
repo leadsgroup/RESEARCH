@@ -121,16 +121,14 @@ def main():
         mission  = unconverged_mission_setup(number_of_cpts, analyses, radius_Vert1, radius_Vert2, dep_heading, app_heading, dep_sector, app_sector, path_heading, total_cruise_distance,cruise_altitude)        
         missions = missions_setup(mission) 
          
-        if (max_cruise_distance > total_cruise_distance):
+        if ((max_cruise_distance > total_cruise_distance) and (total_cruise_distance > 0)):
             
             # evaluate mission, not that it purposely does not converge
             results  = missions.base_mission.evaluate()
              
             N_segs = len(results.segments) 
             N_cpts = results.segments[0].state.numerics.number_of_control_points  
-            for seg in range(N_segs):
-                print("segment: "+str(seg))
-                print(results.segments[seg])                
+            for seg in range(N_segs):              
                 for i in range(N_cpts):  
                     results.segments[seg].state.conditions.noise  = noise_results.segments[seg].state.conditions.noise          
              
