@@ -29,8 +29,8 @@ def main():
     # -------------------------------------------------------------------------------------------    
     # SET UP SIMULATION PARAMETERS   
     # -------------------------------------------------------------------------------------------  
-    days_per_group             = 1#5              # total number of days simulated
-    flights_per_day            = 1#6               # number of flights per day
+    days_per_group             = 2#5              # total number of days simulated
+    flights_per_day            = 2#6               # number of flights per day
     day_group                  = [1]#list(range(1, 31))  # Creates a list from 1 to 24
     plot_mission               = True            # plot mission flag  
    
@@ -88,7 +88,7 @@ def main():
 
             if np.any(SOC<0.2) or np.any(Temp>=322.65):
                 print('**********Battery End of Life Reached**********')
-                break
+                #break
             
             if plot_mission: 
                 Plots.plot_results(results,save_figure_flag = False)       

@@ -24,6 +24,10 @@ def repeated_flight_operation_setup(configs,analyses,day_group,g_idx,group,days_
     base_segment = Segments.Segment()
     base_segment.temperature_deviation  = 10
     base_segment.state.numerics.number_of_control_points  = 8
+
+    atmosphere    = RCAIDE.Framework.Analyses.Atmospheric.US_Standard_1976()
+    atmo_data    = atmosphere.compute_values(altitude = 0, temperature_deviation= base_segment.temperature_deviation)  
+
  
     for d_idx in  range(days_per_group):
         day =  ((group -1) * days_per_group) +  d_idx + 1
@@ -44,6 +48,8 @@ def repeated_flight_operation_setup(configs,analyses,day_group,g_idx,group,days_
             segment.air_speed_start                               = Vstall *1.2  
             segment.air_speed_end                                 = Vstall *1.25
             segment.initial_battery_state_of_charge               = 1.0
+            if f_idx == 0: # Resets the battery temp to atmosphereic temperature at the start of every day
+                 segment.battery_cell_temperature =  atmo_data.temperature[0,0]  
             if group != 1 and d_idx == 0:
                 try:
                     segment.charge_throughput            = Data()
