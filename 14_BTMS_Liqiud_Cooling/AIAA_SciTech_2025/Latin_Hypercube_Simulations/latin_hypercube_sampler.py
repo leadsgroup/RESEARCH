@@ -4,8 +4,10 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
+import os
+import pickle
 
-def generate_lhs_samples(variable_limits, num_samples, variable_names=None):
+def generate_lhs_samples(variable_limits, num_samples, variable_names,lhs_samples):
     
     # Generate Latin Hypercube Samples
     num_variables = len(variable_limits)
@@ -16,23 +18,15 @@ def generate_lhs_samples(variable_limits, num_samples, variable_names=None):
         np.random.shuffle(samples)
         lhs_samples[:, i] = samples
     
-    # Visualize if there are three variables
-    if num_variables == 3:
-        fig = plt.figure(figsize=(10, 8))
-        ax = fig.add_subplot(111, projection='3d')
-        scatter = ax.scatter(lhs_samples[:, 0], lhs_samples[:, 1], lhs_samples[:, 2], 
-                              c='blue', alpha=0.7, edgecolors='k')
-        
-        # Add labels
-        if variable_names and len(variable_names) == 3:
-            ax.set_xlabel(variable_names[0])
-            ax.set_ylabel(variable_names[1])
-            ax.set_zlabel(variable_names[2])
-        else:
-            ax.set_xlabel('Variable 1')
-            ax.set_ylabel('Variable 2')
-            ax.set_zlabel('Variable 3')
-        
-        ax.set_title('3D Latin Hypercube Sampling Visualization')
+    save_results(lhs_samples,"LHS Samples")
     
     return lhs_samples
+
+def save_results(results, filename, storage_dir):
+    save_dir = storage_dir
+    if not os.path.exists(save_dir):
+        os.makedirs(save_dir)  # Create the directory if it doesn't exist
+    pickle_file = os.path.join(save_dir, f"{filename}.pkl")
+    with open(pickle_file, 'wb') as file:
+        pickle.dump(results, file) 
+    return
