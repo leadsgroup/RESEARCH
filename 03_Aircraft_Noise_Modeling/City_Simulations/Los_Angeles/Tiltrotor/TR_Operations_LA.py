@@ -454,7 +454,7 @@ def noise_mission_setup(number_of_cpts, analyses, radius_Vert1=3600*Units.ft, ra
     segment.tag                       = "Climb"  
     segment.analyses.extend(analyses.cruise) 
     segment.climb_rate                = 500. * Units['ft/min']
-    segment.air_speed_start           = 90.   * Units.kts 
+    segment.air_speed_start           = pattern_speed
     segment.air_speed_end             = cruise_speed
     segment.altitude_end              = cruise_altitude
     segment.true_course               = path_heading    
@@ -500,7 +500,7 @@ def noise_mission_setup(number_of_cpts, analyses, radius_Vert1=3600*Units.ft, ra
     segment                          = Segments.Climb.Linear_Speed_Constant_Rate(base_segment)
     segment.tag                      = "Descent"  
     segment.analyses.extend(analyses.cruise)
-    segment.climb_rate               = -300. * Units['ft/min']
+    segment.climb_rate               = -500. * Units['ft/min']
     segment.air_speed_start          = cruise_speed
     segment.air_speed_end            = pattern_speed
     segment.altitude_start           = cruise_altitude
@@ -559,10 +559,10 @@ def noise_mission_setup(number_of_cpts, analyses, radius_Vert1=3600*Units.ft, ra
     
     
     # ------------------------------------------------------------------
-    #   First Cruise Segment: Constant Acceleration, Constant Altitude
+    #   Transition descent
     # ------------------------------------------------------------------ 
     segment                          = Segments.Descent.Linear_Speed_Constant_Rate(base_segment)
-    segment.tag                      = "low_speed_climb_transition" 
+    segment.tag                      = "low_speed_descent_transition" 
     segment.analyses.extend(analyses.low_speed_climb_transition) 
     segment.climb_rate               = 822. * Units['ft/min']
     segment.air_speed_end            = 35 * Units['mph']       
@@ -896,7 +896,7 @@ def unconverged_mission_setup(number_of_cpts,analyses, radius_Vert1, radius_Vert
     
         
     # ------------------------------------------------------------------
-    #   First Cruise Segment: Constant Acceleration, Constant Altitude
+    #   Transition descent
     # ------------------------------------------------------------------ 
     segment                          = Segments.Descent.Linear_Speed_Constant_Rate(base_segment)
     segment.tag                      = "low_speed_descent_transition" 
