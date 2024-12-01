@@ -567,7 +567,7 @@ def noise_mission_setup(number_of_cpts, analyses, radius_Vert1=3600*Units.ft, ra
     segment.climb_rate               = 822. * Units['ft/min']
     segment.air_speed_end            = 35 * Units['mph']       
     segment.air_speed_start          = transition_speed
-    segment.altitude_end             = 500.0 * Units.ft
+    segment.altitude_end             = 0.0 * Units.ft
     segment.true_course              = app_heading
 
     # define flight dynamics to model 
@@ -905,7 +905,7 @@ def unconverged_mission_setup(number_of_cpts,analyses, radius_Vert1, radius_Vert
     segment.climb_rate               = 822. * Units['ft/min']
     segment.air_speed_end            = 35 * Units['mph']       
     segment.air_speed_start          = transition_speed
-    segment.altitude_end             = 500.0 * Units.ft
+    segment.altitude_end             = 0.0 * Units.ft
     segment.true_course              = app_heading
 
     # define flight dynamics to model 
