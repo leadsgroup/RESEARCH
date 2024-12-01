@@ -5,6 +5,7 @@
 # ---------------------------------------------------------------------
 import RCAIDE
 from RCAIDE.Framework.Core import Units,Data    
+from RCAIDE.Library.Methods.Performance.estimate_stall_speed        import estimate_stall_speed 
 
 # ------------------------------------------------------------------
 #   Repeated Flight Operation Setup
@@ -22,8 +23,17 @@ def repeated_flight_operation_setup(configs,analyses,day_group,g_idx,group,days_
     # unpack Segments module
     Segments = RCAIDE.Framework.Mission.Segments  
     base_segment = Segments.Segment()
-    base_segment.temperature_deviation  = 35
+    base_segment.temperature_deviation  = 10
     base_segment.state.numerics.number_of_control_points  = 8
+    atmosphere    = RCAIDE.Framework.Analyses.Atmospheric.US_Standard_1976()
+    atmo_data    = atmosphere.compute_values(altitude = 0, temperature_deviation= base_segment.temperature_deviation)  
+
+      # VSTALL Calculation  
+    vehicle        = analyses.base.aerodynamics.vehicle
+    vehicle_mass   = vehicle.mass_properties.max_takeoff
+    reference_area = vehicle.reference_area 
+    Vstall         = estimate_stall_speed(vehicle_mass,reference_area,altitude = 0.0,maximum_lift_coefficient = 1.2)
+
  
     for d_idx in  range(days_per_group):
         day =  ((group -1) * days_per_group) +  d_idx + 1
@@ -32,7 +42,7 @@ def repeated_flight_operation_setup(configs,analyses,day_group,g_idx,group,days_
             current_flight_no = f_idx + 1
             print(' ***********  Flight ' + str(current_flight_no) + ' ***********  ')
                
-            Vstall =  45
+            
             # ------------------------------------------------------------------
             #   Departure End of Runway Segment Flight 1 : 
             # ------------------------------------------------------------------ 
@@ -44,6 +54,8 @@ def repeated_flight_operation_setup(configs,analyses,day_group,g_idx,group,days_
             segment.air_speed_start                               = Vstall *1.2  
             segment.air_speed_end                                 = Vstall *1.25
             segment.initial_battery_state_of_charge               = 1.0
+            if f_idx == 0: # Resets the battery temp to atmosphereic temperature at the start of every day
+                 segment.battery_cell_temperature =  atmo_data.temperature[0,0]  
             if group != 1 and d_idx == 0:
                 try:
                     segment.charge_throughput            = Data()
@@ -54,10 +66,11 @@ def repeated_flight_operation_setup(configs,analyses,day_group,g_idx,group,days_
                     segment.capacity_fade.bus      = capacity_fade[str(group-1)]
                     segment.cycle_day                    = Data()
                     segment.cycle_day.bus          = cycle_day[str(group-1)]
+                  
                    
                 except KeyError:
                     raise Exception(f"Error: The key '{group-1}' was not found in charge_throughput or cycle_day. Run the simulation for the previous day group.")
-                        
+
             # define flight dynamics to model 
             segment.flight_dynamics.force_x                       = True  
             segment.flight_dynamics.force_z                       = True     
