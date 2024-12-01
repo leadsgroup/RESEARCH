@@ -7,7 +7,7 @@ from mpl_toolkits.mplot3d import Axes3D
 import os
 import pickle
 
-def generate_lhs_samples(variable_limits, num_samples, variable_names,lhs_samples):
+def generate_lhs_samples(variable_limits, num_samples, variable_names,storage_dir):
     
     # Generate Latin Hypercube Samples
     num_variables = len(variable_limits)
@@ -18,7 +18,7 @@ def generate_lhs_samples(variable_limits, num_samples, variable_names,lhs_sample
         np.random.shuffle(samples)
         lhs_samples[:, i] = samples
     
-    save_results(lhs_samples,"LHS Samples")
+    save_results(lhs_samples,"LHS_Samples",storage_dir)
     
     return lhs_samples
 

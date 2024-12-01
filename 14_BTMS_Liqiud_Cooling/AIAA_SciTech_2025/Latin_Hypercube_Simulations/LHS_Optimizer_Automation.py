@@ -15,7 +15,7 @@ import latin_hypercube_sampler
 def main():
     # Define parameters
     total_no_sims = 2#75  # Total number of simulations to run
-    parallel_sims = 2#75 # Number of simulations to run in parallel
+    parallel_sims = 1#75 # Number of simulations to run in parallel
 
     variable_limits = [(1000, 12500), (500, 9000), (0.1, 0.6)]
     variable_names  = ['Power_HAS', 'Power_HEX', 'Dim_RES']
