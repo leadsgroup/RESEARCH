@@ -319,10 +319,8 @@ def vehicle_setup(redesign_rotors=True) :
     rudder.deflection                     = 0.0  * Units.deg
     rudder.chord_fraction                 = 0.4
     wing.append_control_surface(rudder)  
-    
         
-    # add to vehicle 
-    wing_segmented_planform(wing, overwrite_reference = True ) 
+    # add to vehicle  
     vehicle.append_component(wing)     
       
     #------------------------------------------------------------------------------------------------------------------------------------

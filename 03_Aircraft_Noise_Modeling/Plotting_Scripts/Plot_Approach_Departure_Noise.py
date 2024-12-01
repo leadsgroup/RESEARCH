@@ -1,19 +1,28 @@
 # RCAIDE Imports 
-from  RCAIDE.Core import Data, Units  
+from  RCAIDE.Framework.Core import Data, Units
+from RCAIDE.Library.Plots  import *
+import plotly.graph_objects as go 
+from RCAIDE import  load 
+from RCAIDE import  save
 
 # Python Imports  
 import numpy as np   
 import pickle 
 import matplotlib.pyplot as plt  
-import matplotlib.cm as cm 
-from MARC.Visualization.Noise.post_process_noise_data import post_process_noise_data
+import matplotlib.cm as cm  
+import  os
+import  sys
 
+local_path_1 =  os.path.split(sys.path[0])[0]
+
+sys.path.append( os.path.join(local_path_1, 'Approach_Departure_Noise'))
 # ----------------------------------------------------------------------
 #   Main
 # ---------------------------------------------------------------------- 
 def main():  
 
-    save_figure = True 
+    save_figure = True
+    show_figure = True
     filetype    = '.png'
     
     # Universal Plot Settings 
@@ -38,77 +47,46 @@ def main():
     plot_parameters.legend_font      = 20                             # legend_font_size          
     
   
-    aircraft_tags  = ['TR','HC','SR'] 
-    angles         = [0,45,90,135,180]      
-    num_aircrafts  = len(aircraft_tags) 
-    
-    
-    for a_i in range(num_aircrafts):
+    aircraft_tags  = ['HC','TR','SR']       
+
+    filename_list = ['HC_Processed_Noise', 'TR_Processed_Noise', 'TSR_Processed_Noise'] 
+    for i, postprocessed_filename in enumerate(filename_list):
         
-        for i in range(len(angles)):  
-            
-            # initialize plots 
-            filename     = 'Raw_Data_' + aircraft_tags[a_i]  + '/'  + aircraft_tags[a_i]  + '_TG_Noise_Angle_' + str(angles[i]) 
-            results      = load_results(filename)  
-
-            fig = plt.figure(filename)    
-            fig.set_size_inches(plot_parameters.figure_width,plot_parameters.figure_height)  
-            axis = fig.add_subplot(1,1,1)       
-             
-            # format results 
-            noise_data   = post_process_noise_data(results)  
-            SPL          = noise_data.SPL_dBA    
-            max_SPL      = np.flip(np.max(SPL,axis=0),axis = 1)      
-               
+        # --------------------------------------------------------------------------------------    
+        # CONTOUR PLOT
+        # -------------------------------------------------------------------------------------- 
+        separator       = os.path.sep
+        relative_path   = sys.path[-1] + separator       
         
-            Range_x    = noise_data.receptor_locations[:,0,0]/Units.nmi + 0.5
-            Range_y    = noise_data.receptor_locations[0,:,1]/Units.nmi + 1.0
-            Y, X       = np.meshgrid(Range_y, Range_x)     
+        results = load(relative_path + postprocessed_filename + '.res')
+        
+        fig_name = aircraft_tags[i] + '_Approach_Contour'
+        fig      = plt.figure(fig_name)    
+        fig.set_size_inches(plot_parameters.figure_width,plot_parameters.figure_height)  
+        axis     = fig.add_subplot(1,1,1)       
             
-
-            #  quantify nodes in bands at airports   
-            aircraft_band_45_65   = percent_exposure(max_SPL, 45, 65)     
-            aircraft_band_65_100   = percent_exposure(max_SPL, 65, 100)   
-            
-            print(filename)
-            print('% 45_65 ', aircraft_band_45_65   ) 
-            print('% 65_90 ', aircraft_band_65_100   )      
-            
-                        
-            levs                = np.linspace(45,90,10)  # np.array([45,50,55,60,70,80,90])  
-            CS                  = axis.contourf(X , Y, max_SPL, levels  = levs, cmap=plt.cm.jet, extend='both')   
-            cbar                = fig.colorbar(CS)
-            cbar.ax.set_ylabel('LA$_{max}$ [dBA]', rotation =  90)      
-            axis.set_xlabel('Longitudinal Distance [nmi]')
-            axis.set_ylabel('Latitudinal Distance [nmi]',labelpad = 15) 
-            
-            axis.grid(False)  
-            axis.minorticks_on()    
-            
-            plt.tight_layout()
-            # save results 
-            if save_figure:
-                safe_filename = '../Papers_and_Presentation/Images/' + aircraft_tags[a_i]  + '_TG_Noise_Angle_' + str(angles[i]) 
-                plt.savefig(safe_filename + filetype)   
-         
+        SPL = results.L_max           
+        Y   = results.microphone_locations[:, 1].reshape(432,432)
+        X   = results.microphone_locations[:, 0].reshape(432,432)
+          
+        levs                = np.linspace(35,100,14)   
+        CS                  = axis.contourf(X/Units.feet , Y/Units.feet, SPL, levels  = levs, cmap=plt.cm.jet, extend='both')   
+        cbar                = fig.colorbar(CS)
+        cbar.ax.set_ylabel('L$_{Amax}$ [dBA]', rotation =  90)      
+        axis.set_xlabel('x [ft]')
+        axis.set_ylabel('y [ft]',labelpad = 15) 
+        
+        axis.grid(False)  
+        axis.minorticks_on()     
+        plt.tight_layout()
     
-    return  
+        if save_figure:
+            safe_filename = fig_name
+            plt.savefig(safe_filename + filetype, dpi=600)  
 
-def percent_exposure(X, lower_bound, upper_bound):
-    count = 0
-    x = X.flatten()
-    for i in range(len(x)):
-        if x[i] >= lower_bound and x[i] < upper_bound: 
-            count += 1  
-    return 100*count/len(x)  
-# ------------------------------------------------------------------
-#   Load Results
-# ------------------------------------------------------------------   
-def load_results(filename):  
-    load_file = filename + '.pkl' 
-    with open(load_file, 'rb') as file:
-        results = pickle.load(file) 
-    return results  
+def colorax(vmin, vmax):
+    return dict(cmin=vmin,  cmax=vmax)       
+ 
  
 
 if __name__ == '__main__': 

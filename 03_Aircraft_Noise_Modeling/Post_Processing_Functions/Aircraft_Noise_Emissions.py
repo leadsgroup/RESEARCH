@@ -8,6 +8,7 @@ from RCAIDE.Library.Methods.Noise.Common.background_noise     import background_
 from RCAIDE.Library.Methods.Noise.Metrics                     import *     
 from RCAIDE.Framework.Analyses.Geodesics.Geodesics            import Calculate_Distance
 from RCAIDE.Library.Plots import * 
+import matplotlib.pyplot as plt  
 
 # package imports 
 from scipy.interpolate import griddata
@@ -73,6 +74,51 @@ def read_flight_simulation_results(results, baseline_results, aircraft_origin_co
         
     return noise_results
 
+
+def approach_departure_flight_simulation_results(results):
+    # Unpack settings      
+    settings   = results.segments[0].analyses.noise.settings
+ 
+    # Create data strutures for storing noise data 
+    noise_results          =  Data()
+    noise_results.settings =  Data()   
+    noise_results.settings.number_of_microphone_in_stencil  = settings.number_of_microphone_in_stencil 
+    noise_results.settings.noise_hemisphere_phi_angles      = settings.noise_hemisphere_phi_angles
+    noise_results.settings.noise_hemisphere_theta_angles    = settings.noise_hemisphere_theta_angles
+    noise_results.settings.mean_sea_level_altitude          = settings.mean_sea_level_altitude
+    noise_results.settings.noise_hemisphere_radius          = settings.noise_hemisphere_radius  
+                           
+    
+    # Step 3: Create empty arrays to store noise data 
+    N_segs = len(results.segments) 
+    N_cpts = results.segments[0].state.numerics.number_of_control_points
+
+    noise_results.segment_name            = []
+    noise_results.time                    = np.zeros((N_segs,N_cpts,1 )) 
+    noise_results.segment_length          = np.zeros((N_segs,1)) 
+    noise_results.position_vector         = np.zeros((N_segs,N_cpts,3 )) 
+    noise_results.hemisphere_SPL_dBA      = np.zeros((N_segs,N_cpts, 72)) 
+    
+    # Step 5: loop through segments and store noise 
+    for seg in range(N_segs):  
+        segment                                     = results.segments[seg] 
+        noise_results.segment_name.append(segment.tag)
+        noise_results.time[seg]                     = segment.state.conditions.frames.inertial.time 
+        noise_results.position_vector[seg]          = segment.state.conditions.frames.inertial.position_vector
+        noise_results.hemisphere_SPL_dBA[seg]       = segment.state.conditions.noise.hemisphere_SPL_dBA
+        
+        # compute distance between points on segment (can account for curved segments)
+        x1 = segment.state.conditions.frames.inertial.position_vector[:-1,0]
+        y1 = segment.state.conditions.frames.inertial.position_vector[:-1,1]
+        z1 = segment.state.conditions.frames.inertial.position_vector[:-1,2] 
+        x2 = segment.state.conditions.frames.inertial.position_vector[1:,0]
+        y2 = segment.state.conditions.frames.inertial.position_vector[1:,1]
+        z2 = segment.state.conditions.frames.inertial.position_vector[1:,2]   
+        noise_results.segment_length[seg] = np.sum(np.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2 +  (z2 - z1) ** 2))       
+        
+    return noise_results
+
+
 # ----------------------------------------------------------------------------------------------------------------------
 #  Main 
 # ----------------------------------------------------------------------------------------------------------------------  
@@ -110,7 +156,7 @@ def post_process_noise_data(noise_results, topography_file ,  flight_times, time
     noise_data.aircraft_destination_coordinates   = noise_results.settings.aircraft_destination_coordinates     
     noise_data.microphone_y_resolution            = N_gm_y
     noise_data.microphone_x_resolution            = N_gm_x    
-    number_of_segment_timesteps_default           =  5          
+    number_of_segment_timesteps_default           = 5          
     noise_data.microphone_locations               = microphone_locations.reshape(N_gm_x,N_gm_y,3)
     noise_data.energy_consumed                    = noise_results.energy_consumed
     
@@ -235,6 +281,163 @@ def post_process_noise_data(noise_results, topography_file ,  flight_times, time
          L_dn            = L_dn)
     return  processed_noise_data
 
+
+# ----------------------------------------------------------------------------------------------------------------------
+#  Main 
+# ----------------------------------------------------------------------------------------------------------------------  
+def post_process_approach_departure_noise_data(noise_results, number_of_microphone_in_stencil, noise_evaluation_pitch, aircraft_origin_location,  N_gm_x, N_gm_y, Mic_min_x, Mic_min_y, Mic_max_x, Mic_max_y): 
+    """This translates all noise data into metadata for plotting 
+    
+    Assumptions:
+    None
+    
+    Source: 
+ 
+    Inputs: results 
+         
+    Outputs: noise_data
+    
+    Properties Used:
+    N/A
+    """
+    ti = t.time()
+    
+    # Step 1: Unpack settings       
+    noise_data = Data()   
+     
+    # Step 2: Determing microhpone points where noise is to be computed    
+    N_x                   = N_gm_x
+    N_y                   = N_gm_y
+    num_gm                = N_x*N_y
+    microphone_locations  = np.zeros((num_gm,3))     
+    min_x                 = Mic_min_x         
+    max_x                 = Mic_max_x         
+    min_y                 = Mic_min_y         
+    max_y                 = Mic_max_y   
+    x_coords_0            = np.repeat(np.linspace(min_x,max_x,N_x)[:,np.newaxis],N_y, axis = 1)
+    y_coords_0            = np.repeat(np.linspace(min_y,max_y,N_y)[:,np.newaxis],N_x, axis = 1).T
+    z_coords_0            = np.zeros_like(x_coords_0) 
+    microphone_locations[:,0] = x_coords_0.reshape(num_gm)
+    microphone_locations[:,1] = y_coords_0.reshape(num_gm)
+    microphone_locations[:,2] = z_coords_0.reshape(num_gm)  
+         
+    noise_data.microphone_y_resolution            = N_gm_y
+    noise_data.microphone_x_resolution            = N_gm_x    
+    number_of_segment_timesteps_default           = 5          
+    noise_data.microphone_locations               = microphone_locations.reshape(N_gm_x,N_gm_y,3) 
+    
+    # Step 3: Create empty arrays to store noise data 
+    N_segs = len(noise_results.time[:, 0, 0]) 
+    
+    # Step 4: Initalize Arrays 
+    Time         = np.empty((0))
+    idx =  0
+     
+    # Step 5: loop through segments and store noise 
+    for seg in range(N_segs):
+        # Step 5.1  unpack properties      
+        time                     = noise_results.time[seg][:,0] 
+        
+        # Step 5.2 compute number of timesteps in segment
+        if noise_evaluation_pitch < noise_results.segment_length[seg][0]:  
+            number_of_segment_timesteps = int(np.ceil(noise_results.segment_length[seg][0] / noise_evaluation_pitch)) 
+            noise_time = np.linspace(time[0],time[-1], number_of_segment_timesteps)
+        else:
+            noise_time = np.linspace(time[0],time[-1],number_of_segment_timesteps_default)
+        # Step 5.3: Compute aircraft position and npose at interpolated hemisphere locations
+        cpt   = 0 
+        if seg == (N_segs - 1):
+            noise_time_ = noise_time 
+        else:
+            noise_time_ = noise_time[:-1] 
+        Time = np.hstack((Time,noise_time_))
+        
+    BG                    =  background_noise()   
+    SPL_dBA               = np.ones((len(Time),N_gm_x,N_gm_y)) *BG
+    Aircraft_pos          = np.zeros((len(Time),3))
+    mic_locs              = np.zeros((len(Time),number_of_microphone_in_stencil))  
+    
+    # Step 5: loop through segments and store noise 
+    for seg in range(N_segs):
+        # Step 5.1  unpack properties 
+        phi                      = noise_results.settings.noise_hemisphere_phi_angles
+        theta                    = noise_results.settings.noise_hemisphere_theta_angles
+        mean_sea_level_altitude  = noise_results.settings.mean_sea_level_altitude
+        time                     = noise_results.time[seg][:,0]
+        position_vector          = noise_results.position_vector[seg]
+        hemisphere_SPL_dBA       = noise_results.hemisphere_SPL_dBA[seg]
+        
+        # Step 5.2 compute number of timesteps in segment
+        if noise_evaluation_pitch < noise_results.segment_length[seg][0]:  
+            number_of_segment_timesteps = int(np.ceil(noise_results.segment_length[seg][0] / noise_evaluation_pitch)) 
+            noise_time = np.linspace(time[0],time[-1], number_of_segment_timesteps)
+        else:
+            noise_time = np.linspace(time[0],time[-1],number_of_segment_timesteps_default)
+        # Step 5.3: Compute aircraft position and npose at interpolated hemisphere locations
+        cpt   = 0 
+        if seg == (N_segs - 1):
+            noise_time_ = noise_time 
+        else:
+            noise_time_ = noise_time[:-1] 
+        
+        for i in range(len(noise_time_)):
+            
+            # Step 5.2.1 : Compute relative microhpone locations
+            time_step =  np.array([noise_time[i]])
+            current_position,locs,R,pts  = compute_relative_noise_evaluation_locations(mean_sea_level_altitude,time_step,aircraft_origin_location,microphone_locations,position_vector,time,number_of_microphone_in_stencil) 
+            
+            Aircraft_pos[i] = current_position
+            
+            
+            # Step 5.2.2 :Noise interpolation             
+            delta_t         = (noise_time[i] -time[cpt]) / (time[cpt+1] - time[cpt])
+            SPL_lower       = hemisphere_SPL_dBA[cpt].reshape(len(phi),len(theta))
+            SPL_uppper      = hemisphere_SPL_dBA[cpt+1].reshape(len(phi),len(theta))
+            SPL_gradient    = SPL_uppper -  SPL_lower
+            SPL_interp      = SPL_lower + SPL_gradient *delta_t     
+           
+            if (noise_results.segment_name[seg] == 'Cruise') and (i != 0): # create surrogate only if you are not in cruise and i is not equal to zero
+                pass
+            else:
+                #  Step 5.2.3 Create surrogate   
+                SPL_dBA_surrogate = RegularGridInterpolator((phi, theta),SPL_interp  ,method = 'linear',   bounds_error=False, fill_value=None)       
+                                
+                SPL_dBA_unscaled  = SPL_dBA_surrogate(pts)
+             
+            #  Step 5.2.5 Scale data using radius  
+            R_ref                = noise_results.settings.noise_hemisphere_radius  
+            SPL_dBA_scaled       = SPL_dBA_unscaled - 20*np.log10(R/R_ref)  
+            noise                = np.nan_to_num(SPL_dBA_scaled)
+            noise[noise<BG] = BG
+
+            SPL_dBA_i            = np.zeros((N_gm_x,N_gm_y))                                
+            SPL_dBA_temp         = SPL_dBA_i.flatten()
+            SPL_dBA_temp[locs]   = noise
+    
+            # Step 5.2.6 concatenate noise for each timestep  
+            SPL_dBA[idx]         = SPL_dBA_temp.reshape(N_gm_x,N_gm_y)     
+            
+            # Stpe 5.2.7 store indexes of microhpone locations  
+            mic_locs[idx]        = locs
+            
+            idx += 1            
+            if noise_time[i] >= time[cpt+1]:
+                cpt += 1     
+    
+    L_max = np.max(SPL_dBA, axis= 0)  
+     
+    tf = t.time() 
+    print("Total Processing Time: "+str(tf-ti))    
+    
+    processed_noise_data      = Data(  
+         flight_time          = Time,
+         trajectory           = Aircraft_pos,
+         hemisphere_noise     = hemisphere_SPL_dBA[-1],
+         microphone_locations = microphone_locations, 
+         phi                  = phi,
+         theta                = theta, 
+         L_max                = L_max)
+    return  processed_noise_data
 
   
 # ----------------------------------------------------------------------------------------------------------------------  

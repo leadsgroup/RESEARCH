@@ -138,8 +138,6 @@ def plot_2D_noise_contour(microphone_coordinates,
     if use_lat_long_coordinates and (topography_file != None ):
         LAT  = microphone_coordinates[:,:,0]
         LONG = microphone_coordinates[:,:,1]
-        axis.set_xlabel('Longitude [°]')
-        axis.set_ylabel('Latitude [°]') 
     else:
         LAT  = microphone_locations[:,:,0]
         LONG = microphone_locations[:,:,1]
