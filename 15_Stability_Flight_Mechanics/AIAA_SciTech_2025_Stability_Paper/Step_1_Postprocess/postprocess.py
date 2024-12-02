@@ -22,7 +22,7 @@ def main():
     #   Load Results
     # ------------------------------------------------------------------    
     
-    excel_file_name_1                   = "/Users/aidanmolloy/Documents/LEADS/RESEARCH/15_Stability_Flight_Mechanics/AIAA_SciTech_2025_Stability_Paper/Step_1_Simulations/025_00_00_40_00_00_Baseline_stick_fixed_cruise_Opt_Results.xlsx"
+    excel_file_name_1                   = "C:/Users/Matteo/Documents/UIUC/RESEARCH/15_Stability_Flight_Mechanics/AIAA_SciTech_2025_Stability_Paper/Step_1_Simulations/025_00_00_40_00_00_Baseline_stick_fixed_cruise_Opt_Results.xlsx"
     Baseline_Opt_Vehicle_1_pkl          = "025_00_00_40_00_00_Baseline_Opt_Vehicle"
     Optimized_Vehicle_1_pkl             = "025_00_00_40_00_00_Optimized_Vehicle"
     Output_Stick_Fixed_1_pkl            = "025_00_00_40_00_00_Output_Stick_Fixed"
@@ -31,7 +31,7 @@ def main():
     Optimized_Vehicle_1                 = load_results(Optimized_Vehicle_1_pkl            )
     Output_Stick_Fixed_1                = load_results(Output_Stick_Fixed_1_pkl           )
                                
-    excel_file_name_2                   = "/Users/aidanmolloy/Documents/LEADS/RESEARCH/15_Stability_Flight_Mechanics/AIAA_SciTech_2025_Stability_Paper/Step_1_Simulations/025_00_00_41_00_00_Baseline_stick_fixed_cruise_Opt_Results.xlsx"
+    excel_file_name_2                   = "C:/Users/Matteo/Documents/UIUC/RESEARCH/15_Stability_Flight_Mechanics/AIAA_SciTech_2025_Stability_Paper/Step_1_Simulations/025_00_00_41_00_00_Baseline_stick_fixed_cruise_Opt_Results.xlsx"
     Baseline_Opt_Vehicle_2_pkl          = "025_00_00_41_00_00_Baseline_Opt_Vehicle"
     Optimized_Vehicle_2_pkl             = "025_00_00_41_00_00_Optimized_Vehicle"
     Output_Stick_Fixed_2_pkl            = "025_00_00_41_00_00_Output_Stick_Fixed"
@@ -58,7 +58,7 @@ def main():
     CM_residual                         = np.array([excel_data_1.CM_residual               [0], excel_data_2.CM_residual               [0]])
     spiral_criteria                     = np.array([excel_data_1.spiral_criteria           [0], excel_data_2.spiral_criteria           [0]])
     static_margin                       = np.array([excel_data_1.static_margin             [0], excel_data_2.static_margin             [0]])
-    C_m_alpha                            = np.array([excel_data_1.CM_alpha                  [0], excel_data_2.CM_alpha                  [0]])
+    C_m_alpha                           = np.array([excel_data_1.CM_alpha                  [0], excel_data_2.CM_alpha                  [0]])
     phugoid_damping_ratio               = np.array([excel_data_1.phugoid_damping_ratio     [0], excel_data_2.phugoid_damping_ratio     [0]])
     short_period_damping_ratio          = np.array([excel_data_1.short_period_damping_ratio[0], excel_data_2.short_period_damping_ratio[0]])
     dutch_roll_frequency                = np.array([excel_data_1.dutch_roll_frequency      [0], excel_data_2.dutch_roll_frequency      [0]])
@@ -152,7 +152,8 @@ def main():
 
 def load_results(filename):  
     # Define the directory where the file is located
-    current_dir = '/Users/aidanmolloy/Documents/LEADS/RESEARCH/15_Stability_Flight_Mechanics/AIAA_SciTech_2025_Stability_Paper/Step_1_Simulations'
+    #current_dir = '/Users/aidanmolloy/Documents/LEADS/RESEARCH/15_Stability_Flight_Mechanics/AIAA_SciTech_2025_Stability_Paper/Step_1_Simulations'
+    current_dir = 'C:/Users/Matteo/Documents/UIUC/RESEARCH/15_Stability_Flight_Mechanics/AIAA_SciTech_2025_Stability_Paper/Step_1_Simulations'
     
     # Combine directory and filename to get full path
     load_file = os.path.join(current_dir, filename + '.pkl')
@@ -208,9 +209,9 @@ def base_analysis(vehicle):
     
     # ------------------------------------------------------------------
     #  Weights
-    #weights         = RCAIDE.Framework.Analyses.Weights.Weights_EVTOL()
-    #weights.vehicle = vehicle
-    #analyses.append(weights)
+    weights         = RCAIDE.Framework.Analyses.Weights.Weights_EVTOL()
+    weights.vehicle = vehicle
+    analyses.append(weights)
 
     # ------------------------------------------------------------------
     #  Aerodynamics Analysis
@@ -228,9 +229,9 @@ def base_analysis(vehicle):
 
     # ------------------------------------------------------------------
     #  Energy
-    #energy          = RCAIDE.Framework.Analyses.Energy.Energy()
-    #energy.vehicle = vehicle 
-    #analyses.append(energy)
+    energy          = RCAIDE.Framework.Analyses.Energy.Energy()
+    energy.vehicle = vehicle 
+    analyses.append(energy)
 
     # ------------------------------------------------------------------
     #  Planet Analysis
