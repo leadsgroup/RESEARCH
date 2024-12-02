@@ -57,16 +57,19 @@ def main():
     
     
     # prop rotor battery module (first module)
-    #                 CG: X,    Y,  Z 
-    CG_bat_1 = np.array([[0.25, 0., 0.],
-                         [0.35, 0., 0.],
-                         [0.45, 0., 0.]])
+    #                 CG: X,    Y,    Z 
+    CG_bat_1 = np.array([[0.25, 0.,   0.],
+                         [0.35, 0.,   0.],
+                         [0.45, 0.,   0.],
+                         [0.25, 0.25, 0.],
+                         [0.25, 0.35, 0.],
+                         [0.25, 0.45, 0.]])
     
     # lift rotor battery modules
-    #                 CG: X,    Y,  Z 
-    CG_bat_2 = np.array([[4.0,  0., 0.],
-                         [4.1,  0., 0.],
-                         [4.2,  0., 0.]])   
+    #                 CG: X,    Y,    Z 
+    CG_bat_2 = np.array([[4.0,  0.,   0.],
+                         [4.1,  0.,   0.],
+                         [4.2,  0.,   0.]])   
  
     for i in range(len(CG_bat_1)):
         for j in range(len(CG_bat_2)):
