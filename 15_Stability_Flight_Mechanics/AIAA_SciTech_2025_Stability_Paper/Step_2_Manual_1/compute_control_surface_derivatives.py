@@ -23,7 +23,21 @@ def  main():
     
     derivatives, results                      = compute_rudder_aileron_derivatives(aileron_size, rudder_size, vehicle,  seg_num=0)
     
-    C_w                                       = W/(0.5*rho*(V**2)*S)                                                              
+    W                                         = 1
+    rho                                       = 1
+    v                                         = 1
+    S                                         = 1
+    b                                         = 1
+    T                                         = 525 # [N]
+    arm                                       = 9.2 # [m]
+    beta                                      = 1
+    C_l_0                                     = 1
+    C_l_beta                                  = 1
+    C_l_delta_a                               = 1
+    C_l_delta_r                               = 1
+    C_n_beta                                  = 1
+    C_n_delta_a                               = 1
+    C_n_delta_r                               = 1                                                           
     C_n_0                                     = - (T*arm)/(0.5*rho*(v**2)*S*b)
     
     delta_r                                   = (-(C_l_0/C_l_delta_r) - (C_l_beta/C_l_delta_r)*beta + (C_l_delta_a/C_l_delta_r)*(C_n_0/C_n_delta_a) + (C_l_delta_a/C_l_delta_r)*(C_n_beta/C_n_delta_a)*beta)/(1 - ((C_l_delta_a)/(C_l_delta_r))*((C_n_delta_r)/(C_n_delta_a)))

@@ -4,75 +4,110 @@
 
 # RCAIDE imports 
 import RCAIDE
-from   RCAIDE.Framework.Core                                                             import Units   
-from   RCAIDE.Library.Plots                                                              import *     
+from   RCAIDE.Framework.Core import Units   
+from   RCAIDE.Library.Plots  import *     
 
 # python imports 
-import numpy             as np  
-import matplotlib.pyplot as plt  
+import numpy                 as np  
+import matplotlib.pyplot     as plt  
 import os   
 import pickle
-import pandas as pd
-from   scipy.interpolate import interp1d
-from   sklearn.linear_model import LinearRegression
+import pandas                as pd
+from   sklearn.linear_model  import LinearRegression
 
 def main():
     
     # ------------------------------------------------------------------
     #   Load Results
-    # ------------------------------------------------------------------    
+    # ------------------------------------------------------------------  
     
-    excel_file_name_1                   = "C:/Users/Matteo/Documents/UIUC/RESEARCH/15_Stability_Flight_Mechanics/AIAA_SciTech_2025_Stability_Paper/Step_1_Simulations/025_00_00_40_00_00_Baseline_stick_fixed_cruise_Opt_Results.xlsx"
-    Baseline_Opt_Vehicle_1_pkl          = "025_00_00_40_00_00_Baseline_Opt_Vehicle"
-    Optimized_Vehicle_1_pkl             = "025_00_00_40_00_00_Optimized_Vehicle"
-    Output_Stick_Fixed_1_pkl            = "025_00_00_40_00_00_Output_Stick_Fixed"
-    Planform_Optimization_Problem_1_pkl = "025_00_00_40_00_00_Planform_Optimization_Problem"
-    excel_data_1                        = read_results(excel_file_name_1       )
-    Optimized_Vehicle_1                 = load_results(Optimized_Vehicle_1_pkl )
-    Output_Stick_Fixed_1                = load_results(Output_Stick_Fixed_1_pkl)
-                               
-    excel_file_name_2                   = "C:/Users/Matteo/Documents/UIUC/RESEARCH/15_Stability_Flight_Mechanics/AIAA_SciTech_2025_Stability_Paper/Step_1_Simulations/025_00_00_41_00_00_Baseline_stick_fixed_cruise_Opt_Results.xlsx"
-    Baseline_Opt_Vehicle_2_pkl          = "025_00_00_41_00_00_Baseline_Opt_Vehicle"
-    Optimized_Vehicle_2_pkl             = "025_00_00_41_00_00_Optimized_Vehicle"
-    Output_Stick_Fixed_2_pkl            = "025_00_00_41_00_00_Output_Stick_Fixed"
-    Planform_Optimization_Problem_2_pkl = "025_00_00_41_00_00_Planform_Optimization_Problem"
-    excel_data_2                        = read_results(excel_file_name_2       )
-    Optimized_Vehicle_2                 = load_results(Optimized_Vehicle_2_pkl )
-    Output_Stick_Fixed_2                = load_results(Output_Stick_Fixed_2_pkl)        
+    excel_files = [
+        "C:/Users/Matteo/Documents/UIUC/RESEARCH/15_Stability_Flight_Mechanics/AIAA_SciTech_2025_Stability_Paper/Step_1_Simulations/025_00_00_40_00_00_Baseline_stick_fixed_cruise_Opt_Results.xlsx",
+        "C:/Users/Matteo/Documents/UIUC/RESEARCH/15_Stability_Flight_Mechanics/AIAA_SciTech_2025_Stability_Paper/Step_1_Simulations/025_00_00_40_00_00_Baseline_stick_fixed_cruise_Opt_Results.xlsx"
+    ]
+    pkl_files = {
+        "Optimized_Vehicle": [
+            "025_00_00_40_00_00_Optimized_Vehicle",
+            "025_00_00_40_00_00_Optimized_Vehicle"
+        ],
+        "Output_Stick_Fixed": [
+            "025_00_00_40_00_00_Output_Stick_Fixed",
+            "025_00_00_40_00_00_Output_Stick_Fixed"
+        ]
+    }
     
-    results1    = run_mission(Optimized_Vehicle_1)
+    # Initialize lists to store data
+    mw_root_twist, mw_tip_twist, vt_span, vt_AR, ht_span, ht_AR, AoA, CD, CM_residual, spiral_criteria, static_margin = [], [], [], [], [], [], [], [], [], [], []
+    C_m_alpha, phugoid_damping_ratio, short_period_damping_ratio, dutch_roll_frequency, dutch_roll_damping_ratio, spiral_doubling_time, run_time = [], [], [], [], [], [], []
+    x_CG, I_xx, I_yy, I_zz = [], [], [], []
+    LonModes, LatModes, phugoidDamping, phugoidTimeDoubleHalf, shortPeriodDamping, shortPeriodTimeDoubleHalf = [], [], [], [], [], []
     
-    # ------------------------------------------------------------------
-    #   Assign Variables 
-    # ------------------------------------------------------------------      
+    for i in range(len(excel_files)):
+        excel_data         = read_results(excel_files[i])
+        Optimized_Vehicle  = load_results(pkl_files["Optimized_Vehicle"][i])
+        Output_Stick_Fixed = load_results(pkl_files["Output_Stick_Fixed"][i])
+        results            = run_mission(Optimized_Vehicle)
+        
+        mw_root_twist.append(excel_data.mw_root_twist[0])
+        mw_tip_twist.append(excel_data.mw_tip_twist[0])
+        vt_span.append(excel_data.vt_span[0])
+        vt_AR.append(excel_data.vt_AR[0])
+        ht_span.append(excel_data.ht_span[0])
+        ht_AR.append(excel_data.ht_AR[0])
+        AoA.append(excel_data.AoA[0])
+        CD.append(excel_data.CD[0])
+        CM_residual.append(excel_data.CM_residual[0])
+        spiral_criteria.append(excel_data.spiral_criteria[0])
+        static_margin.append(excel_data.static_margin[0])
+        C_m_alpha.append(results.segments[0].conditions.static_stability.derivatives.CM_alpha[0][0])
+        phugoid_damping_ratio.append(excel_data.phugoid_damping_ratio[0])
+        short_period_damping_ratio.append(excel_data.short_period_damping_ratio[0])
+        dutch_roll_frequency.append(excel_data.dutch_roll_frequency[0])
+        dutch_roll_damping_ratio.append(excel_data.dutch_roll_damping_ratio[0])
+        spiral_doubling_time.append(excel_data.spiral_doubling_time[0])
+        run_time.append(excel_data.run_time[0])
     
-    mw_root_twist                       = np.array([excel_data_1.mw_root_twist             [0], excel_data_2.mw_root_twist             [0]])
-    mw_tip_twist                        = np.array([excel_data_1.mw_tip_twist              [0], excel_data_2.mw_tip_twist              [0]])
-    vt_span                             = np.array([excel_data_1.vt_span                   [0], excel_data_2.vt_span                   [0]])
-    vt_AR                               = np.array([excel_data_1.vt_AR                     [0], excel_data_2.vt_AR                     [0]])
-    ht_span                             = np.array([excel_data_1.ht_span                   [0], excel_data_2.ht_span                   [0]])
-    ht_AR                               = np.array([excel_data_1.ht_AR                     [0], excel_data_2.ht_AR                     [0]])
-    AoA                                 = np.array([excel_data_1.AoA                       [0], excel_data_2.AoA                       [0]])
-    CD                                  = np.array([excel_data_1.CD                        [0], excel_data_2.CD                        [0]])
-    CM_residual                         = np.array([excel_data_1.CM_residual               [0], excel_data_2.CM_residual               [0]])
-    spiral_criteria                     = np.array([excel_data_1.spiral_criteria           [0], excel_data_2.spiral_criteria           [0]])
-    static_margin                       = np.array([excel_data_1.static_margin             [0], excel_data_2.static_margin             [0]])
-    C_m_alpha                           = np.array([excel_data_1.CM_alpha                  [0], excel_data_2.CM_alpha                  [0]])
-    phugoid_damping_ratio               = np.array([excel_data_1.phugoid_damping_ratio     [0], excel_data_2.phugoid_damping_ratio     [0]])
-    short_period_damping_ratio          = np.array([excel_data_1.short_period_damping_ratio[0], excel_data_2.short_period_damping_ratio[0]])
-    dutch_roll_frequency                = np.array([excel_data_1.dutch_roll_frequency      [0], excel_data_2.dutch_roll_frequency      [0]])
-    dutch_roll_damping_ratio            = np.array([excel_data_1.dutch_roll_damping_ratio  [0], excel_data_2.dutch_roll_damping_ratio  [0]])
-    spiral_doubling_time                = np.array([excel_data_1.spiral_doubling_time      [0], excel_data_2.spiral_doubling_time      [0]])
-    run_time                            = np.array([excel_data_1.run_time                  [0], excel_data_2.run_time                  [0]])
-                                        
-    x_CG                                = np.array([Optimized_Vehicle_1.mass_properties.center_of_gravity        [0][0], Optimized_Vehicle_2.mass_properties.center_of_gravity        [0][0]])
-    I_xx                                = np.array([Optimized_Vehicle_1.mass_properties.moments_of_inertia.tensor[0, 0], Optimized_Vehicle_2.mass_properties.moments_of_inertia.tensor[0, 0]])
-    I_yy                                = np.array([Optimized_Vehicle_1.mass_properties.moments_of_inertia.tensor[1, 1], Optimized_Vehicle_2.mass_properties.moments_of_inertia.tensor[1, 1]])
-    I_zz                                = np.array([Optimized_Vehicle_1.mass_properties.moments_of_inertia.tensor[2, 2], Optimized_Vehicle_2.mass_properties.moments_of_inertia.tensor[2, 2]])
-
-    C_m_alpha                           = np.array([results1.segments[0].conditions.static_stability.derivatives.CL_beta[0][0], results1.segments[0].conditions.static_stability.derivatives.CL_beta[0][0]])
-
-
+        x_CG.append(Optimized_Vehicle.mass_properties.center_of_gravity[0][0])
+        I_xx.append(Optimized_Vehicle.mass_properties.moments_of_inertia.tensor[0, 0])
+        I_yy.append(Optimized_Vehicle.mass_properties.moments_of_inertia.tensor[1, 1])
+        I_zz.append(Optimized_Vehicle.mass_properties.moments_of_inertia.tensor[2, 2])
+    
+        LonModes.append(results.segments[0].conditions.dynamic_stability.LongModes.LongModes[0])
+        LatModes.append(results.segments[0].conditions.dynamic_stability.LatModes.LatModes[0])
+        phugoidDamping.append(results.segments[0].conditions.dynamic_stability.LongModes.phugoidDamping[0])
+        phugoidTimeDoubleHalf.append(results.segments[0].conditions.dynamic_stability.LongModes.phugoidTimeDoubleHalf[0])
+        shortPeriodDamping.append(results.segments[0].conditions.dynamic_stability.LongModes.shortPeriodDamping[0])
+        shortPeriodTimeDoubleHalf.append(results.segments[0].conditions.dynamic_stability.LongModes.shortPeriodTimeDoubleHalf[0])
+    
+    mw_root_twist              = np.array(mw_root_twist)
+    mw_tip_twist               = np.array(mw_tip_twist)
+    vt_span                    = np.array(vt_span)
+    vt_AR                      = np.array(vt_AR)
+    ht_span                    = np.array(ht_span)
+    ht_AR                      = np.array(ht_AR)
+    AoA                        = np.array(AoA)
+    CD                         = np.array(CD)
+    CM_residual                = np.array(CM_residual)
+    spiral_criteria            = np.array(spiral_criteria)
+    static_margin              = np.array(static_margin)
+    C_m_alpha                  = np.array(C_m_alpha)
+    phugoid_damping_ratio      = np.array(phugoid_damping_ratio)
+    short_period_damping_ratio = np.array(short_period_damping_ratio)
+    dutch_roll_frequency       = np.array(dutch_roll_frequency)
+    dutch_roll_damping_ratio   = np.array(dutch_roll_damping_ratio)
+    spiral_doubling_time       = np.array(spiral_doubling_time)
+    run_time                   = np.array(run_time)
+    x_CG                       = np.array(x_CG)
+    I_xx                       = np.array(I_xx)
+    I_yy                       = np.array(I_yy)
+    I_zz                       = np.array(I_zz)
+    LonModes                   = np.array(LonModes)
+    LatModes                   = np.array(LatModes)
+    phugoidDamping             = np.array(phugoidDamping)
+    phugoidTimeDoubleHalf      = np.array(phugoidTimeDoubleHalf)
+    shortPeriodDamping         = np.array(shortPeriodDamping)
+    shortPeriodTimeDoubleHalf  = np.array(shortPeriodTimeDoubleHalf)
+    
     # ------------------------------------------------------------------
     #   Regression CG
     # ------------------------------------------------------------------ 
@@ -91,7 +126,7 @@ def main():
     d_C_m_alpha_dx1   = np.full_like(x_dense1, slope1)
     
     # ------------------------------------------------------------------
-    #   Plots
+    #   CG Plot
     # ------------------------------------------------------------------ 
     
     plot_parameters = plot_style()
@@ -130,7 +165,7 @@ def main():
     d_C_m_alpha_dx2   = np.full_like(x_dense2, slope2)    
     
     # ------------------------------------------------------------------
-    #   Plots
+    #   MOI Plot
     # ------------------------------------------------------------------ 
     
     plot_parameters = plot_style()
@@ -151,6 +186,35 @@ def main():
     ax2.tick_params(axis='y', labelcolor='red')
     fig.tight_layout()
     fig.subplots_adjust(right=0.85)
+    
+    # ------------------------------------------------------------------
+    #   Root locus Plot
+    # ------------------------------------------------------------------
+    
+    plot_parameters = plot_style()
+    real_parts = LatModes.real
+    imaginary_parts = LatModes.imag
+    
+
+    fig, ax = plt.subplots(figsize=(8, 6))
+    colors = ['blue', 'green']
+    labels = [f"Static Margin {sm:.4f}" for sm in static_margin]
+    for i in range(len(static_margin)):
+        ax.plot(real_parts[i], imaginary_parts[i], plot_parameters.line_style[0], 
+                label=labels[i], color=colors[i], linewidth=plot_parameters.line_width, 
+                marker=plot_parameters.markers[i])
+        for j in range(1, len(real_parts[i])):
+            ax.annotate('', xy=(real_parts[i][j], imaginary_parts[i][j]),
+                        xytext=(real_parts[i][j-1], imaginary_parts[i][j-1]),
+                        arrowprops=dict(facecolor=colors[i], arrowstyle='->', lw=0.5))
+    
+    ax.set_xlabel("n (s$^{-1}$)", fontsize=plot_parameters.axis_font_size)
+    ax.set_ylabel("$\omega$ (rad/s)", fontsize=plot_parameters.axis_font_size)
+    ax.axhline(0, color='black', linewidth=0.8, linestyle='--')  # Horizontal line at Imaginary=0
+    ax.axvline(0, color='black', linewidth=0.8, linestyle='--')  # Vertical line at Real=0
+    ax.grid()
+    ax.legend(loc="best", fontsize=plot_parameters.legend_fontsize)
+    plt.tight_layout()
     plt.show()
 
     return
