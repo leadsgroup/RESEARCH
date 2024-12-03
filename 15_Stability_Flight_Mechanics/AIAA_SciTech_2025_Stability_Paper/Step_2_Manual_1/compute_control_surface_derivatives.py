@@ -13,52 +13,72 @@ import pickle
 
 def main():
     
-    print("Choose a control surface analysis")
+    # -------------------------------------------------------------
+    #  Aileron & Rudder
+    # -------------------------------------------------------------
+    
+    # Create arrays of aileron and rudder sizes
     
     aileron_size                              = np.array([0.5, 0.6])
     rudder_size                               = np.array([0.5, 0.6])
     
-    Optimized_Vehicle_1_pkl                   = "025_00_00_40_00_00_Optimized_Vehicle"
-    vehicle                                   = load_results(Optimized_Vehicle_1_pkl)
-    vehicle                                   = setup_rudder_aileron(vehicle)
+    # Load optimized vehicle
     
-    derivatives, results                      = compute_rudder_aileron_derivatives(aileron_size, rudder_size, vehicle, seg_num=0)
+    #Optimized_Vehicle_1_pkl                   = "025_00_00_40_00_00_Optimized_Vehicle"
+    #vehicle                                   = load_results(Optimized_Vehicle_1_pkl)
     
-    x_aileron, y_aileron, dy_dx_aileron       = regression(aileron_size, derivatives['aileron'])
-    x_rudder, y_rudder, dy_dx_rudder          = regression(aileron_size, derivatives['aileron'])
+    # Append aileron and rudder
     
-    W                                         = 1
+    #vehicle                                   = setup_rudder_aileron(vehicle)
+    
+    # Compute the control derivatives related to the control surfaces
+    
+    #derivatives, results                      = compute_rudder_aileron_derivatives(aileron_size, rudder_size, vehicle, seg_num=0)
+    
+    derivatives_aileron1                      = np.array([0.5, 0.6])
+    derivatives_aileron2                      = np.array([0.5, 0.6])
+    derivatives_rudder1                       = np.array([0.5, 0.6])     
+    derivatives_rudder2                       = np.array([0.5, 0.6]) 
+    
+    # Create the functions describing the control derivatives as functions of control surface size
+    
+    fa1                                       = regression(aileron_size, derivatives_aileron1)
+    fa2                                       = regression(aileron_size, derivatives_aileron2)
+    fr1                                       = regression(rudder_size, derivatives_rudder1)    
+    fr2                                       = regression(rudder_size, derivatives_rudder2)
+    
+    # Import data from vehicle
+    
+    W                                         = 2700*9.81
     rho                                       = 1.225
-    v                                         = 1
-    S                                         = 1
-    b                                         = 1
+    v                                         = 110.  * Units['mph']
+    S                                         = 15.629           
+    b                                         = 11.82855
     T                                         = 525              # [N]
     arm                                       = 9.2              # [m]
     delta_a                                   = 30 * np.pi/180   # [rad/s] 
     delta_r                                   = 30 * np.pi/180   # [rad/s]
     beta                                      = 5 * np.pi/180    # [rad/s]
-    C_l_0                                     = 1
+    C_l_0                                     = 0
     C_l_beta                                  = 1
-    C_l_delta_a                               = 1
-    C_l_delta_r                               = 1
-    C_n_beta                                  = 1
-    C_n_delta_a                               = 1
-    C_n_delta_r                               = 1                                                           
-    C_n_0                                     = - (T*arm)/(0.5*rho*(v**2)*S*b)
+    C_n_beta                                  = 1                                                          
+    C_n_0                                     = -(T*arm)/(0.5*rho*(v**2)*S*b)
     
     #delta_r                                   = (-(C_l_0/C_l_delta_r) - (C_l_beta/C_l_delta_r)*beta + (C_l_delta_a/C_l_delta_r)*(C_n_0/C_n_delta_a) + (C_l_delta_a/C_l_delta_r)*(C_n_beta/C_n_delta_a)*beta)/(1 - ((C_l_delta_a)/(C_l_delta_r))*((C_n_delta_r)/(C_n_delta_a)))
     #delta_a                                   = (-C_n_0 - C_n_beta*beta - C_n_delta_r*delta_r)/C_n_delta_a
     
-    def system(vars):
-        x, y = vars  # Unpack the variables
-        eq1 = C_l_beta*beta + C_l_delta_a(x)*delta_a + C_l_delta_r(y)*delta_r
-        eq2 = C_n_0 + C_n_beta*beta + C_n_delta_a(x)*delta_a + C_n_delta_r(y)*delta_r
-        return [eq1, eq2]
-
-    initial_guess = [1.0, 2.0]
-
-    solution = fsolve(system, initial_guess)
+    # Setup the system of equations to solve
     
+    def system(vars):
+        x, y = vars  
+        eq1 = C_l_beta*beta + fa1(x)*delta_a + fr1(y)*delta_r
+        eq2 = C_n_0 + C_n_beta*beta + fa2(x)*delta_a + fr2(y)*delta_r
+        return [eq1, eq2]
+    
+    # Solve the system
+
+    initial_guess              = [1.0, 2.0]
+    solution                   = fsolve(system, initial_guess)
     delta_a_size, delta_r_size = solution    
     
     return delta_a_size, delta_r_size 
@@ -82,7 +102,7 @@ def regression(x,y):
     y_new            = linear_regression_function1(x_new)   
     dy_dx            = np.full_like(x_new, slope)    
     
-    return x_new, y_new, dy_dx
+    return linear_regression_function1
 
 def setup_rudder_aileron(vehicle):
     
