@@ -156,6 +156,12 @@ def base_analysis(vehicle):
     analyses.append(aerodynamics)
     
     # ------------------------------------------------------------------
+    #  Stability Analysis
+    stability         = RCAIDE.Framework.Analyses.Stability.Vortex_Lattice_Method() 
+    stability.vehicle = vehicle
+    analyses.append(stability)
+    
+    # ------------------------------------------------------------------
     #  Energy
     # ------------------------------------------------------------------
     energy     = RCAIDE.Framework.Analyses.Energy.Energy()
