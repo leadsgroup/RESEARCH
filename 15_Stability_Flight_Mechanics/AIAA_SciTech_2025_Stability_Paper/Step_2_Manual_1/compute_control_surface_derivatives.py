@@ -11,7 +11,7 @@ from   sklearn.linear_model  import LinearRegression
 import os   
 import pickle
 
-def  main():
+def main():
     
     print("Choose a control surface analysis")
     
@@ -49,8 +49,6 @@ def  main():
     #delta_r                                   = (-(C_l_0/C_l_delta_r) - (C_l_beta/C_l_delta_r)*beta + (C_l_delta_a/C_l_delta_r)*(C_n_0/C_n_delta_a) + (C_l_delta_a/C_l_delta_r)*(C_n_beta/C_n_delta_a)*beta)/(1 - ((C_l_delta_a)/(C_l_delta_r))*((C_n_delta_r)/(C_n_delta_a)))
     #delta_a                                   = (-C_n_0 - C_n_beta*beta - C_n_delta_r*delta_r)/C_n_delta_a
     
-    
-    
     def system(vars):
         x, y = vars  # Unpack the variables
         eq1 = C_l_beta*beta + C_l_delta_a(x)*delta_a + C_l_delta_r(y)*delta_r
@@ -63,7 +61,7 @@ def  main():
     
     delta_a_size, delta_r_size = solution    
     
-    return
+    return delta_a_size, delta_r_size 
 
 def regression(x,y):
     
@@ -86,7 +84,7 @@ def regression(x,y):
     
     return x_new, y_new, dy_dx
 
-def  setup_rudder_aileron(vehicle):
+def setup_rudder_aileron(vehicle):
     
     mw_wing                       = vehicle.wings.main_wing 
     aileron                       = RCAIDE.Library.Components.Wings.Control_Surfaces.Aileron()
@@ -107,7 +105,6 @@ def  setup_rudder_aileron(vehicle):
     vt_wing.append_control_surface(rudder) 
     
     return vehicle
-
 
 def compute_rudder_aileron_derivatives(aileron_size, rudder_size, vehicle,  seg_num=0):           
     # seg_num is the number of the mission segment correspdoning to the segment for which control surface derivatives are being found
@@ -249,10 +246,6 @@ def configs_setup(vehicle):
 
     return configs
  
-
-# ----------------------------------------------------------------------
-#   Define the Mission
-# ---------------------------------------------------------------------- 
 def mission_setup(analyses): 
     
     '''
