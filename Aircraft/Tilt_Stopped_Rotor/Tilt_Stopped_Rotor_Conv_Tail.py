@@ -1052,7 +1052,7 @@ def mission_setup(analyses):
     vehicle_mass   = analyses.base.aerodynamics.vehicle.mass_properties.max_takeoff
     reference_area = analyses.base.aerodynamics.vehicle.reference_area 
     Vstall         = estimate_stall_speed(vehicle_mass,reference_area,altitude = 0.0,maximum_lift_coefficient = 1.2)      
-     
+    '''
     #------------------------------------------------------------------------------------------------------------------------------------  
     # Vertical Climb 
     #------------------------------------------------------------------------------------------------------------------------------------  
@@ -1191,7 +1191,7 @@ def mission_setup(analyses):
     segment.assigned_control_variables.body_angle.active             = True                
                  
     mission.append_segment(segment)  
-
+    '''
     #------------------------------------------------------------------------------------------------------------------------------------  
     # Cruise 
     #------------------------------------------------------------------------------------------------------------------------------------  
@@ -1239,7 +1239,7 @@ def mission_setup(analyses):
        
     mission.append_segment(segment)  
      
-
+    '''
     #------------------------------------------------------------------------------------------------------------------------------------ 
     # Circular approach pattern 
     #------------------------------------------------------------------------------------------------------------------------------------ 
@@ -1328,7 +1328,7 @@ def mission_setup(analyses):
                                                                          'lift_rotor_propulsor_4', 'lift_rotor_propulsor_5', 'lift_rotor_propulsor_6']]
        
     mission.append_segment(segment)  
-    
+    '''
    
     return mission 
 
