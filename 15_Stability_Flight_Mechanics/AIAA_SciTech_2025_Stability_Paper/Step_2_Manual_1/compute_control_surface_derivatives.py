@@ -11,6 +11,7 @@ import os
 import pickle
 
 def  main():
+    
     print("Choose a control surface analysis")
     
     aileron_size                              = np.array([0.5, 0.6])
@@ -21,6 +22,12 @@ def  main():
     vehicle                                   = setup_rudder_aileron(vehicle)
     
     derivatives, results                      = compute_rudder_aileron_derivatives(aileron_size, rudder_size, vehicle,  seg_num=0)
+    
+    C_w                                       = W/(0.5*rho*(V**2)*S)                                                              
+    C_n_0                                     = - (T*arm)/(0.5*rho*(v**2)*S*b)
+    
+    delta_r                                   = (-(C_l_0/C_l_delta_r) - (C_l_beta/C_l_delta_r)*beta + (C_l_delta_a/C_l_delta_r)*(C_n_0/C_n_delta_a) + (C_l_delta_a/C_l_delta_r)*(C_n_beta/C_n_delta_a)*beta)/(1 - ((C_l_delta_a)/(C_l_delta_r))*((C_n_delta_r)/(C_n_delta_a)))
+    delta_a                                   = (-C_n_0 - C_n_beta*beta - C_n_delta_r*delta_r)/C_n_delta_a
     
     return
 
