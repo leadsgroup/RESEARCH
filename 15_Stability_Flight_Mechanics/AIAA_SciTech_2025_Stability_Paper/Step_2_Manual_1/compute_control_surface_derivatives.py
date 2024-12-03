@@ -19,7 +19,8 @@ def  main():
     Optimized_Vehicle_1_pkl                   = "025_00_00_40_00_00_Optimized_Vehicle"
     vehicle                                   = load_results(Optimized_Vehicle_1_pkl)
     vehicle                                   = setup_rudder_aileron(vehicle)
-    derivatives = compute_rudder_aileron_derivatives(aileron_size, rudder_size, vehicle,  seg_num=0)
+    
+    derivatives, results                      = compute_rudder_aileron_derivatives(aileron_size, rudder_size, vehicle,  seg_num=0)
     
     return
 
@@ -101,7 +102,7 @@ def compute_rudder_aileron_derivatives(aileron_size, rudder_size, vehicle,  seg_
     # Pack data for return 
     derivatives = {'delta_r':{'CN_delta_r': CN_delta_r,'CL_delta_r': CL_delta_r, 'CY_delta_r': CY_delta_r}, 'delta_a':{'CN_delta_a': CN_delta_a,'CL_delta_a': CL_delta_a, 'CY_delta_a': CY_delta_a}}
                 
-    return derivatives
+    return derivatives, results
                  
                 
 def evalaute_aircraft(vehicle): 
@@ -270,8 +271,8 @@ def missions_setup(mission):
 
 def load_results(filename):  
     # Define the directory where the file is located
-    current_dir = '/Users/aidanmolloy/Documents/LEADS/RESEARCH/15_Stability_Flight_Mechanics/AIAA_SciTech_2025_Stability_Paper/Step_1_Simulations'
-    #current_dir = 'C:/Users/Matteo/Documents/UIUC/RESEARCH/15_Stability_Flight_Mechanics/AIAA_SciTech_2025_Stability_Paper/Step_1_Simulations'
+    #current_dir = '/Users/aidanmolloy/Documents/LEADS/RESEARCH/15_Stability_Flight_Mechanics/AIAA_SciTech_2025_Stability_Paper/Step_1_Simulations'
+    current_dir = 'C:/Users/Matteo/Documents/UIUC/RESEARCH/15_Stability_Flight_Mechanics/AIAA_SciTech_2025_Stability_Paper/Step_1_Simulations'
     
     # Combine directory and filename to get full path
     load_file = os.path.join(current_dir, filename + '.pkl')
