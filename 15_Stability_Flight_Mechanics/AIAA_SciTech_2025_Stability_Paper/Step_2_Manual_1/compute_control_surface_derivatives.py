@@ -6,6 +6,7 @@ import RCAIDE
 from   RCAIDE.Framework.Core import Units,Data  
 from   RCAIDE.Library.Plots  import *  
 import numpy                 as np
+from   scipy.optimize        import fsolve
 from   sklearn.linear_model  import LinearRegression
 import os   
 import pickle
@@ -21,16 +22,21 @@ def  main():
     vehicle                                   = load_results(Optimized_Vehicle_1_pkl)
     vehicle                                   = setup_rudder_aileron(vehicle)
     
-    derivatives, results                      = compute_rudder_aileron_derivatives(aileron_size, rudder_size, vehicle,  seg_num=0)
+    derivatives, results                      = compute_rudder_aileron_derivatives(aileron_size, rudder_size, vehicle, seg_num=0)
+    
+    x_aileron, y_aileron, dy_dx_aileron       = regression(aileron_size, derivatives['aileron'])
+    x_rudder, y_rudder, dy_dx_rudder          = regression(aileron_size, derivatives['aileron'])
     
     W                                         = 1
-    rho                                       = 1
+    rho                                       = 1.225
     v                                         = 1
     S                                         = 1
     b                                         = 1
-    T                                         = 525 # [N]
-    arm                                       = 9.2 # [m]
-    beta                                      = 1
+    T                                         = 525              # [N]
+    arm                                       = 9.2              # [m]
+    delta_a                                   = 30 * np.pi/180   # [rad/s] 
+    delta_r                                   = 30 * np.pi/180   # [rad/s]
+    beta                                      = 5 * np.pi/180    # [rad/s]
     C_l_0                                     = 1
     C_l_beta                                  = 1
     C_l_delta_a                               = 1
@@ -40,8 +46,22 @@ def  main():
     C_n_delta_r                               = 1                                                           
     C_n_0                                     = - (T*arm)/(0.5*rho*(v**2)*S*b)
     
-    delta_r                                   = (-(C_l_0/C_l_delta_r) - (C_l_beta/C_l_delta_r)*beta + (C_l_delta_a/C_l_delta_r)*(C_n_0/C_n_delta_a) + (C_l_delta_a/C_l_delta_r)*(C_n_beta/C_n_delta_a)*beta)/(1 - ((C_l_delta_a)/(C_l_delta_r))*((C_n_delta_r)/(C_n_delta_a)))
-    delta_a                                   = (-C_n_0 - C_n_beta*beta - C_n_delta_r*delta_r)/C_n_delta_a
+    #delta_r                                   = (-(C_l_0/C_l_delta_r) - (C_l_beta/C_l_delta_r)*beta + (C_l_delta_a/C_l_delta_r)*(C_n_0/C_n_delta_a) + (C_l_delta_a/C_l_delta_r)*(C_n_beta/C_n_delta_a)*beta)/(1 - ((C_l_delta_a)/(C_l_delta_r))*((C_n_delta_r)/(C_n_delta_a)))
+    #delta_a                                   = (-C_n_0 - C_n_beta*beta - C_n_delta_r*delta_r)/C_n_delta_a
+    
+    
+    
+    def system(vars):
+        x, y = vars  # Unpack the variables
+        eq1 = C_l_beta*beta + C_l_delta_a(x)*delta_a + C_l_delta_r(y)*delta_r
+        eq2 = C_n_0 + C_n_beta*beta + C_n_delta_a(x)*delta_a + C_n_delta_r(y)*delta_r
+        return [eq1, eq2]
+
+    initial_guess = [1.0, 2.0]
+
+    solution = fsolve(system, initial_guess)
+    
+    delta_a_size, delta_r_size = solution    
     
     return
 
@@ -88,9 +108,7 @@ def  setup_rudder_aileron(vehicle):
     
     return vehicle
 
-# ----------------------------------------------------------------------------------------------------------------------
-#  REGRESSION
-# ----------------------------------------------------------------------------------------------------------------------  
+
 def compute_rudder_aileron_derivatives(aileron_size, rudder_size, vehicle,  seg_num=0):           
     # seg_num is the number of the mission segment correspdoning to the segment for which control surface derivatives are being found
     
