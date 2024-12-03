@@ -38,10 +38,9 @@ def main():
     Planform_Optimization_Problem_2_pkl = "025_00_00_41_00_00_Planform_Optimization_Problem"
     excel_data_2                        = read_results(excel_file_name_2       )
     Optimized_Vehicle_2                 = load_results(Optimized_Vehicle_2_pkl )
-    Output_Stick_Fixed_2                = load_results(Output_Stick_Fixed_2_pkl)    
+    Output_Stick_Fixed_2                = load_results(Output_Stick_Fixed_2_pkl)        
     
-    
-    #results = run_mission(Optimized_Vehicle_1)
+    results1    = run_mission(Optimized_Vehicle_1)
     
     # ------------------------------------------------------------------
     #   Assign Variables 
@@ -70,6 +69,9 @@ def main():
     I_xx                                = np.array([Optimized_Vehicle_1.mass_properties.moments_of_inertia.tensor[0, 0], Optimized_Vehicle_2.mass_properties.moments_of_inertia.tensor[0, 0]])
     I_yy                                = np.array([Optimized_Vehicle_1.mass_properties.moments_of_inertia.tensor[1, 1], Optimized_Vehicle_2.mass_properties.moments_of_inertia.tensor[1, 1]])
     I_zz                                = np.array([Optimized_Vehicle_1.mass_properties.moments_of_inertia.tensor[2, 2], Optimized_Vehicle_2.mass_properties.moments_of_inertia.tensor[2, 2]])
+
+    C_m_alpha                           = np.array([results1.segments[0].conditions.static_stability.derivatives.CL_beta[0][0], results1.segments[0].conditions.static_stability.derivatives.CL_beta[0][0]])
+
 
     # ------------------------------------------------------------------
     #   Regression CG

@@ -3,13 +3,46 @@
 #   Imports
 # ---------------------------------------------------------------------
 import RCAIDE
-from RCAIDE.Framework.Core import Units,Data  
-from RCAIDE.Library.Plots  import *  
-import numpy as np
+from   RCAIDE.Framework.Core import Units,Data  
+from   RCAIDE.Library.Plots  import *  
+import numpy                 as np
+from   sklearn.linear_model  import LinearRegression
+import os   
+import pickle
 
 def  main():
     print("Choose a control surface analysis")
+    
+    aileron_size                              = np.array([0.5, 0.6])
+    rudder_size                               = np.array([0.5, 0.6])
+    
+    Optimized_Vehicle_1_pkl                   = "025_00_00_40_00_00_Optimized_Vehicle"
+    vehicle                                   = load_results(Optimized_Vehicle_1_pkl)
+    vehicle                                   = setup_rudder_aileron(vehicle)
+    derivatives = compute_rudder_aileron_derivatives(aileron_size, rudder_size, vehicle,  seg_num=0)
+    
     return
+
+def regression(x,y):
+    
+    # ------------------------------------------------------------------
+    #   Regression 
+    # ------------------------------------------------------------------ 
+    
+    x_reshaped      = x.reshape(-1, 1)
+    linear_regressor  = LinearRegression()
+    linear_regressor.fit(x_reshaped, y)
+    slope             = linear_regressor.coef_[0]
+    intercept         = linear_regressor.intercept_
+    
+    def linear_regression_function1(x):
+        return slope * x + intercept
+    
+    x_new            = np.linspace(x.min(), x.max(), 100)
+    y_new            = linear_regression_function1(x_new)   
+    dy_dx            = np.full_like(x_new, slope)    
+    
+    return x_new, y_new, dy_dx
 
 def  setup_rudder_aileron(vehicle):
     
@@ -48,7 +81,7 @@ def compute_rudder_aileron_derivatives(aileron_size, rudder_size, vehicle,  seg_
     CY_delta_r     = np.zeros(np.size(rudder_size))
     
     for i in range(len(aileron_size)):
-        vehicle.main_wing.aileron.chord_fraction = aileron_size[i]
+        vehicle.wings.main_wing.control_surfaces.aileron.chord_fraction = aileron_size[i]
         results =  evalaute_aircraft(vehicle)
             
         # store properties
@@ -57,7 +90,7 @@ def compute_rudder_aileron_derivatives(aileron_size, rudder_size, vehicle,  seg_
         CY_delta_a[i]     =  results.segments[seg_num].conditions.static_stability.derivatives.CY_delta_a
         
     for i in range(len(rudder_size)):
-        vehicle.vertical_stabilizer.rudder.chord_fraction = rudder_size[i]
+        vehicle.wings.vertical_tail.rudder.chord_fraction = rudder_size[i]
         results =  evalaute_aircraft(vehicle)
             
         # store properties
@@ -155,7 +188,18 @@ def configs_setup(vehicle):
     base_config.tag                                                   = 'base'     
     configs.append(base_config) 
  
- 
+    # ------------------------------------------------------------------
+    #   Cruise Configuration
+    # ------------------------------------------------------------------
+    config                                            = RCAIDE.Library.Components.Configs.Config(vehicle)
+    config.tag                                        = 'forward_flight'   
+    vector_angle                                      = 0.0 * Units.degrees   
+    config.networks.electric.busses.lift_rotor_bus.active  = False   
+    bus = config.networks.electric.busses.prop_rotor_bus  
+    for propulsor in  bus.propulsors:
+        propulsor.rotor.orientation_euler_angles =  [0, vector_angle, 0]
+        propulsor.rotor.pitch_command   = propulsor.rotor.cruise.design_pitch_command  
+    configs.append(config)    
 
     return configs
  
@@ -202,7 +246,9 @@ def mission_setup(analyses):
                                                                          'prop_rotor_propulsor_4','prop_rotor_propulsor_5','prop_rotor_propulsor_6'] ] 
     segment.assigned_control_variables.body_angle.active             = True                
          
-    mission.append_segment(segment)   
+    mission.append_segment(segment)  
+    
+    return mission
     
 
 
@@ -215,6 +261,20 @@ def missions_setup(mission):
     missions.append(mission)
  
     return missions  
+
+def load_results(filename):  
+    # Define the directory where the file is located
+    #current_dir = '/Users/aidanmolloy/Documents/LEADS/RESEARCH/15_Stability_Flight_Mechanics/AIAA_SciTech_2025_Stability_Paper/Step_1_Simulations'
+    current_dir = 'C:/Users/Matteo/Documents/UIUC/RESEARCH/15_Stability_Flight_Mechanics/AIAA_SciTech_2025_Stability_Paper/Step_1_Simulations'
+    
+    # Combine directory and filename to get full path
+    load_file = os.path.join(current_dir, filename + '.pkl')
+    
+    # Open and load the pickle file
+    with open(load_file, 'rb') as file:
+        results = pickle.load(file) 
+    
+    return results
  
 if __name__ == '__main__': 
     main()     

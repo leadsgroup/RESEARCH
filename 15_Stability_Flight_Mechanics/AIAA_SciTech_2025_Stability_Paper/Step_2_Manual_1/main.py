@@ -16,86 +16,86 @@ def main():
     Optimized_Vehicle_1_pkl               = "025_00_00_40_00_00_Optimized_Vehicle"
     Optimized_Vehicle_1                   = load_results(Optimized_Vehicle_1_pkl)
     
-    # ----------------------------------------------------------------------------
-    # -2  create aircraft with any elevator 
-    # ----------------------------------------------------------------------------     
+    debug = 0
     
-    elevator                              = RCAIDE.Library.Components.Wings.Control_Surfaces.Elevator()
-    elevator.tag                          = 'elevator'
-    elevator.span_fraction_start          = 0.1
-    elevator.span_fraction_end            = 0.9
-    elevator.deflection                   = 0.0  * Units.deg
-    elevator.chord_fraction               = 0.35
-    Optimized_Vehicle_1.wings.horizontal_tail.control_surfaces.append(elevator)     
+    ## ----------------------------------------------------------------------------
+    ## -2  create aircraft with any elevator 
+    ## ----------------------------------------------------------------------------     
+    
+    #elevator                              = RCAIDE.Library.Components.Wings.Control_Surfaces.Elevator()
+    #elevator.tag                          = 'elevator'
+    #elevator.span_fraction_start          = 0.1
+    #elevator.span_fraction_end            = 0.9
+    #elevator.deflection                   = 0.0  * Units.deg
+    #elevator.chord_fraction               = 0.35
+    #Optimized_Vehicle_1.wings.horizontal_tail.control_surfaces.append(elevator)     
     
     # ----------------------------------------------------------------------------
     # -3  run 1st mission: Pull up 
     # ---------------------------------------------------------------------------- 
     
-    results = run_mission(Optimized_Vehicle_1)
+    #results          = run_mission(Optimized_Vehicle_1)
     
-    C_m_alpha    = 1
-    C_L_trim     = 1
-    C_L_alpha    = 1
-    C_m_0        = 1
-    C_L_alpha    = 1
-    C_m_delta_e  = 1
-    C_L_delta_e  = 1
-    C_m_alpha    = 1
+    #C_m_alpha        = 1
+    #C_L_trim         = 1
+    #C_L_alpha        = 1
+    #C_m_0            = 1
+    #C_L_alpha        = 1
+    #C_m_delta_e      = 1
+    #C_L_delta_e      = 1
+    #C_m_alpha        = 1
+    #static_margin    = 1
     
-    det          = C_L_alpha * C_m_delta_e - C_L_delta_e * C_m_alpha
+    #det              = C_L_alpha * C_m_delta_e - C_L_delta_e * C_m_alpha
+    #delta_e_trim     = -(C_m_alpha*C_L_trim + C_L_alpha*C_m_0)/det
+    #delta_e_trim_MAX = -(C_m_0 * C_L_alpha)/det
+    
+    #stability_criterion = ((4*C_L_alpha*W)/(det*(rho*S*v**3)))*(static_margin)
 
-    delta_e_trim = -(C_m_alpha*C_L_trim + C_L_alpha*C_m_0)/det
+    #C_L_trim         = (2*W*np.cos(gamma))/(rho*S*V**2)                                                      #[-]                                                                                           
+    #C_D              = C_D_0 + k*C_L_trim**2                                                                 #[-]    
     
-    delta_e_trim_MAX = - (C_m_0 * C_L_alpha)/det
+    #if stability_criterion <= 0:
+        #print("Error: Unstable")
+    #else:
+        #print("Stable") 
     
-    stability_criterion = ((4*C_L_alpha*W)/(det*(rho*S*v**3)))*(static_margin)
-
-    C_L_trim        = (2*W*np.cos(gamma))/(rho*S*V**2)                                                      #[-]                                                                                           
-    C_D             = C_D_0 + k*C_L_trim**2                                                                 #[-]    
-    
-    if stability_criterion <= 0:
-        print("Error: Unstable")
-    else:
-        print("Stable") 
-
-    
-    #W               = 8000                                                                                  #[lbs]       
-    #S               = 200                                                                                   #[ft**2]
-    #MAC             = 6                                                                                     #[ft]
-    #z_p             = -2                                                                                    #[ft]
-    #S_t             = 40                                                                                    #[ft**2]
-    #l_sign_t        = 6                                                                                     #[ft]
-    #h_n_wb          = 0.25                                                                                  #[-]
-    #a_t             = 4.5                                                                                   #[rad**-1]
-    #a_e             = 2                                                                                     #[rad**-1]
-    #i_t             = 0.047                                                                                 #[rad]    
-    #C_L_alpha_wb    = 5.0                                                                                   #[rad**-1]
-    #C_m_ac_wb       = -0.1                                                                                  #[-]
-    #C_D_0           = 0.03                                                                                  #[-]
-    #k               = 0.1                                                                                   #[-]
-    #epsilon_0       = 0.01                                                                                  #[rad]
-    #depsilon_dalpha = 0.3                                                                                   #[-]
-    #V               = 421.952                                                                               #[ft/s]
-    #rho             = 0.001756                                                                              #[slugs/ft**3]
-    #gamma           = 0*np.pi/180                                                                           #[deg -> rad]
-    #h               = 0.46                                                                                  #[-]
-    #C_m_p_alpha     = 0                                                                                     #[rad**-1]  
-    #V_H             = l_sign_t*S_t/(MAC*S)                                                                  #[-]
-    #C_L_alpha       = C_L_alpha_wb + a_t*(S_t/S)*(1 - depsilon_dalpha)                                      #[rad**-1]
-    #h_n_p           = h_n_wb + (a_t/C_L_alpha)*V_H*(1 - depsilon_dalpha) - (1/C_L_alpha)*C_m_p_alpha        #[-]
-    #C_L_delta_e     = a_e*S_t/S                                                                             #[rad**-1]
-    #C_L_trim        = (2*W*np.cos(gamma))/(rho*S*V**2)                                                      #[-]                                                                                           
-    #C_D             = C_D_0 + k*C_L_trim**2                                                                 #[-]
-    D               = 0.5*rho*(V**2)*S*C_D                                                                  #[lbs]
-    T               = D + W*gamma                                                                           #[lbs]
-    C_T             = T/(0.5*rho*(V**2)*S)                                                                  #[-]
-    C_m_0_p         = C_T*z_p/MAC                                                                           #[-]
-    C_m_0           = C_m_ac_wb + C_m_0_p + V_H*a_t*(epsilon_0 + i_t)*(1 + (1 -                             
-                      depsilon_dalpha) * ((a_t*S_t)/(C_L_alpha*S)))                                         #[-]
-    delta_e_trim    = (- C_m_0 - C_L_trim*(h - h_n_p))/(C_L_delta_e*(h_n_p - h_n_wb) - a_e*V_H)*180/np.pi   #[deg]
+    #W                = 8000                                                                                  #[lbs]       
+    #S                = 200                                                                                   #[ft**2]
+    #MAC              = 6                                                                                     #[ft]
+    #z_p              = -2                                                                                    #[ft]
+    #S_t              = 40                                                                                    #[ft**2]
+    #l_sign_t         = 6                                                                                     #[ft]
+    #h_n_wb           = 0.25                                                                                  #[-]
+    #a_t              = 4.5                                                                                   #[rad**-1]
+    #a_e              = 2                                                                                     #[rad**-1]
+    #i_t              = 0.047                                                                                 #[rad]    
+    #C_L_alpha_wb     = 5.0                                                                                   #[rad**-1]
+    #C_m_ac_wb        = -0.1                                                                                  #[-]
+    #C_D_0            = 0.03                                                                                  #[-]
+    #k                = 0.1                                                                                   #[-]
+    #epsilon_0        = 0.01                                                                                  #[rad]
+    #depsilon_dalpha  = 0.3                                                                                   #[-]
+    #V                = 421.952                                                                               #[ft/s]
+    #rho              = 0.001756                                                                              #[slugs/ft**3]
+    #gamma            = 0*np.pi/180                                                                           #[deg -> rad]
+    #h                = 0.46                                                                                  #[-]
+    #C_m_p_alpha      = 0                                                                                     #[rad**-1]  
+    #V_H              = l_sign_t*S_t/(MAC*S)                                                                  #[-]
+    #C_L_alpha        = C_L_alpha_wb + a_t*(S_t/S)*(1 - depsilon_dalpha)                                      #[rad**-1]
+    #h_n_p            = h_n_wb + (a_t/C_L_alpha)*V_H*(1 - depsilon_dalpha) - (1/C_L_alpha)*C_m_p_alpha        #[-]
+    #C_L_delta_e      = a_e*S_t/S                                                                             #[rad**-1]
+    #C_L_trim         = (2*W*np.cos(gamma))/(rho*S*V**2)                                                      #[-]                                                                                           
+    #C_D              = C_D_0 + k*C_L_trim**2                                                                 #[-]
+    #D                = 0.5*rho*(V**2)*S*C_D                                                                  #[lbs]
+    #T                = D + W*gamma                                                                           #[lbs]
+    #C_T              = T/(0.5*rho*(V**2)*S)                                                                  #[-]
+    #C_m_0_p          = C_T*z_p/MAC                                                                           #[-]
+    #C_m_0            = C_m_ac_wb + C_m_0_p + V_H*a_t*(epsilon_0 + i_t)*(1 + (1 -                             
+                       #depsilon_dalpha) * ((a_t*S_t)/(C_L_alpha*S)))                                         #[-]
+    #delta_e_trim     = (- C_m_0 - C_L_trim*(h - h_n_p))/(C_L_delta_e*(h_n_p - h_n_wb) - a_e*V_H)*180/np.pi   #[deg]
         
-    print("The elevator deflection required to trim the aircraft in cruise configuration is:", "%0.3f" % delta_e_trim, "deg.") 
+    #print("The elevator deflection required to trim the aircraft in cruise configuration is:", "%0.3f" % delta_e_trim, "deg.") 
     
     # ---------------------------------------------------------------------------------------------------------------
     
@@ -120,12 +120,8 @@ def main():
     C_n_delta_a          = 0                                                                                 #[-]    
     C_n_beta             = C_n_beta_wb + ((S_f*l_f)/(S*b))*v_f_v_squared*a_f*(1 - dsigma_dbeta)     
     V                    = 200                                                                               #[ft/s]  
-    v                    = 35                                                                                #[ft/s] 
-    
-    # crosswind. Assume standard sea-level conditions 
-    
+    v                    = 35                                                                                #[ft/s] # crosswind
     rho                  = 0.002377                                                                          #[slug/ft**3] 
-      
     beta                 = np.arcsin(v/V)                                                                    #[rad] 
     C_w                  = W/(0.5*rho*(V**2)*S)                                                              #[-] 
     C_l_beta             = a_f*(1 - dsigma_dbeta)*((S_f*z_f)/(S*b))*v_f_v_squared + C_l_beta_wb              #[-] 
