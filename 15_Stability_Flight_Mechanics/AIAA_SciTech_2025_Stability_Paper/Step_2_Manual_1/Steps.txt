@@ -1,7 +1,7 @@
 
 # -----------------------------------
 - What do we want?: Trim the aircraft
-- Objective:        ()C_D)min
+- Objective:        (C_D)min
 # -----------------------------------
 
 Steps for Elevator Sizing:
@@ -20,5 +20,3 @@ Steps for Elevator Sizing:
 Steps for Aileron Sizing:
 
 Steps for Rudder Sizing:
-
-Steps for Flap Sizing:

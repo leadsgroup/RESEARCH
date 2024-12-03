@@ -27,21 +27,21 @@ def main():
     Optimized_Vehicle_1_pkl             = "025_00_00_40_00_00_Optimized_Vehicle"
     Output_Stick_Fixed_1_pkl            = "025_00_00_40_00_00_Output_Stick_Fixed"
     Planform_Optimization_Problem_1_pkl = "025_00_00_40_00_00_Planform_Optimization_Problem"
-    excel_data_1                        = read_results(excel_file_name_1                  )
-    Optimized_Vehicle_1                 = load_results(Optimized_Vehicle_1_pkl            )
-    Output_Stick_Fixed_1                = load_results(Output_Stick_Fixed_1_pkl           )
+    excel_data_1                        = read_results(excel_file_name_1       )
+    Optimized_Vehicle_1                 = load_results(Optimized_Vehicle_1_pkl )
+    Output_Stick_Fixed_1                = load_results(Output_Stick_Fixed_1_pkl)
                                
     excel_file_name_2                   = "C:/Users/Matteo/Documents/UIUC/RESEARCH/15_Stability_Flight_Mechanics/AIAA_SciTech_2025_Stability_Paper/Step_1_Simulations/025_00_00_41_00_00_Baseline_stick_fixed_cruise_Opt_Results.xlsx"
     Baseline_Opt_Vehicle_2_pkl          = "025_00_00_41_00_00_Baseline_Opt_Vehicle"
     Optimized_Vehicle_2_pkl             = "025_00_00_41_00_00_Optimized_Vehicle"
     Output_Stick_Fixed_2_pkl            = "025_00_00_41_00_00_Output_Stick_Fixed"
     Planform_Optimization_Problem_2_pkl = "025_00_00_41_00_00_Planform_Optimization_Problem"
-    excel_data_2                        = read_results(excel_file_name_2                  )
-    Optimized_Vehicle_2                 = load_results(Optimized_Vehicle_2_pkl            )
-    Output_Stick_Fixed_2                = load_results(Output_Stick_Fixed_2_pkl           )    
+    excel_data_2                        = read_results(excel_file_name_2       )
+    Optimized_Vehicle_2                 = load_results(Optimized_Vehicle_2_pkl )
+    Output_Stick_Fixed_2                = load_results(Output_Stick_Fixed_2_pkl)    
     
     
-    results = run_mission(Optimized_Vehicle_1)
+    #results = run_mission(Optimized_Vehicle_1)
     
     # ------------------------------------------------------------------
     #   Assign Variables 
@@ -92,23 +92,24 @@ def main():
     #   Plots
     # ------------------------------------------------------------------ 
     
+    plot_parameters = plot_style()
     fig, ax1 = plt.subplots(figsize=(8, 6))
-    ax1.plot(x_dense1, C_m_alpha_new1, '-', label=r"$C_{m_{\alpha}}$ (Interpolation)", color='blue')
-    ax1.scatter(x_CG, C_m_alpha, color='blue', label="Original Points", zorder=5)
-    ax1.set_xlabel(r"$x_{CG}$", fontsize=14)
-    ax1.set_ylabel(r"$C_{m_{\alpha}}$", fontsize=14, color='blue')
+    ax1.plot(x_dense1, C_m_alpha_new1, plot_parameters.line_style[0], 
+             label=r"$C_{m_{\alpha}}$ (Interpolation)", color='blue', linewidth=plot_parameters.line_width)
+    ax1.scatter(x_CG, C_m_alpha, color='blue', label="Original Points", 
+                zorder=5, s=plot_parameters.marker_size**2, marker=plot_parameters.markers[0])
+    ax1.set_xlabel(r"$x_{CG}$", fontsize=plot_parameters.axis_font_size)
+    ax1.set_ylabel(r"$C_{m_{\alpha}}$", fontsize=plot_parameters.axis_font_size, color='blue')
     ax1.tick_params(axis='y', labelcolor='blue')
     ax1.grid()
     ax2 = ax1.twinx()
-    ax2.plot(x_dense1, d_C_m_alpha_dx1, '--', label=r"$\frac{dC_{m_{\alpha}}}{dx_{CG}}$ (Slope)", color='red')
-    ax2.set_ylabel(r"$\frac{dC_{m_{\alpha}}}{dx_{CG}}$", fontsize=14, color='red')
+    ax2.plot(x_dense1, d_C_m_alpha_dx1, plot_parameters.line_style[1], 
+             label=r"$\frac{dC_{m_{\alpha}}}{dx_{CG}}$ (Slope)", color='red', linewidth=plot_parameters.line_width)
+    ax2.set_ylabel(r"$\frac{dC_{m_{\alpha}}}{dx_{CG}}$", fontsize=plot_parameters.axis_font_size, color='red')
     ax2.tick_params(axis='y', labelcolor='red')
-    #ax1.legend(loc='upper left', fontsize=10)
-    #ax2.legend(loc='upper right', fontsize=10)
     fig.tight_layout()
-    fig.subplots_adjust(right=0.85)    
-    #plt.show()    
-    
+    fig.subplots_adjust(right=0.85)   
+        
     # ------------------------------------------------------------------
     #   Regression MOI
     # ------------------------------------------------------------------ 
@@ -130,21 +131,24 @@ def main():
     #   Plots
     # ------------------------------------------------------------------ 
     
+    plot_parameters = plot_style()
+    
     fig, ax1 = plt.subplots(figsize=(8, 6))
-    ax1.plot(x_dense2, C_m_alpha_new2, '-', label=r"$C_{m_{\alpha}}$ (Interpolation)", color='blue')
-    ax1.scatter(I_yy, C_m_alpha, color='blue', label="Original Points", zorder=5)
-    ax1.set_xlabel(r"$I_{yy}$", fontsize=14)
-    ax1.set_ylabel(r"$C_{m_{\alpha}}$", fontsize=14, color='blue')
+    ax1.plot(x_dense2, C_m_alpha_new2, plot_parameters.line_style[0], 
+             label=r"$C_{m_{\alpha}}$ (Interpolation)", color='blue', linewidth=plot_parameters.line_width)
+    ax1.scatter(I_yy, C_m_alpha, color='blue', label="Original Points", 
+                zorder=5, s=plot_parameters.marker_size**2, marker=plot_parameters.markers[0])
+    ax1.set_xlabel(r"$I_{yy}$", fontsize=plot_parameters.axis_font_size)
+    ax1.set_ylabel(r"$C_{m_{\alpha}}$", fontsize=plot_parameters.axis_font_size, color='blue')
     ax1.tick_params(axis='y', labelcolor='blue')
     ax1.grid()
     ax2 = ax1.twinx()
-    ax2.plot(x_dense2, d_C_m_alpha_dx2, '--', label=r"$\frac{dC_{m_{\alpha}}}{dI_{yy}}$ (Slope)", color='red')
-    ax2.set_ylabel(r"$\frac{dC_{m_{\alpha}}}{dI_{yy}}$", fontsize=14, color='red')
+    ax2.plot(x_dense2, d_C_m_alpha_dx2, plot_parameters.line_style[1], 
+             label=r"$\frac{dC_{m_{\alpha}}}{dI_{yy}}$ (Slope)", color='red', linewidth=plot_parameters.line_width)
+    ax2.set_ylabel(r"$\frac{dC_{m_{\alpha}}}{dI_{yy}}$", fontsize=plot_parameters.axis_font_size, color='red')
     ax2.tick_params(axis='y', labelcolor='red')
-    #ax1.legend(loc='upper left', fontsize=10)
-    #ax2.legend(loc='upper right', fontsize=10)
     fig.tight_layout()
-    fig.subplots_adjust(right=0.85)    
+    fig.subplots_adjust(right=0.85)
     plt.show()
 
     return
@@ -332,7 +336,32 @@ def missions_setup(mission):
  
     return missions 
 
+def plot_style():
 
+    plt.rcParams['axes.linewidth'] = 1.0
+    plt.rcParams["font.family"] = "Times New Roman"
+    parameters = {'axes.labelsize': 20,
+                  'xtick.labelsize': 14,
+                  'ytick.labelsize': 14,
+                  'axes.titlesize': 18,
+                  'figure.dpi': 100}
+    plt.rcParams.update(parameters)
+    
+    class Data:
+        pass
+    
+    plot_parameters = Data()
+    plot_parameters.line_width = 1
+    plot_parameters.line_style = ['-', '-']
+    plot_parameters.marker_size = 4
+    plot_parameters.legend_fontsize = '12'
+    plot_parameters.legend_title_font_size = 14
+    plot_parameters.axis_font_size = 16
+    plot_parameters.title_font_size = 16
+    plot_parameters.markers = ['o', 'x', 'o', 'v', 'P', 'p', '^', 'D', '*']
+    plot_parameters.color = 'black'
+    
+    return plot_parameters
 
 if __name__ == '__main__': 
     main()
