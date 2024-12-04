@@ -49,27 +49,27 @@ def size_control_surfaces(CG_bat_1, CG_bat_2, vehicle, cruise_velocity = 120 * U
                           elapsed_time_stick_fixed
                          )    
     
-    cg_x1   =  str(CG_bat_1[0]).replace('.', "")
-    cg_y1   =  str(CG_bat_1[1]).replace('.', "")
-    cg_z1   =  str(CG_bat_1[2]).replace('.', "")
-    cg_x2   =  str(CG_bat_2[0]).replace('.', "")
-    cg_y2   =  str(CG_bat_2[1]).replace('.', "")
-    cg_z2   =  str(CG_bat_2[2]).replace('.', "")
+    #cg_x1   =  str(CG_bat_1[0]).replace('.', "")
+    #cg_y1   =  str(CG_bat_1[1]).replace('.', "")
+    #cg_z1   =  str(CG_bat_1[2]).replace('.', "")
+    #cg_x2   =  str(CG_bat_2[0]).replace('.', "")
+    #cg_y2   =  str(CG_bat_2[1]).replace('.', "")
+    #cg_z2   =  str(CG_bat_2[2]).replace('.', "")
     
-    def new_filename(filename):
-        return filename.replace('[', '').replace(']', '').replace(' ', '_').replace('.', '_')
+    #def new_filename(filename):
+        #return filename.replace('[', '').replace(']', '').replace(' ', '_').replace('.', '_')
 
-    raw_file_name1 = f"{cg_x1}_{cg_y1}_{cg_z1}_{cg_x2}_{cg_y2}_{cg_z2}_Optimized_Vehicle"
-    vehicle_file_name = new_filename(raw_file_name1)
-    save_data(optimized_vehicle,vehicle_file_name)
+    #raw_file_name1 = f"{cg_x1}_{cg_y1}_{cg_z1}_{cg_x2}_{cg_y2}_{cg_z2}_Optimized_Vehicle"
+    #vehicle_file_name = new_filename(raw_file_name1)
+    #save_data(optimized_vehicle,vehicle_file_name)
     
-    raw_file_name2 = f"{cg_x1}_{cg_y1}_{cg_z1}_{cg_x2}_{cg_y2}_{cg_z2}_Planform_Optimization_Problem"
-    planform_optimization_problem_file_name = new_filename(raw_file_name2)
-    save_data(planform_optimization_problem,planform_optimization_problem_file_name)  
+    #raw_file_name2 = f"{cg_x1}_{cg_y1}_{cg_z1}_{cg_x2}_{cg_y2}_{cg_z2}_Planform_Optimization_Problem"
+    #planform_optimization_problem_file_name = new_filename(raw_file_name2)
+    #save_data(planform_optimization_problem,planform_optimization_problem_file_name)  
     
-    raw_file_name3 = f"{cg_x1}_{cg_y1}_{cg_z1}_{cg_x2}_{cg_y2}_{cg_z2}_Output_Stick_Fixed"
-    output_stick_fixed_file_name = new_filename(raw_file_name3)
-    save_data(output_stick_fixed,output_stick_fixed_file_name)      
+    #raw_file_name3 = f"{cg_x1}_{cg_y1}_{cg_z1}_{cg_x2}_{cg_y2}_{cg_z2}_Output_Stick_Fixed"
+    #output_stick_fixed_file_name = new_filename(raw_file_name3)
+    #save_data(output_stick_fixed,output_stick_fixed_file_name)      
     
     return
   

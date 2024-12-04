@@ -11,87 +11,183 @@ from   scipy                 import interpolate
 from   scipy.optimize        import minimize 
 from   scipy.interpolate     import interp1d
 import os   
-import pickle
+import pickle  
+import pylab as plt 
+from   copy import deepcopy
+import sys 
+import pandas                as pd
+
+sys.path.append(os.path.join(os.path.split(os.path.split(os.path.split(sys.path[0])[0])[0])[0], 'Aircraft'))
+
+from   Stopped_Rotor.Stopped_Rotor                                        import vehicle_setup as SR_vehicle_setup   
+from   Tiltrotor.Tiltrotor                                                import vehicle_setup as TR_vehicle_setup   
+from   Tiltwing.Tiltwing                                                  import vehicle_setup as TW_vehicle_setup   
+from   Hexacopter.Hexacopter                                              import vehicle_setup as HC_vehicle_setup   
+from   Tilt_Stopped_Rotor.Tilt_Stopped_Rotor_Conv_Tail                    import vehicle_setup as TSR_vehicle_setup 
 
 def main():
     
     # -------------------------------------------------------------
-    #  Aileron & Rudder
+    #  Select aircraft model
+    # -------------------------------------------------------------     
+    
+    aircraft_model  = 'TSR'
+    cruise_velocity = 150  * Units['mph']
+    cruise_altitude = 1000*Units.feet
+    
+    if aircraft_model == 'SR':
+        vehicle =  SR_vehicle_setup(redesign_rotors=False)
+    if aircraft_model == 'TR':
+        vehicle =  TR_vehicle_setup(redesign_rotors=False)
+    if aircraft_model == 'TW':
+        vehicle =  TW_vehicle_setup(redesign_rotors=False)
+    if aircraft_model == 'HC':
+        vehicle =  HC_vehicle_setup(redesign_rotors=False)
+    if aircraft_model == 'TSR':
+        vehicle =  TSR_vehicle_setup(redesign_rotors=False)
+        
     # -------------------------------------------------------------
+    #  Deepcopy vehicle and find excel file location
+    # -------------------------------------------------------------         
+        
+    case_vehicle  = deepcopy(vehicle)
     
-    # Create arrays of aileron and rudder sizes
+    excel_file = "C:/Users/Matteo/Documents/UIUC/RESEARCH/15_Stability_Flight_Mechanics/AIAA_SciTech_2025_Stability_Paper/Step_1_Simulations/025_00_00_40_00_00_Baseline_stick_fixed_cruise_Opt_Results.xlsx"
     
-    aileron_size                              = np.array([0.01, 3])
-    rudder_size                               = np.array([0.01, 3])
+    # delete control surfaces if they have been defined 
+    for wing in case_vehicle.wings:
+        for control_surface in wing.control_surfaces:
+            del wing.control_surfaces[control_surface.tag]
+            
+    # -------------------------------------------------------------
+    #  Sweeps of battery locations (UPDATE WITH LAT VALUES LATER)
+    # -------------------------------------------------------------            
     
-    # Load optimized vehicle
+    # prop rotor battery module (first module)
+    #                 CG: X,    Y,    Z 
+    CG_bat_1 = np.array([[0.25, 0.,   0.],
+                         [0.35, 0.,   0.],
+                         [0.45, 0.,   0.],
+                         [0.25, 0.25, 0.],
+                         [0.25, 0.35, 0.],
+                         [0.25, 0.45, 0.]])
     
-    #Optimized_Vehicle_1_pkl                   = "025_00_00_40_00_00_Optimized_Vehicle"
-    #vehicle                                   = load_results(Optimized_Vehicle_1_pkl)
-    
-    # Append aileron and rudder
-    
-    #vehicle                                   = setup_rudder_aileron(vehicle)
-    
-    # Compute the control derivatives related to the control surfaces
-    
-    #derivatives, results                      = compute_rudder_aileron_derivatives(aileron_size, rudder_size, vehicle, seg_num=0)
-    
-    C_Y_delta_a                               = np.array([0.5, 0.6])
-    C_L_delta_a                               = np.array([0.5, 0.6])
-    C_N_delta_a                               = np.array([0.5, 0.6])    
-    C_Y_delta_r                               = np.array([0.5, 0.6])
-    C_L_delta_r                               = np.array([0.5, 0.6])
-    C_N_delta_r                               = np.array([0.5, 0.6])     
-    
-    # Create the functions describing the control derivatives as functions of control surface size
-    
-    static_variable = Data()
-    
-    static_variable.C_Y_delta_a_fz            = interpolate.interp1d(aileron_size, C_Y_delta_a)
-    static_variable.C_L_delta_a_fz            = interpolate.interp1d(aileron_size, C_L_delta_a)
-    static_variable.C_N_delta_a_fz            = interpolate.interp1d(aileron_size, C_N_delta_a)   
-    static_variable.C_Y_delta_r_fz            = interpolate.interp1d(rudder_size,  C_Y_delta_r)
-    static_variable.C_L_delta_r_fz            = interpolate.interp1d(rudder_size,  C_L_delta_r)
-    static_variable.C_N_delta_r_fz            = interpolate.interp1d(rudder_size,  C_N_delta_r)
-    
-    # Import data from vehicle
-    
-    # General 
-    
-    static_variable.W                                          = 2700*9.81
-    static_variable.rho                                        = 1.225
-    static_variable.S                                          = 15.629           
-    static_variable.wing_span                                  = 11.82855 
-    static_variable.vertical_tail_span                         = 2
-    static_variable.aileron_chord                              = 0.1
-    static_variable.rudder_chord                               = 0.1  
-    static_variable.C_Y_beta                                   = 1 
-    static_variable.C_L_beta                                   = 1
-    static_variable.C_N_beta                                   = 1 
-    static_variable.V                                          = 110. * Units['mph']
-    static_variable.C_w                                        = static_variable.W/(0.5*static_variable.rho*(static_variable.V**2)*static_variable.S)    
-    
-    # CROSSWIND 
+    # lift rotor battery modules
+    #                 CG: X,    Y,    Z 
+    CG_bat_2 = np.array([[4.0,  0.,   0.],
+                         [4.1,  0.,   0.],
+                         [4.2,  0.,   0.]])   
  
-    static_variable.C_Y_0_cw                                   = 0                       
-    static_variable.C_L_0_cw                                   = 0    
-    static_variable.C_N_0_cw                                   = 0  
-    static_variable.v_cw                                       = 35  * Units['ft/s']                          # [ft/s] 
-    static_variable.beta_cw                                    = np.arcsin(static_variable.v_cw/static_variable.V) # [rad]  
-    static_variable.phi_cw                                     = 0                                                                    #[-]
-    
-    # OEI
-    
-    static_variable.T_oei                                      = 525              # [N]
-    static_variable.arm_oei                                    = 9.2              # [m]
-    static_variable.beta_oei                                   = 0 * np.pi/180  
-    static_variable.C_Y_0_oei                                  = 0                        
-    static_variable.C_L_0_oei                                  = 0                                                        
-    static_variable.C_N_0_oei                                  = -(static_variable.T_oei*static_variable.arm_oei)/(0.5*static_variable.rho*(static_variable.V**2)*static_variable.S*static_variable.wing_span)
-    static_variable.phi_oei                                    = 0
-    
-    delta_a_lower_bound_cw, delta_r_lower_bound_cw, delta_a_lower_bound_oei, delta_r_lower_bound_oei, aileron_span_lower_bound, rudder_span_lower_bound = optimization(static_variable)
+    for i in range(len(CG_bat_1)):
+        for j in range(len(CG_bat_2)):
+            
+            # -------------------------------------------------------------
+            #  Assign new battery locations
+            # -------------------------------------------------------------            
+            
+            # prop rotor battery modules      
+            case_vehicle.networks.electric.busses.prop_rotor_bus.battery_modules.nmc_module_1.origin = np.array([CG_bat_1[i]])
+            case_vehicle.networks.electric.busses.prop_rotor_bus.battery_modules.nmc_module_2.origin = np.array([CG_bat_1[i,0] + case_vehicle.networks.electric.busses.prop_rotor_bus.battery_modules.nmc_module_1.length, 
+                                                                                                                 CG_bat_1[i,1], 
+                                                                                                                 CG_bat_1[i,2]])
+            # lift rotor battery modules 
+            case_vehicle.networks.electric.busses.lift_rotor_bus.battery_modules.nmc_module_1.origin = np.array([CG_bat_2[j]])
+            case_vehicle.networks.electric.busses.lift_rotor_bus.battery_modules.nmc_module_2.origin = np.array([CG_bat_2[i,0], 
+                                                                                                                 CG_bat_2[i,1], 
+                                                                                                                 CG_bat_2[i,2] + case_vehicle.networks.electric.busses.lift_rotor_bus.battery_modules.nmc_module_2.height])
+            
+            # -------------------------------------------------------------
+            #  Load specs from Stick Fixed Optimization 
+            # -------------------------------------------------------------               
+            
+            excel_data         = read_results(excel_file)            
+            
+            # -------------------------------------------------------------
+            #  Assign specs from Stick Fixed Optimization 
+            # -------------------------------------------------------------            
+            
+            #case_vehicle.wings.main_wing.spans.projected = excel_data.mw_span
+            #case_vehicle.wings.main_wing            = excel_data.mw_AR
+            #case_vehicle.wings.main_wing            = excel_data.mw_root_twist
+            #case_vehicle.wings.main_wing            = excel_data.mw_tip_twist
+            #case_vehicle.wings.vertical_tail         = excel_data.vt_span
+            #case_vehicle.wings.vertical_tail         = excel_data.vt_AR
+            #case_vehicle.wings.horizontal_tail       = excel_data.ht_AR
+            #case_vehicle.wings.horizontal_tail       = excel_data.ht_span
+            #case_vehicle.wings.horizontal_tail       = excel_data.ht_tip_twist
+            
+            # -------------------------------------------------------------
+            #  Aileron & Rudder
+            # -------------------------------------------------------------
+            
+            # Create arrays of aileron and rudder sizes
+            
+            aileron_size                              = np.array([0.1, 0.5, 0.9])
+            rudder_size                               = np.array([0.1, 0.5, 0.9])
+            
+            # Append aileron and rudder
+            
+            case_vehicle                              = setup_rudder_aileron(case_vehicle)
+            
+            # Compute the control derivatives related to the control surfaces
+            
+            derivatives, results                      = compute_rudder_aileron_derivatives(aileron_size, rudder_size, case_vehicle, seg_num=0)
+            
+            C_Y_delta_a                               = derivatives.C_Y_delta_a
+            C_L_delta_a                               = derivatives.C_L_delta_a
+            C_N_delta_a                               = derivatives.C_N_delta_a
+            C_Y_delta_r                               = derivatives.C_Y_delta_r
+            C_L_delta_r                               = derivatives.C_L_delta_r
+            C_N_delta_r                               = derivatives.C_N_delta_r          
+            
+            # Create the functions describing the control derivatives as functions of control surface size
+            
+            static_variable = Data()
+            
+            static_variable.C_Y_delta_a_fz            = interpolate.interp1d(aileron_size, C_Y_delta_a)
+            static_variable.C_L_delta_a_fz            = interpolate.interp1d(aileron_size, C_L_delta_a)
+            static_variable.C_N_delta_a_fz            = interpolate.interp1d(aileron_size, C_N_delta_a)   
+            static_variable.C_Y_delta_r_fz            = interpolate.interp1d(rudder_size,  C_Y_delta_r)
+            static_variable.C_L_delta_r_fz            = interpolate.interp1d(rudder_size,  C_L_delta_r)
+            static_variable.C_N_delta_r_fz            = interpolate.interp1d(rudder_size,  C_N_delta_r)
+            
+            # Import data from vehicle
+            
+            # General 
+            
+            static_variable.W                                          = 2700*9.81
+            static_variable.rho                                        = 1.225
+            static_variable.S                                          = 15.629           
+            static_variable.wing_span                                  = 11.82855 
+            static_variable.vertical_tail_span                         = 2
+            static_variable.aileron_chord                              = 0.1
+            static_variable.rudder_chord                               = 0.1  
+            static_variable.C_Y_beta                                   = 1 
+            static_variable.C_L_beta                                   = 1
+            static_variable.C_N_beta                                   = 1 
+            static_variable.V                                          = 110. * Units['mph']
+            static_variable.C_w                                        = static_variable.W/(0.5*static_variable.rho*(static_variable.V**2)*static_variable.S)    
+            
+            # CROSSWIND 
+         
+            static_variable.C_Y_0_cw                                   = 0                       
+            static_variable.C_L_0_cw                                   = 0    
+            static_variable.C_N_0_cw                                   = 0  
+            static_variable.v_cw                                       = 35  * Units['ft/s']                          # [ft/s] 
+            static_variable.beta_cw                                    = np.arcsin(static_variable.v_cw/static_variable.V) # [rad]  
+            static_variable.phi_cw                                     = 0                                                                    #[-]
+            
+            # OEI
+            
+            static_variable.T_oei                                      = 525              # [N]
+            static_variable.arm_oei                                    = 9.2              # [m]
+            static_variable.beta_oei                                   = 0 * np.pi/180  
+            static_variable.C_Y_0_oei                                  = 0                        
+            static_variable.C_L_0_oei                                  = 0                                                        
+            static_variable.C_N_0_oei                                  = -(static_variable.T_oei*static_variable.arm_oei)/(0.5*static_variable.rho*(static_variable.V**2)*static_variable.S*static_variable.wing_span)
+            static_variable.phi_oei                                    = 0
+            
+            delta_a_lower_bound_cw, delta_r_lower_bound_cw, delta_a_lower_bound_oei, delta_r_lower_bound_oei, aileron_span_lower_bound, rudder_span_lower_bound = optimization(static_variable)
     
     return delta_a_size, delta_r_size 
 
@@ -483,6 +579,18 @@ def hard_constraint_N_oei(design_variables,static_variable):
     res = C_N_0_oei + C_N_beta*beta_oei + C_N_delta_a_fz(aileron_span)*design_variables[2] +  C_N_delta_r_fz(rudder_span)*design_variables[3]
     
     return res
+
+def read_results(file_name):
+    # Load the Excel file
+    excel_data = pd.ExcelFile(file_name)
+    
+    # Check sheet names
+    print("Available sheets:", excel_data.sheet_names)
+    
+    # Load data from the 'Stick_Fixed' sheet
+    data = excel_data.parse("Stick_Fixed")
+    
+    return data
  
 if __name__ == '__main__': 
     main()     
