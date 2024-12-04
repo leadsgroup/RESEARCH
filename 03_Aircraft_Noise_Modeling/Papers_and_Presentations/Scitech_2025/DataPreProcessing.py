@@ -17,7 +17,7 @@ race_dictionary = {
 }
 
 income_dictionary = {
-    "B19001001": "Total",
+    "B19001001": "Total Households",
     "B19001002": "<$10k",
     "B19001003": "$10k to $15k",
     "B19001004": "$15k to $20k",
@@ -46,34 +46,6 @@ income_dictionary = {
 #         pass
 #     # Load noise data
 #     noise_data = noise_file
-
-#     # Extract noise columns (excluding Latitude and Longitude)
-#     noise_columns = noise_data.columns[2:]
-
-#     # Compute minimum noise values for each column
-#     threshold_values = {col: noise_data[col].min() for col in noise_columns}
-
-#     # Convert noise data to GeoDataFrame using vectorized approach
-#     noise_data['geometry'] = gpd.points_from_xy(
-#         noise_data['Longitude'] - 360, noise_data['Latitude']
-#     )
-#     noise_gdf = gpd.GeoDataFrame(noise_data, geometry='geometry', crs="EPSG:4326")
-
-#     # Perform spatial join to associate noise points with census tracts
-#     joined = gpd.sjoin(noise_gdf, census_tracts, how='inner', predicate='within')
-
-#     # Group by census tract and calculate mean noise levels
-#     mean_noise = joined.groupby('index_right')[noise_columns].mean().reset_index()
-
-#     # Merge the mean noise levels back into the census tracts GeoDataFrame
-#     census_tracts = census_tracts.merge(mean_noise, left_index=True, right_on='index_right', how='left')
-
-#     # Fill missing values with threshold values
-#     for col in noise_columns:
-#         census_tracts[col] = census_tracts[col].fillna(threshold_values[col])
-    
-#     return census_tracts
-
 
 def noise_preprocess(noise_file, census_tracts_file):
     # Load the existing census tracts GeoDataFrame
@@ -151,7 +123,7 @@ def convert_csv(file,save_name):
     df = df.drop(columns=['name_y'])
     df = df.drop(columns=['geoid_y'])
     df = df.loc[:, ~df.columns.str.contains('Error', case=False)]
-    df_proj = df.to_crs(epsg=3857)
+    # df_proj = df.to_crs(epsg=3857)
     # df['Area']  = (df_proj.geometry.area)*(3.861e-7)
     df = df.drop(columns=['geometry'])
 

@@ -16,7 +16,6 @@ race_dictionary = {
     "Pacific Islander": "B03002007",
     "Hispanic": "B03002012"
 }
-# 0-50,50-100,100-150,150-200, 200+
 
 income_dictionary = {
     "Total": "B19001001",
@@ -69,9 +68,9 @@ income_aggregation = {
 }
 
 
-# Load the data
 
 data_file_tract = pd.read_csv('HC_Data_Tract_CA.csv')
+
 # Define the relevant columns
 race_columns = ['Asian','Black','Hispanic','American Indian','Pacific Islander', 'White']
 
@@ -84,30 +83,6 @@ for income in income_columns:
 
 
 noise_column = 'L_dn'
-
-# def bplot(data_bg,data_columns, noise, x_axis):
-#     noise_threshold_1 = 45
-#     noise_threshold_2 = 55
-
-#     data_frame_thresh45 = data_bg[data_bg[noise] >= noise_threshold_1]
-#     data_frame_thresh60 = data_bg[data_bg[noise] >= noise_threshold_2]
-
-#     for name in data_frame_thresh45['name_x']:
-#         name = name.split(',')
-#         tract_name = name[1]
-
-
-#     melted_data = data_file.melt(value_vars=[f'{col}' for col in data_columns],
-#                              var_name='variables', value_name='values')
-    
-#     plt.figure(figsize=(10, 6))
-#     plt.rcParams['axes.linewidth'] = 2.0
-#     plt.rcParams["font.family"] = "Times New Roman"
-#     sns.boxplot(data=melted_data, x='variables', y='values')
-#     plt.xlabel(x_axis)
-#     plt.ylabel("Log(Population Density) * Noise Level")
-#     plt.savefig(f'{x_axis}bplot.png', bbox_inches='tight')
-#     plt.close()
 
 def stackedbplot_race(data_frame, column_names, noise_type, save_name,col_names):
     folder_path = 'Bar_Plots'
@@ -252,44 +227,6 @@ split_violin_plot(data_file_tract,race_columns,'L_dn','Race')
 split_violin_plot(data_file_tract,income_columns,'L_dn','Income')
 split_violin_plot(data_file_tract,struct_columns,'L_dn','Structures')
 
-
-
-
-# lin_reg_plot(data_file,race_columns,'L_dn','Race')
-# lin_reg_plot(data_file,income_columns,'L_dn','Income')
-
-
-    # for threshold in noise_thresholds:
-    #     filtered_tract = data_tract[data_tract[noise] >= threshold]
-    #     filtered_tract['threshold'] = threshold
-
-    #     results.append(filtered_tract[[f"{col}" for col in data_columns+['threshold']+['CA']]])
-
-    # results = pd.concat(results)
-    # results.to_csv('violinplot_results.csv', index=False)
-
-    # results_melted = results.melt(
-    #     id_vars=['threshold'], 
-    #     value_vars=['CA'],
-    #     var_name=x_axis, 
-    #     value_name='CA_val'
-    # )
-
-    # print(results_melted)
-    # # Plot the split violin plot using seaborn
-    # plt.figure(figsize=(10, 6))
-    # # sns.violinplot(
-    # #     x=x_axis, y='CA_val', hue='threshold', 
-    # #     data=results_melted, inner='quartile', palette='Set2'
-    # # )
-    # sns.violinplot(filtered_tract)
-    # plt.ylabel("Percentage of Population")
-    # plt.title("Split Violin Plot by Noise Thresholds")
-
-    # # Save the plot
-    # plot_file_name = os.path.join(folder_path, f'violin_plot_{x_axis}.png')
-    # plt.tight_layout()
-    # plt.savefig(plot_file_name)
 
 # folder_path = 'Bar_Plots'
 
