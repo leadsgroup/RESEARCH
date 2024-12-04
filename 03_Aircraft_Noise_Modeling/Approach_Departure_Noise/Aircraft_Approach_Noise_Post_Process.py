@@ -31,7 +31,7 @@ def main():
     # ----------------------------------------------------------------------------------------------------------------------  
     aircraft_codes                   = ['HC','TSR','TR']  
 
-    number_of_microphone_in_stencil  = 4000
+    number_of_microphone_in_stencil  = 90000
     noise_evaluation_pitch           = 100 * Units.feet  
     aircraft_origin_location         = np.array([0, 0])
     N_gm_x                           = 300 # mics every 50 feet
