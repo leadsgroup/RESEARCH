@@ -185,19 +185,21 @@ def generate_census_analysis_plots():
     #colors = cm.tab20c(6)
     for i in  range(len(income_ranges)):
         fig_name = 'income_range_' + str(i+1)  
-        plt.figure(figsize=(4, 6))
+        plt.figure(figsize=(3, 4))
         sns.regplot(data=cencus_data, x="Perc_Asian"          , scatter=False, y= income_tag[i], line_kws={"color": pp.colors[0]}, label = 'Asian') 
         sns.regplot(data=cencus_data, x="Perc_Black"          , scatter=False, y= income_tag[i], line_kws={"color": pp.colors[1]}, label = 'Black') 
         sns.regplot(data=cencus_data, x="Perc_Hispanic"       , scatter=False, y= income_tag[i], line_kws={"color": pp.colors[2]}, label = 'Hispanic') 
         sns.regplot(data=cencus_data, x="Perc_AmericanIndian" , scatter=False, y= income_tag[i], line_kws={"color": pp.colors[3]}, label = 'Native American') 
         sns.regplot(data=cencus_data, x="Perc_PacificIslander", scatter=False, y= income_tag[i], line_kws={"color": pp.colors[4]}, label = 'Pacific Islander')
         sns.regplot(data=cencus_data, x="Perc_White"          , scatter=False, y= income_tag[i], line_kws={"color": pp.colors[5]}, label = 'White' )  
-        plt.ylabel('% Population Income Between ' + income_ranges[i] + 'k per Tract') 
-        plt.xlabel('% Population of Given Demographic') 
+        plt.ylabel('% Population') 
+        plt.xlabel('% Demographic') 
         plt.tight_layout()
+ 
+        #plt.legend(fontsize = pp.legend_font_size,bbox_to_anchor=(0.05, 0.95),loc='upper center')
         
-    plt.figure(figsize=(10, 1))
-    plt.legend(fontsize = pp.legend_font_size,bbox_to_anchor=(0.05, 0.95),loc='upper center')          
+        plt.savefig(fig_name + '.png', dpi=600)         
+               
 
     
     return 
@@ -232,12 +234,12 @@ def kde_density_plot(ax, coords, boundary_gdf, title):
 # ------------------------------------------------------------------  
 def define_plot_parameters(): 
 
-    plt.rcParams['axes.linewidth'] = 2.
+    plt.rcParams['axes.linewidth'] = 1.
     plt.rcParams["font.family"] = "Times New Roman"
-    parameters = {'axes.labelsize': 12,
+    parameters = {'axes.labelsize': 18,
                   'legend.fontsize': 12,
-                  'xtick.labelsize': 12,
-                  'ytick.labelsize': 12,
+                  'xtick.labelsize': 18,
+                  'ytick.labelsize': 18,
                   'axes.titlesize': 12}
     plt.rcParams.update(parameters)
     plot_parameters                  = Data()
