@@ -21,8 +21,8 @@ def main():
     
     # Create arrays of aileron and rudder sizes
     
-    aileron_size                              = np.array([0.5, 0.6])
-    rudder_size                               = np.array([0.5, 0.6])
+    aileron_size                              = np.array([0.01, 3])
+    rudder_size                               = np.array([0.01, 3])
     
     # Load optimized vehicle
     
@@ -349,9 +349,9 @@ def optimization(static_variable):
     delta_r_lower_bound_oei  = -30 * np.pi/180    # [rad]
     delta_r_upper_bound_oei  = 30  * np.pi/180    # [rad]   
     
-    x0         = [0.5, 0.1, 0.5, 0.1, 0.8, 0.8]
+    x0         = [0.3, 0.1, 0.3, 0.1, 0.3, 0.3]
     
-    args       = static_variable
+    args       = [static_variable]
     
     hard_cons  = [{'type':'eq', 'fun': hard_constraint_Y_cw,'args':  args},
                   {'type':'eq', 'fun': hard_constraint_L_cw,'args':  args},
@@ -371,7 +371,7 @@ def optimization(static_variable):
     sol = minimize(objective, x0, args= (static_variable) , method='SLSQP', bounds=bnds, tol=1e-6, constraints=hard_cons) 
     
     if sol.success == False:
-        print('\n Optimum motor design failed.')
+        print('\n Optimum control surfaces design failed.')
     
     delta_a_cw   = sol.x[0]
     delta_r_cw   = sol.x[1]    
@@ -390,7 +390,7 @@ def objective(design_variables,static_variable):
     return (aileron_span*static_variable.aileron_chord)*(rudder_span*static_variable.rudder_chord)
 
 # hard constraint
-def hard_constraint_Y_cw(design_variables,static_variable): 
+def hard_constraint_Y_cw(design_variables,static_variable):     
     
     aileron_span    = static_variable.wing_span*(0.95 - design_variables[4])
     rudder_span     = static_variable.vertical_tail_span*(0.95 - design_variables[5])
