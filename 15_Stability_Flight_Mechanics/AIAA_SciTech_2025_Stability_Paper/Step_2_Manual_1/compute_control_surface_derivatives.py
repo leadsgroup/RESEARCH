@@ -7,7 +7,9 @@ from   RCAIDE.Framework.Core import Units,Data
 from   RCAIDE.Library.Plots  import *  
 import numpy                 as np
 from   scipy.optimize        import fsolve
-from   sklearn.linear_model  import LinearRegression
+from   scipy                 import interpolate
+from   scipy.optimize        import minimize 
+from   scipy.interpolate     import interp1d
 import os   
 import pickle
 
@@ -35,74 +37,117 @@ def main():
     
     #derivatives, results                      = compute_rudder_aileron_derivatives(aileron_size, rudder_size, vehicle, seg_num=0)
     
-    derivatives_aileron1                      = np.array([0.5, 0.6])
-    derivatives_aileron2                      = np.array([0.5, 0.6])
-    derivatives_rudder1                       = np.array([0.5, 0.6])     
-    derivatives_rudder2                       = np.array([0.5, 0.6]) 
+    C_Y_delta_a_cw                            = np.array([0.5, 0.6])
+    C_L_delta_a_cw                            = np.array([0.5, 0.6])
+    C_N_delta_a_cw                            = np.array([0.5, 0.6])     
+    C_Y_delta_a_oei                           = np.array([0.5, 0.6])
+    C_L_delta_a_oei                           = np.array([0.5, 0.6])
+    C_N_delta_a_oei                           = np.array([0.5, 0.6])
+    C_Y_delta_r_cw                            = np.array([0.5, 0.6])
+    C_L_delta_r_cw                            = np.array([0.5, 0.6])
+    C_N_delta_r_cw                            = np.array([0.5, 0.6])     
+    C_Y_delta_r_oei                           = np.array([0.5, 0.6])
+    C_L_delta_r_oei                           = np.array([0.5, 0.6])
+    C_N_delta_r_oei                           = np.array([0.5, 0.6])    
     
     # Create the functions describing the control derivatives as functions of control surface size
     
-    fa1                                       = regression(aileron_size, derivatives_aileron1)
-    fa2                                       = regression(aileron_size, derivatives_aileron2)
-    fr1                                       = regression(rudder_size, derivatives_rudder1)    
-    fr2                                       = regression(rudder_size, derivatives_rudder2)
+    static_variable = Data()
+    
+    static_variable.C_Y_delta_a_cw            = interpolate.interp1d(aileron_size, C_Y_delta_a_cw)
+    static_variable.C_L_delta_a_cw            = interpolate.interp1d(aileron_size, C_L_delta_a_cw)
+    static_variable.C_N_delta_a_cw            = interpolate.interp1d(aileron_size, C_N_delta_a_cw)
+    static_variable.C_Y_delta_a_oei           = interpolate.interp1d(aileron_size, C_Y_delta_a_oei)
+    static_variable.C_L_delta_a_oei           = interpolate.interp1d(aileron_size, C_L_delta_a_oei)
+    static_variable.C_N_delta_a_oei           = interpolate.interp1d(aileron_size, C_N_delta_a_oei)    
+    static_variable.C_Y_delta_r_cw            = interpolate.interp1d(rudder_size,  C_Y_delta_r_cw)
+    static_variable.C_L_delta_r_cw            = interpolate.interp1d(rudder_size,  C_L_delta_r_cw)
+    static_variable.C_N_delta_r_cw            = interpolate.interp1d(rudder_size,  C_N_delta_r_cw)
+    static_variable.C_Y_delta_r_oei           = interpolate.interp1d(rudder_size,  C_Y_delta_r_oei)
+    static_variable.C_L_delta_r_oei           = interpolate.interp1d(rudder_size,  C_L_delta_r_oei)
+    static_variable.C_N_delta_r_oei           = interpolate.interp1d(rudder_size,  C_N_delta_r_oei)
     
     # Import data from vehicle
     
-    W                                         = 2700*9.81
-    rho                                       = 1.225
-    v                                         = 110.  * Units['mph']
-    S                                         = 15.629           
-    b                                         = 11.82855
-    T                                         = 525              # [N]
-    arm                                       = 9.2              # [m]
-    delta_a                                   = 30 * np.pi/180   # [rad/s] 
-    delta_r                                   = 30 * np.pi/180   # [rad/s]
-    beta                                      = 5 * np.pi/180    # [rad/s]
-    C_l_0                                     = 0
-    C_l_beta                                  = 1
-    C_n_beta                                  = 1                                                          
-    C_n_0                                     = -(T*arm)/(0.5*rho*(v**2)*S*b)
+    # CROSSWIND 
     
-    #delta_r                                   = (-(C_l_0/C_l_delta_r) - (C_l_beta/C_l_delta_r)*beta + (C_l_delta_a/C_l_delta_r)*(C_n_0/C_n_delta_a) + (C_l_delta_a/C_l_delta_r)*(C_n_beta/C_n_delta_a)*beta)/(1 - ((C_l_delta_a)/(C_l_delta_r))*((C_n_delta_r)/(C_n_delta_a)))
-    #delta_a                                   = (-C_n_0 - C_n_beta*beta - C_n_delta_r*delta_r)/C_n_delta_a
+    static_variable.W_cw                                          = 2700*9.81
+    static_variable.rho_cw                                        = 1.225
+    static_variable.S_cw                                          = 15.629           
+    static_variable.wing_span_cw                                  = 11.82855 
+    static_variable.vertical_tail_span_cw                         = 2
+    static_variable.aileron_chord_cw                              = 0.1
+    static_variable.rudder_chord_cw                               = 0.1
+    static_variable.T_cw                                          = 525                           # [N]
+    static_variable.arm_cw                                        = 9.2                           # [m]
+    static_variable.delta_a_cw                                    = 30 * np.pi/180                # [rad/s] 
+    static_variable.delta_r_cw                                    = 30 * np.pi/180                # [rad/s]
+    static_variable.beta_cw                                       = 5 * np.pi/180                 # [rad/s]
+    static_variable.C_l_0_cw                                      = 0
+    static_variable.C_l_beta_cw                                   = 1
+    static_variable.C_n_beta_cw                                   = 1                                                          
+    static_variable.C_n_0_cw                                      = 0
+    static_variable.V_cw                                          = 110. * Units['mph']
+    static_variable.v_cw                                          = 35                            # [ft/s] 
+    static_variable.beta_cw                                       = np.arcsin(static_variable.v_cw/static_variable.V_cw) # [rad]
+    static_variable.C_w_cw                                        = static_variable.W_cw/(0.5*static_variable.rho_cw*(static_variable.V_cw**2)*static_variable.S_cw)                                                                      #[-]
+    
+    # OEI
+    
+    static_variable.W_oei                                         = 2700*9.81
+    static_variable.rho_oei                                       = 1.225
+    static_variable.V_oei                                         = 110.  * Units['mph']
+    static_variable.S_oei                                         = 15.629           
+    static_variable.b_oei                                         = 11.82855
+    static_variable.aileron_chord_oei                             = 0.1
+    static_variable.rudder_chord_oei                              = 0.1
+    static_variable.T_oei                                         = 525              # [N]
+    static_variable.arm_oei                                       = 9.2              # [m]
+    static_variable.delta_a_oei                                   = 30 * np.pi/180   # [rad/s] 
+    static_variable.delta_r_oei                                   = 30 * np.pi/180   # [rad/s]
+    static_variable.beta_oei                                      = 0 * np.pi/180    # [rad/s]
+    static_variable.C_l_0_oei                                     = 0
+    static_variable.C_l_beta_oei                                  = 1
+    static_variable.C_n_beta_oei                                  = 1                                                          
+    static_variable.C_n_0_oei                                     = -(static_variable.T_oei*static_variable.arm_oei)/(0.5*static_variable.rho_oei*(static_variable.V_oei**2)*static_variable.S_oei*static_variable.b_oei)
+    static_variable.C_w_oei                                       = static_variable.W_oei/(0.5*static_variable.rho_oei*(static_variable.V_oei**2)*static_variable.S_oei)
+    
+    delta_a_lower_bound_cw, delta_r_lower_bound_cw, delta_a_lower_bound_oei, delta_r_lower_bound_oei, aileron_span_lower_bound, rudder_span_lower_bound = optimization(static_variable)
+    
+    debug = 0
     
     # Setup the system of equations to solve
     
-    def system(vars):
-        x, y = vars  
-        eq1 = C_l_beta*beta + fa1(x)*delta_a + fr1(y)*delta_r
-        eq2 = C_n_0 + C_n_beta*beta + fa2(x)*delta_a + fr2(y)*delta_r
-        return [eq1, eq2]
+    #def system(vars):
+        #x, y = vars  
+        #eq1 = C_l_beta*beta + fa1(x)*delta_a + fr1(y)*delta_r
+        #eq2 = C_n_0 + C_n_beta*beta + fa2(x)*delta_a + fr2(y)*delta_r
+        #return [eq1, eq2]
     
-    # Solve the system
+    ## Solve the system
 
-    initial_guess              = [1.0, 2.0]
-    solution                   = fsolve(system, initial_guess)
-    delta_a_size, delta_r_size = solution    
+    #initial_guess              = [1.0, 2.0]
+    #solution                   = fsolve(system, initial_guess)
+    #delta_a_size, delta_r_size = solution    
     
     return delta_a_size, delta_r_size 
 
-def regression(x,y):
-    
+def interpolation(x, y, kind='linear'):
     # ------------------------------------------------------------------
-    #   Regression 
-    # ------------------------------------------------------------------ 
+    #   Interpolation
+    # ------------------------------------------------------------------
     
-    x_reshaped      = x.reshape(-1, 1)
-    linear_regressor  = LinearRegression()
-    linear_regressor.fit(x_reshaped, y)
-    slope             = linear_regressor.coef_[0]
-    intercept         = linear_regressor.intercept_
+    interpolating_function = interp1d(x, y, kind=kind, fill_value="extrapolate")
     
-    def linear_regression_function1(x):
-        return slope * x + intercept
+    x_new = np.linspace(x.min(), x.max(), 100)
+    y_new = interpolating_function(x_new)
     
-    x_new            = np.linspace(x.min(), x.max(), 100)
-    y_new            = linear_regression_function1(x_new)   
-    dy_dx            = np.full_like(x_new, slope)    
+    if kind == 'linear':
+        dy_dx = np.gradient(y_new, x_new)
+    else:
+        dy_dx = np.gradient(y_new, x_new)
     
-    return linear_regression_function1
+    return interpolating_function, x_new, y_new, dy_dx
 
 def setup_rudder_aileron(vehicle):
     
@@ -266,50 +311,40 @@ def configs_setup(vehicle):
 
     return configs
  
-def mission_setup(analyses): 
-    
+def base_mission_setup(analyses,max_speed_multiplier,cruise_velocity,cruise_altitude,angle_of_attack,sideslip_angle,bank_angle, roll_rate,pitch_rate,yaw_rate):   
     '''
     This sets up the nominal cruise of the aircraft
     '''
-    # ------------------------------------------------------------------
-    #   Initialize the Mission
-    # ------------------------------------------------------------------
-
-    mission        = RCAIDE.Framework.Mission.Sequential_Segments()
-    mission.tag    = 'baseline_mission' 
-    
-    # unpack Segments module
-    Segments       = RCAIDE.Framework.Mission.Segments
-
-    # base segment           
-    base_segment   = Segments.Segment()    
      
-    #------------------------------------------------------------------------------------------------------------------------------------  
-    # Cruise 
-    #------------------------------------------------------------------------------------------------------------------------------------  
-    segment                                                          = Segments.Cruise.Constant_Speed_Constant_Altitude(base_segment)
-    segment.tag                                                      = "Cruise"  
-    segment.analyses.extend( analyses.forward_flight )                             
-    segment.altitude                                                 = 1000.0 * Units.ft  
-    segment.air_speed                                                = 110.  * Units['mph']  
-    segment.distance                                                 = 40 *Units.nmi 
-    segment.true_course                                              = 30 * Units.degree
-                                                                     
-    # define flight dynamics to model                                
-    segment.flight_dynamics.force_x                                  = True  
-    segment.flight_dynamics.force_z                                  = True     
+    mission = RCAIDE.Framework.Mission.Sequential_Segments()
+    mission.tag = 'base_mission'
+  
+    # unpack Segments module
+    Segments = RCAIDE.Framework.Mission.Segments
+
+    #   Cruise Segment: constant Speed, constant altitude 
+    segment                           = Segments.Untrimmed.Untrimmed()
+    segment.analyses.extend( analyses )   
+    segment.tag                       = "cruise"
+    segment.angle_of_attack           = angle_of_attack
+    segment.sideslip_angle            = sideslip_angle
+    segment.bank_angle                = bank_angle
+    segment.altitude                  = cruise_altitude
+    segment.air_speed                 = cruise_velocity * max_speed_multiplier
+    segment.roll_rate                 = roll_rate 
+    segment.pitch_rate                = pitch_rate  
+    segment.yaw_rate                  = yaw_rate   
+
+    segment.flight_dynamics.force_x   = True    
+    segment.flight_dynamics.force_z   = True    
+    segment.flight_dynamics.force_y   = True     
+    segment.flight_dynamics.moment_y  = True 
+    segment.flight_dynamics.moment_x  = True
+    segment.flight_dynamics.moment_z  = True
     
-    # define flight controls 
-    segment.assigned_control_variables.throttle.active               = True           
-    segment.assigned_control_variables.throttle.assigned_propulsors  = [['prop_rotor_propulsor_1','prop_rotor_propulsor_2','prop_rotor_propulsor_3',
-                                                                         'prop_rotor_propulsor_4','prop_rotor_propulsor_5','prop_rotor_propulsor_6'] ] 
-    segment.assigned_control_variables.body_angle.active             = True                
-         
-    mission.append_segment(segment)  
+    mission.append_segment(segment)     
     
     return mission
-    
-
 
 def missions_setup(mission): 
  
@@ -334,89 +369,154 @@ def load_results(filename):
         results = pickle.load(file) 
     
     return results
-
-from scipy.optimize import minimize 
-
-# ----------------------------------------------------------------------------------------------------------------------
-#  design motor 
-# ----------------------------------------------------------------------------------------------------------------------     
-def design_motor(motor):
-    ''' Sizes a DC motor to obtain the best combination of speed constant and resistance values
-    by sizing the motor for a design RPM value. Note that this design RPM value can be compute
-    from design tip mach. The following properties are computed.  
-      motor.speed_constant  (float): speed-constant [untiless] 
-      motor.resistance      (float): resistance     [ohms]        
     
-    Assumptions:
-        None 
-    
-    Source:
-        None
-    
-    Args:
-        motor.no_load_current  (float): no-load current  [A]
-        motor.nominal_voltage  (float): nominal voltage  [V]
-        motor.angular_velocity (float): angular velocity [radians/s]    
-        motor.efficiency       (float): efficiency       [unitless]
-        motor.design_torque    (float): design torque    [Nm]
-       
-    Returns:
-       None 
-    
-    '''     
-    # design properties of the motor 
-    io    = motor.no_load_current
-    v     = motor.nominal_voltage
-    omeg  = motor.angular_velocity     
-    etam  = motor.efficiency 
-    Q     = motor.design_torque 
+def optimization(static_variable):
     
     # define optimizer bounds 
-    KV_lower_bound  = 0.01
-    Res_lower_bound = 0.001
-    KV_upper_bound  = 100
-    Res_upper_bound = 10
+    aileron_span_lower_bound = 0.75               # [%]    # just changing the upper and lower bound of the lower bound of the control surface (the limit closer to root of wing)
+    aileron_span_upper_bound = 0.90               # [%]  
+    rudder_span_lower_bound  = 0.05               # [%]  
+    rudder_span_upper_bound  = 0.90               # [%]
+    delta_a_lower_bound_cw   = -30 * np.pi/180    # [rad]
+    delta_a_upper_bound_cw   = 30  * np.pi/180    # [rad]
+    delta_r_lower_bound_cw   = -30 * np.pi/180    # [rad]
+    delta_r_upper_bound_cw   = 30  * np.pi/180    # [rad]                     
+    delta_a_lower_bound_oei  = -30 * np.pi/180    # [rad]
+    delta_a_upper_bound_oei  = 30  * np.pi/180    # [rad]
+    delta_r_lower_bound_oei  = -30 * np.pi/180    # [rad]
+    delta_r_upper_bound_oei  = 30  * np.pi/180    # [rad]    
     
-    args       = (v , omeg,  etam , Q , io ) 
-    hard_cons  = [{'type':'eq', 'fun': hard_constraint_1,'args': args},{'type':'eq', 'fun': hard_constraint_2,'args': args}] 
-    slack_cons = [{'type':'eq', 'fun': slack_constraint_1,'args': args},{'type':'eq', 'fun': slack_constraint_2,'args': args}]  
-    bnds       = ((KV_lower_bound, KV_upper_bound), (Res_lower_bound , Res_upper_bound)) 
+    args       = static_variable
+    
+    hard_cons  = [{'type':'eq', 'fun': hard_constraint_Y_cw,'args': args},
+                  {'type':'eq', 'fun': hard_constraint_L_cw,'args': args},
+                  {'type':'eq', 'fun': hard_constraint_N_cw,'args': args},
+                  {'type':'eq', 'fun': hard_constraint_Y_oei,'args': args},
+                  {'type':'eq', 'fun': hard_constraint_L_oei,'args': args},
+                  {'type':'eq', 'fun': hard_constraint_N_oei,'args': args}]
+    
+    bnds       = ((delta_a_lower_bound_cw,   delta_a_upper_bound_cw  ), 
+                  (delta_r_lower_bound_cw ,  delta_r_upper_bound_cw  ),
+                  (delta_a_lower_bound_oei,  delta_a_upper_bound_oei ),
+                  (delta_r_lower_bound_oei,  delta_r_upper_bound_oei ),
+                  (aileron_span_lower_bound, aileron_span_upper_bound),                 
+                  (rudder_span_lower_bound,  rudder_span_upper_bound )) 
     
     # try hard constraints to find optimum motor parameters
-    sol = minimize(objective, [0.5, 0.1], args=(v , omeg,  etam , Q , io) , method='SLSQP', bounds=bnds, tol=1e-6, constraints=hard_cons) 
+    sol = minimize(objective, [0.5, 0.1], args= (static_variable) , method='SLSQP', bounds=bnds, tol=1e-6, constraints=hard_cons) 
     
     if sol.success == False:
-        # use slack constraints if optimizer fails and motor parameters cannot be found 
-        print('\n Optimum motor design failed. Using slack constraints')
-        sol = minimize(objective, [0.5, 0.1], args=(v , omeg,  etam , Q , io) , method='SLSQP', bounds=bnds, tol=1e-6, constraints=slack_cons) 
-        if sol.success == False:
-            assert('\n Slack contraints failed')  
+        print('\n Optimum motor design failed.')
     
-    motor.speed_constant   = sol.x[0]
-    motor.resistance       = sol.x[1]    
+    delta_a_lower_bound_cw   = sol.x[0]
+    delta_r_lower_bound_cw   = sol.x[1]    
+    delta_a_lower_bound_oei  = sol.x[2] 
+    delta_r_lower_bound_oei  = sol.x[3] 
+    aileron_span_lower_bound = sol.x[4] 
+    rudder_span_lower_bound  = sol.x[5] 
     
-    return   
-  
+    return delta_a_lower_bound_cw, delta_r_lower_bound_cw, delta_a_lower_bound_oei, delta_r_lower_bound_oei, aileron_span_lower_bound, rudder_span_lower_bound 
+
 # objective function
-def objective(x, v , omeg,  etam , Q , io ): 
-    return (v - omeg/x[0])/x[1]   
+def objective(design_variables,static_variable):
+    aileron_span_cw    = static_variable.wing_span_cw*(0.95 - design_variables[4])
+    rudder_span_cw     = static_variable.vertical_tail_span_cw*(0.95 - design_variables[5])    
+    return (aileron_span_cw*static_variable.aileron_chord_cw)*(rudder_span_cw*static_variable.rudder_chord_cw)
 
-# hard efficiency constraint
-def hard_constraint_1(x, v , omeg,  etam , Q , io ): 
-    return etam - (1- (io*x[1])/(v - omeg/x[0]))*(omeg/(v*x[0]))   
+# hard constraint
+def hard_constraint_Y_cw(design_variables,static_variable): 
+    
+    aileron_span    = static_variable.wing_span_cw*(0.95 - design_variables[4])
+    rudder_span     = static_variable.vertical_tail_span_cw*(0.95 - design_variables[5])
+    
+    C_w_cw          = static_variable.C_w_cw
+    phi_cw          = static_variable.phi_cw
+    C_Y_0_cw        = static_variable.C_Y_0_cw
+    C_Y_beta_cw     = static_variable.C_Y_beta_cw
+    beta_cw         = static_variable.beta_cw 
+    C_Y_delta_a_cw  = static_variable.C_Y_beta_cw
+    C_Y_delta_r_cw  = static_variable.C_Y_beta_cw
+    
+    res = C_w_cw*np.sin(phi_cw) + C_Y_0_cw + C_Y_beta_cw*beta_cw + C_Y_delta_a_cw(aileron_span)*design_variables[0] + C_Y_delta_r_cw(rudder_span)*design_variables[1]
+    
+    return res
 
-# hard torque equality constraint
-def hard_constraint_2(x, v , omeg,  etam , Q , io ): 
-    return ((v - omeg/x[0])/x[1] - io)/x[0] - Q  
+def hard_constraint_L_cw(design_variables,static_variable): 
+    
+    aileron_span    = static_variable.wing_span_cw*(0.95 - design_variables[4])
+    rudder_span     = static_variable.vertical_tail_span_cw*(0.95 - design_variables[5])
+    
+    C_L_0_cw        = static_variable.C_L_0_cw
+    C_L_beta_cw     = static_variable.C_L_beta_cw
+    beta_cw         = static_variable.beta_cw 
+    C_L_delta_a_cw  = static_variable.C_L_beta_cw
+    C_L_delta_r_cw  = static_variable.C_L_beta_cw
+    
+    res = C_L_0_cw + C_L_beta_cw*beta_cw + C_L_delta_a_cw(aileron_span)*design_variables[0] +  C_L_delta_r_cw(rudder_span)*design_variables[1]
+    
+    return res
 
-# slack efficiency constraint 
-def slack_constraint_1(x, v , omeg,  etam , Q , io ): 
-    return abs(etam - (1- (io*x[1])/(v - omeg/x[0]))*(omeg/(v*x[0]))) - 0.2
+def hard_constraint_N_cw(design_variables,static_variable): 
+    
+    aileron_span    = static_variable.wing_span_cw*(0.95 - design_variables[4])
+    rudder_span     = static_variable.vertical_tail_span_cw*(0.95 - design_variables[5])
+    
+    C_N_0_cw        = static_variable.C_N_0_cw
+    C_N_beta_cw     = static_variable.C_N_beta_cw
+    beta_cw         = static_variable.beta_cw 
+    C_N_delta_a_cw  = static_variable.C_N_beta_cw
+    C_N_delta_r_cw  = static_variable.C_N_beta_cw
+    
+    res = C_N_0_cw + C_N_beta_cw*beta_cw + C_N_delta_a_cw(aileron_span)*design_variables[0] +  C_N_delta_r_cw(rudder_span)*design_variables[1]
+    
+    return res
 
-# slack torque equality constraint 
-def slack_constraint_2(x, v , omeg,  etam , Q , io ): 
-    return  abs(((v - omeg/x[0])/x[1] - io)/x[0] - Q) - 200 
+def hard_constraint_Y_oei(design_variables,static_variable): 
+    
+    aileron_span     = static_variable.wing_span_oei*(0.95 - design_variables[4])
+    rudder_span      = static_variable.vertical_tail_span_oei*(0.95 - design_variables[5])
+    
+    C_w_oei          = static_variable.C_w_oei
+    phi_oei          = static_variable.phi_oei
+    C_Y_0_oei        = static_variable.C_Y_0_oei
+    C_Y_beta_oei     = static_variable.C_Y_beta_oei
+    beta_oei         = static_variable.beta_oei 
+    C_Y_delta_a_oei  = static_variable.C_Y_beta_oei
+    C_Y_delta_r_oei  = static_variable.C_Y_beta_oei
+    
+    res = C_w_oei*np.sin(phi_oei) + C_Y_0_oei + C_Y_beta_oei*beta_oei + C_Y_delta_a_oei(aileron_span)*design_variables[2] + C_Y_delta_r_oei(rudder_span)*design_variables[3]
+    
+    return res
 
+def hard_constraint_L_oei(design_variables,static_variable): 
+    
+    aileron_span     = static_variable.wing_span_oei*(0.95 - design_variables[4])
+    rudder_span      = static_variable.vertical_tail_span_oei*(0.95 - design_variables[5])
+    
+    C_L_0_oei        = static_variable.C_L_0_oei
+    C_L_beta_oei     = static_variable.C_L_beta_oei
+    beta_oei         = static_variable.beta_oei 
+    C_L_delta_a_oei  = static_variable.C_L_beta_oei
+    C_L_delta_r_oei  = static_variable.C_L_beta_oei
+    
+    res = C_L_0_oei + C_L_beta_oei*beta_oei + C_L_delta_a_oei(aileron_span)*design_variables[2] +  C_L_delta_r_oei(rudder_span)*design_variables[3]
+    
+    return res
+
+def hard_constraint_N_oei(design_variables,static_variable): 
+    
+    aileron_span     = static_variable.wing_span_oei*(0.95 - design_variables[4])
+    rudder_span      = static_variable.vertical_tail_span_oei*(0.95 - design_variables[5])
+    
+    C_N_0_oei        = static_variable.C_N_0_oei
+    C_N_beta_oei     = static_variable.C_N_beta_oei
+    beta_oei         = static_variable.beta_oei 
+    C_N_delta_a_oei  = static_variable.C_N_beta_oei
+    C_N_delta_r_oei  = static_variable.C_N_beta_oei
+    
+    res = C_N_0_oei + C_N_beta_oei*beta_oei + C_N_delta_a_oei(aileron_span)*design_variables[2] +  C_N_delta_r_oei(rudder_span)*design_variables[3]
+    
+    return res
  
 if __name__ == '__main__': 
     main()     
