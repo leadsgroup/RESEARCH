@@ -158,11 +158,15 @@ def split_violin_plot(data_tract, data_columns, noise, x_axis):
     data=[]
     for threshold in noise_thresholds:
         filtered_tract = data_tract[data_tract[noise] >= threshold]
-        filtered_tract['threshold'] = threshold
-        data.append(filtered_tract)
+        val = filtered_tract[data_columns]/data_tract[data_columns]
+        val['CA'] = filtered_tract['CA']
+        val["L_dn"] = filtered_tract["L_dn"]
+        val["L_dnlog(PD)"] = filtered_tract["L_dnlog(PD)"]
+        val['threshold'] = threshold
+        data.append(val)
     data = pd.concat(data)
     data.to_csv('data.csv',index=False)
-
+    print(data)
     # Create the DataFrame
     df = pd.DataFrame(data)
 
@@ -175,7 +179,6 @@ def split_violin_plot(data_tract, data_columns, noise, x_axis):
     )
     y_val = ["L_dn","L_dnlog(PD)","CA"]
     for value in y_val:
-        # Plot the split violin plot with CA as the y-axis
         plt.figure(figsize=(12, 8))
         sns.violinplot(
             x="Race", y=value, hue="threshold", 
