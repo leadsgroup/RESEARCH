@@ -5,6 +5,7 @@ import numpy as np
 import os
 import matplotlib.cm as cm
 from RCAIDE.Framework.Core import  Data
+import scipy.stats as stats
 
 
 race_dictionary = {
@@ -158,15 +159,14 @@ def split_violin_plot(data_tract, data_columns, noise, x_axis):
     data=[]
     for threshold in noise_thresholds:
         filtered_tract = data_tract[data_tract[noise] >= threshold]
-        val = filtered_tract[data_columns]/data_tract[data_columns]
+        val = filtered_tract[data_columns]
         val['CA'] = filtered_tract['CA']
         val["L_dn"] = filtered_tract["L_dn"]
         val["L_dnlog(PD)"] = filtered_tract["L_dnlog(PD)"]
         val['threshold'] = threshold
         data.append(val)
     data = pd.concat(data)
-    data.to_csv('data.csv',index=False)
-    print(data)
+    data.to_csv(f'{x_axis}data.csv',index=False)
     # Create the DataFrame
     df = pd.DataFrame(data)
 
@@ -191,8 +191,6 @@ def split_violin_plot(data_tract, data_columns, noise, x_axis):
         plot_file_name = os.path.join(folder_path, f'violin_plot_{x_axis}{value}.png')
         plt.tight_layout()
         plt.savefig(plot_file_name)
-    
-
 
     # for threshold in noise_thresholds:
     #     filtered_bg = data_tract[data_tract[noise] >= threshold]
