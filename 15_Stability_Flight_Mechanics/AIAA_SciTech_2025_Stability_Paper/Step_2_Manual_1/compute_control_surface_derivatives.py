@@ -100,21 +100,21 @@ def main():
             #  Load specs from Stick Fixed Optimization 
             # -------------------------------------------------------------               
             
-            excel_data         = read_results(excel_file)            
+            excel_data         = read_results(excel_file)   # Change to for loop when add all results from stick fixed         
             
             # -------------------------------------------------------------
             #  Assign specs from Stick Fixed Optimization 
             # -------------------------------------------------------------            
             
-            #case_vehicle.wings.main_wing.spans.projected = excel_data.mw_span
-            #case_vehicle.wings.main_wing            = excel_data.mw_AR
-            #case_vehicle.wings.main_wing            = excel_data.mw_root_twist
-            #case_vehicle.wings.main_wing            = excel_data.mw_tip_twist
-            #case_vehicle.wings.vertical_tail         = excel_data.vt_span
-            #case_vehicle.wings.vertical_tail         = excel_data.vt_AR
-            #case_vehicle.wings.horizontal_tail       = excel_data.ht_AR
-            #case_vehicle.wings.horizontal_tail       = excel_data.ht_span
-            #case_vehicle.wings.horizontal_tail       = excel_data.ht_tip_twist
+            case_vehicle.wings.main_wing.spans.projected       = excel_data.mw_span[0]*10
+            case_vehicle.wings.main_wing.aspect_ratio          = excel_data.mw_AR[0]*10
+            case_vehicle.wings.main_wing.twists.root           = excel_data.mw_root_twist[0]
+            case_vehicle.wings.main_wing.twists.tip            = excel_data.mw_tip_twist[0]
+            case_vehicle.wings.vertical_tail.spans.projected   = excel_data.vt_span[0]
+            case_vehicle.wings.vertical_tail.aspect_ratio      = excel_data.vt_AR[0]
+            case_vehicle.wings.horizontal_tail.aspect_ratio    = excel_data.ht_AR[0]*10
+            case_vehicle.wings.horizontal_tail.spans.projected = excel_data.ht_span[0]*10
+            case_vehicle.wings.horizontal_tail.twists.tip      = excel_data.ht_tip_twist[0]
             
             # -------------------------------------------------------------
             #  Aileron & Rudder
@@ -122,16 +122,16 @@ def main():
             
             # Create arrays of aileron and rudder sizes
             
-            aileron_size                              = np.array([0.1, 0.5, 0.9])
-            rudder_size                               = np.array([0.1, 0.5, 0.9])
+            aileron_span_fraction_start               = np.array([0.1, 0.4, 0.7])
+            rudder_chord_fraction                     = np.array([0.1, 0.4, 0.7])
             
             # Append aileron and rudder
             
             case_vehicle                              = setup_rudder_aileron(case_vehicle)
             
-            # Compute the control derivatives related to the control surfaces
+            # Compute the control derivatives related to the control surface dimensions
             
-            derivatives, results                      = compute_rudder_aileron_derivatives(aileron_size, rudder_size, case_vehicle, seg_num=0)
+            derivatives, results                      = compute_rudder_aileron_derivatives(aileron_span_fraction_start, rudder_chord_fraction, case_vehicle, seg_num=0)
             
             C_Y_delta_a                               = derivatives.C_Y_delta_a
             C_L_delta_a                               = derivatives.C_L_delta_a
@@ -144,12 +144,12 @@ def main():
             
             static_variable = Data()
             
-            static_variable.C_Y_delta_a_fz            = interpolate.interp1d(aileron_size, C_Y_delta_a)
-            static_variable.C_L_delta_a_fz            = interpolate.interp1d(aileron_size, C_L_delta_a)
-            static_variable.C_N_delta_a_fz            = interpolate.interp1d(aileron_size, C_N_delta_a)   
-            static_variable.C_Y_delta_r_fz            = interpolate.interp1d(rudder_size,  C_Y_delta_r)
-            static_variable.C_L_delta_r_fz            = interpolate.interp1d(rudder_size,  C_L_delta_r)
-            static_variable.C_N_delta_r_fz            = interpolate.interp1d(rudder_size,  C_N_delta_r)
+            static_variable.C_Y_delta_a_fz            = interpolate.interp1d(aileron_span_fraction_start, C_Y_delta_a)
+            static_variable.C_L_delta_a_fz            = interpolate.interp1d(aileron_span_fraction_start, C_L_delta_a)
+            static_variable.C_N_delta_a_fz            = interpolate.interp1d(aileron_span_fraction_start, C_N_delta_a)   
+            static_variable.C_Y_delta_r_fz            = interpolate.interp1d(rudder_chord_fraction,  C_Y_delta_r)
+            static_variable.C_L_delta_r_fz            = interpolate.interp1d(rudder_chord_fraction,  C_L_delta_r)
+            static_variable.C_N_delta_r_fz            = interpolate.interp1d(rudder_chord_fraction,  C_N_delta_r)
             
             # Import data from vehicle
             
@@ -230,19 +230,19 @@ def setup_rudder_aileron(vehicle):
     
     return vehicle
 
-def compute_rudder_aileron_derivatives(aileron_size, rudder_size, vehicle,  seg_num=0):           
+def compute_rudder_aileron_derivatives(aileron_span_fraction_start, rudder_chord_fraction, vehicle,  seg_num=0):           
     # seg_num is the number of the mission segment correspdoning to the segment for which control surface derivatives are being found
     
-    CN_delta_a    =  np.zeros(np.size(aileron_size))
-    CL_delta_a    =  np.zeros(np.size(aileron_size))
-    CY_delta_a    =  np.zeros(np.size(aileron_size))
+    CN_delta_a    =  np.zeros(np.size(aileron_span_fraction_start))
+    CL_delta_a    =  np.zeros(np.size(aileron_span_fraction_start))
+    CY_delta_a    =  np.zeros(np.size(aileron_span_fraction_start))
     
-    CN_delta_r     = np.zeros(np.size(rudder_size))
-    CL_delta_r     = np.zeros(np.size(rudder_size))
-    CY_delta_r     = np.zeros(np.size(rudder_size))
+    CN_delta_r     = np.zeros(np.size(rudder_chord_fraction))
+    CL_delta_r     = np.zeros(np.size(rudder_chord_fraction))
+    CY_delta_r     = np.zeros(np.size(rudder_chord_fraction))
     
-    for i in range(len(aileron_size)):
-        vehicle.wings.main_wing.control_surfaces.aileron.chord_fraction = aileron_size[i]
+    for i in range(len(aileron_span_fraction_start)):
+        vehicle.wings.main_wing.control_surfaces.aileron.span_fraction_start = aileron_span_fraction_start[i]
         results =  evalaute_aircraft(vehicle)
             
         # store properties
@@ -250,8 +250,8 @@ def compute_rudder_aileron_derivatives(aileron_size, rudder_size, vehicle,  seg_
         CL_delta_a[i]     =  results.segments[seg_num].conditions.static_stability.derivatives.CL_delta_a[0, 0]
         CY_delta_a[i]     =  results.segments[seg_num].conditions.static_stability.derivatives.CY_delta_a[0, 0]
         
-    for i in range(len(rudder_size)):
-        vehicle.wings.vertical_tail.rudder.chord_fraction = rudder_size[i]
+    for i in range(len(rudder_chord_fraction)):
+        vehicle.wings.vertical_tail.rudder.chord_fraction = rudder_chord_fraction[i]
         results =  evalaute_aircraft(vehicle)
             
         # store properties
@@ -266,20 +266,22 @@ def compute_rudder_aileron_derivatives(aileron_size, rudder_size, vehicle,  seg_
                  
                 
 def evalaute_aircraft(vehicle): 
-        
-    # Set up configs
+    
+    # Set up vehicle configs
     configs  = configs_setup(vehicle)
 
-    # vehicle analyses
+    # create analyses
     analyses = analyses_setup(configs)
 
     # mission analyses
-    mission  = mission_setup(analyses)
+    mission  = base_mission_setup(analyses) 
+
+    # create mission instances (for multiple types of missions)
     missions = missions_setup(mission) 
-     
-    results = missions.base_mission.evaluate()
-    
-          
+
+    # mission analysis 
+    results = missions.base_mission.evaluate() 
+
     return results
  
 def analyses_setup(configs):
@@ -370,7 +372,7 @@ def configs_setup(vehicle):
 
     return configs
  
-def base_mission_setup(analyses,max_speed_multiplier,cruise_velocity,cruise_altitude,angle_of_attack,sideslip_angle,bank_angle, roll_rate,pitch_rate,yaw_rate):   
+def base_mission_setup(analyses,max_speed_multiplier=1,cruise_velocity= 150  * Units['mph'],cruise_altitude= 1000*Units.feet):   
     '''
     This sets up the nominal cruise of the aircraft
     '''
@@ -385,14 +387,14 @@ def base_mission_setup(analyses,max_speed_multiplier,cruise_velocity,cruise_alti
     segment                           = Segments.Untrimmed.Untrimmed()
     segment.analyses.extend( analyses )   
     segment.tag                       = "cruise"
-    segment.angle_of_attack           = angle_of_attack
-    segment.sideslip_angle            = sideslip_angle
-    segment.bank_angle                = bank_angle
+    segment.angle_of_attack           = 0
+    segment.sideslip_angle            = 0
+    segment.bank_angle                = 0
     segment.altitude                  = cruise_altitude
     segment.air_speed                 = cruise_velocity * max_speed_multiplier
-    segment.roll_rate                 = roll_rate 
-    segment.pitch_rate                = pitch_rate  
-    segment.yaw_rate                  = yaw_rate   
+    segment.roll_rate                 = 0
+    segment.pitch_rate                = 0  
+    segment.yaw_rate                  = 0 
 
     segment.flight_dynamics.force_x   = True    
     segment.flight_dynamics.force_z   = True    
@@ -407,7 +409,7 @@ def base_mission_setup(analyses,max_speed_multiplier,cruise_velocity,cruise_alti
 
 def missions_setup(mission): 
  
-    missions         = RCAIDE.Framework.Mission.Missions()
+    missions     = RCAIDE.Framework.Mission.Missions()
     
     # base mission 
     mission.tag  = 'base_mission'
