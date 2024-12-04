@@ -1,0 +1,13 @@
+#PLots
+
+Barplot-
+Income
+Race
+Sensitive Noise Structs
+
+Noise Threshold (45db L_dn and 65db for L_dn)
+
+race plot
+	two columns
+
+Color scheme - 
