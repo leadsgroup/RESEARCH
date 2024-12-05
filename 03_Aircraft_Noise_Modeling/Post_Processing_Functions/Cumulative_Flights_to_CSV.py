@@ -14,7 +14,7 @@ from Aircraft_Noise_Emissions   import generate_terrain_microphone_locations
 
 
 def main():
-    store_dir = '/Users/aidanmolloy/Documents' # Change this as needed
+    store_dir = '/Users/aidanmolloy/Documents/LEADS/RESEARCH/03_Aircraft_Noise_Modeling/City_Simulations/Los_Angeles/Tiltrotor' # Change this as needed
     filename = 'Cumulative_TR_LA_1000ft' # Change this as needed
     
     microphone_x_resolution                 = 1200 

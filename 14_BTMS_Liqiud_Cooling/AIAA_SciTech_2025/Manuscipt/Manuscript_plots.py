@@ -8,7 +8,7 @@ import os
 
 
 def main():
-    file_name = 'Optimization_Results_Analysis/consolidated_exit_conditions.xlsx'
+    file_name = 'WRONG_Optimization_Results_Analysis/consolidated_exit_conditions.xlsx'
     file_path = os.path.join(os.path.dirname(__file__), file_name)
     sheet_name = 'Sheet1'
     data = load_data(file_path, sheet_name)
