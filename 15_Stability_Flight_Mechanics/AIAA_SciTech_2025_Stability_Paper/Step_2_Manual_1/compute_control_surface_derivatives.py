@@ -511,10 +511,10 @@ def objective(x,static_variable):
     Area_aileron    = static_variable.aileron_chord_fraction*static_variable.wing_span*(0.95 - x[4])*((0.95 + x[4])*(static_variable.wing_tip_chord - static_variable.wing_root_chord)/2 + static_variable.wing_root_chord)
     Area_rudder     = static_variable.rudder_chord_fraction*static_variable.vertical_tail_span*(0.95 - x[5])*((0.95 + x[5])*(static_variable.vertical_tail_tip_chord - static_variable.vertical_tail_root_chord)/2 + static_variable.vertical_tail_root_chord)
     
-    print(x[5])
-    #print(Area_aileron + Area_rudder)
+    #print(x[5])
+    print(Area_aileron * Area_rudder)
         
-    return Area_aileron + Area_rudder
+    return Area_aileron * Area_rudder
 
 # hard constraint
 def hard_constraint_Y_cw(x,static_variable):     
