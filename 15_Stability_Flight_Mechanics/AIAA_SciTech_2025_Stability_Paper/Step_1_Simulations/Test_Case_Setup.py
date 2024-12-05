@@ -78,15 +78,16 @@ def main():
             
             # prop rotor battery modules      
             case_vehicle.networks.electric.busses.prop_rotor_bus.battery_modules.nmc_module_1.origin = np.array([CG_bat_1[i, 0:3]])
-            case_vehicle.networks.electric.busses.prop_rotor_bus.battery_modules.nmc_module_2.origin = np.array([CG_bat_1[i,0] + case_vehicle.networks.electric.busses.prop_rotor_bus.battery_modules.nmc_module_1.length, 
-                                                                                                                 -CG_bat_1[i,1], 
-                                                                                                                 CG_bat_1[i,2]])
+            case_vehicle.networks.electric.busses.prop_rotor_bus.battery_modules.nmc_module_2.origin = np.array([[CG_bat_1[i,0] + case_vehicle.networks.electric.busses.prop_rotor_bus.battery_modules.nmc_module_1.length, 
+                          -CG_bat_1[i,1], 
+                          CG_bat_1[i,2]]])
             # lift rotor battery modules 
 
             case_vehicle.networks.electric.busses.lift_rotor_bus.battery_modules.nmc_module_1.origin = np.array([CG_bat_2[j,  0:3]])
-            case_vehicle.networks.electric.busses.lift_rotor_bus.battery_modules.nmc_module_2.origin = np.array([CG_bat_2[j,0], 
-                                                                                                                 CG_bat_2[j,1], 
-                                                                                                                 CG_bat_2[j,2] + case_vehicle.networks.electric.busses.lift_rotor_bus.battery_modules.nmc_module_2.height])
+            case_vehicle.networks.electric.busses.lift_rotor_bus.battery_modules.nmc_module_2.origin = np.array([[CG_bat_2[j,0], 
+                                                                                                      CG_bat_2[j,1], 
+                                                                                                      CG_bat_2[j,2] + case_vehicle.networks.electric.busses.lift_rotor_bus.battery_modules.nmc_module_2.height]])
+
             size_control_surfaces(CG_bat_1[i], CG_bat_2[j], case_vehicle, cruise_velocity, cruise_altitude)
     
     # Wing cases
@@ -107,20 +108,23 @@ def main():
             case_vehicle.networks.electric.busses.prop_rotor_bus.battery_modules.nmc_module_2.length = width2
             case_vehicle.networks.electric.busses.prop_rotor_bus.battery_modules.nmc_module_2.width = length2
             
-            case_vehicle.networks.electric.busses.prop_rotor_bus.battery_modules.nmc_module_1.origin = np.array([CG_bat_1[i, 0],
-                                                                                                                 CG_bat_1[i,1] + width2 / 2, 
-                                                                                                                 CG_bat_1[i,2]                                                                                                                     ])
-            case_vehicle.networks.electric.busses.prop_rotor_bus.battery_modules.nmc_module_2.origin = np.array([CG_bat_1[i,0], 
-                                                                                                                 -CG_bat_1[i,1] - width2 / 2, 
-                                                                                                                 CG_bat_1[i,2]])
+            case_vehicle.networks.electric.busses.prop_rotor_bus.battery_modules.nmc_module_1.origin = np.array([[CG_bat_1[i, 0],
+                                                                                                                CG_bat_1[i, 1] + width2 / 2, 
+                                                                                                                CG_bat_1[i, 2]]])
+
+            case_vehicle.networks.electric.busses.prop_rotor_bus.battery_modules.nmc_module_2.origin = np.array([[CG_bat_1[i, 0], 
+                                                                                                                -CG_bat_1[i, 1] - width2 / 2, 
+                                                                                                                CG_bat_1[i, 2]]])
+
                 
         # lift rotor battery modules 
-        case_vehicle.networks.electric.busses.lift_rotor_bus.battery_modules.nmc_module_1.origin = np.array([CG_bat_2[0,  0:3]])
-        case_vehicle.networks.electric.busses.lift_rotor_bus.battery_modules.nmc_module_2.origin = np.array([CG_bat_2[0,0], 
-                                                                                                             CG_bat_2[0,1], 
-                                                                                                             CG_bat_2[0,2] + case_vehicle.networks.electric.busses.lift_rotor_bus.battery_modules.nmc_module_2.height])
+        case_vehicle.networks.electric.busses.lift_rotor_bus.battery_modules.nmc_module_1.origin = np.array([CG_bat_2[0, 0:3]]).reshape(1, 3)
+
+        case_vehicle.networks.electric.busses.lift_rotor_bus.battery_modules.nmc_module_2.origin = np.array([[CG_bat_2[0, 0], 
+                                                                                                            CG_bat_2[0, 1], 
+                                                                                                            CG_bat_2[0, 2] + case_vehicle.networks.electric.busses.lift_rotor_bus.battery_modules.nmc_module_2.height]])
         size_control_surfaces(CG_bat_1[i], CG_bat_2[0], case_vehicle, cruise_velocity, cruise_altitude)    
-    
+        
     return 
 
 if __name__ == '__main__': 

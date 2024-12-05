@@ -44,10 +44,12 @@ def size_control_surfaces(CG_bat_1, CG_bat_2, vehicle, cruise_velocity = 120 * U
     save_data_stick_fixed(CG_bat_1, 
                           CG_bat_2,
                           optimized_vehicle.tag, 
+                            optimized_vehicle,
                           output_stick_fixed, 
                           planform_optimization_problem,
                           elapsed_time_stick_fixed
-                         )    
+                         )  
+    DUMMY =0  
     
     #cg_x1   =  str(CG_bat_1[0]).replace('.', "")
     #cg_y1   =  str(CG_bat_1[1]).replace('.', "")
