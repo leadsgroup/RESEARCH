@@ -28,7 +28,7 @@ def main():
     ospath          = os.path.abspath(__file__)
     separator       = os.path.sep
     relative_path   = os.path.dirname(ospath) + separator 
-    routes_filepath = relative_path +  '..' + separator +  '..' + separator + 'UAM_City_Routes.xlsx'
+    routes_filepath = relative_path +  '..' + separator + 'UAM_City_Routes.xlsx'
     topography_file = relative_path +  '..' + separator +  'Topography' + separator + 'LA_Metropolitan_Area.txt'
     flight_data     = pd.read_excel(routes_filepath,sheet_name=['Los_Angeles'])
     LA_flight_data  =  flight_data['Los_Angeles']

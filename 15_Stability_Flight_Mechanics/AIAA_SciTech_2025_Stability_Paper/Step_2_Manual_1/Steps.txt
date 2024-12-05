@@ -1,0 +1,22 @@
+
+# -----------------------------------
+- What do we want?: Trim the aircraft
+- Objective:        (C_D)min
+# -----------------------------------
+
+Steps for Elevator Sizing:
+-1  load optimized_vehicle
+-2  create aircraft with any elevator 
+-3  run 1st mission: Pull up
+-4  run 2nd mission: Push over
+-5  Store results and properties (Forces, Moments, Drag)
+-6  Manually change elevator size (keep chord same, vary length)
+-7  Repeat from step 3
+-8  Manually change elevator size (keep chord same, vary length)
+-9  Repeat again from step 3
+-10 Get relation between derivative and control surface area
+-11 Solve the Longitudinal equations to trim the aircraft
+
+Steps for Aileron Sizing:
+
+Steps for Rudder Sizing:

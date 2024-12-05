@@ -28,16 +28,16 @@ def main():
     # Universal Plot Settings 
     plt.rcParams['axes.linewidth'] = 1.
     plt.rcParams["font.family"] = "Times New Roman"
-    parameters = {'axes.labelsize': 28,
-                  'xtick.labelsize': 24,
-                  'ytick.labelsize': 24,
-                  'axes.titlesize': 28}
+    parameters = {'axes.labelsize': 24,
+                  'xtick.labelsize': 22,
+                  'ytick.labelsize': 22,
+                  'axes.titlesize': 24}
     plt.rcParams.update(parameters)
     plot_parameters                  = Data()
     plot_parameters.line_width       = 3 
     plot_parameters.line_style       = '-' 
-    plot_parameters.figure_width     = 10 
-    plot_parameters.figure_height    = 7 
+    plot_parameters.figure_width     = 7 
+    plot_parameters.figure_height    = 5 
     plot_parameters.marker_size      = 10 
     plot_parameters.legend_font_size = 20 
     plot_parameters.plot_grid        = True   
@@ -66,11 +66,15 @@ def main():
         axis     = fig.add_subplot(1,1,1)       
             
         SPL = results.L_max           
-        Y   = results.microphone_locations[:, 1].reshape(432,432)
-        X   = results.microphone_locations[:, 0].reshape(432,432)
+        Y   = results.microphone_locations[:, 1].reshape(300,300)
+        X   = results.microphone_locations[:, 0].reshape(300,300)
           
         levs                = np.linspace(35,100,14)   
-        CS                  = axis.contourf(X/Units.feet , Y/Units.feet, SPL, levels  = levs, cmap=plt.cm.jet, extend='both')   
+        CS                  = axis.contourf(X/Units.feet , Y/Units.feet, SPL, levels  = levs, cmap=plt.cm.jet, extend='both')
+        
+        levs2 = np.array([45,55,65])
+        CS2 = axis.contour(X/Units.feet , Y/Units.feet, SPL, levels=levs2, linewidths=2, colors='k')
+        axis.clabel(CS2, fontsize=20)
         cbar                = fig.colorbar(CS)
         cbar.ax.set_ylabel('L$_{Amax}$ [dBA]', rotation =  90)      
         axis.set_xlabel('x [ft]')

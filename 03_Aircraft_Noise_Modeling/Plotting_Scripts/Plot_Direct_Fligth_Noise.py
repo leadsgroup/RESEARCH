@@ -61,10 +61,10 @@ def main():
         filename = relative_path +  '..' + separator +  'City_Simulations' + separator + 'Los_Angeles' + separator +'Tiltrotor' + separator + 'Cumulative_' + aircraft_models[i] + '_'+ city +'_' +altitudes[0] +'ft.res'
         noise_data = load(filename)
         plot_2D_noise_contour(mic_coord, mic_loc, topography_file, 
-                          noise_level              = noise_data.Total_L_dn, # d
+                          noise_level              = noise_data.Total_L_max, # noise_data.Total_L_dn, # d
                           min_noise_level          = 30,  
                           max_noise_level          = 90, 
-                          noise_scale_label        = r'$SPL_{max} [dBA]$',
+                          noise_scale_label        = r'$L_{max} [dBA]$',
                           save_figure              = False,
                           show_figure              = True,
                           save_filename            = "2D_Noise_Contour",
@@ -131,7 +131,7 @@ def plot_2D_noise_contour(microphone_coordinates,
     
     axis = fig.add_subplot(1,1,1) 
     
-    noise_levels   = np.linspace(min_noise_level,max_noise_level,10)  
+    noise_levels   = np.linspace(30,100,15) #np.linspace(min_noise_level,max_noise_level,10)  
     noise_cmap     = plt.get_cmap('turbo')
     noise_new_cmap = truncate_colormap(noise_cmap,0.0, 1.0) 
      
