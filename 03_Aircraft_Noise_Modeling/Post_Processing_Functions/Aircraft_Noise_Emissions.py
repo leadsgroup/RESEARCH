@@ -220,7 +220,7 @@ def post_process_noise_data(noise_results, topography_file ,  flight_times, time
             time_step =  np.array([noise_time[i]])
             current_position,locs,R,pts  = compute_relative_noise_evaluation_locations(mean_sea_level_altitude,time_step,aircraft_origin_location,microphone_locations,position_vector,time,number_of_microphone_in_stencil) 
             
-            Aircraft_pos[i] = current_position
+            Aircraft_pos[idx] = current_position
             
             
             # Step 5.2.2 :Noise interpolation             
@@ -386,7 +386,7 @@ def post_process_approach_departure_noise_data(noise_results, number_of_micropho
             time_step =  np.array([noise_time[i]])
             current_position,locs,R,pts  = compute_relative_noise_evaluation_locations(mean_sea_level_altitude,time_step,aircraft_origin_location,microphone_locations,position_vector,time,number_of_microphone_in_stencil) 
             
-            Aircraft_pos[i] = current_position
+            Aircraft_pos[idx] = current_position
             
             
             # Step 5.2.2 :Noise interpolation             

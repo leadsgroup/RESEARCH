@@ -1218,7 +1218,7 @@ def mission_setup(analyses):
     segment.altitude_start                                = 500.0 * Units.ft   
     segment.altitude_end                                  = 50.0 * Units.ft   
     segment.climb_angle                                   = 7.125 * Units.degrees
-    segment.acceleration                                  = -0.9574 * Units['m/s/s']    
+    segment.acceleration                                  = 0.9574 * Units['m/s/s']    
     segment.pitch_initial                                 = 4.3  * Units.degrees  
     segment.pitch_final                                   = 7. * Units.degrees     
     segment.true_course                                   = 30 * Units.degree

@@ -154,8 +154,8 @@ def base_analysis(vehicle):
     #  Noise Analysis   
     noise = RCAIDE.Framework.Analyses.Noise.Frequency_Domain_Buildup()   
     noise.vehicle = vehicle    
-    noise.settings.noise_hemisphere_phi_angles   = np.linspace(-np.pi / 2,np.pi / 2,24)
-    noise.settings.noise_hemisphere_theta_angles = np.linspace(-1 * np.pi, 1*np.pi,12)
+    noise.settings.noise_hemisphere_phi_angles   = np.linspace(0,np.pi / 2,12)
+    noise.settings.noise_hemisphere_theta_angles = np.linspace(-1 * np.pi, 1*np.pi,24)
     analyses.append(noise)
  
     # ------------------------------------------------------------------
