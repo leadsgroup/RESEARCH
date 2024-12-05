@@ -53,6 +53,8 @@ def main():
     case_vehicle  = deepcopy(vehicle)
     
     excel_file = "C:/Users/Matteo/Documents/UIUC/RESEARCH/15_Stability_Flight_Mechanics/AIAA_SciTech_2025_Stability_Paper/Step_1_Simulations/025_00_00_40_00_00_Baseline_stick_fixed_cruise_Opt_Results.xlsx"
+    # ADD OTHER FILES
+    
     
     # delete control surfaces if they have been defined 
     for wing in case_vehicle.wings:
