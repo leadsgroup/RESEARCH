@@ -96,53 +96,23 @@ def main():
     
     case_vehicle                              = setup_rudder_aileron(case_vehicle)    
  
-    for i in range(len(CG_bat_1)-3):
+    for i in range(len(CG_bat_1)):
         for j in range(len(CG_bat_2)):
             
             # -------------------------------------------------------------
             #  Assign new battery locations
-            # -------------------------------------------------------------          
+            # -------------------------------------------------------------            
             
             # prop rotor battery modules      
-            case_vehicle.networks.electric.busses.prop_rotor_bus.battery_modules.nmc_module_1.origin = np.array([CG_bat_1[i, 0:3]])
+            case_vehicle.networks.electric.busses.prop_rotor_bus.battery_modules.nmc_module_1.origin = np.array([CG_bat_1[i]])
             case_vehicle.networks.electric.busses.prop_rotor_bus.battery_modules.nmc_module_2.origin = np.array([CG_bat_1[i,0] + case_vehicle.networks.electric.busses.prop_rotor_bus.battery_modules.nmc_module_1.length, 
-                                                                                                                 -CG_bat_1[i,1], 
+                                                                                                                 CG_bat_1[i,1], 
                                                                                                                  CG_bat_1[i,2]])
-         
-            # If the prop rotor batteries are in the wing:
-            if CG_bat_1[i, 3]:
-                # rotate Battery 90 degrees
-                length1 = case_vehicle.networks.electric.busses.prop_rotor_bus.battery_modules.nmc_module_1.length
-                width1 = case_vehicle.networks.electric.busses.prop_rotor_bus.battery_modules.nmc_module_1.width
-                
-                case_vehicle.networks.electric.busses.prop_rotor_bus.battery_modules.nmc_module_1.length = width1
-                case_vehicle.networks.electric.busses.prop_rotor_bus.battery_modules.nmc_module_1.width = length1       
-                
-                length2 = case_vehicle.networks.electric.busses.prop_rotor_bus.battery_modules.nmc_module_2.length
-                width2 = case_vehicle.networks.electric.busses.prop_rotor_bus.battery_modules.nmc_module_2.width
-                
-                case_vehicle.networks.electric.busses.prop_rotor_bus.battery_modules.nmc_module_2.length = width2
-                case_vehicle.networks.electric.busses.prop_rotor_bus.battery_modules.nmc_module_2.width = length2
-                
-                case_vehicle.networks.electric.busses.prop_rotor_bus.battery_modules.nmc_module_1.origin = np.array([CG_bat_1[i, 0],
-                                                                                                                     CG_bat_1[i,1] + width2 / 2, 
-                                                                                                                     CG_bat_1[i,2]                                                                                                                     ])
-                case_vehicle.networks.electric.busses.prop_rotor_bus.battery_modules.nmc_module_2.origin = np.array([CG_bat_1[i,0], 
-                                                                                                                     -CG_bat_1[i,1] - width2 / 2, 
-                                                                                                                     CG_bat_1[i,2]])
-                
-            #case_vehicle.networks.electric.busses.prop_rotor_bus.initialize_bus_properties()    
             # lift rotor battery modules 
-
-            case_vehicle.networks.electric.busses.lift_rotor_bus.battery_modules.nmc_module_1.origin = np.array([CG_bat_2[j,  0:3]])
+            case_vehicle.networks.electric.busses.lift_rotor_bus.battery_modules.nmc_module_1.origin = np.array([CG_bat_2[j]])
             case_vehicle.networks.electric.busses.lift_rotor_bus.battery_modules.nmc_module_2.origin = np.array([CG_bat_2[j,0], 
                                                                                                                  CG_bat_2[j,1], 
                                                                                                                  CG_bat_2[j,2] + case_vehicle.networks.electric.busses.lift_rotor_bus.battery_modules.nmc_module_2.height])
-
-            
-            
-            
-
             # -------------------------------------------------------------
             #  Load specs from Stick Fixed Optimization 
             # -------------------------------------------------------------               
@@ -499,7 +469,7 @@ def optimization(static_variable):
     delta_r_lower_bound_oei  = -30 * np.pi/180    # [rad]
     delta_r_upper_bound_oei  = 30  * np.pi/180    # [rad]   
     
-    x0         = [0.5, 0.5, 0.5, 0.5, 0.5, 0.5]
+    x0         = [-2.604e-01, -2.604e-01, -2.604e-01, -2.604e-01, 8.0e-01, 2.342e-01]
     
     args       = [static_variable]
     
@@ -518,7 +488,7 @@ def optimization(static_variable):
                   (rudder_span_lower_bound,  rudder_span_upper_bound )) 
     
     # try hard constraints to find optimum motor parameters
-    sol = minimize(objective, x0, args= (static_variable) , method='SLSQP', bounds=bnds, tol=1e-6, constraints=hard_cons) 
+    sol = minimize(objective, x0, args= (static_variable) , method='trust-constr', bounds=bnds, tol=1e-6, constraints=hard_cons) 
     
     if sol.success == False:
         print('\n Optimum control surfaces design failed.')
@@ -530,10 +500,10 @@ def optimization(static_variable):
     delta_r_cw   = sol.x[1]    
     delta_a_oei  = sol.x[2] 
     delta_r_oei  = sol.x[3] 
-    aileron_span = sol.x[4] 
-    rudder_span  = sol.x[5] 
+    aileron_lower_bound = sol.x[4] 
+    rudder_lower_bound  = sol.x[5] 
     
-    return delta_a_cw, delta_r_cw, delta_a_oei, delta_r_oei, aileron_span, rudder_span 
+    return delta_a_cw, delta_r_cw, delta_a_oei, delta_r_oei, aileron_lower_bound, rudder_lower_bound
 
 # objective function
 def objective(x,static_variable):
