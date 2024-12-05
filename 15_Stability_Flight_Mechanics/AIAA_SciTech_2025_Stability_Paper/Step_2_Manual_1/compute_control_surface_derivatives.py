@@ -123,7 +123,7 @@ def main():
             # Create arrays of aileron and rudder sizes
             
             aileron_span_fraction_start               = np.array([0.1, 0.4, 0.7])
-            rudder_chord_fraction                     = np.array([0.1, 0.4, 0.7])
+            rudder_span_fraction_start                = np.array([0.1, 0.4, 0.7])
             
             # Append aileron and rudder
             
@@ -131,43 +131,47 @@ def main():
             
             # Compute the control derivatives related to the control surface dimensions
             
-            derivatives, results                      = compute_rudder_aileron_derivatives(aileron_span_fraction_start, rudder_chord_fraction, case_vehicle, seg_num=0)
+            derivatives, results                      = compute_rudder_aileron_derivatives(aileron_span_fraction_start, rudder_span_fraction_start, case_vehicle, seg_num=0)
             
-            C_Y_delta_a                               = derivatives.C_Y_delta_a
-            C_L_delta_a                               = derivatives.C_L_delta_a
-            C_N_delta_a                               = derivatives.C_N_delta_a
-            C_Y_delta_r                               = derivatives.C_Y_delta_r
-            C_L_delta_r                               = derivatives.C_L_delta_r
-            C_N_delta_r                               = derivatives.C_N_delta_r          
+            CY_delta_a                                = derivatives.CY_delta_a
+            CL_delta_a                                = derivatives.CL_delta_a
+            CN_delta_a                                = derivatives.CN_delta_a
+            CY_delta_r                                = derivatives.CY_delta_r
+            CL_delta_r                                = derivatives.CL_delta_r
+            CN_delta_r                                = derivatives.CN_delta_r          
             
             # Create the functions describing the control derivatives as functions of control surface size
             
             static_variable = Data()
             
-            static_variable.C_Y_delta_a_fz            = interpolate.interp1d(aileron_span_fraction_start, C_Y_delta_a)
-            static_variable.C_L_delta_a_fz            = interpolate.interp1d(aileron_span_fraction_start, C_L_delta_a)
-            static_variable.C_N_delta_a_fz            = interpolate.interp1d(aileron_span_fraction_start, C_N_delta_a)   
-            static_variable.C_Y_delta_r_fz            = interpolate.interp1d(rudder_chord_fraction,  C_Y_delta_r)
-            static_variable.C_L_delta_r_fz            = interpolate.interp1d(rudder_chord_fraction,  C_L_delta_r)
-            static_variable.C_N_delta_r_fz            = interpolate.interp1d(rudder_chord_fraction,  C_N_delta_r)
+            static_variable.C_Y_delta_a_fz            = interpolate.interp1d(aileron_span_fraction_start, CY_delta_a)
+            static_variable.C_L_delta_a_fz            = interpolate.interp1d(aileron_span_fraction_start, CL_delta_a)
+            static_variable.C_N_delta_a_fz            = interpolate.interp1d(aileron_span_fraction_start, CN_delta_a)   
+            static_variable.C_Y_delta_r_fz            = interpolate.interp1d(rudder_span_fraction_start,  CY_delta_r)
+            static_variable.C_L_delta_r_fz            = interpolate.interp1d(rudder_span_fraction_start,  CL_delta_r)
+            static_variable.C_N_delta_r_fz            = interpolate.interp1d(rudder_span_fraction_start,  CN_delta_r)
             
             # Import data from vehicle
             
             # General 
-            
-            static_variable.W                                          = 2700*9.81
+
+            static_variable.W                                          = case_vehicle.mass_properties.max_takeoff*9.81
             static_variable.rho                                        = 1.225
-            static_variable.S                                          = 15.629           
-            static_variable.wing_span                                  = 11.82855 
-            static_variable.vertical_tail_span                         = 2
-            static_variable.aileron_chord                              = 0.1
-            static_variable.rudder_chord                               = 0.1  
-            static_variable.C_Y_beta                                   = 1 
-            static_variable.C_L_beta                                   = 1
-            static_variable.C_N_beta                                   = 1 
-            static_variable.V                                          = 110. * Units['mph']
-            static_variable.C_w                                        = static_variable.W/(0.5*static_variable.rho*(static_variable.V**2)*static_variable.S)    
-            
+            static_variable.S                                          = case_vehicle.wings.main_wing.areas.reference           
+            static_variable.wing_span                                  = case_vehicle.wings.main_wing.spans.projected 
+            static_variable.vertical_tail_span                         = case_vehicle.wings.vertical_tail.spans.projected 
+            static_variable.C_Y_beta                                   = derivatives.CY_beta
+            static_variable.C_L_beta                                   = derivatives.CL_beta
+            static_variable.C_N_beta                                   = derivatives.CN_beta 
+            static_variable.V                                          = 150  * Units['mph']
+            static_variable.C_w                                        = static_variable.W/(0.5*static_variable.rho*(static_variable.V**2)*static_variable.S) 
+            static_variable.aileron_chord_fraction                     = case_vehicle.wings.main_wing.control_surfaces.aileron.chord_fraction
+            static_variable.rudder_chord_fraction                      = case_vehicle.wings.vertical_tail.control_surfaces.rudder.chord_fraction
+            static_variable.wing_tip_chord                             = case_vehicle.wings.main_wing.chords.tip  
+            static_variable.wing_root_chord                            = case_vehicle.wings.main_wing.chords.root
+            static_variable.vertical_tail_tip_chord                    = case_vehicle.wings.vertical_tail.chords.tip 
+            static_variable.vertical_tail_root_chord                   = case_vehicle.wings.vertical_tail.chords.root
+                        
             # CROSSWIND 
          
             static_variable.C_Y_0_cw                                   = 0                       
@@ -175,12 +179,12 @@ def main():
             static_variable.C_N_0_cw                                   = 0  
             static_variable.v_cw                                       = 35  * Units['ft/s']                          # [ft/s] 
             static_variable.beta_cw                                    = np.arcsin(static_variable.v_cw/static_variable.V) # [rad]  
-            static_variable.phi_cw                                     = 0                                                                    #[-]
+            static_variable.phi_cw                                     = 0                                            #[-]
             
             # OEI
             
             static_variable.T_oei                                      = 525              # [N]
-            static_variable.arm_oei                                    = 9.2              # [m]
+            static_variable.arm_oei                                    = case_vehicle.networks.electric.busses.prop_rotor_bus.propulsors.prop_rotor_propulsor_6.rotor.origin[0][1]              # [m]
             static_variable.beta_oei                                   = 0 * np.pi/180  
             static_variable.C_Y_0_oei                                  = 0                        
             static_variable.C_L_0_oei                                  = 0                                                        
@@ -230,16 +234,16 @@ def setup_rudder_aileron(vehicle):
     
     return vehicle
 
-def compute_rudder_aileron_derivatives(aileron_span_fraction_start, rudder_chord_fraction, vehicle,  seg_num=0):           
+def compute_rudder_aileron_derivatives(aileron_span_fraction_start, rudder_span_fraction_start, vehicle,  seg_num=0):           
     # seg_num is the number of the mission segment correspdoning to the segment for which control surface derivatives are being found
     
     CN_delta_a    =  np.zeros(np.size(aileron_span_fraction_start))
     CL_delta_a    =  np.zeros(np.size(aileron_span_fraction_start))
     CY_delta_a    =  np.zeros(np.size(aileron_span_fraction_start))
     
-    CN_delta_r     = np.zeros(np.size(rudder_chord_fraction))
-    CL_delta_r     = np.zeros(np.size(rudder_chord_fraction))
-    CY_delta_r     = np.zeros(np.size(rudder_chord_fraction))
+    CN_delta_r     = np.zeros(np.size(rudder_span_fraction_start))
+    CL_delta_r     = np.zeros(np.size(rudder_span_fraction_start))
+    CY_delta_r     = np.zeros(np.size(rudder_span_fraction_start))
     
     for i in range(len(aileron_span_fraction_start)):
         vehicle.wings.main_wing.control_surfaces.aileron.span_fraction_start = aileron_span_fraction_start[i]
@@ -250,8 +254,8 @@ def compute_rudder_aileron_derivatives(aileron_span_fraction_start, rudder_chord
         CL_delta_a[i]     =  results.segments[seg_num].conditions.static_stability.derivatives.CL_delta_a[0, 0]
         CY_delta_a[i]     =  results.segments[seg_num].conditions.static_stability.derivatives.CY_delta_a[0, 0]
         
-    for i in range(len(rudder_chord_fraction)):
-        vehicle.wings.vertical_tail.rudder.chord_fraction = rudder_chord_fraction[i]
+    for i in range(len(rudder_span_fraction_start)):
+        vehicle.wings.vertical_tail.control_surfaces.rudder.span_fraction_start = rudder_span_fraction_start[i]
         results =  evalaute_aircraft(vehicle)
             
         # store properties
@@ -259,8 +263,21 @@ def compute_rudder_aileron_derivatives(aileron_span_fraction_start, rudder_chord
         CL_delta_r[i]     =  results.segments[seg_num].conditions.static_stability.derivatives.CL_delta_r[0, 0]
         CY_delta_r[i]     =  results.segments[seg_num].conditions.static_stability.derivatives.CY_delta_r[0, 0]
         
+    CN_beta =  results.segments[seg_num].conditions.static_stability.derivatives.CN_beta[0, 0]
+    CL_beta =  results.segments[seg_num].conditions.static_stability.derivatives.CL_beta[0, 0]
+    CY_beta =  results.segments[seg_num].conditions.static_stability.derivatives.CY_beta[0, 0]    
+        
     # Pack data for return 
-    derivatives = {'delta_r':{'CN_delta_r': CN_delta_r,'CL_delta_r': CL_delta_r, 'CY_delta_r': CY_delta_r}, 'delta_a':{'CN_delta_a': CN_delta_a,'CL_delta_a': CL_delta_a, 'CY_delta_a': CY_delta_a}}
+    derivatives = Data(  
+         CN_delta_r =  CN_delta_r,
+         CL_delta_r = CL_delta_r,
+         CY_delta_r =  CY_delta_r , 
+         CN_delta_a =  CN_delta_a,
+         CL_delta_a =  CL_delta_a, 
+         CY_delta_a =  CY_delta_a,
+         CN_beta    =  CN_beta,
+         CL_beta    =  CL_beta,
+         CY_beta    =  CY_beta) 
                 
     return derivatives, results
                  
@@ -318,11 +335,6 @@ def base_analysis(vehicle):
     aerodynamics.settings.trim_aircraft               = False 
     analyses.append(aerodynamics)
     
-    # ------------------------------------------------------------------
-    #  Stability Analysis
-    stability         = RCAIDE.Framework.Analyses.Stability.Vortex_Lattice_Method() 
-    stability.vehicle = vehicle
-    analyses.append(stability)
     
     # ------------------------------------------------------------------
     #  Energy
@@ -372,7 +384,7 @@ def configs_setup(vehicle):
 
     return configs
  
-def base_mission_setup(analyses,max_speed_multiplier=1,cruise_velocity= 150  * Units['mph'],cruise_altitude= 1000*Units.feet):   
+def base_mission_setup(analyses,max_speed_multiplier=1,cruise_velocity= 150  * Units['mph'],cruise_altitude= 0*Units.feet):   
     '''
     This sets up the nominal cruise of the aircraft
     '''
@@ -385,16 +397,16 @@ def base_mission_setup(analyses,max_speed_multiplier=1,cruise_velocity= 150  * U
 
     #   Cruise Segment: constant Speed, constant altitude 
     segment                           = Segments.Untrimmed.Untrimmed()
-    segment.analyses.extend( analyses )   
+    segment.analyses.extend( analyses.forward_flight )   
     segment.tag                       = "cruise"
-    segment.angle_of_attack           = 0
-    segment.sideslip_angle            = 0
-    segment.bank_angle                = 0
+    #segment.angle_of_attack           = angle_of_attack
+    #segment.sideslip_angle            = sideslip_angle
+    #segment.bank_angle                = bank_angle
     segment.altitude                  = cruise_altitude
     segment.air_speed                 = cruise_velocity * max_speed_multiplier
-    segment.roll_rate                 = 0
-    segment.pitch_rate                = 0  
-    segment.yaw_rate                  = 0 
+    #segment.roll_rate                 = roll_rate 
+    #segment.pitch_rate                = pitch_rate  
+    #segment.yaw_rate                  = yaw_rate   
 
     segment.flight_dynamics.force_x   = True    
     segment.flight_dynamics.force_z   = True    
@@ -482,10 +494,11 @@ def optimization(static_variable):
 
 # objective function
 def objective(design_variables,static_variable):
-    aileron_span    = static_variable.wing_span*(0.95 - design_variables[4])
-    rudder_span     = static_variable.vertical_tail_span*(0.95 - design_variables[5]) 
     
-    return (aileron_span*static_variable.aileron_chord)*(rudder_span*static_variable.rudder_chord)
+    Area_aileron    = static_variable.aileron_chord_fraction*static_variable.wing_span*(0.95 - design_variables[4])*((0.95 + design_variables[4])*(static_variable.wing_tip_chord - static_variable.wing_root_chord)/2 + static_variable.wing_root_chord)
+    Area_rudder     = static_variable.rudder_chord_fraction*static_variable.vertical_tail_span*(0.95 - design_variables[5])*((0.95 + design_variables[5])*(static_variable.vertical_tail_tip_chord - static_variable.vertical_tail_root_chord)/2 + static_variable.vertical_tail_root_chord)
+        
+    return Area_aileron + Area_rudder
 
 # hard constraint
 def hard_constraint_Y_cw(design_variables,static_variable):     
@@ -501,7 +514,7 @@ def hard_constraint_Y_cw(design_variables,static_variable):
     C_Y_delta_a_fz  = static_variable.C_Y_delta_a_fz
     C_Y_delta_r_fz  = static_variable.C_Y_delta_r_fz
     
-    res = C_w*np.sin(phi_cw) + C_Y_0_cw + C_Y_beta*beta_cw + C_Y_delta_a_fz(aileron_span)*design_variables[0] + C_Y_delta_r_fz(rudder_span)*design_variables[1]
+    res = C_w*np.sin(phi_cw) + C_Y_0_cw + C_Y_beta*beta_cw + C_Y_delta_a_fz(aileron_span/static_variable.wing_span)*design_variables[0] + C_Y_delta_r_fz(rudder_span/static_variable.vertical_tail_span)*design_variables[1]
     
     return res
 
@@ -516,7 +529,7 @@ def hard_constraint_L_cw(design_variables,static_variable):
     C_L_delta_a_fz  = static_variable.C_L_delta_a_fz
     C_L_delta_r_fz  = static_variable.C_L_delta_r_fz
     
-    res = C_L_0_cw + C_L_beta*beta_cw + C_L_delta_a_fz(aileron_span)*design_variables[0] +  C_L_delta_r_fz(rudder_span)*design_variables[1]
+    res = C_L_0_cw + C_L_beta*beta_cw + C_L_delta_a_fz(aileron_span/static_variable.wing_span)*design_variables[0] +  C_L_delta_r_fz(rudder_span/static_variable.vertical_tail_span)*design_variables[1]
     
     return res
 
@@ -531,7 +544,7 @@ def hard_constraint_N_cw(design_variables,static_variable):
     C_N_delta_a_fz  = static_variable.C_N_delta_a_fz
     C_N_delta_r_fz  = static_variable.C_N_delta_r_fz
     
-    res = C_N_0_cw + C_N_beta*beta_cw + C_N_delta_a_fz(aileron_span)*design_variables[0] +  C_N_delta_r_fz(rudder_span)*design_variables[1]
+    res = C_N_0_cw + C_N_beta*beta_cw + C_N_delta_a_fz(aileron_span/static_variable.wing_span)*design_variables[0] +  C_N_delta_r_fz(rudder_span/static_variable.vertical_tail_span)*design_variables[1]
     
     return res
 
@@ -548,7 +561,7 @@ def hard_constraint_Y_oei(design_variables,static_variable):
     C_Y_delta_a_fz   = static_variable.C_Y_delta_a_fz
     C_Y_delta_r_fz   = static_variable.C_Y_delta_r_fz
     
-    res = C_w*np.sin(phi_oei) + C_Y_0_oei + C_Y_beta*beta_oei + C_Y_delta_a_fz(aileron_span)*design_variables[2] + C_Y_delta_r_fz(rudder_span)*design_variables[3]
+    res = C_w*np.sin(phi_oei) + C_Y_0_oei + C_Y_beta*beta_oei + C_Y_delta_a_fz(aileron_span/static_variable.wing_span)*design_variables[2] + C_Y_delta_r_fz(rudder_span/static_variable.vertical_tail_span)*design_variables[3]
     
     return res
 
@@ -563,7 +576,7 @@ def hard_constraint_L_oei(design_variables,static_variable):
     C_L_delta_a_fz   = static_variable.C_L_delta_a_fz
     C_L_delta_r_fz   = static_variable.C_L_delta_r_fz  
     
-    res = C_L_0_oei + C_L_beta*beta_oei + C_L_delta_a_fz(aileron_span)*design_variables[2] +  C_L_delta_r_fz(rudder_span)*design_variables[3]
+    res = C_L_0_oei + C_L_beta*beta_oei + C_L_delta_a_fz(aileron_span/static_variable.wing_span)*design_variables[2] +  C_L_delta_r_fz(rudder_span/static_variable.vertical_tail_span)*design_variables[3]
     
     return res
 
@@ -578,7 +591,7 @@ def hard_constraint_N_oei(design_variables,static_variable):
     C_N_delta_a_fz   = static_variable.C_N_delta_a_fz
     C_N_delta_r_fz   = static_variable.C_N_delta_r_fz 
     
-    res = C_N_0_oei + C_N_beta*beta_oei + C_N_delta_a_fz(aileron_span)*design_variables[2] +  C_N_delta_r_fz(rudder_span)*design_variables[3]
+    res = C_N_0_oei + C_N_beta*beta_oei + C_N_delta_a_fz(aileron_span/static_variable.wing_span)*design_variables[2] +  C_N_delta_r_fz(rudder_span/static_variable.vertical_tail_span)*design_variables[3]
     
     return res
 
