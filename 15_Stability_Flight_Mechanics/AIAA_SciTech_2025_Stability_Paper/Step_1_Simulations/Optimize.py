@@ -121,8 +121,7 @@ def stick_fixed_stability_and_drag_optimization_setup(vehicle,cruise_velocity,cr
         [ 'static_margin'              ,   '>' ,   0.1   ,   0.1   , 1*Units.less],  # checked 
         [ 'CM_alpha'                   ,   '<' ,   0.0   ,   1.0   , 1*Units.less],  # checked 
         [ 'phugoid_damping_ratio'      ,   '>' ,   0.04  ,   1.0   , 1*Units.less],  # checked 
-        [ 'short_period_damping_ratio' ,   '<' ,   2.0   ,   1.0   , 1*Units.less],  # checked 
-        [ 'short_period_damping_ratio' ,   '>' ,   0.3   ,   1.0   , 1*Units.less], # checked    
+        [ 'short_period_damping_ratio' ,   '<' ,   2.0   ,   1.0   , 1*Units.less],  # checked   
         #[ 'dutch_roll_frequency'      ,   '>' ,   0.4   ,   1.0   , 1*Units.less],  # checked   frequency in rad/sec
         #[ 'dutch_roll_damping_ratio'  ,   '>' ,   0.08  ,   1.0   , 1*Units.less],  # checked   
         #[ 'spiral_doubling_time'      ,   '>' ,   20.0  ,   1.0   , 1*Units.less],  # checked   
