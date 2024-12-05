@@ -65,9 +65,9 @@ def vehicle_setup(BTMS_flag):
 
     vehicle = RCAIDE.Vehicle()
     vehicle.tag = 'Twin_Otter'
-    HAS_power = 7137.296435
-    HEX_power = 3191.504726
-    RES_dimensions = 0.611827665
+    HAS_power = 2040.204795
+    HEX_power = 1290.329405
+    RES_dimensions =0.383875956
     # ################################################# Vehicle-level Properties ########################################################  
 
     # mass properties
