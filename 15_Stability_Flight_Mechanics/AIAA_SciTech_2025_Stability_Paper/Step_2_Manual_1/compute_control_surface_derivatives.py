@@ -122,8 +122,8 @@ def main():
             
             # Create arrays of aileron and rudder sizes
             
-            aileron_span_fraction_start               = np.array([0.1, 0.4, 0.7])
-            rudder_span_fraction_start                = np.array([0.1, 0.4, 0.7])
+            aileron_span_fraction_start               = np.array([0.3, 0.4, 0.5])
+            rudder_span_fraction_start                = np.array([0.1, 0.2, 0.3])
             
             # Append aileron and rudder
             
@@ -144,12 +144,12 @@ def main():
             
             static_variable = Data()
             
-            static_variable.C_Y_delta_a_fz            = interpolate.interp1d(aileron_span_fraction_start, CY_delta_a)
-            static_variable.C_L_delta_a_fz            = interpolate.interp1d(aileron_span_fraction_start, CL_delta_a)
-            static_variable.C_N_delta_a_fz            = interpolate.interp1d(aileron_span_fraction_start, CN_delta_a)   
-            static_variable.C_Y_delta_r_fz            = interpolate.interp1d(rudder_span_fraction_start,  CY_delta_r)
-            static_variable.C_L_delta_r_fz            = interpolate.interp1d(rudder_span_fraction_start,  CL_delta_r)
-            static_variable.C_N_delta_r_fz            = interpolate.interp1d(rudder_span_fraction_start,  CN_delta_r)
+            static_variable.C_Y_delta_a_fz            = interpolate.interp1d(aileron_span_fraction_start, CY_delta_a, kind='linear', fill_value="extrapolate", bounds_error=False)
+            static_variable.C_L_delta_a_fz            = interpolate.interp1d(aileron_span_fraction_start, CL_delta_a, kind='linear', fill_value="extrapolate", bounds_error=False)
+            static_variable.C_N_delta_a_fz            = interpolate.interp1d(aileron_span_fraction_start, CN_delta_a, kind='linear', fill_value="extrapolate", bounds_error=False)   
+            static_variable.C_Y_delta_r_fz            = interpolate.interp1d(rudder_span_fraction_start,  CY_delta_r, kind='linear', fill_value="extrapolate", bounds_error=False)
+            static_variable.C_L_delta_r_fz            = interpolate.interp1d(rudder_span_fraction_start,  CL_delta_r, kind='linear', fill_value="extrapolate", bounds_error=False)
+            static_variable.C_N_delta_r_fz            = interpolate.interp1d(rudder_span_fraction_start,  CN_delta_r, kind='linear', fill_value="extrapolate", bounds_error=False)
             
             # Import data from vehicle
             
@@ -459,7 +459,7 @@ def optimization(static_variable):
     delta_r_lower_bound_oei  = -30 * np.pi/180    # [rad]
     delta_r_upper_bound_oei  = 30  * np.pi/180    # [rad]   
     
-    x0         = [0.3, 0.1, 0.3, 0.1, 0.3, 0.3]
+    x0         = [0.5, 0.5, 0.5, 0.5, 0.5, 0.5]
     
     args       = [static_variable]
     
