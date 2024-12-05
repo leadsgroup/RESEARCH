@@ -65,7 +65,7 @@ def modify_stick_fixed_vehicle(nexus):
                 
       
     # Update MOI 
-    weight_analysis                               = RCAIDE.Framework.Analyses.Weights.Weights_EVTOL()
+    weight_analysis                               = RCAIDE.Framework.Analyses.Weights.Weights_General_Aviation()
     weight_analysis.vehicle                       = vehicle 
     results                                       = weight_analysis.evaluate()
 

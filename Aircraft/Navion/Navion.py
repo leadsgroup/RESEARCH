@@ -239,7 +239,7 @@ def vehicle_setup():
     #  Horizontal Stabilizer
     # ------------------------------------------------------------------       
     wing                                  = RCAIDE.Library.Components.Wings.Horizontal_Tail()
-    wing.tag                              = 'horizontal_stabilizer'  
+    wing.tag                              = 'horizontal_tail'  
     wing.sweeps.leading_edge              = 6 * Units.degrees 
     wing.thickness_to_chord               = 0.12
     wing.areas.reference                  = 4   
@@ -257,6 +257,23 @@ def vehicle_setup():
     wing.symmetric                        = True
     wing.high_lift                        = False 
     wing.dynamic_pressure_ratio           = 0.9  
+    
+    # Segment                                  
+    segment                       = RCAIDE.Library.Components.Wings.Segment()
+    segment.tag                   = 'Root'   
+    segment.percent_span_location = 0.0
+    segment.root_chord_percent    = 1. 
+    segment.sweeps.leading_edge   = 6 * Units.degrees 
+    segment.thickness_to_chord    = 0.12  
+    wing.Segments.append(segment)  
+    
+    # Segment                                  
+    segment                       = RCAIDE.Library.Components.Wings.Segment()
+    segment.tag                   = 'Tip'   
+    segment.percent_span_location = 1.0
+    segment.root_chord_percent    = wing.taper
+    segment.thickness_to_chord    = 0.12  
+    wing.Segments.append(segment)    
     
     elevator                              = RCAIDE.Library.Components.Wings.Control_Surfaces.Elevator()
     elevator.tag                          = 'elevator'
@@ -276,7 +293,7 @@ def vehicle_setup():
     #   Vertical Stabilizer
     # ------------------------------------------------------------------ 
     wing                                  = RCAIDE.Library.Components.Wings.Vertical_Tail()
-    wing.tag                              = 'vertical_stabilizer'   
+    wing.tag                              = 'vertical_tail'   
     wing.sweeps.leading_edge              = 20 * Units.degrees 
     wing.thickness_to_chord               = 0.125
     wing.areas.reference                  = 1.163 
@@ -296,6 +313,23 @@ def vehicle_setup():
     wing.t_tail                           = False
     wing.winglet_fraction                 = 0.0  
     wing.dynamic_pressure_ratio           = 1.0  
+    
+    # Segment                                  
+    segment                       = RCAIDE.Library.Components.Wings.Segment()
+    segment.tag                   = 'Root'   
+    segment.percent_span_location = 0.0
+    segment.root_chord_percent    = 1. 
+    segment.sweeps.leading_edge   = 20 * Units.degrees 
+    segment.thickness_to_chord    = 0.125  
+    wing.Segments.append(segment)  
+    
+    # Segment                                  
+    segment                       = RCAIDE.Library.Components.Wings.Segment()
+    segment.tag                   = 'Tip'   
+    segment.percent_span_location = 1.0
+    segment.root_chord_percent    = wing.taper
+    segment.thickness_to_chord    = 0.125  
+    wing.Segments.append(segment)      
     
     rudder                                = RCAIDE.Library.Components.Wings.Control_Surfaces.Rudder()
     rudder.tag                            = 'rudder'
