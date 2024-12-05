@@ -76,7 +76,23 @@ def main():
     #                 CG: X,    Y,    Z 
     CG_bat_2 = np.array([[4.0,  0.,   0.],
                          [4.1,  0.,   0.],
-                         [4.2,  0.,   0.]])   
+                         [4.2,  0.,   0.]])  
+    
+    delta_a_cw   = np.zeros([len(CG_bat_1),len(CG_bat_2)])
+    delta_r_cw   = np.zeros([len(CG_bat_1),len(CG_bat_2)])
+    delta_a_oei  = np.zeros([len(CG_bat_1),len(CG_bat_2)])
+    delta_r_oei  = np.zeros([len(CG_bat_1),len(CG_bat_2)])
+    aileron_span = np.zeros([len(CG_bat_1),len(CG_bat_2)])
+    rudder_span  = np.zeros([len(CG_bat_1),len(CG_bat_2)])
+    
+    # Create arrays of aileron and rudder sizes
+    
+    aileron_span_fraction_start               = np.array([0.3, 0.4, 0.5])
+    rudder_span_fraction_start                = np.array([0.2, 0.3, 0.4])
+    
+    # Append aileron and rudder
+    
+    case_vehicle                              = setup_rudder_aileron(case_vehicle)    
  
     for i in range(len(CG_bat_1)):
         for j in range(len(CG_bat_2)):
@@ -92,10 +108,9 @@ def main():
                                                                                                                  CG_bat_1[i,2]])
             # lift rotor battery modules 
             case_vehicle.networks.electric.busses.lift_rotor_bus.battery_modules.nmc_module_1.origin = np.array([CG_bat_2[j]])
-            case_vehicle.networks.electric.busses.lift_rotor_bus.battery_modules.nmc_module_2.origin = np.array([CG_bat_2[i,0], 
-                                                                                                                 CG_bat_2[i,1], 
-                                                                                                                 CG_bat_2[i,2] + case_vehicle.networks.electric.busses.lift_rotor_bus.battery_modules.nmc_module_2.height])
-            
+            case_vehicle.networks.electric.busses.lift_rotor_bus.battery_modules.nmc_module_2.origin = np.array([CG_bat_2[j,0], 
+                                                                                                                 CG_bat_2[j,1], 
+                                                                                                                 CG_bat_2[j,2] + case_vehicle.networks.electric.busses.lift_rotor_bus.battery_modules.nmc_module_2.height])
             # -------------------------------------------------------------
             #  Load specs from Stick Fixed Optimization 
             # -------------------------------------------------------------               
@@ -119,15 +134,6 @@ def main():
             # -------------------------------------------------------------
             #  Aileron & Rudder
             # -------------------------------------------------------------
-            
-            # Create arrays of aileron and rudder sizes
-            
-            aileron_span_fraction_start               = np.array([0.3, 0.4, 0.5])
-            rudder_span_fraction_start                = np.array([0.1, 0.2, 0.3])
-            
-            # Append aileron and rudder
-            
-            case_vehicle                              = setup_rudder_aileron(case_vehicle)
             
             # Compute the control derivatives related to the control surface dimensions
             
@@ -191,9 +197,9 @@ def main():
             static_variable.C_N_0_oei                                  = -(static_variable.T_oei*static_variable.arm_oei)/(0.5*static_variable.rho*(static_variable.V**2)*static_variable.S*static_variable.wing_span)
             static_variable.phi_oei                                    = 0
             
-            delta_a_lower_bound_cw, delta_r_lower_bound_cw, delta_a_lower_bound_oei, delta_r_lower_bound_oei, aileron_span_lower_bound, rudder_span_lower_bound = optimization(static_variable)
+            delta_a_cw[i,j], delta_r_cw[i,j], delta_a_oei[i,j], delta_r_oei[i,j], aileron_span[i,j], rudder_span[i,j] = optimization(static_variable)
     
-    return delta_a_size, delta_r_size 
+    return delta_a_cw, delta_r_cw, delta_a_oei, delta_r_oei, aileron_span, rudder_span
 
 def interpolation(x, y, kind='linear'):
     # ------------------------------------------------------------------
@@ -246,7 +252,7 @@ def compute_rudder_aileron_derivatives(aileron_span_fraction_start, rudder_span_
     CY_delta_r     = np.zeros(np.size(rudder_span_fraction_start))
     
     for i in range(len(aileron_span_fraction_start)):
-        vehicle.wings.main_wing.control_surfaces.aileron.span_fraction_start = aileron_span_fraction_start[i]
+        vehicle.wings.main_wing.control_surfaces['aileron'].span_fraction_start = aileron_span_fraction_start[i]
         results =  evalaute_aircraft(vehicle)
             
         # store properties
@@ -255,7 +261,7 @@ def compute_rudder_aileron_derivatives(aileron_span_fraction_start, rudder_span_
         CY_delta_a[i]     =  results.segments[seg_num].conditions.static_stability.derivatives.CY_delta_a[0, 0]
         
     for i in range(len(rudder_span_fraction_start)):
-        vehicle.wings.vertical_tail.control_surfaces.rudder.span_fraction_start = rudder_span_fraction_start[i]
+        vehicle.wings.vertical_tail.control_surfaces['rudder'].span_fraction_start = rudder_span_fraction_start[i]
         results =  evalaute_aircraft(vehicle)
             
         # store properties
