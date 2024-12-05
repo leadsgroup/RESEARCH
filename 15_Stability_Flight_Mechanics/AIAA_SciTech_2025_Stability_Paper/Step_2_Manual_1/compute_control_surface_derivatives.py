@@ -200,6 +200,8 @@ def main():
             static_variable.phi_oei                                    = 0
             
             delta_a_cw[i,j], delta_r_cw[i,j], delta_a_oei[i,j], delta_r_oei[i,j], aileron_span[i,j], rudder_span[i,j] = optimization(static_variable)
+            
+            debug = 0
     
     return delta_a_cw, delta_r_cw, delta_a_oei, delta_r_oei, aileron_span, rudder_span
 
@@ -454,7 +456,7 @@ def load_results(filename):
 def optimization(static_variable):
     
     # define optimizer bounds 
-    aileron_span_lower_bound = 0.75               # [%]    # just changing the upper and lower bound of the lower bound of the control surface (the inner limit closer to root of wing)
+    aileron_span_lower_bound = 0.45               # [%]    # just changing the upper and lower bound of the lower bound of the control surface (the inner limit closer to root of wing)
     aileron_span_upper_bound = 0.90               # [%]  
     rudder_span_lower_bound  = 0.05               # [%]  
     rudder_span_upper_bound  = 0.90               # [%]
@@ -490,6 +492,9 @@ def optimization(static_variable):
     
     if sol.success == False:
         print('\n Optimum control surfaces design failed.')
+        print(sol)
+    
+    print(sol)
     
     delta_a_cw   = sol.x[0]
     delta_r_cw   = sol.x[1]    
@@ -501,18 +506,21 @@ def optimization(static_variable):
     return delta_a_cw, delta_r_cw, delta_a_oei, delta_r_oei, aileron_span, rudder_span 
 
 # objective function
-def objective(design_variables,static_variable):
+def objective(x,static_variable):
     
-    Area_aileron    = static_variable.aileron_chord_fraction*static_variable.wing_span*(0.95 - design_variables[4])*((0.95 + design_variables[4])*(static_variable.wing_tip_chord - static_variable.wing_root_chord)/2 + static_variable.wing_root_chord)
-    Area_rudder     = static_variable.rudder_chord_fraction*static_variable.vertical_tail_span*(0.95 - design_variables[5])*((0.95 + design_variables[5])*(static_variable.vertical_tail_tip_chord - static_variable.vertical_tail_root_chord)/2 + static_variable.vertical_tail_root_chord)
+    Area_aileron    = static_variable.aileron_chord_fraction*static_variable.wing_span*(0.95 - x[4])*((0.95 + x[4])*(static_variable.wing_tip_chord - static_variable.wing_root_chord)/2 + static_variable.wing_root_chord)
+    Area_rudder     = static_variable.rudder_chord_fraction*static_variable.vertical_tail_span*(0.95 - x[5])*((0.95 + x[5])*(static_variable.vertical_tail_tip_chord - static_variable.vertical_tail_root_chord)/2 + static_variable.vertical_tail_root_chord)
+    
+    print(x[5])
+    #print(Area_aileron + Area_rudder)
         
     return Area_aileron + Area_rudder
 
 # hard constraint
-def hard_constraint_Y_cw(design_variables,static_variable):     
+def hard_constraint_Y_cw(x,static_variable):     
     
-    aileron_span    = static_variable.wing_span*(0.95 - design_variables[4])
-    rudder_span     = static_variable.vertical_tail_span*(0.95 - design_variables[5])
+    aileron_span    = static_variable.wing_span*(0.95 - x[4])
+    rudder_span     = static_variable.vertical_tail_span*(0.95 - x[5])
     
     C_w             = static_variable.C_w
     phi_cw          = static_variable.phi_cw
@@ -522,14 +530,14 @@ def hard_constraint_Y_cw(design_variables,static_variable):
     C_Y_delta_a_fz  = static_variable.C_Y_delta_a_fz
     C_Y_delta_r_fz  = static_variable.C_Y_delta_r_fz
     
-    res = C_w*np.sin(phi_cw) + C_Y_0_cw + C_Y_beta*beta_cw + C_Y_delta_a_fz(aileron_span/static_variable.wing_span)*design_variables[0] + C_Y_delta_r_fz(rudder_span/static_variable.vertical_tail_span)*design_variables[1]
+    res = C_w*np.sin(phi_cw) + C_Y_0_cw + C_Y_beta*beta_cw + C_Y_delta_a_fz(aileron_span/static_variable.wing_span)*x[0] + C_Y_delta_r_fz(rudder_span/static_variable.vertical_tail_span)*x[1]
     
     return res
 
-def hard_constraint_L_cw(design_variables,static_variable): 
+def hard_constraint_L_cw(x,static_variable): 
     
-    aileron_span    = static_variable.wing_span*(0.95 - design_variables[4])
-    rudder_span     = static_variable.vertical_tail_span*(0.95 - design_variables[5])
+    aileron_span    = static_variable.wing_span*(0.95 - x[4])
+    rudder_span     = static_variable.vertical_tail_span*(0.95 - x[5])
     
     C_L_0_cw        = static_variable.C_L_0_cw
     C_L_beta        = static_variable.C_L_beta 
@@ -537,14 +545,14 @@ def hard_constraint_L_cw(design_variables,static_variable):
     C_L_delta_a_fz  = static_variable.C_L_delta_a_fz
     C_L_delta_r_fz  = static_variable.C_L_delta_r_fz
     
-    res = C_L_0_cw + C_L_beta*beta_cw + C_L_delta_a_fz(aileron_span/static_variable.wing_span)*design_variables[0] +  C_L_delta_r_fz(rudder_span/static_variable.vertical_tail_span)*design_variables[1]
+    res = C_L_0_cw + C_L_beta*beta_cw + C_L_delta_a_fz(aileron_span/static_variable.wing_span)*x[0] +  C_L_delta_r_fz(rudder_span/static_variable.vertical_tail_span)*x[1]
     
     return res
 
-def hard_constraint_N_cw(design_variables,static_variable): 
+def hard_constraint_N_cw(x,static_variable): 
     
-    aileron_span    = static_variable.wing_span*(0.95 - design_variables[4])
-    rudder_span     = static_variable.vertical_tail_span*(0.95 - design_variables[5])
+    aileron_span    = static_variable.wing_span*(0.95 - x[4])
+    rudder_span     = static_variable.vertical_tail_span*(0.95 - x[5])
     
     C_N_0_cw        = static_variable.C_N_0_cw
     C_N_beta        = static_variable.C_N_beta
@@ -552,14 +560,14 @@ def hard_constraint_N_cw(design_variables,static_variable):
     C_N_delta_a_fz  = static_variable.C_N_delta_a_fz
     C_N_delta_r_fz  = static_variable.C_N_delta_r_fz
     
-    res = C_N_0_cw + C_N_beta*beta_cw + C_N_delta_a_fz(aileron_span/static_variable.wing_span)*design_variables[0] +  C_N_delta_r_fz(rudder_span/static_variable.vertical_tail_span)*design_variables[1]
+    res = C_N_0_cw + C_N_beta*beta_cw + C_N_delta_a_fz(aileron_span/static_variable.wing_span)*x[0] +  C_N_delta_r_fz(rudder_span/static_variable.vertical_tail_span)*x[1]
     
     return res
 
-def hard_constraint_Y_oei(design_variables,static_variable): 
+def hard_constraint_Y_oei(x,static_variable): 
     
-    aileron_span     = static_variable.wing_span*(0.95 - design_variables[4])
-    rudder_span      = static_variable.vertical_tail_span*(0.95 - design_variables[5])
+    aileron_span     = static_variable.wing_span*(0.95 - x[4])
+    rudder_span      = static_variable.vertical_tail_span*(0.95 - x[5])
     
     C_w              = static_variable.C_w
     phi_oei          = static_variable.phi_oei
@@ -569,14 +577,14 @@ def hard_constraint_Y_oei(design_variables,static_variable):
     C_Y_delta_a_fz   = static_variable.C_Y_delta_a_fz
     C_Y_delta_r_fz   = static_variable.C_Y_delta_r_fz
     
-    res = C_w*np.sin(phi_oei) + C_Y_0_oei + C_Y_beta*beta_oei + C_Y_delta_a_fz(aileron_span/static_variable.wing_span)*design_variables[2] + C_Y_delta_r_fz(rudder_span/static_variable.vertical_tail_span)*design_variables[3]
+    res = C_w*np.sin(phi_oei) + C_Y_0_oei + C_Y_beta*beta_oei + C_Y_delta_a_fz(aileron_span/static_variable.wing_span)*x[2] + C_Y_delta_r_fz(rudder_span/static_variable.vertical_tail_span)*x[3]
     
     return res
 
-def hard_constraint_L_oei(design_variables,static_variable): 
+def hard_constraint_L_oei(x,static_variable): 
     
-    aileron_span     = static_variable.wing_span*(0.95 - design_variables[4])
-    rudder_span      = static_variable.vertical_tail_span*(0.95 - design_variables[5])
+    aileron_span     = static_variable.wing_span*(0.95 - x[4])
+    rudder_span      = static_variable.vertical_tail_span*(0.95 - x[5])
     
     C_L_0_oei        = static_variable.C_L_0_oei
     C_L_beta         = static_variable.C_L_beta 
@@ -584,14 +592,14 @@ def hard_constraint_L_oei(design_variables,static_variable):
     C_L_delta_a_fz   = static_variable.C_L_delta_a_fz
     C_L_delta_r_fz   = static_variable.C_L_delta_r_fz  
     
-    res = C_L_0_oei + C_L_beta*beta_oei + C_L_delta_a_fz(aileron_span/static_variable.wing_span)*design_variables[2] +  C_L_delta_r_fz(rudder_span/static_variable.vertical_tail_span)*design_variables[3]
+    res = C_L_0_oei + C_L_beta*beta_oei + C_L_delta_a_fz(aileron_span/static_variable.wing_span)*x[2] +  C_L_delta_r_fz(rudder_span/static_variable.vertical_tail_span)*x[3]
     
     return res
 
-def hard_constraint_N_oei(design_variables,static_variable): 
+def hard_constraint_N_oei(x,static_variable): 
     
-    aileron_span     = static_variable.wing_span*(0.95 - design_variables[4])
-    rudder_span      = static_variable.vertical_tail_span*(0.95 - design_variables[5])
+    aileron_span     = static_variable.wing_span*(0.95 - x[4])
+    rudder_span      = static_variable.vertical_tail_span*(0.95 - x[5])
     
     C_N_0_oei        = static_variable.C_N_0_oei
     C_N_beta         = static_variable.C_N_beta
@@ -599,7 +607,7 @@ def hard_constraint_N_oei(design_variables,static_variable):
     C_N_delta_a_fz   = static_variable.C_N_delta_a_fz
     C_N_delta_r_fz   = static_variable.C_N_delta_r_fz 
     
-    res = C_N_0_oei + C_N_beta*beta_oei + C_N_delta_a_fz(aileron_span/static_variable.wing_span)*design_variables[2] +  C_N_delta_r_fz(rudder_span/static_variable.vertical_tail_span)*design_variables[3]
+    res = C_N_0_oei + C_N_beta*beta_oei + C_N_delta_a_fz(aileron_span/static_variable.wing_span)*x[2] +  C_N_delta_r_fz(rudder_span/static_variable.vertical_tail_span)*x[3]
     
     return res
 
