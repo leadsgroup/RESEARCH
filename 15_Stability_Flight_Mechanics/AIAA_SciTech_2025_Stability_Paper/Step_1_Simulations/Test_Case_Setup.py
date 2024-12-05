@@ -105,6 +105,7 @@ def main():
                 
             #case_vehicle.networks.electric.busses.prop_rotor_bus.initialize_bus_properties()    
             # lift rotor battery modules 
+
             case_vehicle.networks.electric.busses.lift_rotor_bus.battery_modules.nmc_module_1.origin = np.array([CG_bat_2[j,  0:3]])
             case_vehicle.networks.electric.busses.lift_rotor_bus.battery_modules.nmc_module_2.origin = np.array([CG_bat_2[i,0], 
                                                                                                                  CG_bat_2[i,1], 
