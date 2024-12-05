@@ -114,7 +114,7 @@ def save_data_stick_fixed(CG_bat_1,
         return filename.replace('[', '').replace(']', '').replace(' ', '_').replace('.', '_')
 
     raw_file_name = f"{cg_x1}_{cg_y1}_{cg_z1}_{cg_x2}_{cg_y2}_{cg_z2}_Baseline_{vehicle_tag}_Opt_Results"
-    raw_file_name = f"Baseline_{vehicle_tag}_Opt_Results"
+    #raw_file_name = f"Baseline_{vehicle_tag}_Opt_Results"
     excel_file_name = new_filename(raw_file_name) 
 
     current_dir =  os.path.dirname(os.path.abspath(__file__))
