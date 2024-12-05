@@ -107,9 +107,9 @@ def main():
             # lift rotor battery modules 
 
             case_vehicle.networks.electric.busses.lift_rotor_bus.battery_modules.nmc_module_1.origin = np.array([CG_bat_2[j,  0:3]])
-            case_vehicle.networks.electric.busses.lift_rotor_bus.battery_modules.nmc_module_2.origin = np.array([CG_bat_2[i,0], 
-                                                                                                                 CG_bat_2[i,1], 
-                                                                                                                 CG_bat_2[i,2] + case_vehicle.networks.electric.busses.lift_rotor_bus.battery_modules.nmc_module_2.height])
+            case_vehicle.networks.electric.busses.lift_rotor_bus.battery_modules.nmc_module_2.origin = np.array([CG_bat_2[j,0], 
+                                                                                                                 CG_bat_2[j,1], 
+                                                                                                                 CG_bat_2[j,2] + case_vehicle.networks.electric.busses.lift_rotor_bus.battery_modules.nmc_module_2.height])
             size_control_surfaces(CG_bat_1[i], CG_bat_2[j], case_vehicle, cruise_velocity, cruise_altitude)
         
     for i in range(len(CG_bat_1)-3):
