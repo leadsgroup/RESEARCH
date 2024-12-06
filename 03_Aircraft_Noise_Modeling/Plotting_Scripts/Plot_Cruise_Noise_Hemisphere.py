@@ -87,7 +87,7 @@ def main():
         Y                        = r  * np.sin(THETA)  *  np.sin(PHI)
         Z                        = - r *  np.cos(PHI)
         
-        hemisphere_noise         = results.hemisphere_noise.reshape( (len(results.theta),len(results.phi))) 
+        hemisphere_noise         = results.hemisphere_noise
         colormap                 = 'jet'
         file_type                = ".png"
         background_color         = 'white'
@@ -120,7 +120,7 @@ def main():
             plot_data,_,_,_,_,_,_, = generate_3d_vehicle_geometry_data(plot_data,vehicle)        
             
         # TERRAIN CONTOUR     
-        hemisphere_contour   = go.Surface(x=X,y=Y,z=Z,
+        hemisphere_contour   = go.Surface(x=X.flatten(),y=Y.flatten(),z=Z.flatten(),
                                           surfacecolor= hemisphere_noise,
                                           colorscale=colormap,
                                           showscale=True,
