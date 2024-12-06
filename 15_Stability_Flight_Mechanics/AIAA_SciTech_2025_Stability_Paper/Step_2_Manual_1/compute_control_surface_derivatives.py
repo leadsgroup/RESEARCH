@@ -481,7 +481,7 @@ def optimization(static_variable):
     delta_r_upper_bound_oei  = 30  * np.pi/180    # [rad]                    
     delta_a_lower_bound_roll = -30 * np.pi/180    # [rad]
     delta_a_upper_bound_roll = 30  * np.pi/180    # [rad]  
-    aileron_span_lower_bound = 0.55               # [%]    # just changing the upper and lower bound of the lower bound of the control surface (the inner limit closer to root of wing)
+    aileron_span_lower_bound = 0.65               # [%]    # just changing the upper and lower bound of the lower bound of the control surface (the inner limit closer to root of wing)
     aileron_span_upper_bound = 0.90               # [%]  
     rudder_span_lower_bound  = 0.05               # [%]  
     rudder_span_upper_bound  = 0.90               # [%]    
