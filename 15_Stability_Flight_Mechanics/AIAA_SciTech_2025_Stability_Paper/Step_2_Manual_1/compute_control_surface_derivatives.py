@@ -4,7 +4,6 @@
 # ---------------------------------------------------------------------
 import RCAIDE
 from   RCAIDE.Framework.Core import Units,Data  
-from   RCAIDE.Library.Methods.Propulsors.Converters.Rotor.compute_rotor_performance import compute_rotor_performance 
 from   RCAIDE.Library.Plots  import *  
 import numpy                 as np
 from   scipy.optimize        import fsolve
@@ -89,10 +88,6 @@ def main():
     delta_a_roll = np.zeros([len(CG_bat_1),len(CG_bat_2)])
     aileron_span = np.zeros([len(CG_bat_1),len(CG_bat_2)])
     rudder_span  = np.zeros([len(CG_bat_1),len(CG_bat_2)])
-    RPM_1        = np.zeros([len(CG_bat_1),len(CG_bat_2)])
-    RPM_2        = np.zeros([len(CG_bat_1),len(CG_bat_2)])
-    RPM_3        = np.zeros([len(CG_bat_1),len(CG_bat_2)])
-    RPM_4        = np.zeros([len(CG_bat_1),len(CG_bat_2)])
     
     # Create arrays of aileron and rudder sizes
     
@@ -102,49 +97,6 @@ def main():
     # Append aileron and rudder
     
     case_vehicle                              = setup_rudder_aileron(case_vehicle)    
-    
-    # -------------------------------------------------------------
-    #  Hover OEI
-    # -------------------------------------------------------------
-    
-    #bus                            = RCAIDE.Library.Components.Energy.Distributors.Electrical_Bus() 
-    #electric_rotor                 = RCAIDE.Library.Components.Propulsors.Electric_Rotor() 
-    #rotor                          = F8745_D4_Propeller() 
-    #electric_rotor.rotor           = rotor  
-    #bus.propulsors.append(electric_rotor)     
-    #segment.state.conditions.energy[bus.tag] = Conditions()
-    #segment.state.conditions.noise[bus.tag]  = Conditions()
-    #electric_rotor.append_operating_conditions(segment,bus) 
-    #for tag, item in  electric_rotor.items(): 
-        #if issubclass(type(item), RCAIDE.Library.Components.Component):
-            #item.append_operating_conditions(segment,bus,electric_rotor)  
-    ## Run BEMT
-    #segment.state.conditions.expand_rows(ctrl_pts)
-    #rotor_conditions             =  segment.state.conditions.energy[bus.tag][electric_rotor.tag][rotor.tag]     
-    #rotor_conditions.omega[:,0]  = test_omega    
-    
-
-    #state.conditions.energy[disributor.tag][propulsor.tag][rotor.tag].omega
-    
-    # Find relation between RPM and Thrust and Power for the two types of rotor  
-    
-    omega                            = np.array([500, 1000, 1500, 2000, 2500])
-    
-    thrust_prop                      = Data()
-    thrust_lift                      = Data()
-    power_prop                       = Data()
-    power_lift                       = Data()
-    
-    for i in range(len(omega)):
-        thrust_prop[i], power_prop[i] = compute_rotor_performance(propulsor_prop,state,disributor)
-        thrust_lift[i], power_lift[i] = compute_rotor_performance(propulsor_lift,state,disributor)
-    
-    # Create the functions describing the thrust as function of RPM for both rotor types
-    
-    thrust_fz_prop            = interpolate.interp1d(omega, thrust_prop, kind='linear', fill_value="extrapolate", bounds_error=False)    
-    power_fz_prop             = interpolate.interp1d(omega, power_prop, kind='linear', fill_value="extrapolate", bounds_error=False)
-    thrust_fz_lift            = interpolate.interp1d(omega, thrust_lift, kind='linear', fill_value="extrapolate", bounds_error=False)
-    power_fz_lift             = interpolate.interp1d(omega, power_lift, kind='linear', fill_value="extrapolate", bounds_error=False)   
  
     for i in range(len(CG_bat_1)):
         for j in range(len(CG_bat_2)):
@@ -260,25 +212,13 @@ def main():
             static_variable.Ixx                                        = case_vehicle.mass_properties.moments_of_inertia.tensor[0,0]
             static_variable.S_w                                        = case_vehicle.wings.main_wing.areas.reference
             static_variable.S_h                                        = case_vehicle.wings.horizontal_tail.areas.reference
-            static_variable.S_v                                        = case_vehicle.wings.vertical_tail.areas.reference    
+            static_variable.S_v                                        = case_vehicle.wings.vertical_tail.areas.reference
             
-            # HOVER OEI
-                                                                         
-            static_variable.thrust_fz_prop                             = thrust_fz_prop                                                                               
-            static_variable.thrust_fz_lift                             = thrust_fz_lift
-            static_variable.power_fz_prop                              = power_fz_prop                                                                               
-            static_variable.power_fz_lift                              = power_fz_lift
-            static_variable.arm1                                       = 0 # FIX
-            static_variable.arm2                                       = 0 # FIX            
-            static_variable.lat1                                       = 0 # FIX
-            static_variable.lat2                                       = 0 # FIX
-            static_variable.lat3                                       = 0 # FIX            
+            delta_a_cw[i,j], delta_r_cw[i,j], delta_a_oei[i,j], delta_r_oei[i,j],delta_a_roll[i,j], aileron_span[i,j], rudder_span[i,j] = optimization(static_variable)
             
-            delta_a_cw[i,j], delta_r_cw[i,j], delta_a_oei[i,j], delta_r_oei[i,j],delta_a_roll[i,j], aileron_span[i,j], rudder_span[i,j], RPM_1[i,j], RPM_2[i,j], RPM_3[i,j], RPM_4[i,j] = optimization(static_variable)
-
             debug = 0
     
-    return delta_a_cw, delta_r_cw, delta_a_oei, delta_r_oei, delta_a_roll, aileron_span, rudder_span, RPM_1, RPM_2, RPM_3, RPM_4
+    return delta_a_cw, delta_r_cw, delta_a_oei, delta_r_oei, aileron_span, rudder_span
 
 def interpolation(x, y, kind='linear'):
     # ------------------------------------------------------------------
@@ -541,21 +481,14 @@ def optimization(static_variable):
     delta_r_upper_bound_oei  = 30  * np.pi/180    # [rad]                    
     delta_a_lower_bound_roll = -30 * np.pi/180    # [rad]
     delta_a_upper_bound_roll = 30  * np.pi/180    # [rad]  
-    aileron_span_lower_bound = 0.65               # [%]    # just changing the upper and lower bound of the lower bound of the control surface (the inner limit closer to root of wing)
+    aileron_span_lower_bound = 0.55               # [%]    # just changing the upper and lower bound of the lower bound of the control surface (the inner limit closer to root of wing)
     aileron_span_upper_bound = 0.90               # [%]  
     rudder_span_lower_bound  = 0.05               # [%]  
-    rudder_span_upper_bound  = 0.90               # [%]  
-    RPM_1_lower_bound        = 100                # [RPM]  
-    RPM_1_upper_bound        = 5000               # [RPM]
-    RPM_2_lower_bound        = 100                # [RPM]  
-    RPM_2_upper_bound        = 5000               # [RPM]
-    RPM_3_lower_bound        = 100                # [RPM]  
-    RPM_3_upper_bound        = 5000               # [RPM]
-    RPM_4_lower_bound        = 100                # [RPM]  
-    RPM_4_upper_bound        = 5000               # [RPM]    
+    rudder_span_upper_bound  = 0.90               # [%]    
     
    
-    x0         = [ 0.5, 0.5, 0.5, 0.5, 0.5, 0.9, 0.9, 2500, 2500, 2500, 2500]
+    x0         = [ 0.5, 0.5, 0.5, 0.5, 0.5, 0.9, 0.9]
+    #x0         = [ 5.603e-02, -5.236e-01, -2.183e-04, -5.627e-02,  4.500e-01, 5.974e-01]
     
     args       = [static_variable]
     
@@ -565,9 +498,6 @@ def optimization(static_variable):
                   {'type':'eq', 'fun': hard_constraint_Y_oei,'args': args},
                   {'type':'eq', 'fun': hard_constraint_L_oei,'args': args},
                   {'type':'eq', 'fun': hard_constraint_N_oei,'args': args},
-                  {'type':'eq', 'fun': hard_constraint_hover_oei_Fz,'args': args},
-                  {'type':'eq', 'fun': hard_constraint_hover_oei_Mx,'args': args},
-                  {'type':'eq', 'fun': hard_constraint_hover_oei_Mz,'args': args},
                   {'type':'ineq', 'fun': hard_constraint_roll_rate,'args': args}
                   ]
     
@@ -575,13 +505,9 @@ def optimization(static_variable):
                   (delta_r_lower_bound_cw ,  delta_r_upper_bound_cw  ),
                   (delta_a_lower_bound_oei,  delta_a_upper_bound_oei ),
                   (delta_r_lower_bound_oei,  delta_r_upper_bound_oei ),
-                  (delta_a_lower_bound_roll, delta_a_upper_bound_roll),
+                  (delta_a_lower_bound_roll,  delta_a_upper_bound_roll),
                   (aileron_span_lower_bound, aileron_span_upper_bound),                 
-                  (rudder_span_lower_bound,  rudder_span_upper_bound ),                 
-                  (RPM_1_lower_bound,        RPM_1_upper_bound       ),                 
-                  (RPM_2_lower_bound,        RPM_2_upper_bound       ),                 
-                  (RPM_3_lower_bound,        RPM_3_upper_bound       ),                 
-                  (RPM_4_lower_bound,        RPM_4_upper_bound       )) 
+                  (rudder_span_lower_bound,  rudder_span_upper_bound )) 
     
     # try hard constraints to find optimum motor parameters
     sol = minimize(objective, x0, args= (static_variable) , method='trust-constr', bounds=bnds, tol=1e-6, constraints=hard_cons) 
@@ -598,13 +524,17 @@ def optimization(static_variable):
     delta_r_oei         = sol.x[3]    
     delta_a_roll        = sol.x[4]  
     aileron_lower_bound = sol.x[5] 
-    rudder_lower_bound  = sol.x[6]  
-    RPM_1_hover_oei     = sol.x[7] 
-    RPM_2_hover_oei     = sol.x[8]  
-    RPM_3_hover_oei     = sol.x[9] 
-    RPM_4_hover_oei     = sol.x[10]
+    rudder_lower_bound  = sol.x[6]
     
-    return delta_a_cw, delta_r_cw, delta_a_oei, delta_r_oei, delta_a_roll, aileron_lower_bound, rudder_lower_bound, RPM_1_hover_oei, RPM_2_hover_oei, RPM_3_hover_oei, RPM_4_hover_oei
+    #delta_a_cw          = sol.x[0]
+    #delta_r_cw          = sol.x[1]   
+    #delta_a_oei         = sol.x[2] 
+    #delta_r_oei         = sol.x[3]    
+    #aileron_lower_bound = sol.x[4]  
+    #rudder_lower_bound  = sol.x[5] 
+    
+    #return delta_a_cw, delta_r_cw, delta_a_oei, delta_r_oei, aileron_lower_bound, rudder_lower_bound    
+    return delta_a_cw, delta_r_cw, delta_a_oei, delta_r_oei, delta_a_roll, aileron_lower_bound, rudder_lower_bound
 
 # objective function
 def objective(x,static_variable):
@@ -612,11 +542,12 @@ def objective(x,static_variable):
     Area_aileron    = static_variable.aileron_chord_fraction*static_variable.wing_span*(0.95 - x[5])*((0.95 + x[5])*(static_variable.wing_tip_chord - static_variable.wing_root_chord)/2 + static_variable.wing_root_chord)
     Area_rudder     = static_variable.rudder_chord_fraction*static_variable.vertical_tail_span*(0.95 - x[6])*((0.95 + x[6])*(static_variable.vertical_tail_tip_chord - static_variable.vertical_tail_root_chord)/2 + static_variable.vertical_tail_root_chord)
     
-    Power           = 3*static_variable.power_fz_prop(x[7]) + 3*static_variable.power_fz_prop(x[8]) + 3*static_variable.power_fz_lift(x[9]) + 2*static_variable.power_fz_lift(x[10])
+    #Area_aileron    = static_variable.aileron_chord_fraction*static_variable.wing_span*(0.95 - x[4])*((0.95 + x[4])*(static_variable.wing_tip_chord - static_variable.wing_root_chord)/2 + static_variable.wing_root_chord)
+    #Area_rudder     = static_variable.rudder_chord_fraction*static_variable.vertical_tail_span*(0.95 - x[5])*((0.95 + x[5])*(static_variable.vertical_tail_tip_chord - static_variable.vertical_tail_root_chord)/2 + static_variable.vertical_tail_root_chord)
     
-    print(Area_aileron + Area_rudder + Power)
+    print(Area_aileron + Area_rudder)
         
-    return Area_aileron + Area_rudder + Power
+    return Area_aileron + Area_rudder
 
 # hard constraint
 def hard_constraint_Y_cw(x,static_variable):     
@@ -718,73 +649,7 @@ def hard_constraint_roll_rate(x,static_variable):
     
     res             = CS_time - np.sqrt(2 * CS_angle / P_dot)
     
-def hard_constraint_hover_oei_Fz(x,static_variable):     
-
-    W               = static_variable.W   
-    
-    T1              = static_variable.thrust_fz_prop(x[7])
-    T2              = static_variable.thrust_fz_prop(x[7])
-    T3              = static_variable.thrust_fz_prop(x[7])
-    T4              = static_variable.thrust_fz_prop(x[8])
-    T5              = static_variable.thrust_fz_prop(x[8])
-    T6              = static_variable.thrust_fz_prop(x[8])
-    
-    T7              = static_variable.thrust_fz_lift(x[9])
-    T8              = static_variable.thrust_fz_lift(x[9])
-    T9              = static_variable.thrust_fz_lift(x[9])
-    T10             = static_variable.thrust_fz_lift(x[10])
-    T11             = static_variable.thrust_fz_lift(x[10])
-    
-    T               = T1 + T2 + T3 + T4 + T5 + T6 + T7 + T8 + T9 + T10 + T11
-    
-    res             = T - W    
-    
     return res
-
-def hard_constraint_hover_oei_Mx(x,static_variable):     
-
-    arm1            = static_variable.arm1
-    arm2            = static_variable.arm2
-
-    T1              = static_variable.thrust_fz_prop(x[7])
-    T2              = static_variable.thrust_fz_prop(x[7])
-    T3              = static_variable.thrust_fz_prop(x[7])
-    T4              = static_variable.thrust_fz_prop(x[8])
-    T5              = static_variable.thrust_fz_prop(x[8])
-    T6              = static_variable.thrust_fz_prop(x[8])
-    
-    T7              = static_variable.thrust_fz_lift(x[9])
-    T8              = static_variable.thrust_fz_lift(x[9])
-    T9              = static_variable.thrust_fz_lift(x[9])
-    T10             = static_variable.thrust_fz_lift(x[10])
-    T11             = static_variable.thrust_fz_lift(x[10])    
-
-    res             = arm1*(T1 + T2 + T3 + T4 + T5 + T6) - arm2*(T7 + T8 + T9 + T10 + T11)    
-    
-    return res
-
-def hard_constraint_hover_oei_Mz(x,static_variable):     
-
-    lat1            = static_variable.lat1
-    lat2            = static_variable.lat2
-    lat3            = static_variable.lat3
-
-    T1              = static_variable.thrust_fz_prop(x[7])
-    T2              = static_variable.thrust_fz_prop(x[7])
-    T3              = static_variable.thrust_fz_prop(x[7])
-    T4              = static_variable.thrust_fz_prop(x[8])
-    T5              = static_variable.thrust_fz_prop(x[8])
-    T6              = static_variable.thrust_fz_prop(x[8])
-    
-    T7              = static_variable.thrust_fz_lift(x[9])
-    T8              = static_variable.thrust_fz_lift(x[9])
-    T9              = static_variable.thrust_fz_lift(x[9])
-    T10             = static_variable.thrust_fz_lift(x[10])
-    T11             = static_variable.thrust_fz_lift(x[10])    
-
-    res             = lat1*(T4 + T9 - T10 - T3) + lat2*(T8 + T5 - T11 - T2) + lat3*(T7 + T6 - T1)    
-    
-    return res  
 
 def read_results(file_name):
     # Load the Excel file
