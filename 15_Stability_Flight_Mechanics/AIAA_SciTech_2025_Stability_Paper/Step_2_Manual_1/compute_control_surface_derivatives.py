@@ -51,7 +51,10 @@ def main():
         
     case_vehicle  = deepcopy(vehicle)
     
-    excel_file = "C:/Users/Matteo/Documents/UIUC/RESEARCH/15_Stability_Flight_Mechanics/AIAA_SciTech_2025_Stability_Paper/Step_1_Simulations/025_00_00_40_00_00_Baseline_stick_fixed_cruise_Opt_Results.xlsx"
+    ospath          = os.path.abspath(__file__)
+    separator       = os.path.sep
+    relative_path   = os.path.dirname(ospath) + separator     
+    excel_file = relative_path +".." + separator + "Step_1_Simulations" + separator + "025_00_00_40_00_00_Baseline_stick_fixed_cruise_Opt_Results.xlsx"
     
     # >>>>>>>>>>>>>>>>>>>>> ADD OTHER FILES
     
@@ -127,7 +130,7 @@ def main():
     #state.conditions.energy[disributor.tag][propulsor.tag][rotor.tag].omega
     
     # Find relation between RPM and Thrust and Power for the two types of rotor  
-    
+    '''
     omega                            = np.array([500, 1000, 1500, 2000, 2500])
     
     thrust_prop                      = Data()
@@ -145,7 +148,7 @@ def main():
     power_fz_prop             = interpolate.interp1d(omega, power_prop, kind='linear', fill_value="extrapolate", bounds_error=False)
     thrust_fz_lift            = interpolate.interp1d(omega, thrust_lift, kind='linear', fill_value="extrapolate", bounds_error=False)
     power_fz_lift             = interpolate.interp1d(omega, power_lift, kind='linear', fill_value="extrapolate", bounds_error=False)   
- 
+    '''
     for i in range(len(CG_bat_1)):
         for j in range(len(CG_bat_2)):
             
