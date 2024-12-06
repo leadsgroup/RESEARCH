@@ -658,7 +658,7 @@ def compute_noise_metrics(noise_data, flight_times,time_period):
     
     # Count up number of flights during and after the restriction period.
     for i in range(number_of_flights):
-        fl_time = float(flight_times[i].split(':')[0])*60*60 +  float(flight_times[i].split(':')[1])*60 +  float(flight_times[i].split(':')[2]) + flight_time
+        fl_time = float(flight_times[i].split(':')[0])*60*60 +  float(flight_times[i].split(':')[1])*60 +  flight_time #float(flight_times[i].split(':')[2]) + flight_time
         if fl_time[-1] < t_7am:
             number_of_penalty_flights += 1
         elif fl_time[0] > t_10pm:
