@@ -5,10 +5,13 @@ from scipy.interpolate import griddata
 import matplotlib.colors
 import matplotlib.colors as colors  
 from geopy.distance import geodesic as GD
+import matplotlib.ticker as ticker
 import pickle
 from RCAIDE import  load
 import  os
 import  sys
+import matplotlib.patches as patches
+from mpl_toolkits.axes_grid1.inset_locator import inset_axes
 
 local_path_1 =  os.path.split(sys.path[0])[0]
 
@@ -43,7 +46,7 @@ def main():
                  
     # tag for city              
     city                                    = 'LA' 
-    aircraft_models                         = ['TSR']# ,'SR','TR']
+    aircraft_models                         = ['HC']# ,'SR','TR']
     aircraft_folder_names                   = ['Tiltrotor', ]
     altitudes                               = ['1000']
     flight_intervals                        = ['60','30','10']
@@ -58,7 +61,7 @@ def main():
     mic_coord =     np.reshape(microphone_coordinates,   (microphone_x_resolution,microphone_y_resolution,3))
     for i in  range(len(aircraft_models)):
         # Read in results
-        filename = relative_path +  '..' + separator +  'City_Simulations' + separator + 'Los_Angeles' + separator +'Tilt_Stopped_Rotor' + separator + 'Cumulative1_' + aircraft_models[i] + '_'+ city +'_' +altitudes[0] +'ft.res'
+        filename = relative_path +  '..' + separator +  'City_Simulations' + separator + 'Los_Angeles' + separator +'Hexacopter' + separator + 'Cumulative_' + aircraft_models[i] + '_'+ city +'_' +altitudes[0] +'ft.res'
         noise_data = load(filename)
         plot_2D_noise_contour(mic_coord, mic_loc, topography_file, 
                           noise_level              = noise_data.Total_L_max, # noise_data.Total_L_dn, # d
@@ -80,10 +83,10 @@ def plot_2D_noise_contour(microphone_coordinates,
                           microphone_locations, 
                           topography_file, 
                           noise_level              = None ,
-                          min_noise_level          = 30,  
+                          min_noise_level          = 35,  
                           max_noise_level          = 90, 
                           noise_scale_label        = None,
-                          save_figure              = False,
+                          save_figure              = True,
                           show_figure              = True,
                           save_filename            = "2D_Noise_Contour",
                           show_elevation           = False,
@@ -125,13 +128,16 @@ def plot_2D_noise_contour(microphone_coordinates,
     colors          = np.vstack((colors_undersea, colors_land))
     cut_terrain_map = matplotlib.colors.LinearSegmentedColormap.from_list('cut_terrain', colors) 
     norm = FixPointNormalize(sealevel=0,vmax=np.max(elevation),vmin=np.min(elevation))  
-     
+    parameters = {
+                  'figure.dpi': 500
+                  }
+    plt.rcParams.update(parameters)
     fig = plt.figure(save_filename)
     fig.set_size_inches(width,height)
     
     axis = fig.add_subplot(1,1,1) 
     
-    noise_levels   = np.linspace(30,100,15) #np.linspace(min_noise_level,max_noise_level,10)  
+    noise_levels   = np.linspace(35,100,256) #np.linspace(min_noise_level,max_noise_level,10)  
     noise_cmap     = plt.get_cmap('turbo')
     noise_new_cmap = truncate_colormap(noise_cmap,0.0, 1.0) 
      
@@ -150,14 +156,53 @@ def plot_2D_noise_contour(microphone_coordinates,
         cbar.ax.set_ylabel('Elevation above sea level [ft]', rotation =  90)  
 
     # plot aircraft noise levels   
-    CS_2    = axis.contourf(LONG,LAT,noise_level ,noise_levels,cmap = noise_new_cmap)     
+    CS_2    = axis.contourf(LONG,LAT,noise_level ,noise_levels,cmap = noise_new_cmap)
+    axis.set_ylim(LAT[0, 0], LAT[-1, 0])
+    axis.set_xlim(LONG[0, 0], LONG[-1, -1])
     cbar    = fig.colorbar(CS_2, ax=axis)        
-    cbar.ax.set_ylabel(noise_scale_label, rotation =  90) 
+    cbar.ax.set_ylabel(noise_scale_label, rotation =  90,  fontsize=20)
+    cbar.ax.tick_params(colors='black', labelsize=20)
+    plt.xlabel("Longitude", fontsize=20)
+    plt.ylabel("Latitude", fontsize=20)
+    axis.tick_params(colors='black', labelsize=20)
+    # -------------------------
+    # Create vertiport inset
+    # -------------------------
+    vertiport_coord = np.array([242.13719, 33.67619])
+    
+    index1 = np.argmin(abs(LAT[:, 0]-vertiport_coord[1]))
+    index2 = np.argmin(abs(LONG[0, :]-vertiport_coord[0]))
+    diff1 = 24
+    diff2 = 54
+    # Filter the x and y values for the zoomed range
+    zoomed_lat = LAT[(index1-diff1):(index1+diff1), (index2-diff2):(index2+diff2)]#LONG[(LONG >= 242.35) & (LONG <= 242.45)]
+    zoomed_long = LONG[(index1-diff1):(index1+diff1), (index2-diff2):(index2+diff2)] #LAT[np.where(LONG==zoomed_long[0]) : np.where(LONG==zoomed_long[-1])+1]
+    zoomed_noise_level = noise_level[(index1-diff1):(index1+diff1), (index2-diff2):(index2+diff2)]
+    
+    y_size = abs(zoomed_lat[0, 0] - zoomed_lat[-1, -1])
+    x_size = abs(zoomed_long[0, 0] - zoomed_long[-1, -1])
+    rect = patches.Rectangle((zoomed_long[0, 0] , zoomed_lat[0, 0] ), x_size, y_size, linewidth=2, edgecolor='black', facecolor='red', alpha=0.5)
+    axis.add_patch(rect)
+
+    # Add inset
+    inset_ax = fig.add_axes([0.15, 0.15, 0.25, 0.25])  # [x, y, width, height]
+    
+    # Access x and y data for the current case
+    
+    # Plot the zoomed data
+    inset_ax.contourf(zoomed_long,  zoomed_lat,  zoomed_noise_level ,noise_levels, cmap = noise_new_cmap)    
+    inset_ax.tick_params(colors='black', labelsize=7)
+    
+    #  Optionally, format tick labels as needed
+    inset_ax.ticklabel_format(useOffset=False) 
+    fig.tight_layout()
+
+    
+    #if save_figure: 
+    figure_title  = save_filename
+    plt.savefig(figure_title + file_type )
         
-    fig.tight_layout()  
-    if save_figure: 
-        figure_title  = save_filename
-        plt.savefig(figure_title + file_type )     
+    
          
     return fig       
 

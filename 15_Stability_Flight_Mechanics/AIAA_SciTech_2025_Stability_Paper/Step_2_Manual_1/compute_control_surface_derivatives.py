@@ -266,7 +266,7 @@ def main():
             static_variable.S_v                                        = case_vehicle.wings.vertical_tail.areas.reference    
             
             # HOVER OEI
-                                                                         
+            '''                                                             
             static_variable.thrust_fz_prop                             = thrust_fz_prop                                                                               
             static_variable.thrust_fz_lift                             = thrust_fz_lift
             static_variable.power_fz_prop                              = power_fz_prop                                                                               
@@ -276,7 +276,7 @@ def main():
             static_variable.lat1                                       = 0 # FIX
             static_variable.lat2                                       = 0 # FIX
             static_variable.lat3                                       = 0 # FIX            
-            
+            '''
             delta_a_cw[i,j], delta_r_cw[i,j], delta_a_oei[i,j], delta_r_oei[i,j],delta_a_roll[i,j], aileron_span[i,j], rudder_span[i,j], RPM_1[i,j], RPM_2[i,j], RPM_3[i,j], RPM_4[i,j] = optimization(static_variable)
 
             debug = 0
@@ -323,6 +323,7 @@ def setup_rudder_aileron(vehicle):
     return vehicle
 
 def compute_rudder_aileron_derivatives(aileron_span_fraction_start, rudder_span_fraction_start, vehicle,  seg_num=0):           
+    # This function calcualtes control derivatives as a function of the starting section fraction for the aileron adn rudder. It assumes they both end at 0.95 of the span. 
     # seg_num is the number of the mission segment correspdoning to the segment for which control surface derivatives are being found
     
     CN_delta_a    =  np.zeros(np.size(aileron_span_fraction_start))
@@ -520,8 +521,11 @@ def missions_setup(mission):
 def load_results(filename):  
     # Define the directory where the file is located
     #current_dir = '/Users/aidanmolloy/Documents/LEADS/RESEARCH/15_Stability_Flight_Mechanics/AIAA_SciTech_2025_Stability_Paper/Step_1_Simulations'
-    current_dir = 'C:/Users/Matteo/Documents/UIUC/RESEARCH/15_Stability_Flight_Mechanics/AIAA_SciTech_2025_Stability_Paper/Step_1_Simulations'
-    
+    ospath          = os.path.abspath(__file__)
+    separator       = os.path.sep
+    relative_path   = os.path.dirname(ospath) + separator     
+    current_dir = relative_path +".." + separator + "Step_1_Simulations"   
+     
     # Combine directory and filename to get full path
     load_file = os.path.join(current_dir, filename + '.pkl')
     
@@ -568,9 +572,9 @@ def optimization(static_variable):
                   {'type':'eq', 'fun': hard_constraint_Y_oei,'args': args},
                   {'type':'eq', 'fun': hard_constraint_L_oei,'args': args},
                   {'type':'eq', 'fun': hard_constraint_N_oei,'args': args},
-                  {'type':'eq', 'fun': hard_constraint_hover_oei_Fz,'args': args},
-                  {'type':'eq', 'fun': hard_constraint_hover_oei_Mx,'args': args},
-                  {'type':'eq', 'fun': hard_constraint_hover_oei_Mz,'args': args},
+                  #{'type':'eq', 'fun': hard_constraint_hover_oei_Fz,'args': args},
+                  #{'type':'eq', 'fun': hard_constraint_hover_oei_Mx,'args': args},
+                  #{'type':'eq', 'fun': hard_constraint_hover_oei_Mz,'args': args},
                   {'type':'ineq', 'fun': hard_constraint_roll_rate,'args': args}
                   ]
     
@@ -615,11 +619,11 @@ def objective(x,static_variable):
     Area_aileron    = static_variable.aileron_chord_fraction*static_variable.wing_span*(0.95 - x[5])*((0.95 + x[5])*(static_variable.wing_tip_chord - static_variable.wing_root_chord)/2 + static_variable.wing_root_chord)
     Area_rudder     = static_variable.rudder_chord_fraction*static_variable.vertical_tail_span*(0.95 - x[6])*((0.95 + x[6])*(static_variable.vertical_tail_tip_chord - static_variable.vertical_tail_root_chord)/2 + static_variable.vertical_tail_root_chord)
     
-    Power           = 3*static_variable.power_fz_prop(x[7]) + 3*static_variable.power_fz_prop(x[8]) + 3*static_variable.power_fz_lift(x[9]) + 2*static_variable.power_fz_lift(x[10])
+    #Power           = 3*static_variable.power_fz_prop(x[7]) + 3*static_variable.power_fz_prop(x[8]) + 3*static_variable.power_fz_lift(x[9]) + 2*static_variable.power_fz_lift(x[10])
     
-    print(Area_aileron + Area_rudder + Power)
+    print(Area_aileron + Area_rudder) #+ Power)
         
-    return Area_aileron + Area_rudder + Power
+    return Area_aileron + Area_rudder # + Power
 
 # hard constraint
 def hard_constraint_Y_cw(x,static_variable):     
@@ -720,6 +724,7 @@ def hard_constraint_roll_rate(x,static_variable):
     P_dot           = (P_ss**2)/(2*np.abs(Phi_1)) 
     
     res             = CS_time - np.sqrt(2 * CS_angle / P_dot)
+    return res
     
 def hard_constraint_hover_oei_Fz(x,static_variable):     
 
