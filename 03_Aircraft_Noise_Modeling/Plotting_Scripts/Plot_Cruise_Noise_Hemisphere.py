@@ -66,10 +66,10 @@ def main():
     plot_parameters.legend_font      = 20                             # legend_font_size          
     
   
-    aircraft_tags  = ['HC','TR','SR']       
+    aircraft_tags  = ['HC' ,'TR','TSR']       
 
     filename_list = ['HC_Hemisphere_Processed_Noise', 'TR_Hemisphere_Processed_Noise', 'TSR_Hemisphere_Processed_Noise'] 
-    for i, postprocessed_filename in enumerate(filename_list):
+    for i in range(len(aircraft_tags)):
         
         # --------------------------------------------------------------------------------------    
         # CONTOUR PLOT
@@ -77,22 +77,20 @@ def main():
         separator       = os.path.sep
         relative_path   = sys.path[-4] + separator       
         
-        results = load(relative_path + postprocessed_filename + '.res')  
+        results = load(relative_path + filename_list[i] + '.res')  
         
-        r     = 20             
-        PHI   = np.tile(results.phi[None,:], (len(results.theta),1))
-        THETA = np.tile(results.theta[:,None], (1,len(results.phi)))
-     
-        X                        = r  * np.cos(THETA)  *  np.sin(PHI)  
-        Y                        = r  * np.sin(THETA)  *  np.sin(PHI)
-        Z                        = - r *  np.cos(PHI)
-        
-        hemisphere_noise         = results.hemisphere_noise
+
+        r     = 20     
+        X     = r * np.outer(np.cos(results.theta),np.sin(results.phi))
+        Y     = r * np.outer(np.sin(results.theta),np.sin(results.phi))
+        Z     = r * np.outer(np.cos(results.phi), np.ones(np.size(results.theta))).T
+         
+        hemisphere_noise         = results.hemisphere_noise.reshape( (len(results.theta),len(results.phi))) 
         colormap                 = 'jet'
         file_type                = ".png"
         background_color         = 'white'
         grid_color               = 'white'
-        noise_scale_label        = r'L$_{A}$ [dBA]' 
+        noise_scale_label        = 'dBA' 
         width                    = 1400
         height                   = 800
         hemisphere_filename      = aircraft_tags[i] + '_Hemisphere_Contour'
@@ -107,47 +105,45 @@ def main():
             if aircraft_tags[i] == 'HC':
                 vec     = HC_vehicle_setup(redesign_rotors = False)     
                 configs  = HC_configs_setup(vec)
-                vehicle  = configs.cruise
+                vehicle  = configs.forward_flight
             elif aircraft_tags[i] == 'TSR':    
                 vec  = TSR_vehicle_setup(redesign_rotors = False)     
                 configs  = TSR_configs_setup(vec)
-                vehicle  = configs.cruise
+                vehicle  = configs.forward_flight
             elif aircraft_tags[i] == 'TR':
                 vec      = TR_vehicle_setup(redesign_rotors = False)     
                 configs  = TR_configs_setup(vec)
-                vehicle  = configs.cruise
+                vehicle  = configs.forward_flight
      
             plot_data,_,_,_,_,_,_, = generate_3d_vehicle_geometry_data(plot_data,vehicle)        
             
         # TERRAIN CONTOUR     
-        hemisphere_contour   = go.Surface(x=X.flatten(),y=Y.flatten(),z=Z.flatten(),
-                                          surfacecolor= hemisphere_noise,
-                                          colorscale=colormap,
-                                          showscale=True,
-                                          colorbar = dict(title = noise_scale_label, titleside = "right", orientation = "v"))        
+        hemisphere_contour   = go.Surface(x=X,y=-Y,z=Z, surfacecolor= hemisphere_noise, colorscale  = colormap, cmin=45, cmax=100, ) #colorbar   = dict(title = noise_scale_label, titleside = "right", orientation = "v"))
+        plot_data.append(hemisphere_contour) 
+        hemisphere_contour   = go.Surface(x=X,y=Y,z=Z, surfacecolor= hemisphere_noise, colorscale  = colormap, showscale   = True, cmin=45, cmax=100,  colorbar   = dict(title = noise_scale_label, titleside = "right", orientation = "v"))        
        
         plot_data.append(hemisphere_contour) 
     
         # Define Colorbar Bounds 
-        fig_3d = go.Figure(data=plot_data)
-        fig_3d.update_traces(cmin=60, cmax=110)
-            
+        fig_3d = go.Figure(data=plot_data) 
                              
-        #fig_3d.update_layout(
-                 #title_text                             = hemisphere_filename, 
-                 #title_x                                = 0.5,
-                 #width                                  = width,
-                 #height                                 = height, 
-                 #font_size                              = 12,
-                 #scene_aspectmode                       = 'auto', 
-                 #scene                                  = dict(xaxis = dict(visible=False),
-                                                            #yaxis = dict(visible=False),
-                                                            #zaxis =dict(visible=False)), 
-                 #scene_camera=dict(up    = dict(x=0, y=0, z=1),
-                                   #center= dict(x=-0.05, y=0, z=-0.0),
-                                   #eye   = dict(x=-1.0, y=-1.0, z=.4))   
-        #)  
-        
+        fig_3d.update_layout( 
+                 title_x                                = 0.5,
+                 width                                  = width,
+                 height                                 = height,  
+                 font=dict(
+                     family="Times New Roman",
+                     size=28,
+                     color="black"
+                 ),           
+                 scene_aspectmode                       = 'auto', 
+                 scene                                  = dict(xaxis = dict(visible=False),
+                                                            yaxis = dict(visible=False),
+                                                            zaxis =dict(visible=False)), 
+                 scene_camera=dict(up    = dict(x=0, y=0, z=1),
+                                   center= dict(x=0.4, y=0, z=0.2),
+                                   eye   = dict(x=1.0, y=1.0, z=1.))   
+        )   
         if save_figure:
             fig_3d.write_image(hemisphere_filename + ".png")
             
@@ -155,13 +151,6 @@ def main():
         if show_figure:
             fig_3d.write_html( hemisphere_filename + '.html', auto_open=True)              
          
-
-
-
-def colorax(vmin, vmax):
-    return dict(cmin=vmin,  cmax=vmax)       
- 
- 
 
 if __name__ == '__main__': 
     main()    

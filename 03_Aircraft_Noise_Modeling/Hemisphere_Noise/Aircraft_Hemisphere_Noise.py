@@ -40,7 +40,7 @@ def main():
     # ----------------------------------------------------------------------------------------------------------------------
     #  SIMULATION SETTINGS 
     # ----------------------------------------------------------------------------------------------------------------------  
-    aircraft_codes                   = ['HC', 'TSR','TR']  
+    aircraft_codes                   = ['HC' , 'TSR','TR']  
     cruise_altitude                  = 1000*Units.feet 
     radius_Vert1                     = 3600* Units.feet # circular pattern radius around vertiport 1
     radius_Vert2                     = 3600* Units.feet # circular pattern radius around vertiport 2
@@ -51,14 +51,24 @@ def main():
     app_sector                       = 180  * Units.degree      
     path_heading                     = 270 *  Units.degree
     level_cruise_distance            = 10 * Units.miles
+    number_of_microphone_in_stencil  = 90000
+    noise_evaluation_pitch           = 100 * Units.feet  
+    aircraft_origin_location         = np.array([0, 0])
+    N_gm_x                           = 300 # mics every 50 feet
+    N_gm_y                           = 300 # mics every 50 feet
+    Mic_min_x                        = -7500 *  Units.feet
+    Mic_min_y                        = -7500*  Units.feet
+    Mic_max_x                        =  7500*  Units.feet
+    Mic_max_y                        =  7500*  Units.feet
  
     # ----------------------------------------------------------------------------------------------------------------------
     #  RUN MISSION TO GET NOISE 
     # ----------------------------------------------------------------------------------------------------------------------
     raw_noise_filenames =  []
     analyzed_filenames  =  [] 
+    processed_filenames =  []    
     
-    for i in  range(3):
+    for i in  range(len(aircraft_codes)):
         aircraft_code      =  aircraft_codes[i]
         results            = run_noise_mission(number_of_cpts,aircraft_code, radius_Vert1, radius_Vert2, dep_heading, app_heading, dep_sector, app_sector, path_heading, level_cruise_distance,cruise_altitude) # Run noise simulation  
         raw_noise_filename =  aircraft_code  +  '_Hemisphere_Raw_Data'
@@ -78,7 +88,17 @@ def main():
         
         F =  Data(filename_list=analyzed_filenames)
         analyzed_filename_name = '_Hemisphere_Analyzed_Noise' 
-        save(F, analyzed_filename_name + '.res')                  
+        save(F, analyzed_filename_name + '.res')
+        
+          
+        processed_results  = post_process_approach_departure_noise_data(analyzed_results, number_of_microphone_in_stencil, noise_evaluation_pitch, aircraft_origin_location,  N_gm_x, N_gm_y, Mic_min_x, Mic_min_y, Mic_max_x, Mic_max_y)
+        processed_filename = aircraft_codes[i]  +  '_Hemisphere_Processed_Noise'
+        processed_filenames.append(processed_filename)
+        save(processed_results, processed_filename + '.res') 
+        
+        F =  Data(filename_list=processed_filenames)
+        postprocessed_filename_name = '_Hemisphere_Postprocessed_Noise' 
+        save(F, postprocessed_filename_name + '.res')                      
               
     return
 
@@ -94,7 +114,7 @@ def run_noise_mission(number_of_cpts,aircraft_code, radius_Vert1, radius_Vert2, 
     elif aircraft_code == 'TR':
         vehicle  = TR_vehicle_setup(redesign_rotors = False)     
         configs  = TR_configs_setup(vehicle)
-
+        
     # vehicle analyses
     analyses = noise_analyses_setup(configs)
 
@@ -153,9 +173,13 @@ def base_analysis(vehicle):
 
     #  Noise Analysis   
     noise = RCAIDE.Framework.Analyses.Noise.Frequency_Domain_Buildup()   
-    noise.vehicle = vehicle    
-    noise.settings.noise_hemisphere_phi_angles   = np.linspace(0,np.pi / 2,12)
-    noise.settings.noise_hemisphere_theta_angles = np.linspace(-1 * np.pi, 1*np.pi,24)
+    noise.vehicle = vehicle
+    
+    epsilon =  1E-5
+    noise.settings.noise_hemisphere_phi_angles            = np.linspace(epsilon + (np.pi/2),   np.pi-epsilon,3)  # 9
+    noise.settings.noise_hemisphere_theta_angles          = np.linspace(epsilon + 0        ,   2*np.pi-epsilon,12)  # 17
+    noise.settings.noise_hemisphere                       = True 
+    
     analyses.append(noise)
  
     # ------------------------------------------------------------------
@@ -256,8 +280,8 @@ def TSR_noise_mission_setup(number_of_cpts, analyses, radius_Vert1=3600*Units.ft
     #   Mission Constants
     # ------------------------------------------------------------------
     
-    pattern_speed    = 90 * Units.kts     #CHANGE FOR EACH AIRCRAFT 
-    cruise_speed     = 110. * Units['mph'] #CHANGE FOR EACH AIRCRAFT 
+    pattern_speed    = 90 * Units.kts      # CHANGE FOR EACH AIRCRAFT 
+    cruise_speed     = 110. * Units['mph'] # CHANGE FOR EACH AIRCRAFT 
      
     #------------------------------------------------------------------------------------------------------------------------------------  
     # Cruise 
@@ -265,7 +289,7 @@ def TSR_noise_mission_setup(number_of_cpts, analyses, radius_Vert1=3600*Units.ft
     segment                                                          = Segments.Cruise.Constant_Speed_Constant_Altitude(base_segment)
     segment.tag                                                      = "Cruise"  
     segment.analyses.extend( analyses.forward_flight )                    
-    segment.initial_battery_state_of_charge                = 1.0
+    segment.initial_battery_state_of_charge                          = 1.0
     segment.altitude                                                 = 1000.0 * Units.ft  
     segment.air_speed                                                = cruise_speed
     segment.distance                                                 = level_cruise_distance
@@ -304,20 +328,17 @@ def TR_noise_mission_setup(number_of_cpts, analyses, radius_Vert1=3600*Units.ft,
 
     # ------------------------------------------------------------------
     #   Mission Constants
-    # ------------------------------------------------------------------
-    
+    # ------------------------------------------------------------------ 
     pattern_speed    = 90 * Units.kts 
     cruise_speed     = 125.  * Units['mph']   
-    transition_speed = 100 * Units['mph']    
+    transition_speed = 100 * Units['mph']
     
- 
-
     # ------------------------------------------------------------------
     #   First Cruise Segment: Constant Acceleration, Constant Altitude
     # ------------------------------------------------------------------ 
     segment                          = Segments.Cruise.Constant_Speed_Constant_Altitude(base_segment)
     segment.tag                      = "Cruise"  
-    segment.analyses.extend(analyses.cruise) 
+    segment.analyses.extend(analyses.forward_flight) 
     segment.initial_battery_state_of_charge                = 1.0
     segment.altitude                 = cruise_altitude
     segment.air_speed                = cruise_speed

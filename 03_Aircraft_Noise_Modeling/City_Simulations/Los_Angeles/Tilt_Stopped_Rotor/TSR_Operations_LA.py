@@ -109,7 +109,7 @@ def main():
         # -------------------------------------
         total_cruise_distance, path_heading, dep_sector, app_sector = compute_route_distances(x1, y1, x2, y2, radius_Vert1, radius_Vert2, dep_heading, app_heading,high_speed_climb_distance)
         
-        vehicle  = vehicle_setup(redesign_rotors= False) 
+        vehicle  = vehicle_setup(redesign_rotors= True) 
         
         # Set up configs
         configs  = configs_setup(vehicle)

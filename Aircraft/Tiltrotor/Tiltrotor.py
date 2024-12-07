@@ -667,7 +667,7 @@ def configs_setup(vehicle):
     #   Cruise Configuration
     # ------------------------------------------------------------------
     config                                            = RCAIDE.Library.Components.Configs.Config(vehicle)
-    config.tag                                        = 'cruise'   
+    config.tag                                        = 'forward_flight'   
     vector_angle                                      = 0.0 * Units.degrees  
     for network in  config.networks: 
         for bus in network.busses: 
