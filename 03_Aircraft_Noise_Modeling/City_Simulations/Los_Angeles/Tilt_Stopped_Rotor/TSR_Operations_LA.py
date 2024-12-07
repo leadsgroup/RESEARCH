@@ -61,12 +61,12 @@ def main():
     aircraft_code                = 'TRS' # CHANGE FOR EACH AIRCRAFT 
     city_code                    = 'LA' 
     cruise_altitude              = 1000*Units.feet
-    high_speed_climb_distance    = 3600
+    high_speed_climb_distance    = 3013.65
     radius_Vert1                 = 3600* Units.feet # circular pattern radius around vertiport 1
     radius_Vert2                 = 3600* Units.feet # circular pattern radius around vertiport 2
     dep_heading                  = 200 * Units.degree # Heading [degrees] of the departure from vertiport 1
     app_heading                  = 90  * Units.degree# Heading [degrees] of the approach to vertiport 2 
-    max_cruise_distance          = 90 * Units.nmi 
+    max_cruise_distance          = 80 * Units.nmi 
     number_of_cpts               = 10  
     
 
@@ -121,9 +121,9 @@ def main():
         mission  = unconverged_mission_setup(number_of_cpts, analyses, radius_Vert1, radius_Vert2, dep_heading, app_heading, dep_sector, app_sector, path_heading, total_cruise_distance,cruise_altitude)        
         missions = missions_setup(mission) 
          
-        if (max_cruise_distance > total_cruise_distance):
+        if (max_cruise_distance > total_cruise_distance) and (0 < total_cruise_distance):
             
-            # evaluate mission, not that it purposely does not converge
+            # evaluate mission, note that it purposely does not converge
             results  = missions.base_mission.evaluate()
              
             N_segs = len(results.segments) 
@@ -220,10 +220,10 @@ def noise_base_analysis(vehicle, origin_coord=[[0, 0]],destination_coord=[[0, 0]
     noise = RCAIDE.Framework.Analyses.Noise.Frequency_Domain_Buildup()   
     noise.vehicle = vehicle
     noise.settings.mean_sea_level_altitude          = False         
-    noise.settings.aircraft_origin_coordinates      = origin_coord  
-    noise.settings.aircraft_destination_coordinates = destination_coord  
-    noise.settings.microphone_x_resolution          = mic_x_res       
-    noise.settings.microphone_y_resolution          = mic_y_res         
+    #noise.settings.aircraft_origin_coordinates      = origin_coord  
+    #noise.settings.aircraft_destination_coordinates = destination_coord  
+    #noise.settings.microphone_x_resolution          = mic_x_res       
+    #noise.settings.microphone_y_resolution          = mic_y_res         
     noise.settings.topography_file                  = topography_file     
     analyses.append(noise)
  
@@ -626,7 +626,7 @@ def noise_mission_setup(number_of_cpts, analyses, radius_Vert1=3600*Units.ft, ra
 # ------------------------------------------------------------------
 #   Baseline Mission Setup
 # ------------------------------------------------------------------
-def unconverged_mission_setup(number_of_cpts, analyses, radius_Vert1=3600*Units.ft, radius_Vert2=3600*Units.ft, dep_heading=200*Units.degrees, app_heading=90*Units.degrees, dep_sector=90*Units.degrees, app_sector=90*Units.degrees, path_heading = 100, level_cruise_distance=10*Units.miles,cruise_altitude=1000*Units.ft): 
+def unconverged_mission_setup(number_of_cpts, analyses, radius_Vert1, radius_Vert2, dep_heading, app_heading, dep_sector, app_sector, path_heading, level_cruise_distance,cruise_altitude): 
     
     # ------------------------------------------------------------------
     #   Initialize the Mission
@@ -679,7 +679,6 @@ def unconverged_mission_setup(number_of_cpts, analyses, radius_Vert1=3600*Units.
                                                                          'prop_rotor_propulsor_4','prop_rotor_propulsor_5','prop_rotor_propulsor_6'],
                                                                         ['lift_rotor_propulsor_1','lift_rotor_propulsor_2','lift_rotor_propulsor_3',
                                                                          'lift_rotor_propulsor_4', 'lift_rotor_propulsor_5', 'lift_rotor_propulsor_6']]
-       unconverged_mission_setup
     mission.append_segment(segment)
     
     # ------------------------------------------------------------------
@@ -705,7 +704,6 @@ def unconverged_mission_setup(number_of_cpts, analyses, radius_Vert1=3600*Units.
                                                                          'prop_rotor_propulsor_4','prop_rotor_propulsor_5','prop_rotor_propulsor_6'],
                                                                         ['lift_rotor_propulsor_1','lift_rotor_propulsor_2','lift_rotor_propulsor_3',
                                                                          'lift_rotor_propulsor_4', 'lift_rotor_propulsor_5', 'lift_rotor_propulsor_6']]
-    # IF NEEDED ADD   segment.assigned_control_variables.body_angle.active             = True 
     mission.append_segment(segment) 
      
     # ------------------------------------------------------------------
