@@ -580,7 +580,7 @@ def noise_mission_setup(number_of_cpts, analyses, radius_Vert1=3600*Units.ft, ra
     # ------------------------------------------------------------------ 
     segment                                               = Segments.Cruise.Constant_Acceleration_Constant_Altitude(base_segment)
     segment.tag                                           = "Horizontal_Transition_Approach"  
-    segment.analyses.extend( analyses.vertical_flight)   
+    segment.analyses.extend( analyses.vertical_transition)   
     segment.air_speed_end                                 = 0  
     segment.acceleration                                  = -1.0
     segment.true_course                                   = dep_heading  
@@ -592,13 +592,14 @@ def noise_mission_setup(number_of_cpts, analyses, radius_Vert1=3600*Units.ft, ra
     
     # define flight controls 
     segment.assigned_control_variables.throttle.active               = True
+    segment.assigned_control_variables.body_angle.active             = True # added this line!!
     segment.assigned_control_variables.throttle.assigned_propulsors  = [['prop_rotor_propulsor_1','prop_rotor_propulsor_2','prop_rotor_propulsor_3',
                                                                          'prop_rotor_propulsor_4','prop_rotor_propulsor_5','prop_rotor_propulsor_6'],
                                                                         ['lift_rotor_propulsor_1','lift_rotor_propulsor_2','lift_rotor_propulsor_3',
                                                                          'lift_rotor_propulsor_4', 'lift_rotor_propulsor_5', 'lift_rotor_propulsor_6']]
     mission.append_segment(segment)   
     
-  #------------------------------------------------------------------------------------------------------------------------------------ 
+    #------------------------------------------------------------------------------------------------------------------------------------ 
     # Vertical Descent 
     #------------------------------------------------------------------------------------------------------------------------------------ 
     segment                                                         = Segments.Vertical_Flight.Descent(base_segment)
@@ -918,7 +919,7 @@ def unconverged_mission_setup(number_of_cpts, analyses, radius_Vert1, radius_Ver
     # ------------------------------------------------------------------ 
     segment                                               = Segments.Cruise.Constant_Acceleration_Constant_Altitude(base_segment)
     segment.tag                                           = "Horizontal_Transition_Approach"  
-    segment.analyses.extend( analyses.vertical_flight)
+    segment.analyses.extend( analyses.vertical_transition)
     del segment.process.converge
     segment.air_speed_end                                 = 0  
     segment.acceleration                                  = -1.0

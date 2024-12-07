@@ -31,7 +31,7 @@ def main():
     aircraft_code             = 'TSR'
     city_code                 = 'LA' 
     cruise_altitude           = 1000*Units.feet 
-    mic_x_res                 = 1600
+    mic_x_res                 = 1200
     mic_y_res                 = 2700
     
     # create data structures to store noise 
@@ -45,9 +45,9 @@ def main():
     E_origin        = np.zeros(len(unique_airports))
     
     processed_filename_list_name =  aircraft_code + '_' + city_code +  '_Single_Flights_Processed' 
-    file_name_dict               =  load(processed_filename_list_name + '.res')
+    #file_name_dict               =  load(processed_filename_list_name + '.res')
     
-    for filename in file_name_dict.filename_list: 
+    for filename in ['Processed_TRS_LA_BUR_LAX_1000ft', 'Processed_TRS_LA_BUR_ONT_1000ft', 'Processed_TRS_LA_ONT_LAX_1000ft', 'Processed_TRS_LA_ONT_BUR_1000ft']:#file_name_dict.filename_list: 
         # load data
 
         origin_code = filename.split('_')[3]
@@ -75,7 +75,7 @@ def main():
     )
     
     # save data 
-    cumulative_processed_filename =  'Cumulative_'  +  aircraft_code + '_' + city_code + '_' + str(int(np.ceil(round(cruise_altitude/Units.feet)))) +'ft'    # Aircraft_City_Frequency_Origin_Destination_Altitude
+    cumulative_processed_filename =  'Cumulative1_'  +  aircraft_code + '_' + city_code + '_' + str(int(np.ceil(round(cruise_altitude/Units.feet)))) +'ft'    # Aircraft_City_Frequency_Origin_Destination_Altitude
     save(cumulative_PND, cumulative_processed_filename + '.res')    
     return     
  

@@ -58,7 +58,7 @@ def main():
 
     mic_x_res                       = 1200
     mic_y_res                       = 2700
-    aircraft_code                   = 'TSR'
+    aircraft_code                   = 'TRS'
     city_code                       = 'LA' 
     cruise_altitude                 = 1000 * Units.feet
     noise_evaluation_pitch          = 150 * Units.feet
@@ -70,7 +70,7 @@ def main():
     processed_filename_list  = []
              
     for filename in file_name_dict.filename_list:  
-        results = load_results(filename + '.res')
+        results = load_results(filename)
         print(f'simulating {filename}')
         origin_code = filename.split('_')[3]
         destination_code = filename.split('_')[4]
@@ -98,12 +98,12 @@ def main():
         processed_filename =  'Processed_'  +  aircraft_code + '_' + city_code + '_' + origin_code + '_' +  destination_code  + '_' + str(int(round(cruise_altitude/Units.feet,0)))+ 'ft'
         
         print(f'saving {filename}')
-        save_results(processed_noise_data, processed_filename + '.res', storage_dir)
+        save_results(processed_noise_data, processed_filename, storage_dir)
         processed_filename_list.append(processed_filename)
         
         processed_filename_list_name =  aircraft_code + '_' + city_code +  '_Single_Flights_Processed'
         F =  Data(filename_list=processed_filename_list)
-        save_results(F, processed_filename_list_name + '.res', storage_dir)
+        save_results(F, processed_filename_list_name, storage_dir)
         
     tf = t.time() 
     print("Total time: "+str(tf-ti))
