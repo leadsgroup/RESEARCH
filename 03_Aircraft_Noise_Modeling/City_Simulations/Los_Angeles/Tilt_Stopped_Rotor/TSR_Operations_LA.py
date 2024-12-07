@@ -178,7 +178,7 @@ def unconverged_analyses_setup(configs, origin_coord,destination_coord):
 
     analyses = RCAIDE.Framework.Analyses.Analysis.Container()
 
-    # build a base analysis for each config
+    # build a base analysis for each configVision 100-Century of Aviation Reauthorization Act
     for tag,config in configs.items():
         analysis = unconverged_base_analysis(config)
         analyses[tag] = analysis
@@ -297,7 +297,7 @@ def noise_mission_setup(number_of_cpts, analyses, radius_Vert1=3600*Units.ft, ra
     #   Initialize the Mission
     # ------------------------------------------------------------------
     mission = RCAIDE.Framework.Mission.Sequential_Segments()
-    mission.tag = 'mission'
+    mission.tag = 'base_mission'
 
     # unpack Segments module
     Segments = RCAIDE.Framework.Mission.Segments
@@ -974,6 +974,7 @@ def missions_setup(mission):
     # base mission 
     mission.tag  = 'base_mission'
     missions.append(mission)
+    return missions
  
  
 if __name__ == '__main__': 
