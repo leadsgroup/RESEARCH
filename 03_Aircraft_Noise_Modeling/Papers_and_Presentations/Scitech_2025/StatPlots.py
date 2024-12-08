@@ -7,6 +7,23 @@ import matplotlib.cm as cm
 from RCAIDE.Framework.Core import  Data
 import scipy.stats as stats
 
+from matplotlib.patches import Rectangle
+from matplotlib.collections import PolyCollection
+from matplotlib.colors import to_rgb
+from matplotlib.legend_handler import HandlerTuple
+
+from scipy.stats import f_oneway
+from statsmodels.stats.multicomp import pairwise_tukeyhsd
+
+from scipy.stats import f_oneway, kruskal, shapiro, levene
+
+import scikit_posthocs as sp
+from sklearn.datasets import load_iris
+
+
+
+
+
 
 race_dictionary = {
     "Total": "B03002001",
@@ -28,7 +45,7 @@ income_dictionary = {
     "$30k to $35k": "B19001007",
     "$35k to $40k": "B19001008",
     "$40k to $45k": "B19001009",
-    "$45k to $45k": "B19001010",
+    "$45k to 50k": "B19001010",
     "$50k to $60k": "B19001011",
     "$60k to $75k": "B19001012",
     "$75k to $100k": "B19001013",
@@ -70,10 +87,16 @@ income_aggregation = {
 
 
 
-data_file_tract = pd.read_csv('HC_Data_Tract_CA.csv')
+
+
+# data_file_tract = pd.read_csv('HC_Data_Tract_CA_ONLY.csv')
+# data_file_tract = pd.read_csv('HC_Data_Tract_LogPOP_Only.csv')
+
+data_file_tract = pd.read_csv('TR_Data_Tract.csv')
+
 
 # Define the relevant columns
-race_columns = ['Asian','Black','Hispanic','American Indian','Pacific Islander', 'White']
+race_columns = ['Asian','Black','Hispanic','Native American','Pacific Islander', 'White']
 
 income_columns =['<50K','50k to 100k','100k to 150k','150k to 200k','200k+']
 income_raw  = list(income_dictionary.keys())[1:]
@@ -93,7 +116,7 @@ def stackedbplot_race(data_frame, column_names, noise_type, save_name,col_names)
         os.mkdir(folder_path)
 
     noise_threshold_1 = 45
-    noise_threshold_2 = 55
+    noise_threshold_2 = 60
 
     data_frame_thresh45 = data_frame[data_frame[noise_type] >= noise_threshold_1]
     data_frame_thresh60 = data_frame[data_frame[noise_type] >= noise_threshold_2]
@@ -127,12 +150,12 @@ def stackedbplot_race(data_frame, column_names, noise_type, save_name,col_names)
         lighter_color = [min(1, c + 0.3) for c in base_color]  
 
         # Plot bars for 45 dB threshold
-        plt.bar(x[idx], values45[column], width=bar_width, color=base_color, label=None if idx > 0 else  r"> 45 dbA $L_{dn}$")
-        plt.bar(x[idx], values2_45[column], width=bar_width, bottom=values45[column], color=lighter_color, label=None if idx > 0 else   r"< 45 dbA $L_{dn}$")
+        plt.bar(x[idx], values45[column], width=bar_width, color=base_color, label=None if idx > 0 else r"> 45 dBA $L_{dn}$")
+        plt.bar(x[idx], values2_45[column], width=bar_width, bottom=values45[column], color=lighter_color, label=None if idx > 0 else   r"< 45 dBA $L_{dn}$")
 
         # Plot bars for 60 dB threshold with hatching
-        plt.bar(x[idx] + bar_width, values60[column], width=bar_width, color=base_color, hatch='//', label=None if idx > 0 else  r"> 65 dbA $L_{dn}$")
-        plt.bar(x[idx] + bar_width, values2_60[column], width=bar_width, bottom=values60[column], color=lighter_color, hatch='//', label=None if idx > 0 else  r" <65 dbA $L_{dn}$")
+        plt.bar(x[idx] + bar_width, values60[column], width=bar_width, color=base_color, hatch='//', label=None if idx > 0 else  r"> 60 dBA $L_{dn}$")
+        plt.bar(x[idx] + bar_width, values2_60[column], width=bar_width, bottom=values60[column], color=lighter_color, hatch='//', label=None if idx > 0 else  r" <60 dBA $L_{dn}$")
 
     # Add labels, title, and legend
     plt.xticks(x+bar_width/2, col_names)  # Set x-tick labels and positions
@@ -141,82 +164,279 @@ def stackedbplot_race(data_frame, column_names, noise_type, save_name,col_names)
     plt.legend(loc='upper center',ncol=2)
 
     # Save plot
-    plot_file_name = os.path.join(folder_path, f'{save_name}{noise_threshold_1}{noise_threshold_2}dB_Plot.png')
+    plot_file_name = os.path.join(folder_path, f'TR_{save_name}{noise_threshold_1}{noise_threshold_2}dB_Plot.png')
     plt.tight_layout()
     plt.savefig(plot_file_name, dpi=1100)
     plt.close()
 
 
 
-def split_violin_plot(data_tract, data_columns, noise, x_axis):
-    folder_path = 'Violin_Plots'
+def split_violin_plot(data_tract, data_columns, noise, x_axis,y_axis,col_names,y_ax):
+    folder_path = 'Violin_Plots_V2'
 
     # Check if the folder exists, and if not, create it
     if not os.path.isdir(folder_path):
         os.mkdir(folder_path)
 
-    noise_thresholds = [45, 55]
+    noise_thresholds = [45,60]
     data=[]
     for threshold in noise_thresholds:
         filtered_tract = data_tract[data_tract[noise] >= threshold]
-        val = filtered_tract[data_columns]
-        val['CA'] = filtered_tract['CA']
+
+        val =filtered_tract[data_columns]
+        val = val.reindex(sorted(val.columns), axis=1)
+        val = val.set_axis(col_names, axis=1)
+        # val['CA'] = filtered_tract['CA']
         val["L_dn"] = filtered_tract["L_dn"]
-        val["L_dnlog(PD)"] = filtered_tract["L_dnlog(PD)"]
         val['threshold'] = threshold
+
         data.append(val)
     data = pd.concat(data)
-    data.to_csv(f'{x_axis}data.csv',index=False)
-    # Create the DataFrame
-    df = pd.DataFrame(data)
+    path_file = 'Data_sets'
+    # Check if the folder exists, and if not, create it
+    if not os.path.isdir(path_file):
+        os.mkdir(path_file)
+    file_path_name = os.path.join(path_file, f'{x_axis}{y_axis}.csv')
+    data = data.apply(pd.to_numeric, errors='coerce') 
+    data.to_csv(file_path_name,index=False)
+
+    df = pd.DataFrame(data).apply(pd.to_numeric, errors='coerce') 
+    
 
     # Reshape the data using melt()
     df_melted = df.melt(
-        id_vars=["threshold", "L_dn","L_dnlog(PD)", "CA"], 
-        value_vars=data_columns, 
+        id_vars=["threshold",'L_dn'],
+        value_vars=col_names, 
         var_name="Race", 
-        value_name="Population"
+        value_name="vals"
     )
-    y_val = ["L_dn","L_dnlog(PD)","CA"]
-    for value in y_val:
-        plt.figure(figsize=(12, 8))
-        sns.violinplot(
-            x="Race", y=value, hue="threshold", 
-            data=df_melted, split=True, inner="quartile", palette="Set2"
-        )
-        plt.ylabel("CA")
-        plt.tight_layout()
-
-        # Save the plot
-        plot_file_name = os.path.join(folder_path, f'violin_plot_{x_axis}{value}.png')
-        plt.tight_layout()
-        plt.savefig(plot_file_name)
-
-    # for threshold in noise_thresholds:
-    #     filtered_bg = data_tract[data_tract[noise] >= threshold]
-
-    #     # merged.to_csv('debug.csv', index=False)
-    #     percentages = filtered_bg['CA']
-    #     percentages['threshold'] = threshold
-    #     results.append(percentages)
-    #     filtered_bg = 0
     
-    # results = pd.concat(results)
-    # results.to_csv('violinplot_results.csv', index=False)
-    # # Reshape the data for plotting (melt into long format)
-    # results_melted = results.melt(id_vars=['threshold'], value_vars=[f"{col}" for col in data_columns], 
-    #                                var_name="variable", value_name="Percentage")
-    # # Plot the split violin plot using seaborn
-    # plt.figure(figsize=(10, 6))
-    # sns.violinplot(x='variable', y='Percentage', hue='threshold', data=results_melted,split=True, inner="quart", palette="Set2")
-    # plt.title("Race Percentage by Noise Threshold")
-    # plt.ylabel("Percentage of Population")
-    # plot_file_name = os.path.join(folder_path, f'pls_vplot_Plot.png')
-    # plt.tight_layout()
-    # plt.savefig(plot_file_name)
+    df_melted = df_melted.dropna()
+
+
+    base_colors = cm.tab20(np.linspace(0, 1, 20))
+    for idx, column in enumerate(col_names):
+        base_color = base_colors[idx*2]
+        lighter_color = [min(1, c + 0.3) for c in base_color]  
+
+
+    # Create a custom color palette
+    plt.figure(figsize=(4,4))
+    plt.rcParams["font.family"] = "Times New Roman"
+    parameters = {'axes.labelsize': 11,
+        'legend.fontsize': 9,
+        'xtick.labelsize': 10,
+        'ytick.labelsize': 10}
+    plt.rcParams.update(parameters)
+    # sns.violinplot(data=df_melted,
+    #     x="Race", y="vals", inner = 'quart', hue="threshold", gap=.5,
+    #     split=True
+    # )
+    # # plt.xticks(col_names) 
+    # plt.ylabel(f'{y_axis}')
+    # plt.xlabel(f'{x_axis}')
+    # # Save the plot
+
+    # Generate the base color palette
+    base_colors = cm.tab20(np.linspace(0, 1, 20))
+
+    # Define the column names or categories you're working with
+    col_names = df_melted['Race'].unique()
+
+    # Create alternating colors (dark, light for each pair)
+    custom_palette = []
+    for idx, column in enumerate(col_names):
+        base_color = base_colors[idx * 2]         # Darker color
+        lighter_color = [min(1, c + 0.3) for c in base_color]  # Lighter version of the dark color
+        custom_palette.extend([base_color, lighter_color])    # Append both colors
+
+    # Set plot parameters
+    plt.figure(figsize=(4, 4))
+    plt.rcParams["font.family"] = "Times New Roman"
+    parameters = {
+        'axes.labelsize': 11,
+        'legend.fontsize': 9,
+        'xtick.labelsize': 10,
+        'ytick.labelsize': 10
+    }
+    plt.rcParams.update(parameters)
+
+    # Create the violin plot using the custom palette
+    ax = sns.violinplot(
+        data=df_melted,
+        x="Race", y="vals", inner='quart', hue="threshold", gap=.1,
+        split=True, palette=custom_palette
+    )
+
+    plt.ylabel(f'{y_ax}')
+    plt.xlabel(f'{x_axis}')
+
+    # plt.ylabel(r'$L_{dn}$')
+    # plt.xlabel(r'$L_{dn}$')
+
+    handles = []
+    for ind, violin in enumerate(ax.findobj(PolyCollection)):
+        rgb = to_rgb(custom_palette[ind])
+        if ind % 2 != 0:  # Lighten for the second split
+            rgb = 0.5 + 0.5 * np.array(rgb)
+        violin.set_facecolor(rgb)
+        handles.append(Rectangle((0, 0), 0, 0, facecolor=rgb, edgecolor='black'))
+
+    ax.legend(
+        # handles=[tuple(handles[::2]), tuple(handles[1::2])],  # Group dark and light shades
+        labels=[r"> 45 dBA $L_{dn}$",r"> 60 dBA $L_{dn}$"],
+        handlelength=2,
+        handler_map={tuple: HandlerTuple(ndivide=None, pad=0)},
+        loc='upper left'
+    )
+    # ax.legend(handles=[tuple(handles)], labels=[r"> 45 dBA $L_{dn}$"], loc='upper left',handler_map={tuple: HandlerTuple(ndivide=None, pad=0)} )
+
+    plot_file_name = os.path.join(folder_path, f'TRviolin_plot_{x_axis}{y_axis}.png')
+    plt.tight_layout()
+    plt.savefig(plot_file_name,dpi=800)
+
+
+    # df_melted = df_melted.dropna()
+
+    # groups = [group['vals'] for _, group in df_melted.groupby(['Race', 'threshold'])]
+    # # f_statistic, p_value = f_oneway(*groups)
+    # stat, p_value = kruskal(*groups)
+    # # stat, p_value = f_oneway(*groups)
+
+
+
+    # groups = []
+    # group_labels = []
+
+    # for (race, threshold), group in df_melted.groupby(['Race', 'threshold']):
+    #     groups.append(group['vals'].values)
+    #     group_labels.append(f"Race {race}, threshold {threshold}")
+
+    # # Directory to save the plots
+    # output_dir = "plots"
+    # os.makedirs(output_dir, exist_ok=True)
+
+
+    # df_melted['group'] = df_melted['Race'] + df_melted['threshold'].astype(str)
+
+    # anova_results = {
+    # 'KWF-statistic': [stat],
+    # 'p-value': [p_value]
+    # }
+
+    # print(x_axis,anova_results)
+    # # Convert to a DataFrame for easier export
+    # anova_df = pd.DataFrame(anova_results)
+
+
+    # df_melted['group'] = df_melted['Race'] + df_melted['threshold'].astype(str)
+    # dunn_p_values = sp.posthoc_dunn(df_melted, val_col='vals', group_col='group', p_adjust='holm')
+
+    # dunn_p_values_df = pd.DataFrame(dunn_p_values)
+
+    # # Save to a CSV file
+    # # dunn_p_values_df.to_csv(output_file, index=True)
+
+    # anova_df = pd.DataFrame(anova_results)
+    # # anova_df.to_csv(anova_file, index=False)
+
+    # # Combine Dunn's and ANOVA results into one file (optional)
+    # combined_file = os.path.join(path_file,f"HC_{x_axis}combined_stat_results.csv")
+
+    # with open(combined_file, 'w') as f:
+    #     f.write("KWF Results\n")
+    #     anova_df.to_csv(f, index=False)
+    #     f.write("\nDunn's Test Results\n")
+    #     dunn_p_values_df.to_csv(f, index=True)
+
+def stats_analysis(data_tract, data_columns, noise, x_axis,y_axis,col_names,ac_type):
+
+    noise_thresholds = [45]
+    data=[]
+    for threshold in noise_thresholds:
+        filtered_tract = data_tract[data_tract[noise] >= threshold]
+
+        val =filtered_tract[data_columns]
+        val = val.reindex(sorted(val.columns), axis=1)
+        val = val.set_axis(col_names, axis=1)
+        # val['CA'] = filtered_tract['CA']
+        val["L_dn"] = filtered_tract["L_dn"]
+        val['threshold'] = threshold
+
+        data.append(val)
+    data = pd.concat(data)
+    path_file = 'Data_sets'
+    # Check if the folder exists, and if not, create it
+    if not os.path.isdir(path_file):
+        os.mkdir(path_file)
+    file_path_name = os.path.join(path_file, f'{x_axis}{y_axis}.csv')
+    data = data.apply(pd.to_numeric, errors='coerce') 
+    data.to_csv(file_path_name,index=False)
+
+    df = pd.DataFrame(data).apply(pd.to_numeric, errors='coerce') 
+    
+
+    # Reshape the data using melt()
+    df_melted = df.melt(
+        id_vars=["threshold",'L_dn'],
+        value_vars=col_names, 
+        var_name="Race", 
+        value_name="vals"
+    )
+    
+    df_melted = df_melted.dropna()
+
+    groups = [group['vals'] for _, group in df_melted.groupby(['Race', 'threshold'])]
+    # f_statistic, p_value = f_oneway(*groups)
+    stat, p_value = kruskal(*groups)
+    # stat, p_value = f_oneway(*groups)
+
+
+
+    groups = []
+    group_labels = []
+
+    for (race, threshold), group in df_melted.groupby(['Race', 'threshold']):
+        groups.append(group['vals'].values)
+        group_labels.append(f"Race {race}, threshold {threshold}")
+
+    # Directory to save the plots
+    output_dir = "plots"
+    os.makedirs(output_dir, exist_ok=True)
+
+
+
+    stat_results = {
+    'KWF-statistic': [stat],
+    'p-value': [p_value]
+    }
+
+    print(x_axis,stat_results)
+    # Convert to a DataFrame for easier export
+    anova_df = pd.DataFrame(stat_results)
+
+
+    df_melted['group'] = df_melted['Race'] + df_melted['threshold'].astype(str)
+    df_melted.to_csv(f"{ac_type}_{x_axis}df_melted.csv",index=False)
+    dunn_p_values = sp.posthoc_dunn(df_melted, val_col='vals', group_col='group', p_adjust='holm')
+
+    dunn_p_values_df = pd.DataFrame(dunn_p_values)
+
+
+    # Combine Dunn's and ANOVA results into one file (optional)
+    combined_file = os.path.join(path_file,f"{ac_type}_{x_axis}combined_stat_results.csv")
+
+    with open(combined_file, 'w') as f:
+        f.write("KWF Results\n")
+        anova_df.to_csv(f, index=False)
+        f.write("\nDunn's Test Results\n")
+        dunn_p_values_df.to_csv(f, index=True)
+
 
 #------------------------#
 col_names_race = ['Asian','Black','Hisp.','Nat.\nAmer.','Pac.\nIsld.', 'White']
+# col_names_race = ['Asian','Black','Hisp.','NatAmer','PacIsld', 'White']
+
 col_names_inc = ['<50K','50k-100k','100k-150k','150k-200k','200k+']
 col_names_struct = ['Churches','Medical\nCenters','Schools']
 
@@ -224,45 +444,60 @@ col_names_struct = ['Churches','Medical\nCenters','Schools']
 # stackedbplot_race(data_file_tract,income_columns,'L_dn','Income',col_names_inc)
 # stackedbplot_race(data_file_tract,struct_columns,'L_dn','Structures',col_names_struct)
 
-split_violin_plot(data_file_tract,race_columns,'L_dn','Race')
-split_violin_plot(data_file_tract,income_columns,'L_dn','Income')
-split_violin_plot(data_file_tract,struct_columns,'L_dn','Structures')
 
 
-# folder_path = 'Bar_Plots'
+# race_columns = ['Asian_CA','Black_CA','Hispanic_CA','Native American_CA','Pacific Islander_CA', 'White_CA']
+# income_columns =['<50K_CA','50k to 100k_CA','100k to 150k_CA','150k to 200k_CA','200k+_CA']
 
-# # Check if the folder exists, and if not, create it
-# if not os.path.isdir(folder_path):
-#     os.mkdir(folder_path)
+race_columns = ['Asian_LogPOP','Black_LogPOP','Hispanic_LogPOP','Native American_LogPOP','Pacific Islander_LogPOP', 'White_LogPOP']
+income_columns =['<50K_LogPOP','50k to 100k_LogPOP','100k to 150k_LogPOP','150k to 200k_LogPOP','200k+_LogPOP']
 
-# noise_thresholds = [45, 65]
-# data=[]
-# for threshold in noise_thresholds:
-#     filtered_tract = data_file_tract[data_file_tract['L_dn'] >= threshold]
-#     filtered_tract['threshold'] = threshold
-#     data.append(filtered_tract)
-# data = pd.concat(data)
-# # Create the DataFrame
-# df = pd.DataFrame(data)
 
-# # Reshape the data using melt()
-# df_melted = df.melt(
-#     id_vars=["threshold", "CA"], 
-#     value_vars=["Asian", "Black", "Hispanic", "American Indian", "Pacific Islander", "White"], 
-#     var_name="Race", 
-#     value_name="Population"
-# )
-# print(df_melted)
-# # Plot the split violin plot with CA as the y-axis
-# plt.figure(figsize=(12, 8))
-# sns.violinplot(
-#     x="Race", y="CA", hue="threshold", 
-#     data=df_melted, split=True, inner="quartile", palette="Set2"
-# )
-# plt.ylabel("CA")
-# plt.xlabel("Race")
-# plt.title("Split Violin Plot: CA by Race and Noise Thresholds")
-# plt.tight_layout()
+# files= ['HC_Raw_Data_Tract.csv','TR_Raw_Data_Tract.csv']
+files= ['TR_Raw_Data_Tract.csv']
 
-# # Show and save the plot
-# plt.savefig("split_violin_plot_ca.png")
+# y_axis_list = ['CA']
+# y_ax_label = ['CA']
+
+y_axis_list = ['Log(PD)L_dn']
+y_ax_label = [r'$L_{dn}\cdot log_{10}(PD)$']
+ac_list= ['HC','TR']
+i=0
+for file in files:
+    data_file_tract = pd.read_csv(file)
+    # stats_analysis(data_file_tract,race_columns,'L_dn','Race',y_axis_list[0],col_names_race,ac_list[i])
+    
+
+    split_violin_plot(data_file_tract,race_columns,'L_dn','Race',y_axis_list[i],col_names_race,y_ax_label[i])
+    split_violin_plot(data_file_tract,income_columns,'L_dn','Income ($)',y_axis_list[i],col_names_inc,y_ax_label[i])
+    # split_violin_plot(data_file_tract,race_columns,'L_dn','L_dn',['L_dn'],col_names_race,'L_dn')
+
+    i+=1
+
+#show the entire table
+#have a table statically singifcant
+#True false - 
+
+# % Please add the following required packages to your document preamble:
+# % \usepackage{multirow}
+# % \usepackage[table,xcdraw]{xcolor}
+# % Beamer presentation requires \usepackage{colortbl} instead of \usepackage[table,xcdraw]{xcolor}
+# \begin{table}[]
+# \begin{tabular}{|c|c|cccc|cccc|}
+# \hline
+#  &  & \multicolumn{4}{c|}{\textbf{\textgreater{}45 dBA}} & \multicolumn{4}{c|}{\textbf{\textgreater{}60dBA}} \\ \cline{3-10} 
+# \multirow{-2}{*}{\textbf{Aircraft}} & \multirow{-2}{*}{\textbf{Race}} & \multicolumn{1}{c|}{Asian} & \multicolumn{1}{c|}{Black} & \multicolumn{1}{c|}{Hispanic} & White & \multicolumn{1}{c|}{Asian} & \multicolumn{1}{c|}{Black} & \multicolumn{1}{c|}{Hispanic} & White \\ \hline
+#  & Asian & \multicolumn{1}{c|}{} & \multicolumn{1}{c|}{} & \multicolumn{1}{c|}{} &  & \multicolumn{1}{c|}{} & \multicolumn{1}{c|}{} & \multicolumn{1}{c|}{} &  \\ \cline{2-10} 
+#  & Black & \multicolumn{1}{c|}{} & \multicolumn{1}{c|}{} & \multicolumn{1}{c|}{} &  & \multicolumn{1}{c|}{} & \multicolumn{1}{c|}{} & \multicolumn{1}{c|}{} &  \\ \cline{2-10} 
+#  & Hispanic & \multicolumn{1}{c|}{} & \multicolumn{1}{c|}{} & \multicolumn{1}{c|}{} &  & \multicolumn{1}{c|}{} & \multicolumn{1}{c|}{} & \multicolumn{1}{c|}{} &  \\ \cline{2-10} 
+# \multirow{-4}{*}{Stop Tilt Rotor} & White & \multicolumn{1}{c|}{} & \multicolumn{1}{c|}{} & \multicolumn{1}{c|}{} &  & \multicolumn{1}{c|}{} & \multicolumn{1}{c|}{} & \multicolumn{1}{c|}{} &  \\ \hline
+#  & Asian & \multicolumn{1}{c|}{\cellcolor[HTML]{FFCCC9}FALSE} & \multicolumn{1}{c|}{\cellcolor[HTML]{FFCCC9}FALSE} & \multicolumn{1}{c|}{\cellcolor[HTML]{FFCCC9}FALSE} & \cellcolor[HTML]{FFCCC9}FALSE & \multicolumn{1}{c|}{N/A} & \multicolumn{1}{c|}{N/A} & \multicolumn{1}{c|}{N/A} & N/A \\ \cline{2-10} 
+#  & Black & \multicolumn{1}{c|}{\cellcolor[HTML]{FFCCC9}FALSE} & \multicolumn{1}{c|}{\cellcolor[HTML]{FFCCC9}FALSE} & \multicolumn{1}{c|}{\cellcolor[HTML]{FFCCC9}FALSE} & \cellcolor[HTML]{FFCCC9}FALSE & \multicolumn{1}{c|}{N/A} & \multicolumn{1}{c|}{N/A} & \multicolumn{1}{c|}{N/A} & N/A \\ \cline{2-10} 
+#  & Hispanic & \multicolumn{1}{c|}{\cellcolor[HTML]{FFCCC9}FALSE} & \multicolumn{1}{c|}{\cellcolor[HTML]{FFCCC9}FALSE} & \multicolumn{1}{c|}{\cellcolor[HTML]{FFCCC9}FALSE} & \cellcolor[HTML]{FFCCC9}FALSE & \multicolumn{1}{c|}{N/A} & \multicolumn{1}{c|}{N/A} & \multicolumn{1}{c|}{N/A} & N/A \\ \cline{2-10} 
+# \multirow{-4}{*}{Tilt Rotor} & White & \multicolumn{1}{c|}{\cellcolor[HTML]{FFCCC9}FALSE} & \multicolumn{1}{c|}{\cellcolor[HTML]{FFCCC9}FALSE} & \multicolumn{1}{c|}{\cellcolor[HTML]{FFCCC9}FALSE} & \cellcolor[HTML]{FFCCC9}FALSE & \multicolumn{1}{c|}{N/A} & \multicolumn{1}{c|}{N/A} & \multicolumn{1}{c|}{N/A} & N/A \\ \hline
+#  & Asian & \multicolumn{1}{c|}{\cellcolor[HTML]{FFCCC9}FALSE} & \multicolumn{1}{c|}{\cellcolor[HTML]{FFCCC9}FALSE} & \multicolumn{1}{c|}{\cellcolor[HTML]{9AFF99}TRUE} & \cellcolor[HTML]{FFCCC9}FALSE & \multicolumn{1}{c|}{\cellcolor[HTML]{FFCCC9}FALSE} & \multicolumn{1}{c|}{\cellcolor[HTML]{FFCCC9}FALSE} & \multicolumn{1}{c|}{\cellcolor[HTML]{9AFF99}TRUE} & \cellcolor[HTML]{FFCCC9}FALSE \\ \cline{2-10} 
+#  & Black & \multicolumn{1}{c|}{\cellcolor[HTML]{FFCCC9}FALSE} & \multicolumn{1}{c|}{\cellcolor[HTML]{FFCCC9}FALSE} & \multicolumn{1}{c|}{\cellcolor[HTML]{9AFF99}TRUE} & \cellcolor[HTML]{FFCCC9}FALSE & \multicolumn{1}{c|}{\cellcolor[HTML]{FFCCC9}FALSE} & \multicolumn{1}{c|}{\cellcolor[HTML]{FFCCC9}FALSE} & \multicolumn{1}{c|}{\cellcolor[HTML]{9AFF99}TRUE} & \cellcolor[HTML]{FFCCC9}FALSE \\ \cline{2-10} 
+#  & Hispanic & \multicolumn{1}{c|}{\cellcolor[HTML]{9AFF99}TRUE} & \multicolumn{1}{c|}{\cellcolor[HTML]{9AFF99}TRUE} & \multicolumn{1}{c|}{\cellcolor[HTML]{FFCCC9}FALSE} & \cellcolor[HTML]{FFCCC9}FALSE & \multicolumn{1}{c|}{\cellcolor[HTML]{9AFF99}TRUE} & \multicolumn{1}{c|}{\cellcolor[HTML]{9AFF99}TRUE} & \multicolumn{1}{c|}{\cellcolor[HTML]{FFCCC9}FALSE} & \cellcolor[HTML]{FFCCC9}FALSE \\ \cline{2-10} 
+# \multirow{-4}{*}{Hexacopter} & White & \multicolumn{1}{c|}{\cellcolor[HTML]{FFCCC9}FALSE} & \multicolumn{1}{c|}{\cellcolor[HTML]{FFCCC9}FALSE} & \multicolumn{1}{c|}{\cellcolor[HTML]{FFCCC9}FALSE} & \cellcolor[HTML]{FFCCC9}FALSE & \multicolumn{1}{c|}{\cellcolor[HTML]{FFCCC9}FALSE} & \multicolumn{1}{c|}{\cellcolor[HTML]{FFCCC9}FALSE} & \multicolumn{1}{c|}{\cellcolor[HTML]{FFCCC9}FALSE} & \cellcolor[HTML]{FFCCC9}FALSE \\ \hline
+# \end{tabular}
+# \end{table}

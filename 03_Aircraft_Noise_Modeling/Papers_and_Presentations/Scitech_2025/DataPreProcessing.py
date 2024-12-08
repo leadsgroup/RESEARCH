@@ -10,7 +10,7 @@ race_dictionary = {
     "B03002001": "Total",
     "B03002003": "White",
     "B03002004": "Black",
-    "B03002005": "American Indian",
+    "B03002005": "Native American",
     "B03002006": "Asian",
     "B03002007": "Pacific Islander",
     "B03002012": "Hispanic"
