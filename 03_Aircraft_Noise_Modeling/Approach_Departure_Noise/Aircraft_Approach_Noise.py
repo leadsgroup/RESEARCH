@@ -46,7 +46,7 @@ def main():
     radius_Vert2                     = 3600* Units.feet # circular pattern radius around vertiport 2
     dep_heading                      = 0   * Units.degree # Heading [degrees] of the departure from vertiport 1
     app_heading                      = 180  * Units.degree # Heading [degrees] of the approach to vertiport 2  
-    number_of_cpts                   = 5  
+    number_of_cpts                   = 12  
     dep_sector                       = 180  * Units.degree      
     app_sector                       = 180  * Units.degree      
     path_heading                     = 270 *  Units.degree
@@ -154,8 +154,8 @@ def base_analysis(vehicle):
     #  Noise Analysis   
     noise = RCAIDE.Framework.Analyses.Noise.Frequency_Domain_Buildup()   
     noise.vehicle = vehicle    
-    noise.settings.noise_hemisphere_phi_angles   = np.linspace(-np.pi / 2,np.pi / 2,24)
-    noise.settings.noise_hemisphere_theta_angles = np.linspace(-1 * np.pi, 1*np.pi,12)
+    noise.settings.noise_hemisphere_phi_angles   = np.linspace(0,np.pi / 2,12)
+    noise.settings.noise_hemisphere_theta_angles = np.linspace(-1 * np.pi, 1*np.pi,24)
     analyses.append(noise)
  
     # ------------------------------------------------------------------
@@ -282,12 +282,11 @@ def HC_noise_mission_setup(number_of_cpts, analyses, radius_Vert1=3600*Units.ft,
     #------------------------------------------------------------------------------------------------------------------------------------ 
     segment                                               = Segments.Cruise.Curved_Constant_Radius_Constant_Speed_Constant_Altitude(base_segment)
     segment.tag                                           = "Departure_Pattern_Curve"     
-    segment.analyses.extend(analyses.climb) 
-    segment.state.numerics.number_of_control_points       = 16
+    segment.analyses.extend(analyses.climb)  
     segment.altitude    = 500.0 * Units.ft  
     segment.air_speed   = pattern_speed       
     segment.turn_radius = radius_Vert1  
-    segment.true_course = dep_heading  
+    segment.true_course = dep_heading + (90 * Units.degree)
     segment.turn_angle  = dep_sector
     
     # define flight dynamics to model 
@@ -338,8 +337,7 @@ def HC_noise_mission_setup(number_of_cpts, analyses, radius_Vert1=3600*Units.ft,
     # ------------------------------------------------------------------ 
     segment                                  = Segments.Cruise.Constant_Speed_Constant_Altitude(base_segment)
     segment.tag                              = "Cruise"  
-    segment.analyses.extend(analyses.forward_flight)  
-    segment.state.numerics.number_of_control_points   = 3
+    segment.analyses.extend(analyses.forward_flight)   
     segment.altitude                         = cruise_altitude      
     segment.air_speed                        = cruise_speed    
     segment.distance                         = level_cruise_distance
@@ -447,12 +445,11 @@ def TSR_noise_mission_setup(number_of_cpts, analyses, radius_Vert1=3600*Units.ft
     #------------------------------------------------------------------------------------------------------------------------------------ 
     segment                                               = Segments.Cruise.Curved_Constant_Radius_Constant_Speed_Constant_Altitude(base_segment)
     segment.tag                                           = "Departure_Pattern_Curve"    
-    segment.analyses.extend( analyses.forward_flight ) 
-    segment.state.numerics.number_of_control_points       = 16
+    segment.analyses.extend( analyses.forward_flight )  
     segment.altitude    = 500. * Units.ft
     segment.air_speed   = pattern_speed
     segment.turn_radius = radius_Vert1
-    segment.true_course = dep_heading  
+    segment.true_course = dep_heading + (90 * Units.degree)
     segment.turn_angle  = dep_sector
     
     # define flight dynamics to model 
@@ -510,7 +507,6 @@ def TSR_noise_mission_setup(number_of_cpts, analyses, radius_Vert1=3600*Units.ft
     segment                                                          = Segments.Cruise.Constant_Speed_Constant_Altitude(base_segment)
     segment.tag                                                      = "Cruise"  
     segment.analyses.extend( analyses.forward_flight )                    
-    segment.state.numerics.number_of_control_points       = 3         
     segment.altitude                                                 = 1000.0 * Units.ft  
     segment.air_speed                                                = cruise_speed
     segment.distance                                                 = level_cruise_distance
@@ -627,11 +623,10 @@ def TR_noise_mission_setup(number_of_cpts, analyses, radius_Vert1=3600*Units.ft,
     #------------------------------------------------------------------------------------------------------------------------------------ 
     segment                                               = Segments.Cruise.Curved_Constant_Radius_Constant_Speed_Constant_Altitude(base_segment)
     segment.tag                                           = "Departure_Pattern_Curve"   
-    segment.analyses.extend( analyses.high_speed_climb_transition )   
-    segment.state.numerics.number_of_control_points       = 16        
+    segment.analyses.extend( analyses.high_speed_climb_transition )    
     segment.air_speed   = pattern_speed
     segment.turn_radius = radius_Vert1
-    segment.true_course = dep_heading 
+    segment.true_course = dep_heading + (90 * Units.degree)
     segment.turn_angle  = dep_sector
     segment.altitude    = 500 * Units.feet
     
@@ -664,8 +659,7 @@ def TR_noise_mission_setup(number_of_cpts, analyses, radius_Vert1=3600*Units.ft,
     # ------------------------------------------------------------------ 
     segment                           = Segments.Climb.Linear_Speed_Constant_Rate(base_segment)
     segment.tag                       = "Climb"  
-    segment.analyses.extend(analyses.cruise) 
-    segment.state.numerics.number_of_control_points       = 3
+    segment.analyses.extend(analyses.cruise)  
     segment.climb_rate                = 500. * Units['ft/min']
     segment.air_speed_start           = 90.   * Units.kts 
     segment.air_speed_end             = cruise_speed

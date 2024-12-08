@@ -28,16 +28,16 @@ def main():
     # Universal Plot Settings 
     plt.rcParams['axes.linewidth'] = 1.
     plt.rcParams["font.family"] = "Times New Roman"
-    parameters = {'axes.labelsize': 28,
-                  'xtick.labelsize': 24,
-                  'ytick.labelsize': 24,
-                  'axes.titlesize': 28}
+    parameters = {'axes.labelsize': 24,
+                  'xtick.labelsize': 22,
+                  'ytick.labelsize': 22,
+                  'axes.titlesize': 24}
     plt.rcParams.update(parameters)
     plot_parameters                  = Data()
     plot_parameters.line_width       = 3 
     plot_parameters.line_style       = '-' 
-    plot_parameters.figure_width     = 10 
-    plot_parameters.figure_height    = 7 
+    plot_parameters.figure_width     = 7 
+    plot_parameters.figure_height    = 5 
     plot_parameters.marker_size      = 10 
     plot_parameters.legend_font_size = 20 
     plot_parameters.plot_grid        = True   
@@ -66,11 +66,17 @@ def main():
         axis     = fig.add_subplot(1,1,1)       
             
         SPL = results.L_max           
-        Y   = results.microphone_locations[:, 1].reshape(432,432)
-        X   = results.microphone_locations[:, 0].reshape(432,432)
+        Y   = results.microphone_locations[:, 1].reshape(300,300)
+        X   = results.microphone_locations[:, 0].reshape(300,300)
           
-        levs                = np.linspace(35,100,14)   
-        CS                  = axis.contourf(X/Units.feet , Y/Units.feet, SPL, levels  = levs, cmap=plt.cm.jet, extend='both')   
+        levs                = np.linspace(30,100,15)   
+        CS                  = axis.contourf(X/Units.feet , Y/Units.feet, SPL, levels  = levs, cmap=plt.cm.jet)
+        
+        levs2 = np.array([45,65])
+        CS2 = axis.contour(X/Units.feet , Y/Units.feet, SPL, levels=levs2, linewidths=1, colors='k') 
+            
+            
+        axis.clabel(CS2, fontsize=20)
         cbar                = fig.colorbar(CS)
         cbar.ax.set_ylabel('L$_{Amax}$ [dBA]', rotation =  90)      
         axis.set_xlabel('x [ft]')
@@ -78,8 +84,32 @@ def main():
         
         axis.grid(False)  
         axis.minorticks_on()     
-        plt.tight_layout()
-    
+        plt.tight_layout() 
+
+         
+        # calculate position and direction vectors:
+        x_pos = results.trajectory[:,0] / Units.feet
+        y_pos = results.trajectory[:,1] / Units.feet
+        
+        x0_pos = x_pos[:-1] 
+        x1_pos = x_pos[1:] 
+        y0_pos = y_pos[:-1] 
+        y1_pos = y_pos[1:] 
+        xpos = (x0_pos+x1_pos)/2
+        ypos = (y0_pos+y1_pos)/2
+        xdir = x1_pos-x0_pos
+        ydir = y1_pos-y0_pos  
+        axis.plot(x_pos,y_pos ,  color = 'w', linewidth = 1)
+        axis.set_xlim([-7500, 7500])
+        axis.set_ylim([-7500, 7500])
+        
+        # plot arrow on each line:
+        arrow_i =  1
+        for X_pos,Y_pos,dX_pos,dY_pos in zip(xpos, ypos, xdir, ydir):
+            if (arrow_i % 50) ==  0:
+                axis.arrow(X_pos,Y_pos, dX_pos,dY_pos, head_width=500, head_length=500, fc='w', ec='w')
+            arrow_i += 1
+ 
         if save_figure:
             safe_filename = fig_name
             plt.savefig(safe_filename + filetype, dpi=600)  

@@ -42,7 +42,7 @@ def read_flight_simulation_results(results, baseline_results, aircraft_origin_co
     noise_results.time                    = np.zeros((N_segs,N_cpts,1 )) 
     noise_results.segment_length          = np.zeros((N_segs,1)) 
     noise_results.position_vector         = np.zeros((N_segs,N_cpts,3 )) 
-    noise_results.hemisphere_SPL_dBA      = np.zeros((N_segs,N_cpts, 72)) 
+    noise_results.hemisphere_SPL_dBA      = np.zeros((N_segs,N_cpts,len(settings.noise_hemisphere_phi_angles) * len( settings.noise_hemisphere_theta_angles))) 
     
     # Step 5: loop through segments and store noise 
     for seg in range(N_segs):  
@@ -97,7 +97,7 @@ def approach_departure_flight_simulation_results(results):
     noise_results.time                    = np.zeros((N_segs,N_cpts,1 )) 
     noise_results.segment_length          = np.zeros((N_segs,1)) 
     noise_results.position_vector         = np.zeros((N_segs,N_cpts,3 )) 
-    noise_results.hemisphere_SPL_dBA      = np.zeros((N_segs,N_cpts, 72)) 
+    noise_results.hemisphere_SPL_dBA      = np.zeros((N_segs,N_cpts,len(settings.noise_hemisphere_phi_angles) * len( settings.noise_hemisphere_theta_angles))) 
     
     # Step 5: loop through segments and store noise 
     for seg in range(N_segs):  
@@ -220,7 +220,7 @@ def post_process_noise_data(noise_results, topography_file ,  flight_times, time
             time_step =  np.array([noise_time[i]])
             current_position,locs,R,pts  = compute_relative_noise_evaluation_locations(mean_sea_level_altitude,time_step,aircraft_origin_location,microphone_locations,position_vector,time,number_of_microphone_in_stencil) 
             
-            Aircraft_pos[i] = current_position
+            Aircraft_pos[idx] = current_position
             
             
             # Step 5.2.2 :Noise interpolation             
@@ -386,7 +386,7 @@ def post_process_approach_departure_noise_data(noise_results, number_of_micropho
             time_step =  np.array([noise_time[i]])
             current_position,locs,R,pts  = compute_relative_noise_evaluation_locations(mean_sea_level_altitude,time_step,aircraft_origin_location,microphone_locations,position_vector,time,number_of_microphone_in_stencil) 
             
-            Aircraft_pos[i] = current_position
+            Aircraft_pos[idx] = current_position
             
             
             # Step 5.2.2 :Noise interpolation             
@@ -658,7 +658,7 @@ def compute_noise_metrics(noise_data, flight_times,time_period):
     
     # Count up number of flights during and after the restriction period.
     for i in range(number_of_flights):
-        fl_time = float(flight_times[i].split(':')[0])*60*60 +  float(flight_times[i].split(':')[1])*60 +  float(flight_times[i].split(':')[2]) + flight_time
+        fl_time = float(flight_times[i].split(':')[0])*60*60 +  float(flight_times[i].split(':')[1])*60 +  flight_time #float(flight_times[i].split(':')[2]) + flight_time
         if fl_time[-1] < t_7am:
             number_of_penalty_flights += 1
         elif fl_time[0] > t_10pm:

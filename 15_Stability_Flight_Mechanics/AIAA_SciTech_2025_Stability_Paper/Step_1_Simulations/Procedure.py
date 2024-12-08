@@ -118,13 +118,43 @@ def longitudinal_static_stability_and_drag_post_process(nexus):
     summary.M_x_residual      =  segment_results.state.residuals.moment_x[0,0] 
     summary.M_y_residual      =  segment_results.state.residuals.moment_y[0,0] 
     summary.M_z_residual      =  segment_results.state.residuals.moment_z[0,0]  
+    summary.CN_beta           = segment_results.conditions.static_stability.derivatives.CN_beta[0,0]
+    summary.CL_beta           = segment_results.conditions.static_stability.derivatives.CL_beta[0,0]
+    
  
+
     if np.count_nonzero(vehicle.mass_properties.moments_of_inertia.tensor) > 0:  
-        summary.phugoid_damping_ratio       = segment_results.conditions.dynamic_stability.LongModes.phugoidDamping[0,0] 
-        summary.short_period_damping_ratio  = segment_results.conditions.dynamic_stability.LongModes.shortPeriodDamping[0,0] 
-        summary.dutch_roll_frequency        = segment_results.conditions.dynamic_stability.LatModes.dutchRollFreqHz[0,0]* (2 * np.pi)  
-        summary.dutch_roll_damping_ratio    = segment_results.conditions.dynamic_stability.LatModes.dutchRollDamping[0,0]
-        summary.spiral_doubling_time        = segment_results.conditions.dynamic_stability.LatModes.spiralTimeDoubleHalf[0,0] 
+        summary.phugoid_damping_ratio                = segment_results.conditions.dynamic_stability.LongModes.phugoidDamping[0,0] 
+        summary.short_period_damping_ratio           = segment_results.conditions.dynamic_stability.LongModes.shortPeriodDamping[0,0] 
+        summary.dutch_roll_frequency                 = segment_results.conditions.dynamic_stability.LatModes.dutchRollFreqHz[0,0]* (2 * np.pi)  
+        summary.dutch_roll_damping_ratio             = segment_results.conditions.dynamic_stability.LatModes.dutchRollDamping[0,0]
+        summary.spiral_doubling_time                 = segment_results.conditions.dynamic_stability.LatModes.spiralTimeDoubleHalf[0,0] 
+        summary.longmodes1                            = segment_results.conditions.dynamic_stability.LongModes.LongModes[0,0]
+        summary.longmodes2                            = segment_results.conditions.dynamic_stability.LongModes.LongModes[0,1]
+        summary.longmodes3                            = segment_results.conditions.dynamic_stability.LongModes.LongModes[0,2]
+        summary.longmodes4                            = segment_results.conditions.dynamic_stability.LongModes.LongModes[0,3]
+        summary.phugoidfreq                          = segment_results.conditions.dynamic_stability.LongModes.phugoidFreqHz[0,0]
+        summary.shortPeriodFreqHz                   = segment_results.conditions.dynamic_stability.LongModes.shortPeriodFreqHz[0,0]
+        summary.phugoidtime                         =              segment_results.conditions.dynamic_stability.LongModes.phugoidTimeDoubleHalf[0,0]
+        summary.shortPeriodTime                     =          segment_results.conditions.dynamic_stability.LongModes.shortPeriodTimeDoubleHalf[0,0]
+
+
+
+        summary.latmodes1                             = segment_results.conditions.dynamic_stability.LatModes.LatModes[0,0]
+        summary.latmodes2                             = segment_results.conditions.dynamic_stability.LatModes.LatModes[0,1]
+        summary.latmodes3                             = segment_results.conditions.dynamic_stability.LatModes.LatModes[0,2]
+        summary.latmodes4                             = segment_results.conditions.dynamic_stability.LatModes.LatModes[0,3]
+        summary.lat_dr_time                           = segment_results.conditions.dynamic_stability.LatModes.dutchRollTimeDoubleHalf[0,0]
+
+        summary.lat_rollsubfreq                 = segment_results.conditions.dynamic_stability.LatModes.rollSubsistenceFreqHz[0,0]
+        summary.rollSubsistenceTimeConstant        = segment_results.conditions.dynamic_stability.LatModes.rollSubsistenceTimeConstant[0,0]
+        summary.rollSubsistenceDamping        = segment_results.conditions.dynamic_stability.LatModes.rollSubsistenceDamping[0,0] 
+        summary.spiralFreqHz                  = segment_results.conditions.dynamic_stability.LatModes.spiralFreqHz[0,0]
+        summary.spiralDamping                 = segment_results.conditions.dynamic_stability.LatModes.spiralDamping[0,0]   
+
+
+
+    
         print("Angle of Attack            : " + str(AoA))
         print("Drag Coefficient           : " + str(summary.CD))
         print("Moment Coefficient         : " + str(summary.CM_residual))

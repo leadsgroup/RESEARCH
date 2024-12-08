@@ -1,30 +1,55 @@
-import numpy as np
-from RCAIDE.Core import Units
+
+from RCAIDE.Framework.Core import Units
+from RCAIDE.Library.Plots  import *
+
 import matplotlib.pyplot as plt
 from matplotlib.image import imread
-from scipy.interpolate import griddata  
 import matplotlib.colors
-import matplotlib.colors as colors  
+import matplotlib.colors as colors
+import numpy as np
+import  os
+import  sys
+from scipy.interpolate import griddata  
 from geopy.distance import geodesic as GD
-from RCAIDE.Visualization.Topography                                          import * 
 import scipy.ndimage as ndimage
 import pickle
 
+ 
+local_path_1 = os.path.split(sys.path[0])[0]
+
+sys.path.append( os.path.join(local_path_1, 'Post_Processing_Functions'))
+from Aircraft_Noise_Emissions   import generate_terrain_microphone_locations 
 
 # ----------------------------------------------------------------------
 #   Main
 # ----------------------------------------------------------------------
 def main(): 
-    # settings 
-    topography_file        = '../Maps_and_Scales/Los_Angeles/LA_Metropolitan_Area_5.txt'   
-    N_lat                  = 225  
-    N_long                 = 390    
+    # settings
+
+    ospath          = os.path.abspath(__file__)
+    separator       = os.path.sep
+    relative_path   = os.path.dirname(ospath) + separator  
+    topography_file = relative_path +  '..' + separator +  'City_Simulations' + separator +  'Los_Angeles'    + separator +  'Topography' + separator + 'LA_Metropolitan_Area.txt'
+    
+    
+
+    mic_x_res              = 1200
+    mic_y_res              = 2700
+    opacity                = 0.5
     save_figure            = True
     use_lat_long           = True    
-    file_type              = '.pdf'   
-    city                   = 'Los_Angeles'  
-          
-    long_dist,lat_dist,long_deg,lat_deg,elevation  = get_topography_data(topography_file,N_lat,N_long)  
+    file_type              = '.png'   
+    city                   = 'Los_Angeles'
+    
+
+    microphone_locations ,microphone_coordinates  = generate_terrain_microphone_locations(topography_file, mic_x_res, mic_y_res)  
+    
+     
+    lat_dist   = microphone_locations[:,0].reshape((mic_x_res, mic_y_res))
+    long_dist  = microphone_locations[:,1].reshape((mic_x_res, mic_y_res))
+    lat_deg    = microphone_coordinates[:,0].reshape((mic_x_res, mic_y_res))
+    long_deg   = microphone_coordinates[:,1].reshape((mic_x_res, mic_y_res))
+    elevation  = microphone_coordinates[:,2].reshape((mic_x_res, mic_y_res))
       
     elevation = elevation/Units.ft 
     colors_undersea = plt.cm.terrain(np.linspace(0, 0.17, 56)) 
@@ -40,14 +65,14 @@ def main():
     axis = fig.add_subplot(1,1,1) 
     
     if use_lat_long: 
-        CS  = axis.contourf(long_deg,lat_deg,elevation,cmap =cut_terrain_map,norm=norm,levels = 20)  
+        CS  = axis.contourf(long_deg,lat_deg,elevation,cmap =cut_terrain_map,norm=norm,levels = 20, alpha=opacity)  
         cbar = fig.colorbar(CS, ax=axis)     
         cbar.ax.set_ylabel('Elevation above sea level [ft]', rotation =  90)  
         axis.set_xlabel('Longitude [°]')
         axis.set_ylabel('Latitude [°]')   
     else:      
      
-        CS   = axis.contourf(long_dist/Units.nmi,lat_dist/Units.nmi,elevation,cmap =cut_terrain_map,norm=norm,levels = 20)     
+        CS   = axis.contourf(long_dist/Units.nmi,lat_dist/Units.nmi,elevation,cmap =cut_terrain_map,norm=norm,levels = 20, alpha=opacity)     
         cbar = fig.colorbar(CS, ax=axis)        
         cbar.ax.set_ylabel('Elevation above sea level [ft]', rotation =  90) 
         axis.set_xlabel('Longitudinal Distance [nmi]')
@@ -57,7 +82,7 @@ def main():
 
     if save_figure:
     
-        save_filename = '../Papers_and_Presentation/Images/'  + city + '_Topography'        
+        save_filename = city + '_Topography'        
         plt.savefig(save_filename + file_type )
     return  
 
