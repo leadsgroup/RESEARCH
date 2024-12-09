@@ -44,11 +44,11 @@ ti=time.time()
 separator = os.path.sep
 
 # Update the filenames for raw census data (race and income) in the Processed_Data directory
-# base_geoJson = 'LA_Area_Tract_TR.geojson'
-# noise_filename = 'Noise_Data' + separator + 'Cumulative_TR_LA_1000ft.csv'
+base_geoJson = 'LA_Area_Tract_TR.geojson'
+noise_filename = 'Noise_Data' + separator + 'Cumulative_TR_LA_1000ft.csv'
 
-base_geoJson = 'LA_Area_Tract_HC.geojson'
-noise_filename = 'Noise_Data' + separator + 'Cumulative_HC_LA_1000ft.csv'
+# base_geoJson = 'LA_Area_Tract_HC.geojson'
+# noise_filename = 'Noise_Data' + separator + 'Cumulative_HC_LA_1000ft.csv'
 
 struct_filename1 = 'Raw_Data' + separator + 'Churches.csv'
 struct_filename2 = 'Raw_Data' + separator + 'Schools_Colleges_and_Universities.csv'
@@ -99,8 +99,8 @@ c_a_gdf = community_annoyance(geoJson_file,list(sensitivity_levels.keys()),sensi
 # save_file(noise_census_file,'LA_Area_Tract_HC.geojson')
 
 # convert_csv(noise_census_file,'HC_Data_Tract.csv')
-convert_csv(c_a_gdf,'HC_Raw_Data_Tract.csv')
-# convert_csv(c_a_gdf,'TR_Raw_Data_Tract.csv')
+# convert_csv(c_a_gdf,'HC_Raw_Data_Tract.csv')
+convert_csv(c_a_gdf,'TR_Raw_Data_Tract.csv')
 
 # convert_csv(c_a_gdf,'TR_Data_Tract_LogPOP_Only.csv')
 

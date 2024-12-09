@@ -94,8 +94,9 @@ def community_annoyance(gdf_data, noise_sensitive_structures, sensitivity_levels
 
     for col in race_list:
         total_population = gdf_census[col]  # Total population in census tract
-        
-        population_density = (total_population / tract_area) # Population density (per unit area)
+        total_pop_all =  gdf_census[col].sum(axis=0)
+
+        population_density = (total_population / (tract_area*total_pop_all)) # Population density (per unit area)
 
         temp_gdf = gdf_census.copy()
 
@@ -123,18 +124,23 @@ def community_annoyance(gdf_data, noise_sensitive_structures, sensitivity_levels
         # gdf_census['s_net'] = 1+ np.nan_to_num(temp_gdf['net_influence'] / gdf_census['total_structures'])
         # gdf_census['lastterm'] = (np.nan_to_num(np.log(1+gdf_census['total_structures']/tract_area))+1)
 
+        gdf_census[f'{race_dictionary_flipped[col]}_PDR'] = (gdf_census['L_dn'] * ((population_density)))
+        
+        gdf_census[f'{race_dictionary_flipped[col]}_CA'] = ((gdf_census['L_dn'] * ((population_density))) * temp_gdf['s_net']*(np.nan_to_num(np.log(1+gdf_census['total_structures']/tract_area))+1))
 
-        gdf_census[f'{race_dictionary_flipped[col]}_LogPOP'] = (gdf_census['L_dn'] * (np.log10(population_density)))
 
-        gdf_census[f'{race_dictionary_flipped[col]}_CA'] = (gdf_census['L_dn'] * np.nan_to_num(np.log10(population_density)) * temp_gdf['s_net']*(np.nan_to_num(np.log(1+gdf_census['total_structures']/tract_area))+1))
+        # gdf_census[f'{race_dictionary_flipped[col]}_LogPOP'] = (gdf_census['L_dn'] * (np.log10(population_density)))
+
+        # gdf_census[f'{race_dictionary_flipped[col]}_CA'] = (gdf_census['L_dn'] * (np.log10(population_density)) * temp_gdf['s_net']*(np.nan_to_num(np.log(1+gdf_census['total_structures']/tract_area))+1))
 
 
 
     
     for col in income_columns:
         total_population = gdf_census[col]  # Total population in census tract
-        
-        population_density = (total_population / tract_area) # Population density (per unit area)
+        total_pop_all =  gdf_census[col].sum(axis=0)
+
+        population_density = (total_population / (tract_area*total_pop_all)) # Population density (per unit area)
 
         temp_gdf = gdf_census.copy()
         # gdf_census['total_structures'] = gdf_census[noise_sensitive_structures].sum(axis=1)
@@ -153,9 +159,13 @@ def community_annoyance(gdf_data, noise_sensitive_structures, sensitivity_levels
         # Normalize by the total structures in each tract
         temp_gdf['s_net'] = 1+ np.nan_to_num(temp_gdf['net_influence'] / gdf_census['total_structures'])
 
-        gdf_census[f'{col}_LogPOP'] = (gdf_census['L_dn'] * (np.log10(population_density)))
+        gdf_census[f'{col}_PDR'] = (gdf_census['L_dn'] * ((population_density)))
+
+        gdf_census[f'{col}_CA'] = ((gdf_census['L_dn'] * ((population_density))) * temp_gdf['s_net']*(np.nan_to_num(np.log(1+gdf_census['total_structures']/tract_area))+1))
+
+        # gdf_census[f'{col}_LogPOP'] = (gdf_census['L_dn'] * (np.log10(population_density)))
         
-        gdf_census[f'{col}_CA'] = (gdf_census['L_dn'] * np.nan_to_num(np.log10(population_density)) * temp_gdf['s_net']*(np.nan_to_num(np.log(1+gdf_census['total_structures']/tract_area))+1))
+        # gdf_census[f'{col}_CA'] = (gdf_census['L_dn'] * (np.log10(population_density)) * temp_gdf['s_net']*(np.nan_to_num(np.log(1+gdf_census['total_structures']/tract_area))+1))
 
     
         # # Calculate net noise-sensitive structure influence for each structure
