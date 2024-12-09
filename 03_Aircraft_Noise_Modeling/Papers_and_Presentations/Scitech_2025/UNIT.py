@@ -12,7 +12,7 @@ race_dictionary = {
     "Total": "B03002001",
     "White": "B03002003",
     "Black or African American": "B03002004",
-    "American Indian and Alaska Native": "B03002005",
+    "Native American": "B03002005",
     "Asian": "B03002006",
     "Native Hawaiian and Other Pacific Islander": "B03002007",
     "Hispanic or Latino": "B03002012"
@@ -44,8 +44,12 @@ ti=time.time()
 separator = os.path.sep
 
 # Update the filenames for raw census data (race and income) in the Processed_Data directory
-base_geoJson = 'LA_Area_Tract.geojson'
+# base_geoJson = 'LA_Area_Tract_TR.geojson'
+# noise_filename = 'Noise_Data' + separator + 'Cumulative_TR_LA_1000ft.csv'
+
+base_geoJson = 'LA_Area_Tract_HC.geojson'
 noise_filename = 'Noise_Data' + separator + 'Cumulative_HC_LA_1000ft.csv'
+
 struct_filename1 = 'Raw_Data' + separator + 'Churches.csv'
 struct_filename2 = 'Raw_Data' + separator + 'Schools_Colleges_and_Universities.csv'
 struct_filename3 = 'Raw_Data' + separator + 'Hospitals_and_Medical_Centers.csv'
@@ -79,18 +83,26 @@ noise_columns=['L_dn']
 #-------------Preprocessing Data---------#
 
 #Merging Data into one geoJSON
-# noise__struct_file = sensitive_area_preprocess(struct_list,geoJson_file,list(sensitivity_levels.keys()))
-# noise_census_file = noise_preprocess(noise_file,noise__struct_file)
+noise__struct_file = sensitive_area_preprocess(struct_list,geoJson_file,list(sensitivity_levels.keys()))
+# save_file(noise__struct_file,'LA_Area_Tract.geojson')
+
+# noise_census_file = noise_preprocess(noise_file,geoJson_file)
+# convert_csv(noise_census_file,'TR_Data_Tract.csv')
+
+# save_file(noise_census_file,'LA_Area_Tract_TR.geojson')
 
 
 c_a_gdf = community_annoyance(geoJson_file,list(sensitivity_levels.keys()),sensitivity_levels)
 
 
 #Save merged data file (optional)
-# save_file(noise_census_file,'LA_Area_Tract.geojson')
+# save_file(noise_census_file,'LA_Area_Tract_HC.geojson')
 
 # convert_csv(noise_census_file,'HC_Data_Tract.csv')
-convert_csv(c_a_gdf,'HC_Data_Tract_CA.csv')
+convert_csv(c_a_gdf,'HC_Raw_Data_Tract.csv')
+# convert_csv(c_a_gdf,'TR_Raw_Data_Tract.csv')
+
+# convert_csv(c_a_gdf,'TR_Data_Tract_LogPOP_Only.csv')
 
 
 
