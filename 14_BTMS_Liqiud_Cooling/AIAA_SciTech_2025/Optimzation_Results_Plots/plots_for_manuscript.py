@@ -32,85 +32,125 @@ def main():
     # data = load_excel_data(filename)
     # create_parallel_plot(data,True,False)
     
-    case_numbers = [22,16,26]
+    #case_numbers = [22,16,26]
     #weight_sunburst(case_numbers,True,True)
     #create_single_flight_profiles(case_numbers,True,False)
     #create_life_cycle_analysis(case_numbers,True,True)
-    create_CF_IR(case_numbers,True,False)
+    #create_CF_IR(case_numbers,True,False)
+
+    filename = "Cycle Day"
+    sensitivity_analysis = load_pickle_results(filename)
+    plot_sensitivity_analysis(sensitivity_analysis,filename,True,True)
+
 
 
     return
-def create_CF_IR(case_numbers, 
-                                  save_figure=True, 
+def plot_sensitivity_analysis(Si,output_variable,save_figure=True, 
                                   show_figure=True,
                                   show_legend=True,
-                                  save_filename="cyclic_plot_", 
+                                  save_filename="sensitivity_analysis_", 
                                   file_type=".png", 
                                   width=6, 
                                   height=6):
+    ps = matplotlibstyle()  
     
-    base_path = "Vehicle_Excel_Files/"
-    save_dir = "Final_Plots"
+    # Extract data from Si
+    S1 = np.array(Si["S1"])
+    ST = np.array(Si["ST"])
+    S1_conf = np.array(Si["S1_conf"])
+    ST_conf = np.array(Si["ST_conf"])
+    S2 = np.array(Si["S2"])
+    S2_conf = np.array(Si["S2_conf"])
+    
+    # Specify custom parameter names
+    parameter_names = [
+        "HAS\nCapacity\n", 
+        "HEX\nCapacity\n", 
+        "RES\nCapacity\n"
+    ]
+    
+    N = len(parameter_names)
+    
+    # Extract upper-triangular S2 values and their confidences
+    param_pairs = []
+    S2_vals = []
+    S2_vals_conf = []
+    for i in range(N):
+        for j in range(i+1, N):
+            param_pairs.append(f"{parameter_names[i]} - {parameter_names[j]}")
+            S2_vals.append(S2[i, j])
+            S2_vals_conf.append(S2_conf[i, j])
+            
+    S2_vals = np.array(S2_vals)
+    S2_vals_conf = np.array(S2_vals_conf)
+    
+    # Set up positions and bar widths
+    x_s1_st = np.arange(N)
+    x_s2 = np.arange(len(param_pairs))
+    width_bar = 0.25
 
-    ps = matplotlibstyle()
+    # --- Figure 1: First and Total Order Sensitivities ---
+    #fig_ST, ax_ST = plt.subplots(figsize=(width, height-.41)) # Total Weight
+    fig_ST, ax_ST = plt.subplots(figsize=(width, height-.3)) # Cycle Day
 
-    fig1, ax1 = plt.subplots(figsize=(width, height))
-    fig2, ax2 = plt.subplots(figsize=(width, height))
-
-
-    for idx, case_number in enumerate(case_numbers):
-    # Load the data
-        file_name = base_path + f'case_{case_number}/Raw_Data/e_Twin_Otter_nmc_case_{case_number}.0.xlsx'
-        try:
-            data = read_excel_file(file_name)  # Custom read function for your Excel files
-        except FileNotFoundError:
-            print(f"File not found: {file_name}")
-            continue
-        ir = data['Resistance Growth']
-        cf = data['Capacity Fade']
-        x = data['Cycle Day']
-        ir = ir[::300]
-        cf = cf[::300]
-        x = x[::300]
-
-        ax1.plot(
-                x, ir,
-                label=f"Config {idx+1}",
-                color=ps.line_color[idx],
-                linewidth=ps.line_width,
-                linestyle=ps.line_style[idx % len(ps.line_style)],
-                marker=ps.markers[idx % len(ps.markers)],
-                markersize=ps.marker_size
-            )
-
-        ax1.set_xlabel("Days", fontsize=ps.axis_font_size)
-        ax1.set_ylabel("Internal Ressistance Growth Factor", fontsize=ps.axis_font_size)
-        ax1.grid(True)
-
-        ax2.plot(
-                x, cf,
-                label=f"Config {idx+1}",
-                color=ps.line_color[idx],
-                linewidth=ps.line_width,
-                linestyle=ps.line_style[idx % len(ps.line_style)],
-                marker=ps.markers[idx % len(ps.markers)],
-                markersize=ps.marker_size
-            )
-
-        ax2.set_xlabel("Days", fontsize=ps.axis_font_size)
-        ax2.set_ylabel("Capacity Fade Factor", fontsize=ps.axis_font_size)
-        ax2.grid(True)
-        ax2.legend(fontsize=ps.legend_fontsize)
-
-    # Save figure
+    
+    # Plot ST
+    ax_ST.bar(x_s1_st, ST, width_bar, yerr=ST_conf, label='Total',
+              color=ps.color[0], alpha=0.9, capsize=4, edgecolor='none', 
+              error_kw=dict(ecolor='black', elinewidth=1))
+    ax_ST.set_ylim(0, 1)
+    # Overlay S1
+    ax_ST.bar(x_s1_st, S1, width_bar, yerr=S1_conf, label='First Order',
+              color=ps.color[1], alpha=1.0, capsize=4, edgecolor='none',
+              error_kw=dict(ecolor='black', elinewidth=1))
+    
+    ax_ST.set_xticks(x_s1_st)
+    ax_ST.set_xticklabels(parameter_names, rotation=0, ha='center')
+    ax_ST.set_ylabel('Sensitivity Index', fontsize=ps.axis_font_size)
+    #ax_ST.grid(True)
+    if show_legend:
+        ax_ST.legend(loc='upper left', fontsize=ps.legend_fontsize)
+    
+    plt.tight_layout()
+    
+    # Save figure if requested (First and Total)
     if save_figure:
         current_dir = os.path.dirname(os.path.abspath(__file__))
         save_dir = os.path.join(current_dir, "Final_Plots") 
-        subplot_filename = f"{save_dir}/{save_filename}_internal_ressistance{file_type}"
-        fig1.savefig(subplot_filename, bbox_inches="tight")
-        subplot_filename = f"{save_dir}/{save_filename}_capacity_fade{file_type}"
-        fig2.savefig(subplot_filename, bbox_inches="tight")
+        subplot_filename = f"{save_dir}/{save_filename}_first_total_{output_variable}{file_type}"
+        fig_ST.savefig(subplot_filename, bbox_inches="tight")
 
+
+    
+    
+    # --- Figure 2: Second Order Sensitivities ---
+    fig_S2, ax_S2 = plt.subplots(figsize=(width, height))
+    
+    ax_S2.bar(x_s2, S2_vals, width_bar, yerr=S2_vals_conf, label='Second Order',
+              color=ps.color[2], alpha=0.8, capsize=4, edgecolor='none',
+              error_kw=dict(ecolor='black', elinewidth=1))
+    
+    ax_S2.set_xticks(x_s2)
+    #ax_S2.grid(True)
+    #ax_S2.set_ylim(-.04, 0.06)
+    ax_S2.set_xticklabels(param_pairs, rotation=0, ha='center')
+    ax_S2.set_ylabel('Sensitivity Index', fontsize=ps.axis_font_size)
+    
+    if show_legend:
+        ax_S2.legend(loc='upper left', fontsize=ps.legend_fontsize)
+    
+    plt.tight_layout()
+    
+    # Save figure if requested (Second Order)
+    if save_figure:
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+        save_dir = os.path.join(current_dir, "Final_Plots") 
+        subplot_filename = f"{save_dir}/{save_filename}_second_{output_variable}{file_type}"
+        fig_S2.savefig(subplot_filename, bbox_inches="tight")
+    
+    # Show figure if requested
+    if show_figure:
+        plt.show()
 
     return
 
@@ -561,7 +601,7 @@ def matplotlibstyle():
     plt.rcParams['axes.linewidth'] = 1.
     plt.rcParams["font.family"] = "Times New Roman"
     parameters = {'axes.labelsize': 20,
-                  'xtick.labelsize': 18,
+                  'xtick.labelsize': 18-4,
                   'ytick.labelsize': 18,
                   'axes.titlesize': 18,
                   'figure.dpi': 128
@@ -579,11 +619,14 @@ def matplotlibstyle():
     plot_parameters.axis_font_size         = 14+4
     plot_parameters.title_font_size        = 18   
     plot_parameters.markers                =  ['o','x','v','P','p','^','D','*']
-    plot_parameters.color                  = 'red'
+    plot_parameters.color                  = [ '#003f5c',
+                                            '#ffa600',
+                                            '#ff6361',]
     plot_parameters.line_color = [
     '#440154',  # Dark Purple
     '#31688E',  # Blue
     '#1F9E89',  # Green-Blue
+   
     '#35B779',  # Green
     '#6DCD59',  # Yellow-Green
     '#FDE725'   # Bright Yellow
@@ -682,6 +725,8 @@ def read_excel_file(filename):
 def load_excel_data(file_name, sheet_name="Sheet1"):
       file_path = os.path.join(os.path.dirname(__file__), file_name)
       return pd.read_excel(file_path, sheet_name=sheet_name)
+
+
 
 if __name__ == '__main__':
     main()

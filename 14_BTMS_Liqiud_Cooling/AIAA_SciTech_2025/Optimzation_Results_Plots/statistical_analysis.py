@@ -3,11 +3,15 @@ from SALib.analyze import sobol
 import pandas as pd
 import numpy as np
 import os
+import pickle
 
 def main():
     filename = 'consolidated_exit_conditions.xlsx'
+    output_variable  = 'Total Weight'
+
+
     data = load_excel_data(filename)
-    sobol_sensitivity_analysis(data)
+    sobol_sensitivity_analysis(data,output_variable)
     return
 
 def load_excel_data(file_name, sheet_name="Sheet1"):
@@ -15,7 +19,7 @@ def load_excel_data(file_name, sheet_name="Sheet1"):
     return pd.read_excel(file_path, sheet_name=sheet_name)
 
 
-def sobol_sensitivity_analysis(data):
+def sobol_sensitivity_analysis(data,output_variable):
     # Normalize the input variables using min-max normalization
     HAS_power = (data['HAS_power'] - data['HAS_power'].min()) / (data['HAS_power'].max() - data['HAS_power'].min())
     HEX_power = (data['HEX_power'] - data['HEX_power'].min()) / (data['HEX_power'].max() - data['HEX_power'].min())
@@ -38,7 +42,7 @@ def sobol_sensitivity_analysis(data):
 
     # Interpolate the Cycle Day values based on normalized input parameter values
     response_variable = np.array([
-        interpolate_cycle_day(data, sample) for sample in param_values
+        interpolate_cycle_day(data, sample,output_variable) for sample in param_values
     ])
     
     # Perform Sobol sensitivity analysis
@@ -51,9 +55,10 @@ def sobol_sensitivity_analysis(data):
     print("S2 (Second Order):", Si['S2'])
     
     Si.plot()
+    save_results(Si,output_variable)
     return 
 
-def interpolate_cycle_day(data, params):
+def interpolate_cycle_day(data, params,output_variable):
     """
     Interpolate the Cycle Day value based on the sampled input parameters.
     """
@@ -67,7 +72,19 @@ def interpolate_cycle_day(data, params):
     ]
     
     
-    return nearest_row['Cycle Day']
+    return nearest_row[output_variable]
+
+# ----------------------------------------------------------------------
+#   Save Results
+# ----------------------------------------------------------------------
+def save_results(results,filename):
+   #  Pickle Backup Files
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    load_dir = os.path.join(current_dir)
+    pickle_file = os.path.join(load_dir, filename+ '.pkl')
+    with open(pickle_file, 'wb') as file:
+        pickle.dump(results, file) 
+    return
 
 if __name__ == "__main__":
     main()

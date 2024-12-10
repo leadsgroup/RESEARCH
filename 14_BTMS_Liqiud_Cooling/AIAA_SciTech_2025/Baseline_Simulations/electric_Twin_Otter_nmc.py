@@ -35,24 +35,24 @@ def main():
     vehicle  = vehicle_setup(BTMS_flag)
     # #plot_3d_vehicle(vehicle)
     
-    # # Set up vehicle configs
-    # configs  = configs_setup(vehicle)
+    # Set up vehicle configs
+    configs  = configs_setup(vehicle)
 
-    # # create analyses
-    # analyses = analyses_setup(configs)
+    # create analyses
+    analyses = analyses_setup(configs)
 
-    # # mission analyses
-    # mission  = mission_setup(analyses) 
+    # mission analyses
+    mission  = mission_setup(analyses) 
     
-    # # create mission instances (for multiple types of missions)
-    # missions = missions_setup(mission) 
+    # create mission instances (for multiple types of missions)
+    missions = missions_setup(mission) 
      
-    # # mission analysis 
-    # results = missions.base_mission.evaluate()  
-    # tf = time.time() 
-    # print ('time taken: '+ str(round(((tf-ti)/60),3)) + ' mins')
+    # mission analysis 
+    results = missions.base_mission.evaluate()  
+    tf = time.time() 
+    print ('time taken: '+ str(round(((tf-ti)/60),3)) + ' mins')
         
-    # plot_mission(results)
+    plot_mission(results)
     
     return 
  
@@ -65,8 +65,8 @@ def vehicle_setup(BTMS_flag):
 
     vehicle = RCAIDE.Vehicle()
     vehicle.tag = 'Twin_Otter'
-    HAS_power = 2040.204795
-    HEX_power = 1290.329405
+    HAS_power = 5000
+    HEX_power = 4500
     RES_dimensions =0.383875956
     # ################################################# Vehicle-level Properties ########################################################  
 

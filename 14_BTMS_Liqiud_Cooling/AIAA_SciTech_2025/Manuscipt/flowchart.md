@@ -16,4 +16,15 @@ G -->|SOC < 20%| H2([End - Capacity Limited]):::whiteBox
 
 classDef whiteBox fill:#ffffff,stroke:#000000,stroke-width:1px;
 classDef whiteDiamond fill:#ffffff,stroke:#000000,stroke-width:1px;
+
+
+
+
+
+
+
+
+
+
+
 ```
