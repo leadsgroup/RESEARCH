@@ -1,37 +1,42 @@
-class Example_class():
+class ClassName(Parent):
     """
-    Description of the class
+    Brief description of the class
 
     Attributes
     ----------
-    Describe non-method attributes here
-    x : data_type
-        Description of the attribute
-    a : data_type (float, int, str, etc)
-        Description of the attribute a
+    simple_attribute : data_type
+        Description of simple attribute
+    
+    complex_attribute : Data
+        Collection of related measurements
+        - sub_attribute_1 : data_type
+            Description of first sub-attribute
+        - sub_attribute_2 : data_type
+            Description of second sub-attribute
+    
+    container_attribute : Container
+        Description of container purpose
 
     Methods
     -------
-    Only list public methods here that can and will be called by the user.
-    Do not list secondary (aka private) methods that are only called by other functions.
-    
-    method1
-        Description of the return.
+    method_name(param1, param2)
+        Brief description of what the method does
 
     Notes
     -----
-    Additional information that is not strictly necessary for the user, but
-    may be helpful. 
+    Additional important information about the class.
+    Implementation details, usage guidelines, etc.
     
     **Definitions**
-    'term'
-        term definition
+    'Technical Term'
+        Definition of the technical term
+    'Another Term'
+        Definition of another technical term
     
     References
     ----------
-
-    .. [1] example name "citation". Champaign, IL, 2024. www.helloworld.com
-    
+    .. [1] Author Name, "Paper Title", Journal, Year
+    .. [2] Documentation Link, etc.
     """
     
     def  method1(self):
