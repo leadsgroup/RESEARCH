@@ -453,7 +453,7 @@ def emrax_348():
     def fun(t):                                                                               
         return i(t) * volt(t)                                                                  
                                                                                             
-    P_time, _      = quad(fun, 0, T)                                       # [W*s]          Real power over the time interval
+    P_time, _      = quad(fun, 0, Time)                                       # [W*s]          Real power over the time interval
     P_time         = (P_time / T)/1000                                     # [kW]           Real power
     S              = (I*V)/1000                                            # [kW]           apparent power (Eq.10)  
     PF             = P_time/S                                              # [-]            power factor (Eq.8)  
@@ -639,7 +639,7 @@ def emrax_348():
         [-L_m / 2, -L_m / 2, L_l + L_m]
     ]                                                                      # Simplified inductance matrix for balanced machines (Eq.55)
 
-    L_d_1 = ((slots*Layers)/(2*N_p))*(3/2)*(N**2)*((2*A_tip*mu_0/l_tip + (3/2)*(W_sp*Stack*mu_0)/(l_m + l_g))) # Direct axis inductance (Eq.57)
+    L_d_1 = ((slots*Layers)/(2*N_p))*(3/2)*(Nt**2)*((2*A_tip*mu_0/l_tip + (3/2)*(W_sp*Stack*mu_0)/(l_m + l_g))) # Direct axis inductance (Eq.57)
     L_d_2 = ((2*N_p)/(Layers*Slots))*(3/2)*(N_t**2)*(2*A_tip*mu_0/l_tip + (3/2)*(W_sp*Stack*mu_0)/(l_m + l_g)) # Direct axis inductance (Eq.57)
     L_d_3 = L_l + (3/2)*L_m                                                # direct axis inductance (Eq.56) 
     N_t   = (Slots*Layers*N/(2*N_p))                                       # number of series connected turns per phase (Eq.58)
