@@ -47,7 +47,7 @@ def main():
     processed_filename_list_name =  aircraft_code + '_' + city_code +  '_Single_Flights_Processed' 
     #file_name_dict               =  load(processed_filename_list_name + '.res')
     
-    for filename in ['Processed_TRS_LA_BUR_LAX_1000ft', 'Processed_TRS_LA_BUR_ONT_1000ft', 'Processed_TRS_LA_ONT_LAX_1000ft', 'Processed_TRS_LA_ONT_BUR_1000ft']:#file_name_dict.filename_list: 
+    for filename in ['Processed_TRS_LA_ONT_LAX_1000ft', 'Processed_TRS_LA_ONT_BUR_1000ft']:#file_name_dict.filename_list: 
         # load data
 
         origin_code = filename.split('_')[3]

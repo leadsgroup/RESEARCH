@@ -1,4 +1,4 @@
-def function2(name):
+def function2(input_function,  a,  complex_func):
     """
     Description of the function
 
@@ -48,5 +48,7 @@ def function2(name):
     .. [1] 
     
     """
-    
-    pass
+    return1 = 0
+    return2 = 0
+    return3 = 0
+    return return1,  return2,  return3

@@ -23,6 +23,19 @@ from Aircraft_Noise_Emissions   import generate_terrain_microphone_locations
 #   Main
 # ----------------------------------------------------------------------
 def main():  
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    # Plot noise on top of topography
+    
     # Universal Plot Settings
     plt.rcParams['axes.linewidth'] = 1.
     plt.rcParams["font.family"]    = "Times New Roman"
@@ -46,8 +59,7 @@ def main():
                  
     # tag for city              
     city                                    = 'LA' 
-    aircraft_models                         = ['HC']# ,'SR','TR']
-    aircraft_folder_names                   = ['Tiltrotor', ]
+    aircraft_models                         = ['TRS']# ,'SR','TR']
     altitudes                               = ['1000']
     flight_intervals                        = ['60','30','10']
     microphone_x_resolution                 = 1200 
@@ -61,13 +73,13 @@ def main():
     mic_coord =     np.reshape(microphone_coordinates,   (microphone_x_resolution,microphone_y_resolution,3))
     for i in  range(len(aircraft_models)):
         # Read in results
-        filename = relative_path +  '..' + separator +  'City_Simulations' + separator + 'Los_Angeles' + separator +'Hexacopter' + separator + 'Cumulative_' + aircraft_models[i] + '_'+ city +'_' +altitudes[0] +'ft.res'
+        filename = relative_path +  '..' + separator +  'City_Simulations' + separator + 'Los_Angeles' + separator +'Tilt_Stopped_Rotor' + separator + 'Cumulative_' + aircraft_models[i] + '_'+ city +'_' +altitudes[0] +'ft.res'
         noise_data = load(filename)
         plot_2D_noise_contour(mic_coord, mic_loc, topography_file, 
-                          noise_level              = noise_data.Total_L_max, # noise_data.Total_L_dn, # d
+                          noise_level              = noise_data.Total_L_dn, # d
                           min_noise_level          = 30,  
                           max_noise_level          = 90, 
-                          noise_scale_label        = r'$L_{max} [dBA]$',
+                          noise_scale_label        = r'$L_{dn} [dBA]$',
                           save_figure              = False,
                           show_figure              = True,
                           save_filename            = "2D_Noise_Contour",
@@ -121,7 +133,66 @@ def plot_2D_noise_contour(microphone_coordinates,
 
     Properties Used:
     N/A
-    """      
+    """
+        # settings
+
+    ospath          = os.path.abspath(__file__)
+    separator       = os.path.sep
+    relative_path   = os.path.dirname(ospath) + separator  
+    topography_file = relative_path +  '..' + separator +  'City_Simulations' + separator +  'Los_Angeles'    + separator +  'Topography' + separator + 'LA_Metropolitan_Area.txt'
+    
+    
+    Textsize               = 20
+    mic_x_res              = 1200
+    mic_y_res              = 2700
+    opacity                = 0.5
+    save_figure            = True
+    use_lat_long           = True    
+    file_type              = '.png'   
+    city                   = 'Los_Angeles'
+    
+
+    #microphone_locations ,microphone_coordinates  = generate_terrain_microphone_locations(topography_file, mic_x_res, mic_y_res)  
+    
+     
+    lat_dist   = microphone_locations[:, :,0] #.reshape((mic_x_res, mic_y_res))
+    long_dist  = microphone_locations[:,:, 1] #.reshape((mic_x_res, mic_y_res))
+    lat_deg    = microphone_coordinates[:,:, 0] #.reshape((mic_x_res, mic_y_res))
+    long_deg   = microphone_coordinates[:,:, 1] #.reshape((mic_x_res, mic_y_res))
+    elevation  = microphone_coordinates[:,:, 2] #.reshape((mic_x_res, mic_y_res))
+      
+    elevation = elevation/Units.ft 
+    colors_undersea = plt.cm.terrain(np.linspace(0, 0.17, 56)) 
+    colors_land     = plt.cm.terrain(np.linspace(0.25, 1, 200))  
+    
+    # combine them and build a new colormap
+    colors          = np.vstack((colors_undersea, colors_land))
+    cut_terrain_map = matplotlib.colors.LinearSegmentedColormap.from_list('cut_terrain', colors) 
+    norm            = FixPointNormalize(sealevel=0,vmax=np.max(elevation),vmin=np.min(elevation))   
+    
+    fig = plt.figure()
+    fig.set_size_inches(9,5)
+    axis = fig.add_subplot(1,1,1) 
+    
+    if use_lat_long: 
+        CS  = axis.contourf(long_deg,lat_deg,elevation,cmap =cut_terrain_map,norm=norm,levels = 20, alpha=opacity)  
+        cbar = fig.colorbar(CS, ax=axis, orientation='horizontal',  shrink=0.6, pad=0.01, anchor=(0.76, 0))     
+        cbar.ax.set_ylabel('Elevation above sea level [ft]', rotation = 0,  fontsize=Textsize,  loc='center')
+        cbar.ax.yaxis.set_label_coords(-0.32, 0)
+        cbar.ax.tick_params(colors='black', labelsize=16)  
+        axis.set_xlabel('Longitude [°]', fontsize=Textsize)
+        axis.set_ylabel('Latitude [°]', fontsize=Textsize)   
+    else:      
+     
+        CS   = axis.contourf(long_dist/Units.nmi,lat_dist/Units.nmi,elevation,cmap =cut_terrain_map,norm=norm,levels = 20, alpha=opacity)     
+        cbar = fig.colorbar(CS, ax=axis)        
+        cbar.ax.set_ylabel('Elevation above sea level [ft]', rotation =  90) 
+        axis.set_xlabel('Longitudinal Distance [nmi]')
+        axis.set_ylabel('Latitudinal Distance [nmi]') 
+    #axis.axis('equal')  
+
+
+    
     elevation       = microphone_locations[:,2]/Units.ft      
     colors_undersea = plt.cm.terrain(np.linspace(0, 0.17, 56))
     colors_land     = plt.cm.terrain(np.linspace(0.25, 1, 200))  
@@ -132,10 +203,10 @@ def plot_2D_noise_contour(microphone_coordinates,
                   'figure.dpi': 500
                   }
     plt.rcParams.update(parameters)
-    fig = plt.figure(save_filename)
+    #fig = plt.figure(save_filename)
     fig.set_size_inches(width,height)
     
-    axis = fig.add_subplot(1,1,1) 
+    #axis = fig.add_subplot(1,1,1) 
     
     noise_levels   = np.linspace(35,100,256) #np.linspace(min_noise_level,max_noise_level,10)  
     noise_cmap     = plt.get_cmap('turbo')
@@ -159,12 +230,12 @@ def plot_2D_noise_contour(microphone_coordinates,
     CS_2    = axis.contourf(LONG,LAT,noise_level ,noise_levels,cmap = noise_new_cmap)
     axis.set_ylim(LAT[0, 0], LAT[-1, 0])
     axis.set_xlim(LONG[0, 0], LONG[-1, -1])
-    cbar    = fig.colorbar(CS_2, ax=axis)        
-    cbar.ax.set_ylabel(noise_scale_label, rotation =  90,  fontsize=20)
-    cbar.ax.tick_params(colors='black', labelsize=20)
-    plt.xlabel("Longitude", fontsize=20)
-    plt.ylabel("Latitude", fontsize=20)
-    axis.tick_params(colors='black', labelsize=20)
+    cbar    = fig.colorbar(CS_2, ax=axis,  orientation='vertical')        
+    cbar.ax.set_ylabel(noise_scale_label, rotation =  90,  fontsize=Textsize)
+    cbar.ax.tick_params(colors='black', labelsize=16)
+    #plt.xlabel("Longitude", fontsize=16)
+   # plt.ylabel("Latitude", fontsize=16)
+    axis.tick_params(colors='black', labelsize=Textsize)
     # -------------------------
     # Create vertiport inset
     # -------------------------
@@ -185,7 +256,7 @@ def plot_2D_noise_contour(microphone_coordinates,
     axis.add_patch(rect)
 
     # Add inset
-    inset_ax = fig.add_axes([0.15, 0.15, 0.25, 0.25])  # [x, y, width, height]
+    inset_ax = fig.add_axes([0.14, 0.25, 0.2, 0.2])  # [x, y, width, height]
     
     # Access x and y data for the current case
     
@@ -237,6 +308,66 @@ class FixPointNormalize(matplotlib.colors.Normalize):
 
 def colorax(vmin, vmax):
     return dict(cmin=vmin,cmax=vmax)
+
+def plot_topography(): 
+    # settings
+
+    ospath          = os.path.abspath(__file__)
+    separator       = os.path.sep
+    relative_path   = os.path.dirname(ospath) + separator  
+    topography_file = relative_path +  '..' + separator +  'City_Simulations' + separator +  'Los_Angeles'    + separator +  'Topography' + separator + 'LA_Metropolitan_Area.txt'
+    
+    
+
+    mic_x_res              = 1200
+    mic_y_res              = 2700
+    opacity                = 0.5
+    save_figure            = True
+    use_lat_long           = True    
+    file_type              = '.png'   
+    city                   = 'Los_Angeles'
+    
+
+    microphone_locations ,microphone_coordinates  = generate_terrain_microphone_locations(topography_file, mic_x_res, mic_y_res)  
+    
+     
+    lat_dist   = microphone_locations[:,0].reshape((mic_x_res, mic_y_res))
+    long_dist  = microphone_locations[:,1].reshape((mic_x_res, mic_y_res))
+    lat_deg    = microphone_coordinates[:,0].reshape((mic_x_res, mic_y_res))
+    long_deg   = microphone_coordinates[:,1].reshape((mic_x_res, mic_y_res))
+    elevation  = microphone_coordinates[:,2].reshape((mic_x_res, mic_y_res))
+      
+    elevation = elevation/Units.ft 
+    colors_undersea = plt.cm.terrain(np.linspace(0, 0.17, 56)) 
+    colors_land     = plt.cm.terrain(np.linspace(0.25, 1, 200))  
+    
+    # combine them and build a new colormap
+    colors          = np.vstack((colors_undersea, colors_land))
+    cut_terrain_map = matplotlib.colors.LinearSegmentedColormap.from_list('cut_terrain', colors) 
+    norm            = FixPointNormalize(sealevel=0,vmax=np.max(elevation),vmin=np.min(elevation))   
+    
+    fig = plt.figure()
+    fig.set_size_inches(9,5)
+    axis = fig.add_subplot(1,1,1) 
+    
+    if use_lat_long: 
+        CS  = axis.contourf(long_deg,lat_deg,elevation,cmap =cut_terrain_map,norm=norm,levels = 20, alpha=opacity)  
+        cbar = fig.colorbar(CS, ax=axis)     
+        cbar.ax.set_ylabel('Elevation above sea level [ft]', rotation =  90)  
+        axis.set_xlabel('Longitude [°]')
+        axis.set_ylabel('Latitude [°]')   
+    else:      
+     
+        CS   = axis.contourf(long_dist/Units.nmi,lat_dist/Units.nmi,elevation,cmap =cut_terrain_map,norm=norm,levels = 20, alpha=opacity)     
+        cbar = fig.colorbar(CS, ax=axis)        
+        cbar.ax.set_ylabel('Elevation above sea level [ft]', rotation =  90) 
+        axis.set_xlabel('Longitudinal Distance [nmi]')
+        axis.set_ylabel('Latitudinal Distance [nmi]') 
+    #axis.axis('equal') 
+    fig.tight_layout()    
+
+    return fig
+
  
 if __name__ == '__main__': 
     main()   

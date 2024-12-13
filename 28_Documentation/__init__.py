@@ -1,11 +1,11 @@
 """
 =============================================
-_Module_Name_ (:mod:`name_of_module`)
+Module_Name (:mod:`actual_module_name`)
 =============================================
 
-.. currentmodule:: (name of folder you are currently in)
+.. currentmodule:: folder_name
 
-Description of the class
+Brief description of what this module does and its purpose
 
 Sub-folders
 ============================================
@@ -13,9 +13,9 @@ Sub-folders
 .. autosummary::
    :toctree: generated/
 
-   sub_folder_1  -- Description of sub-folder 1
-   sub_folder_2  -- Description of sub-folder 2
-   sub_folder_3  -- Description of sub-folder 3
+   folder_name1  -- Purpose of this sub-folder
+   folder_name2  -- Purpose of this sub-folder
+   folder_name3  -- Purpose of this sub-folder
 
 Functions
 ==========================================
@@ -23,12 +23,25 @@ Functions
 .. autosummary::
    :toctree: generated/
 
-   Function_Example1    -- Description of Function_Example1
-   Function_Example2    -- Description of Function_Exampel2
+   function_name1    -- What this function does
+   function_name2    -- What this function does
    
-Sub-heading
+Classes
 -------
+.. autosummary::
+   :toctree: generated/
+   
+   ClassName1    -- Purpose of this class
+   ClassName2    -- Purpose of this class
+
+Notes
+-----
+Any additional information about using this module
+
+See Also
+--------
+Related modules or external links
 """
 
-from  Function_Example import  *
-from  Function_Example2 import * 
+from function_name1 import *
+from function_name2 import *
