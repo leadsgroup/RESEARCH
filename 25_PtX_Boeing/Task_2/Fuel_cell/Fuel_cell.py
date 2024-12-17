@@ -1,7 +1,7 @@
 import RCAIDE
 from   RCAIDE.Framework.Core                                   import Units, Data
-from   RCAIDE.Library.Components.Energy.Sources.Fuel_Cells.PEM import PEM_Cell
-from   RCAIDE.Library.Components.Energy.Sources.Fuel_Cells.CEM import CEM_Module
+from   RCAIDE.Library.Components.Energy.Sources.Fuel_Cell_Stacks.PEM import PEM_Cell
+from   RCAIDE.Library.Components.Energy.Sources.Fuel_Cell_Stacks.CEM import CEM_Module
 import  numpy as  np
 import  matplotlib.pyplot as  plt
 from FC.pressure_dependence import CDs_1, CDs_1_5, CDs_2_5, Vs_1, Vs_1_5, Vs_2_5
