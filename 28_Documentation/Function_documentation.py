@@ -24,6 +24,7 @@ def function2(input_function,  a,  complex_func):
     Additional information that is not strictally necessary for the user, but
     may be helpful.
     
+    
     **Extra modules required**
     List any additional modules (like Cantera) that are required.
     Delete this section if there are none.
@@ -44,8 +45,12 @@ def function2(input_function,  a,  complex_func):
     
     References
     ----------
+    [1] 
+    (Only include references if there is a reference in the function)
 
-    .. [1] 
+    See Also
+    --------
+    Related modules or external links   
     
     """
     return1 = 0

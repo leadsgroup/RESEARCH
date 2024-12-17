@@ -17,11 +17,6 @@ class ClassName(Parent):
     container_attribute : Container
         Description of container purpose
 
-    Methods
-    -------
-    method_name(param1, param2)
-        Brief description of what the method does
-
     Notes
     -----
     Additional important information about the class.
@@ -35,14 +30,8 @@ class ClassName(Parent):
     
     References
     ----------
-    .. [1] Author Name, "Paper Title", Journal, Year
-    .. [2] Documentation Link, etc.
+    [1] Author Name, "Paper Title", Journal, Year
+    [2] Documentation Link, etc.
+    Do not include this section if there are no references. Only include references in the documentation if they are directly relevant to the class.
+
     """
-    
-    def  method1(self):
-        print("Hello World")
-        self.private_method2()
-        
-    def private_method2(self):
-        # This is private
-        pass    
