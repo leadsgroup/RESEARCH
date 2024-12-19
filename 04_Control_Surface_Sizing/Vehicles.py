@@ -48,8 +48,8 @@ def vehicle_setup():
     vehicle.mass_properties.takeoff       = 1335.76   
     vehicle.mass_properties.moments_of_inertia.tensor = np.array([[164627.7,0.0,0.0],[0.0,471262.4,0.0],[0.0,0.0,554518.7]])
     vehicle.mass_properties.center_of_gravity = [[2.239696797,0,-0.131189711 ]]
-    vehicle.envelope.ultimate_load        = 5.7
-    vehicle.envelope.limit_load           = 3.8
+    vehicle.flight_envelope.ultimate_load        = 5.7
+    vehicle.flight_envelope.positive_limit_load           = 3.8
     vehicle.reference_area                = 17.112 
     vehicle.passengers                    = 2
       

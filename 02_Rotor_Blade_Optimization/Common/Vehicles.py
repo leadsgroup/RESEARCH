@@ -14,7 +14,7 @@ from RCAIDE.Methods.Geometry.Two_Dimensional.Cross_Section.Airfoil.compute_airfo
      import compute_airfoil_properties
 from RCAIDE.Methods.Geometry.Two_Dimensional.Cross_Section.Airfoil.import_airfoil_geometry \
      import import_airfoil_geometry     
-from RCAIDE.Analyses.Propulsion.Rotor_Wake_Fidelity_Zero import Rotor_Wake_Fidelity_Zero
+from RCAIDE.Analyses.Propulsion.Momentum_Theory_Wake import Momentum_Theory_Wake
 import numpy as np
 
 from RCAIDE.Methods.Geometry.Two_Dimensional.Cross_Section.Airfoil.import_airfoil_geometry  import import_airfoil_geometry
@@ -59,7 +59,7 @@ def base_setup(problem):
     prop.airfoil_polars           = rs.airfoil_polars
     prop.number_of_stations   = N = rs.number_of_stations    
 
-    prop.Wake = Rotor_Wake_Fidelity_Zero()  
+    prop.Wake = Momentum_Theory_Wake()  
 
     prop.number_of_airfoil_section_points               = 500
     

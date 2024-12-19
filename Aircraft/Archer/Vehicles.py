@@ -18,7 +18,7 @@ from RCAIDE.Methods.Geometry.Two_Dimensional.Planform import segment_properties
 from RCAIDE.Input_Output.OpenVSP.vsp_read import vsp_read
 from RCAIDE.Components.Energy.Networks import Battery_Electric_Rotor
 from RCAIDE.Plots.Geometry.Three_Dimensional import plot_3d_vehicle
-from RCAIDE.Analyses.Propulsion.Rotor_Wake_Fidelity_Zero import Rotor_Wake_Fidelity_Zero
+from RCAIDE.Analyses.Propulsion.Momentum_Theory_Wake import Momentum_Theory_Wake
 
 import matplotlib.pyplot as plt
 
@@ -60,8 +60,8 @@ def base_setup():
     vehicle.passengers                        = 2
 
     # basic parameters
-    vehicle.envelope.ultimate_load = 5.7
-    vehicle.envelope.limit_load    = 3.    
+    vehicle.flight_envelope.ultimate_load = 5.7
+    vehicle.flight_envelope.positive_limit_load    = 3.    
     
     vehicle.passengers = 2
     
@@ -161,7 +161,7 @@ def base_setup():
         rotor.airfoil_cl_surrogates = None
         rotor.airfoil_cd_surrogates = None
         
-        rotor.Wake                  = Rotor_Wake_Fidelity_Zero()        
+        rotor.Wake                  = Momentum_Theory_Wake()        
         
         thrust_vector, torque, power, Cp, outputs , etap = rotor.spin(conditions)
         

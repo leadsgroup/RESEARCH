@@ -35,7 +35,7 @@ import matplotlib.pyplot as plt
 def main():           
          
     # vehicle data
-    new_geometry =  True
+    new_geometry    = True
     redesign_rotors = False
     if new_geometry :
         vehicle  = vehicle_setup(redesign_rotors)
@@ -57,19 +57,6 @@ def main():
      
     # plot the results 
     plot_results(results)    
-     
-
-    ## plot vehicle 
-    #plot_3d_vehicle(vehicle, 
-                    #min_x_axis_limit            = -5,
-                    #max_x_axis_limit            = 15,
-                    #min_y_axis_limit            = -10,
-                    #max_y_axis_limit            = 10,
-                    #min_z_axis_limit            = -10,
-                    #max_z_axis_limit            = 10,
-                    #show_figure                 = False 
-                    #)               
-          
     return
 
 def vehicle_setup(redesign_rotors=True): 
@@ -91,8 +78,8 @@ def vehicle_setup(redesign_rotors=True):
     vehicle.mass_properties.operating_empty     = vehicle.mass_properties.max_takeoff
     vehicle.mass_properties.center_of_gravity   = [[ 2.0144,   0.  ,  0.]] 
     vehicle.passengers                          = 6
-    vehicle.envelope.ultimate_load              = 5.7
-    vehicle.envelope.limit_load                 = 3.     
+    vehicle.flight_envelope.ultimate_load       = 5.7
+    vehicle.flight_envelope.positive_limit_load          = 3.     
     
     #------------------------------------------------------------------------------------------------------------------------------------
     # ######################################################## Wings ####################################################################  
@@ -346,7 +333,7 @@ def vehicle_setup(redesign_rotors=True):
         loaded_prop_rotor = load_rotor(os.path.join(local_path, 'Tiltwing_rotor_geometry.res')) 
         for key,item in prop_rotor.items():
             prop_rotor[key] = loaded_prop_rotor[key] 
-        prop_rotor.Wake   = RCAIDE.Framework.Analyses.Propulsion.Rotor_Wake_Fidelity_Zero()      
+        prop_rotor.Wake   = RCAIDE.Framework.Analyses.Propulsion.Momentum_Theory_Wake()      
         
     propulsor.rotor =  prop_rotor 
     
@@ -377,7 +364,8 @@ def vehicle_setup(redesign_rotors=True):
 
     # Front Rotors Locations 
     origins =[[-0.5, 2.0, 0.0], [-0.5, 4.8, 0.0],[-0.5, -2.0, 0.0], [-0.5, -4.8, 0.0], [4.5, 2.0 ,1.4], [4.5, 4.8, 1.4],[4.5, -2.0, 1.4], [4.5, -4.8, 1.4]] 
-    
+
+    assigned_propulsor_list = []    
     for i in range(len(origins)): 
         propulsor_i                                       = deepcopy(propulsor)
         propulsor_i.tag                                   = 'prop_rotor_propulsor_' + str(i + 1)
@@ -389,12 +377,15 @@ def vehicle_setup(redesign_rotors=True):
         propulsor_i.electronic_speed_controller.origin    = [origins[i]]  
         propulsor_i.nacelle.tag                           = 'prop_rotor_nacelle_' + str(i + 1)  
         propulsor_i.nacelle.origin                        = [origins[i]]   
-        bus.propulsors.append(propulsor_i)  
+        network.propulsors.append(propulsor_i)  
+        assigned_propulsor_list.append(propulsor_i.tag)
+    bus.assigned_propulsors = [assigned_propulsor_list] 
+
 
     #------------------------------------------------------------------------------------------------------------------------------------  
     # Additional Bus Loads
     #------------------------------------------------------------------------------------------------------------------------------------            
-    # Payload   
+    # Payload    
     payload                         = RCAIDE.Library.Components.Systems.Avionics()
     payload.power_draw              = 10. # Watts 
     payload.mass_properties.mass    = 1.0 * Units.kg
@@ -459,10 +450,9 @@ def configs_setup(vehicle):
     config.wings.main_wing.twists.tip                      = vector_angle
     config.wings.canard_wing.twists.root                   = vector_angle
     config.wings.canard_wing.twists.tip                    = vector_angle    
-    for network in  config.networks: 
-        for bus in network.busses: 
-            for propulsor in  bus.propulsors:
-                propulsor.rotor.orientation_euler_angles =  [0, vector_angle, 0]
+    for network in  config.networks:  
+        for propulsor in  network.propulsors:
+            propulsor.rotor.orientation_euler_angles =  [0, vector_angle, 0]
     configs.append(config)
 
     # ------------------------------------------------------------------
@@ -474,12 +464,11 @@ def configs_setup(vehicle):
     config.wings.main_wing.twists.root                = vector_angle
     config.wings.main_wing.twists.tip                 = vector_angle
     config.wings.canard_wing.twists.root              = vector_angle
-    config.wings.canard_wing.twists.tip               = vector_angle
-    for network in  config.networks: 
-        for bus in network.busses: 
-            for propulsor in  bus.propulsors:
-                propulsor.rotor.orientation_euler_angles =  [0, vector_angle, 0]
-                propulsor.rotor.pitch_command   = propulsor.rotor.hover.design_pitch_command * 0.5 
+    config.wings.canard_wing.twists.tip               = vector_angle  
+    for network in  config.networks:  
+        for propulsor in  network.propulsors:
+            propulsor.rotor.orientation_euler_angles =  [0, vector_angle, 0]
+            propulsor.rotor.pitch_command   = propulsor.rotor.hover.design_pitch_command * 0.5 
     configs.append(config) 
 
     # ------------------------------------------------------------------
@@ -491,12 +480,11 @@ def configs_setup(vehicle):
     config.wings.main_wing.twists.root                = vector_angle
     config.wings.main_wing.twists.tip                 = vector_angle
     config.wings.canard_wing.twists.root              = vector_angle
-    config.wings.canard_wing.twists.tip               = vector_angle 
-    for network in  config.networks: 
-        for bus in network.busses: 
-            for propulsor in  bus.propulsors:
-                propulsor.rotor.orientation_euler_angles =  [0, vector_angle, 0]
-                propulsor.rotor.pitch_command     = propulsor.rotor.cruise.design_pitch_command  
+    config.wings.canard_wing.twists.tip               = vector_angle   
+    for network in  config.networks:  
+        for propulsor in  network.propulsors:
+            propulsor.rotor.orientation_euler_angles =  [0, vector_angle, 0]
+            propulsor.rotor.pitch_command     = propulsor.rotor.cruise.design_pitch_command  
     configs.append(config) 
 
     # ------------------------------------------------------------------
@@ -508,12 +496,11 @@ def configs_setup(vehicle):
     config.wings.main_wing.twists.root                = vector_angle
     config.wings.main_wing.twists.tip                 = vector_angle
     config.wings.canard_wing.twists.root              = vector_angle
-    config.wings.canard_wing.twists.tip               = vector_angle  
-    for network in  config.networks: 
-        for bus in network.busses: 
-            for propulsor in  bus.propulsors:
-                propulsor.rotor.orientation_euler_angles =  [0, vector_angle, 0]
-                propulsor.rotor.pitch_command   = propulsor.rotor.cruise.design_pitch_command  
+    config.wings.canard_wing.twists.tip               = vector_angle    
+    for network in  config.networks:  
+        for propulsor in  network.propulsors:
+            propulsor.rotor.orientation_euler_angles =  [0, vector_angle, 0]
+            propulsor.rotor.pitch_command   = propulsor.rotor.cruise.design_pitch_command  
     configs.append(config)     
     
     # ------------------------------------------------------------------
@@ -525,12 +512,11 @@ def configs_setup(vehicle):
     config.wings.main_wing.twists.root                     = vector_angle
     config.wings.main_wing.twists.tip                      = vector_angle
     config.wings.canard_wing.twists.root                   = vector_angle
-    config.wings.canard_wing.twists.tip                    = vector_angle
-    for network in  config.networks: 
-        for bus in network.busses: 
-            for propulsor in  bus.propulsors:
-                propulsor.rotor.orientation_euler_angles =  [0, vector_angle, 0]
-                propulsor.rotor.pitch_command   = propulsor.rotor.cruise.design_pitch_command * 0.5
+    config.wings.canard_wing.twists.tip                    = vector_angle  
+    for network in  config.networks:  
+        for propulsor in  network.propulsors:
+            propulsor.rotor.orientation_euler_angles =  [0, vector_angle, 0]
+            propulsor.rotor.pitch_command   = propulsor.rotor.cruise.design_pitch_command * 0.5
     configs.append(config)  
 
 
@@ -543,12 +529,10 @@ def configs_setup(vehicle):
     config.wings.main_wing.twists.root                = vector_angle
     config.wings.main_wing.twists.tip                 = vector_angle
     config.wings.canard_wing.twists.root              = vector_angle
-    config.wings.canard_wing.twists.tip               = vector_angle 
-    for network in  config.networks: 
-        for bus in network.busses: 
-            for propulsor in  bus.propulsors:
-                propulsor.rotor.orientation_euler_angles =  [0, vector_angle, 0] 
-                #propulsor.rotor.pitch_command   = propulsor.rotor.cruise.design_pitch_command *0.5  
+    config.wings.canard_wing.twists.tip               = vector_angle   
+    for network in  config.networks:  
+        for propulsor in  network.propulsors:
+            propulsor.rotor.orientation_euler_angles =  [0, vector_angle, 0]  
     configs.append(config)
     
     
@@ -561,11 +545,10 @@ def configs_setup(vehicle):
     config.wings.main_wing.twists.root                = vector_angle
     config.wings.main_wing.twists.tip                 = vector_angle
     config.wings.canard_wing.twists.root              = vector_angle
-    config.wings.canard_wing.twists.tip               = vector_angle     
-    for network in  config.networks: 
-        for bus in network.busses: 
-            for propulsor in  bus.propulsors:
-                propulsor.rotor.orientation_euler_angles =  [0, vector_angle, 0]
+    config.wings.canard_wing.twists.tip               = vector_angle       
+    for network in  config.networks:  
+        for propulsor in  network.propulsors:
+            propulsor.rotor.orientation_euler_angles =  [0, vector_angle, 0]
     configs.append(config)
 
 
@@ -621,7 +604,7 @@ def base_analysis(vehicle):
 
     # ------------------------------------------------------------------
     #  Planet Analysis
-    planet = RCAIDE.Framework.Analyses.Planets.Planet()
+    planet = RCAIDE.Framework.Analyses.Planets.Earth()
     analyses.append(planet)
 
     # ------------------------------------------------------------------
@@ -645,27 +628,16 @@ def mission_setup(analyses ):
     # unpack Segments module
     Segments = RCAIDE.Framework.Mission.Segments  
     base_segment = Segments.Segment()
- 
-    # ------------------------------------------------------------------
-    #   First Climb Segment: Constant Speed, Constant Rate
-    # ------------------------------------------------------------------  
-    segment                                 = Segments.Ground.Battery_Recharge(base_segment)      
-    segment.analyses.extend(analyses.base) 
-    segment.cutoff_SOC                      = 1.0  
-    segment.true_course                     = 30 * Units.degree # this is the true couse of the starting value 
-    segment.initial_battery_state_of_charge = 0.999
-    segment.tag                             = 'Recharge' 
-    mission.append_segment(segment) 
- 
+  
     # ------------------------------------------------------------------
     #   First Climb Segment: Constant Speed, Constant Rate
     # ------------------------------------------------------------------ 
     segment                                            = Segments.Vertical_Flight.Climb(base_segment)
     segment.tag                                        = "Vertical_Climb"   
-    segment.analyses.extend(analyses.vertical_climb) 
-    segment.altitude_start                             = 0.0  * Units.ft  
+    segment.analyses.extend(analyses.vertical_climb)  
+    segment.altitude_start                             = 500.0  * Units.ft  
     segment.altitude_end                               = 0.  * Units.ft   
-    segment.climb_rate                                 = 50. * Units['ft/min'] 
+    segment.climb_rate                                 = 300. * Units['ft/min']  
     segment.initial_battery_state_of_charge            = 1.0 
     segment.true_course                                = 30 * Units.degree # this is the true couse of the starting value 
 
@@ -688,8 +660,7 @@ def mission_setup(analyses ):
     segment.altitude_end                                  = 500. * Units.ft 
     segment.air_speed_start                               = 10 * Units.kts
     segment.air_speed_end                                 = 90 * Units.kts
-    segment.climb_rate                                    = 628.0 * Units['ft/min']
-    segment.true_course                                   = 30 * Units.degree # this is the true couse of the starting value 
+    segment.climb_rate                                    = 628.0 * Units['ft/min'] 
 
     # define flight dynamics to model 
     segment.flight_dynamics.force_x                       = True  
@@ -727,42 +698,7 @@ def mission_setup(analyses ):
                                                                              
     mission.append_segment(segment)   
      
-    '''
-    #------------------------------------------------------------------------------------------------------------------------------------ 
-    # Circular departure pattern 
-    #------------------------------------------------------------------------------------------------------------------------------------ 
-    segment                                               = Segments.Cruise.Curved_Constant_Radius_Constant_Speed_Constant_Altitude(base_segment)
-    segment.tag                                           = "Departure_Pattern_Curve"  
-    segment.analyses.extend(analyses.climb_transition)  
-    segment.air_speed   = 90 * Units.kts 
-    segment.turn_radius = 3600 * Units.feet  
-    segment.true_course = 30 * Units.degree # this is the true couse of the starting value     
-    segment.turn_angle  = 90 * Units.degree
-    segment.altitude    = 500 * Units.feet 
-    
-    # define flight dynamics to model 
-    segment.flight_dynamics.force_x                                             = True    
-    segment.flight_dynamics.force_z                                             = True    
-    segment.flight_dynamics.force_y                                             = True     
-    segment.flight_dynamics.moment_y                                            = True 
-    segment.flight_dynamics.moment_x                                            = True
-    segment.flight_dynamics.moment_z                                            = True 
-
-    # define flight controls              
-    segment.assigned_control_variables.throttle.active                          = True           
-    segment.assigned_control_variables.throttle.assigned_propulsors             =  [['prop_rotor_propulsor_1','prop_rotor_propulsor_2','prop_rotor_propulsor_3','prop_rotor_propulsor_4',
-                                                                                     'prop_rotor_propulsor_5','prop_rotor_propulsor_6','prop_rotor_propulsor_7','prop_rotor_propulsor_8']] 
-    segment.assigned_control_variables.body_angle.active                        = True    
-    segment.assigned_control_variables.elevator_deflection.active               = True    
-    segment.assigned_control_variables.elevator_deflection.assigned_surfaces    = [['elevator']]   
-    segment.assigned_control_variables.aileron_deflection.active                = True    
-    segment.assigned_control_variables.aileron_deflection.assigned_surfaces     = [['aileron']] 
-    segment.assigned_control_variables.rudder_deflection.active                 = True    
-    segment.assigned_control_variables.rudder_deflection.assigned_surfaces      = [['rudder']] 
-    segment.assigned_control_variables.bank_angle.active                        = True    
-    segment.assigned_control_variables.bank_angle.initial_guess_values          = [[20.0 * Units.degree]]
-    
-    mission.append_segment(segment)  
+    ''' 
       
     # ------------------------------------------------------------------
     #  Second Transition Segment
@@ -770,9 +706,8 @@ def mission_setup(analyses ):
     segment                           = Segments.Cruise.Constant_Acceleration_Constant_Altitude(base_segment)
     segment.tag                       = "high_speed_climb_transition"  
     segment.analyses.extend( analyses.climb_transition)   
-    segment.air_speed_end             = 125.  * Units['mph']  
-    segment.acceleration              = 9.81/5 
-    segment.true_course               = 30 * Units.degree # this is the true couse of the starting value 
+    segment.air_speed_end             = 150.  * Units['mph']  
+    segment.acceleration              = 9.81/5  
 
     # define flight dynamics to model 
     segment.flight_dynamics.force_x                       = True  
@@ -795,8 +730,7 @@ def mission_setup(analyses ):
     segment.air_speed_start           = 125.   * Units['mph']
     segment.air_speed_end             = 130.  * Units['mph']  
     segment.altitude_start            = 500.0 * Units.ft   
-    segment.altitude_end              = 1000.0 * Units.ft 
-    segment.true_course               = 30 * Units.degree # this is the true couse of the starting value 
+    segment.altitude_end              = 1000.0 * Units.ft  
     
     # define flight dynamics to model 
     segment.flight_dynamics.force_x                       = True  
@@ -820,9 +754,8 @@ def mission_setup(analyses ):
     segment.tag                      = "Cruise"  
     segment.analyses.extend(analyses.cruise) 
     segment.altitude                 = 1000.0 * Units.ft
-    segment.air_speed                = 110.  * Units['mph']   
-    segment.distance                 = 30*Units.nmi
-    segment.true_course              = 30 * Units.degree # this is the true couse of the starting value 
+    segment.air_speed                = 150.  * Units['mph']   
+    segment.distance                 = 30*Units.nmi 
     
     # define flight dynamics to model 
     segment.flight_dynamics.force_x                       = True  
@@ -846,8 +779,7 @@ def mission_setup(analyses ):
     segment.air_speed_end            = 90 * Units.kts 
     segment.altitude_start           = 2500.0 * Units.ft
     segment.altitude_end             = 500.0 * Units.ft
-    segment.true_course              = 30 * Units.degree # this is the true couse of the starting value 
-
+    
     # define flight dynamics to model 
     segment.flight_dynamics.force_x                       = True  
     segment.flight_dynamics.force_z                       = True     
@@ -871,8 +803,7 @@ def mission_setup(analyses ):
     segment.air_speed_start          = 130.  * Units['mph'] 
     segment.air_speed_end            = 100.   * Units['mph'] 
     segment.altitude_start           = 1000.0 * Units.ft
-    segment.altitude_end             = 500.0 * Units.ft
-    segment.true_course              = 30 * Units.degree # this is the true couse of the starting value 
+    segment.altitude_end             = 500.0 * Units.ft 
 
     # define flight dynamics to model 
     segment.flight_dynamics.force_x                       = True  
@@ -885,59 +816,20 @@ def mission_setup(analyses ):
     segment.assigned_control_variables.body_angle.active             = True
     
         
-    mission.append_segment(segment)     
- 
-    
-  
-    #------------------------------------------------------------------------------------------------------------------------------------ 
-    # Circular departure pattern 
-    #------------------------------------------------------------------------------------------------------------------------------------ 
-    segment                                               = Segments.Cruise.Curved_Constant_Radius_Constant_Speed_Constant_Altitude(base_segment)
-    segment.tag                                           = "Approach_Pattern_Curve"   
-    segment.analyses.extend( analyses.cruise )             
-    segment.air_speed   = 90 * Units.kts 
-    segment.turn_radius = 3600 * Units.feet  
-    segment.true_course = 30 * Units.degree # this is the true couse of the starting value     
-    segment.turn_angle  = 90 * Units.degree
-    segment.altitude    = 500 * Units.feet
-    
-    # define flight dynamics to model 
-    segment.flight_dynamics.force_x                                             = True    
-    segment.flight_dynamics.force_z                                             = True    
-    segment.flight_dynamics.force_y                                             = True     
-    segment.flight_dynamics.moment_y                                            = True 
-    segment.flight_dynamics.moment_x                                            = True
-    segment.flight_dynamics.moment_z                                            = True 
-
-    # define flight controls              
-    segment.assigned_control_variables.throttle.active                          = True           
-    segment.assigned_control_variables.throttle.assigned_propulsors             = [['prop_rotor_propulsor_1','prop_rotor_propulsor_2','prop_rotor_propulsor_3','prop_rotor_propulsor_4',
-                                                                                    'prop_rotor_propulsor_5','prop_rotor_propulsor_6','prop_rotor_propulsor_7','prop_rotor_propulsor_8']]
-    segment.assigned_control_variables.body_angle.active                        = True    
-    segment.assigned_control_variables.elevator_deflection.active               = True    
-    segment.assigned_control_variables.elevator_deflection.assigned_surfaces    = [['elevator']]   
-    segment.assigned_control_variables.aileron_deflection.active                = True    
-    segment.assigned_control_variables.aileron_deflection.assigned_surfaces     = [['aileron']] 
-    segment.assigned_control_variables.rudder_deflection.active                 = True    
-    segment.assigned_control_variables.rudder_deflection.assigned_surfaces      = [['rudder']] 
-    segment.assigned_control_variables.bank_angle.active                        = True    
-    segment.assigned_control_variables.bank_angle.initial_guess_values          = [[20.0 * Units.degree]]
-    
-    mission.append_segment(segment)  
+    mission.append_segment(segment)    
  
     # ------------------------------------------------------------------
     #  High-Speed Descending Transition Segment
     # ------------------------------------------------------------------ 
     segment                          = Segments.Transition.Constant_Acceleration_Constant_Angle_Linear_Climb(base_segment)
     segment.tag                      = "Approach_Transition"   
-    segment.analyses.extend(analyses.high_speed_climb_transition)  
+    segment.analyses.extend(analyses.approach_transition)  
     segment.altitude_start                                = 500.0 * Units.ft   
     segment.altitude_end                                  = 50.0 * Units.ft   
     segment.climb_angle                                   = 7.125 * Units.degrees
     segment.acceleration                                  = -0.9574 * Units['m/s/s']    
     segment.pitch_initial                                 = 4.3  * Units.degrees  
-    segment.pitch_final                                   = 7. * Units.degrees     
-    segment.true_course                                   = 30 * Units.degree
+    segment.pitch_final                                   = 7. * Units.degrees      
 
     # define flight dynamics to model 
     segment.flight_dynamics.force_x                       = True  
@@ -960,8 +852,7 @@ def mission_setup(analyses ):
     segment.analyses.extend( analyses.vertical_descent)               
     segment.altitude_start                                          = 50.0 * Units.ft   
     segment.altitude_end                                            = 0.   * Units.ft  
-    segment.descent_rate                                            = 300. * Units['ft/min']  
-    segment.true_course                                             = 30 * Units.degree # this is the true couse of the starting value 
+    segment.descent_rate                                            = 300. * Units['ft/min']   
                   
     # define flight dynamics to model              
     segment.flight_dynamics.force_z                                  = True     

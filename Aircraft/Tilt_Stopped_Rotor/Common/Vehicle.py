@@ -57,8 +57,8 @@ def vehicle_setup(resize_aircraft,vehicle_name = 'Tiltrotor_CRM') :
         vehicle.mass_properties.max_takeoff       = 2100             
         vehicle.mass_properties.center_of_gravity = [[2.0144,   0.  ,  0. ]]      
         vehicle.reference_area                    = 10.39
-        vehicle.envelope.ultimate_load            = 5.7   
-        vehicle.envelope.limit_load               = 3.  
+        vehicle.flight_envelope.ultimate_load            = 5.7   
+        vehicle.flight_envelope.positive_limit_load               = 3.  
         vehicle.passengers                        = 5
     
         # ------------------------------------------------------------------    

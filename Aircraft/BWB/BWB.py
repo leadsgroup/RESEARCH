@@ -140,7 +140,7 @@ def base_analysis(vehicle):
 
     # ------------------------------------------------------------------
     #  Planet Analysis
-    planet = RCAIDE.Analyses.Planets.Planet()
+    planet = RCAIDE.Analyses.Planets.Earth()
     analyses.append(planet)
 
     # ------------------------------------------------------------------
@@ -178,8 +178,8 @@ def vehicle_setup():
     vehicle.mass_properties.cargo                     = 00.  * Units.kilogram   
 
     # envelope properties
-    vehicle.envelope.ultimate_load = 2.5
-    vehicle.envelope.limit_load    = 1.5
+    vehicle.flight_envelope.ultimate_load = 2.5
+    vehicle.flight_envelope.positive_limit_load    = 1.5
 
     # basic parameters
     vehicle.reference_area         = 15680. * Units.feet**2       

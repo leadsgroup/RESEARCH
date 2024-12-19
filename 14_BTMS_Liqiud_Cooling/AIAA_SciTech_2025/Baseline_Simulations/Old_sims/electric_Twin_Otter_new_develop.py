@@ -75,8 +75,8 @@ def vehicle_setup(BTMS_flag):
     vehicle.mass_properties.max_takeoff   = 5670  # kg 
     vehicle.mass_properties.takeoff       = 5670  # kg 
     vehicle.mass_properties.max_zero_fuel = 5670  # kg 
-    vehicle.envelope.ultimate_load        = 5.7
-    vehicle.envelope.limit_load           = 3.8 
+    vehicle.flight_envelope.ultimate_load        = 5.7
+    vehicle.flight_envelope.positive_limit_load           = 3.8 
     vehicle.reference_area                = 39 
     vehicle.passengers                    = 19
     vehicle.systems.control               = "fully powered"
@@ -1060,7 +1060,7 @@ def base_analysis(vehicle):
 
     # ------------------------------------------------------------------
     #  Planet Analysis
-    planet = RCAIDE.Framework.Analyses.Planets.Planet()
+    planet = RCAIDE.Framework.Analyses.Planets.Earth()
     analyses.append(planet)
 
     # ------------------------------------------------------------------

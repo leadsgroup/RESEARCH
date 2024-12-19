@@ -88,8 +88,8 @@ def vehicle_setup(propellant):
     vehicle.mass_properties.operating_empty           = 19051 * Units.kilogram  
     vehicle.mass_properties.max_zero_fuel             = 28259 * Units.kilogram 
     vehicle.mass_properties.cargo                     = 7000  * Units.kilogram 
-    vehicle.envelope.ultimate_load                    = 3.75
-    vehicle.envelope.limit_load                       = 2.5 
+    vehicle.flight_envelope.ultimate_load                    = 3.75
+    vehicle.flight_envelope.positive_limit_load                       = 2.5 
     vehicle.reference_area                            = 70.61 * Units['meters**2']   
     vehicle.passengers                                = 70
     vehicle.systems.control                           = "fully powered" 
@@ -837,7 +837,7 @@ def base_analysis(vehicle):
 
     # ------------------------------------------------------------------
     #  Planet Analysis
-    planet = RCAIDE.Framework.Analyses.Planets.Planet()
+    planet = RCAIDE.Framework.Analyses.Planets.Earth()
     analyses.append(planet)
 
     # ------------------------------------------------------------------

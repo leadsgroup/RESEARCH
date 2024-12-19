@@ -41,8 +41,8 @@ def vehicle_setup(resize_aircraft,HAS_power, HEX_power, RES_dimensions, storage_
       vehicle.mass_properties.max_takeoff   = 5670  # kg 
       vehicle.mass_properties.takeoff       = 5670  # kg 
       vehicle.mass_properties.max_zero_fuel = 5670  # kg 
-      vehicle.envelope.ultimate_load        = 5.7
-      vehicle.envelope.limit_load           = 3.8 
+      vehicle.flight_envelope.ultimate_load        = 5.7
+      vehicle.flight_envelope.positive_limit_load           = 3.8 
       vehicle.reference_area                = 39 
       vehicle.passengers                    = 19
       vehicle.systems.control               = "fully powered"

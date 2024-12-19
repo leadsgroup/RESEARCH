@@ -77,7 +77,7 @@ def vehicle_setup():
 
     # envelope properties
     vehicle.flight_envelope.ultimate_load        = 3.75
-    vehicle.flight_envelope.limit_load           = 1.5 
+    vehicle.flight_envelope.positive_limit_load           = 1.5 
                                                 
     cruise_speed                                = 343 *  0.6
     altitude                                    = 25000. * Units.ft
@@ -969,7 +969,7 @@ def base_analysis(vehicle):
 
     # ------------------------------------------------------------------
     #  Planet Analysis
-    planet = RCAIDE.Framework.Analyses.Planets.Planet()
+    planet = RCAIDE.Framework.Analyses.Planets.Earth()
     analyses.append(planet)
 
     # ------------------------------------------------------------------

@@ -91,7 +91,7 @@ def base_analysis(vehicle,run_noise_analysis_flag,use_topology_flag,microphone_t
 
     # ------------------------------------------------------------------
     #  Planet Analysis
-    planet = RCAIDE.Analyses.Planets.Planet()
+    planet = RCAIDE.Analyses.Planets.Earth()
     analyses.append(planet)
 
     # ------------------------------------------------------------------

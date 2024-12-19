@@ -93,8 +93,8 @@ def vehicle_setup(redesign_rotors) :
     # This needs updating                       
     vehicle.passengers                          = 6
     vehicle.reference_area                      = 73  * Units.feet**2 
-    vehicle.envelope.ultimate_load              = 5.7   
-    vehicle.envelope.limit_load                 = 3.  
+    vehicle.flight_envelope.ultimate_load              = 5.7   
+    vehicle.flight_envelope.positive_limit_load                 = 3.  
                                                 
     wing                                        = RCAIDE.Library.Components.Wings.Main_Wing()  # this is the body of the vehicle 
     wing.tag                                    = 'main_wing'   
@@ -278,7 +278,7 @@ def vehicle_setup(redesign_rotors) :
         loaded_lift_rotor = load_rotor(os.path.join(local_path, 'Hexacopter_rotor_geometry.res')) 
         for key,item in lift_rotor.items():
             lift_rotor[key] = loaded_lift_rotor[key] 
-        lift_rotor.Wake   = RCAIDE.Framework.Analyses.Propulsion.Rotor_Wake_Fidelity_Zero()    
+        lift_rotor.Wake   = RCAIDE.Framework.Analyses.Propulsion.Momentum_Theory_Wake()    
     propulsor.rotor =  lift_rotor           
     
     
@@ -490,7 +490,7 @@ def base_analysis(vehicle):
 
     # ------------------------------------------------------------------
     #  Planet Analysis
-    planet = RCAIDE.Framework.Analyses.Planets.Planet()
+    planet = RCAIDE.Framework.Analyses.Planets.Earth()
     analyses.append(planet)
 
     # ------------------------------------------------------------------

@@ -56,8 +56,8 @@ def vehicle_setup():
     vehicle.mass_properties.max_zero_fuel       = 2555. * Units.pounds
                                                
     # envelope properties                       
-    vehicle.envelope.ultimate_load              = 5.7
-    vehicle.envelope.limit_load                 = 3.8
+    vehicle.flight_envelope.ultimate_load              = 5.7
+    vehicle.flight_envelope.positive_limit_load                 = 3.8
                                                 
     # basic parameters                          
     vehicle.reference_area                      = 174. * Units.feet**2       
@@ -478,7 +478,7 @@ def base_analysis(vehicle):
 
     # ------------------------------------------------------------------
     #  Planet Analysis
-    planet = RCAIDE.Analyses.Planets.Planet()
+    planet = RCAIDE.Analyses.Planets.Earth()
     analyses.append(planet)
 
     # ------------------------------------------------------------------

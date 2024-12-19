@@ -105,7 +105,7 @@ def base_analysis(vehicle, configs):
     # ------------------------------------------------------------------
     #  Planet Analysis
     # ------------------------------------------------------------------
-    planet     = RCAIDE.Framework.Analyses.Planets.Planet()
+    planet     = RCAIDE.Framework.Analyses.Planets.Earth()
     analyses.append(planet)
 
     # ------------------------------------------------------------------
@@ -135,7 +135,7 @@ def vehicle_setup():
     vehicle.mass_properties.moments_of_inertia.tensor = np.array([[1741,0.0,0.0],[0.0,3759,0.0],[0.0,0.0,4386]])
     vehicle.mass_properties.center_of_gravity         = [[2.239696797,0,-0.131189711 ]]
     vehicle.flight_envelope.ultimate_load             = 5.7
-    vehicle.flight_envelope.limit_load                = 3.8
+    vehicle.flight_envelope.positive_limit_load                = 3.8
 
                                                 
     cruise_speed                                      = 124. * Units.kts

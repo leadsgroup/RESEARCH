@@ -86,8 +86,8 @@ def vehicle_setup():
     vehicle.design_cruise_alt                         = 25000 *Units.feet
 
     # envelope properties
-    vehicle.envelope.ultimate_load        = 3.75
-    vehicle.envelope.limit_load           = 1.5
+    vehicle.flight_envelope.ultimate_load        = 3.75
+    vehicle.flight_envelope.positive_limit_load           = 1.5
        
     # basic parameters       
     vehicle.reference_area                = 61.0  
@@ -988,7 +988,7 @@ def base_analysis(vehicle):
 
     # ------------------------------------------------------------------
     #  Planet Analysis
-    planet = RCAIDE.Framework.Analyses.Planets.Planet()
+    planet = RCAIDE.Framework.Analyses.Planets.Earth()
     analyses.append(planet)
 
     # ------------------------------------------------------------------

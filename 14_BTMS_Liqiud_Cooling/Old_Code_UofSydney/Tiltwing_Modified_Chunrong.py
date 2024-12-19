@@ -338,7 +338,7 @@ def base_analysis(vehicle, N_gm_x, N_gm_y, min_y, max_y, min_x, max_x, aircraft_
 
     # ------------------------------------------------------------------
     #  Planet Analysis
-    planet                                      = SUAVE.Analyses.Planets.Planet()
+    planet                                      = SUAVE.Analyses.Planets.Earth()
     analyses.append(planet)
 
     # ------------------------------------------------------------------
@@ -370,8 +370,8 @@ def vehicle_setup():
     vehicle.mass_properties.max_takeoff         = 2900
     vehicle.mass_properties.center_of_gravity   = [[2.0144, 0., 0.]]
     vehicle.passengers                          = 6
-    vehicle.envelope.ultimate_load              = 5.7
-    vehicle.envelope.limit_load                 = 3.
+    vehicle.flight_envelope.ultimate_load              = 5.7
+    vehicle.flight_envelope.positive_limit_load                 = 3.
 
     # ------------------------------------------------------    
     # WINGS    

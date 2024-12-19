@@ -62,8 +62,8 @@ def vehicle_setup(resize_aircraft,vehicle_name = 'NASA_Quadcopter') :
         # This needs updating                       
         vehicle.passengers                          =  
         vehicle.reference_area                      =  
-        vehicle.envelope.ultimate_load              =  
-        vehicle.envelope.limit_load                 =  
+        vehicle.flight_envelope.ultimate_load              =  
+        vehicle.flight_envelope.positive_limit_load                 =  
                                                     
         wing                                        = RCAIDE.Components.Wings.Main_Wing()  # this is the body of the vehicle 
         wing.tag                                    = 'main_wing'   

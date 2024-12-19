@@ -115,7 +115,7 @@ def base_analysis(vehicle):
 
     # ------------------------------------------------------------------
     #  Planet Analysis
-    planet = RCAIDE.Framework.Analyses.Planets.Planet()
+    planet = RCAIDE.Framework.Analyses.Planets.Earth()
     analyses.append(planet)
 
     # ------------------------------------------------------------------
@@ -158,7 +158,7 @@ def vehicle_setup(redesign_rotors=True) :
     vehicle.mass_properties.center_of_gravity = [[ 2.1345, 0 , 0 ]] 
     vehicle.mass_properties.moments_of_inertia.tensor = np.array([[164627.7,0.0,0.0],[0.0,471262.4,0.0],[0.0,0.0,554518.7]])
     vehicle.flight_envelope.ultimate_load            = 5.7   
-    vehicle.flight_envelope.limit_load               = 3.
+    vehicle.flight_envelope.positive_limit_load               = 3.
     vehicle.flight_envelope.mach_number              = 0.15
     vehicle.passengers                               = 5
     vehicle.design_dynamic_pressure                  = 1929 # THis value comes form the Navion
@@ -690,7 +690,7 @@ def vehicle_setup(redesign_rotors=True) :
         loaded_prop_rotor = load_rotor(os.path.join(local_path, 'Tilt_Stopped_Rotor_prop_rotor_geometry.res')) 
         for key,item in prop_rotor.items():
             prop_rotor[key] = loaded_prop_rotor[key] 
-        prop_rotor.Wake   = RCAIDE.Framework.Analyses.Propulsion.Rotor_Wake_Fidelity_Zero()      
+        prop_rotor.Wake   = RCAIDE.Framework.Analyses.Propulsion.Momentum_Theory_Wake()      
         
     front_propulsor.rotor =  prop_rotor 
     
@@ -826,7 +826,7 @@ def vehicle_setup(redesign_rotors=True) :
         loaded_lift_rotor = load_rotor(os.path.join(local_path, 'Tilt_Stopped_Rotor_lift_rotor_geometry.res')) 
         for key,item in lift_rotor.items():
             lift_rotor[key] = loaded_lift_rotor[key] 
-        lift_rotor.Wake   = RCAIDE.Framework.Analyses.Propulsion.Rotor_Wake_Fidelity_Zero()         
+        lift_rotor.Wake   = RCAIDE.Framework.Analyses.Propulsion.Momentum_Theory_Wake()         
             
     lift_propulsor.rotor =  lift_rotor          
     

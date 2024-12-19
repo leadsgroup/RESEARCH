@@ -98,8 +98,8 @@ def vehicle_setup(propellant):
     vehicle.mass_properties.operating_empty  = 35221  # kg (https://aircraft.airbus.com/sites/g/files/jlcbta126/files/2023-11/A220-ACP-Issue001-00-19Oct2023.pdf)
     vehicle.mass_properties.max_payload      = 15128  # kg (https://aircraft.airbus.com/sites/g/files/jlcbta126/files/2023-11/A220-ACP-Issue001-00-19Oct2023.pdf)
     vehicle.mass_properties.cargo            = 0.0    # kg (Should be 0?)
-    vehicle.envelope.ultimate_load           = 3.75
-    vehicle.envelope.limit_load              = 1.5
+    vehicle.flight_envelope.ultimate_load           = 3.75
+    vehicle.flight_envelope.positive_limit_load              = 1.5
     vehicle.reference_area                   = 112.3* Units['meters**2']
     vehicle.passengers                       = 135
     vehicle.systems.control                  = "fully powered"
@@ -751,7 +751,7 @@ def base_analysis(vehicle):
 
     # ------------------------------------------------------------------
     #  Planet Analysis
-    planet = RCAIDE.Framework.Analyses.Planets.Planet()
+    planet = RCAIDE.Framework.Analyses.Planets.Earth()
     analyses.append(planet)
 
     # ------------------------------------------------------------------

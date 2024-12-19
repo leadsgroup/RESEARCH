@@ -62,8 +62,8 @@ def vehicle_setup(resize_aircraft,vehicle_name = 'Hexacopter_CRM') :
         # This needs updating                       
         vehicle.passengers                          = 6
         vehicle.reference_area                      = 73  * Units.feet**2 
-        vehicle.envelope.ultimate_load              = 5.7   
-        vehicle.envelope.limit_load                 = 3.  
+        vehicle.flight_envelope.ultimate_load              = 5.7   
+        vehicle.flight_envelope.positive_limit_load                 = 3.  
                                                     
         wing                                        = RCAIDE.Components.Wings.Main_Wing()  # this is the body of the vehicle 
         wing.tag                                    = 'main_wing'   

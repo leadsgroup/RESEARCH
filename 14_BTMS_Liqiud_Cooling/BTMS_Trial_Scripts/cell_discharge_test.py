@@ -56,7 +56,7 @@ def base_analysis(vehicle):
     analyses.append(energy)
  
     #  Planet Analysis
-    planet  = RCAIDE.Analyses.Planets.Planet()
+    planet  = RCAIDE.Analyses.Planets.Earth()
     analyses.append(planet)
  
     #  Atmosphere Analysis

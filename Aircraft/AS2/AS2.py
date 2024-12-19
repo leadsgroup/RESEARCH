@@ -134,7 +134,7 @@ def base_analysis(vehicle):
 
     # ------------------------------------------------------------------
     #  Planet Analysis
-    planet = RCAIDE.Analyses.Planets.Planet()
+    planet = RCAIDE.Analyses.Planets.Earth()
     analyses.append(planet)
 
     # ------------------------------------------------------------------
@@ -171,8 +171,8 @@ def vehicle_setup():
     vehicle.mass_properties.moments_of_inertia.tensor = [[10 ** 5, 0, 0],[0, 10 ** 6, 0,],[0,0, 10 ** 7]] # not accurate
 
     # envelope properties
-    vehicle.envelope.ultimate_load = 2.5
-    vehicle.envelope.limit_load    = 1.5
+    vehicle.flight_envelope.ultimate_load = 2.5
+    vehicle.flight_envelope.positive_limit_load    = 1.5
 
     # basic parameters
     vehicle.reference_area         = 125.

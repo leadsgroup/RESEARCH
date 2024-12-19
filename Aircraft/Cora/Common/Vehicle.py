@@ -66,8 +66,8 @@ def vehicle_setup(resize_aircraft,vehicle_name = 'Wisk_Cora_CRM') :
         vehicle.mass_properties.max_takeoff       = 2450. * Units.lb              
         vehicle.mass_properties.center_of_gravity = [[2.0144,   0.  ,  0. ]] # Approximate 
         vehicle.reference_area                    = 10.76  
-        vehicle.envelope.ultimate_load            = 5.7   
-        vehicle.envelope.limit_load               = 3.  
+        vehicle.flight_envelope.ultimate_load            = 5.7   
+        vehicle.flight_envelope.positive_limit_load               = 3.  
         vehicle.passengers                        = 2
     
         # ------------------------------------------------------------------    
