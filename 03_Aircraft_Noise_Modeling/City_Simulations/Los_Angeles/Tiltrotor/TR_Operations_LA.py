@@ -25,24 +25,49 @@ sys.path.append(os.path.join(local_path_2, 'Aircraft' + os.path.sep + 'Tiltrotor
 from Tiltrotor                import vehicle_setup, configs_setup
 from compute_route_distances  import compute_route_distances
 from compute_terrain_points   import compute_terrain_points
-from Aircraft_Noise_Emissions import read_flight_simulation_results 
+from Aircraft_Noise_Emissions import read_flight_simulation_results
+from Climb_distance           import Linear_Accel_Climb_Distance
 # ----------------------------------------------------------------------------------------------------------------------
 #  Main 
 # ----------------------------------------------------------------------------------------------------------------------  
 def main():           
-
+  
+    # ----------------------------------------------------------------------------------------------------------------------
+    #  SIMULATION SETTINGS 
+    # ----------------------------------------------------------------------------------------------------------------------  
+    # Aircraft settings
+    aircraft_code                = 'TR' 
+    city_code                    = 'LA'
+    city_name                    = 'Los_Angeles'
+    max_cruise_distance          = 90  * Units.nmi #CHANGE FOR EACH AIRCRAFT
+    
+    # Flight settings
+    cruise_altitude              = 1000 * Units.feet
+    pattern_speed                = 100. * Units['mph'] 
+    cruise_speed                 = 125. * Units['mph']
+    cruise_climb_rate            = 500. * Units['ft/min']
+    radius_Vert1                 = 3600* Units.feet # circular pattern radius around vertiport 1
+    radius_Vert2                 = 3600* Units.feet # circular pattern radius around vertiport 2
+    dep_heading                  = 200 * Units.degree # Heading [degrees] of the departure from vertiport 1
+    app_heading                  = 90  * Units.degree# Heading [degrees] of the approach to vertiport 2 
+    number_of_cpts               = 10
+    
+    # ----------------------------------------------------------------------------------------------------------------------    
+    # Initial Analysis based on settings
+    # ----------------------------------------------------------------------------------------------------------------------
+    high_speed_climb_distance    = Linear_Accel_Climb_Distance(pattern_speed, cruise_speed, cruise_climb_rate, cruise_altitude-500*Units.feet)  
+    
     # ----------------------------------------------------------------------------------------------------------------------
     # FILE IMPORTS 
     # ----------------------------------------------------------------------------------------------------------------------            
     ospath                = os.path.abspath(__file__)
     separator             = os.path.sep
     relative_path         = os.path.dirname(ospath) + separator 
-    routes_filepath       = relative_path  +  '..' + separator + 'UAM_City_Routes.xlsx'
-    topography_file       = relative_path +  '..' + separator +  'Topography' + separator + 'LA_Metropolitan_Area.txt'
-    flight_data           = pd.read_excel(routes_filepath,sheet_name=['Los_Angeles'])
-    LA_flight_data_total  = flight_data['Los_Angeles']
+    routes_filepath       = relative_path  +  '..' + separator + city_code + '_' + 'UAM_City_Routes.xlsx'
+    topography_file       = relative_path +  '..' + separator +  'Topography' + separator + 'LA_Metropolitan_Area.txt' # CHANGE THIS FOR EACH LOCATION
+    flight_data           = pd.read_excel(routes_filepath,sheet_name=[city_name])
+    LA_flight_data_total  = flight_data[city_name]
     
-
     # ----------------------------------------------------------------------------------------------------------------------
     #  BATCH SETTINGS 
     # ----------------------------------------------------------------------------------------------------------------------      
@@ -53,29 +78,13 @@ def main():
     n_sims_group   = int(np.ceil(n_sims_total / number_of_batches))
     start          = batch_number * n_sims_group
     end            = (batch_number + 1) * n_sims_group
-    LA_flight_data = LA_flight_data_total[start:end]
+    LA_flight_data = LA_flight_data_total[start:end]    
     
-    # ----------------------------------------------------------------------------------------------------------------------
-    #  SIMULATION SETTINGS 
-    # ----------------------------------------------------------------------------------------------------------------------  
-    aircraft_code                = 'TR' # CHANGE FOR EACH AIRCRAFT 
-    city_code                    = 'LA' 
-    cruise_altitude              = 1000*Units.feet
-    high_speed_climb_distance    = 3013.65 # DONE as of 11/18. CHANGE FOR EACH AIRCRAFT  
-    radius_Vert1                 = 3600* Units.feet # circular pattern radius around vertiport 1
-    radius_Vert2                 = 3600* Units.feet # circular pattern radius around vertiport 2
-    dep_heading                  = 200 * Units.degree # Heading [degrees] of the departure from vertiport 1
-    app_heading                  = 90  * Units.degree# Heading [degrees] of the approach to vertiport 2 
-    max_cruise_distance          = 90  * Units.nmi #CHANGE FOR EACH AIRCRAFT
-    number_of_cpts               = 10  
-    
-
     # ----------------------------------------------------------------------------------------------------------------------
     #  RUN BASELINE MISSION TO GET NOISE 
     # ----------------------------------------------------------------------------------------------------------------------     
-    noise_results = run_noise_mission(number_of_cpts ) # Run noise simulation
+    noise_results = run_noise_mission(number_of_cpts, pattern_speed=pattern_speed, cruise_speed=cruise_speed, cruise_climb_rate=cruise_climb_rate) # Run noise simulation
     
-
     # ----------------------------------------------------------------------------------------------------------------------
     #  USE BASE MISSION TO GET NOISE OF ALL OPERATIONS 
     # ----------------------------------------------------------------------------------------------------------------------     
@@ -87,7 +96,6 @@ def main():
         origin_coord      = [LA_flight_data['Origin Latitude'][i], LA_flight_data['Origin Longitude'][i]]
         destination_coord = [LA_flight_data['Destination Latitude'][i], LA_flight_data['Destination Longitude'][i]]
         
-
         terrain_data =  compute_terrain_points(topography_file, 
                                number_of_latitudinal_points  = 100,
                                number_of_longitudinal_points = 100) 
@@ -118,7 +126,7 @@ def main():
         analyses = unconverged_analyses_setup(configs, origin_coord,destination_coord)
         
         # mission analyses 
-        mission  = unconverged_mission_setup(number_of_cpts, analyses, radius_Vert1, radius_Vert2, dep_heading, app_heading, dep_sector, app_sector, path_heading, total_cruise_distance,cruise_altitude)        
+        mission  = unconverged_mission_setup(number_of_cpts, analyses, radius_Vert1, radius_Vert2, dep_heading, app_heading, dep_sector, app_sector, path_heading, total_cruise_distance,cruise_altitude, pattern_speed, cruise_speed, cruise_climb_rate)        
         missions = missions_setup(mission) 
          
         if ((max_cruise_distance > total_cruise_distance) and (total_cruise_distance > 0)):
@@ -301,7 +309,7 @@ def unconverged_base_analysis(vehicle):
 # ------------------------------------------------------------------
 #   Baseline Mission Setup
 # ------------------------------------------------------------------
-def noise_mission_setup(number_of_cpts, analyses, radius_Vert1=3600*Units.ft, radius_Vert2=3600*Units.ft, dep_heading=200*Units.degrees, app_heading=90*Units.degrees, dep_sector=90*Units.degrees, app_sector=90*Units.degrees, path_heading = 100, level_cruise_distance=10*Units.miles,cruise_altitude=1000*Units.ft): 
+def noise_mission_setup(number_of_cpts, analyses, radius_Vert1=3600*Units.ft, radius_Vert2=3600*Units.ft, dep_heading=200*Units.degrees, app_heading=90*Units.degrees, dep_sector=90*Units.degrees, app_sector=90*Units.degrees, path_heading = 100, level_cruise_distance=10*Units.miles,cruise_altitude=1000*Units.ft, pattern_speed=100. * Units['mph'] , cruise_speed=125. * Units['mph'] , cruise_climb_rate =  500. * Units['ft/min']) :
     
     # ------------------------------------------------------------------
     #   Initialize the Mission
@@ -319,15 +327,11 @@ def noise_mission_setup(number_of_cpts, analyses, radius_Vert1=3600*Units.ft, ra
     #   Mission Constants
     # ------------------------------------------------------------------
     hover_altitude = 50.0 * Units.ft
+    pattern_altitude  =  500.0 * Units.ft
     
-    pattern_speed    = 100. * Units['mph'] 
-    cruise_speed     = 125. * Units['mph']
     transition_speed = 35.  * Units['mph']
     
     transition_climb_rate = 824.0 * Units['ft/min']
-    
-    cruise_climb_rate =  500. * Units['ft/min']
-    pattern_altitude  =  500.0 * Units.ft
 
     # ------------------------------------------------------------------
     #   Vertical Climb from vertiport A
@@ -613,7 +617,7 @@ def noise_mission_setup(number_of_cpts, analyses, radius_Vert1=3600*Units.ft, ra
 # ------------------------------------------------------------------
 #   Baseline Mission Setup
 # ------------------------------------------------------------------
-def unconverged_mission_setup(number_of_cpts,analyses, radius_Vert1, radius_Vert2, dep_heading, app_heading, dep_sector, app_sector, path_heading, level_cruise_distance,cruise_altitude): 
+def unconverged_mission_setup(number_of_cpts,analyses, radius_Vert1, radius_Vert2, dep_heading, app_heading, dep_sector, app_sector, path_heading, level_cruise_distance,cruise_altitude, pattern_speed, cruise_speed, cruise_climb_rate): 
     
     # ------------------------------------------------------------------
     #   Initialize the Mission
@@ -632,13 +636,9 @@ def unconverged_mission_setup(number_of_cpts,analyses, radius_Vert1, radius_Vert
     # ------------------------------------------------------------------
     hover_altitude = 50.0 * Units.ft
     
-    pattern_speed    = 100. * Units['mph'] 
-    cruise_speed     = 125. * Units['mph']
     transition_speed = 35.  * Units['mph']
     
     transition_climb_rate = 824.0 * Units['ft/min']
-    
-    cruise_climb_rate =  500. * Units['ft/min']
     pattern_altitude  =  500.0 * Units.ft
 
     # ------------------------------------------------------------------
